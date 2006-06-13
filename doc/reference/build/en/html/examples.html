@@ -1,0 +1,156 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;9.&nbsp;Examples</title><link rel="stylesheet" href="../shared/css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="Esper - Java Event Stream Processor "><link rel="up" href="index.html" title="Esper - Java Event Stream Processor "><link rel="previous" href="Indicators.html" title="Chapter&nbsp;8.&nbsp;Indicators"><link rel="next" href="references.html" title="Chapter&nbsp;10.&nbsp;References"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;9.&nbsp;Examples</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="Indicators.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="references.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="examples"></a>Chapter&nbsp;9.&nbsp;Examples</h2></div></div><div></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-overview"></a>9.1.&nbsp;Examples Overview</h2></div></div><div></div></div><p>
+			This chapters outlines the examples that come with Esper in the <tt class="literal">eg/src</tt> folder of the distribution. The code for examples can be found in the <tt class="literal">net.esper.example</tt> packages.
+		</p><p>
+			In order to compile and run the samples please follow the below instructions:
+		</p><div class="orderedlist"><ol type="1"><li><p>
+                    Make sure Java 1.5 or greater is installed and the JAVA_HOME environment variable is set.
+                </p></li><li><p>
+                    Open a console window and change directory to esper/eg/etc.
+                </p></li><li><p>
+                    Run "setenv.bat" (Windows) or "setenv.sh" (Unix) to verify your environment settings.
+                </p></li><li><p>
+                    Run "compile.bat" (Windows) or "compile.sh" (Unix) to compile the examples.
+                </p></li><li><p>
+                    Now you are ready to run the examples. Some examples require mandatory parameters. Further information to running
+                    each example can be found in "readme.txt".
+                </p></li><li><p>
+                    Modify the logger logging level in the "log4j.xml" configuration file 
+                    changing DEBUG to INFO on a class or package level to reduce the volume of text output. 
+                </p></li></ol></div><p>
+			JUnit tests exist for the example code. The JUnit test source code for the examples can be found in the <tt class="literal">eg/test</tt> folder. To build and run the example JUnit tests, use the Maven 2 goal <tt class="literal">test</tt>. The JUnit test source code can also be helpful in understanding the example and in the use of Esper APIs.
+		</p></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-transaction-3-event-challenge"></a>9.2.&nbsp;Transaction 3-Event Challenge</h2></div></div><div></div></div><p>
+			The classes for this example live in package <tt class="literal">net.esper.example.transaction</tt>. 
+			Run "run_txnsim.bat" (Windows) or "run_txnsim.sh" (Unix) to start the transaction simulator. 
+			Please see the readme file in the same folder for build instructions and command line parameters.
+		</p><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="examples-txn3event-1"></a>9.2.1.&nbsp;The Events</h3></div></div><div></div></div><p>
+	The use case involves tracking three components of a transaction. It&#8216;s important that we use at least three components, since some engines have different performance or coding for only two events per transaction. Each component comes to the engine as an event with the following fields:
+			</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+						Transaction ID
+					</p></li><li><p>
+						Time stamp
+					</p></li></ul></div><p>
+				In addition, we have the following extra fields:
+			</p><p>
+				In event A:
+			</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+						Customer ID
+					</p></li></ul></div><p>
+				In event C:
+			</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+						Supplier ID (the ID of the supplier that the order was filled through)
+					</p></li></ul></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="examples-txn3event-2"></a>9.2.2.&nbsp;Combined event</h3></div></div><div></div></div><p>
+					We need to take in events A, B and C and produce a single, combined event with the following fields:
+			</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+						Transaction ID
+					</p></li><li><p>
+						Customer ID
+					</p></li><li><p>
+						Time stamp from event A
+					</p></li><li><p>
+						Time stamp from event B
+					</p></li><li><p>
+						Time stamp from event C
+					</p></li></ul></div><p>
+What we&#8216;re doing here is matching the transaction IDs on each event, to form an aggregate event. If all these events were in a relational database, this could be done as a simple SQL join&#8230; except that with 10,000 events per second, you will need some serious database hardware to do it.
+			</p></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="examples-txn3event-3"></a>9.2.3.&nbsp;Real time summary data</h3></div></div><div></div></div><p>
+Further, we need to produce the following:
+			</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+						Min,Max,Average total latency from the events (difference in time between A and C) over the past 30 minutes.
+					</p></li><li><p>
+						Min,Max,Average latency grouped by (a) customer ID and (b) supplier ID. In other words, metrics on the the latency of the orders coming from each customer and going to each supplier.
+					</p></li><li><p>
+						Min,Max,Average latency between events A/B (time stamp of B minus A) and B/C (time stamp of C minus B).
+					</p></li></ul></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="examples-txn3event-4"></a>9.2.4.&nbsp;Find problems</h3></div></div><div></div></div><p>
+We need to detect a transaction that did not make it through all three events. In other words, a transaction with events A or B, but not C. Note that, in this case, what we care about is event C. The lack of events A or B could indicate a failure in the event transport and should be ignored. Although the lack of an event C could also be a transport failure, it merits looking into.
+			</p></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="examples-txn3event-5"></a>9.2.5.&nbsp;Event generator</h3></div></div><div></div></div><p>
+To make testing easier, standard and to demonstrate how the example works, the example is including an event generator. The generator generates events for a given number of transactions, using the following rules:
+			</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+						One in 5,000 transactions will skip event A
+					</p></li><li><p>
+						One in 1,000 transactions will skip event B
+					</p></li><li><p>
+						One in 10,000 transactions will skip event C.
+					</p></li><li><p>
+						Transaction identifiers are randomly generated
+					</p></li><li><p>
+						Customer and supplier identifiers are randomly chosen from two lists
+					</p></li><li><p>
+						The time stamp on each event is based on the system time. Between events A and B as well as B and C, between 0 and 999 is added to the time. So, we have an expected time difference of around 500 milliseconds between each event
+					</p></li><li><p>
+						Events are randomly shuffled as described below
+					</p></li></ul></div><p>
+	To make things harder, we don&#8216;t want transaction events coming in order. This code ensures that they come completely out of order. To do this, we fill in a bucket with events and, when the bucket is full, we shuffle it. The buckets are sized so that some transactions&#8216; events will be split between buckets. So, you have a fairly randomized flow of events, representing the worst case from a big, distributed infrastructure.
+				</p><p>
+	The generator lets you change the size of the bucket (small, medium, large, larger, largerer). The larger the bucket size, the more events potentially come in between two events in a given transaction and so, the more the performance characteristics like buffers, hashes/indexes and other structures are put to the test as the bucket size increases.
+				</p></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-stockticker"></a>9.3.&nbsp;StockTicker</h2></div></div><div></div></div><p>
+			 The StockTicker example comes from the stock trading domain. The example creates event patterns to filter stock tick events based on price and symbol. 
+			 When a stock tick event is encountered that falls outside the lower or upper price limit, the example simply displays that stock tick event.
+			 The price range itself is dynamically created and changed. This is accomplished by an event patterns that searches for another event class, the price limit event.			 			 
+		</p><p>
+			The classes <tt class="literal">net.esper.example.stockticker.event.StockTick</tt> and <tt class="literal">PriceLimit</tt> represent our events. The event patterns are created by the class <tt class="literal">net.esper.example.stockticker.monitor.StockTickerMonitor</tt>. 
+		</p><p>
+			Summary:
+		</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+                    Good example to learn the API and get started with event patterns
+                </p></li><li><p>
+                    Dynamically creates and removes event patterns based on price limit events received
+                </p></li><li><p>
+                    Simple, highly-performant filter expressions for event properties in the stock tick event such as symbol and price
+                </p></li></ul></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-matchmaker"></a>9.4.&nbsp;MatchMaker</h2></div></div><div></div></div><p>
+			 In the MatchMaker example every mobile user has an X and Y location, a set of properties (gender, hair color, age range) and a set of preferences (one for each property) to match. The task of the event patterns created by this example is to detect mobile users that are within proximity given a certain range, and for which the properties match preferences.
+		</p><p>
+			The event class representing mobile users is <tt class="literal">net.esper.example.matchmaker.event.MobileUserBean</tt>. The <tt class="literal">net.esper.example.matchmaker.monitor.MatchMakingMonitor</tt> class contains the patterns for detecing matches.
+		</p><p>
+			Summary:
+		</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+                    Dynamically creates and removes event patterns based on mobile user events received
+                </p></li><li><p>
+                    Uses range matching for X and Y properties of mobile user events
+                </p></li></ul></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-qossla"></a>9.5.&nbsp;QualityOfService</h2></div></div><div></div></div><p>
+            This example develops some code for measuring quality-of-service levels such as for a service-level agreement (SLA).
+            A SLA is a contract between 2 parties that defines service constraints such as maximum latency for service operations or error rates.
+        </p><p>                      
+            The example measures and monitors operation latency and error counts per customer and operation. When 
+            one of our operations oversteps these constraints, we want to be alerted right away. Additionally, we would like to have some monitoring in
+            place that checks the health of our service and provides some information on how the operations are used.
+        </p><p>                      
+            Some of the constraints we need to check are:
+         </p><div class="itemizedlist"><ul type="disc" compact><li><p>
+					That the latency (time to finish) of some of the operations is always less then X seconds.
+				</p></li><li><p>
+					That the latency average is always less then Y seconds over Z operation invocations. 
+				</p></li></ul></div><p>
+			The <tt class="literal">net.esper.example.qos_sla.events.OperationMeasurement</tt> event class with its latency and status properties is the main event used for the SLA analysis. The other event <tt class="literal">LatencyLimit</tt> serves to set latency limits on the fly.
+		</p><p>
+			The <tt class="literal">net.esper.example.qos_sla.monitor.AverageLatencyMonitor</tt> creates an EQL statement that computes latency statistics per customer and operation for the
+			last 100 events. The <tt class="literal">DynaLatencySpikeMonitor</tt> uses an event pattern to listen to spikes in latency with dynamically set limits. The <tt class="literal">ErrorRateMonitor</tt> uses the timer <tt class="literal">'at'</tt> operator in an event pattern that wakes up periodically and polls the error rate within the last 10 minutes. The <tt class="literal">ServiceHealthMonitor</tt> simply alerts when 3 errors occur, and the <tt class="literal">SpikeAndErrorMonitor</tt> alerts when a fixed latency is overstepped or an error status is reported.
+		</p><p>
+			Summary:
+		</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+                    This example combines event patterns with EQL statements for event stream analysis.
+                </p></li><li><p>
+                    Shows the use of the timer <tt class="literal">'at'</tt> operator and followed-by operator <tt class="literal">-&gt;</tt> in event patterns
+                </p></li><li><p>
+                    Outlines basic EQL statements
+                </p></li><li><p>
+                    Shows how to pull data out of EQL statements rather then subscribing to events a statement publishes
+                </p></li></ul></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-linearroad"></a>9.6.&nbsp;LinearRoad</h2></div></div><div></div></div><p>
+			The Linear Road example is a very incomplete implementation of the Stream Data Management Benchmark [3] by Standford University. 
+        </p><p>
+			Linear Road simulates a toll system for the motor vehicle expressways of a large metropolitan area. The main event in this example is a car location report which the class
+			<tt class="literal">net.esper.example.linearroad.CarLocEvent</tt> represents. Currently the event stream joins are performed by JUnit test classes in the <tt class="literal">eg/test</tt> folder. See the <tt class="literal">net.esper.example.linearroad.TestAccidentNotify</tt> and the <tt class="literal">TestCarSegmentCount</tt> classes. Please consider this a work in progress.
+        </p><p>
+			Summary:
+		</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+                    Shows more complex joins between event streams.
+                </p></li></ul></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="examples-stocktick-rsi"></a>9.7.&nbsp;StockTick RSI</h2></div></div><div></div></div><p>
+			The RSI gives you the trend for a stock and for more complete explanation, you can visit the link: http://www.stockcharts.com/education/IndicatorAnalysis/indic_RSI.html.
+		</p><p>
+			After a definite number of stock events, or accumulation period, the first RSI is computed. Then for each subsequent stock event, the RSI calculations use the previous period&#8217;s Average Gain and Loss to determine the &#8220;smoothed RSI&#8221;.
+        </p><p>
+			Summary:
+		</p><div class="itemizedlist"><ul type="disc" compact><li><p>
+                    Uses a simple event pattern with a filter which feeds a listener that computes the RSI, which publishes events containing the computed RSI.
+                </p></li></ul></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="Indicators.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="references.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;8.&nbsp;Indicators&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;10.&nbsp;References</td></tr></table></div></body></html>

@@ -1,0 +1,382 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>Chapter&nbsp;6.&nbsp;EQL Reference</title><link rel="stylesheet" href="../shared/css/html.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.65.1"><link rel="home" href="index.html" title="Esper - Java Event Stream Processor "><link rel="up" href="index.html" title="Esper - Java Event Stream Processor "><link rel="previous" href="event_patterns.html" title="Chapter&nbsp;5.&nbsp;Event Pattern Reference"><link rel="next" href="Adapters.html" title="Chapter&nbsp;7.&nbsp;Adapters"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter&nbsp;6.&nbsp;EQL Reference</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="event_patterns.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;<a accesskey="n" href="Adapters.html">Next</a></td></tr></table><hr></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="EQL"></a>Chapter&nbsp;6.&nbsp;EQL Reference</h2></div></div><div></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-intro"></a>6.1.&nbsp;EQL Introduction</h2></div></div><div></div></div><p>
+			EQL statements are used to derive and aggregate information from one or more streams of events, and to join event streams. This section outlines EQL syntax. It also outlines the built-in views, which are the building blocks for deriving and aggregating information from event streams. 
+        </p><p>
+			EQL is similar to SQL in its use of the <tt class="literal">select</tt> clause and the <tt class="literal">where</tt> clause. Where EQL differs most from SQL is in the use of tables. EQL replaces tables with the concept of event streams.
+        </p><p>
+			EQL statements contain definitions of one or more views. Similar to tables in an SQL statement, views define the data available for querying and filtering. 
+			Some views represent windows over a stream of events. Other views derive statistics from event properties, group events or handle unique event property values.
+            Views can be staggered onto each other to build a chain of views. The Esper engine makes sure that views are reused among EQL statements for efficiency.
+        </p><p>
+			The built-in set of views is:
+         </p><div class="orderedlist"><ol type="1" compact><li><p>
+					Views that represent moving event windows: <tt class="literal">win:length</tt>, <tt class="literal">win:time</tt>, <tt class="literal">win:time_batch</tt>, <tt class="literal">win:ext_time</tt>, <tt class="literal">ext:sort_window</tt>
+				</p></li><li><p>
+					Views for aggregation: <tt class="literal">std:unique</tt>, <tt class="literal">std:groupby</tt>, <tt class="literal">std:lastevent</tt>
+				</p></li><li><p>
+					Views that derive statistics: <tt class="literal">std:size</tt>, <tt class="literal">stat:uni</tt>, <tt class="literal">stat:linest</tt>, <tt class="literal">stat:correl</tt>, <tt class="literal">stat:weighted_avg</tt>, 
+					<tt class="literal">stat:multidim_stat</tt>
+				</p></li></ol></div><p>
+			Esper can be extended by plugging-in custom developed views.
+        </p></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-select-syntax"></a>6.2.&nbsp;EQL Syntax</h2></div></div><div></div></div><p>
+			EQL queries are created and stored in the engine, and publish results as events are received by the engine or timer events occur that match the criteria specified in the query. Events can also be pulled from running EQL queries.
+		</p><p>
+			The select clause in an EQL query specifies the event properties or events to retrieve. The <tt class="literal">from</tt> clause in an EQL query specifies the event stream definitions and stream names to use. The <tt class="literal">where</tt> clause in an EQL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds if the average hit 75 or more.
+		</p><pre class="programlisting">select average from StockTick(symbol='IBM').win:time(30).stat:uni('price') where average &gt;= 75;
+</pre><p>
+			EQL queries follow the below syntax. EQL queries can be simple queries or more complex queries. A simple select contains only a select clause and a single stream definition. Complex EQL queries can be build that feature a more elaborate select list utilizing expressions, may join multiple streams or may contain a where clause that with search conditions.
+		</p><pre class="synopsis">select <span class="emphasis"><em>select_list</em></span>
+from <span class="emphasis"><em>stream_def</em></span> [as name] [, <span class="emphasis"><em>stream_def</em></span> [as name]] [,...]
+[where <span class="emphasis"><em>search_conditions</em></span>]
+[group by <span class="emphasis"><em>grouping_expression_list</em></span>]
+[having <span class="emphasis"><em>grouping_search_conditions</em></span>]
+[output <span class="emphasis"><em>output_specification</em></span>]
+</pre></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-select-list"></a>6.3.&nbsp;Choosing Event Properties And Events: the <span class="emphasis"><em>Select</em></span> Clause</h2></div></div><div></div></div><p>
+			The select clause is required in all EQL statements. The select clause can be used to select all properties via the wildcard <tt class="literal">*</tt>, or to specify a list of event properties and expressions. The select clause defines the event type (event property names and types) of the resulting events published by the statement, or pulled from the statement.
+		</p><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-select-all-props"></a>6.3.1.&nbsp;Choosing all event properties: select *</h3></div></div><div></div></div><p>
+				The syntax for selecting all event properties in a stream is:
+			</p><pre class="synopsis">select * from <span class="emphasis"><em>stream_def</em></span></pre><p>
+				The following statement selects all univariate statistics properties for the last 30 seconds of IBM stock ticks for price.
+			</p><pre class="programlisting">select * from StockTick(symbol='IBM').win:time(30).stat:uni('price')
+</pre><p>
+				In a join statement, using the <tt class="literal">select *</tt> syntax selects event properties that contain the events representing the joined streams themselves.
+			</p></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-select-event-props"></a>6.3.2.&nbsp;Choosing specific event properties</h3></div></div><div></div></div><p>
+				To chose the particular event properties to return:
+			</p><pre class="synopsis">select <span class="emphasis"><em>event_property</em></span> [, <span class="emphasis"><em>event_property</em></span>] [, ...] from <span class="emphasis"><em>stream_def</em></span></pre><p>
+				The following statement selects the count and standard deviation properties for the last 100 events of IBM stock ticks for volume.
+			</p><pre class="programlisting">select count, stdev from StockTick(symbol='IBM').win:length(100).stat:uni('volume')
+</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-select-expressions"></a>6.3.3.&nbsp;Expressions</h3></div></div><div></div></div><p>
+				The select clause can contain one or more expressions.
+			</p><pre class="synopsis">select <span class="emphasis"><em>expression</em></span> [, <span class="emphasis"><em>expression</em></span>] [, ...] from <span class="emphasis"><em>stream_def</em></span></pre><p>
+				The following statement selects the volume multiplied by price for a time batch of the last 30 seconds of stock tick events. 
+			</p><pre class="programlisting">select volume * price from StockTick.win:time_batch(30)
+</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-select-renaming"></a>6.3.4.&nbsp;Renaming event properties</h3></div></div><div></div></div><p>
+				Event properties and expressions can be renamed using below syntax.
+			</p><pre class="synopsis">select [event property | expression] as <span class="emphasis"><em>identifier</em></span> [, ...]</pre><p>
+				The following statement selects volume multiplied by price and specifies the name <span class="emphasis"><em>volPrice</em></span> for the event property.
+			</p><pre class="programlisting">select volume * price as volPrice from StockTick.win:length(100)
+</pre></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-from-clause"></a>6.4.&nbsp;Specifying Event Streams : the <span class="emphasis"><em>From</em></span> Clause</h2></div></div><div></div></div><p>
+			The <tt class="literal">from</tt> clause is required in all EQL statements. It specifies one or more event streams. Each event stream can optionally be given a name by means of the <tt class="literal">as</tt> syntax.
+		</p><pre class="synopsis">from <span class="emphasis"><em>stream_def</em></span> [as <span class="emphasis"><em>name</em></span>] [, <span class="emphasis"><em>stream_def</em></span> [as <span class="emphasis"><em>name</em></span>]] [, ...]</pre><p>
+			The event stream definition <span class="emphasis"><em>stream_def</em></span> as shown in the syntax above consists of an event type, an optional filter property list and an optional list of views that derive data from a stream must be supplied. The syntax for an event stream definition is as below:
+		</p><pre class="synopsis"><span class="emphasis"><em>event_type</em></span> ( [<span class="emphasis"><em>filter_criteria</em></span>] ) [.<span class="emphasis"><em>view_spec</em></span>] [.<span class="emphasis"><em>view_spec</em></span>] [...]</pre><p>
+			The following EQL statement selects all event properties for the last 100 events of IBM stock ticks for volume. In the example, the event type is the fully qualified Java class name <tt class="literal">org.esper.example.StockTick</tt>. The expression filters for events where the property <tt class="literal">symbol</tt> has a value of "IBM". The optional view specifications for deriving data from the StockTick events are a length window and a view for computing statistics on volume. The name for the event stream is "volumeStats".
+		</p><pre class="programlisting">select * from org.esper.example.StockTick(symbol='IBM').win:length(100).stat:uni('volume') as volumeStats</pre><p>
+			Instead of the fully-qualified Java class name any other event name can be mapped via Configuration to a Java class, making the resulting statement more readable.
+		</p><pre class="programlisting">select * from StockTick(symbol='IBM').win:length(100).stat:uni('volume') as volumeStats</pre><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-from-clause-event-type"></a>6.4.1.&nbsp;Specifying an event type</h3></div></div><div></div></div><p>
+				In the example above the event type was <tt class="literal">org.esper.example.StockTick</tt>. The event type is simply the fully qualified Java class name. Interfaces and abstract classes are also supported. Alternatively, via configuration an alias for an event type can be defined and used instead of the fully qualified class name. The below example shows one way to obtain the fully qualified class name of a given Java class <tt class="literal">StockTick</tt>.
+			</p><pre class="programlisting">String eventName = StockTick.class.getName();
+String stmt = "from " + eventName + ".win:length(100)"
+</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-from-clause-filter-criteria"></a>6.4.2.&nbsp;Specifying event filter criteria</h3></div></div><div></div></div><p>
+				Filter criteria follow the same syntax as outlined in the event pattern section on filters; see <a href="event_patterns.html#pattern-filter" title="5.3.&nbsp;Filter Expressions">Section&nbsp;5.3, &#8220;Filter Expressions&#8221;</a>. Filter criteria operators are: <tt class="literal">=, &lt; , &gt; , &gt;=, &lt;=</tt>. Ranges use the <tt class="literal">in </tt> keyword and round <tt class="literal">(...)</tt> or square brackets <tt class="literal">[]</tt>.
+			</p><p>
+				Esper filters out events in an event stream as defined by filter criteria before it sends events to subsequent views. Thus, compared to search conditions in a where-clause, filter criteria remove unneeded events early.
+			</p><p>
+				The below example is a filter criteria list that removes events based on category, price and grade.
+			</p><pre class="programlisting">from mypackage.RfidEvent(category="Perishable", price&lt;1.00, grade in [1, 2])</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-from-clause-view-spec"></a>6.4.3.&nbsp;Specifying views</h3></div></div><div></div></div><p>
+				Views are used to derive or aggregate data. Views can be staggered onto each other. The section below outlines the views available and plug-in of custom views.
+			</p><p>
+				Views can optionally take one or parameters. These parameters can consist of primitive constants such as String, boolean or numeric types. String arrays are also supported as a view parameter type.
+			</p><p>
+				Views can optionally take one or parameters. These parameters can consist of primitive constants such as String, boolean or numeric types. String arrays are also supported as a view parameter type.
+			</p><p>
+				The below example uses the car location event. It specifies an empty list of filter criteria by adding a empty round brackets <tt class="literal">()</tt> after the event type. The first view <tt class="literal">"std:groupby('carId')"</tt> groups car location events by car id. The second view <tt class="literal">"win:length(4)"</tt> keeps a length window of the 4 last events, with one length window for each car id. The next view <tt class="literal">"std:groupby({'expressway', 'direction', 'segment'})"</tt> groups each event by it's expressway, direction and segment property values. Again, the grouping is done for each car id considering the last 4 events only. The last view <tt class="literal">"std:size()"</tt> is used to report the number of events. Thus the below example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. The <tt class="literal">"as accSegment"</tt> syntax assigns the name accSegment to the resulting event stream.
+			</p><pre class="programlisting">String carLocEvent = CarLocEvent.class.getName();
+String joinStatement = "select * from " +
+	carLocEvent + ".std:groupby('carId').win:length(4).std:groupby({'expressway', 'direction', 'segment'}).std:size() as accSeg," +
+	carLocEvent + ".win:time(30).std:unique('carId') as curCarSeg" +
+		" where accSeg.size &gt;= 4" +
+		"   and accSeg.expressway = curCarSeg.expressway" +
+		"   and accSeg.direction = curCarSeg.direction" +
+		"   and (" +
+				"(accSeg.direction=0 " +
+				" and curCarSeg.segment &lt; accSeg.segment" +
+				" and curCarSeg.segment &gt; accSeg.segment - 5)" +
+			" or " +
+				"(accSeg.direction=1 " +
+				" and curCarSeg.segment &gt; accSeg.segment" +
+				" and curCarSeg.segment &lt; accSeg.segment + 5)" +
+			")";
+</pre></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-where-clause"></a>6.5.&nbsp;Specifying Search Conditions: the <span class="emphasis"><em>Where</em></span> Clause</h2></div></div><div></div></div><p>
+			The where clause is an optional clause in EQL statements. Via the where clause event streams can be joined and events can be filtered. 
+		</p><p>
+			Comparison operators <tt class="literal">=, &lt; , &gt; , &gt;=, &lt;=, !=, &lt;&gt;, is null, is not null</tt> and logical combinations via <tt class="literal">and</tt> and <tt class="literal">or</tt> are supported in the where clause. The where clause can also introduce join conditions as outlined in <a href="EQL.html#eql-join" title="6.10.&nbsp;Joining Event Streams">Section&nbsp;6.10, &#8220;Joining Event Streams&#8221;</a>. Where-clauses can also contain expressions. Some examples are listed below.
+		</p><pre class="programlisting">...where fraud.severity = 5 and amount &gt; 500
+...where (orderItem.orderId is null) or (orderItem.class != 10)		 
+...where (orderItem.orderId = null) or (orderItem.class &lt;&gt; 10)		 
+...where itemCount / packageCount &gt; 10		 </pre></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-grouping-aggregating"></a>6.6.&nbsp;Aggregates and grouping: the <span class="emphasis"><em>Group-by</em></span> Clause and the <span class="emphasis"><em>Having</em></span> Clause</h2></div></div><div></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-grouping-aggregate-functions"></a>6.6.1.&nbsp;Using aggregate functions</h3></div></div><div></div></div><p>
+					The aggregate functions are <tt class="literal">sum, avg, count, max, min, median, stddev, avedev</tt>. You can use aggregate functions to
+					calculate and summarize data from event properties.
+					For example, to find out the total price for all stock tick events in the last 30 seconds, type:
+				</p><pre class="programlisting">select sum(price) from StockTickEvent.win:time(30)</pre><p>
+					Here is the syntax for aggregate functions: 
+				</p><pre class="synopsis"><span class="emphasis"><em>aggregate_function</em></span>( [all | distinct] <span class="emphasis"><em>expression</em></span>)</pre><p>
+					You can apply aggregate functions to all events in an event stream window or other view, or to one or more groups of events. From each set of events to which 
+					an aggregate function is applied, Esper generates a single value. 
+				</p><p>
+					<tt class="literal">Expression</tt> is usually an event property name. However it can also be a constant, function, or any combination of event property names, constants, 
+					and functions connected by arithmetic operators.
+				</p><p>
+					For example, to find out the average price for all stock tick events in the last 30 seconds if the price was doubled:
+				</p><pre class="programlisting">select avg(price * 2) from StockTickEvent.win:time(30)</pre><p>
+					You can use the optional keyword <tt class="literal">distinct</tt> with all aggregate functions to eliminate duplicate values before the aggregate function is applied. The optional 
+					keyword <tt class="literal">all</tt> which performs the operation on all events is the default. 
+				</p><p>
+					The syntax of the aggregation functions and the results they produce are shown in below table.
+				</p><div class="table"><a name="eql-grouping-aggregate-func"></a><p class="title"><b>Table&nbsp;6.1.&nbsp;Syntax and results of aggregate functions</b></p><table summary="Syntax and results of aggregate functions" border="1"><colgroup><col><col></colgroup><thead><tr><th>Aggregate Function</th><th>Result</th></tr></thead><tbody><tr><td>sum([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Totals the (distinct) values in the expression, returning a value of <tt class="literal">long, double, float or integer</tt> type depending on the expression
+									</p></td></tr><tr><td>avg([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Average of the (distinct) values in the expression, returning a value of <tt class="literal">double</tt> type
+									</p></td></tr><tr><td>count([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Number of the (distinct) non-null values in the expression, returning a value of <tt class="literal">long</tt> type
+									</p></td></tr><tr><td>count(*)</td><td><p>
+										Number of events, returning a value of <tt class="literal">long</tt> type
+									</p></td></tr><tr><td>max([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Highest (distinct) value in the expression, returning a value of the same type as the expression itself returns
+									</p></td></tr><tr><td>min([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Lowest (distinct) value in the expression, returning a value of the same type as the expression itself returns
+									</p></td></tr><tr><td>median([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Median (distinct) value in the expression, returning a value of <tt class="literal">double</tt> type
+									</p></td></tr><tr><td>stddev([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Standard deviation of the (distinct) values in the expression, returning a value of <tt class="literal">double</tt> type
+									</p></td></tr><tr><td>avedev([all|distinct] <span class="emphasis"><em>expression</em></span>)</td><td><p>
+										Mean deviation of the (distinct) values in the expression, returning a value of <tt class="literal">double</tt> type
+									</p></td></tr></tbody></table></div><p>
+					You can use aggregation functions in a <tt class="literal">select</tt> clause and in a <tt class="literal">having</tt> clause. You cannot use aggregate functions in a <tt class="literal">where</tt> clause, but you can use the where clause to restrict the events to which the aggregate is applied. The next query computes the average and sum of the price of stock tick events for the symbol IBM only, for the last 10 stock tick events regardless of their symbol.
+				</p><pre class="programlisting">select 'IBM stats' as title, avg(price) as avgPrice, sum(price) as sumPrice
+from StockTickEvent.win:length(10)
+where symbol='IBM'</pre><p>
+					In the above example the length window of 10 elements is not affected by the where-clause, i.e. all events enter and leave the length window regardless of their symbol. If we only care about the last 10 IBM events, we need to add filter criteria as below.
+				</p><pre class="programlisting">select 'IBM stats' as title, avg(price) as avgPrice, sum(price) as sumPrice
+from StockTickEvent(symbol='IBM').win:length(10)
+where symbol='IBM'</pre><p>
+					You can use aggregate functions with any type of event property or expression, with the following exceptions:
+				</p><div class="orderedlist"><ol type="1" compact><li><p>
+							You can use <tt class="literal">sum, avg, median, stddev, avedev</tt> with numeric event properties only	
+						</p></li></ol></div><p>
+					Esper ignores any null values returned by the event property or expression on which the aggregate function is operating, except for the <tt class="literal">count(*)</tt> function, which counts null values as well. All aggregate functions return null if the data set contains no events, or if all events in the data set contain only null values for the aggregated expression.
+				</p></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-grouping-group-by"></a>6.6.2.&nbsp;Organizing statement results into groups: the <span class="emphasis"><em>Group-by</em></span> clause</h3></div></div><div></div></div><p>
+					The <tt class="literal">group by</tt> clause is optional in all EQL statements. The <tt class="literal">group by</tt> clause divides the output of an EQL statement into groups. You can group by one or more event property names, or by the result of computed expressions. When used with aggregate functions, <tt class="literal">group by</tt> retrieves the calculations in each subgroup. You can use <tt class="literal">group by</tt> without aggregate functions, but generally that can produce confusing results.
+				</p><p>
+					For example, the below statement returns the total price per symbol for all stock tick events in the last 30 seconds:
+				</p><pre class="programlisting">select symbol, sum(price) from StockTickEvent.win:time(30) group by symbol</pre><p>
+					The syntax of the group by clause is:
+				</p><pre class="synopsis">group by <span class="emphasis"><em>arregate_free_expression</em></span> [, <span class="emphasis"><em>arregate_free_expression</em></span>] [, ...]</pre><p>
+					Esper places the following restrictions on expressions in the <tt class="literal">group by</tt> clause:
+				</p><div class="orderedlist"><ol type="1" compact><li><p>
+							Expressions in the <tt class="literal">group by</tt> cannot contain aggregate functions
+						</p></li><li><p>
+							Event properties that are used within aggregate functions in the <tt class="literal">select</tt> clause cannot also be used in a <tt class="literal">group by</tt> expression
+						</p></li></ol></div><p>
+					You can list more then one expression in the <tt class="literal">group by</tt> clause to nest groups. Once the sets are established with <tt class="literal">group by</tt> the aggregation
+					functions are applied. This statement posts the median volume for all stock tick events in the last 30 seconds per symbol and tick data feed. Esper posts one event for each group to statement listeners:
+				</p><pre class="programlisting">select symbol, tickDataFeed, median(volume) 
+from StockTickEvent.win:time(30) 
+group by symbol, tickDataFeed</pre><p>
+					In the statement above the event properties in the <tt class="literal">select</tt> list (symbol, tickDataFeed) are also listed in the <tt class="literal">group by</tt> clause.
+					The statement thus follows the SQL standard which prescribes that non-aggregated event properties in the <tt class="literal">select</tt> list must match the 
+					<tt class="literal">group by</tt> columns.
+				</p><p>
+					Esper also supports statements in which one or more event properties in the <tt class="literal">select</tt> list are not listed in the <tt class="literal">group by</tt> clause.
+					The statement below demonstrates this case. It calculates the standard deviation for the last 30 seconds of stock ticks aggregating by symbol and posting for 
+					each event the symbol, tickDataFeed and the standard deviation on price.
+				</p><pre class="programlisting">select symbol, tickDataFeed, stddev(price) from StockTickEvent.win:time(30) group by symbol</pre><p>
+					The above example still aggregates the <tt class="literal">price</tt> event property based on the <tt class="literal">symbol</tt>, but produces one event per incoming event, not one 
+					event per group.
+				</p><p>
+					Additionally, Esper supports statements in which one or more event properties in the <tt class="literal">group by</tt> clause are not listed in the <tt class="literal">select</tt> list.
+					This is an example that calculates the mean deviation per <tt class="literal">symbol</tt> and <tt class="literal">tickDataFeed</tt> and posts one event per group with <tt class="literal">symbol</tt> and mean deviation of price in the generated events. Since tickDataFeed is not in the posted results, this can potentially be confusing.
+				</p><pre class="programlisting">select symbol, avedev(price) 
+from StockTickEvent.win:time(30) 
+group by symbol, tickDataFeed</pre><p>
+					Expressions are also allowed in the <tt class="literal">group by</tt> list:
+				</p><pre class="programlisting">select symbol * price, count(*) from StockTickEvent.win:time(30) group by symbol * price</pre><p>
+					If the <tt class="literal">group by</tt> expression resulted in a null value, the null value becomes its own group. All null values are aggregated into the same group. If you are using the <tt class="literal">count(expression)</tt> aggregate function which does not count null values, the count returns zero if only null values are encountered.								
+				</p><p>
+					You can use a <tt class="literal">where</tt>	clause in a statement with <tt class="literal">group by</tt>. Events that do not satisfy the conditions in the <tt class="literal">where</tt> clause are eliminated before any grouping is done. For example, the statement below posts the number of stock ticks in the last 30 seconds with a volume larger then 100, posting one event per group (symbol).
+				</p><pre class="programlisting">select symbol, count(*) from StockTickEvent.win:time(30) where volume &gt; 100 group by symbol</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-grouping-having"></a>6.6.3.&nbsp;Selecting groups of events: the <span class="emphasis"><em>Having</em></span> clause</h3></div></div><div></div></div><p>
+					Use the <tt class="literal">having</tt> clause to pass or reject events defined by the <tt class="literal">group-by</tt> clause. The <tt class="literal">having</tt> clause sets conditions for the <tt class="literal">group by</tt> clause in the same way <tt class="literal">where</tt> sets conditions for the <tt class="literal">select</tt> clause, except <tt class="literal">where</tt> cannot include aggregate functions, while <tt class="literal">having</tt> often does.
+				</p><p>
+					This statement is an example of a <tt class="literal">having</tt> clause with an aggregate function. It posts the total price per symbol for the last 30 seconds of stock tick events for only those symbols in which the total price exceeds 1000. The <tt class="literal">having</tt> clause eliminates all symbols where the total price is equal or less then 1000.
+				</p><pre class="programlisting">select symbol, sum(price) 
+from StockTickEvent.win:time(30) 
+group by symbol 
+having sum(price) &gt; 1000</pre><p>
+					To include more then one condition in the <tt class="literal">having</tt> clause combine the conditions with <tt class="literal">and</tt>, <tt class="literal">or</tt> or <tt class="literal">not</tt>.
+					This is shown in the statement below which selects only groups with a total price greater then 1000 and an average volume less then 500.
+				</p><pre class="programlisting">select symbol, sum(price), avg(volume)
+from StockTickEvent.win:time(30) 
+group by symbol 
+having sum(price) &gt; 1000 and avg(volume) &lt; 500</pre><p>
+					Esper places the following restrictions on expressions in the <tt class="literal">having</tt> clause:
+				</p><div class="orderedlist"><ol type="1" compact><li><p>
+							Any expressions that contain aggregate functions must also occur in the <tt class="literal">select</tt> clause
+						</p></li></ol></div><p>
+					A statement with the <tt class="literal">having</tt> clause should also have a <tt class="literal">group by</tt> clause. If you omit <tt class="literal">group-by</tt>, all the events not excluded
+					by the <tt class="literal">where</tt> clause return as a single group. In that case <tt class="literal">having</tt> acts like a <tt class="literal">where</tt> except that <tt class="literal">having</tt> can have aggregate functions. 
+				</p><p>
+					The <tt class="literal">having</tt> clause can also be used without <tt class="literal">group by</tt> clause as the below example shows. The example below posts events where the price is less then the current running average price of all stock tick events in the last 30 seconds.
+				</p><pre class="programlisting">select symbol, price, avg(price) 
+from StockTickEvent.win:time(30) 
+having price &lt; avg(price)</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-filter-where-grouping-having-interactions"></a>6.6.4.&nbsp;How the stream filter, <span class="emphasis"><em>Where</em></span>, <span class="emphasis"><em>Group By</em></span> and <span class="emphasis"><em>Having</em></span> clauses interact</h3></div></div><div></div></div><p>
+					When you include filters, the <tt class="literal">where</tt> condition, the <tt class="literal">group by</tt> clause and the <tt class="literal">having</tt> condition in an EQL statement
+					the sequence in which each clause affects events determines the final result:
+				</p><div class="orderedlist"><ol type="1" compact><li><p>
+							The event stream's filter condition, if present, dictates which events enter a window (if one is used). The filter discards any events not meeting filter criteria.
+						</p></li><li><p>
+							The <tt class="literal">where</tt> clause excludes events that do not meet its search condition.
+						</p></li><li><p>
+							Aggregate functions in the select list calculate summary values for each group.
+						</p></li><li><p>
+							The <tt class="literal">having</tt> clause excludes events from the final results that do not meet its search condition.
+						</p></li></ol></div><p>
+					The following query illustrates the use of filter, <tt class="literal">where</tt>, <tt class="literal">group by</tt> and <tt class="literal">having</tt> clauses in one statement with 
+					a <tt class="literal">select</tt> clause containing an aggregate function.
+				</p><pre class="programlisting">select tickDataFeed, stddev(price)
+from StockTickEvent(symbol='IBM').win:length(10) 
+where volume &gt; 1000
+group by tickDataFeed 
+having stddev(price) &gt; 0.8</pre><p>
+					Esper filters events using the filter criteria for the event stream <tt class="literal">StockTickEvent</tt>. In the example above only events with symbol IBM enter the length window over the last 10 events, all other events are simply discarded. The <tt class="literal">where</tt> clause removes any events posted by the length window (events entering the window and event leaving the window) that do not match the condition of volume greater then 1000. Remaining events are applied to the <tt class="literal">stddev</tt> standard deviation aggregate function for each tick data feed as specified in the <tt class="literal">group by</tt> clause. Each <tt class="literal">tickDataFeed</tt> value generates one event. Esper applies the <tt class="literal">having</tt> clause and only lets events pass for <tt class="literal">tickDataFeed</tt> groups with a standard deviation of price greater then 0.8.
+				</p></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-output-rate"></a>6.7.&nbsp;Stabilizing and Limiting Output: the <span class="emphasis"><em>Output</em></span> Clause</h2></div></div><div></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-output-options"></a>6.7.1.&nbsp;Output Clause Options</h3></div></div><div></div></div><p>
+				The <tt class="literal">output</tt> clause is optional in Esper and is used to stabilize the rate at which events are output. For example, the following statement batches old and new events and outputs them at the end of every 90 second interval.				
+				</p><pre class="programlisting">select * from StockTickEvent.win:length(5) output every 90 seconds</pre><p>
+					Here is the syntax for output rate limiting: 
+				</p><pre class="synopsis">output [all | last] every <span class="emphasis"><em>number</em></span> [minutes | seconds | events]</pre><p>
+					The optional <tt class="literal">last</tt> keyword specifies to only output the very last event, while the <tt class="literal">all</tt> keyword is the default and specifies to output all events
+					in a batch. The batch size can be specified in terms of time or number of events.
+				</p><p>
+					The time interval can also be specified in terms of minutes; the following statement is identical to the first one.
+				</p><pre class="programlisting">select * from StockTickEvent.win:length(5) output every 1.5 minutes</pre><p>
+					A second way that output can be stabilized is by batching events until a certain number of events have been collected. The next statement only outputs when either 5 (or more) new or 5 (or more) old events have been batched.
+				</p><pre class="programlisting">select * from StockTickEvent.win:time(30) output every 5 events</pre><p>
+					Additionally, event output can be further modified by the optional last keyword, which causes output of only the last event to arrive into an output batch.
+				</p><pre class="programlisting">select * from StockTickEvent.win:time(30) output last every 5 events</pre></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="eql-output-groupby"></a>6.7.2.&nbsp;Group By, Having and Output clause interaction</h3></div></div><div></div></div><p>
+					The <tt class="literal">output</tt> clause interacts in two ways with the <tt class="literal">group by</tt> and <tt class="literal">having</tt> clauses. First, in the <tt class="literal">output every n events </tt>case, the number <tt class="literal">n</tt> refers to the number of events arriving into the <tt class="literal">group by clause</tt>. That is, if the <tt class="literal">group by</tt> clause outputs only 1 event per group, or if the arriving events don't satisfy the <tt class="literal">having</tt> clause, then the actual number of events output by the statement could be fewer than <tt class="literal">n</tt>.
+				</p><p>
+Second, the <tt class="literal">last</tt> and <tt class="literal">all</tt> keywords have special meanings when used in a statement with aggregate functions and the <tt class="literal">group by</tt> clause. The <tt class="literal">last</tt> keyword specifies that only groups whose aggregate values have been updated with the most recent batch of events should be output. The <tt class="literal">all</tt> keyword (the default) specifies that the most recent data for all groups seen so far should be output, whether or not these groups' aggregate values have just been updated.
+				</p></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-single-row-function-ref"></a>6.8.&nbsp;Single-row function reference</h2></div></div><div></div></div><p>
+			Single-row functions return a single value for every single event result row generated by your statement. These functions can appear in the <tt class="literal">select</tt> clause,
+			in the <tt class="literal">where</tt> clause and in the <tt class="literal">having</tt> clause.
+		</p><p>
+			The below table outlines the single-row functions available.
+		</p><div class="table"><a name="eql-single-row-func"></a><p class="title"><b>Table&nbsp;6.2.&nbsp;Syntax and results of single-row functions</b></p><table summary="Syntax and results of single-row functions" border="1"><colgroup><col><col></colgroup><thead><tr><th>Single-row Function</th><th>Result</th></tr></thead><tbody><tr><td>max(<span class="emphasis"><em>expression</em></span>, <span class="emphasis"><em>expression</em></span>, [, <span class="emphasis"><em>expression</em></span> [,...]])</td><td><p>
+								Returns the highest numeric value among the 2 or more comma-separated expressions.
+							</p></td></tr><tr><td>min(<span class="emphasis"><em>expression</em></span>, <span class="emphasis"><em>expression</em></span>, [, <span class="emphasis"><em>expression</em></span> [,...]])</td><td><p>
+								Returns the lowest numeric value among the 2 or more comma-separated expressions.
+							</p></td></tr></tbody></table></div><p>
+            An example showing the use of the <tt class="literal">min</tt> single-row function is below.
+        </p><pre class="programlisting">select symbol, min(ticks.timestamp, news.timestamp) as minT
+from StockTickEvent.win:time(30) as ticks, 
+     NewsEvent.win:time(30) as news
+where ticks.symbol = news.symbol
+</pre></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="built-in-views"></a>6.9.&nbsp;Build-in views</h2></div></div><div></div></div><p>
+            This chapter outlines the views that are built into Esper.
+        </p><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="win-views"></a>6.9.1.&nbsp;Window views</h3></div></div><div></div></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-win-length"></a>6.9.1.1.&nbsp;Length window</h4></div></div><div></div></div><p>
+					Creates a moving window extending the specified number of elements into the past. 
+				</p><p>
+					The below example calculates basic univariate statistics for the last 5 stock ticks for symbol IBM.
+				</p><pre class="programlisting">StockTickEvent(symbol='IBM').win:length(5).stat:uni('price')</pre><p>
+					The next example keeps a length window of 10 events of stock trade events, with a separate window for each symbol. The
+					statistics on price is calculated only for the last 10 events for each symbol.
+				</p><pre class="programlisting">StockTickEvent.std:groupby('symbol').win:length(10).stat:uni('price')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-win-time"></a>6.9.1.2.&nbsp;Time window</h4></div></div><div></div></div><p>
+					The time_window creates a moving time window extending from the specified time interval in seconds into the past based on the system time.
+				</p><p>
+					For the IBM stock tick events in the last 1000 milliseconds, calculate statistics on price.
+				</p><pre class="programlisting">StockTickEvent(symbol='IBM').win:time(1).stat:uni('price')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-win-ext_time"></a>6.9.1.3.&nbsp;Externally-timed window</h4></div></div><div></div></div><p>
+					Similar to the time window this view moving time window extending from the specified time interval in seconds into the past, but based on the millisecond
+					time value supplied by an event property.
+				</p><p>
+					This view holds stock tick events of the last 10 seconds based on the timestamp property in <tt class="literal">StockTickEvent</tt>.
+				</p><pre class="programlisting">StockTickEvent.win:ext_timed(10, 'timestamp')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-win-time-batch"></a>6.9.1.4.&nbsp;Time window buffer</h4></div></div><div></div></div><p>
+					This window view buffers events and releases them every specified time interval in one update. 
+				</p><p>
+					The below example batches events into a 5 second window releasing new batches every 5 seconds. Listeners to updates
+					posted by this view receive updated information only every 5 seconds.
+				</p><pre class="programlisting">StockTickEvent.win:time_batch(5)</pre></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="std-views"></a>6.9.2.&nbsp;Standard view set</h3></div></div><div></div></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-std-unique"></a>6.9.2.1.&nbsp;Unique</h4></div></div><div></div></div><p>
+					The <tt class="literal">unique</tt>view is a view that includes only the most recent among events having the same value for the specified field. 
+				</p><p>
+					The below example creates a view that retains only the last event per symbol.
+				</p><pre class="programlisting">StockTickEvent.std:unique('symbol')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-std-groupby"></a>6.9.2.2.&nbsp;Group By</h4></div></div><div></div></div><p>
+					This view groups events into sub-views by the value of the specified field.
+				</p><p>
+					This example calculates statistics on price separately for each symbol.					
+				</p><pre class="programlisting">StockTickEvent.std:groupby('symbol').stat:uni('price')</pre><p>
+					The next example keeps a length window of 10 events of stock trade events, with a separate window for each symbol. Now the
+					statistics on price is calculated only for the last 10 events for each symbol.
+				</p><pre class="programlisting">StockTickEvent.std:groupby('symbol').win:length(10).stat:uni('price')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-std-size"></a>6.9.2.3.&nbsp;Size</h4></div></div><div></div></div><p>
+					This view returns the number of elements in view.
+				</p><p>
+					This example view reports the number of events within the last 1 minute.
+				</p><pre class="programlisting">StockTickEvent.win:time(60000).std:size()</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-std-last"></a>6.9.2.4.&nbsp;Last</h4></div></div><div></div></div><p>
+					This view exposes the last element of its parent view.
+				</p><p>
+					This example view retains statistics calculated on stock tick price for the symbol IBM.
+				</p><pre class="programlisting">StockTickEvent(symbol='IBM').stat:uni('price').std:lastevent()</pre></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="stat-views"></a>6.9.3.&nbsp;Statistics views</h3></div></div><div></div></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-stat-uni"></a>6.9.3.1.&nbsp;Univariate statistics</h4></div></div><div></div></div><p>
+					This view calculated basic univariate statistics on an event property.
+				</p><div class="table"><a name="view-stat-uni-table"></a><p class="title"><b>Table&nbsp;6.3.&nbsp;Univariate statistics derived properties</b></p><table summary="Univariate statistics derived properties" border="1"><colgroup><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th></tr></thead><tbody><tr><td><tt class="literal">count</tt></td><td>Number of values</td></tr><tr><td><tt class="literal">sum</tt></td><td>Sum of values</td></tr><tr><td><tt class="literal">average</tt></td><td>Average of values</td></tr><tr><td><tt class="literal">variance</tt></td><td>Variance</td></tr><tr><td><tt class="literal">stdev</tt></td><td>Sample standard deviation (square root of variance) </td></tr><tr><td><tt class="literal">stdevpa</tt></td><td>Population standard deviation</td></tr></tbody></table></div><p>
+					The below example calculates price statistics on stock tick events for the last 10 events.
+				</p><pre class="programlisting">StockTickEvent.win:length(10).stat:uni('price')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-stat-linest"></a>6.9.3.2.&nbsp;Regression</h4></div></div><div></div></div><p>
+					This view calculates regression on two event properties.
+				</p><div class="table"><a name="view-stat-linest-table"></a><p class="title"><b>Table&nbsp;6.4.&nbsp;Regression derived properties</b></p><table summary="Regression derived properties" border="1"><colgroup><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th></tr></thead><tbody><tr><td><tt class="literal">slope</tt></td><td>Slope</td></tr><tr><td><tt class="literal">yintercept</tt></td><td>Y Intercept</td></tr></tbody></table></div><p>
+					Calculate slope and y-intercept on price and offer for all events in the last 10 seconds.
+				</p><pre class="programlisting">StockTickEvent.win:time(10000).stat:linest('price', 'offer')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-stat-correl"></a>6.9.3.3.&nbsp;Correlation</h4></div></div><div></div></div><p>
+					This view calculates the correlation value on two event properties.
+				</p><div class="table"><a name="view-stat-correl-table"></a><p class="title"><b>Table&nbsp;6.5.&nbsp;Correlation derived properties</b></p><table summary="Correlation derived properties" border="1"><colgroup><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th></tr></thead><tbody><tr><td><tt class="literal">correl</tt></td><td>Correlation between two event properties</td></tr></tbody></table></div><p>
+					Calculate correlation on price and offer over all stock tick events for IBM.
+				</p><pre class="programlisting">StockTickEvent(symbol='IBM').stat:correl('price', 'offer')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-stat-weightedavg"></a>6.9.3.4.&nbsp;Weighted average</h4></div></div><div></div></div><p>
+					This view returns the weighted average given a weight field and a field to compute the average for.
+					Syntax: weighted_avg(field, weightField)
+				</p><div class="table"><a name="view-stat-weightedavg-table"></a><p class="title"><b>Table&nbsp;6.6.&nbsp;Weighted average derived properties</b></p><table summary="Weighted average derived properties" border="1"><colgroup><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th></tr></thead><tbody><tr><td><tt class="literal">average</tt></td><td>Weighted average</td></tr></tbody></table></div><p>
+					Views that derive the volume-weighted average price for the last 3 seconds.
+				</p><pre class="programlisting">StockTickEvent(symbol='IBM').win:time(3000).stat:weighted_avg('price', 'volume')</pre></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-stat-multidim"></a>6.9.3.5.&nbsp;Multi-dimensional statistics</h4></div></div><div></div></div><p>
+					This view works similar to the <tt class="literal">std:groupby</tt> views in that it groups information by one or more event properties. 
+					The view accepts 3 or more parameters: The first parameter to the view defines the univariate statistics values to derive.
+					The second parameter is the property name to derive data from.
+					The remaining parameters supply the event property names to use to derive dimensions.
+				</p><div class="table"><a name="view-stat-multidim-table"></a><p class="title"><b>Table&nbsp;6.7.&nbsp;Multi-dim derived properties</b></p><table summary="Multi-dim derived properties" border="1"><colgroup><col><col></colgroup><thead><tr><th>Property Name</th><th>Description</th></tr></thead><tbody><tr><td><tt class="literal">cube</tt></td><td>The cube following the <tt class="literal"></tt> interface</td></tr></tbody></table></div><p>
+					The example below derives the count, average and standard deviation latency of service measurement events per customer.
+				</p><pre class="programlisting">ServiceMeasurement.stat:multidim_stats({&#8216;count&#8217;, &#8216;average&#8217;, &#8216;stdev&#8217;}, 
+    'latency', 'customer')</pre><p>
+					This example derives the average latency of service measurement events per customer, service and error status for events in
+					the last 30 seconds.
+				</p><pre class="programlisting">ServiceMeasurement.win:length(30000).stat:multidim_stats({&#8216;average&#8217;}, 
+	'latency', 'customer', 'service', 'status')</pre></div></div><div class="sect2" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="ext-views"></a>6.9.4.&nbsp;Extension View Set</h3></div></div><div></div></div><div class="sect3" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="view-ext-sort"></a>6.9.4.1.&nbsp;Sorted Window View</h4></div></div><div></div></div><p>					
+					This view sorts by values in the specified event property and keeps only the top elements up to the given size. 
+				</p><p>
+					The syntax for this view is : <tt class="literal">sort(String propertyName, boolean isDescending, int size) </tt>.
+				</p><p>
+					These view can be used to sort on price descending keeping the lowest 10 prices and reporting statistics on price.
+				</p><pre class="programlisting">StockTickEvent.ext:sort('price', true, 10).stat:uni('price'))</pre></div></div></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-join"></a>6.10.&nbsp;Joining Event Streams</h2></div></div><div></div></div><p>
+			Two or more event streams can be part of the <tt class="literal">from</tt> clause and thus both streams determine the resulting events. The where-clause lists the join conditions that Esper uses to relate events in the two or more streams.
+		</p><p>
+			Each point in time that an event arrives to one of the event streams, the two event streams are joined and output events are produced according to the where-clause.
+		</p><p>
+			This example joins 2 event streams. The first event stream consists of fraud warning events for which we keep the last 30 minutes (1800 seconds). The second stream is withdrawal events for which we consider the last 30 seconds. The streams are joined on account number.
+		</p><pre class="programlisting">select fraud.accountNumber as accntNum, fraud.warning as warn, withdraw.amount as amount,
+       max(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraud' as desc
+  from net.esper.example.atm.FraudWarningEvent.win:time(1800) as fraud,
+       net.esper.example.atm.WithdrawalEvent.win:time(30) as withdraw
+ where fraud.accountNumber = withdraw.accountNumber</pre></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="eql-outerjoin"></a>6.11.&nbsp;Outer Join</h2></div></div><div></div></div><p>
+			Esper supports left outer joins, right outer joins and full outer joins between an unlimited number of event streams.
+		</p><p>
+			If the outer join is a left outer join, there will be an output event for each event of the stream on the left-hand side of the clause. For example, in the left outer join shown below we will get output for each event in the stream RfidEvent, even if the event does not match any event in the event stream OrderList.
+		</p><pre class="programlisting">select * from net.esper.example.rfid.RfidEvent.win:time(30) as rfid
+       left outer join
+       net.esper.example.rfid.OrderList.win:length(10000) as orderlist
+     on rfid.itemId = orderList.itemId</pre><p>
+			Similarly, if the join is a Right Outer Join, then there will be an output event for each event of the stream on the right-hand side of the clause. For example, in the right outer join shown below we will get output for each event in the stream OrderList, even if the event does not match any event in the event stream RfidEvent.
+		</p><pre class="programlisting">select * from net.esper.example.rfid.RfidEvent.win:time(30) as rfid
+       right outer join
+       net.esper.example.rfid.OrderList.win:length(10000) as orderlist
+     on rfid.itemId = orderList.itemId</pre><p>
+			For all types of outer joins, if the join condition is not met, the select list is computed with the event properties of the arrived event while all other event properties are considered to be null.
+		</p><pre class="programlisting">select * from net.esper.example.rfid.RfidEvent.win:time(30) as rfid
+       full outer join
+       net.esper.example.rfid.OrderList.win:length(10000) as orderlist
+     on rfid.itemId = orderList.itemId</pre><p>
+			The last type of outer join is a full outer join. In a full outer join, each point in time that an event arrives to one of the event streams, one or more output events are produced. In the example below, when either an RfidEvent or an OrderList event arrive, one or more output event is produced.
+		</p></div><div class="sect1" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="view-adding-views"></a>6.12.&nbsp;View Plug-in</h2></div></div><div></div></div><p>
+            This is currently not supported (planned).
+        </p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="event_patterns.html">Prev</a>&nbsp;</td><td width="20%" align="center"><a accesskey="u" href="index.html">Up</a></td><td width="40%" align="right">&nbsp;<a accesskey="n" href="Adapters.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter&nbsp;5.&nbsp;Event Pattern Reference&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;Chapter&nbsp;7.&nbsp;Adapters</td></tr></table></div></body></html>

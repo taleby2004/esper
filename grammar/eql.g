@@ -1,18 +1,4 @@
-a
-
-
-sd
-a
-sd
-a
-da
-sd
-
-dsfdsfjh
-
-
-
-dfsdf/.,sdf header
+header
 {
   package net.esper.eql.generated;
 }
