@@ -1,6 +1,0 @@
--------------------------------------------------------------------------------
-Battery: net.esper.example.qos_sla.monitor.TestDynamicLatencyAlertMonitor
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.34 sec 
-
-
