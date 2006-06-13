@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Maven">
+	<bannerLeft>
+		<name>Esper</name>
+		<src>http://sourceforge.net/sflogo.php?group_id=121492&amp;amp;type=1</src>
+		<href>http://sourceforge.net</href>
+	</bannerLeft>
+	<bannerRight>
+		<src>./images/logos/esper.gif</src>
+	</bannerRight>
+	<body>
+		<links/>
+		<menu name="Esper 0.9.1">
+			<item name="About Esper" href="/index.html" collapse="false">
+				<item name="News" href="/about/news/news.html"/>
+				<item name="Change History" href="/about/history/history.html"/>
+			</item>
+			<item name="Evaluating Esper" href="/evaluating/evaluating.html" collapse="false">
+				<item name="Two Minute Tutorial" href="/evaluating/tutorial/tutorial.html"/>
+				<item name="Download" href="http://sourceforge.net/project/showfiles.php?group_id=121492"/>
+			</item>
+			<item name="Using Esper" href="/using/using.html" collapse="false">
+				<item name="FAQ" href="/using/faq/faq.html"/>
+				<item name="Documentation" href="/using/documentation/documentation.html"/>
+				<item name="Technology Links" href="/using/links/links.html"/>
+				<item name="License" href="/using/license/license.html"/>
+				<item name="Reporting Issues" href="/using/issues/issues.html"/>
+			</item>
+			<item name="Developing Esper" href="/developing/developing.html" collapse="false">
+				<item name="How To Contribute" href="/developing/contribute/contribute.html"/>
+				<item name="Development Team" href="/developing/team/team.html"/>
+				<item name="Mailing Lists" href="http://sourceforge.net/mail/?group_id=121492"/>
+				<item name="Roadmap" href="/developing/roadmap/roadmap.html"/>
+				<item name="Building Esper" href="/developing/building/building.html"/>
+			</item>
+			<item name="SourceForge Home" href="http://sourceforge.net/projects/esper"/>
+		</menu>
+	</body>
+</project>

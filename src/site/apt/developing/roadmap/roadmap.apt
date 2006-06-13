@@ -1,0 +1,102 @@
+Roadmap
+~~~~~~~~~~~~~~
+
+  	This is a non-prioritized list of loosly categorized features.
+	  	
+  	If there is anything you would like to see on this list, or have an immediate need for,
+  	please send mail to {{{mailto:esper-user@lists.sourceforge.net}esper-user@lists.sourceforge.net}}, or
+  	file a feature request via the Esper SourceForge project page.
+  	
+* Features
+  	  	
+** Indicators, Presentation, Output Adapters (Output)
+
+	* Presentation layer...JMX and/or web client, charting, dashboarding
+					
+	* GUI for modelling/testing/admin statements and monitoring
+	
+	* Alerting infrastructure, actioning
+	
+** Feeds, Input Adapters, Data into Engine (Input)
+
+	* JMS
+	
+	* Poll data from relational databases and CSV
+	
+** Events
+		
+	* XML-type event support. I.e. <order><item><id>1</id><name>candy</name></item></order> then order.item[0].id='1'
+			
+	* Support for positional property access
+	
+	* Support for causal relationship representation in event types, support for causal operators "a caused b"
+
+** Filter enhancements
+		
+	* Null value support (IS NOT NULL test)
+	
+	* IN-clause support for checking if a value is within a list of values
+
+	* Date/Time/Timestamp/Interval support for filter operators
+		
+	* Support for JDK5 enums
+	
+** EQL
+
+	* Support for subqueries
+	
+	* Support for rate stabilizing, delaying and limiting output
+	
+	* Support for insert-into for chaining EQL statements, named streams
+	
+	* Support incremental user-define aggregators, user-defined functions and user-defined datatypes
+
+	* Allow expressions in the select clause to be used via alias in the where clause
+
+	* Filter rewrite, ie.  select * from A where a="x" would rewrite as select * from A(a="x")		
+			
+	* Support for SORT-BY (there is a 'sort' view already)
+
+	* More operators, such as concat (|), exponent, modulo, LIKE etc.
+	
+	* More functions/expressions for calculation and string and timestamp manipulation, such as ROUND, IF/CASE etc.
+		
+** Event Patterns	
+	
+	* Causal relationship operators
+	
+	* Operator/guard for immediate sequence
+		
+	* Operator/observer for no-event-of-any-time-in-given-timeframe 
+
+	* Support for where-clause in guards that contain expressions	
+
+** Documentation
+
+	* More examples	
+
+** Performance
+
+	* Prepared (precompiled) view and pattern statements
+	
+	* Version 2 resource management for window views	
+	
+	* Performance evaluation and profiling
+
+** Customizability/Extensibility/Usability
+
+	* View, observer and guard plug-in support
+	
+	* Index-based access into window contents through API
+	
+** Enterprise Readyness Features
+
+	* State persistance
+	
+	* Support for clustering, high-availability and/or distributed caching
+	
+	* Security Features
+	
+	* Monitoring and management capabilities
+	
+	[]

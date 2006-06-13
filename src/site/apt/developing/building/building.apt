@@ -1,0 +1,17 @@
+Building Esper
+~~~~~~~~~~~~~~
+
+  The Esper build is managed by Apache Maven 2.0 or above. The Esper engine itself can be build and unit tested
+  via the below command.
+  
+----------------------------------------
+mvn antlr:generate
+mvn test
+----------------------------------------	
+
+  Esper examples are a separate Maven project. The examples are also JUnit tests and can be build and run as below.
+  
+----------------------------------------
+cd eg
+mvn test
+----------------------------------------	
