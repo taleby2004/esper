@@ -1,0 +1,6 @@
+-------------------------------------------------------------------------------
+Battery: net.esper.example.qos_sla.monitor.TestServiceHealthMonitor
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 0.03 sec 
+
+

@@ -1,0 +1,6 @@
+-------------------------------------------------------------------------------
+Battery: net.esper.example.stockticker.TestStockTickerSimple
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Time elapsed: 3.064 sec 
+
+
