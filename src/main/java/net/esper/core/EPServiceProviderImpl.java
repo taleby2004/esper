@@ -2,6 +2,8 @@ package net.esper.core;
 
 import net.esper.client.*;
 
+import java.util.Map;
+
 /**
  * Service provider encapsulates the engine's services for runtime and administration interfaces.
  */
@@ -20,8 +22,21 @@ public class EPServiceProviderImpl implements EPServiceProvider
      */
     public EPServiceProviderImpl(Configuration configuration) throws ConfigurationException
     {
-        // We take a snapshot of the configuration here, maintained by the config service
-        eventTypeResolutionService = new EventTypeResolutionServiceImpl(configuration.getEventTypeAliases());
+        eventTypeResolutionService = new EventTypeResolutionServiceImpl();
+
+        // Add from the configuration the Java event class aliases
+        Map<String, String> javaClassAliases = configuration.getEventTypeAliases();
+        for (Map.Entry<String, String> entry : javaClassAliases.entrySet())
+        {
+            try
+            {
+                eventTypeResolutionService.add(entry.getKey(), entry.getValue());
+            }
+            catch (EventTypeResolutionException ex)
+            {
+                throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+            }
+        }
 
         initialize();
     }

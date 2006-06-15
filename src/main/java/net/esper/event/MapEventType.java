@@ -1,5 +1,7 @@
 package net.esper.event;
 
+import net.esper.collection.InterchangeablePair;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
@@ -12,15 +14,19 @@ public final class MapEventType implements EventType
     private final String[] propertyNames;       // Cache an array of property names so not to construct one frequently
     private final Map<String, Class> types;     // Mapping of property name and type
     private Map<String, EventPropertyGetter> propertyGetters;   // Mapping of property name and getters
+    private int hashCode;
 
     /**
      * Constructor takes a map of property names and types.
-     * @param types is pairs of property name and type
+     * @param propertyTypes is pairs of property name and type
      */
-    public MapEventType(Map<String, Class> types)
+    public MapEventType(Map<String, Class> propertyTypes)
     {
-        this.types = types;
+        // copy the property names and types
+        this.types = new HashMap<String, Class>();
+        this.types.putAll(propertyTypes);
 
+        hashCode = 0;
         propertyNames = new String[types.size()];
         propertyGetters = new HashMap<String, EventPropertyGetter>();
 
@@ -29,6 +35,8 @@ public final class MapEventType implements EventType
         for (Map.Entry<String, Class> entry : types.entrySet())
         {
             final String name = entry.getKey();
+            hashCode = hashCode ^ name.hashCode();
+
             propertyNames[index++] = name;
 
             EventPropertyGetter getter = new EventPropertyGetter()
@@ -89,4 +97,47 @@ public final class MapEventType implements EventType
         return "MapEventType " +
                 "propertyNames=" + Arrays.toString(propertyNames);
     }
+
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+
+        if (!(obj instanceof MapEventType))
+        {
+            return false;
+        }
+
+        MapEventType other = (MapEventType) obj;
+
+        // Should have the same number of properties
+        if (other.types.size() != this.types.size())
+        {
+            return false;
+        }
+
+        // Compare property by property
+        for (Map.Entry<String, Class> entry : types.entrySet())
+        {
+            Class otherClass = other.types.get(entry.getKey());
+            if (otherClass == null)
+            {
+                return false;
+            }
+            if (!otherClass.equals(entry.getValue()))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public int hashCode()
+    {
+        return hashCode;
+    }
+
 }

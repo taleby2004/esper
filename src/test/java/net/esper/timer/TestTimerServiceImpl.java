@@ -40,7 +40,7 @@ public class TestTimerServiceImpl extends TestCase
         {
             log.debug(".testClocking i=" + i + " ...sleeping " + TimerServiceImpl.INTERNAL_CLOCK_RESOLUTION_MSEC);
             sleep(TimerServiceImpl.INTERNAL_CLOCK_RESOLUTION_MSEC);
-            assertEquals(1, callback.getAndResetCount());
+            assertTrue(callback.getAndResetCount() >= 1);
         }
 
         // Stop and check again

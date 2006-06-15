@@ -15,4 +15,14 @@ public class EventTypeResolutionException extends EPException
     {
         super(message);
     }
+
+    /**
+     * Ctor.
+     * @param message - error message
+     * @param nested - nested exception
+     */
+    public EventTypeResolutionException(final String message, Throwable nested)
+    {
+        super(message, nested);
+    }
 }

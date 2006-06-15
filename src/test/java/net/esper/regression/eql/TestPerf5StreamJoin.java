@@ -48,7 +48,7 @@ public class TestPerf5StreamJoin extends TestCase
 
         long endTime = System.currentTimeMillis();
         log.info(".testPerfAllProps delta=" + (endTime - startTime));
-        assertTrue((endTime - startTime) < 1000);
+        assertTrue((endTime - startTime) < 1500);
 
         // test if join returns data
         assertNull(updateListener.getLastNewData());

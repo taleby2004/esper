@@ -1,9 +1,13 @@
 package net.esper.support.core;
 
 import net.esper.core.EventTypeResolutionService;
+import net.esper.core.EventTypeResolutionException;
 import net.esper.event.EventType;
 import net.esper.event.EventTypeFactory;
+import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean_N;
+
+import java.util.Map;
 
 public class SupportEventTypeResolutionService implements EventTypeResolutionService
 {
@@ -25,5 +29,25 @@ public class SupportEventTypeResolutionService implements EventTypeResolutionSer
         }
 
         return EventTypeFactory.getInstance().createBeanType(clazz);
+    }
+
+    public EventType add(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventTypeResolutionException
+    {
+        throw new UnsupportedOperationException("Not handled by mock impl");
+    }
+
+    public EventType add(String eventTypeAlias, String fullyQualClassName) throws EventTypeResolutionException
+    {
+        throw new UnsupportedOperationException("Not handled by mock impl");
+    }
+
+    public EventBean wrap(Object event)
+    {
+        throw new UnsupportedOperationException("Not handled by mock impl");
+    }
+
+    public EventBean wrap(Object event, String eventTypeAlias) throws EventTypeResolutionException
+    {
+        throw new UnsupportedOperationException("Not handled by mock impl");
     }
 }

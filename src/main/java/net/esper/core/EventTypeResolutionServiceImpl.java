@@ -1,9 +1,6 @@
 package net.esper.core;
 
-import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
-import net.esper.client.ConfigurationException;
-
+import net.esper.event.*;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -16,12 +13,10 @@ public class EventTypeResolutionServiceImpl implements EventTypeResolutionServic
 
     /**
      * Ctor.
-     * @param eventNameClassNameMap is a mapping of event name to fully qualified java class name
-     * @throws ConfigurationException is throw to indicate the mapped-to classes are invalid
      */
-    public EventTypeResolutionServiceImpl(Map<String, String> eventNameClassNameMap) throws ConfigurationException
+    public EventTypeResolutionServiceImpl()
     {
-        eventTypes = mapToTypes(eventNameClassNameMap);
+        eventTypes = new HashMap<String, EventType>();
     }
 
     public EventType resolveEventType(String eventName)
@@ -37,35 +32,57 @@ public class EventTypeResolutionServiceImpl implements EventTypeResolutionServic
         return lookupClass(eventName);
     }
 
-    /**
-     * Returns a map of event name and event type for a map of event name and Java class name.
-     * @param mappedEventClasses map of event name and java class name
-     * @return map of event name and event type
-     */
-    protected static Map<String, EventType> mapToTypes(Map<String, String> mappedEventClasses)
+    public EventType add(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventTypeResolutionException
     {
-        Map<String, EventType> eventTypes = new HashMap<String, EventType>();
+        MapEventType newEventType = new MapEventType(propertyTypes);
 
-        for (Map.Entry<String, String> entry : mappedEventClasses.entrySet())
+        EventType existingType = eventTypes.get(eventTypeAlias);
+        if (existingType != null)
         {
-            String eventName = entry.getKey();
-            String className = entry.getValue();
-
-            Class clazz = null;
-            try
+            // The existing type must be the same as the type created
+            if (!newEventType.equals(existingType))
             {
-                clazz = Class.forName(entry.getValue());
-            }
-            catch (ClassNotFoundException ex)
-            {
-                throw new ConfigurationException("Failed to load class " + className, ex);
+                throw new EventTypeResolutionException("Event type named '" + eventTypeAlias +
+                        "' has already been declared with differing type information");
             }
 
-            EventType eventType = EventTypeFactory.getInstance().createBeanType(clazz);
-            eventTypes.put(eventName, eventType);
+            // Since it's the same, return the existing type
+            return existingType;
         }
 
-        return eventTypes;
+        eventTypes.put(eventTypeAlias, newEventType);
+
+        return newEventType;
+    }
+
+    public EventType add(String eventTypeAlias, String fullyQualClassName) throws EventTypeResolutionException
+    {
+        EventType existingType = eventTypes.get(eventTypeAlias);
+        if (existingType != null)
+        {
+            if (existingType.getUnderlyingType().getName().equals(fullyQualClassName))
+            {
+                return existingType;
+            }
+
+            throw new EventTypeResolutionException("Event type named '" + eventTypeAlias +
+                    "' has already been declared with differing type information");
+        }
+
+        Class clazz = null;
+        try
+        {
+            clazz = Class.forName(fullyQualClassName);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            throw new EventTypeResolutionException("Failed to load class " + fullyQualClassName, ex);
+        }
+
+        EventType eventType = EventTypeFactory.getInstance().createBeanType(clazz);
+        eventTypes.put(eventTypeAlias, eventType);
+
+        return eventType;
     }
 
     /**
@@ -73,7 +90,7 @@ public class EventTypeResolutionServiceImpl implements EventTypeResolutionServic
      * @param className is the fully qualified Java class name to get event type
      * @return event type for java class
      */ 
-    protected static EventType lookupClass(String className)
+    private static EventType lookupClass(String className)
     {
         Class clazz;
         try
@@ -87,5 +104,36 @@ public class EventTypeResolutionServiceImpl implements EventTypeResolutionServic
 
         EventType eventType = EventTypeFactory.getInstance().createBeanType(clazz);
         return eventType;
+    }
+
+    public EventBean wrap(Object event)
+    {
+        return EventBeanFactory.createObject(event);
+    }
+
+    public EventBean wrap(Object event, String eventTypeAlias) throws EventTypeResolutionException
+    {
+        EventType existingType = eventTypes.get(eventTypeAlias);
+        if (existingType == null)
+        {
+            throw new EventTypeResolutionException("Event type alias '" + eventTypeAlias + "' has not been defined");
+        }
+
+        Class underlyingType = existingType.getUnderlyingType();
+        if (!underlyingType.equals(event.getClass()))
+        {
+            throw new EventTypeResolutionException("Event type alias '" + eventTypeAlias
+                    + "' underlying type mismatches");
+        }
+
+        if (underlyingType.equals(Map.class))
+        {
+            Map<String, Object> propValues = (Map<String, Object>) event;
+            return EventBeanFactory.createMapFromValues(propValues, existingType);
+        }
+        else
+        {
+            return EventBeanFactory.createObject(event);
+        }
     }
 }

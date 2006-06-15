@@ -17,7 +17,7 @@ public abstract class TestStmtBase extends TestCase
         configuration.addEventTypeAlias("EventC", TxnEventC.class.getName());
         configuration.addEventTypeAlias("LatencyEvent", LatencyEvent.class.getName());
 
-        epService = EPServiceProviderManager.getProvider("TestCombinedEventStmt", configuration);
+        epService = EPServiceProviderManager.getProvider("TestStmtBase", configuration);
         epService.initialize();
     }
 

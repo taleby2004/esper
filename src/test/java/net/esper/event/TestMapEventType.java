@@ -14,10 +14,10 @@ public class TestMapEventType extends TestCase
 
     public void setUp()
     {
-        Map<String, Class> testTypesMap = new LinkedHashMap<String, Class>();
+        Map<String, Class> testTypesMap = new HashMap<String, Class>();
         testTypesMap.put("myInt", int.class);
         testTypesMap.put("myString", String.class);
-        eventType = EventTypeFactory.getInstance().createMapType(testTypesMap);
+        eventType = new MapEventType(testTypesMap);
     }
 
     public void testGetPropertyNames()
@@ -80,6 +80,28 @@ public class TestMapEventType extends TestCase
     public void testGetSuperTypes()
     {
         assertNull(eventType.getSuperTypes());
+    }
+
+    public void testEquals()
+    {
+        Map<String, Class> mapTwo = new LinkedHashMap<String, Class>();
+        mapTwo.put("myInt", int.class);
+        mapTwo.put("myString", String.class);
+
+        // compare, should equal
+        assertEquals(new MapEventType(mapTwo), eventType);
+
+        mapTwo.put("xx", int.class);
+        assertFalse(eventType.equals(new MapEventType(mapTwo)));
+        mapTwo.remove("xx");
+        assertTrue(eventType.equals(new MapEventType(mapTwo)));
+
+        mapTwo.put("myInt", Integer.class);
+        assertFalse(eventType.equals(new MapEventType(mapTwo)));
+        mapTwo.remove("myInt");
+        assertFalse(eventType.equals(new MapEventType(mapTwo)));
+        mapTwo.put("myInt", int.class);
+        assertTrue(eventType.equals(new MapEventType(mapTwo)));
     }
 
     private static final Log log = LogFactory.getLog(TestMapEventType.class);

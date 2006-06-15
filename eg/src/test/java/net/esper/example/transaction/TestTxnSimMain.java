@@ -13,7 +13,7 @@ public class TestTxnSimMain extends TestCase
 
     public void testSmall() throws Exception
     {
-        TxnGenMain main = new TxnGenMain(4999, 10000);
+        TxnGenMain main = new TxnGenMain(1000, 3000);
         main.run();
     }
 }
