@@ -5,10 +5,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.filter.SupportEventEvaluator;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestFilterParamIndexCompare extends TestCase
 {
@@ -22,7 +22,7 @@ public class TestFilterParamIndexCompare extends TestCase
     {
         testEvaluator = new SupportEventEvaluator();
         testBean = new SupportBean();
-        testEventBean = EventBeanFactory.createObject(testBean);
+        testEventBean = SupportEventBeanFactory.createObject(testBean);
         testEventType = testEventBean.getEventType();
         matchesList = new LinkedList<FilterCallback>();
     }

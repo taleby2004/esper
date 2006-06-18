@@ -12,10 +12,11 @@ import net.esper.support.bean.SupportBean;
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.support.filter.SupportFilterCallback;
 import net.esper.support.filter.IndexTreeBuilderRunnable;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
-import net.esper.event.EventBeanFactory;
+import net.esper.event.BeanEventAdapter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,7 +36,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
     public void setUp()
     {
         builder = new IndexTreeBuilder();
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         topNode = new FilterCallbackSetNode();
         filterCallbacks = new LinkedList<FilterCallback>();
         pathsAddedTo = new LinkedList<IndexTreePath>();
@@ -199,7 +200,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(aInt);
         bean.setDoublePrimitive(aDouble);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 
     private static final Log log = LogFactory.getLog(TestIndexTreeBuilderMultithreaded.class);

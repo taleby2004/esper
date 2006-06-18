@@ -2,8 +2,8 @@ package net.esper.eql.join;
 
 import net.esper.support.eql.SupportQueryExecNode;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import junit.framework.TestCase;
 
 public class TestQueryPlanExecStrategy extends TestCase
@@ -19,7 +19,7 @@ public class TestQueryPlanExecStrategy extends TestCase
 
     public void testLookup()
     {
-        EventBean lookupEvent = EventBeanFactory.createObject(new SupportBean());
+        EventBean lookupEvent = SupportEventBeanFactory.createObject(new SupportBean());
 
         strategy.lookup(new EventBean[] {lookupEvent}, null);
 

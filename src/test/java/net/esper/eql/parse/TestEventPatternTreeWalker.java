@@ -9,7 +9,7 @@ import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportBean_N;
 import net.esper.support.bean.SupportBeanComplexProps;
-import net.esper.support.core.SupportEventTypeResolutionService;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.pattern.*;
 
 public class TestEventPatternTreeWalker extends TestCase
@@ -79,7 +79,8 @@ public class TestEventPatternTreeWalker extends TestCase
 
     public void testWalkPatternNoPackage() throws Exception
     {
-        String text = "na=SupportBean_N()"; // Notice no package name, see SupportEventTypeResolutionService
+        SupportEventAdapterService.getService().addBeanType("SupportBean_N", SupportBean_N.class);
+        String text = "na=SupportBean_N()";
         parseAndWalk(text);
     }
 
@@ -119,14 +120,12 @@ public class TestEventPatternTreeWalker extends TestCase
 
     private static EQLPatternTreeWalker parseAndWalk(String expression) throws Exception
     {
-        SupportEventTypeResolutionService typeResService = new SupportEventTypeResolutionService();
-
         log.debug(".parseAndWalk Trying text=" + expression);
         AST ast = SupportParserHelper.parsePattern(expression);
         log.debug(".parseAndWalk success, tree walking...");
         SupportParserHelper.displayAST(ast);
 
-        EQLPatternTreeWalker walker = new EQLPatternTreeWalker(typeResService);
+        EQLPatternTreeWalker walker = new EQLPatternTreeWalker(SupportEventAdapterService.getService());
         walker.startPatternExpressionRule(ast);
         return walker;
     }

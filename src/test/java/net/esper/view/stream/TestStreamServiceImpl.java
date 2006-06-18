@@ -3,8 +3,9 @@ package net.esper.view.stream;
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.support.filter.SupportFilterServiceImpl;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.filter.FilterOperator;
 import net.esper.filter.FilterSpec;
 import net.esper.view.EventStream;
@@ -21,7 +22,7 @@ public class TestStreamServiceImpl extends TestCase
     public void setUp()
     {
         streamReuseService = new StreamReuseServiceImpl();
-        EventType eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         supportFilterService = new SupportFilterServiceImpl();
 
         filterSpecs = new FilterSpec[3];

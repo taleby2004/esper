@@ -7,7 +7,6 @@ import net.esper.client.EPStatement;
 import net.esper.client.time.CurrentTimeEvent;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;

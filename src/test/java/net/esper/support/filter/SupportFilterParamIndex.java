@@ -5,8 +5,9 @@ import net.esper.filter.EventEvaluator;
 import net.esper.filter.FilterCallback;
 import net.esper.filter.FilterOperator;
 import net.esper.event.EventBean;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.List;
@@ -15,7 +16,7 @@ public class SupportFilterParamIndex extends FilterParamIndex
 {
     public SupportFilterParamIndex()
     {
-        super("intPrimitive", FilterOperator.EQUAL, EventTypeFactory.getInstance().createBeanType(SupportBean.class));
+        super("intPrimitive", FilterOperator.EQUAL, SupportEventTypeFactory.createBeanType(SupportBean.class));
     }
 
     protected EventEvaluator get(Object expressionValue)

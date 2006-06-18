@@ -2,12 +2,14 @@ package net.esper.eql.parse;
 
 import net.esper.filter.*;
 import net.esper.event.EventType;
+import net.esper.event.EventAdapterException;
 import net.esper.type.PrimitiveValue;
 import net.esper.type.PrimitiveValueFactory;
 import net.esper.type.PrimitiveValueType;
 import net.esper.eql.generated.EqlTokenTypes;
-import net.esper.core.EventTypeResolutionService;
-import net.esper.core.EventTypeResolutionException;
+import net.esper.event.EventAdapterService;
+import net.esper.event.EventAdapterException;
+import net.esper.event.EventAdapterService;
 import net.esper.core.EPAdministratorImpl;
 import net.esper.util.JavaClassHelper;
 import antlr.collections.AST;
@@ -43,13 +45,13 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
      * Creates a filter specification for the AST representing the filter expression.
      * @param filterAST - root filter AST node
      * @param optionalTaggedEventTypes - event type for each named event if named events are allowed in filter
-     * @param eventTypeResolutionService - service for resolving event names to known event types
+     * @param eventAdapterService - service for resolving event names to known event types
      * @return filter spec
      * @throws ASTFilterSpecValidationException if the filter spec cannot be validate
      */
     public static FilterSpec buildSpec(AST filterAST, 
                                        Map<String, EventType> optionalTaggedEventTypes,
-                                       EventTypeResolutionService eventTypeResolutionService)
+                                       EventAdapterService eventAdapterService)
         throws ASTFilterSpecValidationException
     {
         // Ignore the event name tag if the
@@ -60,14 +62,19 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
         }
 
         String eventName = startNode.getText();
-        EventType eventType = null;
-        try
+        EventType eventType = eventAdapterService.getEventType(eventName);
+
+        // The type is not known yet, attempt to add as a JavaBean type with the same alias
+        if (eventType == null)
         {
-            eventType = eventTypeResolutionService.resolveEventType(eventName);
-        }
-        catch (EventTypeResolutionException ex)
-        {
-            throw new ASTFilterSpecValidationException("Failed to resolve event type: " + ex.getMessage(), ex); 
+            try
+            {
+                eventType = eventAdapterService.addBeanType(eventName, eventName);
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ASTFilterSpecValidationException("Failed to resolve event type: " + ex.getMessage(), ex);
+            }
         }
 
         // Create parameter list

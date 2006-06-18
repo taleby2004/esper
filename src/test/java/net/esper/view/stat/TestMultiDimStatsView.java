@@ -8,11 +8,13 @@ import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportSchemaNeutralView;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportEnum;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.ViewFieldEnum;
+import net.esper.view.ViewServiceContext;
 import net.esper.view.stat.olap.Cube;
 import net.esper.view.stat.olap.MultidimCube;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 
 public class TestMultiDimStatsView extends TestCase
 {
@@ -32,6 +34,7 @@ public class TestMultiDimStatsView extends TestCase
         MultiDimStatsView olapView = new MultiDimStatsView(derivedFields, "intPrimitive", "enumValue");
         parentStream.addView(olapView);
         olapView.addView(childView);
+        olapView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
 
         insertEvents();
 
@@ -58,6 +61,7 @@ public class TestMultiDimStatsView extends TestCase
         MultiDimStatsView olapView = new MultiDimStatsView(derivedFields, "intPrimitive", "string", "enumValue");
         parentStream.addView(olapView);
         olapView.addView(childView);
+        olapView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
 
         insertEvents();
 
@@ -82,6 +86,7 @@ public class TestMultiDimStatsView extends TestCase
         MultiDimStatsView olapView = new MultiDimStatsView(derivedFields, "intPrimitive", "boolBoxed", "string", "enumValue");
         parentStream.addView(olapView);
         olapView.addView(childView);
+        olapView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
 
         insertEvents();
 
@@ -162,6 +167,6 @@ public class TestMultiDimStatsView extends TestCase
         bean.setEnumValue(enumValue);
         bean.setString(stringValue);
         bean.setBoolBoxed(boolValue);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

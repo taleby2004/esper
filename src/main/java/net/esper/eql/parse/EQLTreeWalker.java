@@ -6,7 +6,8 @@ import net.esper.eql.generated.EQLBaseWalker;
 import net.esper.eql.expression.*;
 import net.esper.type.*;
 import net.esper.collection.Pair;
-import net.esper.core.EventTypeResolutionService;
+import net.esper.event.EventAdapterService;
+import net.esper.event.EventAdapterService;
 import antlr.collections.AST;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +20,7 @@ import java.util.*;
  */
 public class EQLTreeWalker extends EQLBaseWalker
 {
-    private EventTypeResolutionService eventTypeResolutionService;
+    private EventAdapterService eventAdapterService;
     private List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
     private OutputLimitSpec outputLimitSpec;
     private FilterSpec filterSpec;
@@ -34,11 +35,11 @@ public class EQLTreeWalker extends EQLBaseWalker
 
     /**
      * Ctor.
-     * @param eventTypeResolutionService for resolving event names
+     * @param eventAdapterService for resolving event names
      */
-    public EQLTreeWalker(EventTypeResolutionService eventTypeResolutionService)
+    public EQLTreeWalker(EventAdapterService eventAdapterService)
     {
-        this.eventTypeResolutionService = eventTypeResolutionService;
+        this.eventAdapterService = eventAdapterService;
         astNodeMap = new HashMap<AST, ExprNode>();
     }
 
@@ -265,7 +266,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
         log.debug(".leaveFilter");
 
-        filterSpec = ASTFilterSpecHelper.buildSpec(node, null, eventTypeResolutionService);
+        filterSpec = ASTFilterSpecHelper.buildSpec(node, null, eventAdapterService);
 
         // clear the sub-nodes for the filter since the event property expressions have been processed
         // by building the spec

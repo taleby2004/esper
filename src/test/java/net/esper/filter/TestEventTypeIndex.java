@@ -5,15 +5,16 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.ISupportA;
 import net.esper.support.bean.ISupportABCImpl;
 import net.esper.support.bean.ISupportAImplSuperGImplPlus;
 import net.esper.support.bean.ISupportBaseAB;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.filter.SupportFilterCallback;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class TestEventTypeIndex extends TestCase
 {
@@ -28,7 +29,7 @@ public class TestEventTypeIndex extends TestCase
     public void setUp()
     {
         SupportBean testBean = new SupportBean();
-        testEventBean = EventBeanFactory.createObject(testBean);
+        testEventBean = SupportEventBeanFactory.createObject(testBean);
         testEventType = testEventBean.getEventType();
 
         callbackSetNode = new FilterCallbackSetNode();
@@ -70,8 +71,8 @@ public class TestEventTypeIndex extends TestCase
 
     public void testSuperclassMatch()
     {
-        testEventBean = EventBeanFactory.createObject(new ISupportAImplSuperGImplPlus());
-        testEventType = EventTypeFactory.getInstance().createBeanType(ISupportA.class);
+        testEventBean = SupportEventBeanFactory.createObject(new ISupportAImplSuperGImplPlus());
+        testEventType = SupportEventTypeFactory.createBeanType(ISupportA.class);
 
         testIndex = new EventTypeIndex();
         testIndex.add(testEventType, callbackSetNode);
@@ -85,8 +86,8 @@ public class TestEventTypeIndex extends TestCase
 
     public void testInterfaceMatch()
     {
-        testEventBean = EventBeanFactory.createObject(new ISupportABCImpl("a", "b", "ab", "c"));
-        testEventType = EventTypeFactory.getInstance().createBeanType(ISupportBaseAB.class);
+        testEventBean = SupportEventBeanFactory.createObject(new ISupportABCImpl("a", "b", "ab", "c"));
+        testEventType = SupportEventTypeFactory.createBeanType(ISupportBaseAB.class);
 
         testIndex = new EventTypeIndex();
         testIndex.add(testEventType, callbackSetNode);

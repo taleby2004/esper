@@ -15,6 +15,11 @@ public class ExprNodeIdentifierVisitor implements ExprNodeVisitor
     private final List<Pair<Integer, String>> exprProperties;
     private final boolean isVisitAggregateNodes;
 
+    /**
+     * Ctor.
+     * @param visitAggregateNodes true to indicate that the visitor should visit aggregate nodes, or false
+     * if the visitor ignores aggregate nodes
+     */
     public ExprNodeIdentifierVisitor(boolean visitAggregateNodes)
     {
         this.isVisitAggregateNodes = visitAggregateNodes;

@@ -4,17 +4,14 @@ import java.util.Iterator;
 
 import net.esper.collection.SingleEventIterator;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventPropertyGetter;
-import net.esper.view.PropertyCheckHelper;
-import net.esper.view.ViewSupport;
-import net.esper.view.Viewable;
+import net.esper.view.*;
 
 /**
  * View for computing statistics that require 2 input variable arrays containing X and Y datapoints.
  * Subclasses compute correlation or regression values, for instance.
  */
-public abstract class BaseBivariateStatisticsView extends ViewSupport
+public abstract class BaseBivariateStatisticsView extends ViewSupport implements ContextAwareView
 {
     /**
      * This bean can be overridden by subclasses providing extra values such as correlation, regression.
@@ -27,10 +24,25 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     private EventPropertyGetter fieldYGetter;
 
     /**
+     * Services required by implementing classes.
+     */
+    protected ViewServiceContext viewServiceContext;
+
+    /**
      * Default constructor - required by all views to adhere to the Java bean specification.
      */
     public BaseBivariateStatisticsView()
     {
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
     }
 
     /**
@@ -98,15 +110,15 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             // Make a copy of the current values since if we change the values subsequently, the handed-down
             // values should not change
             BaseStatisticsBean newValues = (BaseStatisticsBean) statisticsBean.clone();
-            EventBean newValuesEvent = EventBeanFactory.createObject(newValues);
-            EventBean oldValuesEvent = EventBeanFactory.createObject(oldValues);
+            EventBean newValuesEvent = viewServiceContext.getEventAdapterService().adapterForBean(newValues);
+            EventBean oldValuesEvent = viewServiceContext.getEventAdapterService().adapterForBean(oldValues);
             updateChildren(new EventBean[] {newValuesEvent}, new EventBean[] {oldValuesEvent});
         }
     }
 
     public final Iterator<EventBean> iterator()
     {
-        return new SingleEventIterator(EventBeanFactory.createObject(statisticsBean));
+        return new SingleEventIterator(viewServiceContext.getEventAdapterService().adapterForBean(statisticsBean));
     }
 
     /**

@@ -5,13 +5,10 @@ import org.apache.commons.logging.Log;
 
 import java.util.*;
 
-import net.esper.view.ViewSupport;
-import net.esper.view.ViewFieldEnum;
-import net.esper.view.Viewable;
 import net.esper.view.stat.olap.Cube;
 import net.esper.event.*;
 import net.esper.view.stat.olap.*;
-import net.esper.view.PropertyCheckHelper;
+import net.esper.view.*;
 import net.esper.collection.SingleEventIterator;
 import net.esper.collection.MultiKeyUntyped;
 
@@ -29,17 +26,14 @@ import net.esper.collection.MultiKeyUntyped;
  *
  * The view post new data to child views that contains a Map with the Cube (see Cube). It does not post old data.
  */
-public final class MultiDimStatsView extends ViewSupport
+public final class MultiDimStatsView extends ViewSupport implements ContextAwareView
 {
-    private static final EventType eventType;
+    private ViewServiceContext viewServiceContext;
+    private EventType eventType;
     private static final MultidimCubeCellFactory<BaseStatisticsBean> multidimCubeCellFactory;
 
     static
     {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
-        eventType = EventTypeFactory.getInstance().createMapType(schemaMap);
-
         multidimCubeCellFactory = new MultidimCubeCellFactory<BaseStatisticsBean>()
         {
             public BaseStatisticsBean newCell()
@@ -72,6 +66,20 @@ public final class MultiDimStatsView extends ViewSupport
      */
     public MultiDimStatsView()
     {
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
+
+        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
+        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }
 
     /**
@@ -382,7 +390,7 @@ public final class MultiDimStatsView extends ViewSupport
 
         Map<String, Object> result = new HashMap<String, Object>();
         result.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), cube);
-        EventBean eventBean = EventBeanFactory.createMapFromValues(result, eventType);
+        EventBean eventBean = viewServiceContext.getEventAdapterService().createMapFromValues(result, eventType);
         return eventBean;
     }
 

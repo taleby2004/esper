@@ -1,7 +1,6 @@
 package net.esper.support.event;
 
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBeanString;
 
 import java.util.*;
@@ -13,7 +12,7 @@ public class EventFactoryHelper
     public static EventBean makeEvent(String id)
     {
         SupportBeanString bean = new SupportBeanString(id);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 
     public static EventBean[] makeEvents(String[] ids)

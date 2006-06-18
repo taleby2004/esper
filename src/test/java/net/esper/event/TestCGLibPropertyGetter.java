@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import junit.framework.TestCase;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -22,7 +23,7 @@ public class TestCGLibPropertyGetter extends TestCase
         testEvent.setString("a");
         testEvent.setDoubleBoxed(null);
 
-        unitTestBean = EventBeanFactory.createObject(testEvent);
+        unitTestBean = SupportEventBeanFactory.createObject(testEvent);
     }
 
     public void testGetter() throws Exception
@@ -38,7 +39,7 @@ public class TestCGLibPropertyGetter extends TestCase
 
         try
         {
-            EventBean eventBean = EventBeanFactory.createObject(new Object());
+            EventBean eventBean = SupportEventBeanFactory.createObject(new Object());
             getter.get(eventBean);
             assertTrue(false);
         }
@@ -107,7 +108,7 @@ public class TestCGLibPropertyGetter extends TestCase
         Class nestedClazz = SupportBeanComplexProps.SupportBeanSpecialGetterNested.class;
         Method methodNested = nestedClazz.getMethod("getNestedValue", new Class[] {});
         FastClass fastClassNested = FastClass.create(nestedClazz);        
-        FastMethod fastMethodNested = fastClassNested.getMethod(methodNested);        
+        fastClassNested.getMethod(methodNested);        
     }
 
     private static final Log log = LogFactory.getLog(TestCGLibPropertyGetter.class);

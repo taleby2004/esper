@@ -1,17 +1,15 @@
 package net.esper.event;
 
 import junit.framework.*;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import net.esper.support.bean.*;
 import net.esper.support.util.ArrayAssertionUtil;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
+import java.io.Serializable;
 
 public class TestBeanEventType extends TestCase
 {
+    private BeanEventAdapter beanEventAdapter;
     private BeanEventType eventTypeSimple;
     private BeanEventType eventTypeComplex;
     private BeanEventType eventTypeNested;
@@ -26,17 +24,19 @@ public class TestBeanEventType extends TestCase
 
     public void setUp()
     {
-        eventTypeSimple = new BeanEventType(SupportBeanSimple.class);
-        eventTypeComplex = new BeanEventType(SupportBeanComplexProps.class);
-        eventTypeNested = new BeanEventType(SupportBeanCombinedProps.class);
+        beanEventAdapter = new BeanEventAdapter();
+
+        eventTypeSimple = new BeanEventType(SupportBeanSimple.class, beanEventAdapter);
+        eventTypeComplex = new BeanEventType(SupportBeanComplexProps.class, beanEventAdapter);
+        eventTypeNested = new BeanEventType(SupportBeanCombinedProps.class, beanEventAdapter);
 
         objSimple = new SupportBeanSimple("a", 20);
         objComplex = SupportBeanComplexProps.makeDefaultBean();
         objCombined = SupportBeanCombinedProps.makeDefaultBean();
 
-        eventSimple = EventBeanFactory.createObject(objSimple);
-        eventComplex = EventBeanFactory.createObject(objComplex);
-        eventNested = EventBeanFactory.createObject(objCombined);
+        eventSimple = beanEventAdapter.adapterForBean(objSimple);
+        eventComplex = beanEventAdapter.adapterForBean(objComplex);
+        eventNested = beanEventAdapter.adapterForBean(objCombined);
     }
 
     public void testGetPropertyNames()
@@ -82,7 +82,7 @@ public class TestBeanEventType extends TestCase
         try
         {
             // test mismatch between bean and object
-            EventBean eventBean = EventBeanFactory.createObject(new Object());
+            EventBean eventBean = beanEventAdapter.adapterForBean(new Object());
             getter.get(eventBean);
             fail();
         }
@@ -163,9 +163,52 @@ public class TestBeanEventType extends TestCase
         tryInvalidGetPropertyType(eventTypeNested, "array[1].mapprop[x].value");
     }
 
+    public void testGetDeepSuperTypes()
+    {
+        BeanEventType type = new BeanEventType(ISupportAImplSuperGImplPlus.class, beanEventAdapter);
+
+        List<EventType> deepSuperTypes = new LinkedList<EventType>();
+        for (Iterator<EventType> it = type.getDeepSuperTypes(); it.hasNext();)
+        {
+            deepSuperTypes.add(it.next());
+        }
+
+
+        assertEquals(5, deepSuperTypes.size());
+        ArrayAssertionUtil.assertEqualsAnyOrder(
+                deepSuperTypes.toArray(),
+                new EventType[] {
+                    beanEventAdapter.createBeanType(ISupportAImplSuperG.class),
+                    beanEventAdapter.createBeanType(ISupportBaseAB.class),
+                    beanEventAdapter.createBeanType(ISupportA.class),
+                    beanEventAdapter.createBeanType(ISupportB.class),
+                    beanEventAdapter.createBeanType(ISupportC.class)
+                });
+    }
+
+    public void testGetSuper()
+    {
+        LinkedHashSet<Class> classes = new LinkedHashSet<Class>();
+        BeanEventType.getSuper(ISupportAImplSuperGImplPlus.class, classes);
+
+        assertEquals(7, classes.size());
+        ArrayAssertionUtil.assertEqualsAnyOrder(
+                classes.toArray(),
+                new Class[] {
+                    ISupportAImplSuperG.class, ISupportBaseAB.class,
+                    ISupportA.class, ISupportB.class, ISupportC.class,
+                    Serializable.class, Object.class,
+                }
+        );
+
+        classes.clear();
+        BeanEventType.getSuper(Object.class, classes);
+        assertEquals(0, classes.size());
+    }
+
     public void testGetSuperTypes()
     {
-        eventTypeSimple = new BeanEventType(ISupportAImplSuperGImplPlus.class);
+        eventTypeSimple = new BeanEventType(ISupportAImplSuperGImplPlus.class, beanEventAdapter);
 
         EventType[] superTypes = eventTypeSimple.getSuperTypes();
         assertEquals(3, superTypes.length);
@@ -173,11 +216,11 @@ public class TestBeanEventType extends TestCase
         assertEquals(ISupportB.class, superTypes[1].getUnderlyingType());
         assertEquals(ISupportC.class, superTypes[2].getUnderlyingType());
 
-        eventTypeSimple = new BeanEventType(Object.class);
+        eventTypeSimple = new BeanEventType(Object.class, beanEventAdapter);
         superTypes = eventTypeSimple.getSuperTypes();
         assertEquals(0, superTypes.length);
 
-        BeanEventType type = new BeanEventType(ISupportD.class);
+        BeanEventType type = new BeanEventType(ISupportD.class, beanEventAdapter);
         assertEquals(3, type.getPropertyNames().length);
         ArrayAssertionUtil.assertEqualsAnyOrder(
                 type.getPropertyNames(),
@@ -294,8 +337,6 @@ public class TestBeanEventType extends TestCase
         {
             return getterReturnValue;
         }
-
     }
 
-    private static final Log log = LogFactory.getLog(TestBeanEventType.class);
 }

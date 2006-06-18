@@ -8,6 +8,8 @@ import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportOverrideBase;
 import net.esper.support.bean.SupportOverrideOne;
 import net.esper.support.bean.SupportOverrideOneA;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class TestEventBeanFactory extends TestCase
 {
@@ -30,7 +32,7 @@ public class TestEventBeanFactory extends TestCase
 
     public void testCreateObject()
     {
-        EventBean eventBean = EventBeanFactory.createObject(testBean);
+        EventBean eventBean = SupportEventBeanFactory.createObject(testBean);
 
         assertEquals(testBean, eventBean.getUnderlying());
         assertEquals(1.1d, eventBean.get("doublePrimitive"));
@@ -39,8 +41,8 @@ public class TestEventBeanFactory extends TestCase
 
     public void testCreateMap()
     {
-        EventType eventType = EventTypeFactory.getInstance().createMapType(testTypesMap);
-        EventBean eventBean = EventBeanFactory.createMapFromValues(testValuesMap, eventType);
+        EventType eventType = SupportEventTypeFactory.createMapType(testTypesMap);
+        EventBean eventBean = SupportEventBeanFactory.createMapFromValues(testValuesMap, eventType);
 
         assertEquals(testValuesMap, eventBean.getUnderlying());
         assertEquals("test", eventBean.get("key1"));
@@ -50,19 +52,19 @@ public class TestEventBeanFactory extends TestCase
     public void testOverrideMethod()
     {
         SupportOverrideOneA override = new SupportOverrideOneA("OneA", "One", "Base");
-        EventBean eventTwo = EventBeanFactory.createObject(override);
+        EventBean eventTwo = SupportEventBeanFactory.createObject(override);
 
         assertEquals("OneA", override.getVal());
         assertEquals("OneA", eventTwo.get("val"));
 
         SupportOverrideOne one = override;
-        EventBean eventOne = EventBeanFactory.createObject(one);
+        EventBean eventOne = SupportEventBeanFactory.createObject(one);
 
         assertEquals("OneA", one.getVal());
         assertEquals("OneA", eventOne.get("val"));
 
         SupportOverrideBase base = override;
-        EventBean eventBase = EventBeanFactory.createObject(base);
+        EventBean eventBase = SupportEventBeanFactory.createObject(base);
 
         assertEquals("OneA", base.getVal());
         assertEquals("OneA", eventBase.get("val"));

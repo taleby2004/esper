@@ -10,7 +10,6 @@ import net.esper.view.ViewSupport;
 import net.esper.view.Viewable;
 import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
-import net.esper.view.ViewProcessingException;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.schedule.ScheduleCallback;
@@ -35,7 +34,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
     private long millisecondsBeforeExpiry;
 
     private final TimeWindow timeWindow = new TimeWindow();
-    private ViewServiceContext context;
+    private ViewServiceContext viewServiceContext;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -105,14 +104,14 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (context == null)
+        if (viewServiceContext == null)
         {
             String message = "View context has not been supplied, cannot schedule callback";
             log.fatal(".update " + message);
             throw new EPException(message);
         }
 
-        long timestamp = context.getSchedulingService().getTime();
+        long timestamp = viewServiceContext.getSchedulingService().getTime();
 
         // we don't care about removed data from a prior view
         if ((newData == null) || (newData.length == 0))
@@ -146,7 +145,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
      */
     protected final void expire()
     {
-        long expireBeforeTimestamp = context.getSchedulingService().getTime() - millisecondsBeforeExpiry + 1;
+        long expireBeforeTimestamp = viewServiceContext.getSchedulingService().getTime() - millisecondsBeforeExpiry + 1;
 
         if (log.isDebugEnabled())
         {
@@ -183,7 +182,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
             return;
         }
         Long oldestTimestamp = timeWindow.getOldestTimestamp();
-        long currentTimestamp = context.getSchedulingService().getTime();
+        long currentTimestamp = viewServiceContext.getSchedulingService().getTime();
         long scheduleMillisec = millisecondsBeforeExpiry - (currentTimestamp - oldestTimestamp);
         scheduleCallback(scheduleMillisec);
 
@@ -201,7 +200,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
                 TimeWindowView.this.expire();
             }
         };
-        context.getSchedulingService().add(msecAfterCurrentTime, callback);
+        viewServiceContext.getSchedulingService().add(msecAfterCurrentTime, callback);
     }
 
     public final Iterator<EventBean> iterator()
@@ -215,18 +214,14 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
                 " millisecondsBeforeExpiry=" + millisecondsBeforeExpiry;
     }
 
-    public final void setContextAware(ViewServiceContext context)
+    public ViewServiceContext getViewServiceContext()
     {
-        this.context = context;
+        return viewServiceContext;
     }
 
-    /**
-     * Returns context holder.
-     * @return context
-     */
-    public final ViewServiceContext getContext()
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
-        return context;
+        this.viewServiceContext = viewServiceContext;
     }
 
     private static final Log log = LogFactory.getLog(TimeWindowView.class);

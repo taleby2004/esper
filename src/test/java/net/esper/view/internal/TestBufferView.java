@@ -2,9 +2,9 @@ package net.esper.view.internal;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.view.SupportBufferObserver;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestBufferView extends TestCase
 {
@@ -51,7 +51,7 @@ public class TestBufferView extends TestCase
         for (int i = 0; i < numTrades; i++)
         {
             SupportBean_A bean = new SupportBean_A(id + i);
-            trades[i] = EventBeanFactory.createObject(bean);
+            trades[i] = SupportEventBeanFactory.createObject(bean);
         }
         return trades;
     }

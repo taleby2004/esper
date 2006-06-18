@@ -2,6 +2,8 @@ package net.esper.filter;
 
 import net.esper.event.*;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.pattern.MatchedEventMap;
 
 import java.util.Map;
@@ -25,7 +27,7 @@ public class TestRangeValueEventProp extends TestCase
     public void testCheckType()
     {
         Map<String, EventType> taggedEventTypes = new HashMap<String, EventType>();
-        taggedEventTypes.put("asName", EventTypeFactory.getInstance().createBeanType(SupportBean.class));
+        taggedEventTypes.put("asName", SupportEventTypeFactory.createBeanType(SupportBean.class));
 
         tryInvalidCheckType(taggedEventTypes, params[0]);
         tryInvalidCheckType(taggedEventTypes, params[1]);
@@ -37,7 +39,7 @@ public class TestRangeValueEventProp extends TestCase
     {
         SupportBean eventBean = new SupportBean();
         eventBean.setIntPrimitive(1000);
-        EventBean event = EventBeanFactory.createObject(eventBean);
+        EventBean event = SupportEventBeanFactory.createObject(eventBean);
         MatchedEventMap matchedEvents = new MatchedEventMap();
         matchedEvents.add("asName", event);
 

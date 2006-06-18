@@ -2,10 +2,10 @@ package net.esper.eql.expression;
 
 import junit.framework.TestCase;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class TestStreamTypeServiceImpl extends TestCase
 {
@@ -14,10 +14,10 @@ public class TestStreamTypeServiceImpl extends TestCase
     public void setUp()
     {
         EventType[] eventTypes = new EventType[] {
-            EventTypeFactory.getInstance().createBeanType(SupportBean.class),
-            EventTypeFactory.getInstance().createBeanType(SupportBean.class),
-            EventTypeFactory.getInstance().createBeanType(SupportBean_A.class),
-            EventTypeFactory.getInstance().createBeanType(SupportMarketDataBean.class)
+            SupportEventTypeFactory.createBeanType(SupportBean.class),
+            SupportEventTypeFactory.createBeanType(SupportBean.class),
+            SupportEventTypeFactory.createBeanType(SupportBean_A.class),
+            SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class)
             };
 
         String[] streamNames = new String[] {"s1", null, "s3", "s4"};

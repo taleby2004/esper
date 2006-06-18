@@ -3,6 +3,8 @@ package net.esper.event;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanSimple;
 import net.esper.support.bean.SupportBeanCombinedProps;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +21,7 @@ public class TestBeanEventBean extends TestCase
 
     public void testGet()
     {
-        EventType eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         BeanEventBean eventBean = new BeanEventBean(testEvent, eventType);
 
         assertEquals(eventType, eventBean.getEventType());
@@ -42,7 +44,7 @@ public class TestBeanEventBean extends TestCase
         // Test wrong event type - not possible to happen under normal use
         try
         {
-            eventType = EventTypeFactory.getInstance().createBeanType(SupportBeanSimple.class);
+            eventType = SupportEventTypeFactory.createBeanType(SupportBeanSimple.class);
             eventBean = new BeanEventBean(testEvent, eventType);
             eventBean.get("myString");
             assertTrue(false);
@@ -57,7 +59,7 @@ public class TestBeanEventBean extends TestCase
     public void testGetComplexProperty()
     {
         SupportBeanCombinedProps event = SupportBeanCombinedProps.makeDefaultBean();
-        EventBean eventBean = EventBeanFactory.createObject(event);
+        EventBean eventBean = SupportEventBeanFactory.createObject(event);
 
         assertEquals("0ma0", eventBean.get("indexed[0].mapped('0ma').value"));
         assertEquals("0ma1", eventBean.get("indexed[0].mapped('0mb').value"));

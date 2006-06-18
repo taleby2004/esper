@@ -2,13 +2,13 @@ package net.esper.view.window;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanTimestamp;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.view.ViewSupport;
 
 public class TestExternallyTimedWindowView extends TestCase
@@ -133,7 +133,7 @@ public class TestExternallyTimedWindowView extends TestCase
         for (int i = 0; i < numBeans; i++)
         {
             SupportBeanTimestamp bean = new SupportBeanTimestamp(id + i, timestamp);
-            beans[i] = EventBeanFactory.createObject(bean);
+            beans[i] = SupportEventBeanFactory.createObject(bean);
         }
         return beans;
     }

@@ -31,10 +31,11 @@ import net.esper.client.EPException;
  * view unto each leaf child view that merges the value key that was grouped by back into the stream
  * using the group-by field name.
  */
-public final class GroupByView extends ViewSupport
+public final class GroupByView extends ViewSupport implements ContextAwareView
 {
     private String[] groupFieldNames;
     private EventPropertyGetter[] groupFieldGetters;
+    private ViewServiceContext viewServiceContext;
 
     private final Map<MultiKey<Object>, List<View>> subViewsPerKey = new HashMap<MultiKey<Object>, List<View>>();;
 
@@ -63,6 +64,16 @@ public final class GroupByView extends ViewSupport
     public GroupByView(String[] groupFieldNames)
     {
         this.groupFieldNames = groupFieldNames;
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
     }
 
     public void setParent(Viewable parent)
@@ -170,7 +181,7 @@ public final class GroupByView extends ViewSupport
         // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
         if (subViews == null)
         {
-            subViews = makeSubViews(this, groupByValuesKey.getArray());
+            subViews = makeSubViews(this, groupByValuesKey.getArray(), viewServiceContext);
             subViewsPerKey.put(groupByValuesKey, subViews);
         }
 
@@ -211,10 +222,12 @@ public final class GroupByView extends ViewSupport
      * Sets up merge data views for merging the group-by key value back in.
      * @param groupView is the parent view for which to copy subviews for
      * @param groupByValues is the key values to group-by
+     * @param viewServiceContext is the view services that sub-views may need
      * @return a list of views that are copies of the original list, with copied children, with
      * data merge views added to the copied child leaf views.
      */
-    protected static List<View> makeSubViews(GroupByView groupView, Object[] groupByValues)
+    protected static List<View> makeSubViews(GroupByView groupView, Object[] groupByValues,
+                                             ViewServiceContext viewServiceContext)
     {
         if (!groupView.hasViews())
         {
@@ -241,13 +254,15 @@ public final class GroupByView extends ViewSupport
             subViewList.add(copyChildView);
 
             // Make the sub views for child copying from the original to the child
-            copySubViews(groupView.getGroupFieldNames(), groupByValues, originalChildView, copyChildView);
+            copySubViews(groupView.getGroupFieldNames(), groupByValues, originalChildView, copyChildView,
+                    viewServiceContext);
         }
 
         return subViewList;
     }
 
-    private static void copySubViews(String[] groupFieldNames, Object[] groupByValues, View originalView, View copyView)
+    private static void copySubViews(String[] groupFieldNames, Object[] groupByValues, View originalView, View copyView,
+                                     ViewServiceContext viewServiceContext)
     {
         for (View subView : originalView.getViews())
         {
@@ -258,7 +273,8 @@ public final class GroupByView extends ViewSupport
                 if (Arrays.equals(mergeView.getGroupFieldNames(), groupFieldNames))
                 {
                     // We found our merge view - install a new data merge view on top of it
-                    AddPropertyValueView mergeDataView = new AddPropertyValueView(groupFieldNames, groupByValues);
+                    AddPropertyValueView mergeDataView = new AddPropertyValueView(groupFieldNames, groupByValues);                    
+                    mergeDataView.setViewServiceContext(viewServiceContext);
 
                     // Add to the copied parent subview the view merge data view
                     copyView.addView(mergeDataView);
@@ -277,7 +293,7 @@ public final class GroupByView extends ViewSupport
             copyView.addView(copiedChild);
 
             // Make the sub views for child
-            copySubViews(groupFieldNames, groupByValues, subView, copiedChild);
+            copySubViews(groupFieldNames, groupByValues, subView, copiedChild, viewServiceContext);
         }
     }
 

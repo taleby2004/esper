@@ -5,6 +5,7 @@ import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewSpecFactory;
+import net.esper.support.event.SupportEventAdapterService;
 
 public class TestViewServiceImpl extends TestCase
 {
@@ -26,11 +27,13 @@ public class TestViewServiceImpl extends TestCase
 
         viewService = new ViewServiceImpl();
 
-        viewOne = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListOne(), null);
-        viewTwo = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListTwo(), null);
-        viewThree = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListThree(), null);
-        viewFour = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListFour(), null);
-        viewFive = viewService.createView(streamTwo, SupportViewSpecFactory.makeSpecListFive(), null);
+        ViewServiceContext context = new ViewServiceContext(null, SupportEventAdapterService.getService());
+
+        viewOne = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListOne(), context);
+        viewTwo = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListTwo(), context);
+        viewThree = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListThree(), context);
+        viewFour = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListFour(), context);
+        viewFive = viewService.createView(streamTwo, SupportViewSpecFactory.makeSpecListFive(), context);
     }
 
     public void testCheckChainReuse()

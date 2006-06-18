@@ -4,10 +4,11 @@ import junit.framework.TestCase;
 import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
-import net.esper.support.core.SupportEventTypeResolutionService;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.filter.*;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.util.DebugFacility;
 
 import org.apache.commons.logging.Log;
@@ -73,7 +74,7 @@ public class TestASTFilterSpecHelper extends TestCase
         String expression = "n1=" + SupportBean.class.getName() + "(intPrimitive=n2.intBoxed)";
 
         Map<String, EventType> taggedEventTypes = new HashMap<String, EventType>();
-        taggedEventTypes.put("n2", EventTypeFactory.getInstance().createBeanType(SupportBean.class));
+        taggedEventTypes.put("n2", SupportEventTypeFactory.createBeanType(SupportBean.class));
 
         FilterSpec spec = getFilterSpec(expression, taggedEventTypes);
 
@@ -118,7 +119,7 @@ public class TestASTFilterSpecHelper extends TestCase
         String expression = "myname=" + SupportBean.class.getName() + "(intPrimitive in (asName.intPrimitive:asName.intBoxed))";
 
         Map<String, EventType> taggedEventTypes = new HashMap<String, EventType>();
-        taggedEventTypes.put("asName", EventTypeFactory.getInstance().createBeanType(SupportBean.class));
+        taggedEventTypes.put("asName", SupportEventTypeFactory.createBeanType(SupportBean.class));
 
         FilterSpec spec = getFilterSpec(expression, taggedEventTypes);
         assertEquals(SupportBean.class, spec.getEventType().getUnderlyingType());
@@ -162,7 +163,7 @@ public class TestASTFilterSpecHelper extends TestCase
     {
         AST filterNode = parse(expressionText);
         DebugFacility.dumpAST(filterNode);
-        return ASTFilterSpecHelper.buildSpec(filterNode, taggedEventTypes, new SupportEventTypeResolutionService());
+        return ASTFilterSpecHelper.buildSpec(filterNode, taggedEventTypes, SupportEventAdapterService.getService());
     }
 
     private String getEventNameTag(String expressionText) throws Exception

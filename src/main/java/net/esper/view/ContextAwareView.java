@@ -8,7 +8,14 @@ public interface ContextAwareView
 {
     /**
      * Set the services context containing service handles.
-     * @param context with service handles
+     * @param viewServiceContext with service handles
      */
-    public void setContextAware(ViewServiceContext context);
+    public void setViewServiceContext(ViewServiceContext viewServiceContext);
+
+    /**
+     * Returns the context instances used by the view.
+     * @return context instance
+     */
+    public ViewServiceContext getViewServiceContext();
+
 }

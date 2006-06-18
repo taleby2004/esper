@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
+import net.esper.support.event.SupportEventBeanFactory;
+
 public class TestMapEventType extends TestCase
 {
     EventType eventType;
@@ -56,7 +58,7 @@ public class TestMapEventType extends TestCase
         Map<String, Object> valuesMap = new HashMap<String, Object>();
         valuesMap.put("myInt", 20);
         valuesMap.put("myString", "a");
-        EventBean eventBean = EventBeanFactory.createObject(valuesMap);
+        EventBean eventBean = new MapEventBean(valuesMap, eventType);
 
         EventPropertyGetter getter = eventType.getGetter("myInt");
         assertEquals(20, getter.get(eventBean));
@@ -66,7 +68,7 @@ public class TestMapEventType extends TestCase
 
         try
         {
-            eventBean = EventBeanFactory.createObject(new Object());
+            eventBean = SupportEventBeanFactory.createObject(new Object());
             getter.get(eventBean);
             assertTrue(false);
         }

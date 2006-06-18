@@ -1,10 +1,10 @@
 package net.esper.eql.join.rep;
 
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventBean;
 import net.esper.support.eql.join.SupportJoinResultNodeFactory;
 import net.esper.support.eql.join.SupportJoinResultNodeFactory;
 import net.esper.support.eql.join.SupportJoinResultNodeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 import java.util.*;
 
@@ -17,7 +17,7 @@ public class TestRepositoryImpl extends TestCase
 
     public void setUp()
     {
-        s0Event = EventBeanFactory.createObject(new Object());
+        s0Event = SupportEventBeanFactory.createObject(new Object());
         repository = new RepositoryImpl(0, s0Event, 6);
     }
 

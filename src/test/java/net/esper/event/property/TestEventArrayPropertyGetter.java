@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import net.esper.support.bean.SupportBeanComplexProps;
-import net.esper.event.EventBeanFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
 import net.esper.event.PropertyAccessException;
 
@@ -18,7 +18,7 @@ public class TestEventArrayPropertyGetter extends TestCase
     public void setUp() throws Exception
     {
         bean = SupportBeanComplexProps.makeDefaultBean();
-        event = EventBeanFactory.createObject(bean);
+        event = SupportEventBeanFactory.createObject(bean);
         getter = makeGetter(0);
         getterOutOfBounds = makeGetter(Integer.MAX_VALUE);
     }
@@ -44,7 +44,7 @@ public class TestEventArrayPropertyGetter extends TestCase
 
         try
         {
-            getter.get(EventBeanFactory.createObject(""));
+            getter.get(SupportEventBeanFactory.createObject(""));
             fail();
         }
         catch (PropertyAccessException ex)

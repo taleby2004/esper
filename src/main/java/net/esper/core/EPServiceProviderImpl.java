@@ -1,6 +1,9 @@
 package net.esper.core;
 
 import net.esper.client.*;
+import net.esper.event.EventAdapterException;
+import net.esper.event.EventAdapterService;
+import net.esper.event.EventAdapterServiceImpl;
 
 import java.util.Map;
 
@@ -13,7 +16,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
     private EPRuntimeImpl runtime;
     private EPAdministratorImpl admin;
 
-    private final EventTypeResolutionService eventTypeResolutionService;
+    private final EventAdapterService eventAdapterService;
 
     /**
      * Constructor - initializes services.
@@ -22,7 +25,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
      */
     public EPServiceProviderImpl(Configuration configuration) throws ConfigurationException
     {
-        eventTypeResolutionService = new EventTypeResolutionServiceImpl();
+        eventAdapterService = new EventAdapterServiceImpl();
 
         // Add from the configuration the Java event class aliases
         Map<String, String> javaClassAliases = configuration.getEventTypeAliases();
@@ -30,9 +33,9 @@ public class EPServiceProviderImpl implements EPServiceProvider
         {
             try
             {
-                eventTypeResolutionService.add(entry.getKey(), entry.getValue());
+                eventAdapterService.addBeanType(entry.getKey(), entry.getValue());
             }
-            catch (EventTypeResolutionException ex)
+            catch (EventAdapterException ex)
             {
                 throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
             }
@@ -68,7 +71,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
         }
 
         // New services and runtime
-        services = new EPServicesContext(eventTypeResolutionService);
+        services = new EPServicesContext(eventAdapterService);
         runtime = new EPRuntimeImpl(services);
         services.getTimerService().setCallback(runtime);
         admin = new EPAdministratorImpl(services);

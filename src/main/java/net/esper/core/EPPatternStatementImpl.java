@@ -4,7 +4,7 @@ import net.esper.client.EPStatement;
 import net.esper.pattern.PatternMatchCallback;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
+import net.esper.event.EventAdapterService;
 import net.esper.collection.SingleEventIterator;
 import net.esper.dispatch.DispatchService;
 
@@ -21,6 +21,7 @@ public class EPPatternStatementImpl extends EPStatementSupport implements Patter
     private final String expressionText;
     private final EventType eventType;
     private final DispatchService dispatchService;
+    private final EventAdapterService eventAdapterService;
     private final EPPatternStmtStartMethod startMethod;
 
     private EPStatementStopMethod stopMethod;
@@ -33,16 +34,19 @@ public class EPPatternStatementImpl extends EPStatementSupport implements Patter
      * @param expressionText - expression
      * @param eventType - event type of events the pattern will fire
      * @param dispatchService - service for dispatching events
+     * @param eventAdapterService - service for generating events or event wrappers and types
      * @param startMethod - method to start the pattern
      */
     public EPPatternStatementImpl(String expressionText,
                                   EventType eventType,
                                   DispatchService dispatchService,
+                                  EventAdapterService eventAdapterService,
                                   EPPatternStmtStartMethod startMethod)
     {
         this.expressionText = expressionText;
         this.eventType = eventType;
         this.dispatchService = dispatchService;
+        this.eventAdapterService = eventAdapterService;
         this.startMethod = startMethod;
 
         dispatch = new PatternListenerDispatch(this.getListeners());
@@ -57,7 +61,7 @@ public class EPPatternStatementImpl extends EPStatementSupport implements Patter
             log.debug(".matchFound Listeners=" + getListeners().size() + "  dispatch=" + dispatch);
         }
 
-        EventBean aggregateEvent = EventBeanFactory.createMapFromUnderlying(matchEvent, eventType);
+        EventBean aggregateEvent = eventAdapterService.createMapFromUnderlying(matchEvent, eventType);
         lastEvent = aggregateEvent;
 
         if (getListeners().size() > 0)

@@ -2,8 +2,8 @@ package net.esper.eql.expression;
 
 import net.esper.support.eql.SupportStreamTypeSvc3Stream;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import junit.framework.TestCase;
 
 public class TestSelectExprJoinWildcardProcessor extends TestCase
@@ -13,7 +13,8 @@ public class TestSelectExprJoinWildcardProcessor extends TestCase
     public void setUp()
     {
         SupportStreamTypeSvc3Stream supportTypes = new SupportStreamTypeSvc3Stream();
-        processor = new SelectExprJoinWildcardProcessor(supportTypes.getStreamNames(), supportTypes.getEventTypes());
+        processor = new SelectExprJoinWildcardProcessor(supportTypes.getStreamNames(), supportTypes.getEventTypes(),
+                SupportEventAdapterService.getService());
     }
 
     public void testProcess()

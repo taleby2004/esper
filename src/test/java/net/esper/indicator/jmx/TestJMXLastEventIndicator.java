@@ -2,10 +2,10 @@ package net.esper.indicator.jmx;
 
 import junit.framework.*;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestJMXLastEventIndicator extends TestCase
 {
@@ -13,7 +13,7 @@ public class TestJMXLastEventIndicator extends TestCase
 
     public void setUp()
     {
-        EventType eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         indicator = new JMXLastEventIndicator(eventType, "test", "");
     }
 
@@ -26,6 +26,6 @@ public class TestJMXLastEventIndicator extends TestCase
 
     private EventBean makeEvent()
     {
-        return EventBeanFactory.createObject(new SupportBean());
+        return SupportEventBeanFactory.createObject(new SupportBean());
     }
 }

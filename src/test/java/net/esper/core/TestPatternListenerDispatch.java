@@ -2,8 +2,8 @@ package net.esper.core;
 
 import net.esper.client.UpdateListener;
 import net.esper.support.util.SupportUpdateListener;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -14,8 +14,8 @@ public class TestPatternListenerDispatch extends TestCase
 {
     private PatternListenerDispatch dispatch;
 
-    private EventBean eventOne = EventBeanFactory.createObject("a");
-    private EventBean eventTwo = EventBeanFactory.createObject("b");
+    private EventBean eventOne = SupportEventBeanFactory.createObject("a");
+    private EventBean eventTwo = SupportEventBeanFactory.createObject("b");
 
     private SupportUpdateListener listener = new SupportUpdateListener();
 

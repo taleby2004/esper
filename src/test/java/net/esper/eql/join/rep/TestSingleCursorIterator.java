@@ -4,7 +4,6 @@ import junit.framework.*;
 import java.util.NoSuchElementException;
 
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.collection.SingleEventIterator;
 
 public class TestSingleCursorIterator extends TestCase

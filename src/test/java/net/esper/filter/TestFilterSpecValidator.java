@@ -2,8 +2,9 @@ package net.esper.filter;
 
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.eql.parse.ASTFilterSpecValidationException;
 import junit.framework.TestCase;
 
@@ -13,7 +14,7 @@ public class TestFilterSpecValidator extends TestCase
 
     public void setUp()
     {
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
     }
 
     public void testValidate()

@@ -2,7 +2,7 @@ package net.esper.view.stat;
 
 import net.esper.view.stat.RegressionBean;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 
 /**
  * A view that calculates regression on two fields. The view uses internally a {@link RegressionBean}
@@ -12,8 +12,7 @@ import net.esper.event.EventTypeFactory;
  */
 public final class RegressionLinestView extends BaseBivariateStatisticsView
 {
-    private static final EventType eventType =
-            EventTypeFactory.getInstance().createBeanType(RegressionBean.class);
+    private EventType eventType;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -31,10 +30,14 @@ public final class RegressionLinestView extends BaseBivariateStatisticsView
     public RegressionLinestView(String xFieldName, String yFieldName)
     {
         super(new RegressionBean(), xFieldName, yFieldName);
-    }
+    }        
 
     public EventType getEventType()
     {
+        if (eventType == null)
+        {
+            eventType = viewServiceContext.getEventAdapterService().addBeanType(RegressionBean.class.getName(), RegressionBean.class);
+        }
         return eventType;
     }
 

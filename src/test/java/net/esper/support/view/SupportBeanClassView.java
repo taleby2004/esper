@@ -1,7 +1,8 @@
 package net.esper.support.view;
 
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.event.EventBean;
+import net.esper.support.event.SupportEventTypeFactory;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -17,7 +18,7 @@ public class SupportBeanClassView extends SupportBaseView
 
     public SupportBeanClassView(Class clazz)
     {
-        super(EventTypeFactory.getInstance().createBeanType(clazz));
+        super(SupportEventTypeFactory.createBeanType(clazz));
         instances.add(this);
     }
 

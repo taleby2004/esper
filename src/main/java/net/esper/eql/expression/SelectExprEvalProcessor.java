@@ -1,9 +1,7 @@
 package net.esper.eql.expression;
 
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.event.EventTypeFactory;
-import net.esper.event.EventBeanFactory;
+import net.esper.event.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -16,13 +14,15 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
 {
     private final List<SelectExprElement> selectionList;
     private final EventType resultEventType;
+    private final EventAdapterService eventAdapterService;
 
     /**
      * Ctor.
      * @param selectionList - list of select-clause items
+     * @param eventAdapterService - service for generating events and handling event types
      * @throws ExprValidationException thrown if any of the expressions don't validate
      */
-    public SelectExprEvalProcessor(List<SelectExprElement> selectionList) throws ExprValidationException
+    public SelectExprEvalProcessor(List<SelectExprElement> selectionList, EventAdapterService eventAdapterService) throws ExprValidationException
     {
         if (selectionList.size() == 0)
         {
@@ -38,6 +38,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
 
         this.selectionList = selectionList;
+        this.eventAdapterService = eventAdapterService;
 
         // Determine the event type for the expressions
         Map<String, Class> types = new HashMap<String, Class>();
@@ -45,7 +46,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         {
             types.put(entry.getAsName(), entry.getSelectExpression().getType());
         }
-        resultEventType = EventTypeFactory.getInstance().createMapType(types);
+        resultEventType = eventAdapterService.createAnonymousMapType(types);
     }
 
     public EventBean process(EventBean[] eventsPerStream)
@@ -56,7 +57,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             props.put(entry.getAsName(), entry.getSelectExpression().evaluate(eventsPerStream));
         }
 
-        EventBean event = EventBeanFactory.createMapFromValues(props, resultEventType);
+        EventBean event = eventAdapterService.createMapFromValues(props, resultEventType);
         return event;
     }
 

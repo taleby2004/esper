@@ -29,6 +29,8 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * @param aggregationService - handles aggregation
      * @param optionalHavingNode - having clause expression node
+     * @param isOutputLimiting - set if output limiting required
+     * @param isOutputLimitLastOnly - set if output limiting to last row
      */
     public ResultSetProcessorAggregateAll(SelectExprProcessor selectExprProcessor, 
                                           AggregationService aggregationService, 

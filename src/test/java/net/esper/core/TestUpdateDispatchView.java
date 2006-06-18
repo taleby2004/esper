@@ -8,8 +8,8 @@ import net.esper.client.UpdateListener;
 import net.esper.dispatch.DispatchService;
 import net.esper.dispatch.DispatchServiceImpl;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.util.SupportUpdateListener;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestUpdateDispatchView extends TestCase
 {
@@ -63,6 +63,6 @@ public class TestUpdateDispatchView extends TestCase
 
     private EventBean[] makeEvents(String text)
     {
-        return new EventBean[] { EventBeanFactory.createObject(text) };
+        return new EventBean[] { SupportEventBeanFactory.createObject(text) };
     }
 }

@@ -2,11 +2,12 @@ package net.esper.view;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.view.SupportSchemaNeutralView;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestZeroDepthStream extends TestCase
 {
@@ -18,7 +19,7 @@ public class TestZeroDepthStream extends TestCase
 
     public void setUp()
     {
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean_A.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean_A.class);
 
         stream = new ZeroDepthStream(eventType);
 
@@ -26,7 +27,7 @@ public class TestZeroDepthStream extends TestCase
         stream.addView(testChildView);
         testChildView.setParent(stream);
 
-        eventBean = EventBeanFactory.createObject(new SupportBean_A("a1"));
+        eventBean = SupportEventBeanFactory.createObject(new SupportBean_A("a1"));
     }
 
     public void testInsert()

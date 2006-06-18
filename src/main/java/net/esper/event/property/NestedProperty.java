@@ -1,9 +1,6 @@
 package net.esper.event.property;
 
-import net.esper.event.EventPropertyGetter;
-import net.esper.event.BeanEventType;
-import net.esper.event.EventTypeFactory;
-import net.esper.event.PropertyAccessException;
+import net.esper.event.*;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -24,14 +21,17 @@ import java.util.Map;
 public class NestedProperty implements Property
 {
     private List<Property> properties;
+    private BeanEventAdapter beanEventAdapter;
 
     /**
      * Ctor.
      * @param properties is the list of Property instances representing each nesting level
+     * @param beanEventAdapter is the chache and factory for event bean types and event wrappers
      */
-    public NestedProperty(List<Property> properties)
+    public NestedProperty(List<Property> properties, BeanEventAdapter beanEventAdapter)
     {
         this.properties = properties;
+        this.beanEventAdapter = beanEventAdapter;
     }
 
     /**
@@ -73,12 +73,12 @@ public class NestedProperty implements Property
                 {
                     return null;
                 }
-                eventType = (BeanEventType) EventTypeFactory.getInstance().createBeanType(clazz);
+                eventType = (BeanEventType) beanEventAdapter.createBeanType(clazz);
             }
             getters.add(getter);
         }
 
-        return new EventNestedPropertyGetter(getters);
+        return new EventNestedPropertyGetter(getters, beanEventAdapter);
     }
 
     public Class getPropertyType(BeanEventType eventType)
@@ -109,7 +109,7 @@ public class NestedProperty implements Property
                     return null;
                 }
 
-                eventType = (BeanEventType) EventTypeFactory.getInstance().createBeanType(result);
+                eventType = beanEventAdapter.createBeanType(result);
             }
         }
 

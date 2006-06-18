@@ -2,7 +2,7 @@ package net.esper.collection;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -82,7 +82,7 @@ public class TestInterchangeablePair extends TestCase
         EventBean[] events = new EventBean[4];
         for (int i = 0; i < events.length; i++)
         {
-            events[i] = EventBeanFactory.createObject(new Integer(i));
+            events[i] = SupportEventBeanFactory.createObject(new Integer(i));
         }
 
         eventPairs.add(new InterchangeablePair<EventBean, EventBean>(events[0], events[1]));

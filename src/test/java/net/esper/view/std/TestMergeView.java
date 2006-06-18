@@ -6,12 +6,14 @@ import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewDataChecker;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.ViewSupport;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 import net.esper.view.View;
+import net.esper.view.ViewServiceContext;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -25,6 +27,7 @@ public class TestMergeView extends TestCase
     {
         // Set up length window view and a test child view
         myView = new MergeView(new String[] {"symbol"});
+        myView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -63,7 +66,7 @@ public class TestMergeView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        EventType someEventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType someEventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.setParent(parent);
         myView.setEventType(someEventType);
@@ -77,8 +80,12 @@ public class TestMergeView extends TestCase
     {
         SupportBeanClassView topView = new SupportBeanClassView(SupportBean.class);
         GroupByView groupByView = new GroupByView("intPrimitive");
+
         SizeView sizeView = new SizeView();
+        sizeView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+
         MergeView mergeView = new MergeView(new String[] {"intPrimitive"});
+        mergeView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
 
         topView.addView(groupByView);
         groupByView.addView(sizeView);
@@ -96,6 +103,6 @@ public class TestMergeView extends TestCase
     private EventBean makeTradeBean(String symbol, int price)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, "");
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

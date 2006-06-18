@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Property getter using CGLib's FastMethod instance.
  */
-public final class CGLibPropertyGetter implements EventPropertyGetter
+public class CGLibPropertyGetter implements EventPropertyGetter
 {
     private final FastMethod fastMethod;
 

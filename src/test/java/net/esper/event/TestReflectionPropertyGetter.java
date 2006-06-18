@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventBeanFactory;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -18,7 +19,7 @@ public class TestReflectionPropertyGetter extends TestCase
         testEvent.setString("a");
         testEvent.setDoubleBoxed(null);
 
-        unitTestBean = EventBeanFactory.createObject(testEvent);
+        unitTestBean = SupportEventBeanFactory.createObject(testEvent);
     }
 
     public void testGetter() throws Exception
@@ -34,7 +35,7 @@ public class TestReflectionPropertyGetter extends TestCase
 
         try
         {
-            EventBean eventBean = EventBeanFactory.createObject(new Object());
+            EventBean eventBean = SupportEventBeanFactory.createObject(new Object());
             getter.get(eventBean);
             assertTrue(false);
         }

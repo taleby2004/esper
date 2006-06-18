@@ -2,10 +2,10 @@ package net.esper.eql.expression;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
 import net.esper.support.eql.SupportStreamTypeSvc3Stream;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.regression.eql.TestPerfPropertyAccess;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -159,7 +159,7 @@ public class TestExprIdentNode extends TestCase
     {
         SupportBean event = new SupportBean();
         event.setIntPrimitive(intPrimitive);
-        return EventBeanFactory.createObject(event);
+        return SupportEventBeanFactory.createObject(event);
     }
 
     private void tryInvalidValidate(ExprIdentNode identNode)

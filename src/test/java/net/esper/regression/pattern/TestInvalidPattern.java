@@ -36,7 +36,7 @@ public class TestInvalidPattern extends TestCase
 
         // class not found
         exceptionText = getStatementExceptionPattern("dummypkg.dummy()");
-        assertEquals("Failed to resolve event type: Class named 'dummypkg.dummy' could not be loaded and no alias is defined [dummypkg.dummy()]", exceptionText);
+        assertEquals("Failed to resolve event type: Failed to load class dummypkg.dummy [dummypkg.dummy()]", exceptionText);
 
         // simple property not found
         exceptionText = getStatementExceptionPattern(EVENT_NUM + "(dummy=1)");

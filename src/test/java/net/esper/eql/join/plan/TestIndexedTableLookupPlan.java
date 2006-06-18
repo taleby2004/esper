@@ -8,8 +8,9 @@ import net.esper.eql.join.exec.TableLookupStrategy;
 import net.esper.eql.join.table.EventTable;
 import net.esper.eql.join.table.PropertyIndexedEventTable;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class TestIndexedTableLookupPlan extends TestCase
 {
@@ -18,7 +19,7 @@ public class TestIndexedTableLookupPlan extends TestCase
 
     public void setUp()
     {
-        types = new EventType[] { EventTypeFactory.getInstance().createBeanType(SupportBean.class) };
+        types = new EventType[] { SupportEventTypeFactory.createBeanType(SupportBean.class) };
 
         propertyMapEventIndex = new PropertyIndexedEventTable(1, types[0], new String[] {"intBoxed"});
     }

@@ -6,11 +6,12 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.esper.collection.Pair;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportAggregationService;
 import net.esper.support.eql.SupportExprNodeFactory;
 import net.esper.support.eql.SupportSelectExprFactory;
+import net.esper.support.event.SupportEventAdapterService;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestResultSetProcessorRowPerGroup extends TestCase
 {
@@ -19,7 +20,8 @@ public class TestResultSetProcessorRowPerGroup extends TestCase
 
     public void setUp() throws Exception
     {
-        SelectExprProcessor selectProcessor = new SelectExprEvalProcessor(SupportSelectExprFactory.makeSelectListFromIdent("string", "s0"));
+        SelectExprProcessor selectProcessor = new SelectExprEvalProcessor(SupportSelectExprFactory.makeSelectListFromIdent("string", "s0"),
+                SupportEventAdapterService.getService());
         supportAggregationService = new SupportAggregationService();
 
         List<ExprNode> groupKeyNodes = new LinkedList<ExprNode>();
@@ -48,6 +50,6 @@ public class TestResultSetProcessorRowPerGroup extends TestCase
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

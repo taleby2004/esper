@@ -6,10 +6,10 @@ import java.util.Set;
 import junit.framework.TestCase;
 import net.esper.collection.MultiKey;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportResultSetProcessor;
 import net.esper.support.view.SupportSchemaNeutralView;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestOutputProcessView extends TestCase
 {
@@ -46,8 +46,8 @@ public class TestOutputProcessView extends TestCase
     {
         EventBean[] oldData = new EventBean[1];
         EventBean[] newData = new EventBean[1];
-        oldData[0] = EventBeanFactory.createObject(new SupportBean());
-        newData[0] = EventBeanFactory.createObject(new SupportBean());
+        oldData[0] = SupportEventBeanFactory.createObject(new SupportBean());
+        newData[0] = SupportEventBeanFactory.createObject(new SupportBean());
 
         outputProcessViewUpdate.update(newData, oldData);
 
@@ -72,8 +72,8 @@ public class TestOutputProcessView extends TestCase
     {
         EventBean[] oldData = new EventBean[1];
         EventBean[] newData = new EventBean[1];
-        oldData[0] = EventBeanFactory.createObject(new SupportBean());
-        newData[0] = EventBeanFactory.createObject(new SupportBean());
+        oldData[0] = SupportEventBeanFactory.createObject(new SupportBean());
+        newData[0] = SupportEventBeanFactory.createObject(new SupportBean());
 
         outputProcessViewProcess.process(makeEventSet(newData[0]), makeEventSet(oldData[0]));
 

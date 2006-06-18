@@ -2,12 +2,12 @@ package net.esper.view.std;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.view.ViewSupport;
 
 public class TestUniqueByPropertyView extends TestCase
@@ -95,6 +95,6 @@ public class TestUniqueByPropertyView extends TestCase
     private EventBean makeTradeBean(String symbol, int price)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, "");
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

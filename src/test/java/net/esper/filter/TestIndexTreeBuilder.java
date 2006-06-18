@@ -4,8 +4,8 @@ import junit.framework.TestCase;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.support.filter.SupportFilterCallback;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventBean;
 
 import java.util.LinkedList;
@@ -30,7 +30,7 @@ public class TestIndexTreeBuilder extends TestCase
         testBean.setShortPrimitive((short) 20);
 
         builder = new IndexTreeBuilder();
-        eventBean = EventBeanFactory.createObject(testBean);
+        eventBean = SupportEventBeanFactory.createObject(testBean);
         eventType = eventBean.getEventType();
 
         matches = new LinkedList<FilterCallback>();

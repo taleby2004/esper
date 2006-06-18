@@ -2,6 +2,8 @@ package net.esper.event;
 
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +29,7 @@ public class TestMapEventBean extends TestCase
         testValuesMap.put("aString", "test");
         testValuesMap.put("anInt", 10);
 
-        eventType = EventTypeFactory.getInstance().createMapType(testTypesMap);
+        eventType = new MapEventType(testTypesMap);
         eventBean = new MapEventBean(testValuesMap, eventType);
     }
 
@@ -67,7 +69,7 @@ public class TestMapEventBean extends TestCase
         assertTrue(eventBean.equals(other));
 
         // try another event type
-        EventType otherEventType = EventTypeFactory.getInstance().createMapType(testTypesMap);
+        EventType otherEventType = SupportEventAdapterService.getService().createAnonymousMapType(testTypesMap);
         other = new MapEventBean(testValuesMap, otherEventType);
         assertFalse(other.equals(eventBean));
         assertFalse(eventBean.equals(other));
@@ -83,14 +85,14 @@ public class TestMapEventBean extends TestCase
         SupportBean beanOne = new SupportBean();
         SupportBean_A beanTwo = new SupportBean_A("a");
 
-        EventBean eventOne = EventBeanFactory.createObject(beanOne);
-        EventBean eventTwo = EventBeanFactory.createObject(beanTwo);
+        EventBean eventOne = SupportEventBeanFactory.createObject(beanOne);
+        EventBean eventTwo = SupportEventBeanFactory.createObject(beanTwo);
 
         // Set up event type
         testTypesMap.clear();
         testTypesMap.put("a", SupportBean.class);
         testTypesMap.put("b", SupportBean_A.class);
-        EventType eventType = EventTypeFactory.getInstance().createMapType(testTypesMap);
+        EventType eventType = SupportEventAdapterService.getService().createAnonymousMapType(testTypesMap);
 
         Map<String, EventBean> events = new HashMap<String, EventBean>();
         events.put("a", eventOne);

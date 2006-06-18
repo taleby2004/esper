@@ -5,8 +5,8 @@ import junit.framework.*;
 import java.util.List;
 
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -82,7 +82,7 @@ public class TestTimeWindow extends TestCase
         // about 30 seconds for a TreeMap-backed-backed
         for (int i = 0; i < 10; i++)
         {
-            window.add(i, EventBeanFactory.createObject("a"));
+            window.add(i, SupportEventBeanFactory.createObject("a"));
 
             window.expireEvents(i - 100);
         }
@@ -92,7 +92,7 @@ public class TestTimeWindow extends TestCase
 
     private EventBean createBean()
     {
-        return EventBeanFactory.createObject(new SupportBean());
+        return SupportEventBeanFactory.createObject(new SupportBean());
     }
 
     private static final Log log = LogFactory.getLog(TestTimeWindow.class);

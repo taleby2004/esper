@@ -4,10 +4,11 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportSelectExprFactory;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventAdapterService;
 
 public class TestSelectExprEvalProcessor extends TestCase
 {
@@ -15,7 +16,8 @@ public class TestSelectExprEvalProcessor extends TestCase
 
     public void setUp() throws Exception
     {
-        method = new SelectExprEvalProcessor(SupportSelectExprFactory.makeNoAggregateSelectList());
+        method = new SelectExprEvalProcessor(SupportSelectExprFactory.makeNoAggregateSelectList(),
+                SupportEventAdapterService.getService());
     }
 
     public void testGetTargetType()
@@ -39,6 +41,6 @@ public class TestSelectExprEvalProcessor extends TestCase
         bean.setDoubleBoxed(doubleBoxed);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

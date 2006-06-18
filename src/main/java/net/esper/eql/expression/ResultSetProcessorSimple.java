@@ -61,6 +61,9 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * same, i.e. this method does not filter it just transforms the result set.
      * @param exprProcessor - processes each input event and returns output event
      * @param events - input events
+     * @param isOutputLimiting - set to indicate to perform output limit checks
+     * @param isOutputLimitLastOnly - set to indicate to output limit to the last event
+     *
      * @return output events, one for each input event
      */
     protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
@@ -131,6 +134,8 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * same, i.e. this method does not filter it just transforms the result set.
      * @param exprProcessor - processes each input event and returns output event
      * @param events - input events
+     * @param isOutputLimiting - set to indicate to perform output limit checks
+     * @param isOutputLimitLastOnly - set to indicate to output limit to the last event
      * @return output events, one for each input event
      */
     protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)

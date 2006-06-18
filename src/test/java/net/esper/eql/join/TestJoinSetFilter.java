@@ -3,8 +3,8 @@ package net.esper.eql.join;
 import net.esper.eql.expression.ExprNode;
 import net.esper.support.eql.SupportExprNodeFactory;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.collection.MultiKey;
 
 import java.util.Set;
@@ -42,6 +42,6 @@ public class TestJoinSetFilter extends TestCase
         event.setIntPrimitive(intPrimitive);
         event.setIntBoxed(intBoxed);
         event.setString(string);
-        return EventBeanFactory.createObject(event);
+        return SupportEventBeanFactory.createObject(event);
     }
 }

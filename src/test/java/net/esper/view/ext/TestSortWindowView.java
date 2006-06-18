@@ -2,12 +2,12 @@ package net.esper.view.ext;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.view.ViewSupport;
 
 public class TestSortWindowView extends TestCase
@@ -145,6 +145,6 @@ public class TestSortWindowView extends TestCase
     private EventBean makeBean(long volume)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean("CSCO.O", 0, volume, "");
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

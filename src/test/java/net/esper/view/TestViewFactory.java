@@ -6,6 +6,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportBeanClassView;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.type.StringValue;
 
 import org.apache.commons.logging.Log;
@@ -22,6 +23,11 @@ public class TestViewFactory extends TestCase
         ViewSpec spec = new ViewSpec(ViewEnum.UNIVARIATE_STATISTICS.getNamespace(), ViewEnum.UNIVARIATE_STATISTICS.getName(), parameters);
 
         Viewable view = ViewFactory.create(parentViewable, spec);
+        if (view instanceof ContextAwareView)
+        {
+            ContextAwareView contextAwareView = (ContextAwareView) view;
+            contextAwareView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));            
+        }
 
         assertTrue(view != null);
         assertTrue(view.getViews().size() == 0);

@@ -3,10 +3,10 @@ package net.esper.filter;
 import junit.framework.TestCase;
 import net.esper.pattern.MatchedEventMap;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class TestFilterSpecParamEventProp extends TestCase
         FilterSpecParamEventProp param = makeParam("asName", "intBoxed");
 
         Map<String, EventType> taggedEventTypes = new HashMap<String, EventType>();
-        taggedEventTypes.put("asName", EventTypeFactory.getInstance().createBeanType(SupportBean.class));
+        taggedEventTypes.put("asName", SupportEventTypeFactory.createBeanType(SupportBean.class));
 
         assertEquals(Integer.class, param.getFilterValueClass(taggedEventTypes));
 
@@ -65,7 +65,7 @@ public class TestFilterSpecParamEventProp extends TestCase
 
         SupportBean eventBean = new SupportBean();
         eventBean.setIntBoxed(1000);
-        EventBean event = EventBeanFactory.createObject(eventBean);
+        EventBean event = SupportEventBeanFactory.createObject(eventBean);
 
         MatchedEventMap matchedEvents = new MatchedEventMap();
         matchedEvents.add("asName", event);

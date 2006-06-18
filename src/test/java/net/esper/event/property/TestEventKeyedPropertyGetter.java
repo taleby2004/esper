@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import net.esper.support.bean.SupportBeanComplexProps;
-import net.esper.event.EventBeanFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.EventBean;
 import net.esper.event.PropertyAccessException;
 
@@ -17,7 +17,7 @@ public class TestEventKeyedPropertyGetter extends TestCase
     public void setUp() throws Exception
     {
         bean = SupportBeanComplexProps.makeDefaultBean();
-        event = EventBeanFactory.createObject(bean);
+        event = SupportEventBeanFactory.createObject(bean);
         FastClass fastClass = FastClass.create(SupportBeanComplexProps.class);
         FastMethod method = fastClass.getMethod("getIndexed", new Class[] {int.class});
         getter = new EventKeyedPropertyGetter(method, 1);
@@ -29,7 +29,7 @@ public class TestEventKeyedPropertyGetter extends TestCase
 
         try
         {
-            getter.get(EventBeanFactory.createObject(""));
+            getter.get(SupportEventBeanFactory.createObject(""));
             fail();
         }
         catch (PropertyAccessException ex)

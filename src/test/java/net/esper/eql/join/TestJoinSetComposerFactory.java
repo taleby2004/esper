@@ -3,10 +3,11 @@ package net.esper.eql.join;
 import junit.framework.TestCase;
 
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.eql.SupportExprNode;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.eql.join.table.PropertyIndexedEventTable;
 import net.esper.eql.join.table.UnindexedEventTable;
 import net.esper.eql.join.table.EventTable;
@@ -23,8 +24,8 @@ public class TestJoinSetComposerFactory extends TestCase
     public void setUp()
     {
         streamTypes = new EventType[2];
-        streamTypes[0] = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
-        streamTypes[1] = EventTypeFactory.getInstance().createBeanType(SupportBean_A.class);
+        streamTypes[0] = SupportEventTypeFactory.createBeanType(SupportBean.class);
+        streamTypes[1] = SupportEventTypeFactory.createBeanType(SupportBean_A.class);
     }
 
     public void testBuildIndex()

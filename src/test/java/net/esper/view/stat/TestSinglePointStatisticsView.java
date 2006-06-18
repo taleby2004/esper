@@ -4,13 +4,15 @@ import java.util.Iterator;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.DoubleValueAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.ViewFieldEnum;
 import net.esper.view.ViewSupport;
+import net.esper.view.ViewServiceContext;
 
 public class TestSinglePointStatisticsView extends TestCase
 {
@@ -21,6 +23,8 @@ public class TestSinglePointStatisticsView extends TestCase
     {
         // Set up sum view and a test child view
         myView = new UnivariateStatisticsView("price");
+        myView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
     }
@@ -137,6 +141,6 @@ public class TestSinglePointStatisticsView extends TestCase
     private EventBean makeBean(String symbol, double price, long volume)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, volume, "");
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

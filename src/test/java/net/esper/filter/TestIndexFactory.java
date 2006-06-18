@@ -2,8 +2,8 @@ package net.esper.filter;
 
 import junit.framework.TestCase;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 
 public class TestIndexFactory extends TestCase
 {
@@ -11,7 +11,7 @@ public class TestIndexFactory extends TestCase
 
     public void setUp()
     {
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
     }
 
     public void testCreateIndex()

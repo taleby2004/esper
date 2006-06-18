@@ -8,8 +8,9 @@ import java.util.TreeSet;
 import junit.framework.TestCase;
 import net.esper.collection.Pair;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class TestIndexHelper extends TestCase
 {
@@ -21,7 +22,7 @@ public class TestIndexHelper extends TestCase
 
     public void setUp()
     {
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         parameters = new TreeSet<FilterValueSetParam>(new FilterSpecParamComparator());
 
         // Create parameter test list

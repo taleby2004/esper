@@ -8,9 +8,10 @@ import junit.framework.TestCase;
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportSelectExprFactory;
+import net.esper.support.event.SupportEventAdapterService;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestResultSetProcessorSimple extends TestCase
 {
@@ -22,12 +23,13 @@ public class TestResultSetProcessorSimple extends TestCase
 
     public void setUp() throws Exception
     {
-        selectExprProcessor = new SelectExprEvalProcessor(SupportSelectExprFactory.makeNoAggregateSelectList());
- 
+        selectExprProcessor = new SelectExprEvalProcessor(SupportSelectExprFactory.makeNoAggregateSelectList(),
+                SupportEventAdapterService.getService());
+
 		outputLimitSpecAll = new OutputLimitSpec(1, false);
 		assertFalse(outputLimitSpecAll.isDisplayLastOnly());
 		outputProcessorAll = new ResultSetProcessorSimple(selectExprProcessor, true, false);
-		
+
 		outputLimitSpecLast = new OutputLimitSpec(1, true);
 		assertTrue(outputLimitSpecLast.isDisplayLastOnly());
 		outputProcessorLast = new ResultSetProcessorSimple(selectExprProcessor, true, true);
@@ -110,7 +112,7 @@ public class TestResultSetProcessorSimple extends TestCase
         bean.setDoubleBoxed(doubleBoxed);
         bean.setIntBoxed(intBoxed);
         bean.setIntPrimitive(intPrimitive);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 
 	public void testProcessLast() throws Exception

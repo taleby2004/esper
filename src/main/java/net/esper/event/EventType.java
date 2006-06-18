@@ -1,5 +1,8 @@
 package net.esper.event;
 
+import java.util.Set;
+import java.util.Iterator;
+
 /**
  * This interface provides metadata on events.
  * <p>
@@ -62,4 +65,12 @@ public interface EventType
      * @return an array of event types
      */
     public EventType[] getSuperTypes();
+
+    /**
+     * Returns iterator over all super types to event type, going up the hierarchy and including all
+     * Java interfaces (and their extended interfaces) and superclasses as EventType instances.
+     * @return iterator of event types represeting all superclasses and implemented interfaces, all the way up to
+     * java.lang.Object but excluding java.lang.Object itself
+     */
+    public Iterator<EventType> getDeepSuperTypes();
 }

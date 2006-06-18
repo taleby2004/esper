@@ -4,7 +4,7 @@ import junit.framework.*;
 import java.util.NoSuchElementException;
 
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestSingleEventIterator extends TestCase
 {
@@ -13,7 +13,7 @@ public class TestSingleEventIterator extends TestCase
 
     public void setUp()
     {
-        eventBean = EventBeanFactory.createObject("a");
+        eventBean = SupportEventBeanFactory.createObject("a");
         iterator = new SingleEventIterator(eventBean);
     }
 

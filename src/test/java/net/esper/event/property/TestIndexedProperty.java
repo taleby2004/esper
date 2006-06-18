@@ -1,10 +1,10 @@
 package net.esper.event.property;
 
 import net.esper.event.EventPropertyGetter;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventBean;
 import net.esper.event.BeanEventType;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.event.SupportEventBeanFactory;
 import junit.framework.TestCase;
 
 public class TestIndexedProperty extends TestCase
@@ -21,7 +21,7 @@ public class TestIndexedProperty extends TestCase
         indexed[2] = new IndexedProperty("arrayProperty", 0);
         indexed[3] = new IndexedProperty("arrayProperty", 1);
 
-        event = EventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
         eventType = (BeanEventType)event.getEventType();
     }
 

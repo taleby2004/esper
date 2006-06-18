@@ -6,10 +6,11 @@ import java.util.List;
 
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.view.EventStream;
 import net.esper.view.StreamView;
 import net.esper.view.View;
+import net.esper.support.event.SupportEventTypeFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +32,7 @@ public class SupportStreamImpl implements EventStream
 
     public SupportStreamImpl(Class clazz, int depth)
     {
-        this.eventType = EventTypeFactory.getInstance().createBeanType(clazz);
+        this.eventType = SupportEventTypeFactory.createBeanType(clazz);
         this.depth = depth;
 
         this.events = new LinkedList<EventBean>();

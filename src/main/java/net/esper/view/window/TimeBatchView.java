@@ -12,7 +12,6 @@ import net.esper.view.Viewable;
 import net.esper.view.ViewSupport;
 import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
-import net.esper.view.ViewProcessingException;
 import net.esper.schedule.ScheduleCallback;
 import net.esper.client.EPException;
 
@@ -41,7 +40,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
 
     // Current running parameters
     private Long currentReferencePoint;
-    private ViewServiceContext context;
+    private ViewServiceContext viewServiceContext;
     private LinkedList<EventBean> lastBatch = null;
     private LinkedList<EventBean> currentBatch = new LinkedList<EventBean>();
     private boolean isCallbackScheduled;
@@ -148,6 +147,16 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         return parent.getEventType();
     }
 
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
+    }
+
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
         if (log.isDebugEnabled())
@@ -157,7 +166,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
                     "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
         }
 
-        if (context == null)
+        if (viewServiceContext == null)
         {
             String message = "View context has not been supplied, cannot schedule callback";
             log.fatal(".update " + message);
@@ -178,7 +187,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
                 currentReferencePoint = initialReferencePoint;
                 if (currentReferencePoint == null)
                 {
-                    currentReferencePoint = context.getSchedulingService().getTime();
+                    currentReferencePoint = viewServiceContext.getSchedulingService().getTime();
                 }
             }
 
@@ -210,7 +219,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         if (log.isDebugEnabled())
         {
             log.debug(".sendBatch Update child views, " +
-                    "  time=" + dateFormat.format(context.getSchedulingService().getTime()));
+                    "  time=" + dateFormat.format(viewServiceContext.getSchedulingService().getTime()));
         }
 
         // If there are child views and the batch was filled, fire update method
@@ -256,6 +265,8 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         currentBatch = new LinkedList<EventBean>();
     }
 
+
+
     public final Iterator<EventBean> iterator()
     {
         return currentBatch.iterator();
@@ -268,36 +279,9 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
                 " initialReferencePoint=" + initialReferencePoint;
     }
 
-    /**
-     * Sets the context instances used by the view.
-     * @param context is the context instance
-     */
-    public void setContextAware(ViewServiceContext context)
-    {
-        this.context = context;
-    }
-
-    /**
-     * Returns the context instances used by the view.
-     * @return context instance
-     */
-    public ViewServiceContext getContext()
-    {
-        return context;
-    }
-
-    /**
-     * Sets the services that this view depends on.
-     * @param context - services
-     */
-    public void setContext(ViewServiceContext context)
-    {
-        this.context = context;
-    }
-
     private void scheduleCallback()
     {
-        long current = context.getSchedulingService().getTime();
+        long current = viewServiceContext.getSchedulingService().getTime();
         long afterMSec = computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);
 
         if (log.isDebugEnabled())
@@ -316,7 +300,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
                 TimeBatchView.this.sendBatch();
             }
         };
-        context.getSchedulingService().add(afterMSec, callback);
+        viewServiceContext.getSchedulingService().add(afterMSec, callback);
     }
 
     /**

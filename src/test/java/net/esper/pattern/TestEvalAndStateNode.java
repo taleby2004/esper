@@ -1,8 +1,8 @@
 package net.esper.pattern;
 
 import junit.framework.*;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventBean;
+import net.esper.support.event.SupportEventBeanFactory;
 
 import java.util.*;
 
@@ -19,7 +19,7 @@ public class TestEvalAndStateNode extends TestCase
         String[] ids = { "0", "a", "b", "c", "d", "e", "f" };
         for (String id : ids)
         {
-            events.put(id, EventBeanFactory.createObject(id));
+            events.put(id, SupportEventBeanFactory.createObject(id));
         }
     }
 

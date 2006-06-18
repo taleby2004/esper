@@ -2,15 +2,16 @@ package net.esper.view;
 
 import junit.framework.*;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class TestPropertyCheckHelper extends TestCase
 {
     public void testCheckNumeric()
     {
-        EventType mySchema = EventTypeFactory.getInstance().createBeanType(SupportMarketDataBean.class);
+        EventType mySchema = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         assertTrue(PropertyCheckHelper.checkNumeric(mySchema, "dummy") != null);
         assertTrue(PropertyCheckHelper.checkNumeric(mySchema, "symbol") != null);
@@ -31,7 +32,7 @@ public class TestPropertyCheckHelper extends TestCase
 
     public void testCheckLong()
     {
-        EventType mySchema = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType mySchema = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
         assertEquals(null, PropertyCheckHelper.checkLong(mySchema, "longPrimitive"));
         assertEquals(null, PropertyCheckHelper.checkLong(mySchema, "longBoxed"));
@@ -43,7 +44,7 @@ public class TestPropertyCheckHelper extends TestCase
 
     public void testFieldExist()
     {
-        EventType mySchema = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType mySchema = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
         assertEquals(null, PropertyCheckHelper.exists(mySchema, "longPrimitive"));
         assertTrue(PropertyCheckHelper.exists(mySchema, "dummy") != null);
@@ -51,7 +52,7 @@ public class TestPropertyCheckHelper extends TestCase
 
     public void test2FieldExist()
     {
-        EventType mySchema = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType mySchema = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
         assertEquals(null, PropertyCheckHelper.exists(mySchema, "longPrimitive", "longBoxed"));
         assertTrue(PropertyCheckHelper.exists(mySchema, "dummy", "longPrimitive") != null);

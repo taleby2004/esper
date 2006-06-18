@@ -1,27 +1,25 @@
 package net.esper.event.property;
 
-import net.esper.event.EventPropertyGetter;
-import net.esper.event.EventBean;
-import net.esper.event.PropertyAccessException;
-import net.esper.event.EventBeanFactory;
-
+import net.esper.event.*;
 import java.util.List;
-import java.util.Iterator;
 
 /**
  * Getter for one or more levels deep nested properties.
  */
 public class EventNestedPropertyGetter implements EventPropertyGetter
 {
-    private EventPropertyGetter[] getterChain;
+    private final EventPropertyGetter[] getterChain;
+    private final BeanEventAdapter beanEventAdapter;
 
     /**
      * Ctor.
      * @param getterChain is the chain of getters to retrieve each nested property
+     * @param beanEventAdapter is the chache and factory for event bean types and event wrappers
      */
-    public EventNestedPropertyGetter(List<EventPropertyGetter> getterChain)
+    public EventNestedPropertyGetter(List<EventPropertyGetter> getterChain, BeanEventAdapter beanEventAdapter)
     {
         this.getterChain = getterChain.toArray(new EventPropertyGetter[0]);
+        this.beanEventAdapter = beanEventAdapter;
     }
 
     public Object get(EventBean eventBean) throws PropertyAccessException
@@ -39,7 +37,7 @@ public class EventNestedPropertyGetter implements EventPropertyGetter
 
             if (i < (getterChain.length - 1))
             {
-                eventBean = EventBeanFactory.createObject(value);
+                eventBean = beanEventAdapter.adapterForBean(value);
             }
         }
         return value;

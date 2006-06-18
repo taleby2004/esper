@@ -4,15 +4,16 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportMapView;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.EventStream;
 import net.esper.view.View;
-import net.esper.view.ViewProcessingException;
+import net.esper.view.ViewServiceContext;
 import net.esper.client.EPException;
 
 public class TestGroupByView extends TestCase
@@ -21,10 +22,14 @@ public class TestGroupByView extends TestCase
     private MergeView myMergeView;
     private SupportBeanClassView childView;
     private SupportBeanClassView ultimateChildView;
+    private ViewServiceContext viewServiceContext;
 
     public void setUp()
     {
+        viewServiceContext = new ViewServiceContext(null, SupportEventAdapterService.getService());
         myGroupByView = new GroupByView(new String[] {"symbol"});
+        myGroupByView.setViewServiceContext(viewServiceContext);
+
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
         myMergeView = new MergeView(new String[] {"symbol"});
@@ -37,6 +42,7 @@ public class TestGroupByView extends TestCase
         myMergeView.addView(ultimateChildView);
 
         SupportBeanClassView.getInstances().clear();
+
     }
 
     public void testViewPush()
@@ -133,7 +139,7 @@ public class TestGroupByView extends TestCase
         // Invalid for no child nodes
         try
         {
-            GroupByView.makeSubViews(groupView, groupByValue);
+            GroupByView.makeSubViews(groupView, groupByValue, viewServiceContext);
             assertTrue(false);
         }
         catch (EPException ex)
@@ -146,7 +152,7 @@ public class TestGroupByView extends TestCase
         groupView.addView(mergeViewOne);
         try
         {
-            GroupByView.makeSubViews(groupView, groupByValue);
+            GroupByView.makeSubViews(groupView, groupByValue, viewServiceContext);
             assertTrue(false);
         }
         catch (EPException ex)
@@ -156,12 +162,16 @@ public class TestGroupByView extends TestCase
 
         // Add a size view parent of merge view
         groupView = new GroupByView("symbol");
+        groupView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+
         SizeView sizeView_1 = new SizeView();
+        sizeView_1.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+
         groupView.addView(sizeView_1);
         mergeViewOne = new MergeView(new String[] {"symbol"});
         sizeView_1.addView(mergeViewOne);
 
-        List<View> subViews = GroupByView.makeSubViews(groupView, groupByValue);
+        List<View> subViews = GroupByView.makeSubViews(groupView, groupByValue, viewServiceContext);
 
         assertTrue(subViews.size() == 1);
         assertTrue(subViews.get(0) instanceof SizeView);
@@ -179,6 +189,6 @@ public class TestGroupByView extends TestCase
     private EventBean makeTradeBean(String symbol, int price)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, "");
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

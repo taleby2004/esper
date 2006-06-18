@@ -1,10 +1,10 @@
 package net.esper.event.property;
 
 import net.esper.event.EventPropertyGetter;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventBean;
 import net.esper.event.BeanEventType;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.event.SupportEventBeanFactory;
 import junit.framework.TestCase;
 
 import java.util.Map;
@@ -21,7 +21,7 @@ public class TestMappedProperty extends TestCase
         mapped[0] = new MappedProperty("mapped", "keyOne");
         mapped[1] = new MappedProperty("mapped", "keyTwo");
 
-        event = EventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
         eventType = (BeanEventType)event.getEventType();
     }
 

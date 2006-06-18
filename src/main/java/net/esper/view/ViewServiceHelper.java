@@ -88,7 +88,7 @@ public class ViewServiceHelper
             // Set context
             if (currentView instanceof ContextAwareView)
             {
-                ((ContextAwareView) currentView).setContextAware(context);
+                ((ContextAwareView) currentView).setViewServiceContext(context);
             }
 
             // New views get their ParentAwareView interface invoked if required

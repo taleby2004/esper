@@ -10,7 +10,6 @@ import net.esper.client.time.CurrentTimeEvent;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.TimerEvent;
 import net.esper.collection.ThreadWorkQueue;
-import net.esper.event.EventBeanFactory;
 import net.esper.timer.TimerCallback;
 
 import org.apache.commons.logging.Log;
@@ -176,7 +175,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback
 
         try
         {
-            services.getFilterService().evaluate(EventBeanFactory.createObject(event));
+            services.getFilterService().evaluate(services.getEventAdapterService().adapterForBean(event));
         }
         catch (RuntimeException ex)
         {

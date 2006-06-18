@@ -12,6 +12,7 @@ import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportSchemaNeutralView;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewSpecFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.window.TimeWindowView;
 
 public class TestViewServiceHelper extends TestCase
@@ -55,7 +56,7 @@ public class TestViewServiceHelper extends TestCase
 
         SupportBeanClassView topView = new SupportBeanClassView(TEST_CLASS);
         List<ViewSpec> specifications = SupportViewSpecFactory.makeSpecListOne();
-        ViewServiceContext context = new ViewServiceContext(null);
+        ViewServiceContext context = new ViewServiceContext(null, SupportEventAdapterService.getService());
 
         // Check correct views created
         List<View> views = ViewServiceHelper.instantiateChain(existingParentViews, topView, specifications, context);
@@ -69,7 +70,7 @@ public class TestViewServiceHelper extends TestCase
         specifications = SupportViewSpecFactory.makeSpecListFive();
         views = ViewServiceHelper.instantiateChain(existingParentViews, topView, specifications, context);
         TimeWindowView timeWindow = (TimeWindowView) views.get(0);
-        assertEquals(context, timeWindow.getContext());
+        assertEquals(context, timeWindow.getViewServiceContext());
     }
 
     public void testMatch() throws Exception

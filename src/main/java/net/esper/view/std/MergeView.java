@@ -8,7 +8,6 @@ import net.esper.view.ViewSupport;
 import net.esper.view.*;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.event.EventTypeHelper;
 import net.esper.collection.IterablesListIterator;
 
 /**
@@ -21,12 +20,13 @@ import net.esper.collection.IterablesListIterator;
  * The parent view of this view is generally the AddPropertyValueView that adds the grouped-by information
  * back into the data.
  */
-public final class MergeView extends ViewSupport implements ParentAwareView
+public final class MergeView extends ViewSupport implements ParentAwareView, ContextAwareView
 {
     private final LinkedList<View> parentViews = new LinkedList<View>();
     private String[] groupFieldNames;
     private Class[] groupFieldTypes;
     private EventType eventType;
+    private ViewServiceContext viewServiceContext;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -60,6 +60,16 @@ public final class MergeView extends ViewSupport implements ParentAwareView
     public final String[] getGroupFieldNames()
     {
         return groupFieldNames;
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
     }
 
     /**
@@ -140,7 +150,8 @@ public final class MergeView extends ViewSupport implements ParentAwareView
         {
             groupFieldTypes[i] = groupByView.getEventType().getPropertyType(groupFieldNames[i]);
         }
-        eventType = EventTypeHelper.createAddToEventType(this.getParent().getEventType(), groupFieldNames, groupFieldTypes);
+        eventType = viewServiceContext.getEventAdapterService().createAddToEventType(
+                this.getParent().getEventType(), groupFieldNames, groupFieldTypes);
     }
 
     public final EventType getEventType()

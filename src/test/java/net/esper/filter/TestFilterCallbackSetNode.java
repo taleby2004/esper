@@ -5,11 +5,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBeanSimple;
 import net.esper.support.filter.SupportEventEvaluator;
 import net.esper.support.filter.SupportFilterCallback;
 import net.esper.support.filter.SupportFilterParamIndex;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestFilterCallbackSetNode extends TestCase
 {
@@ -60,7 +60,7 @@ public class TestFilterCallbackSetNode extends TestCase
     public void testNodeMatching()
     {
         SupportBeanSimple eventObject = new SupportBeanSimple("DepositEvent_1", 1);
-        EventBean eventBean = EventBeanFactory.createObject(eventObject);
+        EventBean eventBean = SupportEventBeanFactory.createObject(eventObject);
 
         FilterCallback expr = new SupportFilterCallback();
         testNode.add(expr);

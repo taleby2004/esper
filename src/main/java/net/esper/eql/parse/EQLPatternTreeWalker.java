@@ -4,12 +4,13 @@ import net.esper.pattern.*;
 import net.esper.filter.FilterSpec;
 import net.esper.eql.generated.EQLBaseWalker;
 import net.esper.event.EventType;
+import net.esper.event.EventAdapterService;
 import net.esper.pattern.guard.GuardEnum;
 import net.esper.pattern.guard.GuardFactory;
 import net.esper.pattern.observer.ObserverFactory;
 import net.esper.pattern.observer.ObserverEnum;
 import net.esper.util.ConstructorHelper;
-import net.esper.core.EventTypeResolutionService;
+import net.esper.event.EventAdapterService;
 import antlr.collections.AST;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,18 +25,18 @@ import java.util.*;
  */
 public class EQLPatternTreeWalker extends EQLBaseWalker
 {
-    private final EventTypeResolutionService eventTypeResolutionService;
+    private final EventAdapterService eventAdapterService;
     private final EvalRootNode rootNode;
     private final Map<AST, EvalNode> astNodeMap;
     private final Map<String, EventType> taggedEventTypes;       // Stores types for filters with tags
 
     /**
      * Ctor.
-     * @param eventTypeResolutionService for resolving event names
+     * @param eventAdapterService for resolving event names
      */
-    public EQLPatternTreeWalker(EventTypeResolutionService eventTypeResolutionService)
+    public EQLPatternTreeWalker(EventAdapterService eventAdapterService)
     {
-        this.eventTypeResolutionService = eventTypeResolutionService;
+        this.eventAdapterService = eventAdapterService;
         rootNode = new EvalRootNode();
         taggedEventTypes = new HashMap<String, EventType>();
         astNodeMap = new HashMap<AST, EvalNode>();
@@ -137,7 +138,7 @@ public class EQLPatternTreeWalker extends EQLBaseWalker
     private void leaveFilter(AST node)
     {
         log.debug(".leaveFilter");
-        FilterSpec spec = ASTFilterSpecHelper.buildSpec(node, taggedEventTypes, eventTypeResolutionService);
+        FilterSpec spec = ASTFilterSpecHelper.buildSpec(node, taggedEventTypes, eventAdapterService);
         String optionalTag = ASTFilterSpecHelper.getEventNameTag(node);
         EvalFilterNode filterNode = new EvalFilterNode(spec, optionalTag);
         EventType eventType = spec.getEventType();

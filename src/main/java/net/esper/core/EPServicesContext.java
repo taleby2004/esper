@@ -14,6 +14,7 @@ import net.esper.view.ViewService;
 import net.esper.view.ViewServiceProvider;
 import net.esper.view.stream.StreamReuseService;
 import net.esper.view.stream.StreamReuseServiceProvider;
+import net.esper.event.EventAdapterService;
 
 /**
  * Convenience class to instantiate implementations for all services.
@@ -27,13 +28,13 @@ public final class EPServicesContext
     private final DispatchService dispatchService;
     private final ViewService viewService;
     private final StreamReuseService streamReuseService;
-    private final EventTypeResolutionService eventTypeResolutionService;
+    private final EventAdapterService eventAdapterService;
 
     /**
      * Constructor - sets up new set of services.
-     * @param eventTypeResolutionService service to resolve event types
+     * @param eventAdapterService service to resolve event types
      */
-    public EPServicesContext(EventTypeResolutionService eventTypeResolutionService)
+    public EPServicesContext(EventAdapterService eventAdapterService)
     {
         this.filterService = FilterServiceProvider.newService();
         this.timerService = TimerServiceProvider.newService();
@@ -42,7 +43,7 @@ public final class EPServicesContext
         this.dispatchService = DispatchServiceProvider.newService();
         this.viewService = ViewServiceProvider.newService();
         this.streamReuseService = StreamReuseServiceProvider.newService();
-        this.eventTypeResolutionService = eventTypeResolutionService;
+        this.eventAdapterService = eventAdapterService;
     }
 
     /**
@@ -112,8 +113,8 @@ public final class EPServicesContext
      * Returns event type resolution service.
      * @return service resolving event type
      */
-    public EventTypeResolutionService getEventTypeResolutionService()
+    public EventAdapterService getEventAdapterService()
     {
-        return eventTypeResolutionService;
+        return eventAdapterService;
     }
 }

@@ -5,8 +5,9 @@ import net.esper.eql.generated.EQLStatementParser;
 import net.esper.eql.generated.EqlTokenTypes;
 import net.esper.type.IntValue;
 import net.esper.type.StringValue;
-import net.esper.client.EPException;
 import net.esper.event.PropertyAccessException;
+import net.esper.event.EventAdapterService;
+import net.esper.event.BeanEventAdapter;
 
 import java.io.StringReader;
 import java.util.List;
@@ -25,9 +26,10 @@ public class PropertyParser implements EqlTokenTypes
     /**
      * Parse the given property name returning a Property instance for the property.
      * @param propertyName is the property name to parse
+     * @param beanEventAdapter is the chache and factory for event bean types and event wrappers
      * @return Property instance for property
      */
-    public static Property parse(String propertyName)
+    public static Property parse(String propertyName, BeanEventAdapter beanEventAdapter)
     {
         EQLStatementLexer lexer = new EQLStatementLexer(new StringReader(propertyName));
         EQLStatementParser parser = new EQLStatementParser(lexer);
@@ -64,7 +66,7 @@ public class PropertyParser implements EqlTokenTypes
         }
         while (child != null);
 
-        return new NestedProperty(properties);
+        return new NestedProperty(properties, beanEventAdapter);
     }
 
     private static Property makeProperty(AST child)

@@ -8,29 +8,16 @@ import net.esper.view.ViewSupport;
 import net.esper.event.*;
 import net.esper.view.ViewFieldEnum;
 import net.esper.view.*;
-import net.esper.view.stat.BaseStatisticsBean;
 import net.esper.collection.SingleEventIterator;
 
 /**
  * View for computing statistics, which the view exposes via fields representing the sum, count, standard deviation
  * for sample and for population and variance.
  */
-public final class UnivariateStatisticsView extends ViewSupport
+public final class UnivariateStatisticsView extends ViewSupport implements ContextAwareView
 {
-    private static final EventType eventType;
-
-    static
-    {
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), long.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), double.class);
-        eventType = EventTypeFactory.getInstance().createMapType(eventTypeMap);
-    }
-
+    private ViewServiceContext viewServiceContext;
+    private EventType eventType;
     private String fieldName;
     private EventPropertyGetter fieldGetter;
     private final BaseStatisticsBean baseStatisticsBean = new BaseStatisticsBean();
@@ -50,6 +37,25 @@ public final class UnivariateStatisticsView extends ViewSupport
     public UnivariateStatisticsView(String fieldName)
     {
         this.fieldName = fieldName;
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
+
+        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), long.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), double.class);
+        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(eventTypeMap);
     }
 
     public void setParent(Viewable parent)
@@ -90,7 +96,7 @@ public final class UnivariateStatisticsView extends ViewSupport
         EventBean oldDataMap = null;
         if (this.hasViews())
         {
-            oldDataMap = populateMap(baseStatisticsBean);
+            oldDataMap = populateMap(baseStatisticsBean, viewServiceContext.getEventAdapterService(), eventType);
         }
 
         // add data points to the bean
@@ -116,7 +122,7 @@ public final class UnivariateStatisticsView extends ViewSupport
         // If there are child view, fire update method
         if (this.hasViews())
         {
-            EventBean newDataMap = populateMap(baseStatisticsBean);
+            EventBean newDataMap = populateMap(baseStatisticsBean, viewServiceContext.getEventAdapterService(), eventType);
             updateChildren(new EventBean[] {newDataMap}, new EventBean[] {oldDataMap});
         }
     }
@@ -128,7 +134,9 @@ public final class UnivariateStatisticsView extends ViewSupport
 
     public final Iterator<EventBean> iterator()
     {
-        return new SingleEventIterator(populateMap(baseStatisticsBean));
+        return new SingleEventIterator(populateMap(baseStatisticsBean,
+                viewServiceContext.getEventAdapterService(),
+                eventType));
     }
 
     public final String toString()
@@ -136,7 +144,9 @@ public final class UnivariateStatisticsView extends ViewSupport
         return this.getClass().getName() + " fieldName=" + fieldName;
     }
 
-    private static EventBean populateMap(BaseStatisticsBean baseStatisticsBean)
+    private static EventBean populateMap(BaseStatisticsBean baseStatisticsBean,
+                                         EventAdapterService eventAdapterService,
+                                         EventType eventType)
     {
         Map<String, Object> result = new HashMap<String, Object>();
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), baseStatisticsBean.getN());
@@ -145,6 +155,6 @@ public final class UnivariateStatisticsView extends ViewSupport
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), baseStatisticsBean.getXStandardDeviationPop());
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), baseStatisticsBean.getXVariance());
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), baseStatisticsBean.getXAverage());
-        return EventBeanFactory.createMapFromValues(result, eventType);
+        return eventAdapterService.createMapFromValues(result, eventType);
     }
 }

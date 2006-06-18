@@ -7,9 +7,10 @@ import java.lang.management.ManagementFactory;
 
 import junit.framework.TestCase;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
-import net.esper.event.EventBeanFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestJMXLastElementDynamicMBean extends TestCase
 {
@@ -19,10 +20,10 @@ public class TestJMXLastElementDynamicMBean extends TestCase
 
     public void setUp()
     {
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportMarketDataBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
         mbean = new JMXLastElementDynamicMBean(eventType);
         dataBean = new SupportMarketDataBean("IBM", 100, 190000L, "Reuters");
-        mbean.setLastValue(EventBeanFactory.createObject(dataBean));
+        mbean.setLastValue(SupportEventBeanFactory.createObject(dataBean));
     }
 
     public void testExpose() throws Exception

@@ -6,11 +6,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeHelper;
+import net.esper.event.EventAdapterService;
 import net.esper.view.ViewSupport;
 import net.esper.view.Viewable;
+import net.esper.view.ContextAwareView;
+import net.esper.view.ViewServiceContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,8 +19,9 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This view simply adds a property to the events posted to it. This is useful for the group-merge views.
  */
-public final class AddPropertyValueView extends ViewSupport
+public final class AddPropertyValueView extends ViewSupport implements ContextAwareView
 {
+    private ViewServiceContext viewServiceContext;
     private String[] propertyNames;
     private Object[] propertyValues;
     private EventType eventType;
@@ -30,6 +32,16 @@ public final class AddPropertyValueView extends ViewSupport
      */
     public AddPropertyValueView()
     {
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
     }
 
     public void setParent(Viewable parent)
@@ -62,7 +74,8 @@ public final class AddPropertyValueView extends ViewSupport
             {
                 propertyValueTypes[i] = propertyValues[i].getClass();
             }
-            eventType = EventTypeHelper.createAddToEventType(parent.getEventType(), propertyNames, propertyValueTypes);
+            eventType = viewServiceContext.getEventAdapterService().createAddToEventType(
+                    parent.getEventType(), propertyNames, propertyValueTypes);
         }
     }
 
@@ -137,7 +150,7 @@ public final class AddPropertyValueView extends ViewSupport
             int index = 0;
             for (EventBean newEvent : newData)
             {
-                EventBean event = addProperty(newEvent, propertyNames, propertyValues, eventType);
+                EventBean event = addProperty(newEvent, propertyNames, propertyValues, eventType, viewServiceContext.getEventAdapterService());
                 newEvents[index++] = event;
             }
         }
@@ -149,7 +162,7 @@ public final class AddPropertyValueView extends ViewSupport
             int index = 0;
             for (EventBean oldEvent : oldData)
             {
-                EventBean event = addProperty(oldEvent, propertyNames, propertyValues, eventType);
+                EventBean event = addProperty(oldEvent, propertyNames, propertyValues, eventType, viewServiceContext.getEventAdapterService());
                 oldEvents[index++] = event;
             }
         }
@@ -178,7 +191,8 @@ public final class AddPropertyValueView extends ViewSupport
                 EventBean nextEvent = parentIterator.next();
                 if (mustAddProperty)
                 {
-                    EventBean event = addProperty(nextEvent, propertyNames, propertyValues, eventType);
+                    EventBean event = addProperty(nextEvent, propertyNames, propertyValues, eventType,
+                            viewServiceContext.getEventAdapterService());
                     return event;
                 }
                 else
@@ -200,12 +214,14 @@ public final class AddPropertyValueView extends ViewSupport
      * @param propertyNames - names of properties to add
      * @param propertyValues - value of properties to add
      * @param targetEventType - new event type
+     * @param eventAdapterService - service for generating events and handling event types
      * @return event with added property
      */
     protected static EventBean addProperty(EventBean originalEvent,
                                        String[] propertyNames,
                                        Object[] propertyValues,
-                                       EventType targetEventType)
+                                       EventType targetEventType,
+                                       EventAdapterService eventAdapterService)
     {
         Map<String, Object> values = new HashMap<String, Object>();
 
@@ -220,7 +236,7 @@ public final class AddPropertyValueView extends ViewSupport
             values.put(propertyNames[i], propertyValues[i]);
         }
 
-        return EventBeanFactory.createMapFromValues(values, targetEventType);
+        return eventAdapterService.createMapFromValues(values, targetEventType);
     }
 
     public final String toString()

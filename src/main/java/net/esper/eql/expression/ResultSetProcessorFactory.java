@@ -1,6 +1,7 @@
 package net.esper.eql.expression;
 
 import net.esper.collection.Pair;
+import net.esper.event.EventAdapterService;
 
 import java.util.*;
 
@@ -43,6 +44,7 @@ public class ResultSetProcessorFactory
      * @param optionalHavingNode - represents the having-clause boolean filter criteria
      * @param typeService - for information about the streams in the from clause
      * @param outputLimitSpec - indicates whether to output all or only the last event.
+     * @param eventAdapterService - service for generating events and handling event types
      * @return result set processor instance
      * @throws ExprValidationException
      */
@@ -50,7 +52,8 @@ public class ResultSetProcessorFactory
                                                	  List<ExprNode> groupByNodes,
                                                	  ExprNode optionalHavingNode,
                                                	  StreamTypeService typeService, 
-                                               	  OutputLimitSpec outputLimitSpec)
+                                               	  OutputLimitSpec outputLimitSpec,
+                                                  EventAdapterService eventAdapterService)
     throws ExprValidationException
     {
         if (log.isDebugEnabled())
@@ -87,7 +90,7 @@ public class ResultSetProcessorFactory
         }
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectionList, typeService);
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectionList, typeService, eventAdapterService);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesAggregatedSelect = getAggregatedProperties(selectAggregateExprNodes);

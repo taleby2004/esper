@@ -2,7 +2,7 @@ package net.esper.support.eql.join;
 
 import net.esper.eql.join.rep.Node;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -62,7 +62,7 @@ public class SupportJoinResultNodeFactory
 
     public static EventBean makeEvent()
     {
-        EventBean event = EventBeanFactory.createObject(new Object());
+        EventBean event = SupportEventBeanFactory.createObject(new Object());
         return event;
     }
 

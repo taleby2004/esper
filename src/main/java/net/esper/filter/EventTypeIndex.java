@@ -2,12 +2,9 @@ package net.esper.filter;
 
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -87,10 +84,10 @@ public class EventTypeIndex implements EventEvaluator
             return;
         }
 
-        Set<EventType> superTypes = EventTypeFactory.getInstance().getDeepSuperTypes(eventType);
-        for (EventType superEventType : superTypes)
+        for (Iterator<EventType> it = eventType.getDeepSuperTypes(); it.hasNext();)
         {
-            matchType(superEventType, event, matches);
+            EventType superType = it.next();
+            matchType(superType, event, matches);
         }
     }
 

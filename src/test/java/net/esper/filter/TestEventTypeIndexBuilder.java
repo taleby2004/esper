@@ -1,11 +1,12 @@
 package net.esper.filter;
 
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanSimple;
 import net.esper.support.filter.SupportFilterCallback;
 import net.esper.support.filter.SupportFilterSpecBuilder;
+import net.esper.support.event.SupportEventTypeFactory;
 
 import junit.framework.TestCase;
 
@@ -28,8 +29,8 @@ public class TestEventTypeIndexBuilder extends TestCase
         eventTypeIndex = new EventTypeIndex();
         indexBuilder = new EventTypeIndexBuilder(eventTypeIndex);
 
-        typeOne = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
-        typeTwo = EventTypeFactory.getInstance().createBeanType(SupportBeanSimple.class);
+        typeOne = SupportEventTypeFactory.createBeanType(SupportBean.class);
+        typeTwo = SupportEventTypeFactory.createBeanType(SupportBeanSimple.class);
 
         valueSetOne = SupportFilterSpecBuilder.build(typeOne, new Object[0]).getValueSet(null);
         valueSetTwo = SupportFilterSpecBuilder.build(typeTwo, new Object[0]).getValueSet(null);

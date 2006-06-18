@@ -5,11 +5,12 @@ import net.esper.collection.InterchangeablePair;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * Implementation of the {@link EventType} interface for handling plain Maps containing name value pairs.
  */
-public final class MapEventType implements EventType
+class MapEventType implements EventType
 {
     private final String[] propertyNames;       // Cache an array of property names so not to construct one frequently
     private final Map<String, Class> types;     // Mapping of property name and type
@@ -91,6 +92,11 @@ public final class MapEventType implements EventType
     {
         return null;
     }    
+
+    public Iterator<EventType> getDeepSuperTypes()
+    {
+        return null;
+    }
 
     public String toString()
     {

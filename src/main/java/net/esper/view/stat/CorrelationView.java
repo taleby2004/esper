@@ -1,8 +1,6 @@
 package net.esper.view.stat;
 
-import net.esper.view.stat.CorrelationBean;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 
 /**
  * A view that calculates correlation on two fields. The view uses internally a {@link CorrelationBean}
@@ -12,8 +10,7 @@ import net.esper.event.EventTypeFactory;
  */
 public final class CorrelationView extends BaseBivariateStatisticsView
 {
-    private static final EventType eventType =
-            EventTypeFactory.getInstance().createBeanType(CorrelationBean.class);
+    private EventType eventType;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -35,6 +32,10 @@ public final class CorrelationView extends BaseBivariateStatisticsView
 
     public EventType getEventType()
     {
+        if (eventType == null)
+        {
+            eventType = viewServiceContext.getEventAdapterService().addBeanType(CorrelationBean.class.getName(), CorrelationBean.class);
+        }
         return eventType;
     }
 

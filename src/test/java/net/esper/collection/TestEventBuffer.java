@@ -2,7 +2,7 @@ package net.esper.collection;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestEventBuffer extends TestCase
 {
@@ -16,7 +16,7 @@ public class TestEventBuffer extends TestCase
 
         for (int i = 0; i < events.length; i++)
         {
-            events[i] = EventBeanFactory.createObject(i);
+            events[i] = SupportEventBeanFactory.createObject(i);
         }
     }
 

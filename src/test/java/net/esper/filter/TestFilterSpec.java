@@ -5,12 +5,12 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 import net.esper.pattern.MatchedEventMap;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.filter.SupportFilterSpecBuilder;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestFilterSpec extends TestCase
 {
@@ -18,7 +18,7 @@ public class TestFilterSpec extends TestCase
 
     public void setUp()
     {
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
     }
 
     public void testHashCode()
@@ -67,7 +67,7 @@ public class TestFilterSpec extends TestCase
 
         SupportBean eventBean = new SupportBean();
         eventBean.setDoublePrimitive(999.999);
-        EventBean event = EventBeanFactory.createObject(eventBean);
+        EventBean event = SupportEventBeanFactory.createObject(eventBean);
         MatchedEventMap matchedEvents = new MatchedEventMap();
         matchedEvents.add("asName", event);
         FilterValueSet valueSet = filterSpec.getValueSet(matchedEvents);

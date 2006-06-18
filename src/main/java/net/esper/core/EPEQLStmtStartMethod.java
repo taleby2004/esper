@@ -95,7 +95,7 @@ public class EPEQLStmtStartMethod
     public Pair<Viewable, EPStatementStopMethod> start()
         throws ExprValidationException, ViewProcessingException
     {
-        ViewServiceContext viewContext = new ViewServiceContext(services.getSchedulingService());
+        ViewServiceContext viewContext = new ViewServiceContext(services.getSchedulingService(), services.getEventAdapterService());
 
         EPStatementStopMethod stopMethod = new EPStatementStopMethod()
         {
@@ -124,7 +124,8 @@ public class EPEQLStmtStartMethod
         // Construct type information per stream
         StreamTypeService typeService = new StreamTypeServiceImpl(streamTypes, streamNames);
 
-        ResultSetProcessor optionalResultSetProcessor = ResultSetProcessorFactory.getProcessor(selectionList, groupByNodes, optionalHavingNode, typeService, optionalOutputLimitSpec);
+        ResultSetProcessor optionalResultSetProcessor = ResultSetProcessorFactory.getProcessor(selectionList, groupByNodes, optionalHavingNode, typeService, optionalOutputLimitSpec,
+                services.getEventAdapterService());
 
         // Validate where-clause filter tree and outer join clause
         validateNodes(typeService);

@@ -3,6 +3,8 @@ package net.esper.eql.join.table;
 import net.esper.event.*;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.eql.join.table.PropertyIndexedEventTable;
 import junit.framework.TestCase;
 import java.util.Set;
@@ -17,7 +19,7 @@ public class TestPropertyIndexedEventTable extends TestCase
     public void setUp()
     {
         propertyNames = new String[] { "intPrimitive", "string" };
-        eventType = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         index = new PropertyIndexedEventTable(1, eventType, propertyNames);
 
         // Populate with testEvents
@@ -54,7 +56,7 @@ public class TestPropertyIndexedEventTable extends TestCase
     public void testAdd()
     {
         // Add event without these properties should fail
-        EventBean event = EventBeanFactory.createObject(new SupportBean_A("d"));
+        EventBean event = SupportEventBeanFactory.createObject(new SupportBean_A("d"));
         try
         {
             index.add(new EventBean[] {event});
@@ -152,6 +154,6 @@ public class TestPropertyIndexedEventTable extends TestCase
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(intValue);
         bean.setString(stringValue);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 }

@@ -14,9 +14,10 @@ import net.esper.event.property.SimpleProperty;
 /**
  * Implementation of the EventType interface for handling JavaBean-type classes.
  */
-public final class BeanEventType implements EventType
+public class BeanEventType implements EventType
 {
     private final Class clazz;
+    private final BeanEventAdapter beanEventAdapter;
 
     private String[] propertyNames;
     private Map<String, Class> simplePropertyTypes;
@@ -26,14 +27,17 @@ public final class BeanEventType implements EventType
     private Map<String, EventPropertyDescriptor> indexedPropertyDescriptors;
     private EventType[] superTypes;
     private FastClass fastClass;
+    private Set<EventType> deepSuperTypes;
 
     /**
      * Constructor takes a java bean class as an argument.
      * @param clazz is the class of a java bean or other POJO
+     * @param beanEventAdapter is the chache and factory for event bean types and event wrappers
      */
-    public BeanEventType(Class clazz)
+    public BeanEventType(Class clazz, BeanEventAdapter beanEventAdapter)
     {
         this.clazz = clazz;
+        this.beanEventAdapter = beanEventAdapter;
 
         initialize();
     }
@@ -46,7 +50,7 @@ public final class BeanEventType implements EventType
             return propertyType;
         }
 
-        Property prop = PropertyParser.parse(propertyName);
+        Property prop = PropertyParser.parse(propertyName, beanEventAdapter);
         if (prop instanceof SimpleProperty)
         {
             // there is no such property since it wasn't in simplePropertyTypes
@@ -77,7 +81,7 @@ public final class BeanEventType implements EventType
             return getter;
         }
 
-        Property prop = PropertyParser.parse(propertyName);
+        Property prop = PropertyParser.parse(propertyName, beanEventAdapter);
         if (prop instanceof SimpleProperty)
         {
             // there is no such property since it wasn't in simplePropertyGetters
@@ -124,6 +128,11 @@ public final class BeanEventType implements EventType
     public EventType[] getSuperTypes()
     {
         return superTypes;
+    }
+
+    public Iterator<EventType> getDeepSuperTypes()
+    {
+        return deepSuperTypes.iterator();
     }
 
     /**
@@ -189,10 +198,24 @@ public final class BeanEventType implements EventType
         }
 
         // Determine event type super types
-        superTypes = getSuperTypes(clazz);
+        superTypes = getSuperTypes(clazz, beanEventAdapter);
+
+        // Determine deep supertypes
+        // Get Java super types (superclasses and interfaces), deep get of all in the tree
+        Set<Class> supers = new HashSet<Class>();
+        getSuper(clazz, supers);
+        removeJavaLibInterfaces(supers);    // Remove "java." super types
+
+        // Cache the supertypes of this event type for later use
+        deepSuperTypes = new HashSet<EventType>();
+        for (Class superClass : supers)
+        {
+            EventType superType = beanEventAdapter.createBeanType(superClass);
+            deepSuperTypes.add(superType);
+        }
     }
 
-    private static EventType[] getSuperTypes(Class clazz)
+    private static EventType[] getSuperTypes(Class clazz, BeanEventAdapter beanEventAdapter)
     {
         List<Class> superclasses = new LinkedList<Class>();
 
@@ -216,11 +239,57 @@ public final class BeanEventType implements EventType
         {
             if (!superclass.getName().startsWith("java"))
             {
-                superTypes.add(EventTypeFactory.getInstance().createBeanType(superclass));
+                EventType superType = beanEventAdapter.createBeanType(superclass);
+                superTypes.add(superType);
             }
         }
 
         return superTypes.toArray(new EventType[0]);
+    }
+
+    /**
+     * Add the given class's implemented interfaces and superclasses to the result set of classes.
+     * @param clazz to introspect
+     * @param result to add classes to
+     */
+    protected static void getSuper(Class clazz, Set<Class> result)
+    {
+        getSuperInterfaces(clazz, result);
+        getSuperClasses(clazz, result);
+    }
+
+    private static void getSuperInterfaces(Class clazz, Set<Class> result)
+    {
+        Class interfaces[] = clazz.getInterfaces();
+
+        for (int i = 0; i < interfaces.length; i++)
+        {
+            result.add(interfaces[i]);
+            getSuperInterfaces(interfaces[i], result);
+        }
+    }
+
+    private static void getSuperClasses(Class clazz, Set<Class> result)
+    {
+        Class superClass = clazz.getSuperclass();
+        if (superClass == null)
+        {
+            return;
+        }
+
+        result.add(superClass);
+        getSuper(superClass, result);
+    }
+
+    private static void removeJavaLibInterfaces(Set<Class> classes)
+    {
+        for (Class clazz : classes.toArray(new Class[0]))
+        {
+            if (clazz.getName().startsWith("java"))
+            {
+                classes.remove(clazz);
+            }
+        }
     }
 
     private static final Log log = LogFactory.getLog(BeanEventType.class);

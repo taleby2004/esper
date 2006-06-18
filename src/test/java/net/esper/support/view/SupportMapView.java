@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.esper.event.EventBean;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class SupportMapView extends SupportBaseView
 {
@@ -27,7 +28,7 @@ public class SupportMapView extends SupportBaseView
 
     public SupportMapView(Map<String, Class> eventTypeMap)
     {
-        super(EventTypeFactory.getInstance().createMapType(eventTypeMap));
+        super(SupportEventTypeFactory.createMapType(eventTypeMap));
         instances.add(this);
     }
 

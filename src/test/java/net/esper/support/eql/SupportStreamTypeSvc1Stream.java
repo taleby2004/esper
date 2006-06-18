@@ -3,11 +3,12 @@ package net.esper.support.eql;
 import net.esper.eql.expression.*;
 import net.esper.collection.Pair;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventBeanFactory;
 
 public class SupportStreamTypeSvc1Stream implements StreamTypeService
 {
@@ -36,14 +37,14 @@ public class SupportStreamTypeSvc1Stream implements StreamTypeService
     public EventType[] getEventTypes()
     {
         EventType[] eventTypes = new EventType[] {
-            EventTypeFactory.getInstance().createBeanType(SupportBean.class)
+            SupportEventTypeFactory.createBeanType(SupportBean.class)
         };
         return eventTypes;
     }
 
     public static EventBean[] getSampleEvents()
     {
-        return new EventBean[] {EventBeanFactory.createObject(new SupportBean())
+        return new EventBean[] {SupportEventBeanFactory.createObject(new SupportBean())
                             };
     }
 }

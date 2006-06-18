@@ -7,13 +7,15 @@ import antlr.collections.AST;
 import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
-import net.esper.support.core.SupportEventTypeResolutionService;
+import net.esper.support.bean.SupportBean_N;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.eql.expression.*;
 import net.esper.view.ViewSpec;
 import net.esper.filter.FilterSpec;
 import net.esper.collection.Pair;
 import net.esper.eql.expression.OuterJoinDesc;
 import net.esper.type.OuterJoinType;
+import net.esper.event.EventAdapterService;
 
 import java.util.List;
 
@@ -218,7 +220,7 @@ public class TestEQLTreeWalker extends TestCase
 
     public void testAggregateFunction() throws Exception
     {
-        String fromClause = " from SupportBean_N().win:lenght(10) as win1";
+        String fromClause = "from " + SupportBean_N.class.getName() + "().win:lenght(10) as win1";
         String text = "select sum(intPrimitive)," +
                 "sum(distinct doubleBoxed)," +
                 "avg(doubleBoxed)," +
@@ -415,7 +417,10 @@ public class TestEQLTreeWalker extends TestCase
         log.debug(".parseAndWalk success, tree walking...");
         SupportParserHelper.displayAST(ast);
 
-        EQLTreeWalker walker = new EQLTreeWalker(new SupportEventTypeResolutionService());
+        EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
+        eventAdapterService.addBeanType("SupportBean_N", SupportBean_N.class);
+
+        EQLTreeWalker walker = new EQLTreeWalker(eventAdapterService);
         walker.startEQLExpressionRule(ast);
         return walker;
     }

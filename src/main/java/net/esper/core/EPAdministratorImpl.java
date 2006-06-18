@@ -5,8 +5,7 @@ import net.esper.client.EPStatement;
 import net.esper.client.EPException;
 import net.esper.client.EPStatementException;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
-import net.esper.event.EventTypeHelper;
+import net.esper.event.BeanEventAdapter;
 import net.esper.eql.parse.*;
 import net.esper.eql.generated.EQLStatementParser;
 import net.esper.eql.generated.EQLBaseWalker;
@@ -22,6 +21,7 @@ import net.esper.view.ViewSpec;
 import java.util.Map;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.HashMap;
 
 import antlr.TokenStreamException;
 import antlr.RecognitionException;
@@ -40,6 +40,7 @@ public class EPAdministratorImpl implements EPAdministrator
     private static WalkRuleSelector eqlWalkRule;
 
     private EPServicesContext services;
+    private long patternIdSequenceNum;
 
     static
     {
@@ -87,7 +88,7 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         // Parse and walk
         AST ast = ParseHelper.parse(expression, patternParseRule);
-        EQLPatternTreeWalker walker = new EQLPatternTreeWalker(services.getEventTypeResolutionService());
+        EQLPatternTreeWalker walker = new EQLPatternTreeWalker(services.getEventAdapterService());
 
         try
         {
@@ -111,13 +112,13 @@ public class EPAdministratorImpl implements EPAdministrator
 
         // Build event type of aggregate event representing the pattern
         Map<String, EventType> eventTypes = walker.getTaggedEventTypes();
-        Map<String, Class> types = EventTypeHelper.getUnderlyingTypes(eventTypes);
-        EventType eventType = EventTypeFactory.getInstance().createMapType(types);
+        Map<String, Class> types = getUnderlyingTypes(eventTypes);
+        EventType eventType = services.getEventAdapterService().createAnonymousMapType(types);
 
         EPPatternStmtStartMethod startMethod = new EPPatternStmtStartMethod(services, walker.getRootNode());
 
         EPPatternStatementImpl patternStatement = new EPPatternStatementImpl(expression,
-                eventType, services.getDispatchService(), startMethod);
+                eventType, services.getDispatchService(), services.getEventAdapterService(), startMethod);
         
         return patternStatement;
     }
@@ -125,7 +126,7 @@ public class EPAdministratorImpl implements EPAdministrator
     public EPStatement createEQL(String eqlStatement) throws EPException
     {
         AST ast = ParseHelper.parse(eqlStatement, eqlParseRule);
-        EQLTreeWalker walker = new EQLTreeWalker(services.getEventTypeResolutionService());
+        EQLTreeWalker walker = new EQLTreeWalker(services.getEventAdapterService());
 
         try
         {
@@ -168,6 +169,25 @@ public class EPAdministratorImpl implements EPAdministrator
 
         return new EPEQLStatementImpl(eqlStatement, services.getDispatchService(), startMethod);
     }
+
+    /**
+     * Return a map of property name and types for a given map of property name and event type,
+     * by extracting the underlying type for the event types.
+     * @param types is the various event types returned.
+     * @return map of property name and type
+     */
+    private static Map<String, Class> getUnderlyingTypes(Map<String, EventType> types)
+    {
+        Map<String, Class> classes = new HashMap<String, Class>();
+
+        for (Map.Entry<String, EventType> type : types.entrySet())
+        {
+            classes.put(type.getKey(), type.getValue().getUnderlyingType());
+        }
+
+        return classes;
+    }
+
 
     private static Log log = LogFactory.getLog(EPAdministratorImpl.class);
 }

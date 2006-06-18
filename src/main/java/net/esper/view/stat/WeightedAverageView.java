@@ -1,10 +1,7 @@
 package net.esper.view.stat;
 
-import net.esper.view.ViewSupport;
-import net.esper.view.ViewFieldEnum;
-import net.esper.view.Viewable;
 import net.esper.event.*;
-import net.esper.view.PropertyCheckHelper;
+import net.esper.view.*;
 import net.esper.collection.SingleEventIterator;
 
 import java.util.Iterator;
@@ -17,17 +14,10 @@ import java.util.HashMap;
  * as   (sum(price * volume) / sum(volume)).
  * Example: weighted_avg("price", "volume")
  */
-public final class WeightedAverageView extends ViewSupport
+public final class WeightedAverageView extends ViewSupport implements ContextAwareView
 {
-    private static final EventType eventType;
-
-    static
-    {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), double.class);
-        eventType = EventTypeFactory.getInstance().createMapType(schemaMap);
-    }
-
+    private EventType eventType;
+    private ViewServiceContext viewServiceContext;
     private String fieldNameX;
     private String fieldNameWeight;
     private EventPropertyGetter fieldXGetter;
@@ -55,6 +45,20 @@ public final class WeightedAverageView extends ViewSupport
     {
         this.fieldNameX = fieldNameX;
         this.fieldNameWeight = fieldNameWeight;
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
+
+        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        schemaMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), double.class);
+        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }
 
     public void setParent(Viewable parent)
@@ -160,11 +164,11 @@ public final class WeightedAverageView extends ViewSupport
         {
             Map<String, Object> newDataMap = new HashMap<String, Object>();
             newDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), currentValue);
-            EventBean newDataEvent = EventBeanFactory.createMapFromValues(newDataMap, eventType);
+            EventBean newDataEvent = viewServiceContext.getEventAdapterService().createMapFromValues(newDataMap, eventType);
 
             Map<String, Object> oldDataMap = new HashMap<String, Object>();
             oldDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), oldValue);
-            EventBean oldDataEvent = EventBeanFactory.createMapFromValues(oldDataMap, eventType);
+            EventBean oldDataEvent = viewServiceContext.getEventAdapterService().createMapFromValues(oldDataMap, eventType);
 
             updateChildren(new EventBean[] {newDataEvent}, new EventBean[] {oldDataEvent});
         }
@@ -179,7 +183,7 @@ public final class WeightedAverageView extends ViewSupport
     {
         Map<String, Object> newDataMap = new HashMap<String, Object>();
         newDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), currentValue);
-        return new SingleEventIterator(EventBeanFactory.createMapFromValues(newDataMap, eventType));
+        return new SingleEventIterator(viewServiceContext.getEventAdapterService().createMapFromValues(newDataMap, eventType));
     }
 
     public final String toString()

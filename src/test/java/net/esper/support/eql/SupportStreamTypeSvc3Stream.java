@@ -1,13 +1,12 @@
 package net.esper.support.eql;
 
 import net.esper.eql.expression.*;
-import net.esper.collection.Pair;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 
 public class SupportStreamTypeSvc3Stream implements StreamTypeService
 {
@@ -36,18 +35,18 @@ public class SupportStreamTypeSvc3Stream implements StreamTypeService
     public EventType[] getEventTypes()
     {
         EventType[] eventTypes = new EventType[] {
-            EventTypeFactory.getInstance().createBeanType(SupportBean.class),
-            EventTypeFactory.getInstance().createBeanType(SupportBean.class),
-            EventTypeFactory.getInstance().createBeanType(SupportBeanComplexProps.class)
+            SupportEventTypeFactory.createBeanType(SupportBean.class),
+            SupportEventTypeFactory.createBeanType(SupportBean.class),
+            SupportEventTypeFactory.createBeanType(SupportBeanComplexProps.class)
         };
         return eventTypes;
     }
 
     public static EventBean[] getSampleEvents()
     {
-        return new EventBean[] {EventBeanFactory.createObject(new SupportBean()),
-                                EventBeanFactory.createObject(new SupportBean()),
-                                EventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean()),
+        return new EventBean[] {SupportEventBeanFactory.createObject(new SupportBean()),
+                                SupportEventBeanFactory.createObject(new SupportBean()),
+                                SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean()),
                             };
     }
 }

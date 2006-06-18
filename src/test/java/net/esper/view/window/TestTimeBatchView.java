@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.event.EventFactoryHelper;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.support.schedule.SupportSchedulingServiceImpl;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
@@ -30,7 +31,7 @@ public class TestTimeBatchView extends TestCase
 
         // Set the scheduling service to use
         schedulingServiceStub = new SupportSchedulingServiceImpl();
-        myView.setContextAware(new ViewServiceContext(schedulingServiceStub));
+        myView.setViewServiceContext(new ViewServiceContext(schedulingServiceStub, SupportEventAdapterService.getService()));
     }
 
     public void testIncorrectUse()
@@ -163,7 +164,7 @@ public class TestTimeBatchView extends TestCase
         myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d, 1505L);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
-        myView.setContextAware(new ViewServiceContext(schedulingServiceStub));
+        myView.setViewServiceContext(new ViewServiceContext(schedulingServiceStub, SupportEventAdapterService.getService()));
 
         Map<String, EventBean> events = EventFactoryHelper.makeEventMap(
             new String[] {"A1", "A2", "A3"});
@@ -241,15 +242,15 @@ public class TestTimeBatchView extends TestCase
     {
         myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d);
 
-        ViewServiceContext context = new ViewServiceContext(null);
+        ViewServiceContext context = new ViewServiceContext(null, SupportEventAdapterService.getService());
         SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.setParent(parent);
-        myView.setContextAware(context);
+        myView.setViewServiceContext(context);
 
         TimeBatchView copied = (TimeBatchView) ViewSupport.shallowCopyView(myView);
         assertEquals(myView.getMsecIntervalSize(), copied.getMsecIntervalSize());
         assertEquals(myView.getInitialReferencePoint(), copied.getInitialReferencePoint());
-        assertEquals(myView.getContext(), copied.getContext());
+        assertEquals(myView.getViewServiceContext(), copied.getViewServiceContext());
     }
 
     public void testConstructors()

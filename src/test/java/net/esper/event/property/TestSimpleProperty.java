@@ -2,6 +2,7 @@ package net.esper.event.property;
 
 import junit.framework.TestCase;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.event.*;
 
 public class TestSimpleProperty extends TestCase
@@ -19,7 +20,7 @@ public class TestSimpleProperty extends TestCase
         invalidPropMap = new SimpleProperty("mapped");
         invalidPropIndexed = new SimpleProperty("indexed");
         invalidDummy = new SimpleProperty("dummy");
-        event = EventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
         eventType = (BeanEventType)event.getEventType();
     }
 

@@ -1,11 +1,7 @@
 package net.esper.eql.expression;
 
-import net.esper.client.EPException;
-
+import net.esper.event.EventAdapterService;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Factory for select expression processors.
@@ -16,11 +12,13 @@ public class SelectExprProcessorFactory
      * Returns the processor to use for a given select-clause.
      * @param selectionList - the list of select clause elements/items, which are expected to have been validated
      * @param typeService - serves stream type information
+     * @param eventAdapterService - service for generating events and handling event types
      * @return select-clause expression processor
      * @throws ExprValidationException to indicate the select expression cannot be validated
      */
     public static SelectExprProcessor getProcessor(List<SelectExprElement> selectionList,
-                                                       StreamTypeService typeService)
+                                                   StreamTypeService typeService,
+                                                   EventAdapterService eventAdapterService)
         throws ExprValidationException
     {
         // Determin wildcard processor (select *)
@@ -29,7 +27,7 @@ public class SelectExprProcessorFactory
             // For joins
             if (typeService.getStreamNames().length > 1)
             {
-                return new SelectExprJoinWildcardProcessor(typeService.getStreamNames(), typeService.getEventTypes());
+                return new SelectExprJoinWildcardProcessor(typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService);
             }
             // Single-table selects don't need extra processing
             else
@@ -42,8 +40,6 @@ public class SelectExprProcessorFactory
         SelectExprElement.verifyNameUniqueness(selectionList);
 
         // Construct processor
-        return new SelectExprEvalProcessor(selectionList);
+        return new SelectExprEvalProcessor(selectionList, eventAdapterService);
     }
-
-    private static final Log log = LogFactory.getLog(SelectExprProcessorFactory.class);
 }

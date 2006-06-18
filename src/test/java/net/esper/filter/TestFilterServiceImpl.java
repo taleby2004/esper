@@ -4,10 +4,11 @@ import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.support.filter.SupportFilterCallback;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanSimple;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 
 import java.util.Vector;
 
@@ -29,8 +30,8 @@ public class TestFilterServiceImpl extends TestCase
     {
         filterService = new FilterServiceImpl();
 
-        eventTypeOne = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
-        eventTypeTwo = EventTypeFactory.getInstance().createBeanType(SupportBeanSimple.class);
+        eventTypeOne = SupportEventTypeFactory.createBeanType(SupportBean.class);
+        eventTypeTwo = SupportEventTypeFactory.createBeanType(SupportBeanSimple.class);
 
         filterSpecs = new Vector<FilterValueSet>();
         filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeOne, new Object[0]).getValueSet(null));
@@ -191,13 +192,13 @@ public class TestFilterServiceImpl extends TestCase
         bean.setString(string);
         bean.setBoolPrimitive(boolPrimitive);
         bean.setDoubleBoxed(doubleBoxed);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 
     private EventBean makeTypeTwoEvent(String myString, int myInt)
     {
         SupportBeanSimple bean = new SupportBeanSimple(myString, myInt);
-        return EventBeanFactory.createObject(bean);
+        return SupportEventBeanFactory.createObject(bean);
     }
 
     private static final Log log = LogFactory.getLog(TestFilterServiceImpl.class);

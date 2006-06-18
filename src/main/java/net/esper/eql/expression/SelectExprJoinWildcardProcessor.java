@@ -1,9 +1,6 @@
 package net.esper.eql.expression;
 
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.event.EventTypeFactory;
-import net.esper.event.EventBeanFactory;
+import net.esper.event.*;
 import net.esper.util.AssertionFacility;
 
 import java.util.*;
@@ -15,13 +12,15 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
 {
     private final String[] streamNames;
     private final EventType resultEventType;
+    private final EventAdapterService eventAdapterService;
 
     /**
      * Ctor.
      * @param streamNames - name of each stream
      * @param streamTypes - type of each stream
+     * @param eventAdapterService - service for generating events and handling event types
      */
-    public SelectExprJoinWildcardProcessor(String[] streamNames, EventType[] streamTypes)
+    public SelectExprJoinWildcardProcessor(String[] streamNames, EventType[] streamTypes, EventAdapterService eventAdapterService)
     {
         if ((streamNames.length < 2) || (streamTypes.length < 2) || (streamNames.length != streamTypes.length))
         {
@@ -29,6 +28,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         }
 
         this.streamNames = streamNames;
+        this.eventAdapterService = eventAdapterService;
 
         // Create EventType of result join events
         Map<String, Class> eventTypeMap = new HashMap<String, Class>();
@@ -36,7 +36,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         {
             eventTypeMap.put(streamNames[i], streamTypes[i].getUnderlyingType());
         }
-        resultEventType = EventTypeFactory.getInstance().createMapType(eventTypeMap);
+        resultEventType = eventAdapterService.createAnonymousMapType(eventTypeMap);
     }
 
     public EventBean process(EventBean[] eventsPerStream)
@@ -56,7 +56,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
             }
         }
 
-        return EventBeanFactory.createMapFromValues(tuple, resultEventType);
+        return eventAdapterService.createMapFromValues(tuple, resultEventType);
     }
 
     public EventType getResultEventType()

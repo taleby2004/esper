@@ -6,35 +6,39 @@ import java.util.Map;
 
 import net.esper.collection.SingleEventIterator;
 import net.esper.event.EventBean;
-import net.esper.event.EventBeanFactory;
 import net.esper.event.EventType;
-import net.esper.event.EventTypeFactory;
-import net.esper.view.ViewFieldEnum;
-import net.esper.view.ViewSupport;
-import net.esper.view.Viewable;
+import net.esper.view.*;
 
 /**
  * This view is a very simple view presenting the number of elements in a stream or view.
  * The view computes a single long-typed count of the number of events passed through it similar
  * to the base statistics COUNT column.
  */
-public final class SizeView extends ViewSupport
+public final class SizeView extends ViewSupport implements ContextAwareView
 {
-    private static final EventType eventType;
+    private ViewServiceContext viewServiceContext;
+    private EventType eventType;
     private long size = 0;
-
-    static
-    {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), long.class);
-        eventType = EventTypeFactory.getInstance().createMapType(schemaMap);
-    }
 
     /**
      * Constructor.
      */
     public SizeView()
     {
+    }
+
+    public ViewServiceContext getViewServiceContext()
+    {
+        return viewServiceContext;
+    }
+
+    public void setViewServiceContext(ViewServiceContext viewServiceContext)
+    {
+        this.viewServiceContext = viewServiceContext;
+
+        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        schemaMap.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), long.class);
+        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }
 
     public final String attachesTo(Viewable parentView)
@@ -70,8 +74,8 @@ public final class SizeView extends ViewSupport
             postNewData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), size);
             Map<String, Object> postOldData = new HashMap<String, Object>();
             postOldData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), priorSize);
-            updateChildren(new EventBean[] {EventBeanFactory.createMapFromValues(postNewData, eventType)},
-                    new EventBean[] {EventBeanFactory.createMapFromValues(postOldData, eventType)});
+            updateChildren(new EventBean[] {viewServiceContext.getEventAdapterService().createMapFromValues(postNewData, eventType)},
+                    new EventBean[] {viewServiceContext.getEventAdapterService().createMapFromValues(postOldData, eventType)});
         }                
     }
 
@@ -79,7 +83,7 @@ public final class SizeView extends ViewSupport
     {
         HashMap<String, Object> current = new HashMap<String, Object>();
         current.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), size);
-        return new SingleEventIterator(EventBeanFactory.createMapFromValues(current, eventType));
+        return new SingleEventIterator(viewServiceContext.getEventAdapterService().createMapFromValues(current, eventType));
     }
 
     public final String toString()

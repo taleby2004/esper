@@ -1,11 +1,12 @@
 package net.esper.eql.join.exec;
 
-import net.esper.event.EventTypeFactory;
+import net.esper.event.BeanEventAdapter;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.eql.join.table.PropertyIndexedEventTable;
 import java.util.List;
 import java.util.LinkedList;
@@ -19,10 +20,10 @@ public class TestTableLookupExecNode extends TestCase
 
     public void setUp()
     {
-        EventType eventTypeIndex = EventTypeFactory.getInstance().createBeanType(SupportBean.class);
+        EventType eventTypeIndex = SupportEventTypeFactory.createBeanType(SupportBean.class);
         index = new PropertyIndexedEventTable(0, eventTypeIndex, new String[] {"string"});
 
-        EventType eventTypeKeyGen = EventTypeFactory.getInstance().createBeanType(SupportMarketDataBean.class);
+        EventType eventTypeKeyGen = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         exec = new TableLookupExecNode(1, new IndexedTableLookupStrategy(eventTypeKeyGen, new String[] {"symbol"}, index));
     }
