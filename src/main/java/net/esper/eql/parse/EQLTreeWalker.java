@@ -160,7 +160,12 @@ public class EQLTreeWalker extends EQLBaseWalker
             case DIV:
                 leaveMath(node);
                 break;
-            case LT:
+            case BAND:
+            case BOR:
+            case BXOR:
+            	leaveBitWise(node);
+            	break;
+             case LT:
             case GT:
             case LE:
             case GE:
@@ -501,6 +506,30 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         ExprRelationalOpNode mathNode = new ExprRelationalOpNode(relationalOpEnum);
         astNodeMap.put(node, mathNode);
+    }
+
+    private void leaveBitWise(AST node)
+    {
+        log.debug(".leaveBitWise");
+
+        BitWiseOpEnum bitWiseOpEnum;
+        switch (node.getType())
+        {
+	        case BAND :
+	        	bitWiseOpEnum = BitWiseOpEnum.BAND;
+	            break;
+	        case BOR :
+	        	bitWiseOpEnum = BitWiseOpEnum.BOR;
+	            break;
+	        case BXOR :
+	        	bitWiseOpEnum = BitWiseOpEnum.BXOR;
+	            break;
+	        default :
+	            throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized bit wise node type");
+        }
+
+	    ExprBitWiseNode bwNode = new ExprBitWiseNode(bitWiseOpEnum);
+	    astNodeMap.put(node, bwNode);       
     }
 
     private void leaveWhereClause()

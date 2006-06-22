@@ -186,6 +186,17 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select 1 from b.win:length(1) having a>5");
     }
 
+    public void testBitWiseCases() throws Exception
+    {
+        String className = SupportBean.class.getName();
+        String eqlSmt = "select intPrimitive&intBoxed from " + className;
+        assertIsValid(eqlSmt + ".win:lenght()");
+        eqlSmt = "select boolPrimitive|boolBoxed from " + className;
+        assertIsValid(eqlSmt + "().std:win(20)");
+        eqlSmt = "select bytePrimitive^byteBoxed from " + className;
+        assertIsValid(eqlSmt + "().win:some_view({})");
+    }
+
     private void tryJoin(String joinType) throws Exception
     {
         String className = SupportBean.class.getName();

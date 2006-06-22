@@ -130,6 +130,9 @@ arithmeticExpr
 	| 	#(MINUS valueExpr valueExpr)
 	| 	#(DIV valueExpr valueExpr)
 	|	#(STAR valueExpr valueExpr)
+	|	#(BAND valueExpr valueExpr)	
+	|	#(BOR valueExpr valueExpr)	
+	|	#(BXOR valueExpr valueExpr)		
 	;
 	
 //----------------------------------------------------------------------------

@@ -19,7 +19,7 @@ tokens
 	OR_EXPR="or";
 	AND_EXPR="and";
 	NOT_EXPR="not";
-    EVERY_EXPR="every";
+    	EVERY_EXPR="every";
 	WHERE="where";
 	AS="as";	
 	SUM="sum";
@@ -66,6 +66,7 @@ tokens
    	STREAM_EXPR;
    	WHERE_EXPR;
    	HAVING_EXPR;
+	EVAL_BITWISE_EXPR;
    	EVAL_AND_EXPR;
    	EVAL_OR_EXPR;
    	EVAL_EQUALS_EXPR;
@@ -221,11 +222,16 @@ evalOrExpression
 	;
 
 evalAndExpression
-	:	evalEqualsExpression (op:AND_EXPR! evalEqualsExpression)*
+	:	evalEqualsExpression (op:AND_EXPR! bitWiseExpression)*
 		{ if (op != null)
 		  #evalAndExpression = #([EVAL_AND_EXPR,"evalAndExpression"], #evalAndExpression);
 		}		
 	;
+
+bitWiseExpression
+	: evalEqualsExpression ( (BAND^|BOR^|BXOR^) evalEqualsExpression )*
+	;
+		
 
 evalEqualsExpression
 	:	evalRelationalExpression ( 
@@ -250,7 +256,7 @@ evalEqualsExpression
 evalRelationalExpression
 	: additiveExpression ( (LT^|GT^|LE^|GE^) additiveExpression )*
 	;
-	
+		
 additiveExpression
 	: multiplyExpression ( (PLUS^|MINUS^) multiplyExpression )*
 	;

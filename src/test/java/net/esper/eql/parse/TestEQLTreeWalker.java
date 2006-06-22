@@ -344,6 +344,28 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals(null, identNode.getStreamOrPropertyName());
     }
 
+    public void testBitWise() throws Exception
+    {
+        String text = "select intPrimitive & intBoxed from " + SupportBean.class.getName() + "().win:lenght(10) as stream0";
+        EQLTreeWalker walker = parseAndWalk(text);
+        List<Pair<ExprNode, String>> selectExpressions = walker.getSelectListExpressions();
+        assertEquals(1, selectExpressions.size());
+        assertTrue(selectExpressions.get(0).getFirst() instanceof ExprBitWiseNode);
+        assertEquals(0, tryBitWise("1&2"));
+        assertEquals(3, tryBitWise("1|2"));
+        assertEquals(8, tryBitWise("10^2"));
+    }
+
+    private Object tryBitWise(String equation) throws Exception
+    {
+        String expression = EXPRESSION + "where " + equation + "=win2.f2";
+
+        EQLTreeWalker walker = parseAndWalk(expression);
+        ExprBitWiseNode bitWiseNode = (ExprBitWiseNode) (walker.getFilterRootNode().getChildNodes().get(0));
+        bitWiseNode.validateDescendents(null);
+        return bitWiseNode.evaluate(null);
+    }
+
     private void tryOuterJoin(String outerType, OuterJoinType typeExpected) throws Exception
     {
         String text = "select intPrimitive from " +
