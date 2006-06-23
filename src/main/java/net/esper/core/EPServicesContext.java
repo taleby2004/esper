@@ -30,6 +30,9 @@ public final class EPServicesContext
     private final StreamReuseService streamReuseService;
     private final EventAdapterService eventAdapterService;
 
+    // Must be set
+    private InternalEventRouter internalEventRouter;
+
     /**
      * Constructor - sets up new set of services.
      * @param eventAdapterService service to resolve event types
@@ -44,6 +47,16 @@ public final class EPServicesContext
         this.viewService = ViewServiceProvider.newService();
         this.streamReuseService = StreamReuseServiceProvider.newService();
         this.eventAdapterService = eventAdapterService;
+    }
+
+    public InternalEventRouter getInternalEventRouter()
+    {
+        return internalEventRouter;
+    }
+
+    public void setInternalEventRouter(InternalEventRouter internalEventRouter)
+    {
+        this.internalEventRouter = internalEventRouter;
     }
 
     /**
@@ -117,4 +130,5 @@ public final class EPServicesContext
     {
         return eventAdapterService;
     }
+
 }

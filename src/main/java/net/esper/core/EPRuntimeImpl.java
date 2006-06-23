@@ -11,6 +11,7 @@ import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.TimerEvent;
 import net.esper.collection.ThreadWorkQueue;
 import net.esper.timer.TimerCallback;
+import net.esper.event.EventBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
  * Implements runtime interface. Also accepts timer callbacks for synchronizing time events with regular events
  * sent in.
  */
-public class EPRuntimeImpl implements EPRuntime, TimerCallback
+public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRouter
 {
     private EPServicesContext services;
     private static ReadWriteLock timerRWLock;
@@ -72,6 +73,11 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback
     }
 
     public void route(Object event)
+    {
+        threadWorkQueue.add(event);
+    }
+
+    public void route(EventBean event)
     {
         threadWorkQueue.add(event);
     }
@@ -170,12 +176,23 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback
 
     private void processRegularEvent(Object event)
     {
+        EventBean eventBean = null;
+
         // All events are processed by the filter service
         timerRWLock.readLock().lock();
 
         try
         {
-            services.getFilterService().evaluate(services.getEventAdapterService().adapterForBean(event));
+            if (event instanceof EventBean)
+            {
+                eventBean = (EventBean) event;
+            }
+            else
+            {
+                eventBean = services.getEventAdapterService().adapterForBean(event);
+            }
+
+            services.getFilterService().evaluate(eventBean);
         }
         catch (RuntimeException ex)
         {
@@ -198,7 +215,6 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback
             throw new EPException(ex);
         }
     }
-
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);
 }

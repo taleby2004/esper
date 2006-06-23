@@ -49,6 +49,8 @@ tokens
 	SECONDS="seconds";
 	MINUTES="minutes";
 	LAST="last";
+	INSERT="insert";
+	INTO="into";
    	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -86,6 +88,7 @@ tokens
    	EVENT_LIMIT_EXPR;
 	SEC_LIMIT_EXPR;
 	MIN_LIMIT_EXPR;
+	INSERTINTO_EXPR;
 	
 	UNARY_MINUS;
 	
@@ -135,13 +138,19 @@ constant
 // EQL expression
 //----------------------------------------------------------------------------
 eqlExpression 
-	:	SELECT! selectionListExpr 
+	:	(INSERT! INTO! insertIntoExpr)?
+		SELECT! selectionListExpr 
 		FROM! streamExpression
 		(regularJoin | outerJoinList)
 		(WHERE! whereClause)?
 		(GROUP! BY! groupByListExpr)?
 		(HAVING! havingClause)?
 		(OUTPUT! outputLimit)?
+	;
+	
+insertIntoExpr
+	:	IDENT (LPAREN! (IDENT) (COMMA! IDENT)* RPAREN!)?
+		{ #insertIntoExpr = #([INSERTINTO_EXPR,"insertIntoExpr"], #insertIntoExpr); }
 	;
 	
 regularJoin

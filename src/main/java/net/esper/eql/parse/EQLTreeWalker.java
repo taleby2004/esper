@@ -7,7 +7,6 @@ import net.esper.eql.expression.*;
 import net.esper.type.*;
 import net.esper.collection.Pair;
 import net.esper.event.EventAdapterService;
-import net.esper.event.EventAdapterService;
 import antlr.collections.AST;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,18 +19,19 @@ import java.util.*;
  */
 public class EQLTreeWalker extends EQLBaseWalker
 {
+    private Map<AST, ExprNode> astNodeMap;
     private EventAdapterService eventAdapterService;
+
     private List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
     private OutputLimitSpec outputLimitSpec;
     private FilterSpec filterSpec;
     private List<StreamSpec> streamSpecs = new LinkedList<StreamSpec>();
-
-    private Map<AST, ExprNode> astNodeMap;
     private List<Pair<ExprNode, String>> selectListExpressions = new LinkedList<Pair<ExprNode, String>>();
     private List<ExprNode> groupByExpressions = new LinkedList<ExprNode>();
     private ExprNode filterExprRootNode;
     private ExprNode havingExprRootNode;
     private List<OuterJoinDesc> outerJoinDescList = new LinkedList<OuterJoinDesc>();
+    private InsertIntoDesc insertIntoDesc;
 
     /**
      * Ctor.
@@ -104,6 +104,15 @@ public class EQLTreeWalker extends EQLBaseWalker
     public OutputLimitSpec getOutputLimitSpec()
     {
         return outputLimitSpec;
+    }
+
+    /**
+     * Return a descriptor with the insert-into event name and optional list of columns
+     * @return insert into specification
+     */
+    public InsertIntoDesc getInsertIntoDesc()
+    {
+        return insertIntoDesc;
     }
 
     protected void leaveNode(AST node) throws ASTWalkException
@@ -199,6 +208,9 @@ public class EQLTreeWalker extends EQLBaseWalker
             case MIN_LIMIT_EXPR:
             	leaveOutputLimit(node);
             	break;    
+            case INSERTINTO_EXPR:
+            	leaveInsertInto(node);
+            	break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + "'");
@@ -628,6 +640,22 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         // Clear the map - all expression node should be gone
         astNodeMap.clear();
+    }
+
+    private void leaveInsertInto(AST node)
+    {
+        log.debug(".leaveInsertInto");
+
+        String eventAliasName = node.getFirstChild().getText();
+        insertIntoDesc = new InsertIntoDesc(eventAliasName);
+
+        // Each child to the insert-into AST node represents a column name
+        AST child = node.getFirstChild().getNextSibling();
+        while (child != null)
+        {
+            insertIntoDesc.add(child.getText());
+            child = child.getNextSibling();
+        }
     }
 
     private static final Log log = LogFactory.getLog(EQLTreeWalker.class);

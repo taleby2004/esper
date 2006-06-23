@@ -134,6 +134,32 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals(true, tryRelationalOp("(4>2) or (2>3)"));
     }
 
+    public void testWalkEQLInsertInto() throws Exception
+    {
+        String expression = "insert into MyAlias select * from " +
+                        CLASSNAME + "().win:length(10).std:lastevent() as win1," +
+                        CLASSNAME + "(string='b').win:length(9).std:lastevent() as win2";
+
+        EQLTreeWalker walker = parseAndWalk(expression);
+
+        InsertIntoDesc desc = walker.getInsertIntoDesc();
+        assertEquals("MyAlias", desc.getEventTypeAlias());
+        assertEquals(0, desc.getColumnNames().size());
+
+        expression = "insert into MyAlias(a, b, c) select * from " +
+                        CLASSNAME + "().win:length(10).std:lastevent() as win1," +
+                        CLASSNAME + "(string='b').win:length(9).std:lastevent() as win2";
+
+        walker = parseAndWalk(expression);
+
+        desc = walker.getInsertIntoDesc();
+        assertEquals("MyAlias", desc.getEventTypeAlias());
+        assertEquals(3, desc.getColumnNames().size());
+        assertEquals("a", desc.getColumnNames().get(0));
+        assertEquals("b", desc.getColumnNames().get(1));
+        assertEquals("c", desc.getColumnNames().get(2));
+    }
+
     public void testWalkView() throws Exception
     {
         String text = "select * from " + SupportBean.class.getName() + "(string=\"IBM\").win:lenght(10, 1.1, \"a\").stat:uni('price', false)";
@@ -177,6 +203,7 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals("myConst", selectExpressions.get(2).getSecond());
         assertTrue(selectExpressions.get(3).getFirst() instanceof ExprIdentNode);
         assertEquals("theString", selectExpressions.get(3).getSecond());
+        assertNull(walker.getInsertIntoDesc());
 
         text = "select * from " + SupportBean.class.getName() + "().win:lenght(10)";
         walker = parseAndWalk(text);

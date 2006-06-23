@@ -13,11 +13,8 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select * from " +
-                        className + "(a=1).win:lenght(10) as win1," +
-                        className + "(a=2).win:lenght(10) as win2 " +
-                        "where win1.f1=win2.f2 " +
-                        "group by win1.f1";
+        String expression = "insert into A(b, c) select * from " +
+                        className + "(a=1).win:lenght(10)";
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
@@ -95,6 +92,15 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
 
         // having
         assertIsInvalid("select 1 from b.win:length(1) group by a having a>5,b<4");
+
+        // insert into
+        assertIsInvalid("insert into select 1 from b.win:length(1)");
+        assertIsInvalid("insert into 38484 select 1 from b.win:length(1)");
+        assertIsInvalid("insert into A B select 1 from b.win:length(1)");
+        assertIsInvalid("insert into A () select 1 from b.win:length(1)");
+        assertIsInvalid("insert into A (a,) select 1 from b.win:length(1)");
+        assertIsInvalid("insert into A (,) select 1 from b.win:length(1)");
+        assertIsInvalid("insert into A(,a) select 1 from b.win:length(1)");
     }
 
     public void testValidCases() throws Exception
@@ -184,6 +190,12 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select 1 from b.win:length(1) where a=b and b=d group by a having (max(3*b - 2, 5) > 1) or 'a'=b");
         assertIsValid("select 1 from b.win:length(1) group by a having a");   // a could be boolean
         assertIsValid("select 1 from b.win:length(1) having a>5");
+
+        // insert into
+        assertIsValid("insert into MyEvent select 1 from b.win:length(1)");
+        assertIsValid("insert into MyEvent (a) select 1 from b.win:length(1)");
+        assertIsValid("insert into MyEvent (a, b) select 1 from b.win:length(1)");
+        assertIsValid("insert into MyEvent (a, b, c) select 1 from b.win:length(1)");
     }
 
     public void testBitWiseCases() throws Exception

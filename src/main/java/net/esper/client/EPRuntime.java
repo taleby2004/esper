@@ -1,5 +1,6 @@
 package net.esper.client;
 
+
 /**
  * Interface to event stream processing runtime services.
  */
@@ -26,17 +27,6 @@ public interface EPRuntime
      * @return number of events emitted
      */
     public int getNumEventsEmitted();
-
-    /**
-     * Route the event object back to the event stream processing runtime for internal dispatching.
-     * The route event is processed just like it was sent to the runtime, that is any
-     * active expressions seeking that event receive it. The routed event has priority over other
-     * events sent to the runtime. In a single-threaded application the routed event is
-     * processed before the next event is sent to the runtime through the
-     * EPRuntime.sendEvent method.
-     * @param event to route internally for processing by the event stream processing runtime
-     */
-    public void route(final Object event);
 
     /**
      * Emit an event object to any registered EmittedListener instances listening to the default channel.
@@ -67,4 +57,15 @@ public interface EPRuntime
      * Deregister all emitted event listeners.
      */
     public void clearEmittedListeners();
+
+    /**
+     * Route the event object back to the event stream processing runtime for internal dispatching.
+     * The route event is processed just like it was sent to the runtime, that is any
+     * active expressions seeking that event receive it. The routed event has priority over other
+     * events sent to the runtime. In a single-threaded application the routed event is
+     * processed before the next event is sent to the runtime through the
+     * EPRuntime.sendEvent method.
+     * @param event to route internally for processing by the event stream processing runtime
+     */
+    public void route(final Object event);
 }

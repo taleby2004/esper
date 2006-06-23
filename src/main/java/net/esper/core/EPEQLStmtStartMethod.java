@@ -5,18 +5,7 @@ import java.util.List;
 
 import net.esper.client.EPStatementException;
 import net.esper.collection.Pair;
-import net.esper.eql.expression.OutputLimitSpec;
-import net.esper.eql.expression.ExprAggregateNode;
-import net.esper.eql.expression.ExprEqualsNode;
-import net.esper.eql.expression.ExprNode;
-import net.esper.eql.expression.ExprValidationException;
-import net.esper.eql.expression.OuterJoinDesc;
-import net.esper.eql.expression.ResultSetProcessor;
-import net.esper.eql.expression.ResultSetProcessorFactory;
-import net.esper.eql.expression.SelectExprElement;
-import net.esper.eql.expression.StreamSpec;
-import net.esper.eql.expression.StreamTypeService;
-import net.esper.eql.expression.StreamTypeServiceImpl;
+import net.esper.eql.expression.*;
 import net.esper.eql.join.JoinExecStrategyDispatchable;
 import net.esper.eql.join.JoinExecutionStrategy;
 import net.esper.eql.join.JoinExecutionStrategyImpl;
@@ -41,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EPEQLStmtStartMethod
 {
+    private InsertIntoDesc optionalInsertIntoDesc;
     private List<SelectExprElement> selectionList;
     private List<StreamSpec> streams;
     private ExprNode optionalFilterNode;
@@ -53,6 +43,7 @@ public class EPEQLStmtStartMethod
 
     /**
      * Ctor.
+     * @param insertIntoDesc describes the insert-into information supplied, or null if no insert into defined
      * @param selectionList describes the list of selected fields, empty list if wildcarded (SELECT-clause)
      * @param streams is a definition of the event streams (FROM-clause)
      * @param outerJoinDescList is a list of outer join descriptors indicating join type and properties (OUTER-JOIN clauses)
@@ -65,7 +56,8 @@ public class EPEQLStmtStartMethod
      * @param eqlStatement is the expression text
      * @param services is the service instances for dependency injection
      */
-    public EPEQLStmtStartMethod(List<SelectExprElement> selectionList,
+    public EPEQLStmtStartMethod(InsertIntoDesc insertIntoDesc,
+                                List<SelectExprElement> selectionList,
                                 List<StreamSpec> streams,
                                 List<OuterJoinDesc> outerJoinDescList,
                                 ExprNode optionalFilterNode,
@@ -75,6 +67,7 @@ public class EPEQLStmtStartMethod
                                 String eqlStatement,
                                 EPServicesContext services)
     {
+        this.optionalInsertIntoDesc = insertIntoDesc;
         this.selectionList = selectionList;
         this.streams = streams;
         this.outerJoinDescList = outerJoinDescList;
@@ -124,6 +117,8 @@ public class EPEQLStmtStartMethod
         // Construct type information per stream
         StreamTypeService typeService = new StreamTypeServiceImpl(streamTypes, streamNames);
 
+        // Construct a processor for results posted by views and joins, which takes care of aggregation if required.
+        // May return null if we don't need to post-process results posted by views or joins.
         ResultSetProcessor optionalResultSetProcessor = ResultSetProcessorFactory.getProcessor(selectionList, groupByNodes, optionalHavingNode, typeService, optionalOutputLimitSpec,
                 services.getEventAdapterService());
 

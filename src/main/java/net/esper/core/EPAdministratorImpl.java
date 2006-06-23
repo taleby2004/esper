@@ -5,18 +5,12 @@ import net.esper.client.EPStatement;
 import net.esper.client.EPException;
 import net.esper.client.EPStatementException;
 import net.esper.event.EventType;
-import net.esper.event.BeanEventAdapter;
 import net.esper.eql.parse.*;
 import net.esper.eql.generated.EQLStatementParser;
 import net.esper.eql.generated.EQLBaseWalker;
-import net.esper.eql.expression.OutputLimitSpec;
-import net.esper.eql.expression.ExprNode;
-import net.esper.eql.expression.SelectExprElement;
-import net.esper.eql.expression.StreamSpec;
-import net.esper.eql.expression.OuterJoinDesc;
+import net.esper.eql.expression.*;
 import net.esper.collection.Pair;
 import net.esper.util.DebugFacility;
-import net.esper.view.ViewSpec;
 
 import java.util.Map;
 import java.util.List;
@@ -40,7 +34,6 @@ public class EPAdministratorImpl implements EPAdministrator
     private static WalkRuleSelector eqlWalkRule;
 
     private EPServicesContext services;
-    private long patternIdSequenceNum;
 
     static
     {
@@ -163,8 +156,9 @@ public class EPAdministratorImpl implements EPAdministrator
         List<ExprNode> groupByNodes = walker.getGroupByExpressions();
         ExprNode havingClause = walker.getHavingExprRootNode();
         OutputLimitSpec outputClause = walker.getOutputLimitSpec();
+        InsertIntoDesc insertIntoDesc = walker.getInsertIntoDesc();
 
-        EPEQLStmtStartMethod startMethod = new EPEQLStmtStartMethod(selectClause, fromClause,
+        EPEQLStmtStartMethod startMethod = new EPEQLStmtStartMethod(insertIntoDesc, selectClause, fromClause,
                 outerJoinClauses, whereClause, groupByNodes, havingClause, outputClause, eqlStatement, services);
 
         return new EPEQLStatementImpl(eqlStatement, services.getDispatchService(), startMethod);

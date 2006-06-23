@@ -65,32 +65,70 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
         			false;
     }
     
-	private OutputCallback getCallbackToLocal(int streamCount)
-	{
-		// single stream means no join
-		// multiple streams means a join
-		if(streamCount == 1)
+    /**
+     * The update method is called if the view does not participate in a join.
+     * @param newData - new events
+     * @param oldData - old events
+     */
+    public void update(EventBean[] newData, EventBean[] oldData)
+    {
+        if (log.isDebugEnabled())
+        {
+            log.debug(".update Received update, " +
+                    "  newData.length==" + ((newData == null) ? 0 : newData.length) +
+                    "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
+        }
+
+        // add the incoming events to the event batches
+        int newDataLength = 0;
+        int oldDataLength = 0;
+        if(newData != null)
+        {
+        	newDataLength = newData.length;
+        	for(EventBean event : newData)
+        	{
+        		newEventsList.add(event);
+        	}
+        }
+        if(oldData != null)
+        {
+        	oldDataLength = oldData.length;
+        	for(EventBean event : oldData)
+        	{
+        		oldEventsList.add(event);
+        	}
+        }
+
+        outputCondition.updateOutputCondition(newDataLength, oldDataLength);
+    }
+
+    /**
+     * This process (update) method is for participation in a join.
+     * @param newEvents - new events
+     * @param oldEvents - old events
+     */
+    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
+    {
+        if (log.isDebugEnabled())
+        {
+            log.debug(".process Received update, " +
+                    "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
+                    "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
+        }
+
+		// add the incoming events to the event batches
+		for(MultiKey<EventBean> event : newEvents)
 		{
-			return new OutputCallback() 
-			{
-				public void continueOutputProcessing(boolean forceUpdate)
-				{
-					OutputProcessView.this.continueOutputProcessingView(false);
-				}
-			};
+			newEventsSet.add(event);
 		}
-		else
+		for(MultiKey<EventBean> event : oldEvents)
 		{
-			return new OutputCallback() 
-			{
-				public void continueOutputProcessing(boolean forceUpdate)
-				{
-					OutputProcessView.this.continueOutputProcessingJoin(false);
-				}
-			};
+			oldEventsSet.add(event);
 		}
-	}
-	
+
+		outputCondition.updateOutputCondition(newEvents.size(), oldEvents.size());
+    }
+
 	/**
 	 * Called once the output condition has been met.
 	 * Invokes the result set processor.
@@ -173,70 +211,6 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
 		oldEventsSet = new HashSet<MultiKey<EventBean>>();
 	}
 
-    /**
-     * The update method is called if the view does not participate in a join.
-     * @param newData - new events
-     * @param oldData - old events
-     */
-    public void update(EventBean[] newData, EventBean[] oldData)
-    {
-        if (log.isDebugEnabled())
-        {
-            log.debug(".update Received update, " +
-                    "  newData.length==" + ((newData == null) ? 0 : newData.length) +
-                    "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
-        }
-        
-        // add the incoming events to the event batches
-        int newDataLength = 0;
-        int oldDataLength = 0;
-        if(newData != null)
-        {
-        	newDataLength = newData.length;
-        	for(EventBean event : newData)
-        	{
-        		newEventsList.add(event);
-        	}
-        }
-        if(oldData != null)
-        {
-        	oldDataLength = oldData.length;
-        	for(EventBean event : oldData)
-        	{
-        		oldEventsList.add(event);
-        	}
-        }
-        
-        outputCondition.updateOutputCondition(newDataLength, oldDataLength);
-    }
-
-    /**
-     * This process (update) method is for participation in a join.
-     * @param newEvents - new events
-     * @param oldEvents - old events
-     */
-    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
-    {
-        if (log.isDebugEnabled())
-        {
-            log.debug(".process Received update, " +
-                    "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
-                    "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
-        }
-        
-		// add the incoming events to the event batches
-		for(MultiKey<EventBean> event : newEvents)
-		{
-			newEventsSet.add(event);
-		}
-		for(MultiKey<EventBean> event : oldEvents)
-		{
-			oldEventsSet.add(event);
-		}
-		
-		outputCondition.updateOutputCondition(newEvents.size(), oldEvents.size());
-    }
-
     public EventType getEventType()
     {
     	if(resultSetProcessor != null)
@@ -265,5 +239,31 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
     public String attachesTo(Viewable parentViewable)
     {
         return null;
+    }
+
+    private OutputCallback getCallbackToLocal(int streamCount)
+    {
+        // single stream means no join
+        // multiple streams means a join
+        if(streamCount == 1)
+        {
+            return new OutputCallback()
+            {
+                public void continueOutputProcessing(boolean forceUpdate)
+                {
+                    OutputProcessView.this.continueOutputProcessingView(false);
+                }
+            };
+        }
+        else
+        {
+            return new OutputCallback()
+            {
+                public void continueOutputProcessing(boolean forceUpdate)
+                {
+                    OutputProcessView.this.continueOutputProcessingJoin(false);
+                }
+            };
+        }
     }
 }

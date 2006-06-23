@@ -70,10 +70,17 @@ public class EPServiceProviderImpl implements EPServiceProvider
             }
         }
 
-        // New services and runtime
+        // New services
         services = new EPServicesContext(eventAdapterService);
+
+        // New runtime
         runtime = new EPRuntimeImpl(services);
+
+        // Configure services
+        services.setInternalEventRouter(runtime);
         services.getTimerService().setCallback(runtime);
+
+        // New admin
         admin = new EPAdministratorImpl(services);
 
         // Start clocking

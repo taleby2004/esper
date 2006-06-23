@@ -35,12 +35,17 @@ tokens
 // EQL expression
 //----------------------------------------------------------------------------
 startEQLExpressionRule
-	:	selectionListExpr streamExpression (streamExpression (outerJoin)* )*
+	:	(insertIntoExpr)?
+		selectionListExpr streamExpression (streamExpression (outerJoin)* )*
 		(whereClause)?
 		(groupByClause)?
 		(havingClause)?
 		(outputLimitExpr)?
 		{ end(); }
+	;
+	
+insertIntoExpr
+	:	#(i:INSERTINTO_EXPR IDENT (IDENT)* { leaveNode(#i); } )
 	;
 
 selectionListExpr
