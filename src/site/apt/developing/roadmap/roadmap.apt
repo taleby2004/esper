@@ -4,8 +4,8 @@ Roadmap
   	This is a non-prioritized list of loosly categorized features.
 	  	
   	If there is anything you would like to see on this list, or have an immediate need for,
-  	please send mail to {{{mailto:esper-user@lists.sourceforge.net}esper-user@lists.sourceforge.net}}, or
-  	file a feature request via the Esper SourceForge project page.
+  	please send mail to {{{mailto:dev@esper.codehaus.org}dev@esper.codehaus.org}}, or
+  	file a feature request via the Esper {{{http://jira.codehaus.org/browse/ESPER}JIRA}} issue tracking database.
   	
 * Features
   	  	

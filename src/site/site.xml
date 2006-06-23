@@ -17,7 +17,7 @@
 			</item>
 			<item name="Evaluating Esper" href="/evaluating/evaluating.html" collapse="false">
 				<item name="Two Minute Tutorial" href="/evaluating/tutorial/tutorial.html"/>
-				<item name="Download" href="http://sourceforge.net/project/showfiles.php?group_id=121492"/>
+				<item name="Download" href="http://dist.codehaus.org/esper"/>
 			</item>
 			<item name="Using Esper" href="/using/using.html" collapse="false">
 				<item name="FAQ" href="/using/faq/faq.html"/>
@@ -29,11 +29,11 @@
 			<item name="Developing Esper" href="/developing/developing.html" collapse="false">
 				<item name="How To Contribute" href="/developing/contribute/contribute.html"/>
 				<item name="Development Team" href="/developing/team/team.html"/>
-				<item name="Mailing Lists" href="http://sourceforge.net/mail/?group_id=121492"/>
+				<item name="Mailing Lists" href="http://xircles.codehaus.org/projects/esper/lists"/>
 				<item name="Roadmap" href="/developing/roadmap/roadmap.html"/>
 				<item name="Building Esper" href="/developing/building/building.html"/>
 			</item>
-			<item name="SourceForge Home" href="http://sourceforge.net/projects/esper"/>
+			<item name="CodeHaus Home" href="http://xircles.codehaus.org/projects/esper"/>
 		</menu>
 	</body>
 </project>
