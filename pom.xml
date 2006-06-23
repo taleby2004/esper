@@ -122,4 +122,10 @@ XXX
 			-->
 		</plugins>
 	</build>
+	<distributionManagement>
+	  <site>
+	    <id>Esper</id>
+	    <url>webdav://dav.codehaus.org/esper</url>
+	  </site>
+	</distributionManagement>
 </project>
