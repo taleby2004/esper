@@ -28,12 +28,10 @@
 			</item>
 			<item name="Developing Esper" href="/developing/developing.html" collapse="false">
 				<item name="How To Contribute" href="/developing/contribute/contribute.html"/>
-				<item name="Development Team" href="/developing/team/team.html"/>
 				<item name="Mailing Lists" href="http://xircles.codehaus.org/projects/esper/lists"/>
 				<item name="Roadmap" href="/developing/roadmap/roadmap.html"/>
 				<item name="Building Esper" href="/developing/building/building.html"/>
 			</item>
-			<item name="CodeHaus Home" href="http://xircles.codehaus.org/projects/esper"/>
 		</menu>
 	</body>
 </project>
