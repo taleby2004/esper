@@ -16,16 +16,18 @@ public class AggregationServiceFactory
      * @param aggregateExprNodes - aggregation nodes extracted out of the select expression
      * @param hasGroupByClause - indicator on whethere there is group-by required, or group-all
      * @param optionalHavingNode - having node if having-clause was specified, or null if no having-clause given
+     * @param sortByNodes - the nodes for the sort-by clause
      * @return instance for aggregation handling
      */
-    public static AggregationService getService(List<ExprAggregateNode> aggregateExprNodes, 
-                                                boolean hasGroupByClause, 
-                                                ExprNode optionalHavingNode)
+    public static AggregationService getService(List<ExprAggregateNode> aggregateExprNodes,
+                                                boolean hasGroupByClause,
+                                                ExprNode optionalHavingNode,
+                                                List<ExprNode> sortByNodes)
     {
         // No aggregates used, we do not need this service
         if (aggregateExprNodes.size() == 0)
         {
-            throw new IllegalArgumentException("No aggregation in select clause");
+        	return new AggregationServiceNull();
         }
 
         // Construct a list of evaluation node for the aggregation function.
@@ -80,6 +82,13 @@ public class AggregationServiceFactory
             ExprAggregateNode.getAggregatesBottomUp(optionalHavingNode, aggregateNodesHaving);
         }
 
+        // Inspect sort-by clause for aggregation
+        List<ExprAggregateNode> aggregateNodesSortBy = new LinkedList<ExprAggregateNode>();
+        for(ExprNode node : sortByNodes)
+        {
+        	ExprAggregateNode.getAggregatesBottomUp(node, aggregateNodesSortBy);
+        }
+
         // Hand a service reference to the aggregation nodes themselves.
         // Thus on expression evaluation time each aggregate node calls back to find out what the
         // group's state is (and thus does not evaluate by asking its child node for its result).
@@ -94,6 +103,15 @@ public class AggregationServiceFactory
                 if (ExprNode.deepEquals(havingNode, aggregateNode))
                 {
                     havingNode.setAggregationResultFuture(service, column);
+                }
+            }
+
+            // Check any same aggregation nodes in the sort-by clause
+            for (ExprAggregateNode sortByNode : aggregateNodesSortBy)
+            {
+                if (ExprNode.deepEquals(sortByNode, aggregateNode))
+                {
+                    sortByNode.setAggregationResultFuture(service, column);
                 }
             }
 

@@ -157,9 +157,10 @@ public class EPAdministratorImpl implements EPAdministrator
         ExprNode havingClause = walker.getHavingExprRootNode();
         OutputLimitSpec outputClause = walker.getOutputLimitSpec();
         InsertIntoDesc insertIntoDesc = walker.getInsertIntoDesc();
+        List<Pair<ExprNode, Boolean>> orderByClause = walker.getOrderByList();
 
         EPEQLStmtStartMethod startMethod = new EPEQLStmtStartMethod(insertIntoDesc, selectClause, fromClause,
-                outerJoinClauses, whereClause, groupByNodes, havingClause, outputClause, eqlStatement, services);
+                outerJoinClauses, whereClause, groupByNodes, havingClause, outputClause, orderByClause, eqlStatement, services);
 
         return new EPEQLStatementImpl(eqlStatement, services.getDispatchService(), startMethod);
     }

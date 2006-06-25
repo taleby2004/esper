@@ -47,7 +47,7 @@ public class FraudMonitorTest extends TestCase
         assertEquals(FRAUD_TEXT, event.get("warning"));
         assertEquals(100, event.get("amount"));
         assertTrue( ((Long) event.get("timestamp")) > (System.currentTimeMillis() - 100));
-        assertEquals("withdrawlFraudWarn", event.get("desc"));
+        assertEquals("withdrawlFraudWarn", event.get("descr"));
     }
 
     private void sendWithdrawal(long acctNum, int amount)

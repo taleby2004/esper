@@ -28,7 +28,7 @@ public class TestResultSetProcessorRowPerGroup extends TestCase
         groupKeyNodes.add(SupportExprNodeFactory.makeIdentNode("intPrimitive", "s0"));
         groupKeyNodes.add(SupportExprNodeFactory.makeIdentNode("intBoxed", "s0"));
 
-        processor = new ResultSetProcessorRowPerGroup(selectProcessor, supportAggregationService, groupKeyNodes, null, false, false);
+        processor = new ResultSetProcessorRowPerGroup(selectProcessor, null, supportAggregationService, groupKeyNodes, null, false, false);
     }
 
     public void testProcess()

@@ -41,11 +41,16 @@ startEQLExpressionRule
 		(groupByClause)?
 		(havingClause)?
 		(outputLimitExpr)?
+		(orderByClause)?
 		{ end(); }
 	;
 	
 insertIntoExpr
-	:	#(i:INSERTINTO_EXPR IDENT (IDENT)* { leaveNode(#i); } )
+	:	#(i:INSERTINTO_EXPR (ISTREAM | RSTREAM)? IDENT (insertIntoExprCol)? { leaveNode(#i); } )
+	;
+	
+insertIntoExprCol
+	:	#(i:INSERTINTO_EXPRCOL IDENT (IDENT)* )
 	;
 
 selectionListExpr
@@ -93,6 +98,14 @@ evalExprChoice
 	
 groupByClause
 	:	#(g:GROUP_BY_EXPR valueExpr (valueExpr)* ) { leaveNode(#g); }
+	;
+
+orderByClause
+	:	#(s:ORDER_BY_EXPR orderByElement (orderByElement)* )
+	;
+	
+orderByElement
+	: 	#(e:ORDER_ELEMENT_EXPR valueExpr (ASC|DESC)? { leaveNode(#e); } )
 	;
 
 havingClause

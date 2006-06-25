@@ -78,6 +78,15 @@ public class TestMapEventBean extends TestCase
         testValuesMap.put("anInt", new Integer(10));
         other = new MapEventBean(testValuesMap, eventType);
         assertTrue(eventBean.equals(other));
+
+        // try null values
+        MapEventBean beanOne = new MapEventBean(testValuesMap, eventType);
+        HashMap<String, Object> beanTwoValues = new HashMap<String, Object>();
+        beanTwoValues.put("aString", null);
+        beanTwoValues.put("anInt", null);
+        MapEventBean beanTwo = new MapEventBean(beanTwoValues, eventType);
+        assertFalse(beanOne.equals(beanTwo));
+        assertFalse(beanTwo.equals(beanOne));
     }
 
     public void testCreateUnderlying()

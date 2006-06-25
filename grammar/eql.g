@@ -19,7 +19,7 @@ tokens
 	OR_EXPR="or";
 	AND_EXPR="and";
 	NOT_EXPR="not";
-    	EVERY_EXPR="every";
+    EVERY_EXPR="every";
 	WHERE="where";
 	AS="as";	
 	SUM="sum";
@@ -51,6 +51,11 @@ tokens
 	LAST="last";
 	INSERT="insert";
 	INTO="into";
+	ORDER="order";
+	ASC="asc";
+	DESC="desc";
+	RSTREAM="rstream";
+	ISTREAM="istream";
    	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -81,6 +86,8 @@ tokens
    	RIGHT_OUTERJOIN_EXPR;
    	FULL_OUTERJOIN_EXPR;
    	GROUP_BY_EXPR;
+   	ORDER_BY_EXPR;
+   	ORDER_ELEMENT_EXPR;
    	EVENT_PROP_EXPR;
    	EVENT_PROP_SIMPLE;
    	EVENT_PROP_MAPPED;
@@ -89,6 +96,7 @@ tokens
 	SEC_LIMIT_EXPR;
 	MIN_LIMIT_EXPR;
 	INSERTINTO_EXPR;
+	INSERTINTO_EXPRCOL;
 	
 	UNARY_MINUS;
 	
@@ -138,7 +146,7 @@ constant
 // EQL expression
 //----------------------------------------------------------------------------
 eqlExpression 
-	:	(INSERT! INTO! insertIntoExpr)?
+	:	(INSERT! insertIntoExpr)?
 		SELECT! selectionListExpr 
 		FROM! streamExpression
 		(regularJoin | outerJoinList)
@@ -146,11 +154,17 @@ eqlExpression
 		(GROUP! BY! groupByListExpr)?
 		(HAVING! havingClause)?
 		(OUTPUT! outputLimit)?
+		(ORDER! BY! orderByListExpr)?
 	;
 	
 insertIntoExpr
-	:	IDENT (LPAREN! (IDENT) (COMMA! IDENT)* RPAREN!)?
+	:	(ISTREAM | RSTREAM)? INTO! IDENT (insertIntoColumnList)?
 		{ #insertIntoExpr = #([INSERTINTO_EXPR,"insertIntoExpr"], #insertIntoExpr); }
+	;
+	
+insertIntoColumnList
+	: 	LPAREN! IDENT (COMMA! IDENT)* RPAREN!
+		{ #insertIntoColumnList = #([INSERTINTO_EXPRCOL,"insertIntoColumnList"], #insertIntoColumnList); }
 	;
 	
 regularJoin
@@ -207,6 +221,16 @@ viewExpression
 groupByListExpr
 	:	additiveExpression (COMMA! additiveExpression)*
 		{ #groupByListExpr = #([GROUP_BY_EXPR,"groupByListExpr"], #groupByListExpr); }
+	;
+
+orderByListExpr
+	:	orderByListElement (COMMA! orderByListElement)*
+		{ #orderByListExpr = #([ORDER_BY_EXPR,"orderByListExpr"], #orderByListExpr); }
+	;
+
+orderByListElement
+	:	additiveExpression (ASC|DESC)?
+		{ #orderByListElement = #([ORDER_ELEMENT_EXPR,"orderByListElement"], #orderByListElement); }
 	;
 
 havingClause

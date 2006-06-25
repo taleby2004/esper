@@ -43,18 +43,19 @@ public class ResultSetProcessorFactory
      * @param groupByNodes - represents the expressions to group-by events based on event properties, or empty if no group-by was specified
      * @param optionalHavingNode - represents the having-clause boolean filter criteria
      * @param typeService - for information about the streams in the from clause
-     * @param outputLimitSpec - indicates whether to output all or only the last event.
-     * @param eventAdapterService - service for generating events and handling event types
+     * @param outputLimitSpec - indicates whether to output all or only the last event
+     * @param orderByList - represent the expressions in the order-by clause
      * @return result set processor instance
      * @throws ExprValidationException
      */
     public static ResultSetProcessor getProcessor(List<SelectExprElement> selectionList,
                                                	  List<ExprNode> groupByNodes,
                                                	  ExprNode optionalHavingNode,
-                                               	  StreamTypeService typeService, 
                                                	  OutputLimitSpec outputLimitSpec,
+                                               	  List<Pair<ExprNode, Boolean>> orderByList,
+                                                  StreamTypeService typeService,
                                                   EventAdapterService eventAdapterService)
-    throws ExprValidationException
+            throws ExprValidationException
     {
         if (log.isDebugEnabled())
         {
@@ -62,6 +63,24 @@ public class ResultSetProcessorFactory
                     " selectionList=" + Arrays.toString(selectionList.toArray()) +
                     " groupByNodes=" + Arrays.toString(groupByNodes.toArray()) +
                     " optionalHavingNode=" + optionalHavingNode);
+        }
+
+        // Expand any instances of select-clause aliases in the
+        // order-by clause with the full expression
+        expandAliases(selectionList, orderByList);
+
+        // Get the select expression nodes
+        List<ExprNode> selectNodes = new ArrayList<ExprNode>();
+        for(SelectExprElement element : selectionList)
+        {
+        	selectNodes.add(element.getSelectExpression());
+        }
+
+        // Get the order-by expression nodes
+        List<ExprNode> orderByNodes = new ArrayList<ExprNode>();
+        for(Pair<ExprNode, Boolean> element : orderByList)
+        {
+        	orderByNodes.add(element.getFirst());
         }
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
@@ -82,12 +101,26 @@ public class ResultSetProcessorFactory
             optionalHavingNode.validateDescendents(typeService);
         }
 
+        // Validate order-by expressions, if any (could be empty list for no order-by)
+        for (ExprNode orderByNode : orderByNodes)
+        {
+            orderByNode.validateDescendents(typeService);
+        }
+
         // Determine aggregate functions used in select, if any
         List<ExprAggregateNode> selectAggregateExprNodes = new LinkedList<ExprAggregateNode>();
         for (SelectExprElement element : selectionList)
         {
             ExprAggregateNode.getAggregatesBottomUp(element.getSelectExpression(), selectAggregateExprNodes);
         }
+
+        // Construct the appropriate aggregation service
+        boolean hasGroupBy = groupByNodes.size() > 0;
+        AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, hasGroupBy, optionalHavingNode, orderByNodes);
+
+        // Construct the processor for sorting output events
+        OrderByProcessor orderByProcessor = OrderByProcessorFactory.getProcessor(selectionList,
+                groupByNodes, orderByList, aggregationService, eventAdapterService);
 
         // Construct the processor for evaluating the select clause
         SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectionList, typeService, eventAdapterService);
@@ -96,7 +129,7 @@ public class ResultSetProcessorFactory
         Set<Pair<Integer, String>> propertiesAggregatedSelect = getAggregatedProperties(selectAggregateExprNodes);
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);
         // Figure out all non-aggregated event properties in the select clause (props not under a sum/avg/max aggregation node)
-        Set<Pair<Integer, String>> nonAggregatedProps = getNonAggregatedProps(selectionList);
+        Set<Pair<Integer, String>> nonAggregatedProps = getNonAggregatedProps(selectNodes);
 
         // Determine if we have a having clause with aggregation
         List<ExprAggregateNode> havingAggregateExprNodes = new LinkedList<ExprAggregateNode>();
@@ -120,8 +153,8 @@ public class ResultSetProcessorFactory
         {
             // (1a)
             // There is no need to perform select expression processing, the single view itself (no join) generates
-            // events in the desired format, therefore there is no output processor.
-            if (selectExprProcessor == null)
+            // events in the desired format, therefore there is no output processor. There are no order-by expressions.
+            if (selectExprProcessor == null && orderByNodes.isEmpty())
             {
                 log.debug(".getProcessor Using no result processor");
                 return null;
@@ -130,8 +163,9 @@ public class ResultSetProcessorFactory
             // (1b)
             // We need to process the select expression in a simple fashion, with each event (old and new)
             // directly generating one row, and no need to update aggregate state since there is no aggregate function.
+            // There might be some order-by expressions.
             log.debug(".getProcessor Using ResultSetProcessorSimple");
-            return new ResultSetProcessorSimple(selectExprProcessor, isOutputLimiting, isOutputLimitLastOnly);
+            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         // (2)
@@ -139,12 +173,8 @@ public class ResultSetProcessorFactory
         if ((selectionList.size() == 0) && (propertiesAggregatedHaving.size() == 0))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
-            return new ResultSetProcessorSimple(selectExprProcessor, isOutputLimiting, isOutputLimitLastOnly);
+            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, isOutputLimiting, isOutputLimitLastOnly);
         }
-
-        // Construct the appropriate aggregation service - we need it (also validates)
-        boolean hasGroupBy = groupByNodes.size() > 0;
-        AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, hasGroupBy, optionalHavingNode);
 
         // Validate the having-clause (selected aggregate nodes and all in group-by are allowed)
         if (optionalHavingNode != null)
@@ -167,7 +197,7 @@ public class ResultSetProcessorFactory
             // There is no group-by clause but there are aggregate functions with event properties in the select clause (aggregation case)
             // and not all event properties are aggregated (some properties are not under aggregation functions).
             log.debug(".getProcessor Using ResultSetProcessorAggregateAll");
-            return new ResultSetProcessorAggregateAll(selectExprProcessor, aggregationService, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+            return new ResultSetProcessorAggregateAll(selectExprProcessor, orderByProcessor, aggregationService, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         // Handle group-by cases
@@ -177,8 +207,9 @@ public class ResultSetProcessorFactory
         }
 
         // Figure out if all non-aggregated event properties in the select clause are listed in the group by
+        Set<Pair<Integer, String>> nonAggregatedPropsSelect = getNonAggregatedProps(selectNodes);
         boolean allInGroupBy = true;
-        for (Pair<Integer, String> nonAggregatedProp : nonAggregatedProps)
+        for (Pair<Integer, String> nonAggregatedProp : nonAggregatedPropsSelect)
         {
             if (!propertiesGroupBy.contains(nonAggregatedProp))
             {
@@ -192,20 +223,39 @@ public class ResultSetProcessorFactory
             allInGroupBy = false;
         }
 
-        // (5)
+        // Figure out if all non-aggregated event properties in the order-by clause are listed in the select expression
+        Set<Pair<Integer, String>> nonAggregatedPropsOrderBy = getNonAggregatedProps(orderByNodes);
+
+        boolean allInSelect = true;
+        for (Pair<Integer, String> nonAggregatedProp : nonAggregatedPropsOrderBy)
+        {
+            if (!nonAggregatedPropsSelect.contains(nonAggregatedProp))
+            {
+                allInSelect = false;
+            }
+        }
+
+        // Wildcard select-clause means that all order-by props in the select expression
+        if (selectionList.size() == 0)
+        {
+            allInSelect = true;
+        }
+
+        // (4)
         // There is a group-by clause, and all event properties in the select clause that are not under an aggregation
-        // function are listed in the group-by clause (output one row per group, not one row per event)
-        if (allInGroupBy)
+        // function are listed in the group-by clause, and if there is an order-by clause, all non-aggregated properties
+        // referred to in the order-by clause also appear in the select (output one row per group, not one row per event)
+        if (allInGroupBy && allInSelect)
         {
             log.debug(".getProcessor Using ResultSetProcessorRowPerGroup");
-            return new ResultSetProcessorRowPerGroup(selectExprProcessor, aggregationService, groupByNodes, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+            return new ResultSetProcessorRowPerGroup(selectExprProcessor, orderByProcessor, aggregationService, groupByNodes, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         // (6)
         // There is a group-by clause, and one or more event properties in the select clause that are not under an aggregation
         // function are not listed in the group-by clause (output one row per event, not one row per group)
         log.debug(".getProcessor Using ResultSetProcessorAggregateGrouped");
-        return new ResultSetProcessorAggregateGrouped(selectExprProcessor, aggregationService, groupByNodes, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+        return new ResultSetProcessorAggregateGrouped(selectExprProcessor, orderByProcessor, aggregationService, groupByNodes, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
     }
 
     private static void validateHaving(List<ExprAggregateNode> selectAggregateExprNodes,
@@ -280,14 +330,14 @@ public class ResultSetProcessorFactory
         }
     }
 
-    private static Set<Pair<Integer, String>> getNonAggregatedProps(List<SelectExprElement> selectionList)
+    private static Set<Pair<Integer, String>> getNonAggregatedProps(List<ExprNode> exprNodes)
     {
-        // Determine all event properties in the select clause not under aggregation functions
+        // Determine all event properties in the clause
         Set<Pair<Integer, String>> nonAggProps = new HashSet<Pair<Integer, String>>();
-        for (SelectExprElement selectExpr : selectionList)
+        for (ExprNode node : exprNodes)
         {
             ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(false);
-            selectExpr.getSelectExpression().accept(visitor);
+            node.accept(visitor);
             List<Pair<Integer, String>> propertiesNode = visitor.getExprProperties();
             nonAggProps.addAll(propertiesNode);
         }
@@ -297,7 +347,7 @@ public class ResultSetProcessorFactory
 
     private static Set<Pair<Integer, String>> getAggregatedProperties(List<ExprAggregateNode> aggregateNodes)
     {
-        // Get a list of properties being aggregated in the select clause.
+        // Get a list of properties being aggregated in the clause.
         Set<Pair<Integer, String>> propertiesAggregated = new HashSet<Pair<Integer, String>>();
 
         for (ExprNode selectAggExprNode : aggregateNodes)
@@ -332,6 +382,25 @@ public class ResultSetProcessorFactory
         }
 
         return propertiesGroupBy;
+    }
+
+    private static void expandAliases(List<SelectExprElement> selectionList, List<Pair<ExprNode, Boolean>> orderByList)
+    {
+    	for(SelectExprElement selectElement : selectionList)
+    	{
+    		String alias = selectElement.getAsName();
+    		if(alias != null)
+    		{
+    			ExprNode fullExpr = selectElement.getSelectExpression();
+    			for(ListIterator<Pair<ExprNode, Boolean>> iterator = orderByList.listIterator(); iterator.hasNext(); )
+    			{
+    				Pair<ExprNode, Boolean> orderByElement = iterator.next();
+    				ExprNode swapped = AliasNodeSwapper.swap(orderByElement.getFirst(), alias, fullExpr);
+    				Pair<ExprNode, Boolean> newOrderByElement = new Pair<ExprNode, Boolean>(swapped, orderByElement.getSecond());
+    				iterator.set(newOrderByElement);
+    			}
+    		}
+    	}
     }
 
     private static final Log log = LogFactory.getLog(ResultSetProcessorFactory.class);

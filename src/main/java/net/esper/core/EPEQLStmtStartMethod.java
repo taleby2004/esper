@@ -38,6 +38,7 @@ public class EPEQLStmtStartMethod
     private OutputLimitSpec optionalOutputLimitSpec;
     private List<OuterJoinDesc> outerJoinDescList;
     private List<ExprNode> groupByNodes;
+    private List<Pair<ExprNode, Boolean>> orderByNodes;
     private String eqlStatement;
     private EPServicesContext services;
 
@@ -64,6 +65,7 @@ public class EPEQLStmtStartMethod
                                 List<ExprNode> groupByNodes,
                                 ExprNode optionalHavingNode,
                                 OutputLimitSpec optionalOutputLimitViewSpecs,
+                                List<Pair<ExprNode, Boolean>> orderByNodes,
                                 String eqlStatement,
                                 EPServicesContext services)
     {
@@ -75,6 +77,7 @@ public class EPEQLStmtStartMethod
         this.groupByNodes = groupByNodes;
         this.optionalHavingNode = optionalHavingNode;
         this.optionalOutputLimitSpec = optionalOutputLimitViewSpecs;
+        this.orderByNodes = orderByNodes;
         this.services = services;
         this.eqlStatement = eqlStatement;
     }
@@ -119,7 +122,12 @@ public class EPEQLStmtStartMethod
 
         // Construct a processor for results posted by views and joins, which takes care of aggregation if required.
         // May return null if we don't need to post-process results posted by views or joins.
-        ResultSetProcessor optionalResultSetProcessor = ResultSetProcessorFactory.getProcessor(selectionList, groupByNodes, optionalHavingNode, typeService, optionalOutputLimitSpec,
+        ResultSetProcessor optionalResultSetProcessor = ResultSetProcessorFactory.getProcessor(selectionList,
+                groupByNodes,
+                optionalHavingNode,
+                optionalOutputLimitSpec,
+                orderByNodes,
+                typeService,
                 services.getEventAdapterService());
 
         // Validate where-clause filter tree and outer join clause

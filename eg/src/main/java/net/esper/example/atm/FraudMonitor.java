@@ -16,7 +16,7 @@ public class FraudMonitor
     public FraudMonitor(EPServiceProvider epService, UpdateListener updateListener)
     {
         String joinStatement = "select fraud.accountNumber as accountNumber, fraud.warning as warning, withdraw.amount as amount, " +
-                               "max(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraudWarn' as desc from " +
+                               "max(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraudWarn' as descr from " +
                                     "FraudWarning.win:time(1800) as fraud," +
                                     "Withdrawal.win:time(30) as withdraw" +
                 " where fraud.accountNumber = withdraw.accountNumber";

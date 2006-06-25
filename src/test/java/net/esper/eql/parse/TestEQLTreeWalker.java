@@ -143,21 +143,30 @@ public class TestEQLTreeWalker extends TestCase
         EQLTreeWalker walker = parseAndWalk(expression);
 
         InsertIntoDesc desc = walker.getInsertIntoDesc();
+        assertTrue(desc.isIStream());
         assertEquals("MyAlias", desc.getEventTypeAlias());
         assertEquals(0, desc.getColumnNames().size());
 
-        expression = "insert into MyAlias(a, b, c) select * from " +
+        expression = "insert rstream into MyAlias(a, b, c) select * from " +
                         CLASSNAME + "().win:length(10).std:lastevent() as win1," +
                         CLASSNAME + "(string='b').win:length(9).std:lastevent() as win2";
 
         walker = parseAndWalk(expression);
 
         desc = walker.getInsertIntoDesc();
+        assertFalse(desc.isIStream());
         assertEquals("MyAlias", desc.getEventTypeAlias());
         assertEquals(3, desc.getColumnNames().size());
         assertEquals("a", desc.getColumnNames().get(0));
         assertEquals("b", desc.getColumnNames().get(1));
         assertEquals("c", desc.getColumnNames().get(2));
+
+        expression = "insert istream into Test2 select * from " + CLASSNAME + "().win:length(10)";
+        walker = parseAndWalk(expression);
+        desc = walker.getInsertIntoDesc();
+        assertTrue(desc.isIStream());
+        assertEquals("Test2", desc.getEventTypeAlias());
+        assertEquals(0, desc.getColumnNames().size());
     }
 
     public void testWalkView() throws Exception

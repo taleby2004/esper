@@ -109,6 +109,16 @@ class MapEventBean implements EventBean
             final Object value = entry.getValue();
             final Object otherValue = other.get(name);
 
+            if ((otherValue == null) && (value == null))
+            {
+                continue;
+            }
+
+            if ((otherValue == null) && (value != null))
+            {
+                return false;
+            }
+
             if (!otherValue.equals(value))
             {
                 return false;

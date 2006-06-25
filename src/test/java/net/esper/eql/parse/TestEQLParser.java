@@ -101,6 +101,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("insert into A (a,) select 1 from b.win:length(1)");
         assertIsInvalid("insert into A (,) select 1 from b.win:length(1)");
         assertIsInvalid("insert into A(,a) select 1 from b.win:length(1)");
+        assertIsInvalid("insert xxx into A(,a) select 1 from b.win:length(1)");
     }
 
     public void testValidCases() throws Exception
@@ -196,12 +197,17 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("insert into MyEvent (a) select 1 from b.win:length(1)");
         assertIsValid("insert into MyEvent (a, b) select 1 from b.win:length(1)");
         assertIsValid("insert into MyEvent (a, b, c) select 1 from b.win:length(1)");
+        assertIsValid("insert istream into MyEvent select 1 from b.win:length(1)");
+        assertIsValid("insert rstream into MyEvent select 1 from b.win:length(1)");
+
+        // TODO and syntax BUG - works with parantheses
+        // assertIsValid("select a and b from b.win:length(1)");
     }
 
     public void testBitWiseCases() throws Exception
     {
         String className = SupportBean.class.getName();
-        String eqlSmt = "select intPrimitive&intBoxed from " + className;
+        String eqlSmt = "select (intPrimitive & intBoxed) from " + className;
         assertIsValid(eqlSmt + ".win:lenght()");
         eqlSmt = "select boolPrimitive|boolBoxed from " + className;
         assertIsValid(eqlSmt + "().std:win(20)");

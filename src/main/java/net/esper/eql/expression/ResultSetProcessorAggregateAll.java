@@ -5,6 +5,8 @@ import net.esper.event.EventBean;
 import net.esper.collection.Pair;
 import net.esper.collection.MultiKey;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.LinkedList;
 
@@ -19,6 +21,7 @@ import java.util.LinkedList;
 public class ResultSetProcessorAggregateAll implements ResultSetProcessor
 {
     private final SelectExprProcessor selectExprProcessor;
+    private final OrderByProcessor orderByProcessor;
     private final AggregationService aggregationService;
     private final ExprNode optionalHavingNode;
     private final boolean isOutputLimiting;
@@ -27,18 +30,20 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
     /**
      * Ctor.
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
+     * @param orderByProcessor - for sorting the outgoing events according to the order-by clause
      * @param aggregationService - handles aggregation
      * @param optionalHavingNode - having clause expression node
-     * @param isOutputLimiting - set if output limiting required
-     * @param isOutputLimitLastOnly - set if output limiting to last row
+     * @param isSorting - true if the output needs to be sorted
      */
-    public ResultSetProcessorAggregateAll(SelectExprProcessor selectExprProcessor, 
-                                          AggregationService aggregationService, 
-                                          ExprNode optionalHavingNode, 
+    public ResultSetProcessorAggregateAll(SelectExprProcessor selectExprProcessor,
+                                          OrderByProcessor orderByProcessor,
+                                          AggregationService aggregationService,
+                                          ExprNode optionalHavingNode,
                                           boolean isOutputLimiting,
                                           boolean isOutputLimitLastOnly)
     {
         this.selectExprProcessor = selectExprProcessor;
+        this.orderByProcessor = orderByProcessor;
         this.aggregationService = aggregationService;
         this.optionalHavingNode = optionalHavingNode;
         this.isOutputLimiting = isOutputLimiting;
@@ -57,11 +62,11 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
 
         if (optionalHavingNode == null)
         {
-            selectOldEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly);
+            selectOldEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly);
         }
         else
         {
-            selectOldEvents = getSelectListEvents(selectExprProcessor, oldEvents, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+            selectOldEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, oldEvents, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         if (!oldEvents.isEmpty())
@@ -84,11 +89,11 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
 
         if (optionalHavingNode == null)
         {
-            selectNewEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly);
+            selectNewEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly);
         }
         else
         {
-            selectNewEvents = getSelectListEvents(selectExprProcessor, newEvents, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+            selectNewEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, newEvents, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         if ((selectNewEvents == null) && (selectOldEvents == null))
@@ -106,12 +111,12 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         // generate old events using select expressions
         if (optionalHavingNode == null)
         {
-            selectOldEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly);
+            selectOldEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly);
         }
         // generate old events using having then select
         else
         {
-            selectOldEvents = getSelectListEvents(selectExprProcessor, oldData, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+            selectOldEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, oldData, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         EventBean[] eventsPerStream = new EventBean[1];
@@ -138,11 +143,11 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         // generate new events using select expressions
         if (optionalHavingNode == null)
         {
-            selectNewEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, newData, isOutputLimiting, isOutputLimitLastOnly);
+            selectNewEvents = ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, newData, isOutputLimiting, isOutputLimitLastOnly);
         }
         else
         {
-            selectNewEvents = getSelectListEvents(selectExprProcessor, newData, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
+            selectNewEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, newData, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         if ((selectNewEvents == null) && (selectOldEvents == null))
@@ -153,7 +158,7 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
     }
 
-    private static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    private static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
     {
         if (isOutputLimiting)
         {
@@ -166,8 +171,13 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         }
 
         LinkedList<EventBean> result = new LinkedList<EventBean>();
-        EventBean[] eventsPerStream = new EventBean[1];
+        List<EventBean[]> eventGenerators = null;
+        if(orderByProcessor != null)
+        {
+        	eventGenerators = new ArrayList<EventBean[]>();
+        }
 
+        EventBean[] eventsPerStream = new EventBean[1];
         for (int i = 0; i < events.length; i++)
         {
             eventsPerStream[0] = events[i];
@@ -179,11 +189,22 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
             }
 
             result.add(exprProcessor.process(eventsPerStream));
+            if(orderByProcessor != null)
+            {
+            	eventGenerators.add(new EventBean[] { events[i] });
+            }
         }
 
         if (result.size() > 0)
         {
-            return result.toArray(new EventBean[0]);
+        	if(orderByProcessor != null)
+        	{
+                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]));
+        	}
+        	else
+        	{
+        		return result.toArray(new EventBean[0]);
+        	}
         }
         else
         {
@@ -191,7 +212,7 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         }
     }
 
-    private static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    private static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
     {
         if (isOutputLimiting)
         {
@@ -199,7 +220,12 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         }
 
         LinkedList<EventBean> result = new LinkedList<EventBean>();
-        
+        List<EventBean[]> eventGenerators = null;
+        if(orderByProcessor != null)
+        {
+        	eventGenerators = new ArrayList<EventBean[]>();
+        }
+
         for (MultiKey<EventBean> key : events)
         {
             EventBean[] eventsPerStream = key.getArray();
@@ -210,12 +236,24 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
                 continue;
             }
 
-            result.add(exprProcessor.process(eventsPerStream));
+            EventBean resultEvent = exprProcessor.process(eventsPerStream);
+            result.add(resultEvent);
+            if(orderByProcessor != null)
+            {
+            	eventGenerators.add(eventsPerStream);
+            }
         }
 
         if (result.size() > 0)
         {
-            return result.toArray(new EventBean[0]);
+        	if(orderByProcessor != null)
+        	{
+                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]));
+        	}
+        	else
+        	{
+        		return result.toArray(new EventBean[0]);
+        	}
         }
         else
         {

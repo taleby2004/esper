@@ -1,16 +1,15 @@
 package net.esper.eql.expression;
 
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.collection.Pair;
-import net.esper.collection.MultiKey;
-
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
+
+import net.esper.collection.MultiKey;
+import net.esper.collection.Pair;
+import net.esper.event.EventBean;
+import net.esper.event.EventType;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,37 +29,48 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
     private static final Log log = LogFactory.getLog(ResultSetProcessorAggregateGrouped.class);
 
     private final SelectExprProcessor selectExprProcessor;
+    private final OrderByProcessor orderByProcessor;
     private final AggregationService aggregationService;
     private final List<ExprNode> groupKeyNodes;
     private final ExprNode optionalHavingNode;
     private final boolean isOutputLimiting;
     private final boolean isOutputLimitLastOnly;
-    private final Map<MultiKey, EventBean> oldEventGroupReps = new LinkedHashMap<MultiKey, EventBean>();
-    private final Map<MultiKey, EventBean> newEventGroupReps = new LinkedHashMap<MultiKey, EventBean>();
+    private final boolean isSorting;
+
+    // For output limiting, keep a representative of each group-by group
+    private final Map<MultiKey, EventBean> oldEventGroupReps = new HashMap<MultiKey, EventBean>();
+    private final Map<MultiKey, EventBean> newEventGroupReps = new HashMap<MultiKey, EventBean>();
+
+    // For sorting, keep the generating events for each outgoing event
+    private final Map<MultiKey, EventBean[]> newGenerators = new HashMap<MultiKey, EventBean[]>();
+	private final Map<MultiKey, EventBean[]> oldGenerators = new HashMap<MultiKey, EventBean[]>();
+
 
     /**
      * Ctor.
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
+     * @param orderByProcessor - for sorting outgoing events according to the order-by clause
      * @param aggregationService - handles aggregation
      * @param groupKeyNodes - list of group-by expression nodes needed for building the group-by keys
      * @param optionalHavingNode - expression node representing validated HAVING clause, or null if none given.
      * Aggregation functions in the having node must have been pointed to the AggregationService for evaluation.
-     * @param isOutputLimiting - set if output limiting required
-     * @param isOutputLimitLastOnly - set if output limiting to last row
      */
     public ResultSetProcessorAggregateGrouped(SelectExprProcessor selectExprProcessor,
-                                      AggregationService aggregationService,
-                                      List<ExprNode> groupKeyNodes,
-                                      ExprNode optionalHavingNode, 
-                                      boolean isOutputLimiting,
-                                      boolean isOutputLimitLastOnly)
+                                      		  OrderByProcessor orderByProcessor,
+                                      		  AggregationService aggregationService,
+                                      		  List<ExprNode> groupKeyNodes,
+                                      		  ExprNode optionalHavingNode,
+                                      		  boolean isOutputLimiting,
+                                      		  boolean isOutputLimitLastOnly)
     {
         this.selectExprProcessor = selectExprProcessor;
+        this.orderByProcessor = orderByProcessor;
         this.aggregationService = aggregationService;
         this.groupKeyNodes = groupKeyNodes;
         this.optionalHavingNode = optionalHavingNode;
         this.isOutputLimiting = isOutputLimiting;
         this.isOutputLimitLastOnly = isOutputLimitLastOnly;
+        this.isSorting = orderByProcessor != null;
     }
 
     public EventType getResultEventType()
@@ -76,7 +86,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
         // generate old events
         log.debug(".processJoinResults creating old output events");
-        EventBean[] selectOldEvents = generateOutputEventsJoin(oldEvents, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps);
+        EventBean[] selectOldEvents = generateOutputEventsJoin(oldEvents, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps, oldGenerators);
 
         // update aggregates
         if (!oldEvents.isEmpty())
@@ -102,7 +112,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
         // generate new events using select expressions
         log.debug(".processJoinResults creating new output events");
-        EventBean[] selectNewEvents = generateOutputEventsJoin(newEvents, newDataGroupByKeys, optionalHavingNode, newEventGroupReps);
+        EventBean[] selectNewEvents = generateOutputEventsJoin(newEvents, newDataGroupByKeys, optionalHavingNode, newEventGroupReps, newGenerators);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))
         {
@@ -119,7 +129,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
         // generate old events
         log.debug(".processJoinResults creating old output events");
-        EventBean[] selectOldEvents = generateOutputEventsView(oldData, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps);
+        EventBean[] selectOldEvents = generateOutputEventsView(oldData, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps, oldGenerators);
 
         // update aggregates
         EventBean[] eventsPerStream = new EventBean[1];
@@ -144,7 +154,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
         // generate new events using select expressions
         log.debug(".processJoinResults creating new output events");
-        EventBean[] selectNewEvents = generateOutputEventsView(newData, newDataGroupByKeys, optionalHavingNode, newEventGroupReps);
+        EventBean[] selectNewEvents = generateOutputEventsView(newData, newDataGroupByKeys, optionalHavingNode, newEventGroupReps, newGenerators);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))
         {
@@ -153,45 +163,79 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         return null;
     }
 
-	private EventBean[] applyOutputLimit(MultiKey[] keys, EventBean[] events, Map<MultiKey, EventBean> groupReps)
+	private EventBean[] applyOutputLimitAndOrderBy(EventBean[] events, EventBean[][] currentGenerators, MultiKey[] keys, Map<MultiKey, EventBean> groupReps, Map<MultiKey, EventBean[]> generators)
 	{
-		if(!isOutputLimitLastOnly)
+		if(isOutputLimiting && !isOutputLimitLastOnly)
 		{
-			log.debug(".applyOutputLimit running map size="+groupReps.size());
-		
-			// Update the running map.
-			int count = 0;
+			// Update the group representatives while keeping track
+			// of the groups that weren't updated
+			Set<MultiKey> notUpdatedKeys = new LinkedHashSet<MultiKey>(groupReps.keySet());
+			int countOne = 0;
 			for(MultiKey key : keys)
 			{
-				groupReps.remove(key);
-				groupReps.put(key, events[count++]);
+				notUpdatedKeys.remove(key);
+				groupReps.put(key, events[countOne++]);
 			}
-			
-			// Make the running map into a list.
-			List<EventBean> runningList = new LinkedList<EventBean>(groupReps.values());
-			
-			// Make the incoming array into a list.
-			List<EventBean> eventList = Arrays.asList(events);
-			
-			// Remove from the running map list all the elements 
-			// that are contained in the incoming array list.
-			// The running array list should now contain
-			// only groups that weren't updated this time.
-			runningList.removeAll(eventList);
-			
-			// Combine the two lists.
-			runningList.addAll(eventList);
-			
-			// Convert to array and return.
-			return runningList.toArray(new EventBean[0]);
+
+
+			int outputLength = events.length + notUpdatedKeys.size();
+			EventBean[] result = new EventBean[outputLength];
+
+			// Add all the current incoming events to the output
+			int countTwo = 0;
+			for(EventBean event : events)
+			{
+				result[countTwo++] =event;
+			}
+
+			// Also add a representative for all groups
+			// that weren't updated
+			for(MultiKey key : notUpdatedKeys)
+			{
+				result[countTwo++] = groupReps.get(key);
+			}
+
+			events = result;
+
+			if(isSorting)
+			{
+				// Update the group-by keys
+				MultiKey[] sortKeys = new MultiKey[outputLength];
+				int countThree = 0;
+				for(MultiKey key : keys)
+				{
+					sortKeys[countThree++] = key;
+				}
+				for(MultiKey key : notUpdatedKeys)
+				{
+					sortKeys[countThree++] = key;
+				}
+				keys = sortKeys;
+
+				// Update the generating events
+				EventBean[][] sortGenerators = new EventBean[outputLength][];
+				int countFour = 0;
+				for(EventBean[] gens : currentGenerators)
+				{
+					sortGenerators[countFour++] = gens;
+				}
+				for(MultiKey key : notUpdatedKeys)
+				{
+					sortGenerators[countFour++] = generators.get(key);
+				}
+				currentGenerators = sortGenerators;
+			}
 		}
-		else
+
+		if(isSorting)
 		{
-			return events;
+			events = orderByProcessor.sort(events, currentGenerators, keys);
 		}
+
+		return events;
 	}
 
-	private EventBean[] generateOutputEventsView(EventBean[] outputEvents, MultiKey[] groupByKeys, ExprNode optionalHavingExpr, Map<MultiKey, EventBean> groupReps)
+	private EventBean[] generateOutputEventsView(EventBean[] outputEvents, MultiKey[] groupByKeys, ExprNode optionalHavingExpr, Map<MultiKey, EventBean> groupReps, Map<MultiKey, EventBean[]> generators)
     {
         if (outputEvents == null)
         {
@@ -201,7 +245,12 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         EventBean[] eventsPerStream = new EventBean[1];
         EventBean[] events = new EventBean[outputEvents.length];
         MultiKey[] keys = new MultiKey[outputEvents.length];
-        
+        EventBean[][] currentGenerators = null;
+        if(isSorting)
+        {
+        	currentGenerators = new EventBean[outputEvents.length][];
+        }
+
         int count = 0;
         for (int i = 0; i < outputEvents.length; i++)
         {
@@ -220,6 +269,13 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
             events[count] = selectExprProcessor.process(eventsPerStream);
             keys[count] = groupByKeys[count];
+            if(isSorting)
+            {
+            	EventBean[] currentEventsPerStream = new EventBean[] { outputEvents[count] };
+            	generators.put(keys[count], currentEventsPerStream);
+            	currentGenerators[count] = currentEventsPerStream;
+            }
+
             count++;
         }
 
@@ -232,19 +288,24 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
             }
             EventBean[] out = new EventBean[count];
             System.arraycopy(events, 0, out, 0, count);
-            
-            MultiKey[] outKeys = new MultiKey[count];
-            System.arraycopy(keys, 0, outKeys, 0, count);
-
-            keys = outKeys;
             events = out;
+
+            if(isSorting || (isOutputLimiting && !isOutputLimitLastOnly))
+            {
+            	MultiKey[] outKeys = new MultiKey[count];
+            	System.arraycopy(keys, 0, outKeys, 0, count);
+            	keys = outKeys;
+            }
+
+            if(isSorting)
+            {
+            	EventBean[][] outGens = new EventBean[count][];
+            	System.arraycopy(currentGenerators, 0, outGens, 0, count);
+            	currentGenerators = outGens;
+            }
         }
 
-        if (!isOutputLimiting)
-        {
-            return events;
-        }
-        return applyOutputLimit(keys, events, groupReps);
+        return applyOutputLimitAndOrderBy(events, currentGenerators, keys, groupReps, generators);
     }
 
     private MultiKey[] generateGroupKeys(Set<MultiKey<EventBean>> resultSet)
@@ -299,7 +360,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         return new MultiKey(keys);
     }
 
-    private EventBean[] generateOutputEventsJoin(Set<MultiKey<EventBean>> resultSet, MultiKey[] groupByKeys, ExprNode optionalHavingExpr, Map<MultiKey, EventBean> groupReps)
+    private EventBean[] generateOutputEventsJoin(Set<MultiKey<EventBean>> resultSet, MultiKey[] groupByKeys, ExprNode optionalHavingExpr, Map<MultiKey, EventBean> groupReps, Map<MultiKey, EventBean[]> generators)
     {
         if (resultSet.isEmpty())
         {
@@ -308,7 +369,12 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
         EventBean[] events = new EventBean[resultSet.size()];
         MultiKey[] keys = new MultiKey[resultSet.size()];
-        
+        EventBean[][] currentGenerators = null;
+        if(isSorting)
+        {
+        	currentGenerators = new EventBean[resultSet.size()][];
+        }
+
         int count = 0;
         for (MultiKey<EventBean> row : resultSet)
         {
@@ -328,6 +394,12 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
             events[count] = selectExprProcessor.process(eventsPerStream);
             keys[count] = groupByKeys[count];
+            if(isSorting)
+            {
+            	generators.put(keys[count], eventsPerStream);
+            	currentGenerators[count] = eventsPerStream;
+            }
+
             count++;
         }
 
@@ -340,18 +412,23 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
             }
             EventBean[] out = new EventBean[count];
             System.arraycopy(events, 0, out, 0, count);
-            
-            MultiKey[] outKeys = new MultiKey[count];
-            System.arraycopy(keys, 0, outKeys, 0, count);
-            
-            keys = outKeys;
             events = out;
+
+            if(isSorting || (isOutputLimiting && !isOutputLimitLastOnly))
+            {
+            	MultiKey[] outKeys = new MultiKey[count];
+            	System.arraycopy(keys, 0, outKeys, 0, count);
+            	keys = outKeys;
+            }
+
+            if(isSorting)
+            {
+            	EventBean[][] outGens = new EventBean[count][];
+            	System.arraycopy(currentGenerators, 0, outGens, 0, count);
+            	currentGenerators = outGens;
+            }
         }
 
-        if (!isOutputLimiting)
-        {
-            return events;
-        }
-        return applyOutputLimit(keys, events, groupReps);
+        return applyOutputLimitAndOrderBy(events, currentGenerators, keys, groupReps, generators);
     }
 }

@@ -32,6 +32,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     private ExprNode havingExprRootNode;
     private List<OuterJoinDesc> outerJoinDescList = new LinkedList<OuterJoinDesc>();
     private InsertIntoDesc insertIntoDesc;
+    private List<Pair<ExprNode, Boolean>> orderByList = new LinkedList<Pair<ExprNode, Boolean>>();
 
     /**
      * Ctor.
@@ -113,6 +114,14 @@ public class EQLTreeWalker extends EQLBaseWalker
     public InsertIntoDesc getInsertIntoDesc()
     {
         return insertIntoDesc;
+    }
+
+    /**
+     * Returns the list of order-by expression as specified in the ORDER BY clause.
+     * @return Returns the orderByList.
+     */
+    public List<Pair<ExprNode, Boolean>> getOrderByList() {
+        return orderByList;
     }
 
     protected void leaveNode(AST node) throws ASTWalkException
@@ -203,6 +212,11 @@ public class EQLTreeWalker extends EQLBaseWalker
             case HAVING_EXPR:
                 leaveHavingClause();
                 break;
+            case ORDER_BY_EXPR:
+            	break;
+            case ORDER_ELEMENT_EXPR:
+            	leaveOrderByElement(node);
+            	break;
             case EVENT_LIMIT_EXPR:
             case SEC_LIMIT_EXPR:
             case MIN_LIMIT_EXPR:
@@ -646,16 +660,59 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
         log.debug(".leaveInsertInto");
 
-        String eventAliasName = node.getFirstChild().getText();
-        insertIntoDesc = new InsertIntoDesc(eventAliasName);
+        AST child = node.getFirstChild();
 
-        // Each child to the insert-into AST node represents a column name
-        AST child = node.getFirstChild().getNextSibling();
-        while (child != null)
+        // istream or rstream
+        boolean isIStream = true;
+        if (child.getType() == RSTREAM)
         {
-            insertIntoDesc.add(child.getText());
+            isIStream = false;
             child = child.getNextSibling();
         }
+        if (child.getType() == ISTREAM)
+        {
+            child = child.getNextSibling();
+        }
+
+        // alias
+        String eventAliasName = child.getText();
+        insertIntoDesc = new InsertIntoDesc(isIStream, eventAliasName);
+
+        // optional columns
+        child = child.getNextSibling();
+        if ((child != null) && (child.getType() == INSERTINTO_EXPRCOL))
+        {
+            // Each child to the insert-into AST node represents a column name
+            child = child.getFirstChild();
+            while (child != null)
+            {
+                insertIntoDesc.add(child.getText());
+                child = child.getNextSibling();
+            }
+        }
+    }
+
+    private void leaveOrderByElement(AST node) throws ASTWalkException
+    {
+        log.debug(".leaveOrderByElement");
+        if ((astNodeMap.size() > 1) || ((astNodeMap.size() == 0)))
+        {
+            throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
+        }
+
+        // Get expression node sub-tree from the AST nodes placed so far
+        ExprNode exprNode = astNodeMap.values().iterator().next();
+        astNodeMap.clear();
+
+        // Get optional ascending or descending qualifier
+        boolean descending = false;
+        if (node.getFirstChild().getNextSibling() != null)
+        {
+            descending = node.getFirstChild().getNextSibling().getType() == DESC;
+        }
+
+        // Add as order-by element
+        orderByList.add(new Pair<ExprNode, Boolean>(exprNode, descending));
     }
 
     private static final Log log = LogFactory.getLog(EQLTreeWalker.class);
