@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.eql.generated.EqlTokenTypes;
 import antlr.collections.AST;
 
@@ -13,14 +14,15 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "insert into A(b, c) select * from " +
-                        className + "(a=1).win:lenght(10)";
+        String expression = "select a & b from " + className + "().win:lenght(10)";
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
         SupportParserHelper.displayAST(ast);
-        //EQLTreeWalker walker = new EQLTreeWalker();
-        //walker.startEQLExpressionRule(ast);
+
+        log.debug(".testDisplayAST walking...");
+        EQLTreeWalker walker = new EQLTreeWalker(SupportEventAdapterService.getService());
+        walker.startEQLExpressionRule(ast);
     }
 
     public void testInvalidCases() throws Exception

@@ -85,17 +85,9 @@ viewExpr
 	;
 	
 whereClause
-	:	#(n:WHERE_EXPR evalExprChoice { leaveNode(#n); } )
+	:	#(n:WHERE_EXPR valueExpr { leaveNode(#n); } )
 	;
 
-evalExprChoice
-	:	#(jo:EVAL_OR_EXPR evalExprChoice evalExprChoice (evalExprChoice)* { leaveNode(#jo); } )
-	|	#(ja:EVAL_AND_EXPR evalExprChoice evalExprChoice (evalExprChoice)* { leaveNode(#ja); } )
-	|	#(je:EVAL_EQUALS_EXPR valueExpr valueExpr { leaveNode(#je); } )
-	|	#(jne:EVAL_NOTEQUALS_EXPR valueExpr valueExpr { leaveNode(#jne); } )
-	|	r:relationalExpr { leaveNode(#r); }
-	;
-	
 groupByClause
 	:	#(g:GROUP_BY_EXPR valueExpr (valueExpr)* ) { leaveNode(#g); }
 	;
@@ -109,7 +101,7 @@ orderByElement
 	;
 
 havingClause
-	:	#(n:HAVING_EXPR evalExprChoice { leaveNode(#n); } )
+	:	#(n:HAVING_EXPR valueExpr { leaveNode(#n); } )
 	;
 
 outputLimitExpr
@@ -125,10 +117,19 @@ relationalExpr
 	|	#(GE valueExpr valueExpr)
 	;
 
+evalExprChoice
+	:	#(jo:EVAL_OR_EXPR valueExpr valueExpr (valueExpr)* { leaveNode(#jo); } )
+	|	#(ja:EVAL_AND_EXPR valueExpr valueExpr (valueExpr)* { leaveNode(#ja); } )
+	|	#(je:EVAL_EQUALS_EXPR valueExpr valueExpr { leaveNode(#je); } )
+	|	#(jne:EVAL_NOTEQUALS_EXPR valueExpr valueExpr { leaveNode(#jne); } )
+	|	r:relationalExpr { leaveNode(#r); }
+	;
+	
 valueExpr
 	: 	c:constant { leaveNode(#c); }
 	| 	a:arithmeticExpr { leaveNode(#a); }
-	| 	p:eventPropertyExpr
+	| 	eventPropertyExpr
+	|   evalExprChoice
 	|	f:builtinFunc { leaveNode(#f); }
 	;
 

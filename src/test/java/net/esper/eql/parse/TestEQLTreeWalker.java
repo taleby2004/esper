@@ -387,6 +387,7 @@ public class TestEQLTreeWalker extends TestCase
         List<Pair<ExprNode, String>> selectExpressions = walker.getSelectListExpressions();
         assertEquals(1, selectExpressions.size());
         assertTrue(selectExpressions.get(0).getFirst() instanceof ExprBitWiseNode);
+
         assertEquals(0, tryBitWise("1&2"));
         assertEquals(3, tryBitWise("1|2"));
         assertEquals(8, tryBitWise("10^2"));
@@ -394,10 +395,11 @@ public class TestEQLTreeWalker extends TestCase
 
     private Object tryBitWise(String equation) throws Exception
     {
-        String expression = EXPRESSION + "where " + equation + "=win2.f2";
+        String expression = EXPRESSION + "where (" + equation + ")=win2.f2";
 
         EQLTreeWalker walker = parseAndWalk(expression);
-        ExprBitWiseNode bitWiseNode = (ExprBitWiseNode) (walker.getFilterRootNode().getChildNodes().get(0));
+        ExprNode exprNode = walker.getFilterRootNode().getChildNodes().get(0);
+        ExprBitWiseNode bitWiseNode = (ExprBitWiseNode) (exprNode);
         bitWiseNode.validateDescendents(null);
         return bitWiseNode.evaluate(null);
     }

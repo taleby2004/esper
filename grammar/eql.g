@@ -202,7 +202,7 @@ selectionListExpr
 	;
 		
 selectionListElement
-	:	additiveExpression (AS! IDENT)?
+	:	expression (AS! IDENT)?
 		{ #selectionListElement = #([SELECTION_ELEMENT_EXPR,"selectionListElement"], #selectionListElement); }
 	;
 		
@@ -219,7 +219,7 @@ viewExpression
 	;
 
 groupByListExpr
-	:	additiveExpression (COMMA! additiveExpression)*
+	:	expression (COMMA! expression)*
 		{ #groupByListExpr = #([GROUP_BY_EXPR,"groupByListExpr"], #groupByListExpr); }
 	;
 
@@ -229,7 +229,7 @@ orderByListExpr
 	;
 
 orderByListElement
-	:	additiveExpression (ASC|DESC)?
+	:	expression (ASC|DESC)?
 		{ #orderByListElement = #([ORDER_ELEMENT_EXPR,"orderByListElement"], #orderByListElement); }
 	;
 
@@ -247,6 +247,11 @@ outputLimit
 		}
 	;	
 
+// Main expression rule
+expression
+	: evalOrExpression
+	;
+
 evalOrExpression
 	: evalAndExpression (op:OR_EXPR! evalAndExpression)*
 		{ if (op != null)
@@ -255,7 +260,7 @@ evalOrExpression
 	;
 
 evalAndExpression
-	:	evalEqualsExpression (op:AND_EXPR! bitWiseExpression)*
+	:	bitWiseExpression (op:AND_EXPR! bitWiseExpression)*
 		{ if (op != null)
 		  #evalAndExpression = #([EVAL_AND_EXPR,"evalAndExpression"], #evalAndExpression);
 		}		
@@ -263,8 +268,7 @@ evalAndExpression
 
 bitWiseExpression
 	: evalEqualsExpression ( (BAND^|BOR^|BXOR^) evalEqualsExpression )*
-	;
-		
+	;		
 
 evalEqualsExpression
 	:	evalRelationalExpression ( 
@@ -302,24 +306,24 @@ unaryExpression
 	: MINUS^ {#MINUS.setType(UNARY_MINUS);} eventProperty
 	| eventProperty
 	| constant
-	| LPAREN! evalOrExpression RPAREN!
+	| LPAREN! expression RPAREN!
 	| builtinFunc
 	;
 	
 builtinFunc
-	: (MAX^ | MIN^) LPAREN! (ALL! | DISTINCT)? additiveExpression (COMMA! additiveExpression (COMMA! additiveExpression)* )? RPAREN!
-	| SUM^ LPAREN! (ALL! | DISTINCT)? additiveExpression RPAREN!
-	| AVG^ LPAREN! (ALL! | DISTINCT)? additiveExpression RPAREN!
+	: (MAX^ | MIN^) LPAREN! (ALL! | DISTINCT)? expression (COMMA! expression (COMMA! expression)* )? RPAREN!
+	| SUM^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+	| AVG^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| COUNT^ LPAREN!
 		(
-			((ALL! | DISTINCT)? additiveExpression)
+			((ALL! | DISTINCT)? expression)
 		|
 			(STAR!) 
 		)
 		RPAREN!
-	| MEDIAN^ LPAREN! (ALL! | DISTINCT)? additiveExpression RPAREN!
-	| STDDEV^ LPAREN! (ALL! | DISTINCT)? additiveExpression RPAREN!
-	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? additiveExpression RPAREN!
+	| MEDIAN^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+	| STDDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	;
 	
 
