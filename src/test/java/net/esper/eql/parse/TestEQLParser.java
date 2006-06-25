@@ -170,6 +170,10 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
                       "left outer join " +
                       "a.b(string[0]='test').win:lenght(100) as y " +
                       "on y.array[1].map('a').nested = x.nested2");
+        assertIsValid("select a and b from b.win:length(1)");
+        assertIsValid("select a or b from b.win:length(1)");
+        assertIsValid("select a = b from b.win:length(1)");
+        assertIsValid("select a != b from b.win:length(1)");
 
         assertIsValid("select sum(a), avg(b) from b.win:length(1)");
         assertIsValid("select sum(all a), avg(all b), avg(all b/c) from b.win:length(1)");
@@ -202,8 +206,6 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("insert istream into MyEvent select 1 from b.win:length(1)");
         assertIsValid("insert rstream into MyEvent select 1 from b.win:length(1)");
 
-        // TODO and syntax BUG - works with parantheses
-        // assertIsValid("select a and b from b.win:length(1)");
     }
 
     public void testBitWiseCases() throws Exception
