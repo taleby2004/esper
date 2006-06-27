@@ -70,6 +70,7 @@ from <emphasis>stream_def</emphasis> [as name] [, <emphasis>stream_def</emphasis
 [group by <emphasis>grouping_expression_list</emphasis>]
 [having <emphasis>grouping_search_conditions</emphasis>]
 [output <emphasis>output_specification</emphasis>]
+[order by <emphasis>order_by_expression_list</emphasis>]
 </synopsis>
                 
     </sect1>
@@ -642,6 +643,40 @@ Second, the <literal>last</literal> and <literal>all</literal> keywords have spe
 		</sect2>
 
     </sect1>
+
+    <sect1 id="eql-order-by">
+        <title>Sorting Output: the <emphasis>Order By</emphasis> Clause</title>
+
+		<para>
+			The <literal>order by</literal> clause is optional in Esper. It is used for ordering output events by their properties, or by expressions involving those properties. For example, the following statement outputs batches of 5 or more stock tick events that are sorted first by price and then by volume.				
+		</para>
+
+		<programlisting>select symbol from StockTickEvent.win:time(60) 
+output every 5 events 
+order by price, volume</programlisting>
+
+		<para>
+			Here is the syntax for the <literal>order by</literal> clause:				
+		</para>
+
+		<synopsis>order by <emphasis>expression</emphasis> [asc | desc] [, <emphasis>expression</emphasis> [asc | desc]] [, ...]</synopsis>
+
+		<para>
+			Esper places the following restrictions on the expressions in the <literal>order by</literal> clause:
+		</para>
+		
+		<orderedlist spacing="compact">
+			<listitem>
+				<para>
+					All aggregate functions that appear in the <literal>order by</literal> clause must also appear in the <literal>select</literal> expression.
+				</para>
+			</listitem>
+		</orderedlist>
+		
+		<para>
+			Otherwise, any kind of expression that can appear in the <literal>select</literal> clause is also valid in the order by clause.
+		</para>		
+	</sect1>
 
 	<sect1 id="eql-single-row-function-ref">
 		<title>Single-row function reference</title>
