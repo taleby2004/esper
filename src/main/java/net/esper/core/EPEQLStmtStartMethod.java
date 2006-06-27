@@ -14,6 +14,7 @@ import net.esper.eql.join.JoinSetComposerFactory;
 import net.esper.eql.join.JoinSetFilter;
 import net.esper.eql.view.FilterExprView;
 import net.esper.eql.view.OutputProcessView;
+import net.esper.eql.view.InternalRouteView;
 import net.esper.event.EventType;
 import net.esper.view.EventStream;
 import net.esper.view.View;
@@ -123,6 +124,7 @@ public class EPEQLStmtStartMethod
         // Construct a processor for results posted by views and joins, which takes care of aggregation if required.
         // May return null if we don't need to post-process results posted by views or joins.
         ResultSetProcessor optionalResultSetProcessor = ResultSetProcessorFactory.getProcessor(selectionList,
+                optionalInsertIntoDesc,
                 groupByNodes,
                 optionalHavingNode,
                 optionalOutputLimitSpec,
@@ -136,7 +138,7 @@ public class EPEQLStmtStartMethod
         // For just 1 event stream without joins, handle the one-table process separatly.
         if (streams.size() == 1)
         {
-            Viewable finalView = handleSimpleSelect(streamViews[0], optionalResultSetProcessor, viewContext);
+            Viewable finalView = handleSimpleSelect(streamViews[0], optionalResultSetProcessor, optionalInsertIntoDesc, viewContext);
 
             return new Pair<Viewable, EPStatementStopMethod>(finalView, stopMethod);
         }
@@ -160,7 +162,16 @@ public class EPEQLStmtStartMethod
             buffer.setObserver(dispatchable);
         }
 
-        return new Pair<Viewable, EPStatementStopMethod>(indicatorView, stopMethod);
+        // Hook up internal event route for insert-into if required
+        View finalView = indicatorView;
+        if (optionalInsertIntoDesc != null)
+        {
+            InternalRouteView routeView = new InternalRouteView(optionalInsertIntoDesc.isIStream(), services.getInternalEventRouter());
+            finalView.addView(routeView);
+            finalView = routeView;
+        }
+
+        return new Pair<Viewable, EPStatementStopMethod>(finalView, stopMethod);
     }
 
     /**
@@ -266,7 +277,10 @@ public class EPEQLStmtStartMethod
         }
     }
 
-    private Viewable handleSimpleSelect(View view, ResultSetProcessor optionalResultSetProcessor, ViewServiceContext viewContext)
+    private Viewable handleSimpleSelect(View view,
+                                        ResultSetProcessor optionalResultSetProcessor,
+                                        InsertIntoDesc insertIntoDesc,
+                                        ViewServiceContext viewContext)
     {
         View finalView = view;
 
@@ -284,6 +298,14 @@ public class EPEQLStmtStartMethod
             OutputProcessView selectView = new OutputProcessView(optionalResultSetProcessor, streams.size(), optionalOutputLimitSpec, viewContext);
             finalView.addView(selectView);
             finalView = selectView;
+        }
+
+        // Add insert-into view for internal event routing if required
+        if (insertIntoDesc != null)
+        {
+            InternalRouteView routeView = new InternalRouteView(insertIntoDesc.isIStream(), services.getInternalEventRouter());
+            finalView.addView(routeView);
+            finalView = routeView;
         }
 
         return finalView;

@@ -21,7 +21,7 @@ public class TestResultSetProcessorRowPerGroup extends TestCase
     public void setUp() throws Exception
     {
         SelectExprProcessor selectProcessor = new SelectExprEvalProcessor(SupportSelectExprFactory.makeSelectListFromIdent("string", "s0"),
-                SupportEventAdapterService.getService());
+                null, SupportEventAdapterService.getService());
         supportAggregationService = new SupportAggregationService();
 
         List<ExprNode> groupKeyNodes = new LinkedList<ExprNode>();

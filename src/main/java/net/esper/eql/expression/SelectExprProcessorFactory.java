@@ -1,10 +1,14 @@
 package net.esper.eql.expression;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.event.EventAdapterService;
+import net.esper.event.EventType;
 
 /**
  * Factory for select expression processors.
@@ -19,6 +23,7 @@ public class SelectExprProcessorFactory
      * @throws ExprValidationException to indicate the select expression cannot be validated
      */
     public static SelectExprProcessor getProcessor(List<SelectExprElement> selectionList,
+                                                   InsertIntoDesc insertIntoDesc,
                                                    StreamTypeService typeService,
                                                    EventAdapterService eventAdapterService)
         throws ExprValidationException
@@ -26,6 +31,12 @@ public class SelectExprProcessorFactory
         // Determin wildcard processor (select *)
         if (selectionList.size() == 0)
         {
+            // Wildcard and insert-into not allowed as combination
+            if (insertIntoDesc != null)
+            {
+                throw new ExprValidationException("Wildcard not allowed in combination with insert-into");
+            }
+
             // For joins
             if (typeService.getStreamNames().length > 1)
             {
@@ -45,7 +56,7 @@ public class SelectExprProcessorFactory
 
         // Construct processor
     	log.debug(".getProcessor Using SelectExprEvalProcessor");
-        return new SelectExprEvalProcessor(selectionList, eventAdapterService);
+        return new SelectExprEvalProcessor(selectionList, insertIntoDesc, eventAdapterService);
     }
 
     private static final Log log = LogFactory.getLog(SelectExprProcessorFactory.class);

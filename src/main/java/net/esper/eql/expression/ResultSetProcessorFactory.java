@@ -49,6 +49,7 @@ public class ResultSetProcessorFactory
      * @throws ExprValidationException
      */
     public static ResultSetProcessor getProcessor(List<SelectExprElement> selectionList,
+                                                  InsertIntoDesc insertIntoDesc,
                                                	  List<ExprNode> groupByNodes,
                                                	  ExprNode optionalHavingNode,
                                                	  OutputLimitSpec outputLimitSpec,
@@ -123,7 +124,7 @@ public class ResultSetProcessorFactory
                 groupByNodes, orderByList, aggregationService, eventAdapterService);
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectionList, typeService, eventAdapterService);
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectionList, insertIntoDesc, typeService, eventAdapterService);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesAggregatedSelect = getAggregatedProperties(selectAggregateExprNodes);

@@ -2,7 +2,6 @@ package net.esper.core;
 
 import java.util.Iterator;
 
-import net.esper.client.EPException;
 import net.esper.client.EPStatement;
 import net.esper.client.EPStatementException;
 import net.esper.collection.Pair;

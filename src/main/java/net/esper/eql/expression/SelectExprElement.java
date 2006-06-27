@@ -65,7 +65,5 @@ public class SelectExprElement
             }
             names.add(element.getAsName());
         }
-
-
     }
 }

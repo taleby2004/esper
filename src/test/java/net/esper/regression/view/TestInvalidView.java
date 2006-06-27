@@ -126,6 +126,22 @@ public class TestInvalidView extends TestCase
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".win:length(1) as aStr " +
                 "left outer join " + EVENT_ALLTYPES + ".win:length(1) on string=string");
         assertEquals("Error validating expression: Outer join ON-clause must cannot refer to properties of the same stream [select * from net.esper.support.bean.SupportBean_N.win:length(1) as aStr left outer join net.esper.support.bean.SupportBean.win:length(1) on string=string]", exceptionText);
+
+        // invalid order by
+        exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".win:length(1) as aStr order by X");
+        assertEquals("Error starting view: Property named 'X' is not valid in any stream [select * from net.esper.support.bean.SupportBean_N.win:length(1) as aStr order by X]", exceptionText);
+
+        // insert into with wildcard - not allowed
+        exceptionText = getStatementExceptionView("insert into Google select * from " + EVENT_NUM + ".win:length(1) as aStr");
+        assertEquals("Error starting view: Wildcard not allowed in combination with insert-into [insert into Google select * from net.esper.support.bean.SupportBean_N.win:length(1) as aStr]", exceptionText);
+
+        // insert into with duplicate column names
+        exceptionText = getStatementExceptionView("insert into Google (a, b, a) select boolBoxed, boolPrimitive, intBoxed from " + EVENT_NUM + ".win:length(1) as aStr");
+        assertEquals("Error starting view: Property name 'a' appears more then once in insert-into clause [insert into Google (a, b, a) select boolBoxed, boolPrimitive, intBoxed from net.esper.support.bean.SupportBean_N.win:length(1) as aStr]", exceptionText);
+
+        // insert into mismatches selected columns
+        exceptionText = getStatementExceptionView("insert into Google (a, b, c) select boolBoxed, boolPrimitive from " + EVENT_NUM + ".win:length(1) as aStr");
+        assertEquals("Error starting view: Number of supplied values in the select clause does not match insert-into clause [insert into Google (a, b, c) select boolBoxed, boolPrimitive from net.esper.support.bean.SupportBean_N.win:length(1) as aStr]", exceptionText);        
     }
 
     public void testInvalidView()
