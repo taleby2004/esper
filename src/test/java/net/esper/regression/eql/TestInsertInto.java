@@ -9,6 +9,7 @@ import net.esper.client.time.CurrentTimeEvent;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
+import net.esper.support.bean.SupportMarketDataBean;
 import junit.framework.TestCase;
 
 public class TestInsertInto extends TestCase
@@ -39,7 +40,6 @@ public class TestInsertInto extends TestCase
         runAsserts(stmtText);
     }
 
-    // TODO: test rstream
     public void testVariantOneJoin()
     {
         String stmtText = "insert into Event_1 (delta, product) " +
@@ -91,6 +91,43 @@ public class TestInsertInto extends TestCase
             // expected
             assertEquals("Error starting view: Event type named 'Event_1' has already been declared with differing type information [insert into Event_1 (delta) select intPrimitive - intBoxed as deltaTag from net.esper.support.bean.SupportBean.win:length(100)]", ex.getMessage());
         }
+    }
+
+    public void testWithOutputLimitAndSort()
+    {
+        // NOTICE: we are inserting the RSTREAM (removed events)
+        String stmtText = "insert rstream into StockTicks(mySymbol, myPrice) " +
+                          "select symbol, price from " + SupportMarketDataBean.class.getName() + ".win:time(60) " +
+                          "output every 5 seconds " +
+                          "order by symbol asc";
+        epService.getEPAdministrator().createEQL(stmtText);
+
+        stmtText = "select mySymbol, myPrice from StockTicks.win:length(100)";
+        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        statement.addListener(feedListener);
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        sendEvent("IBM", 50);
+        sendEvent("CSC", 10);
+        sendEvent("GE", 20);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10 * 1000));
+        sendEvent("DEF", 100);
+        sendEvent("ABC", 11);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(20 * 1000));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(30 * 1000));
+
+        assertFalse(feedListener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000));
+        //epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000 + 1));
+
+        // Since inserting removed events,
+        assertTrue(feedListener.isInvoked());
+    }
+
+    private void sendEvent(String symbol, double price)
+    {
+        SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, null, null);
+        epService.getEPRuntime().sendEvent(bean);
     }
 
     private void runAsserts(String stmtText)
