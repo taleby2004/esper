@@ -16,7 +16,7 @@
 				<item name="Change History" href="/about/history/history.html"/>
 			</item>
 			<item name="Evaluating Esper" href="/evaluating/evaluating.html" collapse="false">
-				<item name="Two Minute Tutorial" href="/evaluating/tutorial/tutorial.html"/>
+				<item name="Two Minute Tutorial" href="/evaluating/tutorial/two_minute_tutorial.html"/>
 				<item name="Download" href="http://dist.codehaus.org/esper"/>
 			</item>
 			<item name="Using Esper" href="/using/using.html" collapse="false">
