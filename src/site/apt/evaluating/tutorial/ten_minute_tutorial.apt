@@ -1,107 +1,91 @@
-Two Minute Tutorial
+10-Minute Tutorial
 ~~~~~~~~~~~~~~
 
-  Esper offers two principal methods of event processing:
-  
-  [[1]] Event stream analysis
+* The Problem
 
-  [[2]] Event pattern matching
+	The use case involves tracking three components of a transaction. Each component comes to the engine as an event with the following fields:
+
+    * Transaction ID
     
-  []
-  
-      
-* Event Stream Analysis
-	
-	EQL statements are used to derive and aggregate information from one or more streams of events, to join or merge event streams,
-	and to feed results from one event stream to subsequent statements.  
-	
-	EQL is similar to SQL in it's use of the <select> clause and the <where> clause. However EQL statements instead of tables use event streams
-	and a concept called <views>. Similar to tables in an SQL statement, views define the data available for querying and filtering. 
-	Views can represent windows over a stream of events. Views can also sort events, derive statistics from event properties, 
-	group events or handle unique event property values.
-	
-	This is a sample EQL statement that computes the average price for the last 30 seconds of stock tick events:
-	
-----------------------------------------
-  select avg(price) from StockTickEvent.win:time(30) 
-----------------------------------------	
+    * Time stamp 
+    
+    []
 
-	A sample EQL that returns the average price per symbol for the last 100 stock ticks.
-		
-----------------------------------------
-  select symbol, avg(price) as averagePrice
-    from StockTickEvent.win:length(100)
-group by symbol
-----------------------------------------	
-	
-	This example joins 2 event streams. The first event stream consists of fraud warning events for which we keep the last 30 minutes (1800 seconds). 
-	The second stream is withdrawal events for which we consider the last 30 seconds. The streams are joined on account number.
+	In addition, we have the following extra fields.
 
-----------------------------------------
-  select fraud.accountNumber as accntNum, fraud.warning as warn, withdraw.amount as amount,
-         MAX(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraud' as desc
-    from FraudWarningEvent.win:time(1800) as fraud,
-         WithdrawalEvent.win:time(30) as withdraw
-   where fraud.accountNumber = withdraw.accountNumber
-----------------------------------------	
+	In event A:
 
-* Event Pattern Matching
+    * Customer ID 
+    
+    []
 
-	Event patterns match when an event or multiple events occur that match the pattern's definition. Patterns can also be temporal (time-based).
-	Pattern matching is implemented via state machines. 
+	In event C:
 
-	Pattern expressions can consist of filter expressions combined with pattern operators. Expressions can contain further nested
-	pattern expressions by including the nested expression(s) in round brackets.
+    * Supplier ID (the ID of the supplier that the order was filled through) 
+    
+    []
 
-	There are 5 types of operators:
-	
-	[[1]] Operators that control pattern finder creation and termination: <every>
-	
-	[[2]] Logical operators: <and, or, not>
-	
-	[[3]] Temporal operators that operate on event order: < -\> (followed-by) >
-	
-	[[4]] Guards are where-conditions that filter out events and cause termination of the pattern finder, such as <timer:within>
-	
-	[[5]] Observers observe time events as well as other events, such as <timer:interval, timer:at>
-	
-	[]
-	
-	
-	A sample pattern that alerts on each IBM stock tick with a price greater then 80 and within the next 60 seconds:
-	
-----------------------------------------
-  every StockTickEvent(symbol="IBM", price>80) where timer:within(60)
-----------------------------------------	
+	We need to take in events A, B and C and produce a single, combined event with the following fields:
 
-	A sample pattern that alerts every 5 minutes past the hour:
+    * Transaction ID
+    
+    * Customer ID
+    
+    * Time stamp from event A
+    
+    * Time stamp from event B
+    
+    * Time stamp from event C 
+    
+    []
+
+	What we are doing here is matching the transaction IDs on each event, to form an aggregate event. 
+	If all these events were in a relational database, this could be done as a simple SQL join except that with 10,000 events per second, 
+	you will need some serious database hardware to do it.
 	
-----------------------------------------
-  every timer:at(5, *, *, *, *)
-----------------------------------------	
+** Real-Time Summary Data
 
-	A sample pattern that alerts when event A occurs, followed by either event B or event C:
+	Further, we need to produce the following:
+
+    * Min,Max,Average total latency from the events (difference in time between A and C) over the past 30 minutes.
+    
+    * Min,Max,Average latency grouped by (a) customer ID and (b) supplier ID. In other words, metrics on the the latency of the orders coming from each customer and going to each supplier.
+    
+    * Min,Max,Average latency between events A/B (time stamp of B minus A) and B/C (time stamp of C minus B). 
+
+	[]    
+
+** Find Missing Events
+
+	We need to detect a transaction that did not make it through all three events. 
+	In other words, a transaction with events A or B, but not C. 
+	Note that, in this case, what we care about is event C. 
+	The lack of events A or B could indicate a failure in the event transport and should be ignored. 
+	Although the lack of an event C could also be a transport failure, it merits looking into. 
+
+* Solution
+
+** Event Definitions
+
+	TODO
+
+** Detecting Combined Events
+
+	TODO
+
+** Compiling Realtime Summary Data
+
+	TODO
 	
-----------------------------------------
-  A -> ( B or C )
-----------------------------------------	
+** Finding Missing Events
 
-	An event pattern where a property of a following event must match a property from the first event: 
- 
-----------------------------------------
-  every a=EventX -> every b=EventY(objectID=a.objectID)
-----------------------------------------
+	TODO
+	
+* Further notes
 
-* Event Representation in Java
-
-  Events are represented as JavaBean instances. Esper can interrogate any plain-old Java object representing an event as long as the object exposes the required getter methods
-  following the JavaBean conventions.
-  
-  Esper can also query object graphs consisting of arrays, mapped or nested event properties, or any combination. The following are examples of valid 
-  event properties for EQL and pattern statements:
-  
-----------------------------------------
-  OrderEvent.item[1].description				
-  RFIDEvent.attribute('shelfcode')
-----------------------------------------  
-
+	The example code can be found in the "eg" folder of the distribution in package net.esper.example.transaction. 
+	The example contains a transaction simulator that can be invoked from the command line.
+	Please consult the examples section in the reference documentation for more detail.
+	
+	Please see the readme file in the same folder for build instructions and command line parameters.
+	
