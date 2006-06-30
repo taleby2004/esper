@@ -47,7 +47,7 @@ public class ExprMathNode extends ExprNode
 
         if (childTypeOne.equals(childTypeTwo))
         {
-            resultType = childTypeTwo;
+            resultType = JavaClassHelper.getBoxedType(childTypeTwo);
         }
         else
         {

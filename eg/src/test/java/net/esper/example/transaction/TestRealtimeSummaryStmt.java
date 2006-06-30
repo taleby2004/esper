@@ -15,10 +15,8 @@ public class TestRealtimeSummaryStmt extends TestStmtBase
     {
         super.setUp();
 
-        // Establish feed for combined events that calculates the latency
-        LatencyFeederListener feederListener = new LatencyFeederListener(epService.getEPRuntime());
-        CombinedEventStmt combinedStmt = new CombinedEventStmt(epService.getEPAdministrator());
-        combinedStmt.addListener(feederListener);
+        // Establish feed for combined events, which contains the latency values
+        new CombinedEventStmt(epService.getEPAdministrator());
 
         // Establish listeners for testing
         listenerTotals = new SupportUpdateListener();

@@ -15,14 +15,14 @@ public class CombinedEventListener implements UpdateListener
             return;
         }
 
-        TxnEventA eventA = (TxnEventA) newEvents[0].get("A");
-        TxnEventB eventB = (TxnEventB) newEvents[0].get("B");
-        TxnEventC eventC = (TxnEventC) newEvents[0].get("C");
-
+        EventBean event = newEvents[0];
         log.debug("Combined event detected " +
-                " TxnEventA " + eventA.toString() +
-                " TxnEventB " + eventB.toString() +
-                " TxnEventC " + eventC.toString()
+                " transactionId=" + event.get("transactionId") +
+                " customerId=" + event.get("customerId") +
+                " supplierId=" + event.get("supplierId") +
+                " latencyAC=" + event.get("latencyAC") +
+                " latencyAB=" + event.get("latencyAB") +
+                " latencyBC=" + event.get("latencyBC")
                 );
     }
 

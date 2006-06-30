@@ -62,9 +62,14 @@ public class TestCombinedEventStmt extends TestStmtBase
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getLastNewData().length);
         EventBean combinedEvent = listener.getLastNewData()[0];
-        assertSame(expectedA, combinedEvent.get("A"));
-        assertSame(expectedB, combinedEvent.get("B"));
-        assertSame(expectedC, combinedEvent.get("C"));
+        assertSame(expectedC.getTransactionId(), combinedEvent.get("transactionId"));
+        assertSame(expectedB.getTransactionId(), combinedEvent.get("transactionId"));
+        assertSame(expectedA.getTransactionId(), combinedEvent.get("transactionId"));
+        assertSame(expectedA.getCustomerId(), combinedEvent.get("customerId"));
+        assertSame(expectedC.getSupplierId(), combinedEvent.get("supplierId"));
+        assertSame(expectedC.getTimestamp() - expectedA.getTimestamp(), combinedEvent.get("latencyAC"));
+        assertSame(expectedB.getTimestamp() - expectedA.getTimestamp(), combinedEvent.get("latencyAB"));
+        assertSame(expectedC.getTimestamp() - expectedB.getTimestamp(), combinedEvent.get("latencyBC"));
         listener.reset();
     }
 }

@@ -90,7 +90,6 @@ public class TxnGenMain {
         configuration.addEventTypeAlias("EventA", TxnEventA.class.getName());
         configuration.addEventTypeAlias("EventB", TxnEventB.class.getName());
         configuration.addEventTypeAlias("EventC", TxnEventC.class.getName());
-        configuration.addEventTypeAlias("LatencyEvent", LatencyEvent.class.getName());
 
         // Get engine instance
         EPServiceProvider epService = EPServiceProviderManager.getProvider("TransactionExample", configuration);
@@ -101,7 +100,6 @@ public class TxnGenMain {
 
         // Set up statement for listening to combined events
         CombinedEventStmt combinedEventStmt = new CombinedEventStmt(epService.getEPAdministrator());
-        combinedEventStmt.addListener(new LatencyFeederListener(epService.getEPRuntime()));
         combinedEventStmt.addListener(new CombinedEventListener());
 
         // Set up statements for realtime summary latency data - overall totals and totals per customer and per supplier
