@@ -11,6 +11,7 @@
 	<!ENTITY adapters SYSTEM "modules/adapters.xml">
 	<!ENTITY indicators SYSTEM "modules/indicators.xml">
 	<!ENTITY references SYSTEM "modules/references.xml">
+	<!ENTITY tutorial SYSTEM "modules/tutorial.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -29,11 +30,17 @@
 			while the data is processed. Esper is an event stream processor that aims to enable a short development cycle from inception to production 
 			for these types of applications.
         </para>
+        
 		<para>
-			Esper is a 100% Java component that can be embedded in Java applications. It allows push and pull of data via its subscription and pull API. Esper can be extended by building custom views, functions, windows etc.
+			If you are new to Esper, please follow these steps:
 		</para>
 			
 		<orderedlist>
+			<listitem>
+				<para>
+                    Read the tutorials and feature list available on the Esper public web site at <literal>http://esper.codehaus.org</literal>
+                </para>
+			</listitem>
 			<listitem>
 				<para>
                     Read <xref linkend="technology_overview_intro_cep"/> if you are new to CEP and ESP (complex event processing, event stream processing)
@@ -58,6 +65,8 @@
 	</preface>
 
     &technology_overview;
+
+    &tutorial;
 
     &architecture;
 
