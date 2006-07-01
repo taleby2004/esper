@@ -87,9 +87,9 @@ public class TxnGenMain {
         // Configure engine with event names to make the statements more readable.
         // This could also be done in a configuration file.
         Configuration configuration = new Configuration();
-        configuration.addEventTypeAlias("EventA", TxnEventA.class.getName());
-        configuration.addEventTypeAlias("EventB", TxnEventB.class.getName());
-        configuration.addEventTypeAlias("EventC", TxnEventC.class.getName());
+        configuration.addEventTypeAlias("TxnEventA", TxnEventA.class.getName());
+        configuration.addEventTypeAlias("TxnEventB", TxnEventB.class.getName());
+        configuration.addEventTypeAlias("TxnEventC", TxnEventC.class.getName());
 
         // Get engine instance
         EPServiceProvider epService = EPServiceProviderManager.getProvider("TransactionExample", configuration);

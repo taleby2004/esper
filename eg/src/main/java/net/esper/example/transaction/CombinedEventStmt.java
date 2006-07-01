@@ -16,9 +16,9 @@ public class CombinedEventStmt
                              "C.timestamp - A.timestamp," +
                              "C.timestamp - B.timestamp," +
                              "B.timestamp - A.timestamp " +
-                        "from EventA.win:time(1800) A," +
-                             "EventB.win:time(1800) B," +
-                             "EventC.win:time(1800) C " +
+                        "from TxnEventA.win:time(1800) A," +
+                             "TxnEventB.win:time(1800) B," +
+                             "TxnEventC.win:time(1800) C " +
                         "where A.transactionId = B.transactionId and B.transactionId = C.transactionId";
 
         statement = admin.createEQL(stmt);

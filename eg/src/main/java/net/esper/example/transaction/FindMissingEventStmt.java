@@ -27,11 +27,11 @@ public class FindMissingEventStmt
         // The window of C is declared large to ensure the C events don't leave the window before A and B
         // thus generating false alerts, making these obvious via timestamp. Lets keep 1 hour of data for C.
         String stmt = "select * from " +
-                        "EventA.win:time(1800) A " +
+                        "TxnEventA.win:time(1800) A " +
                           "full outer join " +
-                        "EventC.win:time(3600) C on A.transactionId = C.transactionId " +
+                        "TxnEventC.win:time(3600) C on A.transactionId = C.transactionId " +
                           "full outer join " +
-                        "EventB.win:time(1800) B on B.transactionId = C.transactionId " +
+                        "TxnEventB.win:time(1800) B on B.transactionId = C.transactionId " +
                       "where C.transactionId is null";
 
         statement = admin.createEQL(stmt);
