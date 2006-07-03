@@ -5,8 +5,10 @@ Evaluating Esper
 	
 * Getting Started
 	
-	* The {{{tutorial/tutorial.html}tutorial}} is a short introduction.
+	* The {{{tutorial/two_minute_tutorial.html}2-minute tutorial}} is a short introduction.
 	
+	* The {{{tutorial/ten_minute_tutorial.html}10-minute tutorial}} is a more detailed introduction.
+
 	* The PDF and JavaDoc {{{../using/documentation/documentation.html}documentation}} is available online.
 	  The reference manual also describes examples.
 	

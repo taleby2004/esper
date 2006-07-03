@@ -12,6 +12,27 @@ Change History
 	[]
 
 
+Version 0.9.5 (Beta enhancements release)
+
+	Released July 3, 2006
+		
+* API changes
+
+    * None
+
+* Major changes
+
+	* Support for "insert into" clause allowing chains of EQL statements and merging of event streams
+	
+	* Capability added to sort output using an "order-by" clause
+	
+	* Support for bit-wise AND (&), OR (|) and XOR(^) operators
+	
+* Minor changes	
+
+	* Bug fix for allowing boolean expression in select clauses, such as "select a and b from MyEvent..."
+	
+
 Version 0.9.1 (Beta bug fix release)
 
 	Released June 10, 2006

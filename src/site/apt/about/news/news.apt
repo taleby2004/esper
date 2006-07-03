@@ -1,5 +1,21 @@
 News
 
+* July 3, 2006  -  Esper 0.9.5 Beta
+
+    * Completed move to the Codehaus open-source repository, see {{{http://esper.codehaus.org/}Esper at Codehaus}}
+	
+    * Support for "insert into" clause allowing chains of EQL statements and merging of event streams (continuous insertion)
+	
+    * Capability added to sort output using an "order-by" clause
+	
+    * Support for bit-wise AND (&), OR (|) and XOR(^) operators
+	
+    * Bug fix for allowing boolean expression in select clauses, such as "select a and b from MyEvent..."
+	
+    * New 10-minute tutorial; Transaction example simplified
+	
+	[]
+
 * June 10, 2006  -  Esper 0.9.1 Beta
 
     * Beta bug fix release
