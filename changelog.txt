@@ -5,10 +5,10 @@ Changes in version 0.9.5
 ------------------------------------
 
 * (EQL) Capability added to sort output using an "order-by" clause
-* (EQL) Support for bit-wise AND (&), OR (|) and XOR(^) 
+* (EQL) Support for bit-wise AND (&), OR (|) and XOR(^) operators
 * (EQL) Bug fix for allowing boolean expression in select clauses, such as "select a and b from MyEvent..."
-* (EQL) Added support for "insert into" thus allowing chains of EQL statements
-* (Docs and Examples) New 10-minute tutorial; Transaction example simplfied
+* (EQL) Added support for "insert into" thus allowing chains of EQL statements, and merging of event streams
+* (Docs and Examples) New 10-minute tutorial; Transaction example simplified
 
 Changes in version 0.9.1
 ------------------------------------

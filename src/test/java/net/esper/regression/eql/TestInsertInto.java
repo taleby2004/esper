@@ -118,10 +118,10 @@ public class TestInsertInto extends TestCase
 
         assertFalse(feedListener.isInvoked());
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000));
-        //epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000 + 1));
 
-        // Since inserting removed events,
-        //assertTrue(feedListener.isInvoked());
+        // TODO: scheduling service not deterministic in scheduling callbacks for
+        // dependent statements, and for callbacks withing the same statement (timed window and timed output limited).
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000 + 1));
     }
 
     private void sendEvent(String symbol, double price)
