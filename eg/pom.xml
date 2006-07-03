@@ -3,7 +3,7 @@
 	<name>Esper Examples</name>
 	<artifactId>esper_examples</artifactId>
 	<groupId>net.esper.examples</groupId>
-	<version>0.9.1</version>
+	<version>0.9.5</version>
 	<packaging>jar</packaging>
 	<description>Esper CEP ESP engine for Java examples, basedir is ${basedir}</description>
 	<repositories>
@@ -13,6 +13,11 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<dependency>
+			<groupId>esper</groupId>
+			<artifactId>esper</artifactId>
+			<version>0.9.5</version>
+		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -37,11 +42,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>3.8.1</version>
-		</dependency>
-		<dependency>
-			<groupId>esper</groupId>
-			<artifactId>esper</artifactId>
-			<version>0.9.1</version>
 		</dependency>
 	</dependencies>
 	<build>

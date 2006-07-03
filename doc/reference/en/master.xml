@@ -17,7 +17,7 @@
 	<bookinfo>
 		<title>Esper - Java Event Stream Processor </title>
 		<subtitle>Esper Reference Documentation</subtitle>
-		<releaseinfo>0.9.1</releaseinfo>
+		<releaseinfo>0.9.5</releaseinfo>
 	</bookinfo>
 	<toc/>
 	<preface id="preface" revision="1">

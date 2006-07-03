@@ -14,7 +14,7 @@ LIB=../../lib
 
 CLASSPATH=.
 CLASSPATH=$CLASSPATH:../target/classes
-CLASSPATH=$CLASSPATH:../../esper-0.9.1.jar
+CLASSPATH=$CLASSPATH:../../esper-0.9.5.jar
 CLASSPATH=$CLASSPATH:$LIB/cglib-full-2.0.2.jar
 CLASSPATH=$CLASSPATH:$LIB/commons-beanutils-1.7.0.jar
 CLASSPATH=$CLASSPATH:$LIB/commons-logging-1.0.3.jar

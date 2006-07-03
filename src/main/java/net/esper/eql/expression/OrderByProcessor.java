@@ -26,7 +26,7 @@ public interface OrderByProcessor {
 	 * @param outgoingEvents - the events to sort
 	 * @param generatingEvents - the events that generated the output events (each event has a corresponding array of generating events per different event streams)
 	 * @param groupByKeys - the keys to use for determining the group-by group of output events 
-	 * @return
+	 * @return an array containing the output events in sorted order
 	 */
 	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, MultiKey[] groupByKeys);
 }	

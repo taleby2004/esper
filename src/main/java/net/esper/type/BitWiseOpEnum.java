@@ -80,8 +80,8 @@ public enum BitWiseOpEnum
     {
         /**
          * Computes using the 2 numbers or boolean a result object.
-         * @param d1 is the first number or boolean
-         * @param d2 is the second number or boolean
+         * @param objOne is the first number or boolean
+         * @param objTwo is the second number or boolean
          * @return result
          */
     	

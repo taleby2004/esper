@@ -1,9 +1,6 @@
 package net.esper.eql.expression;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -73,7 +70,6 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param exprProcessor - processes each input event and returns output event
      * @param orderByProcessor - orders the outgoing events according to the order-by clause
      * @param events - input events
-     * @param isSorting - true if outgoing events need to be sorted
      * @return output events, one for each input event
      */
     protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
