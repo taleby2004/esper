@@ -1,8 +1,11 @@
 Building Esper
 ~~~~~~~~~~~~~~
 
+  You do not need to build Esper to run the examples. Please follow the instructions in the readme file in the "eg/etc" foldere
+  to run the examples.
+
   The Esper build is managed by Apache Maven 2.0 or above. The Esper engine itself can be build and unit tested
-  via the below command.
+  via the below commands.
   
   The instructions below have last been tried using Maven 2.0.4 and the Esper 0.9.1 release. 
         

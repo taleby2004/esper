@@ -30,7 +30,7 @@
 			<item name="Developing Esper" href="/developing/developing.html" collapse="false">
 				<item name="How To Contribute" href="/developing/contribute/contribute.html"/>
 				<item name="Mailing Lists" href="http://xircles.codehaus.org/projects/esper/lists"/>
-				<item name="Roadmap" href="/developing/roadmap/roadmap.html"/>
+				<item name="Roadmap" href="http://jira.codehaus.org/browse/ESPER?report=com.atlassian.jira.plugin.system.project:roadmap-panel"/>
 				<item name="Building Esper" href="/developing/building/building.html"/>
 			</item>
 		</menu>

@@ -1,7 +1,7 @@
 10-Minute Tutorial
 ~~~~~~~~~~~~~~
-
-* The Problem
+  
+* The Problem 
 
 	The use case involves tracking three components of a transaction. Each component comes to the engine as an event with the following fields:
 
@@ -61,7 +61,8 @@
 	The lack of events A or B could indicate a failure in the event transport and should be ignored. 
 	Although the lack of an event C could also be a transport failure, it merits looking into. 
 
-* Solution
+
+* Solution 
 
 ** Event Definitions
 
@@ -223,12 +224,14 @@ TxnEventA a = new TxnEventA("txnid1", 1, "customerId1");
 epService.getEPRuntime().sendEvent(event);	
 ----------------------------------------
 
-	
-* Further notes
 
+* Running the Example 
+	
 	The complete example code can be found in the "eg" folder of the distribution in package net.esper.example.transaction. 
 	The example contains a transaction simulator that can be invoked from the command line.	
-	Please consult the examples section in the reference documentation for more detail.
+	The readme file in the "eg/etc" folder contains build instructions and command line parameters
+	to run the transaction simulator from the command line. You do not need to perform a build of the Esper engine to
+	run the example, the Esper jar file has been included in the distribution.
 	
-	The readme file in the "eg/etc" folder contains build instructions and command line parameters.
-	
+	Please consult the examples section in the reference documentation for more information.
+		
