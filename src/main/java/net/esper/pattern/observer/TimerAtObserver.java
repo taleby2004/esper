@@ -4,6 +4,7 @@ import net.esper.pattern.PatternContext;
 import net.esper.pattern.MatchedEventMap;
 import net.esper.schedule.ScheduleCallback;
 import net.esper.schedule.ScheduleSpec;
+import net.esper.schedule.ScheduleSlot;
 import net.esper.pattern.observer.EventObserver;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +16,7 @@ public class TimerAtObserver implements EventObserver, ScheduleCallback
 {
     private final ScheduleSpec scheduleSpec;
     private final PatternContext context;
+    private final ScheduleSlot scheduleSlot;
     private final MatchedEventMap beginState;
     private final ObserverEventEvaluator observerEventEvaluator;
 
@@ -33,6 +35,7 @@ public class TimerAtObserver implements EventObserver, ScheduleCallback
         this.context = context;
         this.beginState = beginState;
         this.observerEventEvaluator = observerEventEvaluator;
+        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
     }
 
     public final void scheduledTrigger()
@@ -58,7 +61,7 @@ public class TimerAtObserver implements EventObserver, ScheduleCallback
             throw new IllegalStateException("Timer already active");
         }
 
-        context.getSchedulingService().add(scheduleSpec, this);
+        context.getSchedulingService().add(scheduleSpec, this, scheduleSlot);
         isTimerActive = true;
     }
 
@@ -71,7 +74,7 @@ public class TimerAtObserver implements EventObserver, ScheduleCallback
 
         if (isTimerActive)
         {
-            context.getSchedulingService().remove(this);
+            context.getSchedulingService().remove(this, scheduleSlot);
             isTimerActive = false;
         }
     }

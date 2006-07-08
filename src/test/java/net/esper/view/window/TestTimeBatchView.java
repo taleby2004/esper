@@ -6,11 +6,11 @@ import junit.framework.TestCase;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.event.EventFactoryHelper;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.support.schedule.SupportSchedulingServiceImpl;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.view.ViewServiceContext;
 import net.esper.view.ViewSupport;
 
@@ -31,7 +31,7 @@ public class TestTimeBatchView extends TestCase
 
         // Set the scheduling service to use
         schedulingServiceStub = new SupportSchedulingServiceImpl();
-        myView.setViewServiceContext(new ViewServiceContext(schedulingServiceStub, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext(schedulingServiceStub));
     }
 
     public void testIncorrectUse()
@@ -164,7 +164,7 @@ public class TestTimeBatchView extends TestCase
         myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d, 1505L);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
-        myView.setViewServiceContext(new ViewServiceContext(schedulingServiceStub, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext(schedulingServiceStub));
 
         Map<String, EventBean> events = EventFactoryHelper.makeEventMap(
             new String[] {"A1", "A2", "A3"});
@@ -242,7 +242,7 @@ public class TestTimeBatchView extends TestCase
     {
         myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d);
 
-        ViewServiceContext context = new ViewServiceContext(null, SupportEventAdapterService.getService());
+        ViewServiceContext context = SupportViewContextFactory.makeContext();
         SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.setParent(parent);
         myView.setViewServiceContext(context);

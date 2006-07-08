@@ -6,9 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.esper.schedule.SchedulingService;
-import net.esper.schedule.ScheduleCallback;
-import net.esper.schedule.ScheduleSpec;
+import net.esper.schedule.*;
 
 public class SupportSchedulingServiceImpl implements SchedulingService
 {
@@ -20,19 +18,19 @@ public class SupportSchedulingServiceImpl implements SchedulingService
         return added;
     }
 
-    public void add(long afterMSec, ScheduleCallback callback)
+    public void add(long afterMSec, ScheduleCallback callback, ScheduleSlot slot)
     {
         log.debug(".add Not implemented, afterMSec=" + afterMSec + " callback=" + callback.getClass().getName());
         added.put(afterMSec, callback);
     }
 
-    public void add(ScheduleSpec scheduleSpecification, ScheduleCallback callback)
+    public void add(ScheduleSpec scheduleSpecification, ScheduleCallback callback, ScheduleSlot slot)
     {
         log.debug(".add Not implemented, scheduleSpecification=" + scheduleSpecification +
                 " callback=" + callback.getClass().getName());
     }
 
-    public void remove(ScheduleCallback callback)
+    public void remove(ScheduleCallback callback, ScheduleSlot slot)
     {
         log.debug(".remove Not implemented, callback=" + callback.getClass().getName());
     }
@@ -52,6 +50,11 @@ public class SupportSchedulingServiceImpl implements SchedulingService
     public void evaluate()
     {
         log.debug(".evaluate Not implemented");
+    }
+
+    public ScheduleBucket allocateBucket()
+    {
+        return new ScheduleBucket(0);
     }
 
     private static final Log log = LogFactory.getLog(SupportSchedulingServiceImpl.class);

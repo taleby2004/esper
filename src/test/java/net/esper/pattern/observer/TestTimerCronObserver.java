@@ -21,7 +21,7 @@ public class TestTimerCronObserver extends TestCase
         beginState = new MatchedEventMap();
 
         scheduleService = new SchedulingServiceImpl();
-        PatternContext context = new PatternContext(null, scheduleService);
+        PatternContext context = new PatternContext(null, scheduleService, scheduleService.allocateBucket());
 
         ScheduleSpec scheduleSpec = new ScheduleSpec();
         scheduleSpec.addValue(ScheduleUnit.SECONDS, 1);

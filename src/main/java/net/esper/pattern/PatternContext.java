@@ -1,6 +1,7 @@
 package net.esper.pattern;
 
 import net.esper.schedule.SchedulingService;
+import net.esper.schedule.ScheduleBucket;
 import net.esper.filter.FilterService;
 
 /**
@@ -10,16 +11,18 @@ public final class PatternContext
 {
     private final FilterService filterService;
     private final SchedulingService schedulingService;
+    private final ScheduleBucket scheduleBucket;
 
     /**
      * Constructor.
      * @param filterService implementation for filtering service
      * @param schedulingService implementation for schedule evaluation
      */
-    public PatternContext(FilterService filterService, SchedulingService schedulingService)
+    public PatternContext(FilterService filterService, SchedulingService schedulingService, ScheduleBucket scheduleBucket)
     {
         this.filterService = filterService;
         this.schedulingService = schedulingService;
+        this.scheduleBucket = scheduleBucket;
     }
 
     /**
@@ -38,5 +41,10 @@ public final class PatternContext
     public final SchedulingService getSchedulingService()
     {
         return schedulingService;
+    }
+
+    public ScheduleBucket getScheduleBucket()
+    {
+        return scheduleBucket;
     }
 }

@@ -12,22 +12,31 @@ import java.util.*;
 public final class SchedulingServiceImpl implements SchedulingService
 {
     // Map of time and callback
-    private final SortedMap<Long, Set<ScheduleCallback>> timeCallbackMap;
+    private final SortedMap<Long, SortedMap<ScheduleSlot, ScheduleCallback>> timeCallbackMap;
 
     // Map of callback and callback list for faster removal
-    private final Map<ScheduleCallback, Set<ScheduleCallback>> callbackSetMap;
+    private final Map<ScheduleCallback, SortedMap<ScheduleSlot, ScheduleCallback>> callbackSetMap;
 
     // Current time - used for evaluation as well as for adding new callbacks
     private long currentTime;
+
+    // Current bucket number - for use in ordering callbacks by bucket
+    private int curBucketNum;
 
     /**
      * Constructor.
      */
     public SchedulingServiceImpl()
     {
-        this.timeCallbackMap = new TreeMap<Long, Set<ScheduleCallback>>();
-        this.callbackSetMap = new Hashtable<ScheduleCallback, Set<ScheduleCallback>>();
+        this.timeCallbackMap = new TreeMap<Long, SortedMap<ScheduleSlot, ScheduleCallback>>();
+        this.callbackSetMap = new Hashtable<ScheduleCallback, SortedMap<ScheduleSlot, ScheduleCallback>>();
         this.currentTime = System.currentTimeMillis();
+    }
+
+    public ScheduleBucket allocateBucket()
+    {
+        curBucketNum++;
+        return new ScheduleBucket(curBucketNum);
     }
 
     public long getTime()
@@ -40,27 +49,27 @@ public final class SchedulingServiceImpl implements SchedulingService
         this.currentTime = currentTime;
     }
 
-    public final void add(long afterMSec, ScheduleCallback callback)
+    public final void add(long afterMSec, ScheduleCallback callback, ScheduleSlot slot)
             throws ScheduleServiceException
     {
         if (callbackSetMap.containsKey(callback))
         {
             String message = "Callback already in collection";
-            log.fatal(".add " + message);
+            SchedulingServiceImpl.log.fatal(".add " + message);
             throw new ScheduleServiceException(message);
         }
 
         long triggerOnTime = currentTime + afterMSec;
 
-        addTrigger(callback, triggerOnTime);
+        addTrigger(slot, callback, triggerOnTime);
     }
 
-    public final void add(ScheduleSpec spec, ScheduleCallback callback)
+    public final void add(ScheduleSpec spec, ScheduleCallback callback, ScheduleSlot slot)
     {
         if (callbackSetMap.containsKey(callback))
         {
             String message = "Callback already in collection";
-            log.fatal(".add " + message);
+            SchedulingServiceImpl.log.fatal(".add " + message);
             throw new ScheduleServiceException(message);
         }
 
@@ -69,24 +78,24 @@ public final class SchedulingServiceImpl implements SchedulingService
         if (nextScheduledTime <= currentTime)
         {
             String message = "Schedule computation returned invalid time, operation not completed";
-            log.fatal(".add " + message + "  nextScheduledTime=" + nextScheduledTime + "  currentTime=" + currentTime);
+            SchedulingServiceImpl.log.fatal(".add " + message + "  nextScheduledTime=" + nextScheduledTime + "  currentTime=" + currentTime);
             assert false;
             return;
         }
 
-        addTrigger(callback, nextScheduledTime);
+        addTrigger(slot, callback, nextScheduledTime);
     }
 
-    public final void remove(ScheduleCallback callback)
+    public final void remove(ScheduleCallback callback, ScheduleSlot slot)
     {
-        Set<ScheduleCallback> callbackSet = callbackSetMap.get(callback);
+        SortedMap<ScheduleSlot, ScheduleCallback> callbackSet = callbackSetMap.get(callback);
         if (callbackSet == null)
         {
             String message = "Callback cannot be located in collection";
-            log.fatal(".remove " + message);
+            SchedulingServiceImpl.log.fatal(".remove " + message);
             throw new ScheduleServiceException(message);
         }
-        callbackSet.remove(callback);
+        callbackSet.remove(slot);
         callbackSetMap.remove(callback);
     }
 
@@ -94,14 +103,16 @@ public final class SchedulingServiceImpl implements SchedulingService
     {
         // Get the values on or before the current time - to get those that are exactly on the
         // current time we just add one to the current time for getting the head map
-        SortedMap<Long, Set<ScheduleCallback>> headMap = timeCallbackMap.headMap(currentTime + 1);
+        SortedMap<Long, SortedMap<ScheduleSlot, ScheduleCallback>> headMap = timeCallbackMap.headMap(currentTime + 1);
 
         List<ScheduleCallback> triggerables = new LinkedList<ScheduleCallback>();
 
         // First determine all triggers to shoot
-        for (Map.Entry<Long, Set<ScheduleCallback>> entry : headMap.entrySet())
+        List<Long> removeKeys = new LinkedList<Long>();
+        for (Map.Entry<Long, SortedMap<ScheduleSlot, ScheduleCallback>> entry : headMap.entrySet())
         {
-            for (ScheduleCallback callback : entry.getValue())
+            removeKeys.add(entry.getKey());
+            for (ScheduleCallback callback : entry.getValue().values())
             {
                 triggerables.add(callback);
             }
@@ -115,14 +126,12 @@ public final class SchedulingServiceImpl implements SchedulingService
         }
 
         // Next remove all callbacks
-        List<Long> removeKeys = new LinkedList<Long>();
-        for (Map.Entry<Long, Set<ScheduleCallback>> entry : headMap.entrySet())
+        for (Map.Entry<Long, SortedMap<ScheduleSlot, ScheduleCallback>> entry : headMap.entrySet())
         {
-            for (ScheduleCallback callback : entry.getValue())
+            for (ScheduleCallback callback : entry.getValue().values())
             {
                 callbackSetMap.remove(callback);
             }
-            removeKeys.add(entry.getKey());
         }
 
         // Remove all triggered msec values
@@ -132,15 +141,15 @@ public final class SchedulingServiceImpl implements SchedulingService
         }
     }
 
-    private void addTrigger(ScheduleCallback callback, long triggerTime)
+    private void addTrigger(ScheduleSlot slot, ScheduleCallback callback, long triggerTime)
     {
-        Set<ScheduleCallback> callbackSet = timeCallbackMap.get(triggerTime);
+        SortedMap<ScheduleSlot, ScheduleCallback> callbackSet = timeCallbackMap.get(triggerTime);
         if (callbackSet == null)
         {
-            callbackSet = new HashSet<ScheduleCallback>();
+            callbackSet = new TreeMap<ScheduleSlot, ScheduleCallback>();
             timeCallbackMap.put(triggerTime, callbackSet);
         }
-        callbackSet.add(callback);
+        callbackSet.put(slot, callback);
         callbackSetMap.put(callback, callbackSet);
     }
 

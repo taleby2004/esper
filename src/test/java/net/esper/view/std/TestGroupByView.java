@@ -5,12 +5,8 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportMarketDataBean;
-import net.esper.support.view.SupportBeanClassView;
-import net.esper.support.view.SupportMapView;
-import net.esper.support.view.SupportStreamImpl;
-import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.view.*;
 import net.esper.support.event.SupportEventBeanFactory;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.EventStream;
 import net.esper.view.View;
 import net.esper.view.ViewServiceContext;
@@ -19,20 +15,18 @@ import net.esper.client.EPException;
 public class TestGroupByView extends TestCase
 {
     private GroupByView myGroupByView;
-    private MergeView myMergeView;
-    private SupportBeanClassView childView;
     private SupportBeanClassView ultimateChildView;
     private ViewServiceContext viewServiceContext;
 
     public void setUp()
     {
-        viewServiceContext = new ViewServiceContext(null, SupportEventAdapterService.getService());
+        viewServiceContext = SupportViewContextFactory.makeContext();
         myGroupByView = new GroupByView(new String[] {"symbol"});
         myGroupByView.setViewServiceContext(viewServiceContext);
 
-        childView = new SupportBeanClassView(SupportMarketDataBean.class);
+        SupportBeanClassView childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
-        myMergeView = new MergeView(new String[] {"symbol"});
+        MergeView myMergeView = new MergeView(new String[]{"symbol"});
 
         ultimateChildView = new SupportBeanClassView(SupportMarketDataBean.class);
 
@@ -162,10 +156,10 @@ public class TestGroupByView extends TestCase
 
         // Add a size view parent of merge view
         groupView = new GroupByView("symbol");
-        groupView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        groupView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         SizeView sizeView_1 = new SizeView();
-        sizeView_1.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        sizeView_1.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         groupView.addView(sizeView_1);
         mergeViewOne = new MergeView(new String[] {"symbol"});

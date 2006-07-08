@@ -8,10 +8,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 import net.esper.collection.Pair;
 import net.esper.support.bean.SupportMarketDataBean;
-import net.esper.support.view.SupportBeanClassView;
-import net.esper.support.view.SupportSchemaNeutralView;
-import net.esper.support.view.SupportStreamImpl;
-import net.esper.support.view.SupportViewSpecFactory;
+import net.esper.support.view.*;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.window.TimeWindowView;
 
@@ -56,7 +53,7 @@ public class TestViewServiceHelper extends TestCase
 
         SupportBeanClassView topView = new SupportBeanClassView(TEST_CLASS);
         List<ViewSpec> specifications = SupportViewSpecFactory.makeSpecListOne();
-        ViewServiceContext context = new ViewServiceContext(null, SupportEventAdapterService.getService());
+        ViewServiceContext context = SupportViewContextFactory.makeContext();
 
         // Check correct views created
         List<View> views = ViewServiceHelper.instantiateChain(existingParentViews, topView, specifications, context);

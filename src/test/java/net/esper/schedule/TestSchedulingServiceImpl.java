@@ -1,118 +1,120 @@
 package net.esper.schedule;
 
 import junit.framework.TestCase;
+import net.esper.support.schedule.SupportScheduleCallback;
 
 import java.util.Calendar;
 
-import net.esper.support.schedule.SupportScheduleCallback;
-
 public class TestSchedulingServiceImpl extends TestCase
 {
+    private SchedulingServiceImpl service;
+
+    private ScheduleSlot slots[][];
+    private SupportScheduleCallback callbacks[];
+
+    public void setUp()
+    {
+        service = new SchedulingServiceImpl();
+
+        // 2-by-2 table of buckets and slots
+        ScheduleBucket[] buckets = new ScheduleBucket[3];
+        slots = new ScheduleSlot[buckets.length][2];
+        for (int i = 0; i < buckets.length; i++)
+        {
+            buckets[i] = service.allocateBucket();
+            slots[i] = new ScheduleSlot[2];
+            for (int j = 0; j < slots[i].length; j++)
+            {
+                slots[i][j] = buckets[i].allocateSlot();
+            }
+        }
+
+        callbacks = new SupportScheduleCallback[5];
+        for (int i= 0; i < callbacks.length; i++)
+        {
+            callbacks[i] = new SupportScheduleCallback();
+        }
+    }
+
     public void testTrigger()
     {
-        SchedulingServiceImpl evaluator = new SchedulingServiceImpl();
-
         long startTime = 0;
 
-        SupportScheduleCallback callbackOne = new SupportScheduleCallback();
-        SupportScheduleCallback callbackTwo = new SupportScheduleCallback();
-        SupportScheduleCallback callbackThree = new SupportScheduleCallback();
+        service.setTime(0);
 
-        evaluator.setTime(0);
-
-        // Add 3 callbacks
-        evaluator.add(20, callbackOne);
-        evaluator.add(20, callbackTwo);
-        evaluator.add(21, callbackThree);
+        // Add callbacks
+        service.add(20, callbacks[3], slots[1][1]);
+        service.add(20, callbacks[2], slots[1][0]);
+        service.add(20, callbacks[1], slots[0][1]);
+        service.add(21, callbacks[0], slots[0][0]);
 
         // Evaluate before the within time, expect not results
         startTime += 19;
-        evaluator.setTime(startTime);
-        evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
+        service.setTime(startTime);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
 
         // Evaluate exactly on the within time, expect a result
         startTime += 1;
-        evaluator.setTime(startTime);
-        evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetOrderTriggered() == 1);
-        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 1);
-        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
+        service.setTime(startTime);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 1, 2, 3, 0});
 
         // Evaluate after already evaluated once, no result
         startTime += 1;
-        evaluator.setTime(startTime);
-        evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackThree.clearAndGetOrderTriggered() == 1);
+        service.setTime(startTime);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {4, 0, 0, 0, 0});
 
         startTime += 1;
-        evaluator.setTime(startTime);
-        evaluator.evaluate();
-        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
-
-        // Add some more callbacks
+        service.setTime(startTime);
+        service.evaluate();
+        assertEquals(0, callbacks[3].clearAndGetOrderTriggered());
 
         // Adding the same callback more than once should cause an exception
-        evaluator.add(20, callbackOne);
+        service.add(20, callbacks[0], slots[0][0]);
         try
         {
-            evaluator.add(28, callbackOne);
+            service.add(28, callbacks[0], slots[0][0]);
+            fail();
         }
         catch (ScheduleServiceException ex)
         {
             // Expected exception
         }
+        service.remove(callbacks[0], slots[0][0]);
 
-        evaluator.add(20, callbackTwo);
-        evaluator.add(25, callbackThree);
-        evaluator.remove(callbackThree);
-        evaluator.add(21, callbackThree);
+        service.add(20, callbacks[2], slots[1][0]);
+        service.add(25, callbacks[1], slots[0][1]);
+        service.remove(callbacks[1], slots[0][1]);
+        service.add(21, callbacks[0], slots[0][0]);
+        service.add(21, callbacks[3], slots[1][1]);
+        service.add(20, callbacks[1], slots[0][1]);
+        SupportScheduleCallback.setCallbackOrderNum(0);
 
         startTime += 20;
-        evaluator.setTime(startTime);
-        evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetOrderTriggered() == 1);
-        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 1);
-        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
+        service.setTime(startTime);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 1, 2, 0, 0});
 
         startTime += 1;
-        evaluator.setTime(startTime);
-        evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackThree.clearAndGetOrderTriggered() == 1);
+        service.setTime(startTime);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {3, 0, 0, 4, 0});
 
-        evaluator.setTime(startTime + Integer.MAX_VALUE);
-        evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
-        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
+        service.setTime(startTime + Integer.MAX_VALUE);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
     }
 
     public void testWaitAndSpecTogether()
     {
-        SchedulingServiceImpl evaluator = new SchedulingServiceImpl();
-
-        SupportScheduleCallback callbacks[] = new SupportScheduleCallback[5];
-        for (int i = 0; i < callbacks.length; i++)
-        {
-            callbacks[i] = new SupportScheduleCallback();
-        }
-
         Calendar calendar = Calendar.getInstance();
         calendar.set(2004, 11, 9, 15, 27, 10);
         calendar.set(Calendar.MILLISECOND, 500);
         long startTime = calendar.getTimeInMillis();
 
-        evaluator.setTime(startTime);
-
-        // Add a callback
-        evaluator.add(5000, callbacks[0]);
-        evaluator.add(10000, callbacks[1]);
-        evaluator.add(15000, callbacks[2]);
+        service.setTime(startTime);
 
         // Add a specification
         ScheduleSpec spec = new ScheduleSpec();
@@ -122,38 +124,52 @@ public class TestSchedulingServiceImpl extends TestCase
         spec.addValue(ScheduleUnit.MINUTES, 27);
         spec.addValue(ScheduleUnit.SECONDS, 20);
 
-        evaluator.add(spec, callbacks[3]);
+        service.add(spec, callbacks[3], slots[1][1]);
 
         spec.addValue(ScheduleUnit.SECONDS, 15);
-        evaluator.add(spec, callbacks[4]);
+        service.add(spec, callbacks[4], slots[2][0]);
+
+        // Add some more callbacks
+        service.add(5000, callbacks[0], slots[0][0]);
+        service.add(10000, callbacks[1], slots[0][1]);
+        service.add(15000, callbacks[2], slots[1][0]);
 
         // Now send a times reflecting various seconds later and check who got a callback
-        evaluator.setTime(startTime + 1000);
-        evaluator.evaluate();
+        service.setTime(startTime + 1000);
+        SupportScheduleCallback.setCallbackOrderNum(0);
+        service.evaluate();
         checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
 
-        evaluator.setTime(startTime + 2000);
-        evaluator.evaluate();
+        service.setTime(startTime + 2000);
+        service.evaluate();
         checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
 
-        evaluator.setTime(startTime + 4000);
-        evaluator.evaluate();
+        service.setTime(startTime + 4000);
+        service.evaluate();
         checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
 
-        evaluator.setTime(startTime + 5000);
-        evaluator.evaluate();
-        checkCallbacks(callbacks, new Integer[] {1, 0, 0, 0, 1});
+        service.setTime(startTime + 5000);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {1, 0, 0, 0, 2});
 
-        evaluator.setTime(startTime + 9000);
-        evaluator.evaluate();
+        service.setTime(startTime + 9000);
+        service.evaluate();
         checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
 
-        evaluator.setTime(startTime + 10000);
-        evaluator.evaluate();
-        checkCallbacks(callbacks, new Integer[] {0, 1, 0, 1, 0});
+        service.setTime(startTime + 10000);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 3, 0, 4, 0});
 
-        evaluator.setTime(startTime + 11000);
-        evaluator.evaluate();
+        service.setTime(startTime + 11000);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
+
+        service.setTime(startTime + 15000);
+        service.evaluate();
+        checkCallbacks(callbacks, new Integer[] {0, 0, 5, 0, 0});
+
+        service.setTime(startTime + Integer.MAX_VALUE);
+        service.evaluate();
         checkCallbacks(callbacks, new Integer[] {0, 0, 0, 0, 0});
     }
 
@@ -164,7 +180,7 @@ public class TestSchedulingServiceImpl extends TestCase
 
         try
         {
-            evaluator.remove(callback);
+            evaluator.remove(callback, null);
             assertTrue(false);
         }
         catch (ScheduleServiceException ex)
@@ -179,7 +195,7 @@ public class TestSchedulingServiceImpl extends TestCase
 
         for (int i = 0; i < callbacks.length; i++)
         {
-            assertTrue(callbacks[i].clearAndGetOrderTriggered() == results[i]);
+            assertEquals((int) results[i], (int) callbacks[i].clearAndGetOrderTriggered());
         }
     }
 

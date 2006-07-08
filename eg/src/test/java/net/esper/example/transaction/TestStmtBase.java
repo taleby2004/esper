@@ -12,9 +12,9 @@ public abstract class TestStmtBase extends TestCase
     public void setUp()
     {
         Configuration configuration = new Configuration();
-        configuration.addEventTypeAlias("EventA", TxnEventA.class.getName());
-        configuration.addEventTypeAlias("EventB", TxnEventB.class.getName());
-        configuration.addEventTypeAlias("EventC", TxnEventC.class.getName());
+        configuration.addEventTypeAlias("TxnEventA", TxnEventA.class.getName());
+        configuration.addEventTypeAlias("TxnEventB", TxnEventB.class.getName());
+        configuration.addEventTypeAlias("TxnEventC", TxnEventC.class.getName());
 
         epService = EPServiceProviderManager.getProvider("TestStmtBase", configuration);
         epService.initialize();

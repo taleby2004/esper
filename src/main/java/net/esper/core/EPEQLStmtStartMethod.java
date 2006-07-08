@@ -22,6 +22,7 @@ import net.esper.view.ViewProcessingException;
 import net.esper.view.ViewServiceContext;
 import net.esper.view.Viewable;
 import net.esper.view.internal.BufferView;
+import net.esper.schedule.ScheduleBucket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,7 @@ public class EPEQLStmtStartMethod
     private List<Pair<ExprNode, Boolean>> orderByNodes;
     private String eqlStatement;
     private EPServicesContext services;
+    private ScheduleBucket scheduleBucket;
 
     /**
      * Ctor.
@@ -81,6 +83,10 @@ public class EPEQLStmtStartMethod
         this.orderByNodes = orderByNodes;
         this.services = services;
         this.eqlStatement = eqlStatement;
+
+        // Allocate the statement's schedule bucket which stays constant over it's lifetime.
+        // The bucket allows callbacks for the same time to be ordered (within and across statements) and thus deterministic.
+        scheduleBucket = services.getSchedulingService().allocateBucket();
     }
 
     /**
@@ -92,7 +98,7 @@ public class EPEQLStmtStartMethod
     public Pair<Viewable, EPStatementStopMethod> start()
         throws ExprValidationException, ViewProcessingException
     {
-        ViewServiceContext viewContext = new ViewServiceContext(services.getSchedulingService(), services.getEventAdapterService());
+        ViewServiceContext viewContext = new ViewServiceContext(services.getSchedulingService(), scheduleBucket, services.getEventAdapterService());
 
         EPStatementStopMethod stopMethod = new EPStatementStopMethod()
         {

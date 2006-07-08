@@ -8,6 +8,7 @@ import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.DoubleValueAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.ViewFieldEnum;
@@ -23,7 +24,7 @@ public class TestRegressionLinestView extends TestCase
     {
         // Set up sum view and a test child view
         myView = new RegressionLinestView("price", "volume");
-        myView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);

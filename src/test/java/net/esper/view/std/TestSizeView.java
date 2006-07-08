@@ -7,11 +7,10 @@ import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.event.SupportEventBeanFactory;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.ViewFieldEnum;
 import net.esper.view.ViewSupport;
-import net.esper.view.ViewServiceContext;
 
 public class TestSizeView extends TestCase
 {
@@ -22,7 +21,7 @@ public class TestSizeView extends TestCase
     {
         // Set up length window view and a test child view
         myView = new SizeView();
-        myView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext());
         
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -97,7 +96,7 @@ public class TestSizeView extends TestCase
     public void testSchema()
     {
         SizeView view = new SizeView();
-        view.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        view.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         EventType eventType = view.getEventType();
         assertEquals(long.class, eventType.getPropertyType(ViewFieldEnum.SIZE_VIEW__SIZE.getName()));

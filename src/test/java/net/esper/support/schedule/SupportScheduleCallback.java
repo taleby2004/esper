@@ -6,19 +6,26 @@ import net.esper.schedule.ScheduleCallback;
 
 public class SupportScheduleCallback implements ScheduleCallback
 {
-    int numTriggered = 0;
+    private static int orderAllCallbacks;
+
+    private int orderTriggered = 0;
 
     public void scheduledTrigger()
     {
         log.debug(".scheduledTrigger");
-        numTriggered++;
+        orderAllCallbacks++;
+        orderTriggered = orderAllCallbacks;
     }
 
-    public int clearAndGetCount()
+    public int clearAndGetOrderTriggered()
     {
-        int result = numTriggered;
-        numTriggered = 0;
+        int result = orderTriggered;
+        orderTriggered = 0;
         return result;
+    }
+
+    public static void setCallbackOrderNum(int orderAllCallbacks) {
+        SupportScheduleCallback.orderAllCallbacks = orderAllCallbacks;
     }
 
     private static final Log log = LogFactory.getLog(SupportScheduleCallback.class);

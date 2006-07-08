@@ -3,6 +3,7 @@ package net.esper.pattern.observer;
 import net.esper.pattern.PatternContext;
 import net.esper.pattern.MatchedEventMap;
 import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleSlot;
 
 /**
  * Observer that will wait a certain interval before indicating true (raising an event).
@@ -13,6 +14,7 @@ public class TimerIntervalObserver implements EventObserver, ScheduleCallback
     private final PatternContext context;
     private final MatchedEventMap beginState;
     private final ObserverEventEvaluator observerEventEvaluator;
+    private final ScheduleSlot scheduleSlot;
 
     private boolean isTimerActive = false;
 
@@ -29,6 +31,7 @@ public class TimerIntervalObserver implements EventObserver, ScheduleCallback
         this.context = context;
         this.beginState = beginState;
         this.observerEventEvaluator = observerEventEvaluator;
+        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
     }
 
     public final void scheduledTrigger()
@@ -50,7 +53,7 @@ public class TimerIntervalObserver implements EventObserver, ScheduleCallback
         }
         else
         {
-            context.getSchedulingService().add(msec, this);
+            context.getSchedulingService().add(msec, this, scheduleSlot);
             isTimerActive = true;
         }
     }
@@ -59,7 +62,7 @@ public class TimerIntervalObserver implements EventObserver, ScheduleCallback
     {
         if (isTimerActive)
         {
-            context.getSchedulingService().remove(this);
+            context.getSchedulingService().remove(this, scheduleSlot);
             isTimerActive = false;
         }
     }

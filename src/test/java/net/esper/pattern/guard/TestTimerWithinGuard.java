@@ -14,7 +14,7 @@ public class TestTimerWithinGuard extends TestCase
     public void setUp()
     {
         scheduleService = new SchedulingServiceImpl();
-        PatternContext context = new PatternContext(null, scheduleService);
+        PatternContext context = new PatternContext(null, scheduleService, scheduleService.allocateBucket());
 
         quitable = new SupportQuitable();
 

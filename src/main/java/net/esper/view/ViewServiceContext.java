@@ -1,6 +1,7 @@
 package net.esper.view;
 
 import net.esper.schedule.SchedulingService;
+import net.esper.schedule.ScheduleBucket;
 import net.esper.event.EventAdapterService;
 
 /**
@@ -9,7 +10,8 @@ import net.esper.event.EventAdapterService;
 public final class ViewServiceContext
 {
     private final SchedulingService schedulingService;
-    private final EventAdapterService eventAdapterService; 
+    private final ScheduleBucket scheduleBucket;
+    private final EventAdapterService eventAdapterService;
 
     /**
      * Constructor.
@@ -17,10 +19,12 @@ public final class ViewServiceContext
      * @param eventAdapterService service for generating events and handling event types
      */
     public ViewServiceContext(SchedulingService schedulingService,
+                              ScheduleBucket scheduleBucket,
                               EventAdapterService eventAdapterService)
     {
         this.schedulingService = schedulingService;
         this.eventAdapterService = eventAdapterService;
+        this.scheduleBucket = scheduleBucket;
     }
 
     /**
@@ -39,5 +43,10 @@ public final class ViewServiceContext
     public EventAdapterService getEventAdapterService()
     {
         return eventAdapterService;
+    }
+
+    public ScheduleBucket getScheduleBucket()
+    {
+        return scheduleBucket;
     }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportBeanClassView;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.type.StringValue;
 
@@ -26,7 +27,7 @@ public class TestViewFactory extends TestCase
         if (view instanceof ContextAwareView)
         {
             ContextAwareView contextAwareView = (ContextAwareView) view;
-            contextAwareView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));            
+            contextAwareView.setViewServiceContext(SupportViewContextFactory.makeContext());            
         }
 
         assertTrue(view != null);

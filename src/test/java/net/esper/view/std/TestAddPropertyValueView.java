@@ -11,6 +11,7 @@ import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportMapView;
 import net.esper.support.view.SupportSchemaNeutralView;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.event.SupportEventAdapterService;
@@ -28,7 +29,7 @@ public class TestAddPropertyValueView extends TestCase
     {
         // Set up length window view and a test child view
         myView = new AddPropertyValueView(new String[] {"symbol"}, new Object[] {"IBM"});
-        myView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         Map<String, Class> schema = new HashMap<String, Class>();
         schema.put("STDDEV", Double.class);

@@ -1,6 +1,7 @@
 package net.esper.eql.view;
 
 import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleSlot;
 import net.esper.view.ViewServiceContext;
 
 import org.apache.commons.logging.Log;
@@ -12,10 +13,10 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class OutputConditionTime implements OutputCondition
 {
-
     private final long msecIntervalSize;
     private final OutputCallback outputCallback;
-    
+    private final ScheduleSlot scheduleSlot;
+
     private Long currentReferencePoint;
     private ViewServiceContext context; 
     private boolean isCallbackScheduled;
@@ -49,6 +50,7 @@ public final class OutputConditionTime implements OutputCondition
         this.msecIntervalSize = Math.round(1000 * secIntervalSize);
         this.context = context;   
         this.outputCallback = outputCallback;
+        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
     }
     
     /**
@@ -110,7 +112,7 @@ public final class OutputConditionTime implements OutputCondition
                 scheduleCallback();
             }
         };
-        context.getSchedulingService().add(afterMSec, callback);
+        context.getSchedulingService().add(afterMSec, callback, scheduleSlot);
     }
 
     /**

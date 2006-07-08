@@ -5,6 +5,7 @@ import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewSpecFactory;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.event.SupportEventAdapterService;
 
 public class TestViewServiceImpl extends TestCase
@@ -27,7 +28,7 @@ public class TestViewServiceImpl extends TestCase
 
         viewService = new ViewServiceImpl();
 
-        ViewServiceContext context = new ViewServiceContext(null, SupportEventAdapterService.getService());
+        ViewServiceContext context = SupportViewContextFactory.makeContext();
 
         viewOne = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListOne(), context);
         viewTwo = viewService.createView(streamOne, SupportViewSpecFactory.makeSpecListTwo(), context);

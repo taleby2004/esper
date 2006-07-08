@@ -2,7 +2,7 @@ package net.esper.eql.view;
 
 import junit.framework.TestCase;
 import net.esper.support.schedule.SupportSchedulingServiceImpl;
-import net.esper.support.event.SupportEventAdapterService;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.view.ViewServiceContext;
 
 
@@ -25,7 +25,7 @@ public class TestOutputConditionTime extends TestCase
     	};
     	
     	schedulingServiceStub = new SupportSchedulingServiceImpl();
-    	context = new ViewServiceContext(schedulingServiceStub, SupportEventAdapterService.getService());
+    	context = SupportViewContextFactory.makeContext(schedulingServiceStub);
 		condition = new OutputConditionTime(TEST_INTERVAL_MSEC / 1000d, context, callback);
     }
 

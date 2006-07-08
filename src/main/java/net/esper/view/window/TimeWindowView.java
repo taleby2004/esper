@@ -13,6 +13,7 @@ import net.esper.view.ViewServiceContext;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleSlot;
 import net.esper.collection.TimeWindow;
 import net.esper.client.EPException;
 
@@ -35,6 +36,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
 
     private final TimeWindow timeWindow = new TimeWindow();
     private ViewServiceContext viewServiceContext;
+    private ScheduleSlot scheduleSlot;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -200,7 +202,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
                 TimeWindowView.this.expire();
             }
         };
-        viewServiceContext.getSchedulingService().add(msecAfterCurrentTime, callback);
+        viewServiceContext.getSchedulingService().add(msecAfterCurrentTime, callback, scheduleSlot);
     }
 
     public final Iterator<EventBean> iterator()
@@ -222,6 +224,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
     public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
         this.viewServiceContext = viewServiceContext;
+        this.scheduleSlot = viewServiceContext.getScheduleBucket().allocateSlot();
     }
 
     private static final Log log = LogFactory.getLog(TimeWindowView.class);

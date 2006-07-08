@@ -3,6 +3,7 @@ package net.esper.pattern.guard;
 import net.esper.pattern.PatternContext;
 import net.esper.pattern.MatchedEventMap;
 import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleSlot;
 
 /**
  * Guard implementation that keeps a timer instance and quits when the timer expired,
@@ -13,6 +14,7 @@ public class TimerWithinGuard implements Guard, ScheduleCallback
     private final long msec;
     private final PatternContext context;
     private final Quitable quitable;
+    private final ScheduleSlot scheduleSlot;
 
     private boolean isTimerActive;
 
@@ -27,6 +29,7 @@ public class TimerWithinGuard implements Guard, ScheduleCallback
         this.msec = msec;
         this.context = context;
         this.quitable = quitable;
+        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
     }
 
     public void startGuard()
@@ -37,7 +40,7 @@ public class TimerWithinGuard implements Guard, ScheduleCallback
         }
 
         // Start the stopwatch timer
-        context.getSchedulingService().add(msec, this);
+        context.getSchedulingService().add(msec, this, scheduleSlot);
         isTimerActive = true;
     }
 
@@ -45,7 +48,7 @@ public class TimerWithinGuard implements Guard, ScheduleCallback
     {
         if (isTimerActive)
         {
-            context.getSchedulingService().remove(this);
+            context.getSchedulingService().remove(this, scheduleSlot);
             isTimerActive = false;
         }
     }

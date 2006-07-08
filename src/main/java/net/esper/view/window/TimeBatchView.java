@@ -13,6 +13,7 @@ import net.esper.view.ViewSupport;
 import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
 import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleSlot;
 import net.esper.client.EPException;
 
 /**
@@ -44,6 +45,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
     private LinkedList<EventBean> lastBatch = null;
     private LinkedList<EventBean> currentBatch = new LinkedList<EventBean>();
     private boolean isCallbackScheduled;
+    private ScheduleSlot scheduleSlot;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -155,6 +157,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
     public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
         this.viewServiceContext = viewServiceContext;
+        this.scheduleSlot = viewServiceContext.getScheduleBucket().allocateSlot();
     }
 
     public final void update(EventBean[] newData, EventBean[] oldData)
@@ -300,7 +303,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
                 TimeBatchView.this.sendBatch();
             }
         };
-        viewServiceContext.getSchedulingService().add(afterMSec, callback);
+        viewServiceContext.getSchedulingService().add(afterMSec, callback, scheduleSlot);
     }
 
     /**

@@ -17,7 +17,7 @@ public interface SchedulingService
      * @param callback to add
      * @throws ScheduleServiceException thrown if the add operation did not complete
      */
-    public void add(long afterMSec, ScheduleCallback callback)
+    public void add(long afterMSec, ScheduleCallback callback, ScheduleSlot slot)
             throws ScheduleServiceException;
 
     /**
@@ -28,7 +28,7 @@ public interface SchedulingService
      * @param callback to add
      * @throws ScheduleServiceException thrown if the add operation did not complete
      */
-    public void add(ScheduleSpec scheduleSpec, ScheduleCallback callback)
+    public void add(ScheduleSpec scheduleSpec, ScheduleCallback callback, ScheduleSlot slot)
             throws ScheduleServiceException;
 
     /**
@@ -37,7 +37,7 @@ public interface SchedulingService
      * @param callback to remove
      * @throws ScheduleServiceException thrown if the callback was not located
      */
-    public void remove(ScheduleCallback callback)
+    public void remove(ScheduleCallback callback, ScheduleSlot slot)
             throws ScheduleServiceException;
 
     /**
@@ -56,4 +56,7 @@ public interface SchedulingService
      * Evaluate the current time and perform any callbacks.
      */
     public void evaluate();
+
+    public ScheduleBucket allocateBucket();
 }
+

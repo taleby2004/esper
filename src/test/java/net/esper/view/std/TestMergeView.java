@@ -4,6 +4,7 @@ import junit.framework.*;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportViewDataChecker;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.event.SupportEventBeanFactory;
@@ -27,7 +28,7 @@ public class TestMergeView extends TestCase
     {
         // Set up length window view and a test child view
         myView = new MergeView(new String[] {"symbol"});
-        myView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -82,10 +83,10 @@ public class TestMergeView extends TestCase
         GroupByView groupByView = new GroupByView("intPrimitive");
 
         SizeView sizeView = new SizeView();
-        sizeView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        sizeView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         MergeView mergeView = new MergeView(new String[] {"intPrimitive"});
-        mergeView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        mergeView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         topView.addView(groupByView);
         groupByView.addView(sizeView);

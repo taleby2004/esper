@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import net.esper.support.view.SupportStreamImpl;
 import net.esper.support.view.SupportSchemaNeutralView;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportEnum;
 import net.esper.support.event.SupportEventBeanFactory;
@@ -34,7 +35,7 @@ public class TestMultiDimStatsView extends TestCase
         MultiDimStatsView olapView = new MultiDimStatsView(derivedFields, "intPrimitive", "enumValue");
         parentStream.addView(olapView);
         olapView.addView(childView);
-        olapView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        olapView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         insertEvents();
 
@@ -61,7 +62,7 @@ public class TestMultiDimStatsView extends TestCase
         MultiDimStatsView olapView = new MultiDimStatsView(derivedFields, "intPrimitive", "string", "enumValue");
         parentStream.addView(olapView);
         olapView.addView(childView);
-        olapView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        olapView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         insertEvents();
 
@@ -86,7 +87,7 @@ public class TestMultiDimStatsView extends TestCase
         MultiDimStatsView olapView = new MultiDimStatsView(derivedFields, "intPrimitive", "boolBoxed", "string", "enumValue");
         parentStream.addView(olapView);
         olapView.addView(childView);
-        olapView.setViewServiceContext(new ViewServiceContext(null, SupportEventAdapterService.getService()));
+        olapView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         insertEvents();
 

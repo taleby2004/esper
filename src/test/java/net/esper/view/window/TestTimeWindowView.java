@@ -6,12 +6,11 @@ import junit.framework.TestCase;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.event.EventFactoryHelper;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.support.schedule.SupportSchedulingServiceImpl;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.view.SupportBeanClassView;
 import net.esper.support.view.SupportViewDataChecker;
-import net.esper.view.ViewServiceContext;
+import net.esper.support.view.SupportViewContextFactory;
 import net.esper.view.ViewSupport;
 
 public class TestTimeWindowView extends TestCase
@@ -31,7 +30,7 @@ public class TestTimeWindowView extends TestCase
 
         // Set the scheduling service to use
         schedulingServiceStub = new SupportSchedulingServiceImpl();
-        myView.setViewServiceContext(new ViewServiceContext(schedulingServiceStub, SupportEventAdapterService.getService()));
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext(schedulingServiceStub));
     }
 
     public void testViewPushAndExpire()
