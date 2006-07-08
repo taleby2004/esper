@@ -29,29 +29,29 @@ public class TestSchedulingServiceImpl extends TestCase
         startTime += 19;
         evaluator.setTime(startTime);
         evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetCount() == 0);
-        assertTrue(callbackTwo.clearAndGetCount() == 0);
+        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
 
         // Evaluate exactly on the within time, expect a result
         startTime += 1;
         evaluator.setTime(startTime);
         evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetCount() == 1);
-        assertTrue(callbackTwo.clearAndGetCount() == 1);
-        assertTrue(callbackThree.clearAndGetCount() == 0);
+        assertTrue(callbackOne.clearAndGetOrderTriggered() == 1);
+        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 1);
+        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
 
         // Evaluate after already evaluated once, no result
         startTime += 1;
         evaluator.setTime(startTime);
         evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetCount() == 0);
-        assertTrue(callbackTwo.clearAndGetCount() == 0);
-        assertTrue(callbackThree.clearAndGetCount() == 1);
+        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackThree.clearAndGetOrderTriggered() == 1);
 
         startTime += 1;
         evaluator.setTime(startTime);
         evaluator.evaluate();
-        assertTrue(callbackThree.clearAndGetCount() == 0);
+        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
 
         // Add some more callbacks
 
@@ -74,22 +74,22 @@ public class TestSchedulingServiceImpl extends TestCase
         startTime += 20;
         evaluator.setTime(startTime);
         evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetCount() == 1);
-        assertTrue(callbackTwo.clearAndGetCount() == 1);
-        assertTrue(callbackThree.clearAndGetCount() == 0);
+        assertTrue(callbackOne.clearAndGetOrderTriggered() == 1);
+        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 1);
+        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
 
         startTime += 1;
         evaluator.setTime(startTime);
         evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetCount() == 0);
-        assertTrue(callbackTwo.clearAndGetCount() == 0);
-        assertTrue(callbackThree.clearAndGetCount() == 1);
+        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackThree.clearAndGetOrderTriggered() == 1);
 
         evaluator.setTime(startTime + Integer.MAX_VALUE);
         evaluator.evaluate();
-        assertTrue(callbackOne.clearAndGetCount() == 0);
-        assertTrue(callbackTwo.clearAndGetCount() == 0);
-        assertTrue(callbackThree.clearAndGetCount() == 0);
+        assertTrue(callbackOne.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackTwo.clearAndGetOrderTriggered() == 0);
+        assertTrue(callbackThree.clearAndGetOrderTriggered() == 0);
     }
 
     public void testWaitAndSpecTogether()
@@ -179,7 +179,7 @@ public class TestSchedulingServiceImpl extends TestCase
 
         for (int i = 0; i < callbacks.length; i++)
         {
-            assertTrue(callbacks[i].clearAndGetCount() == results[i]);
+            assertTrue(callbacks[i].clearAndGetOrderTriggered() == results[i]);
         }
     }
 
