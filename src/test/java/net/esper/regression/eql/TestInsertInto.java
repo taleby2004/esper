@@ -102,7 +102,7 @@ public class TestInsertInto extends TestCase
                           "order by symbol asc";
         epService.getEPAdministrator().createEQL(stmtText);
 
-        stmtText = "select mySymbol, myPrice from StockTicks.win:length(100)";
+        stmtText = "select mySymbol, sum(myPrice) as pricesum from StockTicks.win:length(100)";
         EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
         statement.addListener(feedListener);
 
@@ -115,13 +115,31 @@ public class TestInsertInto extends TestCase
         sendEvent("ABC", 11);
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(20 * 1000));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(30 * 1000));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(40 * 1000));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(50 * 1000));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(55 * 1000));
 
         assertFalse(feedListener.isInvoked());
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000));
 
-        // TODO: scheduling service not deterministic in scheduling callbacks for
-        // dependent statements, and for callbacks withing the same statement (timed window and timed output limited).
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60 * 1000 + 1));
+        assertTrue(feedListener.isInvoked());
+        assertEquals(3, feedListener.getNewDataList().size());
+        assertEquals("CSC", feedListener.getNewDataList().get(0)[0].get("mySymbol"));
+        assertEquals(10.0, feedListener.getNewDataList().get(0)[0].get("pricesum"));
+        assertEquals("GE", feedListener.getNewDataList().get(1)[0].get("mySymbol"));
+        assertEquals(30.0, feedListener.getNewDataList().get(1)[0].get("pricesum"));
+        assertEquals("IBM", feedListener.getNewDataList().get(2)[0].get("mySymbol"));
+        assertEquals(80.0, feedListener.getNewDataList().get(2)[0].get("pricesum"));
+        feedListener.reset();
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(65 * 1000));
+        assertFalse(feedListener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(70 * 1000));
+        assertEquals("ABC", feedListener.getNewDataList().get(0)[0].get("mySymbol"));
+        assertEquals(91.0, feedListener.getNewDataList().get(0)[0].get("pricesum"));
+        assertEquals("DEF", feedListener.getNewDataList().get(1)[0].get("mySymbol"));
+        assertEquals(191.0, feedListener.getNewDataList().get(1)[0].get("pricesum"));
     }
 
     private void sendEvent(String symbol, double price)
