@@ -5,6 +5,7 @@ import net.esper.client.EPStatement;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.bean.SupportBean_S0;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 
@@ -58,6 +59,51 @@ public class TestPerRowFunc extends TestCase
         assertEquals(-10L, received.get("myMaxEx"));
     }
 
+    public void testOperators()
+    {
+        String viewExpr = "select longBoxed % intBoxed as myMod " +
+                          " from " + SupportBean.class.getName() + ".win:length(3) where not(longBoxed > intBoxed)";
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        sendEvent(1, 1, (short)0);
+        assertEquals(0l, testListener.getLastNewData()[0].get("myMod"));
+        testListener.reset();
+
+        sendEvent(2, 1, (short)0);
+        assertFalse(testListener.getAndClearIsInvoked());
+
+        sendEvent(2, 3, (short)0);
+        assertEquals(2l, testListener.getLastNewData()[0].get("myMod"));
+        testListener.reset();
+    }
+
+    public void testConcat()
+    {
+        String viewExpr = "select p00 || p01 as c1, p00 || p01 || p02 as c2, p00 || '|' || p01 as c3" +
+                          " from " + SupportBean_S0.class.getName() + ".win:length(10)";
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "a", "b", "c"));
+        assertConcat("ab", "abc", "a|b");
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, null, "b", "c"));
+        assertConcat(null, null, null);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "", "b", "c"));
+        assertConcat("b", "bc", "|b");
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "123", null, "c"));
+        assertConcat(null, null, null);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "123", "456", "c"));
+        assertConcat("123456", "123456c", "123|456");
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "123", "456", null));
+        assertConcat("123456", null, "123|456");
+    }
+
     private void setUpMinMax()
     {
         String viewExpr = "select max(longBoxed, intBoxed) as myMax, " +
@@ -76,6 +122,15 @@ public class TestPerRowFunc extends TestCase
         bean.setIntBoxed(intBoxed);
         bean.setShortBoxed(shortBoxed);
         epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void assertConcat(String c1, String c2, String c3)
+    {
+        EventBean event = testListener.getLastNewData()[0];
+        assertEquals(c1, event.get("c1"));
+        assertEquals(c2, event.get("c2"));
+        assertEquals(c3, event.get("c3"));
+        testListener.reset();
     }
 
     private static final Log log = LogFactory.getLog(TestViewSelectExprClause.class);

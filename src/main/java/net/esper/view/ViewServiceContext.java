@@ -16,6 +16,7 @@ public final class ViewServiceContext
     /**
      * Constructor.
      * @param schedulingService implementation for schedule registration
+     * @param scheduleBucket is for ordering scheduled callbacks within the view statements
      * @param eventAdapterService service for generating events and handling event types
      */
     public ViewServiceContext(SchedulingService schedulingService,
@@ -45,6 +46,10 @@ public final class ViewServiceContext
         return eventAdapterService;
     }
 
+    /**
+     * Returns the schedule bucket for ordering schedule callbacks within this pattern.
+     * @return schedule bucket
+     */
     public ScheduleBucket getScheduleBucket()
     {
         return scheduleBucket;

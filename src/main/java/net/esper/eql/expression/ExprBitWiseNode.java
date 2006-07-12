@@ -7,6 +7,9 @@ import net.esper.event.EventBean;
 import net.esper.type.BitWiseOpEnum;
 import net.esper.util.JavaClassHelper;
 
+/**
+ * Represents the bit-wise operators in an expression tree.
+ */
 public class ExprBitWiseNode extends ExprNode {
 
     private final BitWiseOpEnum _bitWiseOpEnum;

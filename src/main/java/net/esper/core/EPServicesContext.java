@@ -49,11 +49,19 @@ public final class EPServicesContext
         this.eventAdapterService = eventAdapterService;
     }
 
+    /**
+     * Returns router for internal event processing.
+     * @return router for internal event processing
+     */
     public InternalEventRouter getInternalEventRouter()
     {
         return internalEventRouter;
     }
 
+    /**
+     * Set the router for internal event processing.
+     * @param internalEventRouter router to use
+     */
     public void setInternalEventRouter(InternalEventRouter internalEventRouter)
     {
         this.internalEventRouter = internalEventRouter;

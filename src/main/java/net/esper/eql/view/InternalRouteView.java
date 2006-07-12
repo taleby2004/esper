@@ -8,12 +8,21 @@ import net.esper.core.InternalEventRouter;
 
 import java.util.Iterator;
 
+/**
+ * View for internally routing events which is commenly the last step in execution of a statement
+ * in which an insert-into clause has been specified.
+ */
 public class InternalRouteView extends ViewSupport
 {
     // Do we route the insert stream (new) events, or the remove stream (old) events
     private final boolean isIStream;
     private final InternalEventRouter internalEventRouter;
 
+    /**
+     * Ctor.
+     * @param isIStream true for insert stream, false for remove stream
+     * @param internalEventRouter routes the events internally
+     */
     public InternalRouteView(boolean isIStream, InternalEventRouter internalEventRouter)
     {
         this.isIStream = isIStream;

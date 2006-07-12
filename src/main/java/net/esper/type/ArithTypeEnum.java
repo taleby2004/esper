@@ -28,7 +28,12 @@ public enum ArithTypeEnum
     /**
      * Multiply.
      */
-    MULTIPLY ("*");
+    MULTIPLY ("*"),
+
+    /**
+     * Modulo.
+     */
+    MODULO ("%");
 
     private static Map<MultiKey<Object>, Computer> computers;
 
@@ -51,6 +56,10 @@ public enum ArithTypeEnum
         computers.put(new MultiKey<Object>(new Object[] {Float.class, MULTIPLY}), new MultiplyFloat());
         computers.put(new MultiKey<Object>(new Object[] {Long.class, MULTIPLY}), new MultiplyLong());
         computers.put(new MultiKey<Object>(new Object[] {Integer.class, MULTIPLY}), new MultiplyInt());
+        computers.put(new MultiKey<Object>(new Object[] {Double.class, MODULO}), new ModuloDouble());
+        computers.put(new MultiKey<Object>(new Object[] {Float.class, MODULO}), new ModuloFloat());
+        computers.put(new MultiKey<Object>(new Object[] {Long.class, MODULO}), new ModuloLong());
+        computers.put(new MultiKey<Object>(new Object[] {Integer.class, MODULO}), new ModuloInt());
     }
 
     /**
@@ -89,7 +98,13 @@ public enum ArithTypeEnum
             throw new IllegalArgumentException("Expected base numeric type for computation result but got type " + coercedType);
         }
         MultiKey<Object> key = new MultiKey<Object>(new Object[] {coercedType, this});
-        return computers.get(key);
+        Computer computer = computers.get(key);
+
+        if (computer == null)
+        {
+            throw new IllegalArgumentException("Could not determine process or type " + this + " type " + coercedType);
+        }
+        return computer;
     }
 
     /**
@@ -268,6 +283,51 @@ public enum ArithTypeEnum
         public Number compute(Number d1, Number d2)
         {
             Number result = d1.intValue() * d2.intValue();
+            return result;
+        }
+    }
+
+    /**
+     * Computer for type-specific arith. operations.
+     */
+    public static class ModuloDouble implements Computer
+    {
+        public Number compute(Number d1, Number d2)
+        {
+            Number result = d1.doubleValue() % d2.doubleValue();
+            return result;
+        }
+    }
+    /**
+     * Computer for type-specific arith. operations.
+     */
+    public static class ModuloFloat implements Computer
+    {
+        public Number compute(Number d1, Number d2)
+        {
+            Number result = d1.floatValue() % d2.floatValue();
+            return result;
+        }
+    }
+    /**
+     * Computer for type-specific arith. operations.
+     */
+    public static class ModuloLong implements Computer
+    {
+        public Number compute(Number d1, Number d2)
+        {
+            Number result = d1.longValue() % d2.longValue();
+            return result;
+        }
+    }
+    /**
+     * Computer for type-specific arith. operations.
+     */
+    public static class ModuloInt implements Computer
+    {
+        public Number compute(Number d1, Number d2)
+        {
+            Number result = d1.intValue() % d2.intValue();
             return result;
         }
     }

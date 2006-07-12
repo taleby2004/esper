@@ -30,6 +30,15 @@ public class ExprMathNode extends ExprNode
             throw new ExprValidationException("Arithmatic node must have 2 child nodes");
         }
 
+        if ((this.getChildNodes().get(0).getType() == String.class) &&
+            (this.getChildNodes().get(1).getType() == String.class))
+        {
+            if (arithTypeEnum == ArithTypeEnum.ADD)
+            {
+                String hugo = "a" + "b";
+            }
+        }
+
         for (ExprNode child : this.getChildNodes())
         {
             Class childType = child.getType();

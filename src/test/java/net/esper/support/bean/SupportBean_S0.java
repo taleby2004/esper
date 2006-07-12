@@ -39,6 +39,14 @@ public class SupportBean_S0
         this.p01 = p01;
     }
 
+    public SupportBean_S0(int id, String p00,  String p01, String p02)
+    {
+        this.id = id;
+        this.p00 = p00;
+        this.p01 = p01;
+        this.p02 = p02;
+    }
+
     public int getId()
     {
         return id;

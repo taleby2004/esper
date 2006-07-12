@@ -15,6 +15,7 @@ public interface SchedulingService
      * callback or change the existing callback to a new time, but throw an exception.
      * @param afterMSec number of millisec to get a callback
      * @param callback to add
+     * @param slot allows ordering of concurrent callbacks
      * @throws ScheduleServiceException thrown if the add operation did not complete
      */
     public void add(long afterMSec, ScheduleCallback callback, ScheduleSlot slot)
@@ -26,6 +27,7 @@ public interface SchedulingService
      * callback or change the existing callback to a new time, but throw an exception.
      * @param scheduleSpec holds the crontab-like information defining the next occurance
      * @param callback to add
+     * @param slot allows ordering of concurrent callbacks
      * @throws ScheduleServiceException thrown if the add operation did not complete
      */
     public void add(ScheduleSpec scheduleSpec, ScheduleCallback callback, ScheduleSlot slot)
@@ -35,6 +37,7 @@ public interface SchedulingService
      * Remove a callback.
      * If the callback to be removed was not found an exception is thrown.
      * @param callback to remove
+     * @param slot for which the callback was added
      * @throws ScheduleServiceException thrown if the callback was not located
      */
     public void remove(ScheduleCallback callback, ScheduleSlot slot)
@@ -57,6 +60,10 @@ public interface SchedulingService
      */
     public void evaluate();
 
+    /**
+     * Returns a bucket from which slots can be allocated for ordering concurrent callbacks.
+     * @return bucket
+     */
     public ScheduleBucket allocateBucket();
 }
 

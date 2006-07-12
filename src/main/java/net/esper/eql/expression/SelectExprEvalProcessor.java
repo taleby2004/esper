@@ -19,6 +19,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
      * Ctor.
      * @param selectionList - list of select-clause items
      * @param eventAdapterService - service for generating events and handling event types
+     * @param insertIntoDesc - descriptor for insert-into clause contains column names overriding select clause names
      * @throws ExprValidationException thrown if any of the expressions don't validate
      */
     public SelectExprEvalProcessor(List<SelectExprElement> selectionList,

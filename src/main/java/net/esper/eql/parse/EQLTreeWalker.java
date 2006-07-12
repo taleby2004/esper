@@ -108,7 +108,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     }
 
     /**
-     * Return a descriptor with the insert-into event name and optional list of columns
+     * Return a descriptor with the insert-into event name and optional list of columns.
      * @return insert into specification
      */
     public InsertIntoDesc getInsertIntoDesc()
@@ -176,6 +176,7 @@ public class EQLTreeWalker extends EQLBaseWalker
             case MINUS:
             case PLUS:
             case DIV:
+            case MOD:
                 leaveMath(node);
                 break;
             case BAND:
@@ -192,6 +193,9 @@ public class EQLTreeWalker extends EQLBaseWalker
             case MAX:
             case MIN:
                 leaveMinMax(node);
+                break;
+            case NOT_EXPR:
+                leaveNot(node);
                 break;
             case SUM:
             case AVG:
@@ -224,6 +228,9 @@ public class EQLTreeWalker extends EQLBaseWalker
             	break;    
             case INSERTINTO_EXPR:
             	leaveInsertInto(node);
+            	break;
+            case CONCAT:
+            	leaveConcat(node);
             	break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
@@ -415,6 +422,9 @@ public class EQLTreeWalker extends EQLBaseWalker
                 break;
             case MINUS :
                 arithTypeEnum = ArithTypeEnum.SUBTRACT;
+                break;
+            case MOD :
+                arithTypeEnum = ArithTypeEnum.MODULO;
                 break;
             default :
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized math node type");
@@ -713,6 +723,18 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         // Add as order-by element
         orderByList.add(new Pair<ExprNode, Boolean>(exprNode, descending));
+    }
+
+    private void leaveNot(AST node)
+    {
+        ExprNotNode notNode = new ExprNotNode();
+        astNodeMap.put(node, notNode);
+    }
+
+    private void leaveConcat(AST node)
+    {
+        ExprConcatNode concatNode = new ExprConcatNode();
+        astNodeMap.put(node, concatNode);
     }
 
     private static final Log log = LogFactory.getLog(EQLTreeWalker.class);

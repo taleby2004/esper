@@ -18,17 +18,28 @@ public class ScheduleBucket
     private final int bucketNum;
     private int lastSlot;
 
+    /**
+     * Ctor.
+     * @param bucketNum is a simple integer number for this bucket by which buckets can be sorted
+     */
     public ScheduleBucket(int bucketNum)
     {
         this.bucketNum = bucketNum;
         lastSlot = 0;
     }
 
+    /**
+     * Restart bucket slot numbering wuch as when a statement is restarted and new slots are allocated.
+     */
     public void restart()
     {
         lastSlot = 0;
     }
 
+    /**
+     * Returns a new slot in the bucket.
+     * @return slot
+     */
     public ScheduleSlot allocateSlot()
     {
         return new ScheduleSlot(bucketNum, lastSlot++);

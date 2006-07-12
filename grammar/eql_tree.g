@@ -122,6 +122,7 @@ evalExprChoice
 	|	#(ja:EVAL_AND_EXPR valueExpr valueExpr (valueExpr)* { leaveNode(#ja); } )
 	|	#(je:EVAL_EQUALS_EXPR valueExpr valueExpr { leaveNode(#je); } )
 	|	#(jne:EVAL_NOTEQUALS_EXPR valueExpr valueExpr { leaveNode(#jne); } )
+	|	#(n:NOT_EXPR valueExpr { leaveNode(#n); } )
 	|	r:relationalExpr { leaveNode(#r); }
 	;
 	
@@ -149,9 +150,11 @@ arithmeticExpr
 	| 	#(MINUS valueExpr valueExpr)
 	| 	#(DIV valueExpr valueExpr)
 	|	#(STAR valueExpr valueExpr)
+	| 	#(MOD valueExpr valueExpr)
 	|	#(BAND valueExpr valueExpr)	
 	|	#(BOR valueExpr valueExpr)	
 	|	#(BXOR valueExpr valueExpr)		
+	| 	#(CONCAT valueExpr valueExpr (valueExpr)*)
 	;
 	
 //----------------------------------------------------------------------------

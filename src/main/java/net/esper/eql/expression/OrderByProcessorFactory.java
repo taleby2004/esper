@@ -13,10 +13,23 @@ import net.esper.event.EventAdapterService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Factory for {@link OrderByProcessor} processors.
+ */
 public class OrderByProcessorFactory {
 	private static final Log log = LogFactory.getLog(OrderByProcessorFactory.class);
-	
-	public static OrderByProcessor getProcessor(List<SelectExprElement> selectionList,
+
+    /**
+     * Returns processor for order-by clauses.
+     * @param selectionList is a list of select expressions
+     * @param groupByNodes is a list of group-by expressions
+     * @param orderByList is a list of order-by expressions
+     * @param aggregationService is the service for aggregation, ie. building sums and averages per group or overall
+     * @param eventAdapterService provides event adapters
+     * @return ordering processor instance
+     * @throws ExprValidationException when validation of expressions fails
+     */
+    public static OrderByProcessor getProcessor(List<SelectExprElement> selectionList,
 											   List<ExprNode> groupByNodes,
 											   List<Pair<ExprNode, Boolean>> orderByList, 
 											   AggregationService aggregationService,

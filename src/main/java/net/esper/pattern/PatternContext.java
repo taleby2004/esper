@@ -16,6 +16,7 @@ public final class PatternContext
     /**
      * Constructor.
      * @param filterService implementation for filtering service
+     * @param scheduleBucket schedule buckets for use by scheduling service for ordering scheduling callbacks for pattern statements 
      * @param schedulingService implementation for schedule evaluation
      */
     public PatternContext(FilterService filterService, SchedulingService schedulingService, ScheduleBucket scheduleBucket)
@@ -43,6 +44,10 @@ public final class PatternContext
         return schedulingService;
     }
 
+    /**
+     * Returns the schedule bucket for ordering schedule callbacks within this pattern.
+     * @return schedule bucket
+     */
     public ScheduleBucket getScheduleBucket()
     {
         return scheduleBucket;

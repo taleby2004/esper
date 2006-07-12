@@ -97,7 +97,7 @@ tokens
 	MIN_LIMIT_EXPR;
 	INSERTINTO_EXPR;
 	INSERTINTO_EXPRCOL;
-	
+	CONCAT;	
 	UNARY_MINUS;
 	
    	INT_TYPE;
@@ -267,8 +267,14 @@ evalAndExpression
 	;
 
 bitWiseExpression
-	: evalEqualsExpression ( (BAND^|BOR^|BXOR^) evalEqualsExpression )*
+	: negatedExpression ( (BAND^|BOR^|BXOR^) negatedExpression)*
 	;		
+
+negatedExpression
+	: evalEqualsExpression 
+	| NOT_EXPR^ evalEqualsExpression
+	;		
+
 
 evalEqualsExpression
 	:	evalRelationalExpression ( 
@@ -291,15 +297,22 @@ evalEqualsExpression
 	;
 	
 evalRelationalExpression
-	: additiveExpression ( (LT^|GT^|LE^|GE^) additiveExpression )*
+	: concatenationExpr ( (LT^|GT^|LE^|GE^) concatenationExpr )*
 	;
 		
+concatenationExpr
+	: additiveExpression ( c:LOR! additiveExpression ( LOR! additiveExpression)* )?
+		{
+			if (c != null) #concatenationExpr = #([CONCAT,"concatenationExpr"], #concatenationExpr); 
+		}
+	;
+
 additiveExpression
 	: multiplyExpression ( (PLUS^|MINUS^) multiplyExpression )*
 	;
 
 multiplyExpression
-	: unaryExpression ( (STAR^|DIV^) unaryExpression )*
+	: unaryExpression ( (STAR^|DIV^|MOD^) unaryExpression )*
 	;
 	
 unaryExpression

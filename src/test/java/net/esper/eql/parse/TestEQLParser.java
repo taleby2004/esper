@@ -61,6 +61,10 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("select * from xxx");
         assertIsInvalid("select * from com.xxx().std:win(3) where a not is null");
         assertIsInvalid("select * from com.xxx().std:win(3) where a = not null");
+        assertIsInvalid("select * from com.xxx().std:win(3) where not not");
+        assertIsInvalid("select * from com.xxx().std:win(3) where not ||");
+        assertIsInvalid("select * from com.xxx().std:win(3) where a ||");
+        assertIsInvalid("select * from com.xxx().std:win(3) where || a");
 
         assertIsInvalid("select a] from com.xxx().std:win(3)");
         assertIsInvalid("select * from com.xxx().std:win(3) where b('aaa)=5");
@@ -143,8 +147,16 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid(preFill + "().win:lenght(3) where a <> 10");
         assertIsValid(preFill + "().win:lenght(3) where a != 10");
         assertIsValid(preFill + "().win:lenght(3) where 10 != a");
+        assertIsValid(preFill + "().win:lenght(3) where not (a = 5)");
+        assertIsValid(preFill + "().win:lenght(3) where not (a = 5 or b = 3)");
+        assertIsValid(preFill + "().win:lenght(3) where not 5 < 4");
+        assertIsValid(preFill + "().win:lenght(3) where a or (not b)");
+        assertIsValid(preFill + "().win:lenght(3) where a % 3 + 6 * (c%d)");
+        assertIsValid(preFill + "().win:lenght(3) where a || b = 'a'");
+        assertIsValid(preFill + "().win:lenght(3) where a || b || c = 'a'");
+        assertIsValid(preFill + "().win:lenght(3) where a + b + c = 'a'");
 
-        assertIsValid("select * from " +
+        assertIsValid("select not a, not (b), not (a > 5) from " +
                         className + "(a=1).win:lenght(10) as win1," +
                         className + "(a=2).win:lenght(10) as win2 " +
                         "where win1.f1 = win2.f2"
@@ -205,7 +217,6 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("insert into MyEvent (a, b, c) select 1 from b.win:length(1)");
         assertIsValid("insert istream into MyEvent select 1 from b.win:length(1)");
         assertIsValid("insert rstream into MyEvent select 1 from b.win:length(1)");
-
     }
 
     public void testBitWiseCases() throws Exception

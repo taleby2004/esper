@@ -8,6 +8,11 @@ public class ScheduleSlot implements Comparable<ScheduleSlot>
     private int bucketNum;
     private int slotNum;
 
+    /**
+     * Ctor.
+     * @param bucketNum is the number of the bucket the slot belongs to
+     * @param slotNum is the slot number for ordering within the bucket
+     */
     public ScheduleSlot(int bucketNum, int slotNum)
     {
         this.bucketNum = bucketNum;

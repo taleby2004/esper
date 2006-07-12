@@ -101,24 +101,29 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals("f4", identNode.getUnresolvedPropertyName());
     }
     
-    public void testWalkEQLBuiltin() throws Exception
+    public void testWalkEQLPerRowFunctions() throws Exception
     {
-        assertEquals(9, tryMath("max(6, 9)"));
-        assertEquals(6.11, tryMath("min(6.11, 6.12)"));
-        assertEquals(6.10, tryMath("min(6.11, 6.12, 6.1)"));
+        assertEquals(9, tryExpression("max(6, 9)"));
+        assertEquals(6.11, tryExpression("min(6.11, 6.12)"));
+        assertEquals(6.10, tryExpression("min(6.11, 6.12, 6.1)"));
+
+        assertEquals("ab", tryExpression("'a'||'b'"));
+        assertEquals("ab", tryExpression("'a'+'b'"));
     }
 
     public void testWalkEQLMath() throws Exception
     {
-        assertEquals(32, tryMath("5*6-3+15/3"));
-        assertEquals(-5, tryMath("1-1-1-2-1-1"));
-        assertEquals(2.8d, tryMath("1.4 + 1.4"));
-        assertEquals(1d, tryMath("55.5/5/11.1"));
-        assertEquals(0, tryMath("2/3"));
-        assertEquals(2/3d, tryMath("2.0/3"));
-        assertEquals(10, tryMath("(1+4)*2"));
-        assertEquals(12, tryMath("(3*(6-4))*2"));
-        assertEquals(8, tryMath("(1+(4*3)+2)/2+1"));
+        assertEquals(32, tryExpression("5*6-3+15/3"));
+        assertEquals(-5, tryExpression("1-1-1-2-1-1"));
+        assertEquals(2.8d, tryExpression("1.4 + 1.4"));
+        assertEquals(1d, tryExpression("55.5/5/11.1"));
+        assertEquals(0, tryExpression("2/3"));
+        assertEquals(2/3d, tryExpression("2.0/3"));
+        assertEquals(10, tryExpression("(1+4)*2"));
+        assertEquals(12, tryExpression("(3*(6-4))*2"));
+        assertEquals(8, tryExpression("(1+(4*3)+2)/2+1"));
+        assertEquals(1, tryExpression("10%3"));
+        assertEquals(10.1 % 3, tryExpression("10.1%3"));
     }
 
     public void testWalkEQLRelationalOp() throws Exception
@@ -132,6 +137,9 @@ public class TestEQLTreeWalker extends TestCase
 
         assertEquals(false, tryRelationalOp("(4>2) and (2>3)"));
         assertEquals(true, tryRelationalOp("(4>2) or (2>3)"));
+
+        assertEquals(false, tryRelationalOp("not 3>2"));
+        assertEquals(true, tryRelationalOp("not (not 3>2)"));
     }
 
     public void testWalkEQLInsertInto() throws Exception
@@ -450,14 +458,14 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals("win3", desc.getRightNode().getStreamOrPropertyName());
     }
 
-    private Object tryMath(String equation) throws Exception
+    private Object tryExpression(String equation) throws Exception
     {
         String expression = EXPRESSION + "where " + equation + "=win2.f2";
 
         EQLTreeWalker walker = parseAndWalk(expression);
-        ExprNode mathNode = (walker.getFilterRootNode().getChildNodes().get(0));
-        mathNode.validateDescendents(null);
-        return mathNode.evaluate(null);
+        ExprNode exprNode = (walker.getFilterRootNode().getChildNodes().get(0));
+        exprNode.validateDescendents(null);
+        return exprNode.evaluate(null);
     }
 
     private Object tryRelationalOp(String subExpr) throws Exception

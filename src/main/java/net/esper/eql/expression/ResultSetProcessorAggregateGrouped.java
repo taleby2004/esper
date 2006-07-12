@@ -54,6 +54,8 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
      * @param groupKeyNodes - list of group-by expression nodes needed for building the group-by keys
      * @param optionalHavingNode - expression node representing validated HAVING clause, or null if none given.
      * Aggregation functions in the having node must have been pointed to the AggregationService for evaluation.
+     * @param isOutputLimiting - true to indicate that we limit output
+     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      */
     public ResultSetProcessorAggregateGrouped(SelectExprProcessor selectExprProcessor,
                                       		  OrderByProcessor orderByProcessor,

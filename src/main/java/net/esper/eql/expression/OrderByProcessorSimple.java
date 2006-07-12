@@ -52,6 +52,7 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 	 * @param aggregationService -
 	 *            used to evaluate aggregate functions in the group-by and
 	 *            sort-by clauses
+     * @param eventAdapterService - provides event wrappers
 	 */
 	public OrderByProcessorSimple(final List<Pair<ExprNode, Boolean>> orderByList,
 								  List<ExprNode> groupByNodes, 
@@ -131,7 +132,14 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 		return result;
 	}
 
-	protected static int compareValues(Object valueOne, Object valueTwo, boolean descending) 
+    /**
+     * Compares values for sorting.
+     * @param valueOne -first value to compare, can be null
+     * @param valueTwo -second value to compare, can be null
+     * @param descending - true if ascending, false if descending
+     * @return 0 if equal, -1 if smaller, +1 if larger
+     */
+    protected static int compareValues(Object valueOne, Object valueTwo, boolean descending)
 	{
 		if (descending) 
 		{

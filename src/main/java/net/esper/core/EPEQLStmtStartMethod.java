@@ -57,6 +57,7 @@ public class EPEQLStmtStartMethod
      * @param optionalHavingNode is filter conditions that grouped-by results must meet (HAVING clause)
      * @param optionalOutputLimitViewSpecs is a list of the output rate limiting views,
      *        empty list if none supplied (OUTPUT clause)
+     * @param orderByNodes is the order-by expression nodes
      * @param eqlStatement is the expression text
      * @param services is the service instances for dependency injection
      */

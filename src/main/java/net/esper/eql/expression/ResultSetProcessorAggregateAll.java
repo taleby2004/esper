@@ -33,6 +33,8 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
      * @param orderByProcessor - for sorting the outgoing events according to the order-by clause
      * @param aggregationService - handles aggregation
      * @param optionalHavingNode - having clause expression node
+     * @param isOutputLimiting - true to indicate that we limit output
+     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      */
     public ResultSetProcessorAggregateAll(SelectExprProcessor selectExprProcessor,
                                           OrderByProcessor orderByProcessor,

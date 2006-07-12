@@ -19,6 +19,8 @@ public class SelectExprProcessorFactory
      * Returns the processor to use for a given select-clause.
      * @param selectionList - the list of select clause elements/items, which are expected to have been validated
      * @param typeService - serves stream type information
+     * @param insertIntoDesc - contains column names for the optional insert-into clause (if supplied)
+     * @param eventAdapterService - for generating wrapper instances for events
      * @return select-clause expression processor
      * @throws ExprValidationException to indicate the select expression cannot be validated
      */

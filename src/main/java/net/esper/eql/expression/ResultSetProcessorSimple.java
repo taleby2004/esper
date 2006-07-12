@@ -70,6 +70,8 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param exprProcessor - processes each input event and returns output event
      * @param orderByProcessor - orders the outgoing events according to the order-by clause
      * @param events - input events
+     * @param isOutputLimiting - true to indicate that we limit output
+     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @return output events, one for each input event
      */
     protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
@@ -167,6 +169,8 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param exprProcessor - processes each input event and returns output event
      * @param orderByProcessor TODO
      * @param events - input events
+     * @param isOutputLimiting - true to indicate that we limit output
+     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @return output events, one for each input event
      */
     protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
