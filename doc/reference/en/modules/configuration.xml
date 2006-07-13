@@ -21,6 +21,8 @@
 		<programlisting><![CDATA[Configuration configuration = new Configuration();
 configuration.addEventTypeAlias("PriceLimit", PriceLimit.class.getName());
 configuration.addEventTypeAlias("StockTick", StockTick.class.getName());
+configuration.addImport("org.mycompany.mypackage.MyUtility");
+configuration.addImport("org.mycompany.util.*");
 
 EPServiceProvider epService = EPServiceProviderManager.getProvider("MyEngine", configuration);
 ]]></programlisting>
@@ -63,6 +65,8 @@ configuration.configure("myengine.esper.cfg.xml");
            xsi:noNamespaceSchemaLocation="esper-configuration-1-0.xsd">
 	<event-type alias="StockTick" class="net.esper.example.stockticker.event.StockTick"/>
 	<event-type alias="PriceLimit" class="net.esper.example.stockticker.event.PriceLimit"/>
+	<auto-import import-name="org.mycompany.mypackage.MyUtility"/>
+	<auto-import import-name="org.mycompany.util.*"/>
 </esper-configuration>		
 ]]></programlisting>
 
@@ -83,6 +87,47 @@ configuration.configure("myengine.esper.cfg.xml");
 every net.esper.example.stockticker.event.StockTick(symbol='IBM')]]></programlisting>
 		</sect2>
 			
+		<sect2 id="config-class--package-imports" revision="1">
+			<title>Class and package imports</title>
+			
+			<para>
+				Esper allows invocations of static Java library functions as outlined in <xref linkend="eql-single-row-function-ref"/>. This configuration 
+				item can be set to allow a partial rather than a fully qualified class name in such invocations. The imports work in the same way as in Java files, so both packages and classes can be imported.
+			</para>
+			
+			<programlisting>select Math.max(priceOne, PriceTwo)
+// via configuration equivalent to
+select java.lang.Math.max(priceOne, priceTwo)</programlisting>
+
+			<para>
+				Esper auto-imports the following Java library packages if no other configuration is supplied.
+				This list is replaced with any configuration specified in a configuration file or through the API.
+			</para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						java.lang.*
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						java.math.*
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						java.text.*
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						java.util.*
+					</para>
+				</listitem>
+			</itemizedlist>
+
+		</sect2>
     </sect1>
 </chapter>
 
