@@ -1,8 +1,6 @@
 package net.esper.eql.expression;
 
 import net.esper.event.EventBean;
-import net.esper.util.JavaClassHelper;
-import net.esper.type.ArithTypeEnum;
 
 /**
  * Represents a simple Math (+/-/divide/*) in a filter expression tree.
@@ -19,7 +17,7 @@ public class ExprConcatNode extends ExprNode
         buffer = new StringBuffer();
     }
 
-    public void validate(StreamTypeService streamTypeService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService) throws ExprValidationException
     {
         if (this.getChildNodes().size() < 2)
         {

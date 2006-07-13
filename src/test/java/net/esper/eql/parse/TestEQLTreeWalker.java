@@ -106,9 +106,7 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals(9, tryExpression("max(6, 9)"));
         assertEquals(6.11, tryExpression("min(6.11, 6.12)"));
         assertEquals(6.10, tryExpression("min(6.11, 6.12, 6.1)"));
-
         assertEquals("ab", tryExpression("'a'||'b'"));
-        assertEquals("ab", tryExpression("'a'+'b'"));
     }
 
     public void testWalkEQLMath() throws Exception
@@ -464,7 +462,7 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalk(expression);
         ExprNode exprNode = (walker.getFilterRootNode().getChildNodes().get(0));
-        exprNode.validateDescendents(null, null);
+        exprNode = exprNode.getValidatedSubtree(null, null);
         return exprNode.evaluate(null);
     }
 

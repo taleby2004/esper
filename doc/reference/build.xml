@@ -53,7 +53,9 @@ Changes made:
     <target name="clean">
 
         <!-- Delete build directory. -->
-        <delete dir="${build.dir}"/>
+        <delete includeemptydirs="false">
+        	<fileset dir="${build.dir}" includes="*.*" />
+        </delete>
 
     </target>
 

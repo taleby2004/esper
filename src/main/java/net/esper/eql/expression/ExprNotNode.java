@@ -8,7 +8,7 @@ import net.esper.event.EventBean;
  */
 public class ExprNotNode extends ExprNode
 {
-    public void validate(StreamTypeService streamTypeService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService) throws ExprValidationException
     {
         // Must have a single child node
         if (this.getChildNodes().size() != 1)
