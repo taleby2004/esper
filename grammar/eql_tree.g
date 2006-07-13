@@ -132,6 +132,7 @@ valueExpr
 	| 	eventPropertyExpr
 	|   evalExprChoice
 	|	f:builtinFunc { leaveNode(#f); }
+	|   l:libFunc { leaveNode(#l); }
 	;
 
 builtinFunc
@@ -155,6 +156,10 @@ arithmeticExpr
 	|	#(BOR valueExpr valueExpr)	
 	|	#(BXOR valueExpr valueExpr)		
 	| 	#(CONCAT valueExpr valueExpr (valueExpr)*)
+	;
+	
+libFunc
+	:  #(LIB_FUNCTION CLASS_IDENT IDENT (valueExpr)*)
 	;
 	
 //----------------------------------------------------------------------------

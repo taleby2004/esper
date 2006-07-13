@@ -98,6 +98,7 @@ tokens
 	INSERTINTO_EXPR;
 	INSERTINTO_EXPRCOL;
 	CONCAT;	
+	LIB_FUNCTION;
 	UNARY_MINUS;
 	
    	INT_TYPE;
@@ -317,7 +318,7 @@ multiplyExpression
 	
 unaryExpression
 	: MINUS^ {#MINUS.setType(UNARY_MINUS);} eventProperty
-	| eventProperty
+	| eventPropertyOrLibFunction
 	| constant
 	| LPAREN! expression RPAREN!
 	| builtinFunc
@@ -339,6 +340,25 @@ builtinFunc
 	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	;
 	
+eventPropertyOrLibFunction
+	: (eventProperty) => eventProperty
+	| libFunction
+	;
+	
+libFunction
+	: classIdentifierNonGreedy DOT! funcIdent LPAREN! (libFunctionArgs)? RPAREN!
+	{ #libFunction = #([LIB_FUNCTION,"libFunction"], #libFunction); }	
+	;	
+	
+funcIdent
+	: IDENT
+	| MAX {#MAX.setType(IDENT);}
+	| MIN {#MIN.setType(IDENT);}
+	;
+	
+libFunctionArgs
+	: expression (COMMA! expression)*
+	;	
 
 //----------------------------------------------------------------------------
 // Pattern event expressions / event pattern operators
@@ -456,13 +476,13 @@ eventFilterExpression
     ;
 
 classIdentifier
-		{ String identifier; }
+		{ String identifier = ""; }
 	:	i1:IDENT! { identifier = #i1.getText(); }
 	    ( 
 	    	// Ambigous since exit block may also be identifier, not yet seen a problem testing this
 	    	// so suppressing warning here.
 	    	options 
-	    	{ 
+	    	{ 	
 	    		warnWhenFollowAmbig=false; 
 	    	} 
 	    	: DOT! i2:IDENT! { identifier += "." + #i2.getText(); } 
@@ -471,6 +491,24 @@ classIdentifier
 	      #classIdentifier.setText(identifier);
 	    }
 	;
+	
+classIdentifierNonGreedy
+		{ String identifier = ""; }
+	:	i1:IDENT! { identifier = #i1.getText(); }
+	    ( 
+	    	// Ambigous since exit block may also be identifier, not yet seen a problem testing this
+	    	// so suppressing warning here.
+	    	options 
+	    	{ 	
+	    		warnWhenFollowAmbig=false; 
+	    		greedy=false;
+	    	} 
+	    	: DOT! i2:IDENT! { identifier += "." + #i2.getText(); } 
+	    )* 
+	    { #classIdentifierNonGreedy = #([CLASS_IDENT,"classIdentifierNonGreedy"], #classIdentifierNonGreedy); 
+	      #classIdentifierNonGreedy.setText(identifier);
+	    }
+	;	
 	
 filterParamSet
     :   filterParameter (COMMA! filterParameter)*

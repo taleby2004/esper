@@ -100,7 +100,7 @@ public class TestEQLTreeWalker extends TestCase
         assertNull(identNode.getStreamOrPropertyName());
         assertEquals("f4", identNode.getUnresolvedPropertyName());
     }
-    
+
     public void testWalkEQLPerRowFunctions() throws Exception
     {
         assertEquals(9, tryExpression("max(6, 9)"));
@@ -408,7 +408,7 @@ public class TestEQLTreeWalker extends TestCase
         EQLTreeWalker walker = parseAndWalk(expression);
         ExprNode exprNode = walker.getFilterRootNode().getChildNodes().get(0);
         ExprBitWiseNode bitWiseNode = (ExprBitWiseNode) (exprNode);
-        bitWiseNode.validateDescendents(null);
+        bitWiseNode.getValidatedSubtree(null, null);
         return bitWiseNode.evaluate(null);
     }
 
@@ -464,7 +464,7 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalk(expression);
         ExprNode exprNode = (walker.getFilterRootNode().getChildNodes().get(0));
-        exprNode.validateDescendents(null);
+        exprNode.validateDescendents(null, null);
         return exprNode.evaluate(null);
     }
 
@@ -474,7 +474,7 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalk(expression);
         ExprNode filterExprNode = walker.getFilterRootNode();
-        filterExprNode.validateDescendents(null);
+        filterExprNode.getValidatedSubtree(null, null);
         return filterExprNode.evaluate(null);
     }
 
