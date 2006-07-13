@@ -675,7 +675,8 @@ order by price, volume</programlisting>
 		</orderedlist>
 		
 		<para>
-			Otherwise, any kind of expression that can appear in the <literal>select</literal> clause is also valid in the order by clause.
+			Otherwise, any kind of expression that can appear in the <literal>select</literal> clause, 
+			as well as any alias defined in the <literal>select</literal> clause, is also valid in the order by clause.
 		</para>		
 	</sect1>
 
