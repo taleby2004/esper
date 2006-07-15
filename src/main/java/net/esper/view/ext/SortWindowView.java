@@ -5,10 +5,12 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
+import net.esper.util.MultiKeyComparator;
 import net.esper.view.ViewSupport;
 import net.esper.view.Viewable;
 import net.esper.view.window.DataWindowView;
 import net.esper.view.PropertyCheckHelper;
+import net.esper.collection.MultiKey;
 import net.esper.event.EventPropertyGetter;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
@@ -29,12 +31,12 @@ import net.esper.event.EventBean;
  */
 public final class SortWindowView extends ViewSupport implements DataWindowView
 {
-    private String sortFieldName;
-    private EventPropertyGetter sortFieldGetter;
-    private boolean isDescending;
+    private String[] sortFieldNames;
+    private EventPropertyGetter[] sortFieldGetters;
+    private Boolean[] isDescendingValues;
     private int sortWindowSize = 0;
 
-    private TreeMap<Object, LinkedList<EventBean>> sortedEvents;
+    private TreeMap<MultiKey, LinkedList<EventBean>> sortedEvents;
     private int eventCount;
 
     /**
@@ -46,30 +48,39 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
 
     /**
      * Constructor.
-     * @param sortFieldName is the name of the field in the event to get the values to sort
-     * @param isDescending true if the sort should be descending, false if ascending
+     * @param propertiesAndDirections - an array of the form [String, Boolean, ...],
+     * 		  where each String represents a property name, and each Boolean indicates 
+     * 	      whether to sort in descending order on that property
      * @param size is the specified number of elements to keep in the sort
      */
-    public SortWindowView(String sortFieldName, boolean isDescending, int size)
+    public SortWindowView(Object[] propertiesAndDirections, int size)
     {
-        if ((size < 1) || (size > Integer.MAX_VALUE))
-        {
-            throw new IllegalArgumentException("Illegal argument for sortWindowSize of length window");
-        }
+    	if(propertiesAndDirections == null || propertiesAndDirections.length < 2)
+    	{
+    		throw new IllegalArgumentException("The sort view must sort on at least one property");
+    	}
 
-        this.sortFieldName = sortFieldName;
-        this.isDescending = isDescending;
-        this.sortWindowSize = size;
+    	if ((size < 1) || (size > Integer.MAX_VALUE))
+    	{
+    		throw new IllegalArgumentException("Illegal argument for sortWindowSize of length window");
+    	}
 
-        if (isDescending)
-        {
-            SortWindowDescending comparator = new SortWindowDescending();
-            sortedEvents = new TreeMap<Object, LinkedList<EventBean>>(comparator);
-        }
-        else
-        {
-            sortedEvents = new TreeMap<Object, LinkedList<EventBean>>();
-        }
+    	setNamesAndIsDescendingValues(propertiesAndDirections);
+    	this.sortWindowSize = size;
+
+    	Comparator<MultiKey> comparator = new MultiKeyComparator(isDescendingValues);
+    	sortedEvents = new TreeMap<MultiKey, LinkedList<EventBean>>(comparator);
+    }
+    
+    /**
+     * Ctor.
+     * @param propertyName - the property to sort on
+     * @param isDescending - true if the property should be sorted in descending order
+     * @param size - the number of elements to keep in the sort
+     */
+    public SortWindowView(String propertyName, boolean isDescending, int size)
+    {
+    	this(new Object[] {propertyName, isDescending}, size);
     }
 
     public void setParent(Viewable parent)
@@ -77,54 +88,31 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         super.setParent(parent);
         if (parent != null)
         {
-            sortFieldGetter = parent.getEventType().getGetter(sortFieldName);
+        	int count = 0;
+        	sortFieldGetters = new EventPropertyGetter[sortFieldNames.length];
+        	for(String name : sortFieldNames)
+        	{
+        		sortFieldGetters[count++] = parent.getEventType().getGetter(name);
+        	}
         }
     }
 
     /**
-     * Returns the field name supplying the values to sort by.
-     * @return field name to sort by
+     * Returns the field names supplying the values to sort by.
+     * @return field names to sort by
      */
-    public final String getSortFieldName()
+    public final String[] getSortFieldNames()
     {
-        return sortFieldName;
+        return sortFieldNames;
     }
-
+    
     /**
-     * Sets the field name supplying the values to sort by.
-     * @param sortFieldName field name to sort by
+     * Returns the flags indicating whether to sort in descending order on each property
+     * @return the isDescending value for each sort property
      */
-    public final void setSortFieldName(String sortFieldName)
+    public final Boolean[] getIsDescendingValues()
     {
-        this.sortFieldName = sortFieldName;
-    }
-
-    /**
-     * Returns an indication of sort order.
-     * @return true for descending sorts, false for ascending sort
-     */
-    public final boolean isDescending()
-    {
-        return isDescending;
-    }
-
-    /**
-     * Set the sort order for the sort window.
-     * @param descending is true to set the descending and false for ascending sorting.
-     */
-    public final void setDescending(boolean descending)
-    {
-        isDescending = descending;
-
-        if (isDescending)
-        {
-            SortWindowDescending comparator = new SortWindowDescending();
-            sortedEvents = new TreeMap<Object, LinkedList<EventBean>>(comparator);
-        }
-        else
-        {
-            sortedEvents = new TreeMap<Object, LinkedList<EventBean>>();
-        }
+    	return isDescendingValues;
     }
 
     /**
@@ -136,19 +124,44 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         return sortWindowSize;
     }
 
-    /**
-     * Sets the number of elements kept by the sort window.
-     * @param sortWindowSize size of window
-     */
-    public final void setSortWindowSize(int sortWindowSize)
-    {
-        this.sortWindowSize = sortWindowSize;
-    }
+   /**
+    * Set the sort order for the sort properties.
+    * @param isDescendingValues - the direction to sort in for each sort property
+    */
+    public final void setIsDescendingValues(Boolean[] isDescendingValues) {
+		this.isDescendingValues = isDescendingValues;
+	}
 
-    public final String attachesTo(Viewable parentView)
+	/**
+	 * Set the names of the properties to sort on.
+	 * @param sortFieldNames - the names of the properties to sort on
+	 */
+    public final void setSortFieldNames(String[] sortFieldNames) {
+		this.sortFieldNames = sortFieldNames;
+	}
+
+    /**
+     * Set the number of elements kept by the sort window.
+     * param sortWindowSize - size of window
+     */
+    public final void setSortWindowSize(int sortWindowSize) {
+		this.sortWindowSize = sortWindowSize;
+	}
+
+	public final String attachesTo(Viewable parentView)
     {
-        // Attaches to parent views where the field exists and implements Comparable
-        return PropertyCheckHelper.exists(parentView.getEventType(), sortFieldName);
+        // Attaches to parent views where the sort fields exist and implement Comparable
+    	String result = null;
+    	for(String name : sortFieldNames)
+    	{
+    		result = PropertyCheckHelper.exists(parentView.getEventType(), name);
+
+    		if(result != null)
+    		{
+    			break;
+    		}
+    	}
+    	return result;
     }
 
     public final EventType getEventType()
@@ -172,8 +185,8 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         {
             for (int i = 0; i < oldData.length; i++)
             {
-                Object sortValue = sortFieldGetter.get(oldData[i]);
-                boolean result = remove(sortValue, oldData[i]);
+                MultiKey sortValues = getSortValues(oldData[i]);
+                boolean result = remove(sortValues, oldData[i]);
                 if (result)
                 {
                     eventCount--;
@@ -187,8 +200,8 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         {
             for (int i = 0; i < newData.length; i++)
             {
-                Object sortValue = sortFieldGetter.get(newData[i]);
-                add(sortValue, newData[i]);
+                MultiKey sortValues = getSortValues(newData[i]);
+                add(sortValues, newData[i]);
                 eventCount++;
             }
         }
@@ -200,7 +213,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
             for (int i = 0; i < removeCount; i++)
             {
                 // Remove the last element of the last key - sort order is key and then natural order of arrival
-                Object lastKey = sortedEvents.lastKey();
+                MultiKey lastKey = sortedEvents.lastKey();
                 LinkedList<EventBean> events = sortedEvents.get(lastKey);
                 EventBean event = events.removeLast();
                 eventCount--;
@@ -241,12 +254,12 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
     public final String toString()
     {
         return this.getClass().getName() +
-                " sortFieldName=" + sortFieldName +
-                " isDescending=" + isDescending +
+                " sortFieldName=" + sortFieldNames +
+                " isDescending=" + isDescendingValues +
                 " sortWindowSize=" + sortWindowSize;
     }
 
-    private void add(Object key, EventBean bean)
+    private void add(MultiKey key, EventBean bean)
     {
         LinkedList<EventBean> listOfBeans = sortedEvents.get(key);
         if (listOfBeans != null)
@@ -260,7 +273,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         sortedEvents.put(key, listOfBeans);
     }
 
-    private boolean remove(Object key, EventBean bean)
+    private boolean remove(MultiKey key, EventBean bean)
     {
         LinkedList<EventBean> listOfBeans = sortedEvents.get(key);
         if (listOfBeans == null)
@@ -274,6 +287,35 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
             sortedEvents.remove(key);
         }
         return result;
+    }
+    
+    private void setNamesAndIsDescendingValues(Object[] propertiesAndDirections)
+    {
+    	if(propertiesAndDirections.length % 2 != 0)
+    	{
+    		throw new IllegalArgumentException("Each property to sort by must have an isDescending boolean qualifier");
+    	}
+
+    	int length = propertiesAndDirections.length / 2;
+    	sortFieldNames = new String[length];
+    	isDescendingValues  = new Boolean[length];
+    	
+    	for(int i = 0; i < length; i++)
+    	{
+    		sortFieldNames[i] = (String)propertiesAndDirections[2*i];
+    		isDescendingValues[i] = (Boolean)propertiesAndDirections[2*i + 1];
+    	}
+    }
+    
+    private MultiKey<Object> getSortValues(EventBean event)
+    {
+    	Object[] result = new Object[sortFieldGetters.length];
+    	int count = 0;
+    	for(EventPropertyGetter getter : sortFieldGetters)
+    	{
+    		result[count++] = getter.get(event);
+    	}
+    	return new MultiKey<Object>(result);
     }
 
     private static final Log log = LogFactory.getLog(SortWindowView.class);
