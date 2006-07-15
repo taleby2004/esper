@@ -79,7 +79,7 @@ public class OrderByProcessorFactory {
     	boolean needsGroupByKeys = !selectionList.isEmpty() && !orderAggNodes.isEmpty();
         
     	log.debug(".getProcessor Using OrderByProcessorSimple");
-    	return new OrderByProcessorSimple(orderByList, groupByNodes, orderType, needsGroupByKeys, aggregationService, eventAdapterService);
+    	return new OrderByProcessorSimple(orderByList, groupByNodes, needsGroupByKeys, aggregationService);
 	}
 	
 
