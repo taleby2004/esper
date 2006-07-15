@@ -14,8 +14,7 @@ import java.util.Set;
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
 import net.esper.event.EventBean;
-import net.esper.event.EventType;
-import net.esper.event.EventAdapterService;
+import net.esper.util.MultiKeyComparator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,12 +29,10 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 
 	private final List<Pair<ExprNode, Boolean>> orderByList;
 	private final List<ExprNode> groupByNodes;
-	private final EventType sortType;
 	private final boolean needsGroupByKeys;
 	private final AggregationService aggregationService;
-    private final EventAdapterService eventAdapterService;
 
-	private final Comparator<EventBean> comparator;
+	private final Comparator<MultiKey> comparator;
 
 	/**
 	 * Ctor.
@@ -44,8 +41,6 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 	 *            the nodes that generate the keys to sort events on
 	 * @param groupByNodes -
 	 *            generate the keys for determining aggregation groups
-	 * @param sortType -
-	 *            event type that represents the event properties to sort on
 	 * @param needsGroupByKeys -
 	 *            indicates whether this processor needs to have individual
 	 *            group by keys to evaluate the sort condition successfully
@@ -56,18 +51,15 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 	 */
 	public OrderByProcessorSimple(final List<Pair<ExprNode, Boolean>> orderByList,
 								  List<ExprNode> groupByNodes, 
-								  EventType sortType,
-								  boolean needsGroupByKeys, 
-								  AggregationService aggregationService,
-                                  EventAdapterService eventAdapterService)
+								  boolean needsGroupByKeys,
+								  AggregationService aggregationService)
 	{
 		this.orderByList = orderByList;
 		this.groupByNodes = groupByNodes;
-		this.sortType = sortType;
 		this.needsGroupByKeys = needsGroupByKeys;
 		this.aggregationService = aggregationService;
-        this.eventAdapterService = eventAdapterService;
-		this.comparator = getComparator();
+        
+		this.comparator = new MultiKeyComparator(getIsDescendingValues());
 	}
 	
 
@@ -96,33 +88,33 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 			return outgoingEvents;
 		}
 
-		// Create the events with sort properties
-		List<EventBean> sortEvents = createSortEvents(generatingEvents, groupByKeys);
+		// Create the multikeys of sort values
+		List<MultiKey> sortValuesMultiKeys = createSortProperties(generatingEvents, groupByKeys);
 
-		// Map the sort events to the corresponding outgoing events
-		Map<EventBean, List<EventBean>> sortToOutgoing = new HashMap<EventBean, List<EventBean>>();
+		// Map the sort values to the corresponding outgoing events
+		Map<MultiKey, List<EventBean>> sortToOutgoing = new HashMap<MultiKey, List<EventBean>>();
 		int countOne = 0;
-		for (EventBean sortEvent : sortEvents) 
+		for (MultiKey sortValues : sortValuesMultiKeys) 
 		{
-			List<EventBean> list = sortToOutgoing.get(sortEvent);
+			List<EventBean> list = sortToOutgoing.get(sortValues);
 			if (list == null) 
 			{
 				list = new ArrayList<EventBean>();
 			}
 			list.add(outgoingEvents[countOne++]);
-			sortToOutgoing.put(sortEvent, list);
+			sortToOutgoing.put(sortValues, list);
 		}
 
-		// Sort the sort events
-		Collections.sort(sortEvents, comparator);
+		// Sort the sort values
+		Collections.sort(sortValuesMultiKeys, comparator);
 
 		// Sort the outgoing events in the same order
-		Set<EventBean> sortSet = new LinkedHashSet<EventBean>(sortEvents);
+		Set<MultiKey> sortSet = new LinkedHashSet<MultiKey>(sortValuesMultiKeys);
 		EventBean[] result = new EventBean[outgoingEvents.length];
 		int countTwo = 0;
-		for (EventBean sortEvent : sortSet) 
+		for (MultiKey sortValues : sortSet) 
 		{
-			Collection<EventBean> output = sortToOutgoing.get(sortEvent);
+			Collection<EventBean> output = sortToOutgoing.get(sortValues);
 			for(EventBean event : output)
 			{
 				result[countTwo++] = event;
@@ -176,29 +168,31 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 		return comparable1.compareTo(valueTwo);
 	}
 	
-	private List<EventBean> createSortEvents(EventBean[][] generatingEvents, MultiKey[] groupByKeys) 
+	private List<MultiKey> createSortProperties(EventBean[][] generatingEvents, MultiKey[] groupByKeys) 
 	{
-		EventBean[] sortEvents = new EventBean[generatingEvents.length];
+		MultiKey[] sortProperties = new MultiKey[generatingEvents.length];
 
 		int count = 0;
 		for (EventBean[] eventsPerStream : generatingEvents) 
 		{
-			// Make a new event that contains the sort-by values.
+			// Make a new multikey that contains the sort-by values.
 			if (needsGroupByKeys) 
 			{
 				aggregationService.setCurrentRow(groupByKeys[count]);
 			}
-			Map<String, Object> props = new HashMap<String, Object>();
+
+			Object[] values = new Object[orderByList.size()];
+			int countTwo = 0;
 			for (Pair<ExprNode, Boolean> sortPair : orderByList) 
 			{
 				ExprNode sortNode = sortPair.getFirst();
-				props.put(sortNode.toExpressionString(), sortNode.evaluate(eventsPerStream));
+				values[countTwo++] = sortNode.evaluate(eventsPerStream);
 			}
-			EventBean sortEvent = eventAdapterService.createMapFromValues(props, sortType);
-			sortEvents[count] = sortEvent;
+
+			sortProperties[count] = new MultiKey<Object>(values);
 			count++;
 		}
-		return Arrays.asList(sortEvents);
+		return Arrays.asList(sortProperties);
 	}
 
 	private MultiKey generateGroupKey(EventBean[] eventsPerStream) 
@@ -228,28 +222,14 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 		return keys;
 	}
 
-	private Comparator<EventBean> getComparator() 
+	private Boolean[] getIsDescendingValues()
 	{
-		Comparator<EventBean> comparator = new Comparator<EventBean>() 
+		Boolean[] isDescendingValues  = new Boolean[orderByList.size()];
+		int count = 0;
+		for(Pair<ExprNode, Boolean> pair : orderByList)
 		{
-			public int compare(EventBean eventOne, EventBean eventTwo) 
-			{
-				for (Pair<ExprNode, Boolean> pair : orderByList) 
-				{
-					String propertyName = pair.getFirst().toExpressionString();
-					Object valueOne = eventOne.get(propertyName);
-					Object valueTwo = eventTwo.get(propertyName);
-					boolean descending = pair.getSecond();
-
-					int comparisonResult = compareValues(valueOne, valueTwo, descending);
-					if (comparisonResult != 0) 
-					{
-						return comparisonResult;
-					}
-				}
-				return 0;
-			}
-		};
-		return comparator;
+			isDescendingValues[count++] = pair.getSecond();
+		}
+		return isDescendingValues;
 	}
 }
