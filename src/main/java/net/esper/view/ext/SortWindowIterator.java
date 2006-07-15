@@ -1,9 +1,11 @@
 package net.esper.view.ext;
 
+import net.esper.collection.MultiKey;
 import net.esper.event.EventBean;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.NoSuchElementException;
 
@@ -12,22 +14,22 @@ import java.util.NoSuchElementException;
  */
 public final class SortWindowIterator implements Iterator<EventBean>
 {
-    private final SortedMap<Object, LinkedList<EventBean>> window;
+    private final SortedMap<MultiKey, LinkedList<EventBean>> window;
 
-    private final Iterator<Object> keyIterator;
+    private final Iterator<MultiKey> keyIterator;
     private Iterator<EventBean> currentListIterator;
 
     /**
      * Ctor.
      * @param window - sorted map with events
      */
-    public SortWindowIterator(SortedMap<Object, LinkedList<EventBean>> window)
+    public SortWindowIterator(SortedMap<MultiKey, LinkedList<EventBean>> window)
     {
         this.window = window;
         keyIterator = window.keySet().iterator();
         if (keyIterator.hasNext())
         {
-            Object initialKey = (Object) keyIterator.next();
+            MultiKey initialKey = (MultiKey) keyIterator.next();
             currentListIterator = window.get(initialKey).iterator();
         }
     }
@@ -46,7 +48,7 @@ public final class SortWindowIterator implements Iterator<EventBean>
             currentListIterator = null;
             if (keyIterator.hasNext())
             {
-                Object nextKey = (Object) keyIterator.next();
+                MultiKey nextKey = (MultiKey) keyIterator.next();
                 currentListIterator = window.get(nextKey).iterator();
             }
         }
