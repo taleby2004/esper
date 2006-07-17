@@ -1,6 +1,13 @@
 Esper Changelog
 ===================
 
+Changes in version 1.0.0
+------------------------------------
+
+* (EQL) Added support for invoking Java library static methods, invoking user-defined static methods, and defining an auto-import list
+* (EQL) Sort view ext:sort now also allowing multiple columns to sort on
+* (EQL) Added NOT, modulo (%) and SQL string concatention operator (||)
+
 Changes in version 0.9.5
 ------------------------------------
 
