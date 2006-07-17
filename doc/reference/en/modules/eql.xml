@@ -1383,17 +1383,29 @@ where ticks.symbol = news.symbol
 			   <title>Sorted Window View</title>
 		
 				<para>					
-					This view sorts by values in the specified event property and keeps only the top elements up to the given size. 
+					This view sorts by values of the specified event properties and keeps only the top events up to the given size. 
 				</para>
 
 				<para>
-					The syntax for this view is : <literal>sort(String propertyName, boolean isDescending, int size) </literal>.
+					The syntax to sort on a single event property is as follows.
 				</para>
+				<synopsis>sort(<emphasis>propertyName</emphasis>, <emphasis>isDescending</emphasis>, <emphasis>size</emphasis>) </synopsis>
 
 				<para>
-					These view can be used to sort on price descending keeping the lowest 10 prices and reporting statistics on price.
+					To sort on a multiple event properties the syntax is as follows.
 				</para>
-				<programlisting><![CDATA[StockTickEvent.ext:sort('price', true, 10).stat:uni('price'))]]></programlisting>				
+				<synopsis>sort( { <emphasis>propertyName</emphasis>, <emphasis>isDescending</emphasis> [ , <emphasis>propertyName</emphasis>, <emphasis>isDescending</emphasis> ...] }, <emphasis>size</emphasis>) </synopsis>
+
+				<para>
+					The view below sorts on price descending keeping the lowest 10 prices and reporting statistics on price.
+				</para>
+				<programlisting><![CDATA[StockTickEvent.ext:sort('price', false, 10).stat:uni('price')]]></programlisting>				
+
+				<para>
+					The following example sorts events first by price in descending order, and then by symbol name in ascending (alphabetical) order, keeping only the 10
+events with the highest price (with ties resolved by alphabetical order of symbol).
+				</para>
+				<programlisting><![CDATA[StockTickEvent.ext:sort({'price', true, 'symbol', false}, 10)]]></programlisting>				
 			</sect3>
 			
 		</sect2>
