@@ -18,6 +18,7 @@
 			<item name="Evaluating Esper" href="/evaluating/evaluating.html" collapse="false">
 				<item name="2-Minute Tutorial" href="/evaluating/tutorial/two_minute_tutorial.html"/>
 				<item name="10-Minute Tutorial" href="/evaluating/tutorial/ten_minute_tutorial.html"/>
+				<item name="Solution Patterns" href="/tutorial/faq/solution_patterns.html"/>
 				<item name="Download" href="http://dist.codehaus.org/esper"/>
 			</item>
 			<item name="Using Esper" href="/using/using.html" collapse="false">
