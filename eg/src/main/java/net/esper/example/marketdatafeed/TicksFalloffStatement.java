@@ -4,14 +4,15 @@ import net.esper.client.EPStatement;
 import net.esper.client.EPAdministrator;
 import net.esper.client.UpdateListener;
 
-public class TicksPerSecondStatement
+public class TicksFalloffStatement
 {
     private EPStatement statement;
 
-    public TicksPerSecondStatement(EPAdministrator admin)
+    public TicksFalloffStatement(EPAdministrator admin)
     {
-        String stmt = "insert into TicksPerSecond " +
-                      "select feed, count(*) as cnt from MarketDataEvent.win:time_batch(1) group by feed";
+        String stmt = "select feed, avg(cnt) from TicksPerSecond.win:time(20) " +
+                      "where cnt < avg(cnt) * 0.75 " +
+                      "group by feed";
 
         statement = admin.createEQL(stmt);
     }
@@ -21,4 +22,3 @@ public class TicksPerSecondStatement
         statement.addListener(listener);
     }
 }
-
