@@ -110,7 +110,7 @@ select feed, max(cnt) as maxCount, min(cnt) as minCount from TicksPerSecond.win:
           at a specified time or row-based interval.
         </p>
         <p>
-          The example below limit the otherwise continuous output to an output row every 5 seconds. The output contains 
+          The example below limits the otherwise continuous output to an output row every 5 seconds. The output contains 
           the feed and average volume per feed of the last 60 seconds of market data events.
         </p>
 	<div class="source"><pre>select feed, avg(volume) as cnt from MarketDataEvent.win:time(60) group by feed output every 5 seconds</pre></div>      
