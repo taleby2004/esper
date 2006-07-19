@@ -58,7 +58,7 @@ public class TestInvalidView extends TestCase
 
         // where-clause has aggregation function
         exceptionText = getStatementExceptionView("select * from " + EVENT_ALLTYPES + ".win:length(1) where sum(intPrimitive) > 5");
-        assertEquals("Error validating expression: An aggregate function may not appear in a WHERE clause [select * from net.esper.support.bean.SupportBean.win:length(1) where sum(intPrimitive) > 5]", exceptionText);
+        assertEquals("Error validating expression: An aggregate function may not appear in a WHERE clause (use the HAVING clause) [select * from net.esper.support.bean.SupportBean.win:length(1) where sum(intPrimitive) > 5]", exceptionText);
 
         // invalid numerical expression
         exceptionText = getStatementExceptionView("select 2 * 's' from " + EVENT_ALLTYPES + ".win:length(1)");

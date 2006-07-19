@@ -219,7 +219,7 @@ public class EPEQLStmtStartMethod
                 ExprAggregateNode.getAggregatesBottomUp(optionalFilterNode, aggregateNodes);
                 if (aggregateNodes.size() > 0)
                 {
-                    throw new ExprValidationException("An aggregate function may not appear in a WHERE clause");
+                    throw new ExprValidationException("An aggregate function may not appear in a WHERE clause (use the HAVING clause)");
                 }
             }
             catch (ExprValidationException ex)

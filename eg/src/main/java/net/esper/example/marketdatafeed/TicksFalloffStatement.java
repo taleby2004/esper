@@ -10,9 +10,9 @@ public class TicksFalloffStatement
 
     public TicksFalloffStatement(EPAdministrator admin)
     {
-        String stmt = "select feed, avg(cnt) from TicksPerSecond.win:time(20) " +
-                      "where cnt < avg(cnt) * 0.75 " +
-                      "group by feed";
+        String stmt = "select feed, avg(cnt) as avgCnt, cnt as feedCnt from TicksPerSecond.win:time(10) " +
+                      "group by feed " +
+                      "having cnt < avg(cnt) * 0.75 ";
 
         statement = admin.createEQL(stmt);
     }
