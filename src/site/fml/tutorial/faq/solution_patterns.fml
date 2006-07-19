@@ -102,6 +102,21 @@ select feed, max(cnt) as maxCount, min(cnt) as minCount from TicksPerSecond.win:
       </answer>
     </faq>    
 
+    <faq id="throughput-3">
+      <question>How do I reduce the rate of event output by my statement? How do I get frequent but not continuous results?</question>
+      <answer>
+        <p>
+          Use output rate limiting to stabilize or reduce the rate at which rows are output from a query, by outputting rows
+          at a specified time or row-based interval.
+        </p>
+        <p>
+          The example below limit the otherwise continuous output to an output row every 5 seconds. The output contains 
+          the feed and average volume per feed of the last 60 seconds of market data events.
+        </p>
+	<div class="source"><pre>select feed, avg(volume) as cnt from MarketDataEvent.win:time(60) group by feed output every 5 seconds</pre></div>      
+      </answer>
+    </faq>    
+
   </part>
 
 </faqs>
