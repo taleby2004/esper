@@ -5,9 +5,11 @@ Evaluating Esper
 	
 * Getting Started
 	
-	* The {{{tutorial/two_minute_tutorial.html}2-minute tutorial}} is a short introduction.
+	* The {{{tutorial/tutorial.html}tutorial}} is an introduction to continuous query statements and patterns for event stream processing.
+
+	* The {{{tutorial/feedmonitor_casestudy.html}short case study}} presents a solution to reporting rates and anomalies on a market data feed.
 	
-	* The {{{tutorial/ten_minute_tutorial.html}10-minute tutorial}} is a more detailed introduction.
+	* The {{{tutorial/transaction_casestudy.html}longer case study}} introduces the API and queries for solving a missing transaction problem.
 
 	* The PDF and JavaDoc {{{../using/documentation/documentation.html}documentation}} is available online.
 	  The reference manual also describes examples.
