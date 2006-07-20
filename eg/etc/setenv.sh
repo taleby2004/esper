@@ -1,10 +1,16 @@
+#!/bin/sh
+
+## run via '. setenv.sh'
+##
+##
+
 if [ -z "${JAVA_HOME}" ]
 then
   echo "JAVA_HOME not set"
   exit 0
 fi
 
-if [ ! -x ${JAVA_HOME}/bin/java.exe ]
+if [ ! -x "${JAVA_HOME}/bin/java" ]
 then
   echo Cannot find java executable, check JAVA_HOME
   exit 0

@@ -45,10 +45,17 @@
 	</target>
 
 	<target name="dist_tar" description="Tar up distribution" depends="touch_all">
+		<property name="tar-file" value="${dist.dir}/${fullname}.tar"/>
 		<echo message="Building a tar for distribution" />
-		<tar tarfile="${dist.dir}/${fullname}.tar">
+		<fixcrlf srcdir="eg/etc"
+		       eol="lf"
+		       eof="remove"
+		       includes="**/*.sh"/>
+		<tar longfile="gnu" tarfile="${tar-file}">
 			<tarfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="eg/etc/*.sh"/>
 		</tar>
+		<gzip zipfile="${tar-file}.gz" src="${tar-file}" />			
 	</target>
 
 	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet">

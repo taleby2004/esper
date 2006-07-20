@@ -1,4 +1,6 @@
-./setenv.sh
+#!/bin/sh
+
+. setenv.sh
 
 if [ ! -d "../target" ]
 then

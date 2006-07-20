@@ -1,7 +1,9 @@
+#!/bin/sh
+
 # Script to run market data feed example
 #
 
-./setenv.bat
+. setenv.sh
 
 MEMORY_OPTIONS="-Xms256m -Xmx256m -XX:+UseParNewGC"
 
