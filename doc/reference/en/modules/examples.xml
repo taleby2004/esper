@@ -5,7 +5,7 @@
         <title>Examples Overview</title>
 
 		<para>
-			This chapters outlines the examples that come with Esper in the <literal>eg/src</literal> folder of the distribution. The code for examples can be found in the <literal>net.esper.example</literal> packages.
+			This chapter outlines the examples that come with Esper in the <literal>eg/src</literal> folder of the distribution. The code for examples can be found in the <literal>net.esper.example</literal> packages.
 		</para>
     	
 		<para>
@@ -36,7 +36,7 @@
 			<listitem>
 				<para>
                     Now you are ready to run the examples. Some examples require mandatory parameters. Further information to running
-                    each example can be found in "readme.txt".
+                    each example can be found in the "eg" folder in file "readme.txt".
                 </para>
 			</listitem>
 			<listitem>
@@ -49,8 +49,101 @@
 
 		<para>
 			JUnit tests exist for the example code. The JUnit test source code for the examples can be found in the <literal>eg/test</literal> folder. To build and run the example JUnit tests, use the Maven 2 goal <literal>test</literal>. The JUnit test source code can also be helpful in understanding the example and in the use of Esper APIs.
+		</para>		
+    </sect1>
+
+    <sect1 id="examples-marketdata-monitor">
+        <title>Market Data Feed Monitor</title>
+
+		<para>
+			This example processes a raw market data feed. It reports throughput statistics and 
+			detects when the data rate of a feed falls off unexpectedly. A rate fall-off may mean that the data is stale and 
+			we want to alert when there is a possible problem with the feed.
+		</para>
+
+		<para>
+			The classes for this example live in package <literal>net.esper.example.marketdatafeed</literal>. 
+			Run "run_mktdatafeed.bat" (Windows) or "run_mktdatafeed.sh" (Unix) in the <literal>eg/etc</literal> folder 
+			to start the market data feed simulator. 			
 		</para>
 		
+        <sect2 id="examples-marketdata-monitor-input">
+        	<title>Input Events</title>
+        
+			<para>
+				The input stream consists of 1 event stream that contains 2 simulated market data feeds. Each individual event in the stream 
+				indicates the feed that supplies the market data, the security symbol and some pricing information:
+			</para>
+
+<programlisting><![CDATA[String symbol;
+FeedEnum feed;
+double bidPrice;
+double askPrice;
+]]></programlisting>
+		</sect2>
+			
+        <sect2 id="examples-marketdata-computing">
+        	<title>Computing Rates Per Feed</title>
+
+			<para>
+				For the throughput statistics and to detect rapid fall-off we calculate a ticks per second rate for each market data feed. 
+			</para>
+
+			<para>
+				We can use an EQL statement that specifies a view onto the market data event stream that batches together 1 second of events. 
+				We specify the feed and a count of events per feed as output values. To make this data available for further processing, we
+				insert output events into the TicksPerSecond event stream:
+			</para>
+
+<programlisting><![CDATA[insert into TicksPerSecond
+select feed, count(*) as cnt 
+  from MarketDataEvent.win:time_batch(1) 
+ group by feed
+]]></programlisting>
+		</sect2>
+
+        <sect2 id="examples-marketdata-falloff">
+        	<title>Detecting a Fall-off</title>
+
+			<para>
+				We define a rapid fall-off by alerting when the number of ticks per second for any second falls below 75% of the 
+				average number of ticks per second over the last 10 seconds. 
+			</para>
+
+			<para>
+				We can compute the average number of ticks per second over the last 10 seconds simply by using the TicksPerSecond events computed by the
+				prior statement and averaging the last 10 seconds. Next, we compare the current rate with the moving average and
+				filter out any rates that fall below 75% of the average:
+			</para>
+
+<programlisting><![CDATA[select feed, avg(cnt) as avgCnt, cnt as feedCnt 
+  from TicksPerSecond.win:time(10)
+ group by feed 
+having cnt < avg(cnt) * 0.75
+]]></programlisting>
+		</sect2>
+
+        <sect2 id="examples-marketdata-monitor-sim">
+			<title>Event generator</title>
+			<para>
+				The simulator generates market data events for 2 feeds, feed A and feed B. A target rate parameter
+				defines how many events for each feed the simulator sends to the engine in each second. Depending on your system,
+				a large target rate may result in more events to be sent to the engine then your system can handle in one second.
+				In that case, the target rate will not be achieved. After reaching the target number of events for a given second, 
+				the simulator sleeps the thread for an approximate remainder of the current second.
+			</para>
+
+			<para>
+				The simulator generates a number of events per second following the formula 
+				<literal>target rate * 0.9 + target rate * 0.2 * random.nextDouble()</literal>.
+				This generates a random rate for each feed in a +-10% range within the target rate.
+			</para>
+
+			<para>
+				The rate drop probability parameter specifies the probability in percent that the engine drops the rate 
+				for a randomly chosen feed to 60% of the target rate for that second. Thus rate fall-off alerts can be generated.
+			</para>
+		</sect2>
     </sect1>
 
     <sect1 id="examples-transaction-3-event-challenge">
