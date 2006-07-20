@@ -41,7 +41,7 @@ public class TxnGenMain {
      */
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.out.println("Arguments are: bucket_size num_transactions");
+            System.out.println("Arguments are: <bucket_size> <num_transactions>");
             System.exit(-1);
         }
         
