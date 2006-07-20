@@ -9,8 +9,6 @@ import net.esper.client.time.CurrentTimeEvent;
 import net.esper.example.support.SupportUpdateListener;
 import net.esper.event.EventBean;
 
-import java.util.HashMap;
-
 public class TestTicksFalloffStatement extends TestCase {
 
     private EPServiceProvider epService;
