@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import junit.framework.TestCase;
-import net.esper.example.stockticker.monitor.StockTickerEmittedEventListener;
+import net.esper.example.stockticker.monitor.StockTickerEmittedListener;
 import net.esper.example.stockticker.monitor.StockTickerMonitor;
 import net.esper.example.stockticker.eventbean.PriceLimit;
 import net.esper.example.stockticker.eventbean.StockTick;
@@ -20,12 +20,12 @@ import org.apache.commons.logging.Log;
 
 public class TestStockTickerMultithreaded extends TestCase implements StockTickerRegressionConstants
 {
-    StockTickerEmittedEventListener listener;
+    StockTickerEmittedListener listener;
     private EPServiceProvider epService;
 
     protected void setUp() throws Exception
     {
-        listener = new StockTickerEmittedEventListener();
+        listener = new StockTickerEmittedListener();
 
         Configuration configuration = new Configuration();
         configuration.addEventTypeAlias("PriceLimit", PriceLimit.class.getName());

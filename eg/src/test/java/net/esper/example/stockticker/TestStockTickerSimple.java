@@ -1,7 +1,7 @@
 package net.esper.example.stockticker;
 
 import junit.framework.*;
-import net.esper.example.stockticker.monitor.StockTickerEmittedEventListener;
+import net.esper.example.stockticker.monitor.StockTickerEmittedListener;
 import net.esper.example.stockticker.monitor.StockTickerMonitor;
 import net.esper.example.stockticker.eventbean.StockTick;
 import net.esper.example.stockticker.eventbean.PriceLimit;
@@ -14,12 +14,12 @@ import org.apache.commons.logging.Log;
 
 public class TestStockTickerSimple extends TestCase
 {
-    private StockTickerEmittedEventListener listener;
+    private StockTickerEmittedListener listener;
     private EPServiceProvider epService;
 
     protected void setUp() throws Exception
     {
-        listener = new StockTickerEmittedEventListener();
+        listener = new StockTickerEmittedListener();
 
         Configuration configuration = new Configuration();
         configuration.addEventTypeAlias("PriceLimit", PriceLimit.class.getName());

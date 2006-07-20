@@ -5,8 +5,8 @@
 	<property name="name" value="esper"/>
 	<property name="version" value="0.9.5"/>
 	<property name="patchlevel" value=""/>
-    <property name="fullversion" value="${version}${patchlevel}"/>
-    <property name="fullname" value="${name}-${fullversion}"/>
+        <property name="fullversion" value="${version}${patchlevel}"/>
+        <property name="fullname" value="${name}-${fullversion}"/>
 
 	<property name="dist.dir" value=".."/>
 	<property name="lib.dir" value="lib"/>
@@ -15,6 +15,8 @@
 	<property name="doc.dir" value="doc"/>
 	<property name="doc.api.dir" value="${doc.dir}/api"/>
 	<property name="dist.api.dir" value="doc/javadoc/api"/>
+
+	<property name="dist_excludes" value="$target/site/**, target/*classes*/**, target/*reports*/**, eg/target/**, intellij/**, doc/reference/support/**"/>
 
 	<path id="lib.class.path">
 		<fileset dir="${lib.dir}">
@@ -38,8 +40,15 @@
 	<target name="dist_zip" description="Zip up distribution" depends="touch_all">
 		<echo message="Building a zip for distribution" />
 		<zip zipfile="${dist.dir}/${fullname}.zip">
-			<zipfileset prefix="${name}-${version}" dir="." excludes="${dist.jar.name}, target/site/**, target/*classes*/**, target/*reports*/**, eg/target/**, intellij/**, doc/reference/support/**"/>
+			<zipfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
 		</zip>
+	</target>
+
+	<target name="dist_tar" description="Tar up distribution" depends="touch_all">
+		<echo message="Building a tar for distribution" />
+		<tar tarfile="${dist.dir}/${fullname}.tar">
+			<tarfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
+		</tar>
 	</target>
 
 	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet">
