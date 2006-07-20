@@ -11,4 +11,4 @@ fi
 
 SOURCEPATH=../src/main/java
 
-${JAVA_HOME}/bin/javac -cp ${CLASSPATH} -d ../target/classes -source 1.5 -sourcepath ${SOURCEPATH} ${SOURCEPATH}/net/esper/example/transaction/sim/TxnGenMain.java
+${JAVA_HOME}/bin/javac -cp ${CLASSPATH} -d ../target/classes -source 1.5 -sourcepath ${SOURCEPATH} ${SOURCEPATH}/net/esper/example/transaction/sim/TxnGenMain.java ${SOURCEPATH}/net/esper/example/marketdatafeed/FeedSimMain.java
