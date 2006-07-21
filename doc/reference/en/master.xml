@@ -11,7 +11,6 @@
 	<!ENTITY adapters SYSTEM "modules/adapters.xml">
 	<!ENTITY indicators SYSTEM "modules/indicators.xml">
 	<!ENTITY references SYSTEM "modules/references.xml">
-	<!ENTITY tutorial SYSTEM "modules/tutorial.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -38,7 +37,7 @@
 		<orderedlist>
 			<listitem>
 				<para>
-                    Read the tutorials and solution patterns available on the Esper public web site at <literal>http://esper.codehaus.org</literal>
+                    Read the tutorials, case studies and solution patterns available on the Esper public web site at <literal>http://esper.codehaus.org</literal>
                 </para>
 			</listitem>
 			<listitem>
@@ -66,10 +65,6 @@
 
     &technology_overview;
 
-    &tutorial;
-
-    &architecture;
-
     &configuration;
 
     &api;
@@ -81,6 +76,8 @@
     &adapters;
 
     &indicators;
+
+    &architecture;
 
     &examples;
     
