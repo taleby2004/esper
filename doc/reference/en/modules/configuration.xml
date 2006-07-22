@@ -24,7 +24,7 @@ configuration.addEventTypeAlias("StockTick", StockTick.class.getName());
 configuration.addImport("org.mycompany.mypackage.MyUtility");
 configuration.addImport("org.mycompany.util.*");
 
-EPServiceProvider epService = EPServiceProviderManager.getProvider("MyEngine", configuration);
+EPServiceProvider epService = EPServiceProviderManager.getProvider("sample", configuration);
 ]]></programlisting>
 
         <para>
@@ -63,10 +63,10 @@ configuration.configure("myengine.esper.cfg.xml");
 		<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <esper-configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
            xsi:noNamespaceSchemaLocation="esper-configuration-1-0.xsd">
-	<event-type alias="StockTick" class="net.esper.example.stockticker.event.StockTick"/>
-	<event-type alias="PriceLimit" class="net.esper.example.stockticker.event.PriceLimit"/>
-	<auto-import import-name="org.mycompany.mypackage.MyUtility"/>
-	<auto-import import-name="org.mycompany.util.*"/>
+  <event-type alias="StockTick" class="net.esper.example.stockticker.event.StockTick"/>
+  <event-type alias="PriceLimit" class="net.esper.example.stockticker.event.PriceLimit"/>
+  <auto-import import-name="org.mycompany.mypackage.MyUtility"/>
+  <auto-import import-name="org.mycompany.util.*"/>
 </esper-configuration>		
 ]]></programlisting>
 

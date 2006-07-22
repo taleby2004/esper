@@ -100,13 +100,13 @@ EPStatement myTrigger = admin.createPattern(
 			</para>
 			<programlisting><![CDATA[myPattern.addListener(new UpdateListener()
 {
-	public void update(EventBean[] newEvents, EventBean[] oldEvents)
-	{
-		ServiceMeasurement spike = (ServiceMeasurement) newEvents[0].get("spike");
-		ServiceMeasurement error = (ServiceMeasurement) newEvents[0].get("error");
-		... // either spike or error can be null, depending on which occured
-		... // add more logic here
-	}
+  public void update(EventBean[] newEvents, EventBean[] oldEvents)
+  {
+    ServiceMeasurement spike = (ServiceMeasurement) newEvents[0].get("spike");
+    ServiceMeasurement error = (ServiceMeasurement) newEvents[0].get("error");
+    ... // either spike or error can be null, depending on which occured
+    ... // add more logic here
+  }
 });
 ]]></programlisting>
 

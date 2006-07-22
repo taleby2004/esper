@@ -54,11 +54,10 @@
 		</para>
 
 		<para>
-			The select clause in an EQL query specifies the event properties or events to retrieve. The <literal>from</literal> clause in an EQL query specifies the event stream definitions and stream names to use. The <literal>where</literal> clause in an EQL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds if the average hit 75 or more.
+			The select clause in an EQL query specifies the event properties or events to retrieve. The <literal>from</literal> clause in an EQL query specifies the event stream definitions and stream names to use. The <literal>where</literal> clause in an EQL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds.
 		</para>
 
-			<programlisting><![CDATA[select average from StockTick(symbol='IBM').win:time(30).stat:uni('price') where average >= 75;
-]]></programlisting>
+			<programlisting><![CDATA[select avg(price) from StockTick.win:time(30) where symbol='IBM']]></programlisting>
 
 		<para>
 			EQL queries follow the below syntax. EQL queries can be simple queries or more complex queries. A simple select contains only a select clause and a single stream definition. Complex EQL queries can be build that feature a more elaborate select list utilizing expressions, may join multiple streams, may contain a where clause with search conditions and so on.
@@ -200,37 +199,23 @@ String stmt = "from " + eventName + ".win:length(100)"
         <sect2 id="eql-from-clause-view-spec" >
            <title>Specifying views</title>
 			<para>
-				Views are used to derive or aggregate data. Views can be staggered onto each other. The section below outlines the views available and plug-in of custom views.
+				Views are used to derive or aggregate data. Views can be staggered onto each other. See the section <xref linkend="built-in-views"/> on the views available.
 			</para>
-			
+						
 			<para>
-				Views can optionally take one or parameters. These parameters can consist of primitive constants such as String, boolean or numeric types. String arrays are also supported as a view parameter type.
-			</para>
-			
-			<para>
-				Views can optionally take one or parameters. These parameters can consist of primitive constants such as String, boolean or numeric types. String arrays are also supported as a view parameter type.
+				Views can optionally take one or parameters. These parameters can consist of primitive constants such as String, boolean or numeric types. Arrays are also supported as a view parameter types.
 			</para>
 
 			<para>
-				The below example uses the car location event. It specifies an empty list of filter criteria by adding a empty round brackets <literal>()</literal> after the event type. The first view <literal>"std:groupby('carId')"</literal> groups car location events by car id. The second view <literal>"win:length(4)"</literal> keeps a length window of the 4 last events, with one length window for each car id. The next view <literal>"std:groupby({'expressway', 'direction', 'segment'})"</literal> groups each event by it's expressway, direction and segment property values. Again, the grouping is done for each car id considering the last 4 events only. The last view <literal>"std:size()"</literal> is used to report the number of events. Thus the below example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. The <literal>"as accSegment"</literal> syntax assigns the name accSegment to the resulting event stream.
+				The below example serves to show views and staggering of views. It uses a car location event that contains information about the location of a car on a highway. 
+			</para>
+				
+			<para>
+				The first view <literal>std:groupby('carId')</literal> groups car location events by car id. The second view <literal>win:length(4)</literal> keeps a length window of the 4 last events, with one length window for each car id. The next view <literal>std:groupby({'expressway', 'direction', 'segment'})</literal> groups each event by it's expressway, direction and segment property values. Again, the grouping is done for each car id considering the last 4 events only. The last view <literal>std:size()</literal> is used to report the number of events. Thus the below example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. 
 			</para>
 
-         <programlisting><![CDATA[String carLocEvent = CarLocEvent.class.getName();
-String joinStatement = "select * from " +
-	carLocEvent + ".std:groupby('carId').win:length(4).std:groupby({'expressway', 'direction', 'segment'}).std:size() as accSeg," +
-	carLocEvent + ".win:time(30).std:unique('carId') as curCarSeg" +
-		" where accSeg.size >= 4" +
-		"   and accSeg.expressway = curCarSeg.expressway" +
-		"   and accSeg.direction = curCarSeg.direction" +
-		"   and (" +
-				"(accSeg.direction=0 " +
-				" and curCarSeg.segment < accSeg.segment" +
-				" and curCarSeg.segment > accSeg.segment - 5)" +
-			" or " +
-				"(accSeg.direction=1 " +
-				" and curCarSeg.segment > accSeg.segment" +
-				" and curCarSeg.segment < accSeg.segment + 5)" +
-			")";
+         <programlisting><![CDATA[select * from CarLocEvent.std:groupby('carId').win:length(4).
+  std:groupby({'expressway', 'direction', 'segment'}).std:size()
 ]]></programlisting>
 		</sect2>
 

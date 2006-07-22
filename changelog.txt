@@ -7,6 +7,9 @@ Changes in version 1.0.0
 * (EQL) Added support for invoking Java library static methods, invoking user-defined static methods, and defining an auto-import list
 * (EQL) Sort view ext:sort now also allowing multiple columns to sort on
 * (EQL) Added NOT, modulo (%) and SQL string concatention operator (||)
+* (EQL) New example 'Market Feed Monitor' which showcases rate calculation and fall-off detection. With a simulator that 
+can be run from command line. 
+* (build) Build scripts now build Linux tarball; Shell scripts for compiling and running examples reworked.
 
 Changes in version 0.9.5
 ------------------------------------
