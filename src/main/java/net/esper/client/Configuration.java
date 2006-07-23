@@ -57,7 +57,7 @@ public class Configuration {
 	protected List<String> imports;
 
 	/**
-	 * True until the user calls addAutoImport()
+	 * True until the user calls addAutoImport().
 	 */
 	private boolean isUsingDefaultImports = true;
 	
@@ -323,7 +323,7 @@ public class Configuration {
     }
     
     /**
-     * Use these imports until the user specifies something else
+     * Use these imports until the user specifies something else.
      */
     private void addDefaultImports()
     {

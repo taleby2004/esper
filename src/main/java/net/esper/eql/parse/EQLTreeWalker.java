@@ -125,6 +125,11 @@ public class EQLTreeWalker extends EQLBaseWalker
         return orderByList;
     }
 
+    /**
+     * Leave AST node and process it's type and child nodes.
+     * @param node is the node to complete
+     * @throws ASTWalkException
+     */
     protected void leaveNode(AST node) throws ASTWalkException
     {
         if (log.isDebugEnabled())
@@ -265,7 +270,11 @@ public class EQLTreeWalker extends EQLBaseWalker
         while (childNode != null);
     }
 
-	protected void end() throws ASTWalkException
+    /**
+     * End processing of the AST tree, check that expression nodes found their homes.
+     * @throws ASTWalkException
+     */
+    protected void end() throws ASTWalkException
     {
         if (astNodeMap.size() > 1)
         {

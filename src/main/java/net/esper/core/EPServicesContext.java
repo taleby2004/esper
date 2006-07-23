@@ -144,7 +144,7 @@ public final class EPServicesContext
     }
     
     /**
-     * Returns the import and class name resolution service
+     * Returns the import and class name resolution service.
      * @return import service
      */
     public AutoImportService getAutoImportService()

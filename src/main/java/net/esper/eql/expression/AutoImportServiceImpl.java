@@ -3,9 +3,6 @@ package net.esper.eql.expression;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /** 
  * A service that allows users to refer to classes by
  * partial names. Users import either package names
@@ -72,13 +69,21 @@ public class AutoImportServiceImpl implements AutoImportService
 		// No import worked, the class isn't resolved
 		throw new ClassNotFoundException("Unknown class " + className);
 	}
-	
-	protected String[] getImports()
+
+    /**
+     * For testing, returns imports.
+     * @return returns auto-import list as array
+     */
+    protected String[] getImports()
 	{
 		return imports.toArray(new String[0]);
 	}
-	
-	protected void addImport(String importName)
+
+    /**
+     * Add a package to the auto-import list, for testing.
+     * @param importName to add
+     */
+    protected void addImport(String importName)
 	{
 		if(!isClassName(importName) && !isPackageName(importName))
 		{

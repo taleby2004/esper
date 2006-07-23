@@ -60,6 +60,10 @@ public class EQLPatternTreeWalker extends EQLBaseWalker
         return taggedEventTypes;
     }
 
+    /**
+     * Ends the tree walk and checks if all expression nodes have a home root node.
+     * @throws ASTWalkException
+     */
     protected void end() throws ASTWalkException
     {
         if (astNodeMap.size() != 1)
@@ -71,6 +75,11 @@ public class EQLPatternTreeWalker extends EQLBaseWalker
         rootNode.addChildNode(astNodeMap.values().iterator().next());
     }
 
+    /**
+     * Leave AST node and process it's type and child nodes.
+     * @param node to leave
+     * @throws ASTWalkException
+     */
     protected void leaveNode(AST node) throws ASTWalkException
     {
         if (log.isDebugEnabled())

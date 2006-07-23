@@ -107,7 +107,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
     }
     
     /**
-     * Returns the flags indicating whether to sort in descending order on each property
+     * Returns the flags indicating whether to sort in descending order on each property.
      * @return the isDescending value for each sort property
      */
     public final Boolean[] getIsDescendingValues()
@@ -142,7 +142,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
 
     /**
      * Set the number of elements kept by the sort window.
-     * param sortWindowSize - size of window
+     * @param sortWindowSize - size of window
      */
     public final void setSortWindowSize(int sortWindowSize) {
 		this.sortWindowSize = sortWindowSize;

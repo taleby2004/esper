@@ -1,5 +1,10 @@
 package net.esper.eql.expression;
 
+/**
+ * Interface for a service that resolves a class name to Java Class instances.
+ * <p>Implementations typically allow some sort of configuration on which Java packages
+ * are automatically checked for presence of a class. 
+ */
 public interface AutoImportService 
 {
 

@@ -41,29 +41,32 @@ public class ExprStaticMethodNode extends ExprNode
 	}
 	
 	/**
+     * Returns the static method.
 	 * @return the static method that this node invokes
 	 */
-	public Method getStaticMethod() 
+	protected Method getStaticMethod()
 	{
 		return staticMethod.getJavaMethod();
 	}
 	
 	/**
+     * Returns the class name.
 	 * @return the class that declared the static method
 	 */
-	public String getClassName() {
+	protected String getClassName() {
 		return className;
 	}
 
 	/**
+     * Returns the method name.
 	 * @return the name of the method
 	 */
-	
-	public String getMethodName() {
+	protected String getMethodName() {
 		return methodName;
 	}
 
 	/**
+     * Returns parameter descriptor.
 	 * @return the types of the child nodes of this node
 	 */
 	public Class[] getParamTypes() {

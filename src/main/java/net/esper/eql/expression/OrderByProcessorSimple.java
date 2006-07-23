@@ -47,7 +47,6 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 	 * @param aggregationService -
 	 *            used to evaluate aggregate functions in the group-by and
 	 *            sort-by clauses
-     * @param eventAdapterService - provides event wrappers
 	 */
 	public OrderByProcessorSimple(final List<Pair<ExprNode, Boolean>> orderByList,
 								  List<ExprNode> groupByNodes, 
