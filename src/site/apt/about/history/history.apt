@@ -12,6 +12,29 @@ Change History
 	[]
 
 
+Version 1.0.0 (final production)
+
+	Released July 24, 2006
+		
+* API changes
+
+    * Added method on Configuration to add auto-import
+
+* Major changes
+
+	* Added support for invoking Java library static methods, invoking user-defined static methods, and defining an auto-import list
+	
+	* Sort view ext:sort now also allowing multiple columns to sort on
+	
+	* Added NOT, modulo (%) and SQL string concatention operator (||)
+	
+* Minor changes	
+
+	* New example 'Market Feed Monitor' which showcases rate calculation and fall-off detection. With a simulator to run from a command line.
+
+    * Build scripts now build Linux tarball; Shell scripts for compiling and running examples reworked.
+	
+
 Version 0.9.5 (Beta enhancements release)
 
 	Released July 3, 2006
