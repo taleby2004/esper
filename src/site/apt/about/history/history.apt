@@ -31,8 +31,10 @@ Version 1.0.0 (final production)
 * Minor changes	
 
 	* New example 'Market Feed Monitor' which showcases rate calculation and fall-off detection. With a simulator to run from a command line.
-
-    * Build scripts now build Linux tarball; Shell scripts for compiling and running examples reworked.
+	
+	* Build scripts now build Linux tarball; Shell scripts for compiling and running examples reworked.
+	
+	[]
 	
 
 Version 0.9.5 (Beta enhancements release)

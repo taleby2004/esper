@@ -1,6 +1,6 @@
 News
 
-* July 24, 2006  -  Esper 1.0.0
+* July 24, 2006  -  Esper 1.0.0 final production
 
     * Added support for invoking Java library static methods, invoking user-defined static methods, and defining an auto-import list
     
@@ -8,11 +8,11 @@ News
     
     * Added NOT, modulo (%) and SQL string concatention operator (||)
 
-	* New example 'Market Feed Monitor' which showcases rate calculation and fall-off detection. With a simulator to run from a command line. 
+    * New example 'Market Feed Monitor' which showcases rate calculation and fall-off detection. With a simulator to run from a command line. 
 
-	* Build scripts now build Linux tarball; Shell scripts for compiling and running examples reworked.
+    * Build scripts now build Linux tarball; Shell scripts for compiling and running examples reworked.
 	
-	[]
+    []
 
 
 * July 3, 2006  -  Esper 0.9.5 Beta
