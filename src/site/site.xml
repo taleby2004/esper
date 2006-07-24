@@ -34,6 +34,7 @@
 				<item name="Mailing Lists" href="http://xircles.codehaus.org/projects/esper/lists"/>
 				<item name="Roadmap" href="http://jira.codehaus.org/browse/ESPER?report=com.atlassian.jira.plugin.system.project:roadmap-panel"/>
 				<item name="Building Esper" href="/developing/building/building.html"/>
+				<item name="Source Repository" href="http://xircles.codehaus.org/projects/esper/repo"/>
 			</item>
 		</menu>
 	</body>
