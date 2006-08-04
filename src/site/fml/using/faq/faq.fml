@@ -183,8 +183,8 @@
 			That said the ESP side - Event Stream Processing - is a different beast, where what matters is the "S" for Stream. 
 			In this side of the Esper engine we provide several language facilities to build expressions using time not 
 			for temporal relationship (happened before etc) but for sliding window. As an example, this makes it very valuable 
-			for computing things like volume weigthed average (VWAP) of ticks - 
-			which would be possibly be awful using something Rete based like JRules.
+			for computing things like volume weigthed average price (VWAP) of ticks -
+			which would be possibly be awful using something Rete based like a classical rule engine.
 		</p>
       </answer>
     </faq>
