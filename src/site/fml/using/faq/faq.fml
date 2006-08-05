@@ -28,12 +28,28 @@
       <question>Can I run it with multiple threads? What, if anything, is multithread-safe?</question>
       <answer>
         <p>
-          Esper supports multiple independent Esper engines per JavaVM. Each engine instance itself is NOT multithread-safe.
-          Therefore only a single thread should sendEvent() for any particular EPRuntime instance. However there is a 
-          scenario which is thread-safe that is strictly limited to pure filtering of events via event pattern statement.
+          Esper supports multiple independent Esper engines per Java VM. Each engine instance itself is NOT multithread-safe.
+          In other words, for a given engine instance we do not currently guarantee the engine instance behaves the same 
+          in a multithreaded environment as in a single-threaded environment. 
+		</p>
+        <p>
+		  Applications using Esper can synchronize around the sendEvent() method. 
+		  No ThreadLocal data representing engine state remains after the sendEvent() method completes. 
+		  Thus multiple threads that synchronize posting events to the same engine instance is supported, with the following 
+		  limitations: (1) statement creation through the EPAdministrator interface, and statement start/stop must be avoided or synchronized 
+		    with the posting of events (2) Iterating (pulling) of statement results must be synchronized as well.
+		</p>
+        <p>
+          Applications can also segregate work to different engine instances allocating a thread to each engine instance.
+		</p>
+        <p>
+          Application that perform pure filtering of events via event pattern statement are also thread-safe.
           In this scenario, the event pattern statement can only consist of a simple filter and no other other operators.
           Also, new patterns cannot be created and patterns cannot be removed while multiple threads
           are used to send events in for filtering.
+        </p>
+        <p>
+          We plan to improve this in upcoming versions. 
         </p>
       </answer>
     </faq>    
