@@ -24,6 +24,23 @@
         </p>
       </answer>
     </faq>    
+    <faq id="testing">
+      <question>How has this been tested? What guarantees do I have that the next release works just as well?</question>
+      <answer>
+        <p>
+          Esper uses the JUnit testing framework to automate testing of the system.
+          Esper's build process runs the currently around 950 unit tests in 330 JUnit test classes whenever a build occurs.
+          The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
+          individual classes and components.
+          See the package "net.esper.regression" in the test source folder as the entry point for
+		  end-to-end testing against the client API.
+        </p>
+        <p>          
+          The Esper team follows the practice of test-driven development (TDD) rigorously, ensuring that each feature added has automated test coverage.
+          We develop and evolve the tests for each feature along with the feature that is currently being developed.
+        </p>
+      </answer>
+    </faq>
     <faq id="multithread-safety">
       <question>Can I run it with multiple threads? What, if anything, is multithread-safe?</question>
       <answer>
@@ -43,8 +60,8 @@
           Applications can also segregate work to different engine instances allocating a thread to each engine instance.
 		</p>
         <p>
-          Application that perform pure filtering of events via event pattern statement are also thread-safe.
-          In this scenario, the event pattern statement can only consist of a simple filter and no other other operators.
+          Applications that perform pure filtering of events via event pattern statement are also thread-safe.
+          In this scenario, the event pattern statement can only consist of a simple filter and no other operators.
           Also, new patterns cannot be created and patterns cannot be removed while multiple threads
           are used to send events in for filtering.
         </p>
@@ -92,9 +109,12 @@
       <answer>
         <p>
           Esper is an event stream processing (ESP) and event correlation engine (CEP) written in Java.
-		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, Esper works as real time engine that triggers actions when event conditions occur among event streams.
-		  A tailored Event Query Language (EQL) allows to register queries in the engine, using javabeans to represent events. A listener class - which is basically a POJO - will then be called by the engine when the EQL condition is matched as events come in. The EQL allows to express complex matching conditions that include temporal windows, 
-		  and possibly join different event streams, as well as filter and sort them.
+		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, Esper works as 
+		  real time engine that triggers actions when event conditions occur among event streams.
+		  A tailored Event Query Language (EQL) allows registering queries in the engine, using javabeans to represent events. 
+		  A listener class - which is basically a POJO - will then be called by the engine when the EQL condition is matched as 
+		  events come in. The EQL allows expressing complex matching conditions that include temporal windows, 
+		  and join different event streams, as well as filter and sort them.
         </p>
         <p>
 		  A simple example could be to compute the average stock price of the BEA tick on a sliding window of 30 seconds. Given a StockTick event bean with a price and symbol property and the EQL "select avg(price) from StockTick.win:time(30) where symbol='BEA'", a POJO would get notified as tick come in - and in real world millions of ticks can come in - so there's no way to store them all to later query them using a classical database architecture.
@@ -122,7 +142,7 @@
       <answer>
         <p>
           With the Esper 1.0 release and given it's shorter history most users are at the evaluation stage. 
-          A major financial institution is looking at Esper for realtime monitoring of proprietary options trading. 
+          A major financial institution is looking at Esper for real-time monitoring of proprietary options trading. 
           A network monitoring application had success with Esper, and Esper is also playing a role in RFID research. 
           Our user community is growing rapidly.
         </p>
@@ -132,7 +152,7 @@
       <question>What business areas/problems is Esper best suited for?</question>
       <answer>
         <p>
-          Esper is best suited for realtime event driven applications. Typical application areas are business process management and 
+          Esper is best suited for real-time event driven applications. Typical application areas are business process management and 
           automation, finance, network and application monitoring and sensor network applications. Esper take much of the complexity 
           out of developing applications that detect patterns among events, filter events, aggregate time or length windows of events, 
           join event streams, trigger based on absence of events etc. 
@@ -175,8 +195,8 @@
 		</p>
         <p>
 		  Esper can hook into any Java based system as a message consumer - whose main purpose would be to listen 
-		  efficiently to everything whilst sending back other events when a matching conditions has occured. On the 
-		  other hand, hooking Esper in a classic messaging system allows to have it correlate events even if those 
+		  efficiently to everything whilst sending back other events when a matching condition has occured. On the 
+		  other hand, hooking Esper in a classic messaging system allows having it correlate events even if those 
 		  come from non-Java based systems. This is just an example. Esper is completely container agnostic, can run 
 		  as a standalone component, and the 1.0 release simply assumes events to be POJO. We are currently working on 
 		  providing native XML format support as well.
@@ -188,7 +208,7 @@
       <answer>
         <p>
         	Esper is the only open source Event Stream Processing out there - and this is not to be confused with 
-        	classical rules engines. Compared to commercial ESP engines implementations such as StreamBase or Coral8, 
+        	classical rules engines. Compared to commercial ESP engines implementations, 
         	Esper may lack high availability options in the 1.0 release, but its open source nature is a driver to get the 
         	Event query language right, and get the Java community up to speed on those concepts - 
         	before tackling enterprise grade requirements in upcoming versions.			
@@ -199,8 +219,8 @@
 			That said the ESP side - Event Stream Processing - is a different beast, where what matters is the "S" for Stream. 
 			In this side of the Esper engine we provide several language facilities to build expressions using time not 
 			for temporal relationship (happened before etc) but for sliding window. As an example, this makes it very valuable 
-			for computing things like volume weigthed average price (VWAP) of ticks -
-			which would be possibly be awful using something Rete based like a classical rule engine.
+			for computing things like volume weighted average price (VWAP) of ticks -
+			which would possibly be awful using something Rete-based like a classical rule engine.
 		</p>
       </answer>
     </faq>
