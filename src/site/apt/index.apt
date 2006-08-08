@@ -65,7 +65,7 @@ Features
 	* Supports multiple independent Esper engines per JavaVM. Each engine instance itself is NOT multithread-safe, 
 	  requiring workload structuring per engine if necessary (also see FAQ on multithread-safety).
 	  
-	* Pluggable architecture for event pattern and event stream analysis functions
+	* Pluggable architecture for event pattern and event stream analysis user-defined functions
 	  
 	[]		
 
