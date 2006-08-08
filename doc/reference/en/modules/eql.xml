@@ -1419,7 +1419,7 @@ events with the highest price (with ties resolved by alphabetical order of symbo
     </sect1>
 
     <sect1 id="eql-outerjoin">
-        <title>Outer Join</title>
+        <title>Outer Joins</title>
 
 		<para>
 			Esper supports left outer joins, right outer joins and full outer joins between an unlimited number of event streams.
@@ -1458,12 +1458,20 @@ events with the highest price (with ties resolved by alphabetical order of symbo
 
     </sect1>
 
-    <sect1 id="view-adding-views">
-        <title>View Plug-in</title>
+    <sect1 id="eql-user-defined">
+        <title>User-Defined Functions</title>
+        
+		 <para>
+			 A user-defined function can be invoked anywhere as an expression itself or within an expresson. The function must simply be a public static method
+			 that the classloader can resolve at statement creation time. The engine resolves the function reference at statement creation time and verifies parameter types.
+		 </para>
 
-        <para>
-            This is currently not supported (planned).
-        </para>
-     
+		 <para>
+			 The example below assumes a class <literal>MyClass</literal> that exposes a public static method <literal>myFunction</literal> accepting 2 parameters, and
+			 returing a numeric type such as <literal>double</literal>.
+		 </para>
+		 
+<programlisting><![CDATA[select 3 * MyClass.myFunction(price, volume) as myValue 
+from StockTick.win:time(30)]]></programlisting>
     </sect1>
 </chapter>
