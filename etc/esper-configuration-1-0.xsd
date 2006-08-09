@@ -10,6 +10,9 @@
 			<xs:sequence maxOccurs="unbounded">
 				<xs:element ref="auto-import"/>
 			</xs:sequence>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element ref="map-event"/>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="event-type">
@@ -22,5 +25,21 @@
 		<xs:simpleType>
 			<xs:attribute name="import-name" type="xs:string" use="required"/>
 		</xs:simpleType>
+	</xs:element>
+	<xs:element name="map-event">
+		<xs:simpleType>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+		</xs:simpleType>
+		<xs:complexType>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element ref="map-property"/>
+			</xs:sequence>	
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="map-property">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attribute name="class" type="xs:string" use="required"/>
+		</xs:complexType>
 	</xs:element>
 </xs:schema>
