@@ -51,6 +51,12 @@ public class Configuration {
 	protected Map<String, String> eventClasses;
 	
 	/**
+	 * The type aliases for events that result when maps are sent
+	 * into the engine.
+	 */
+	protected Map<String, Map<String, String>> mapAliases;
+	
+	/**
 	 * The java-style class and package name imports that
 	 * will be used to resolve partial class names.
 	 */
@@ -82,6 +88,16 @@ public class Configuration {
     }
     
     /**
+     * Define a map event type.
+     * @param eventTypeAlias - the name for this type of event
+     * @param typeMap - for each key-value pair in this map, the name of the key and the type (as a string) of the value
+     */
+    public void addMapEvent(String eventTypeAlias, Map<String, String> typeMap)
+    {
+    	mapAliases.put(eventTypeAlias, typeMap);
+    }
+    
+    /**
      * Add an import (a class or package). Adding will suppress the use of the default imports.
      * @param autoImport - the import to add
      */
@@ -102,6 +118,15 @@ public class Configuration {
     public Map<String, String> getEventTypeAliases()
     {
         return eventClasses;
+    }
+    
+    /**
+     * Returns the mapping of event type aliases to map objects.
+     * @return map type aliases
+     */
+    public Map<String, Map<String, String>> getMapAliases()
+    {
+    	return mapAliases;
     }
     
     /**
@@ -281,6 +306,14 @@ public class Configuration {
             addImport(name);
         }
         
+        NodeList mapNodes = root.getElementsByTagName("map-event");
+        for (int i = 0; i < mapNodes.getLength(); i++)
+        {
+            String mapAlias = mapNodes.item(i).getAttributes().getNamedItem("alias").getTextContent();
+            Map<String, String> propertyTypeNames = createPropertyTypeNames(root.getElementsByTagName("map-property"));
+            addMapEvent(mapAlias, propertyTypeNames);
+        }
+        
 		return this;
 	}
 
@@ -300,7 +333,7 @@ public class Configuration {
             stream = classLoader.getResourceAsStream( stripped );
         }
         if ( stream == null ) {
-            Configuration.class.getResourceAsStream( resource );
+            stream = Configuration.class.getResourceAsStream( resource );
         }
         if ( stream == null ) {
             stream = Configuration.class.getClassLoader().getResourceAsStream( stripped );
@@ -317,6 +350,7 @@ public class Configuration {
     protected void reset()
     {
         eventClasses = new HashMap<String, String>();
+        mapAliases = new HashMap<String, Map<String, String>>();
         imports = new ArrayList<String>();
         addDefaultImports();
         isUsingDefaultImports = true;
@@ -331,6 +365,18 @@ public class Configuration {
     	imports.add("java.math.*");
     	imports.add("java.text.*");
     	imports.add("java.util.*");
+    }
+    
+    private Map<String, String> createPropertyTypeNames(NodeList nodeList)
+    {
+    	Map<String, String> propertyTypeNames = new HashMap<String, String>();
+        for (int i = 0; i < nodeList.getLength(); i++)
+        {
+            String name = nodeList.item(i).getAttributes().getNamedItem("name").getTextContent();
+            String clazz = nodeList.item(i).getAttributes().getNamedItem("class").getTextContent();
+            propertyTypeNames.put(name, clazz);
+        }
+    	return propertyTypeNames;
     }
 }
 
