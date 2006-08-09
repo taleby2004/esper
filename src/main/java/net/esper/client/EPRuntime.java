@@ -1,5 +1,6 @@
 package net.esper.client;
 
+import java.util.Map;
 
 /**
  * Interface to event stream processing runtime services.
@@ -15,6 +16,14 @@ public interface EPRuntime
      * @throws EPException is thrown when the processing of the event lead to an error
      */
     public void sendEvent(Object object) throws EPException;
+    
+    /**
+     * Send a map object to the event stream processing runtime.
+     * @param map - the map object to send to the runtime
+     * @param eventTypeAlias - the alias for the (property name, property type) information for this map
+     * @throws EPException - when the processing of the event leads to an error
+     */
+    public void sendMap(Map<String, Object> map, String eventTypeAlias) throws EPException;
 
     /**
      * Number of events received over the lifetime of the event stream processing runtime.
