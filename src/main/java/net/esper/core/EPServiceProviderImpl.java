@@ -7,6 +7,7 @@ import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterService;
 import net.esper.event.EventAdapterServiceImpl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -53,6 +54,24 @@ public class EPServiceProviderImpl implements EPServiceProvider
         	throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
         }
         
+        Map<String, Map<String, String>> mapAliases = configuration.getMapAliases();
+        for(Map.Entry<String, Map<String, String>> entry : mapAliases.entrySet())
+        {
+        	try
+        	{
+        		Map<String, Class> propertyTypes = createPropertyTypes(entry.getValue());
+        		eventAdapterService.addMapType(entry.getKey(), propertyTypes);
+        	}
+        	catch (EventAdapterException ex)
+        	{
+        		throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+        	} 
+        	catch (ClassNotFoundException ex)
+			{
+        		throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+			}
+        }
+        
         initialize();
     }
 
@@ -97,5 +116,15 @@ public class EPServiceProviderImpl implements EPServiceProvider
 
         // Start clocking
         services.getTimerService().startInternalClock();
+    }
+    
+    private Map<String, Class> createPropertyTypes(Map<String, String> propertyNames) throws ClassNotFoundException
+    {
+    	Map<String, Class> propertyTypes = new HashMap<String, Class>();
+    	for(String property : propertyNames.keySet())
+    	{
+    		propertyTypes.put(property, Class.forName(propertyNames.get(property)));
+    	}
+    	return propertyTypes;
     }
 }
