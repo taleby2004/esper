@@ -21,8 +21,8 @@ public class TestConfiguration extends TestCase
     public void setUp()
     {
         config = new Configuration();
-    	typeMap.put("myString", "String");
-    	typeMap.put("myInt", "Integer");
+    	typeMap.put("myString", "java.lang.String");
+    	typeMap.put("myInt", "java.lang.Integer");
     }
 
     public void testDefault() throws Exception
