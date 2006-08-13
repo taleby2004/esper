@@ -23,7 +23,7 @@ public interface EPRuntime
      * @param eventTypeAlias - the alias for the (property name, property type) information for this map
      * @throws EPException - when the processing of the event leads to an error
      */
-    public void sendMap(Map<String, Object> map, String eventTypeAlias) throws EPException;
+    public void sendEvent(Map<String, Object> map, String eventTypeAlias) throws EPException;
 
     /**
      * Send an event represented by a DOM node to the event stream processing runtime.
