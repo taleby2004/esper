@@ -27,7 +27,7 @@ public class TestMapEvents extends TestCase
 		map.put("myString", "some string");
 		
 		Configuration configuration = new Configuration();
-		configuration.addMapEvent("myMapEvent", properties);
+		configuration.addEventTypeAlias("myMapEvent", properties);
 		
 		epService = EPServiceProviderManager.getProvider("myProvider", configuration);
 	}	
@@ -39,7 +39,7 @@ public class TestMapEvents extends TestCase
 		SupportUpdateListener listener = new SupportUpdateListener();
 		statement.addListener(listener);		
 		
-		epService.getEPRuntime().sendMap(map, "myMapEvent");
+		epService.getEPRuntime().sendEvent(map, "myMapEvent");
 		
 		assertTrue(listener.getAndClearIsInvoked());
 		assertEquals(1, listener.getLastNewData().length);
