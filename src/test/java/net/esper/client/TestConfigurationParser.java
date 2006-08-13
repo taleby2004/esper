@@ -4,6 +4,8 @@ import junit.framework.TestCase;
 
 import javax.xml.xpath.XPathConstants;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestConfigurationParser extends TestCase
 {
@@ -47,5 +49,12 @@ public class TestConfigurationParser extends TestCase
         assertEquals(XPathConstants.NUMBER, schemaDesc.getXPathProperties().get("element1").getType());
         assertEquals(1, schemaDesc.getNamespacePrefixes().size());
         assertEquals("samples:schemas:simpleSchema", schemaDesc.getNamespacePrefixes().get("ss"));
+    
+        assertEquals(1, config.getMapAliases().size());        
+        assertTrue(config.getMapAliases().keySet().contains("myMapEvent"));
+        Map<String, String> expectedProps = new HashMap<String, String>();
+        expectedProps.put("myInt", "java.lang.Integer");
+        expectedProps.put("myString", "java.lang.String");
+        assertEquals(expectedProps, config.getMapAliases().get("myMapEvent"));
     }
 }
