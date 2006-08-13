@@ -7,15 +7,17 @@
 			<xs:sequence>
 				<xs:element ref="event-type" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="auto-import" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="map-event" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="event-type">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="xml-dom" minOccurs="0"/>
-			</xs:sequence>
+			<choice>
+				<xs:sequence>
+					<xs:element ref="xml-dom" minOccurs="0"/>
+				</xs:sequence>
+				<xs:element ref="map minOccurs="0"">	
+			</choice>	
 			<xs:attribute name="alias" type="xs:string" use="required"/>
 			<xs:attribute name="class" type="xs:string" use="optional"/>
 		</xs:complexType>
@@ -52,23 +54,22 @@
 			<xs:enumeration value="boolean"/>
 		</xs:restriction>
 	</xs:simpleType>
-	<xs:element name="auto-import">
-		<xs:complexType>
-			<xs:attribute name="import-name" type="xs:string" use="required"/>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="map-event">
+	<xs:element name="map">
 		<xs:complexType>
 			<xs:sequence maxOccurs="unbounded">
 				<xs:element ref="map-property"/>
 			</xs:sequence>	
-			<xs:attribute name="alias" type="xs:string" use="required"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="map-property">
+	<xs:element name="property">
 		<xs:complexType>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="class" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="auto-import">
+		<xs:complexType>
+			<xs:attribute name="import-name" type="xs:string" use="required"/>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>
