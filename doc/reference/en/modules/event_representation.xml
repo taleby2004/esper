@@ -274,5 +274,36 @@ from SensorEvent.win:time(30)]]></programlisting>
 
 	</sect1>
 
+	<sect1 id="eventrep-map">
+	   <title>Map Events</title>
+	   
+		<para>
+			Events can also be represented by objects that implement the <literal>java.util.Map&lt;String, Object&gt;</literal> interface. 
+			The event properties of <literal>Map</literal> events are the values in the map accessible through the map's <literal>get</literal> method. 
+		</para>
+			
+		<para>
+			For Esper to properly interpret and process <literal>Map</literal> events, you must specify the alias name of the event type when sending
+			a <literal>Map</literal> event into the runtime. Use the <literal>sendEvent(Map, alias)</literal> method on <literal>EPRuntime</literal> to 
+			process <literal>Map</literal> events.
+		</para>
+			
+		<para>
+			To allow EQL and pattern statements to verify event properties, the event type alias must be configured by 
+			specifying the names and types of the event properties of your event. Please see the <xref linkend="configuration"/> section 
+			for an example.
+		</para>
+			
+		<para>
+			The code snippet below creates and processes a <literal>Map</literal> event. The example assumes the <literal>CarLocationUpdateEvent</literal> event type alias has been configured.
+		</para>
+
+		<programlisting><![CDATA[Map<String, Object> event = new HashMap<String, Object>();
+event.put("carId", carId);
+event.put("locationX", locationX);
+event.put("locationY", locationY);
+epRuntime.sendEvent(event, "CarLocationUpdateEvent");]]></programlisting>
+	</sect1>
+	
 </chapter>
 

@@ -265,6 +265,19 @@ configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 		  
 		</sect2>
 		
+		<sect2 id="config-eventtype-map" revision="1">
+			<title>Map Event Types</title>
+			
+			<para>
+				Via this configuration item the Esper engine can natively process <literal>java.util.Map</literal> instances as events.
+				Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.				
+			</para>
+			
+			<programlisting><![CDATA[
+				
+			]]></programlisting>
+		</sect2>
+
     </sect1>
 </chapter>
 

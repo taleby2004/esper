@@ -125,7 +125,9 @@ for (EventBean event : eventIter) {
         </para>
         
         <para>
-			The below code snippet shows how to send events to the engine.
+			The below code snippet shows how to send a Java object event to the engine. Note that the <literal>sendEvent</literal> method is overloaded. As events can take on different representation classes in Java, the <literal>sendEvent</literal> takes parameters to reflect the different 
+			types of events that can be send into the engine. The <xref linkend="event_representation"/> section explains the types of events 
+			accepted.
         </para>
 		<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
 EPRuntime runtime = epService.getEPRuntime();
