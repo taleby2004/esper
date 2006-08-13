@@ -101,7 +101,24 @@ class ConfigurationParser {
             {
                 handleXMLDOM(aliasName, configuration, eventTypeElement);
             }
+            else if(eventTypeElement.getNodeName().equals("map")) 
+            {
+            	handleMap(aliasName, configuration, eventTypeElement);
+            }
         }
+    }
+    
+    private static void handleMap(String aliasName, Configuration configuration, Element eventTypeElement)
+    {
+		Map<String, String> propertyTypeNames = new LinkedHashMap<String, String>();
+		NodeList propertyList = eventTypeElement.getElementsByTagName("property");
+		for (int i = 0; i < propertyList.getLength(); i++)
+	    {
+	        String name = propertyList.item(i).getAttributes().getNamedItem("name").getTextContent();
+	        String clazz = propertyList.item(i).getAttributes().getNamedItem("class").getTextContent();
+	        propertyTypeNames.put(name, clazz);
+	    }
+    	configuration.addEventTypeAlias(aliasName, propertyTypeNames);
     }
 
     private static void handleXMLDOM(String aliasName, Configuration configuration, Element xmldomElement)
