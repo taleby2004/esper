@@ -2,95 +2,57 @@ package net.esper.client;
 
 import junit.framework.TestCase;
 
+import javax.xml.xpath.XPathConstants;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.File;
-
 
 public class TestConfiguration extends TestCase
 {
-    private final static String SAMPLE_EVENT_NAME = "MySampleEvent";
-    private final static String SAMPLE_EVENT_CLASS = "com.mycompany.myapp.MySampleEvent";
-    private final static String SAMPLE_IMPORT_PACKAGE = "com.mycompany.myapp.*";
-    private final static String SAMPLE_MAP_ALIAS = "mapEvent";
-    private final Map<String, String> typeMap = new HashMap<String, String>();
-    
+    protected static final String ESPER_TEST_CONFIG = "regression/esper.test.readconfig.cfg.xml";
+
     private Configuration config;
 
     public void setUp()
     {
         config = new Configuration();
-    	typeMap.put("myString", "java.lang.String");
-    	typeMap.put("myInt", "java.lang.Integer");
-    }
-
-    public void testDefault() throws Exception
-    {
-        config.configure();
-        assertConfig(config, false);
-        assertConfigMap(config);
     }
 
     public void testString() throws Exception
     {
-        config.configure(Configuration.ESPER_DEFAULT_CONFIG);
-        assertConfig(config, false);
-        assertConfigMap(config);
+        config.configure(ESPER_TEST_CONFIG);
+        TestConfigurationParser.assertFileConfig(config);
     }
 
     public void testURL() throws Exception
     {
-        URL url = this.getClass().getClassLoader().getResource(Configuration.ESPER_DEFAULT_CONFIG);
+        URL url = this.getClass().getClassLoader().getResource(ESPER_TEST_CONFIG);
         config.configure(url);
-        assertConfig(config, false);
-        assertConfigMap(config);
+        TestConfigurationParser.assertFileConfig(config);
     }
 
     public void testFile() throws Exception
     {
-        URL url = this.getClass().getClassLoader().getResource(Configuration.ESPER_DEFAULT_CONFIG);
+        URL url = this.getClass().getClassLoader().getResource(ESPER_TEST_CONFIG);
         File file = new File(url.toURI());
         config.configure(file);
-        assertConfig(config, false);
-        assertConfigMap(config);
+        TestConfigurationParser.assertFileConfig(config);
     }
 
-    public void testAddEventMapping()
+    public void testAddEventTypeAlias()
     {
-        config.addEventTypeAlias(SAMPLE_EVENT_NAME, SAMPLE_EVENT_CLASS);
-    	assertConfig(config, true);
-    }
-    
-    public void testAddMapAliases()
-    {
-    	config.addMapEvent(SAMPLE_MAP_ALIAS, typeMap);
-    	assertConfigMap(config);
-    }
-    
-    private void assertConfig(Configuration config, boolean isUsingDefaultImports)
-    {
+        config.addEventTypeAlias("AEventType", "BClassName");
+
         assertEquals(1, config.getEventTypeAliases().size());
-        assertEquals(SAMPLE_EVENT_CLASS, config.getEventTypeAliases().get(SAMPLE_EVENT_NAME));
-
-        if(isUsingDefaultImports)
-        {
-            assertEquals(4, config.getImports().size());
-            assertEquals("java.lang.*", config.getImports().get(0));
-            assertEquals("java.math.*", config.getImports().get(1));
-            assertEquals("java.text.*", config.getImports().get(2));
-            assertEquals("java.util.*", config.getImports().get(3));
-        }
-        else
-        {
-        	assertEquals(1, config.getImports().size());
-        	assertEquals(SAMPLE_IMPORT_PACKAGE, config.getImports().get(0));
-        }        
+        assertEquals("BClassName", config.getEventTypeAliases().get("AEventType"));
+        assertDefaultConfig();
     }
-    
-    private void assertConfigMap(Configuration config)
+
+    private void assertDefaultConfig()
     {
-        assertEquals(1, config.getMapAliases().size());
-        assertEquals(typeMap, config.getMapAliases().get(SAMPLE_MAP_ALIAS));
+        assertEquals(4, config.getImports().size());
+        assertEquals("java.lang.*", config.getImports().get(0));
+        assertEquals("java.math.*", config.getImports().get(1));
+        assertEquals("java.text.*", config.getImports().get(2));
+        assertEquals("java.util.*", config.getImports().get(3));
     }
 }

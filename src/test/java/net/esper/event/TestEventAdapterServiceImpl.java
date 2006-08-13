@@ -1,23 +1,28 @@
 package net.esper.event;
 
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.event.EventAdapterException;
-import net.esper.event.EventAdapterServiceImpl;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
+import net.esper.client.ConfigurationEventTypeXMLDOM;
 import junit.framework.TestCase;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.StringReader;
+
+import org.xml.sax.InputSource;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathConstants;
 
 public class TestEventAdapterServiceImpl extends TestCase
 {
-    private EventAdapterServiceImpl typeResService;
+    private EventAdapterServiceImpl adapterService;
 
     public void setUp()
     {
-        typeResService = new EventAdapterServiceImpl();
+        adapterService = new EventAdapterServiceImpl();
     }
 
     public void testCreateMapType()
@@ -25,7 +30,7 @@ public class TestEventAdapterServiceImpl extends TestCase
         Map<String, Class> testTypesMap;
         testTypesMap = new HashMap<String, Class>();
         testTypesMap.put("key1", String.class);
-        EventType eventType = typeResService.createAnonymousMapType(testTypesMap);
+        EventType eventType = adapterService.createAnonymousMapType(testTypesMap);
 
         assertEquals(Map.class, eventType.getUnderlyingType());
         assertEquals(1, eventType.getPropertyNames().length);
@@ -34,22 +39,22 @@ public class TestEventAdapterServiceImpl extends TestCase
 
     public void testGetType()
     {
-        typeResService.addBeanType("NAME", TestEventAdapterServiceImpl.class.getName());
+        adapterService.addBeanType("NAME", TestEventAdapterServiceImpl.class.getName());
 
-        EventType type = typeResService.getEventType("NAME");
+        EventType type = adapterService.getEventType("NAME");
         assertEquals(TestEventAdapterServiceImpl.class, type.getUnderlyingType());
 
-        EventType typeTwo = typeResService.getEventType(TestEventAdapterServiceImpl.class.getName());
+        EventType typeTwo = adapterService.getEventType(TestEventAdapterServiceImpl.class.getName());
         assertSame(typeTwo, typeTwo);
 
-        assertNull(typeResService.getEventType("xx"));
+        assertNull(adapterService.getEventType("xx"));
     }
 
     public void testAddInvalid()
     {
         try
         {
-            typeResService.addBeanType("x", "xx");
+            adapterService.addBeanType("x", "xx");
             fail();
         }
         catch (EventAdapterException ex)
@@ -65,20 +70,20 @@ public class TestEventAdapterServiceImpl extends TestCase
         props.put("b", String.class);
 
         // check result type
-        EventType typeOne = typeResService.addMapType("latencyEvent", props);
+        EventType typeOne = adapterService.addMapType("latencyEvent", props);
         assertEquals(Long.class, typeOne.getPropertyType("a"));
         assertEquals(String.class, typeOne.getPropertyType("b"));
         assertEquals(2, typeOne.getPropertyNames().length);
 
         // add the same type with the same name, should succeed and return the same reference
-        EventType typeTwo = typeResService.addMapType("latencyEvent", props);
+        EventType typeTwo = adapterService.addMapType("latencyEvent", props);
         assertSame(typeOne, typeTwo);
 
         // add the same name with a different type, should fail
         props.put("b", boolean.class);
         try
         {
-            typeResService.addMapType("latencyEvent", props);
+            adapterService.addMapType("latencyEvent", props);
             fail();
         }
         catch (EventAdapterException ex)
@@ -89,15 +94,15 @@ public class TestEventAdapterServiceImpl extends TestCase
 
     public void testAddClassName()
     {
-        EventType typeOne = typeResService.addBeanType("latencyEvent", SupportBean.class.getName());
+        EventType typeOne = adapterService.addBeanType("latencyEvent", SupportBean.class.getName());
         assertEquals(SupportBean.class, typeOne.getUnderlyingType());
 
-        EventType typeTwo = typeResService.addBeanType("latencyEvent", SupportBean.class.getName());
+        EventType typeTwo = adapterService.addBeanType("latencyEvent", SupportBean.class.getName());
         assertSame(typeOne, typeTwo);
 
         try
         {
-            typeResService.addBeanType("latencyEvent", SupportBean_A.class.getName());
+            adapterService.addBeanType("latencyEvent", SupportBean_A.class.getName());
             fail();
         }
         catch (EventAdapterException ex)
@@ -109,7 +114,7 @@ public class TestEventAdapterServiceImpl extends TestCase
     public void testWrap()
     {
         SupportBean bean = new SupportBean();
-        EventBean event = typeResService.adapterForBean(bean);
+        EventBean event = adapterService.adapterForBean(bean);
         assertSame(event.getUnderlying(), bean);
     }
 
@@ -117,11 +122,53 @@ public class TestEventAdapterServiceImpl extends TestCase
     {
         Map<String, Class> schema = new HashMap<String, Class>();
         schema.put("STDDEV", Double.class);
-        EventType parentEventType = typeResService.createAnonymousMapType(schema);
+        EventType parentEventType = adapterService.createAnonymousMapType(schema);
 
-        EventType newEventType = typeResService.createAddToEventType(parentEventType, new String[] {"test"}, new Class[] {Integer.class});
+        EventType newEventType = adapterService.createAddToEventType(parentEventType, new String[] {"test"}, new Class[] {Integer.class});
 
         assertTrue(newEventType.isProperty("test"));
         assertEquals(Integer.class, newEventType.getPropertyType("test"));
+    }
+
+    public void testAddXMLDOMType() throws Exception
+    {
+        adapterService.addXMLDOMType("XMLDOMTypeOne", getXMLDOMConfig());
+        EventType eventType = adapterService.getEventType("XMLDOMTypeOne");
+        assertEquals(Node.class, eventType.getUnderlyingType());
+
+        try
+        {
+            adapterService.addXMLDOMType("a", new ConfigurationEventTypeXMLDOM());
+            fail();
+        }
+        catch (EventAdapterException ex)
+        {
+            // expected
+        }
+    }
+
+    public void testAdapterForDOM() throws Exception
+    {
+        adapterService.addXMLDOMType("XMLDOMTypeOne", getXMLDOMConfig());
+
+        String xml =
+                "<simpleEvent>\n" +
+                "  <nested1>value</nested1>\n" +
+                "</simpleEvent>";
+
+        InputSource source = new InputSource(new StringReader(xml));
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        Document simpleDoc = builderFactory.newDocumentBuilder().parse(source);
+
+        EventBean bean = adapterService.adapterForDOM(simpleDoc);
+        assertEquals("value", bean.get("nested1"));
+    }
+
+    private static ConfigurationEventTypeXMLDOM getXMLDOMConfig()
+    {
+        ConfigurationEventTypeXMLDOM config = new ConfigurationEventTypeXMLDOM();
+        config.setRootElementName("simpleEvent");
+        config.addXPathProperty("nested1", "/simpleEvent/nested1", XPathConstants.STRING);
+        return config;
     }
 }

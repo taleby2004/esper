@@ -40,12 +40,63 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
 
     public void sendEvent(Object event) throws EPException
     {
-    	sendEventOrMap(event, null);
+        if (event == null)
+        {
+            log.fatal(".sendEvent Null object supplied");
+            return;
+        }
+
+        if (log.isDebugEnabled())
+        {
+            log.debug(".sendEvent Processing event " + event);
+        }
+
+        // Process event
+        processBeanEvent(event);
+
+        // Dispatch results, work off thread queue
+        postProcessEvent();
+    }
+
+    public void sendEvent(org.w3c.dom.Node document) throws EPException
+    {
+        if (document == null)
+        {
+            log.fatal(".sendEvent Null object supplied");
+            return;
+        }
+
+        if (log.isDebugEnabled())
+        {
+            log.debug(".sendEvent Processing DOM node event " + document);
+        }
+
+        // Get it wrapped up, process event
+        EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
+        processWrappedEvent(eventBean);
+
+        // Dispatch results, work off thread queue
+        postProcessEvent();
     }
     
     public void sendMap(Map<String, Object> map, String eventTypeAlias) throws EPException
     {
-    	sendEventOrMap(map, eventTypeAlias);
+        if (map == null)
+        {
+            throw new IllegalArgumentException("Invalid null event object");
+        }
+
+        if (log.isDebugEnabled())
+        {
+            log.debug(".sendMap Processing event " + map);
+        }
+
+        // Process event
+        EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeAlias);
+        processBeanEvent(eventBean);
+
+        // Dispatch results, work off thread queue
+        postProcessEvent();
     }
     
     public int getNumEventsReceived()
@@ -100,7 +151,21 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         sendEvent(currentTimeEvent);
     }
 
-    private void processEvent(Object event, String eventTypeAlias)
+    private void postProcessEvent() throws EPException
+    {
+        // Dispatch internal work items and results
+        dispatch();
+
+        // Work off the event queue if any events accumulated in there via a route()
+        Object event;
+        while ( (event = threadWorkQueue.next()) != null)
+        {
+            processBeanEvent(event);
+            dispatch();
+        }
+    }
+
+    private void processBeanEvent(Object event)
     {
         if (event instanceof TimerEvent)
         {
@@ -108,7 +173,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         }
         else
         {
-            processRegularEvent(event, eventTypeAlias);
+            processUnwrappedEvent(event);
         }
     }
 
@@ -160,31 +225,28 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         dispatch();
     }
 
-    private void processRegularEvent(Object event, String eventTypeAlias)
+    private void processUnwrappedEvent(Object event)
     {
         EventBean eventBean = null;
 
-        // All events are processed by the filter service
-        timerRWLock.readLock().lock();
+        if (event instanceof EventBean)
+        {
+            eventBean = (EventBean) event;
+        }
+        else
+        {
+            eventBean = services.getEventAdapterService().adapterForBean(event);
+        }
 
+        processWrappedEvent(eventBean);
+    }
+
+    private void processWrappedEvent(EventBean eventBean)
+    {
+        // All events are processed by the filter service
         try
         {
-            if (event instanceof EventBean)
-            {
-                eventBean = (EventBean) event;
-            }
-            else if (eventTypeAlias != null)
-            {
-            	if ( !(event instanceof Map) )
-            	{
-            		throw new IllegalStateException("Non-java.lang.Map type " + event.getClass().getName() +  " is being sent with an event type alias");
-            	}
-            	eventBean = services.getEventAdapterService().adapterForMap((Map)event, eventTypeAlias);
-            }
-            else
-            {
-                eventBean = services.getEventAdapterService().adapterForBean(event);
-            }
+            timerRWLock.readLock().lock();
 
             services.getFilterService().evaluate(eventBean);
         }
@@ -207,31 +269,6 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         catch (RuntimeException ex)
         {
             throw new EPException(ex);
-        }
-    }
-    
-    private void sendEventOrMap(Object eventOrMap, String eventTypeAlias)
-    {
-        if (eventOrMap == null)
-        {
-            log.fatal(".sendEventOrMap Null object supplied");
-            return;
-        }
-
-        if (log.isDebugEnabled())
-        {
-            log.debug(".sendEventOrMap Processing event " + eventOrMap);
-        }
-
-        // Process event and dispatch results
-        processEvent(eventOrMap, eventTypeAlias);
-        dispatch();
-
-        // Work off the event queue if any events accumulated in there via a route()
-        while ( (eventOrMap = threadWorkQueue.next()) != null)
-        {
-            processEvent(eventOrMap, eventTypeAlias);
-            dispatch();
         }
     }
 

@@ -1,7 +1,15 @@
 package net.esper.event;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
 import java.util.Map;
 import java.util.HashMap;
+
+import net.esper.client.ConfigurationEventTypeXMLDOM;
+import net.esper.event.xml.SimpleXMLEventType;
+import net.esper.event.xml.XMLEventBean;
+import net.esper.event.xml.SchemaXMLEventType;
 
 /**
  * Implementation for resolving event name to event type.
@@ -10,6 +18,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 {
     private Map<String, EventType> eventTypes;
     private BeanEventAdapter beanEventAdapter;
+    private Map<String, EventType> xmldomRootElementNames;
 
     /**
      * Ctor.
@@ -17,6 +26,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
     public EventAdapterServiceImpl()
     {
         eventTypes = new HashMap<String, EventType>();
+        xmldomRootElementNames = new HashMap<String, EventType>();
         beanEventAdapter = new BeanEventAdapter();
     }
 
@@ -146,7 +156,56 @@ public class EventAdapterServiceImpl implements EventAdapterService
             types.put(fieldNames[i], fieldTypes[i]);
         }
 
-        EventType eventType = createAnonymousMapType(types);
-        return eventType;
+        return createAnonymousMapType(types);
+    }
+
+    public EventBean adapterForDOM(Node node)
+    {
+        String rootElementName = null;
+        Node namedNode = null;
+        if (node instanceof Document)
+        {
+            namedNode = ((Document) node).getDocumentElement();
+        }
+        rootElementName = namedNode.getLocalName();
+        if (rootElementName == null)
+        {
+            rootElementName = namedNode.getNodeName();
+        }
+
+        EventType eventType = xmldomRootElementNames.get(rootElementName);
+        if (eventType == null)
+        {
+            throw new EventAdapterException("DOM event root element name '" + rootElementName +
+                    "' has not been configured");
+        }
+
+        return new XMLEventBean(node, eventType);
+    }
+
+    /**
+     * Add a configured XML DOM event type.
+     * @param eventTypeAlias is the alias name of the event type
+     * @param configurationEventTypeXMLDOM configures the event type schema and namespace and XPath
+     * property information.
+     */
+    public void addXMLDOMType(String eventTypeAlias, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
+    {
+        if (configurationEventTypeXMLDOM.getRootElementName() == null)
+        {
+            throw new EventAdapterException("Required root element name has not been supplied");
+        }
+        EventType type = null;
+        if (configurationEventTypeXMLDOM.getSchemaResource() == null)
+        {
+            type = new SimpleXMLEventType(configurationEventTypeXMLDOM);
+        }
+        else
+        {
+            type = new SchemaXMLEventType(configurationEventTypeXMLDOM);
+        }
+
+        eventTypes.put(eventTypeAlias, type);
+        xmldomRootElementNames.put(configurationEventTypeXMLDOM.getRootElementName(), type);
     }
 }

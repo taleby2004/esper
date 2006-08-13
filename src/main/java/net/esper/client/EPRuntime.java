@@ -26,6 +26,16 @@ public interface EPRuntime
     public void sendMap(Map<String, Object> map, String eventTypeAlias) throws EPException;
 
     /**
+     * Send an event represented by a DOM node to the event stream processing runtime.
+     *
+     * Use the route method for events internally within the runtime.
+     *
+     * @param node is the DOM node as an event
+     * @throws EPException is thrown when the processing of the event lead to an error
+     */
+    public void sendEvent(org.w3c.dom.Node node) throws EPException;
+
+    /**
      * Number of events received over the lifetime of the event stream processing runtime.
      * @return number of events received
      */

@@ -6,21 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.w3c.dom.*;
 
 /**
  * An instance of <tt>Configuration</tt> allows the application
@@ -49,7 +39,12 @@ public class Configuration {
      * Map of event name and fully-qualified Java class name.
      */
 	protected Map<String, String> eventClasses;
-	
+
+    /**
+     * Map of event name and fully-qualified Java class name.
+     */
+	protected Map<String, ConfigurationEventTypeXMLDOM> eventTypesXMLDOM;
+
 	/**
 	 * The type aliases for events that result when maps are sent
 	 * into the engine.
@@ -66,7 +61,7 @@ public class Configuration {
 	 * True until the user calls addAutoImport().
 	 */
 	private boolean isUsingDefaultImports = true;
-	
+
     /**
      * Constructs an empty configuration. The auto import values
      * are set by default to java.lang, java.math, java.text and
@@ -86,8 +81,9 @@ public class Configuration {
     {
         eventClasses.put(eventTypeAlias, javaEventClass);
     }
-    
+
     /**
+<<<<<<< .working
      * Define a map event type.
      * @param eventTypeAlias - the name for this type of event
      * @param typeMap - for each key-value pair in this map, the name of the key and the type (as a string) of the value
@@ -98,6 +94,18 @@ public class Configuration {
     }
     
     /**
+=======
+     * Add an alias for an event type.
+     * @param eventTypeAlias is the alias for the event type
+     * @param xmlDOMEventTypeDesc descriptor containing property and mapping information for XML-DOM events
+     */
+    public void addEventTypeAlias(String eventTypeAlias, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
+    {
+        eventTypesXMLDOM.put(eventTypeAlias, xmlDOMEventTypeDesc);
+    }
+
+    /**
+>>>>>>> .merge-right.r206
      * Add an import (a class or package). Adding will suppress the use of the default imports.
      * @param autoImport - the import to add
      */
@@ -112,15 +120,16 @@ public class Configuration {
     }
 
     /**
-     * Returns the mapping of event type alias to event types.
-     * @return event type aliases
+     * Returns the mapping of event type alias to Java class name.
+     * @return event type aliases for Java class names
      */
     public Map<String, String> getEventTypeAliases()
     {
         return eventClasses;
     }
-    
+
     /**
+<<<<<<< .working
      * Returns the mapping of event type aliases to map objects.
      * @return map type aliases
      */
@@ -130,10 +139,21 @@ public class Configuration {
     }
     
     /**
+=======
+     * Returns the mapping of event type alias to XML DOM event type information.
+     * @return event type aliases mapping to XML DOM configs
+     */
+    public Map<String, ConfigurationEventTypeXMLDOM> getEventTypesXMLDOM()
+    {
+        return eventTypesXMLDOM;
+    }
+
+    /**
+>>>>>>> .merge-right.r206
      * Returns the class and package imports.
      * @return imported names
      */
-	public List<String> getImports() 
+	public List<String> getImports()
 	{
 		return imports;
 	}
@@ -156,6 +176,9 @@ public class Configuration {
      * <tt>esper-configuration-1.0.xsd</tt>.
      * <p/>
      * The resource is found via <tt>getConfigurationInputStream(resource)</tt>.
+     * That method can be overridden to implement an arbitrary lookup strategy.
+     * <p/>
+     * See <tt>getResourceAsStream</tt> for information on how the resource name is resolved.
      * @param resource if the file name of the resource
      * @return Configuration initialized from the resource
      * @throws EPException thrown to indicate error reading configuration
@@ -164,13 +187,16 @@ public class Configuration {
     {
         log.debug( "configuring from resource: " + resource );
         InputStream stream = getConfigurationInputStream( resource );
-        return doConfigure( stream, resource );
+        ConfigurationParser.doConfigure(this, stream, resource );
+        return this;
     }
 
     /**
      * Get the configuration file as an <tt>InputStream</tt>. Might be overridden
      * by subclasses to allow the configuration to be located by some arbitrary
      * mechanism.
+     * <p>
+     * See <tt>getResourceAsStream</tt> for information on how the resource name is resolved.
      * @param resource is the resource name
      * @return input stream for resource
      * @throws EPException thrown to indicate error reading configuration
@@ -195,7 +221,8 @@ public class Configuration {
     {
 		log.debug( "configuring from url: " + url.toString() );
 		try {
-			return doConfigure( url.openStream(), url.toString() );
+            ConfigurationParser.doConfigure(this, url.openStream(), url.toString());
+            return this;
 		}
 		catch (IOException ioe) {
 			throw new EPException("could not configure from URL: " + url, ioe );
@@ -215,12 +242,13 @@ public class Configuration {
     {
 		log.debug( "configuring from file: " + configFile.getName() );
 		try {
-			return doConfigure( new FileInputStream( configFile ), configFile.toString() );
+            ConfigurationParser.doConfigure(this, new FileInputStream(configFile), configFile.toString());
 		}
 		catch (FileNotFoundException fnfe) {
 			throw new EPException( "could not find file: " + configFile, fnfe );
 		}
-	}
+        return this;
+    }
 
 
 	/**
@@ -235,54 +263,12 @@ public class Configuration {
 	public Configuration configure(Document document) throws EPException
     {
 		log.debug( "configuring from XML document" );
-		return doConfigure(document);
-	}
-
-    /**
-     * Use the configuration specified in the given input stream.
-     *
-     * @param stream	   Inputstream to be read from
-     * @param resourceName The name to use in warning/error messages
-     * @return A configuration configured via the stream
-     * @throws EPException
-     */
-    protected Configuration doConfigure(InputStream stream, String resourceName) throws EPException
-    {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = null;
-
-        Document document = null;
-
-        try
-        {
-            builder = factory.newDocumentBuilder();
-            document = builder.parse(stream);
-        }
-        catch (ParserConfigurationException ex)
-        {
-            throw new EPException("Could not get a DOM parser configuration: " + resourceName, ex);
-        }
-        catch (SAXException ex)
-        {
-            throw new EPException("Could not parse configuration: " + resourceName, ex);
-        }
-        catch (IOException ex)
-        {
-            throw new EPException("Could not read configuration: " + resourceName, ex);
-        }
-        finally {
-            try {
-                stream.close();
-            }
-            catch (IOException ioe) {
-                log.warn( "could not close input stream for: " + resourceName, ioe );
-            }
-        }
-
-        return doConfigure(document);
+		ConfigurationParser.doConfigure(this, document);
+        return this;
     }
 
     /**
+<<<<<<< .working
      * Parse the W3C DOM document.
      * @param doc to parse
      * @return configuration
@@ -318,7 +304,26 @@ public class Configuration {
 	}
 
     /**
+=======
+>>>>>>> .merge-right.r206
      * Returns an input stream from an application resource in the classpath.
+     * <p>
+     * The method first removes the '/' character from the resource name if
+     * the first character is '/'.
+     * <p>
+     * The lookup order is as follows:
+     * <p>
+     * If a thread context class loader exists, use <tt>Thread.currentThread().getResourceAsStream</tt>
+     * to obtain an InputStream.
+     * <p>
+     * If no input stream was returned, use the <tt>Configuration.class.getResourceAsStream</tt>.
+     * to obtain an InputStream.
+     * <p>
+     * If no input stream was returned, use the <tt>Configuration.class.getClassLoader().getResourceAsStream</tt>.
+     * to obtain an InputStream.
+     * <p>
+     * If no input stream was returned, throw an Exception.
+     *
      * @param resource to get input stream for
      * @return input stream for resource
      */
@@ -351,11 +356,12 @@ public class Configuration {
     {
         eventClasses = new HashMap<String, String>();
         mapAliases = new HashMap<String, Map<String, String>>();
+        eventTypesXMLDOM = new HashMap<String, ConfigurationEventTypeXMLDOM>();
         imports = new ArrayList<String>();
         addDefaultImports();
         isUsingDefaultImports = true;
     }
-    
+
     /**
      * Use these imports until the user specifies something else.
      */
