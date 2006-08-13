@@ -84,11 +84,11 @@ public class Configuration {
 
     /**
 <<<<<<< .working
-     * Define a map event type.
-     * @param eventTypeAlias - the name for this type of event
-     * @param typeMap - for each key-value pair in this map, the name of the key and the type (as a string) of the value
+     * Add an alias for an event.
+     * @param eventTypeAlias is the alias for the event type
+     * @param typeMap maps the name of each property in the Map event to the type (as a string) of its value in the Map object
      */
-    public void addMapEvent(String eventTypeAlias, Map<String, String> typeMap)
+    public void addEventTypeAlias(String eventTypeAlias, Map<String, String> typeMap)
     {
     	mapAliases.put(eventTypeAlias, typeMap);
     }
@@ -268,42 +268,6 @@ public class Configuration {
     }
 
     /**
-<<<<<<< .working
-     * Parse the W3C DOM document.
-     * @param doc to parse
-     * @return configuration
-     * @throws EPException
-     */
-	protected Configuration doConfigure(Document doc) throws EPException
-    {
-        Element root = doc.getDocumentElement();
-        NodeList nodes = root.getElementsByTagName("event-type");
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            String name = nodes.item(i).getAttributes().getNamedItem("alias").getTextContent();
-            String clazz = nodes.item(i).getAttributes().getNamedItem("class").getTextContent();
-            eventClasses.put(name, clazz);
-        }
-        
-        NodeList importNodes = root.getElementsByTagName("auto-import");
-        for (int i = 0; i < importNodes.getLength(); i++)
-        {
-            String name = importNodes.item(i).getAttributes().getNamedItem("import-name").getTextContent();
-            addImport(name);
-        }
-        
-        NodeList mapNodes = root.getElementsByTagName("map-event");
-        for (int i = 0; i < mapNodes.getLength(); i++)
-        {
-            String mapAlias = mapNodes.item(i).getAttributes().getNamedItem("alias").getTextContent();
-            Map<String, String> propertyTypeNames = createPropertyTypeNames(root.getElementsByTagName("map-property"));
-            addMapEvent(mapAlias, propertyTypeNames);
-        }
-        
-		return this;
-	}
-
-    /**
 =======
 >>>>>>> .merge-right.r206
      * Returns an input stream from an application resource in the classpath.
@@ -371,18 +335,6 @@ public class Configuration {
     	imports.add("java.math.*");
     	imports.add("java.text.*");
     	imports.add("java.util.*");
-    }
-    
-    private Map<String, String> createPropertyTypeNames(NodeList nodeList)
-    {
-    	Map<String, String> propertyTypeNames = new HashMap<String, String>();
-        for (int i = 0; i < nodeList.getLength(); i++)
-        {
-            String name = nodeList.item(i).getAttributes().getNamedItem("name").getTextContent();
-            String clazz = nodeList.item(i).getAttributes().getNamedItem("class").getTextContent();
-            propertyTypeNames.put(name, clazz);
-        }
-    	return propertyTypeNames;
     }
 }
 
