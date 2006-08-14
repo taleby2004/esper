@@ -335,6 +335,39 @@ To make testing easier, standard and to demonstrate how the example works, the e
 			</sect2>
     </sect1>
 
+    <sect1 id="examples-autoid">
+        <title>AutoID RFID Reader</title>
+
+		<para>
+			In this example an array of RFID readers sense RFID tags as pallets are coming within the range of one of the readers. 
+			A reader generates XML documents with observation information such as reader sensor ID, observation time 
+			and tags observed. A statement computes the total number of tags per reader sensor ID within the last 60 seconds.
+		</para>
+    	
+		<para>
+			This example demonstrates how XML documents unmarshalled to <literal>org.w3c.dom.Node</literal> DOM document nodes
+			can natively be processed by the engine without requiring Java object event representations. The example uses an XPath
+			expression for an event property counting the number of tags observed by a sensor. The XML documents follow the AutoID (<literal>http://www.autoid.org/</literal>) organization
+			standard. 
+		</para>
+
+		<para>
+			The classes for this example can be found in package <literal>net.esper.example.autoid</literal>.
+			As events are XML documents with no Java object representation, the example does not have event classes.
+		</para>
+
+		<para>
+			The code snippet below shows the simple statement to compute the total number of tags per sensor. The statement is created by class 
+			<literal>net.esper.example.autoid.RFIDTagsPerSensorStmt</literal>.
+		</para>
+
+<programlisting><![CDATA[select ID as sensorId, sum(countTags) as numTagsPerSensor
+from AutoIdRFIDExample.win:time(60)
+where Observation[0].Command = 'READ_PALLET_TAGS_ONLY'
+group by ID]]></programlisting>
+
+    </sect1>
+
     <sect1 id="examples-stockticker">
         <title>StockTicker</title>
 
