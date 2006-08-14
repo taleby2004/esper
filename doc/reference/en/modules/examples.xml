@@ -357,6 +357,14 @@ To make testing easier, standard and to demonstrate how the example works, the e
 		</para>
 
 		<para>
+			A simulator that can be run from the command line is also available for this example.
+			The simulator generates a number of XML documents as specified by a command line argument and
+			prints out the totals per sensor.
+			Run "run_autoid.bat" (Windows) or "run_autoid.sh" (Unix) to start the autoid simulator. 
+			Please see the readme file in the same folder for build instructions and command line parameters.
+		</para>
+
+		<para>
 			The code snippet below shows the simple statement to compute the total number of tags per sensor. The statement is created by class 
 			<literal>net.esper.example.autoid.RFIDTagsPerSensorStmt</literal>.
 		</para>
