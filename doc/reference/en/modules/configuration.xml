@@ -175,10 +175,10 @@ configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 			<programlisting><![CDATA[<event-type alias="AutoIdRFIDEvent">
   <xml-dom root-element-name="Sensor" schema-resource="data/AutoIdPmlCore.xsd" 
        default-namespace="urn:autoid:specification:interchange:PMLCore:xml:schema:1">
-    <namespace-prefix prefix="pmluid" 
-       namespace="urn:autoid:specification:universal:Identifier:xml:schema:1"/>
+    <namespace-prefix prefix="pmlcore" 
+       namespace="urn:autoid:specification:interchange:PMLCore:xml:schema:1"/>
     <xpath-property property-name="countTags" 
-       xpath="count(/Sensor/Observation/Tag)" type="number"/>
+       xpath="count(/pmlcore:Sensor/pmlcore:Observation/pmlcore:Tag)" type="number"/>
   </xml-dom>
 </event-type>]]></programlisting>
 

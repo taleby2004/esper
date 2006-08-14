@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.MalformedURLException;
 
 /**
  * EventType for xml events that have a Schema.
@@ -34,8 +33,8 @@ public class SchemaXMLEventType extends BaseXMLEventType {
     // schema model
     private XSModel xsModel;
 
-    // namespace of the root Element
-    private String namespace;
+    // rootElementNamespace of the root Element
+    private String rootElementNamespace;
 
     private Map<String, TypedEventPropertyGetter> propertyGetterCache;
 
@@ -63,12 +62,14 @@ public class SchemaXMLEventType extends BaseXMLEventType {
             throw new EPException("Failed to read schema '" + schemaResource + "'", ex);
         }
 
-        // Set up namespace context
-        namespace = configurationEventTypeXMLDOM.getRootElementNamespace();
+        // Use the root namespace for resolving the root element
+        rootElementNamespace = configurationEventTypeXMLDOM.getRootElementNamespace();
+
+        // Set of namespace context for XPath expressions
         XPathNamespaceContext ctx = new XPathNamespaceContext();
-        if (configurationEventTypeXMLDOM.getRootElementNamespace() != null)
+        if (configurationEventTypeXMLDOM.getDefaultNamespace() != null)
         {
-            ctx.setDefaultNamespace(configurationEventTypeXMLDOM.getRootElementNamespace());
+            ctx.setDefaultNamespace(configurationEventTypeXMLDOM.getDefaultNamespace());
         }
         for (Map.Entry<String, String> entry : configurationEventTypeXMLDOM.getNamespacePrefixes().entrySet())
         {
@@ -76,7 +77,7 @@ public class SchemaXMLEventType extends BaseXMLEventType {
         }
         super.setNamespaceContext(ctx);
 
-        // Finally add XPath properties as that may depend on the namespace
+        // Finally add XPath properties as that may depend on the rootElementNamespace
         super.setExplicitProperties(configurationEventTypeXMLDOM.getXPathProperties().values());
     }
 
@@ -120,7 +121,7 @@ public class SchemaXMLEventType extends BaseXMLEventType {
 
         try
         {
-            getter = SchemaXMLPropertyParser.parse(property,getXPathFactory(),getRootElementName(),namespace,xsModel);
+            getter = SchemaXMLPropertyParser.parse(property,getXPathFactory(),getRootElementName(),rootElementNamespace,xsModel);
             propertyGetterCache.put(property, getter);
             return getter;
         }
