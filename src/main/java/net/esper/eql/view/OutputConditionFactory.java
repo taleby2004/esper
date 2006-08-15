@@ -14,7 +14,7 @@ public final class OutputConditionFactory {
 
     /**
      * Creates an output condition instance.
-     * @param outputLimitSpec specifies what to create
+     * @param outputLimitSpec specifies what kind of condition to create
      * @param viewContext supplies the services required such as for scheduling callbacks
      * @param outputCallback is the method to invoke for output
      * @return instance for performing output
@@ -23,12 +23,21 @@ public final class OutputConditionFactory {
 										 	  	  ViewServiceContext viewContext, 
 										 	      OutputCallback outputCallback)
 	{
+		if(outputCallback ==  null)
+		{
+			throw new NullPointerException("Output condition by count requires a non-null callback");
+		}
+		
 		if(outputLimitSpec == null)
 		{
 			return new OutputConditionNull(outputCallback);
+		}		
+		else if(outputLimitSpec.isDisplayFirstOnly())
+		{
+			log.debug(".createCondition creating OutputConditionFirst");
+			return new OutputConditionFirst(outputLimitSpec, viewContext, outputCallback);
 		}
-				
-		if (outputLimitSpec.isEventLimit())
+		if(outputLimitSpec.isEventLimit())
 		{
 			log.debug(".createCondition creating OutputConditionCount with event rate " + outputLimitSpec.getEventRate());
 			return new OutputConditionCount(outputLimitSpec.getEventRate(), outputCallback);
