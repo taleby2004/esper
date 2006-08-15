@@ -1,6 +1,7 @@
 package net.esper.eql.parse;
 
 import net.esper.eql.expression.OutputLimitSpec;
+import net.esper.eql.expression.OutputLimitSpec.DisplayLimit;
 import net.esper.eql.generated.EqlTokenTypes;
 import antlr.collections.AST;
 
@@ -16,22 +17,32 @@ import antlr.collections.AST;
 	  */
 	 public static OutputLimitSpec buildSpec(AST node)
 	 {
-		 boolean outputLastOnly = false;
 		 AST child = node.getFirstChild();
-		 if(child.getType() == ALL || child.getType() == LAST)
+		 
+		 DisplayLimit displayLimit = DisplayLimit.ALL;
+		 if(child.getType() == FIRST)
 		 {
-			 outputLastOnly = (child.getType() == LAST);
+			 displayLimit = DisplayLimit.FIRST;
+			 child = child.getNextSibling();
+		 }
+		 else if(child.getType() == LAST)
+		 {
+			 displayLimit = DisplayLimit.LAST;
+			 child = child.getNextSibling();
+		 }
+		 else if(child.getType() == ALL)
+		 {
 			 child = child.getNextSibling();
 		 }
 		 
 		 switch (node.getType()) {
 		 case EVENT_LIMIT_EXPR:
-			 return  new OutputLimitSpec(Integer.parseInt(child.getText()), outputLastOnly);
+			 return  new OutputLimitSpec(Integer.parseInt(child.getText()), displayLimit);
 		 case SEC_LIMIT_EXPR:	
-			 return  new OutputLimitSpec(Double.parseDouble(child.getText()), outputLastOnly);
+			 return  new OutputLimitSpec(Double.parseDouble(child.getText()), displayLimit);
 		 case MIN_LIMIT_EXPR:
 			 // 60 seconds to a minute
-			 return  new OutputLimitSpec(60 * Double.parseDouble(child.getText()), false);
+			 return  new OutputLimitSpec(60 * Double.parseDouble(child.getText()), displayLimit);
 		 default:
 			 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized output limit type");
 		 } 
