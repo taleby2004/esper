@@ -15,7 +15,7 @@ public class TestOutputConditionNull extends TestCase
     	listener = new SupportUpdateListener();
     	
     	callback = new OutputCallback() {
-		    		public void continueOutputProcessing(boolean forceUpdate)
+		    		public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
 		    		{
 		    			listener.update(null, null);
 		    		}
