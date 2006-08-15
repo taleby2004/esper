@@ -23,19 +23,19 @@ public class TestOutputConditionCount extends TestCase
     	listener2 = new SupportUpdateListener();
     	
     	callback1 = new OutputCallback() {
-		    		public void continueOutputProcessing(boolean forceUpdate)
+		    		public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
 		    		{
 		    			listener1.update(null, null);
 		    		}
 		    	};
 		callback2 = new OutputCallback() {
-		    		public void continueOutputProcessing(boolean forceUpdate)
+		    		public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
 		    		{
 		    			listener2.update(null, null);
 		    		}
 		    	};
 		callback3 = new OutputCallback() {
-		    		public void continueOutputProcessing(boolean forceUpdate)
+		    		public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
 		    		{
 		    			listener3.update(null, null);
 		    		}
