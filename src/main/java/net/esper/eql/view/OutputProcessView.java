@@ -133,82 +133,85 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
 	 * Called once the output condition has been met.
 	 * Invokes the result set processor.
 	 * Used for non-join event data.
-	 * @param forceUpdate is a flag to indicate that even if there is no data, 
-	 * child views should still be updated.
+	 * @param doOutput - true if the batched events should actually be output as well as processed, false if they should just be processed
+	 * @param forceUpdate - true if output should be made even when no updating events have arrived
 	 * */
-	protected void continueOutputProcessingView(boolean forceUpdate)
+	protected void continueOutputProcessingView(boolean doOutput, boolean forceUpdate)
 	{
 		log.debug(".continueOutputProcessingView");			
-		
-		EventBean[] newEvents = newEventsList.toArray(new EventBean[0]);
-		EventBean[] oldEvents = oldEventsList.toArray(new EventBean[0]);		
-		// convert 0 length arrays to nulls, to prevent
-		// the result set processor from working needlessly
-		if(newEvents.length == 0)
-		{
-			newEvents = null;
-		}
-		if(oldEvents.length == 0)
-		{
-			oldEvents = null;
-		}
+
+		// Get the arrays of new and old events, or null if none
+		EventBean[] newEvents = newEventsList.size() > 0 ? newEventsList.toArray(new EventBean[0]) : null;
+		EventBean[] oldEvents = oldEventsList.size() > 0 ? oldEventsList.toArray(new EventBean[0]) : null;		
+
 		
 		if(resultSetProcessor != null)
 		{
+			// Process the events and get the result
 			Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processViewResult(newEvents, oldEvents);
-			
-			if (newOldEvents != null)
-			{
-				this.updateChildren(newOldEvents.getFirst(), newOldEvents.getSecond());
-			}
-			else if(forceUpdate)
-			{
-				this.updateChildren(null, null);
-			}
+			newEvents = newOldEvents != null ? newOldEvents.getFirst() : null;
+			oldEvents = newOldEvents != null ? newOldEvents.getSecond() : null;
 		}
-		else 
+		else if(outputLastOnly)
 		{
-			if(outputLastOnly)
-			{
-				EventBean[] lastNew = newEvents == null ? null : new EventBean[] { newEvents[newEvents.length - 1] };
-				EventBean[] lastOld = oldEvents == null ? null : new EventBean[] { oldEvents[oldEvents.length - 1] };
-				this.updateChildren(lastNew, lastOld);
-			}
-			else
-			{
-				this.updateChildren(newEvents, oldEvents);
-			}
+			// Keep only the last event, if there is one
+			newEvents = newEvents != null ? new EventBean[] { newEvents[newEvents.length - 1] } : newEvents;
+			oldEvents = oldEvents != null ? new EventBean[] { oldEvents[oldEvents.length - 1] } : oldEvents;
 		}
-		
-		// reset the local event batches
-		newEventsList = new LinkedList<EventBean>();
-		oldEventsList = new LinkedList<EventBean>();
+
+		if(doOutput)
+		{
+			output(forceUpdate, newEvents, oldEvents);
+		}
+		resetEventBatches();
+	}
+
+	private void output(boolean forceUpdate, EventBean[] newEvents, EventBean[] oldEvents)
+	{
+		if(newEvents != null || oldEvents != null)
+		{
+			updateChildren(newEvents, oldEvents);
+		}
+		else if(forceUpdate)
+		{
+			updateChildren(null, null);
+		}
+	}
+
+	private void resetEventBatches()
+	{
+		newEventsList.clear();
+		oldEventsList.clear();
+		newEventsSet.clear();
+		oldEventsSet.clear();
 	}
 	
 	/**
 	 * Called once the output condition has been met.
 	 * Invokes the result set processor.
 	 * Used for join event data.
-	 * @param forceUpdate is a flag to indicate that even if there is no data, 
-	 * child views should still be updated.
+	 * @param doOutput - true if the batched events should actually be output as well as processed, false if they should just be processed
+	 * @param forceUpdate - true if output should be made even when no updating events have arrived	
 	 */
-	protected void continueOutputProcessingJoin(boolean forceUpdate)
+	protected void continueOutputProcessingJoin(boolean doOutput, boolean forceUpdate)
 	{
 		log.debug(".continueOutputProcessingJoin");			
+
+		EventBean[] newEvents = null;
+		EventBean[] oldEvents = null;
 		
 		Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEventsSet, oldEventsSet);
-		
 		if (newOldEvents != null)
 		{
-			this.updateChildren(newOldEvents.getFirst(), newOldEvents.getSecond());
+			newEvents = newOldEvents.getFirst();
+			oldEvents = newOldEvents.getSecond();
 		} 		
-		else if(forceUpdate)
+
+		if(doOutput)
 		{
-			this.updateChildren(null, null);
+			output(forceUpdate, newEvents, oldEvents);
 		}
-		// reset the local event batches
-		newEventsSet = new HashSet<MultiKey<EventBean>>();
-		oldEventsSet = new HashSet<MultiKey<EventBean>>();
+		resetEventBatches();
 	}
 
     public EventType getEventType()
@@ -249,9 +252,9 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
         {
             return new OutputCallback()
             {
-                public void continueOutputProcessing(boolean forceUpdate)
+                public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
                 {
-                    OutputProcessView.this.continueOutputProcessingView(false);
+                    OutputProcessView.this.continueOutputProcessingView(doOutput, forceUpdate);
                 }
             };
         }
@@ -259,9 +262,9 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
         {
             return new OutputCallback()
             {
-                public void continueOutputProcessing(boolean forceUpdate)
+                public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
                 {
-                    OutputProcessView.this.continueOutputProcessingJoin(false);
+                    OutputProcessView.this.continueOutputProcessingJoin(doOutput, forceUpdate);
                 }
             };
         }
