@@ -6,8 +6,8 @@ package net.esper.eql.view;
  * is allowed to continue. Once the condition is satisfied, it
  * makes a callback to continue output processing.
  */
-public interface OutputCondition {
-	
+public interface OutputCondition 
+{	
 	/**
 	 * Update the output condition.
 	 * @param newEventsCount - number of new events incoming
