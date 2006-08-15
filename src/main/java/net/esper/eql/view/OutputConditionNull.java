@@ -5,7 +5,10 @@ package net.esper.eql.view;
  */
 public class OutputConditionNull implements OutputCondition {
 
-	OutputCallback outputCallback;
+	public static final boolean DO_OUTPUT = true;
+	public static final boolean FORCE_UPDATE = false;
+	
+	private final OutputCallback outputCallback;
 	
 	/**
 	 * Ctor.
@@ -21,7 +24,7 @@ public class OutputConditionNull implements OutputCondition {
 	}
 	
 	public void updateOutputCondition(int newEventsCount, int oldEventsCount) {
-		outputCallback.continueOutputProcessing(false);
+		outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);
 	}
 
 }
