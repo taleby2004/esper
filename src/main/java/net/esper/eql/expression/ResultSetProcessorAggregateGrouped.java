@@ -130,7 +130,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         MultiKey[] oldDataGroupByKeys = generateGroupKeys(oldData);
 
         // generate old events
-        log.debug(".processJoinResults creating old output events");
+        log.debug(".processViewResults creating old output events");
         EventBean[] selectOldEvents = generateOutputEventsView(oldData, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps, oldGenerators);
 
         // update aggregates
@@ -155,7 +155,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         }
 
         // generate new events using select expressions
-        log.debug(".processJoinResults creating new output events");
+        log.debug(".processViewResults creating new output events");
         EventBean[] selectNewEvents = generateOutputEventsView(newData, newDataGroupByKeys, optionalHavingNode, newEventGroupReps, newGenerators);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))
