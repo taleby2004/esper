@@ -48,6 +48,7 @@ tokens
 	EVENTS="events";
 	SECONDS="seconds";
 	MINUTES="minutes";
+	FIRST="first";
 	LAST="last";
 	INSERT="insert";
 	INTO="into";
@@ -240,7 +241,7 @@ havingClause
 	;
 
 outputLimit
-	:   (ALL|LAST)? EVERY_EXPR! number (e:EVENTS!|sec:SECONDS!|min:MINUTES!)
+	:   (ALL|FIRST|LAST)? EVERY_EXPR! number (e:EVENTS!|sec:SECONDS!|min:MINUTES!)
 		{ 
 			if (e != null) #outputLimit = #([EVENT_LIMIT_EXPR,"outputLimitEvent"], #outputLimit); 
 			if (sec != null) #outputLimit = #([SEC_LIMIT_EXPR,"outputLimitSec"], #outputLimit); 

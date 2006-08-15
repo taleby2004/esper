@@ -105,9 +105,9 @@ havingClause
 	;
 
 outputLimitExpr
-	:	#(e:EVENT_LIMIT_EXPR (ALL|LAST)? number { leaveNode(#e); } ) 
-	|   #(sec:SEC_LIMIT_EXPR (ALL|LAST)? number { leaveNode(#sec); } )
-	|   #(min:MIN_LIMIT_EXPR (ALL|LAST)? number { leaveNode(#min); } )
+	:	#(e:EVENT_LIMIT_EXPR (ALL|FIRST|LAST)? number { leaveNode(#e); } ) 
+	|   #(sec:SEC_LIMIT_EXPR (ALL|FIRST|LAST)? number { leaveNode(#sec); } )
+	|   #(min:MIN_LIMIT_EXPR (ALL|FIRST|LAST)? number { leaveNode(#min); } )
 	;
 
 relationalExpr
