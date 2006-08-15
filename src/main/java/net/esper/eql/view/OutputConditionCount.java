@@ -10,6 +10,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class OutputConditionCount implements OutputCondition
 {
+	public static final boolean DO_OUTPUT = true;
+	public static final boolean FORCE_UPDATE = false;
     
     private final int eventRate;
     private int newEventsCount;
@@ -29,10 +31,10 @@ public final class OutputConditionCount implements OutputCondition
         {
             throw new IllegalArgumentException("Limiting output by event count requires an event count of at least 1");
         }
-        if(outputCallback == null)
-        {
-        	throw new NullPointerException("Output condition by count requires a non-null callback");
-        }
+		if(outputCallback ==  null)
+		{
+			throw new NullPointerException("Output condition by count requires a non-null callback");
+		}
         this.eventRate = eventRate;
         this.outputCallback = outputCallback;
     }
@@ -79,7 +81,7 @@ public final class OutputConditionCount implements OutputCondition
         	log.debug(".updateOutputCondition() condition satisfied");
             this.newEventsCount = 0;
             this.oldEventsCount = 0;
-            outputCallback.continueOutputProcessing(false);    
+            outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);    
         }
     }
 
