@@ -7,6 +7,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
+import net.esper.eql.expression.OutputLimitSpec.DisplayLimit;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportSelectExprFactory;
@@ -27,11 +28,11 @@ public class TestResultSetProcessorSimple extends TestCase
         selectExprProcessor = new SelectExprEvalProcessor(SupportSelectExprFactory.makeNoAggregateSelectList(), null, SupportEventAdapterService.getService());
         orderByProcessor = null;
 
-		outputLimitSpecAll = new OutputLimitSpec(1, false);
+		outputLimitSpecAll = new OutputLimitSpec(1, DisplayLimit.ALL);
 		assertFalse(outputLimitSpecAll.isDisplayLastOnly());
 		outputProcessorAll = new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, true, false);
 
-		outputLimitSpecLast = new OutputLimitSpec(1, true);
+		outputLimitSpecLast = new OutputLimitSpec(1, DisplayLimit.LAST);
 		assertTrue(outputLimitSpecLast.isDisplayLastOnly());
 		outputProcessorLast = new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, true, true);
     }
