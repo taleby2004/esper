@@ -53,7 +53,7 @@ public class TestOutputLimit extends TestCase
     	timeCallback(statementString4, 3000);
     }
     
-    public void TestWithGroupBy()
+    public void testWithGroupBy()
     {
     	String eventName = SupportMarketDataBean.class.getName();  
     	String statementString = "select symbol, sum(price) from " + eventName + ".win:length(5) group by symbol output every 5 events";
@@ -81,7 +81,125 @@ public class TestOutputLimit extends TestCase
     	assertSingleInstance(oldData, "MAC");
     }
     
-    private void assertSingleInstance(EventBean[] data, String symbol)
+    public void testLimitEventJoin()
+	{
+		String eventName1 = SupportBean.class.getName();
+		String eventName2 = SupportBean_A.class.getName();
+		String joinStatement = 
+			"select * from " +
+				eventName1 + ".win:length(5) as event1," + 
+				eventName2 + ".win:length(5) as event2" +
+			" where event1.string = event2.id";
+		String outputStmt1 = joinStatement + " output every 1 events";
+	   	String outputStmt3 = joinStatement + " output every 3 events";
+		
+	   	EPStatement fireEvery1 = epService.getEPAdministrator().createEQL(outputStmt1);
+		EPStatement fireEvery3 = epService.getEPAdministrator().createEQL(outputStmt3);
+		
+	   	SupportUpdateListener updateListener1 = new SupportUpdateListener();
+		fireEvery1.addListener(updateListener1);
+		SupportUpdateListener updateListener3 = new SupportUpdateListener();
+		fireEvery3.addListener(updateListener3);
+		
+		// send event 1
+		sendJoinEvents("s1");
+		
+		assertTrue(updateListener1.getAndClearIsInvoked());
+		assertEquals(1, updateListener1.getLastNewData().length);
+		assertNull(updateListener1.getLastOldData());
+		
+		assertFalse(updateListener3.getAndClearIsInvoked());
+		assertNull(updateListener3.getLastNewData());
+		assertNull(updateListener3.getLastOldData());
+		
+		// send event 2
+		sendJoinEvents("s2");
+		
+		assertTrue(updateListener1.getAndClearIsInvoked());
+		assertEquals(1, updateListener1.getLastNewData().length);
+		assertNull(updateListener1.getLastOldData());
+		
+	   	assertFalse(updateListener3.getAndClearIsInvoked());
+		assertNull(updateListener3.getLastNewData());
+		assertNull(updateListener3.getLastOldData());
+	   	
+		// send event 3
+		sendJoinEvents("s3");
+		
+		assertTrue(updateListener1.getAndClearIsInvoked());
+		assertEquals(1, updateListener1.getLastNewData().length);
+		assertNull(updateListener1.getLastOldData());
+		
+		assertTrue(updateListener3.getAndClearIsInvoked());
+		assertEquals(3, updateListener3.getLastNewData().length);
+		assertNull(updateListener3.getLastOldData());
+	}
+
+	public void testLimitEventSimple()
+	{       
+	    SupportUpdateListener updateListener1 = new SupportUpdateListener();
+	    SupportUpdateListener updateListener2 = new SupportUpdateListener();
+	    SupportUpdateListener updateListener3 = new SupportUpdateListener();
+	
+		String eventName = SupportBean.class.getName();
+		String selectStmt = "select * from " + eventName + ".win:length(5)";
+		String statement1 = selectStmt +
+			" output every 1 events";
+		String statement2 = selectStmt +
+			" output every 2 events";
+		String statement3 = selectStmt +
+			" output every 3 events";
+	
+		EPStatement rateLimitStmt1 = epService.getEPAdministrator().createEQL(statement1);
+	    rateLimitStmt1.addListener(updateListener1); 
+		EPStatement rateLimitStmt2 = epService.getEPAdministrator().createEQL(statement2);
+	    rateLimitStmt2.addListener(updateListener2);
+		EPStatement rateLimitStmt3 = epService.getEPAdministrator().createEQL(statement3);
+	    rateLimitStmt3.addListener(updateListener3);
+		
+		// send event 1
+		sendEvent("s1");
+	
+		assertTrue(updateListener1.getAndClearIsInvoked());
+		assertEquals(1,updateListener1.getLastNewData().length);
+		assertNull(updateListener1.getLastOldData());
+		
+		assertFalse(updateListener2.getAndClearIsInvoked());
+		assertNull(updateListener2.getLastNewData());
+		assertNull(updateListener2.getLastOldData());
+		
+		assertFalse(updateListener3.getAndClearIsInvoked());
+		assertNull(updateListener3.getLastNewData());
+		assertNull(updateListener3.getLastOldData());
+		
+		// send event 2
+		sendEvent("s2");
+	
+		assertTrue(updateListener1.getAndClearIsInvoked());
+		assertEquals(1,updateListener1.getLastNewData().length);
+		assertNull(updateListener1.getLastOldData());
+		
+		assertTrue(updateListener2.getAndClearIsInvoked());
+		assertEquals(2,updateListener2.getLastNewData().length);
+		assertNull(updateListener2.getLastOldData());
+		
+		assertFalse(updateListener3.getAndClearIsInvoked());
+		
+		// send event 3
+		sendEvent("s3");
+		
+		assertTrue(updateListener1.getAndClearIsInvoked());   	
+		assertEquals(1,updateListener1.getLastNewData().length);
+		assertNull(updateListener1.getLastOldData());
+	
+		assertFalse(updateListener2.getAndClearIsInvoked());
+	
+		assertTrue(updateListener3.getAndClearIsInvoked());
+		assertEquals(3,updateListener3.getLastNewData().length);
+		assertNull(updateListener3.getLastOldData());
+	}
+
+	private void assertSingleInstance(EventBean[] data, String symbol)
     {
     	int instanceCount = 0;
     	for(EventBean event : data)
@@ -186,71 +304,6 @@ public class TestOutputLimit extends TestCase
     	assertNull(updateListener.getLastOldData());
     }
     
-    public void testLimitEventSimple()
-    {       
-        SupportUpdateListener updateListener1 = new SupportUpdateListener();
-        SupportUpdateListener updateListener2 = new SupportUpdateListener();
-        SupportUpdateListener updateListener3 = new SupportUpdateListener();
-
-    	String eventName = SupportBean.class.getName();
-    	String selectStmt = "select * from " + eventName + ".win:length(5)";
-    	String statement1 = selectStmt +
-    		" output every 1 events";
-    	String statement2 = selectStmt +
-			" output every 2 events";
-    	String statement3 = selectStmt +
-			" output every 3 events";
- 
-    	EPStatement rateLimitStmt1 = epService.getEPAdministrator().createEQL(statement1);
-        rateLimitStmt1.addListener(updateListener1); 
-    	EPStatement rateLimitStmt2 = epService.getEPAdministrator().createEQL(statement2);
-        rateLimitStmt2.addListener(updateListener2);
-    	EPStatement rateLimitStmt3 = epService.getEPAdministrator().createEQL(statement3);
-        rateLimitStmt3.addListener(updateListener3);
-    	
-    	// send event 1
-    	sendEvent("s1");
-
-    	assertTrue(updateListener1.getAndClearIsInvoked());
-    	assertEquals(1,updateListener1.getLastNewData().length);
-    	assertNull(updateListener1.getLastOldData());
-    	
-    	assertFalse(updateListener2.getAndClearIsInvoked());
-    	assertNull(updateListener2.getLastNewData());
-    	assertNull(updateListener2.getLastOldData());
-    	
-    	assertFalse(updateListener3.getAndClearIsInvoked());
-    	assertNull(updateListener3.getLastNewData());
-    	assertNull(updateListener3.getLastOldData());
-    	
-    	// send event 2
-    	sendEvent("s2");
-
-    	assertTrue(updateListener1.getAndClearIsInvoked());
-    	assertEquals(1,updateListener1.getLastNewData().length);
-    	assertNull(updateListener1.getLastOldData());
-    	
-    	assertTrue(updateListener2.getAndClearIsInvoked());
-    	assertEquals(2,updateListener2.getLastNewData().length);
-    	assertNull(updateListener2.getLastOldData());
-    	
-    	assertFalse(updateListener3.getAndClearIsInvoked());
-    	
-    	// send event 3
-    	sendEvent("s3");
-    	
-    	assertTrue(updateListener1.getAndClearIsInvoked());   	
-    	assertEquals(1,updateListener1.getLastNewData().length);
-    	assertNull(updateListener1.getLastOldData());
-
-    	assertFalse(updateListener2.getAndClearIsInvoked());
-
-    	assertTrue(updateListener3.getAndClearIsInvoked());
-    	assertEquals(3,updateListener3.getLastNewData().length);
-    	assertNull(updateListener3.getLastOldData());
-    }
-    
-
     private void sendEvent(String s)
 	{
 	    SupportBean bean = new SupportBean();
@@ -276,61 +329,7 @@ public class TestOutputLimit extends TestCase
 	    epService.getEPRuntime().sendEvent(event2);
 	}
 
-    public void testLimitEventJoin()
-    {
-    	String eventName1 = SupportBean.class.getName();
-    	String eventName2 = SupportBean_A.class.getName();
-    	String joinStatement = 
-    		"select * from " +
-    			eventName1 + ".win:length(5) as event1," + 
-    			eventName2 + ".win:length(5) as event2" +
-    		" where event1.string = event2.id";
-    	String outputStmt1 = joinStatement + " output every 1 events";
-       	String outputStmt3 = joinStatement + " output every 3 events";
-    	
-       	EPStatement fireEvery1 = epService.getEPAdministrator().createEQL(outputStmt1);
-    	EPStatement fireEvery3 = epService.getEPAdministrator().createEQL(outputStmt3);
-    	
-       	SupportUpdateListener updateListener1 = new SupportUpdateListener();
-    	fireEvery1.addListener(updateListener1);
-    	SupportUpdateListener updateListener3 = new SupportUpdateListener();
-    	fireEvery3.addListener(updateListener3);
-    	
-    	// send event 1
-    	sendJoinEvents("s1");
-    	
-    	assertTrue(updateListener1.getAndClearIsInvoked());
-    	assertEquals(1, updateListener1.getLastNewData().length);
-    	assertNull(updateListener1.getLastOldData());
-    	
-    	assertFalse(updateListener3.getAndClearIsInvoked());
-    	assertNull(updateListener3.getLastNewData());
-    	assertNull(updateListener3.getLastOldData());
-    	
-    	// send event 2
-    	sendJoinEvents("s2");
-    	
-    	assertTrue(updateListener1.getAndClearIsInvoked());
-    	assertEquals(1, updateListener1.getLastNewData().length);
-    	assertNull(updateListener1.getLastOldData());
-    	
-       	assertFalse(updateListener3.getAndClearIsInvoked());
-    	assertNull(updateListener3.getLastNewData());
-    	assertNull(updateListener3.getLastOldData());
-       	
-    	// send event 3
-    	sendJoinEvents("s3");
-    	
-    	assertTrue(updateListener1.getAndClearIsInvoked());
-    	assertEquals(1, updateListener1.getLastNewData().length);
-    	assertNull(updateListener1.getLastOldData());
-    	
-    	assertTrue(updateListener3.getAndClearIsInvoked());
-    	assertEquals(3, updateListener3.getLastNewData().length);
-    	assertNull(updateListener3.getLastOldData());
-    }
-
-	private void sendMarketEvent(String symbol, double price)
+    private void sendMarketEvent(String symbol, double price)
 	{
 	    SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, null);
 	    epService.getEPRuntime().sendEvent(bean);
