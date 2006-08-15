@@ -19,7 +19,7 @@ public class TestOutputConditionTime extends TestCase
     public void setUp()
     {
     	callback = new OutputCallback() {
-    		public void continueOutputProcessing(boolean forceUpdate)
+    		public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
     		{
     		}
     	};
