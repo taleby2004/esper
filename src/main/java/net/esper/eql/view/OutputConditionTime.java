@@ -13,6 +13,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class OutputConditionTime implements OutputCondition
 {
+	public static final boolean DO_OUTPUT = true;
+	public static final boolean FORCE_UPDATE = true;
+	
     private final long msecIntervalSize;
     private final OutputCallback outputCallback;
     private final ScheduleSlot scheduleSlot;
@@ -33,6 +36,10 @@ public final class OutputConditionTime implements OutputCondition
     						   ViewServiceContext context, 
     						   OutputCallback outputCallback)
     {
+		if(outputCallback ==  null)
+		{
+			throw new NullPointerException("Output condition by count requires a non-null callback");
+		}
         if (secIntervalSize < 0.1)
         {
             throw new IllegalArgumentException("Output condition by time requires a millisecond interval size of at least 100 msec");
@@ -41,10 +48,6 @@ public final class OutputConditionTime implements OutputCondition
         {
             String message = "OutputConditionTime requires a non-null view context";
             throw new NullPointerException(message);
-        }
-        if(outputCallback == null)
-        {
-        	throw new NullPointerException("Output condition by time requires a non-null callback");
         }
         
         this.msecIntervalSize = Math.round(1000 * secIntervalSize);
@@ -108,7 +111,7 @@ public final class OutputConditionTime implements OutputCondition
             public void scheduledTrigger()
             {
                 OutputConditionTime.this.isCallbackScheduled = false;
-                OutputConditionTime.this.outputCallback.continueOutputProcessing(true);
+                OutputConditionTime.this.outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);
                 scheduleCallback();
             }
         };
