@@ -26,27 +26,27 @@ public class TestCSVTimer extends TestCase
 		CSVTimer timer = new CSVTimer();
 		
 		timer.schedule(new TestTimerTask(0), 0);
-		timer.schedule(new TestTimerTask(1), 80);
-		timer.schedule(new TestTimerTask(2), 120);
+		timer.schedule(new TestTimerTask(1), 400);
+		timer.schedule(new TestTimerTask(2), 600);
 		
 		timer.start();
 		
-		Thread.sleep(60);
+		Thread.sleep(300);
 		assertCallbackAndReset(0);
 		
-		Thread.sleep(40);
+		Thread.sleep(200);
 		assertCallbackAndReset(1);
 		
 
-		Thread.sleep(40);
+		Thread.sleep(200);
 		assertCallbackAndReset(2);
 		
-		timer.schedule(new TestTimerTask(3), 160);
+		timer.schedule(new TestTimerTask(3), 800);
 		
-		Thread.sleep(20);
+		Thread.sleep(100);
 		assertCallbackAndReset(3);
 		
-		Thread.sleep(40);
+		Thread.sleep(200);
 		assertNull(currentCallback);
 	}
 	
