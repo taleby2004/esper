@@ -586,18 +586,28 @@ having stddev(price) &gt; 0.8</programlisting>
 				<title>Output Clause Options</title>
 			
 				<para>
-				The <literal>output</literal> clause is optional in Esper and is used to stabilize the rate at which events are output. For example, the following statement batches old and new events and outputs them at the end of every 90 second interval.				
+				The <literal>output</literal> clause is optional in Esper and is used to control or stabilize the rate at which events are output. For example, the following statement batches old and new events and outputs them at the end of every 90 second interval.				
 				</para>
 			    <programlisting>select * from StockTickEvent.win:length(5) output every 90 seconds</programlisting>
 
 				<para>
 					Here is the syntax for output rate limiting: 
 				</para>
-				<synopsis>output [all | last] every <emphasis>number</emphasis> [minutes | seconds | events]</synopsis>
+				<synopsis>output [all | first | last] every <emphasis>number</emphasis> [minutes | seconds | events]</synopsis>
 
 				<para>
-					The optional <literal>last</literal> keyword specifies to only output the very last event, while the <literal>all</literal> keyword is the default and specifies to output all events
-					in a batch. The batch size can be specified in terms of time or number of events.
+					The <literal>all</literal> keyword is the default and specifies that all events in a batch should be output. The batch size can be specified in terms of time or number of events.
+				</para>
+
+				<para>
+					The <literal>first</literal> keyword specifies that only the first event in an output batch is to be output.
+					Using the <literal>first</literal> keyword instructs the engine to output the first matching event as soon as it arrives, and then ignore matching events for the time interval or number of events specified. 
+					After the time interval elapsed, or the number of matching events has been reached, the next first matching event is output again and the following interval the engine again ignores matching events.
+				</para>
+
+				<para>
+					The <literal>last</literal> keyword specifies to only output the last event at the end of the given time interval or after the given number of matching events
+					have been accumulated.
 				</para>
 
 				<para>
@@ -611,9 +621,15 @@ having stddev(price) &gt; 0.8</programlisting>
 			    <programlisting>select * from StockTickEvent.win:time(30) output every 5 events</programlisting>
 			    
 				<para>
-					Additionally, event output can be further modified by the optional last keyword, which causes output of only the last event to arrive into an output batch.
+					Additionally, event output can be further modified by the optional <literal>last</literal> keyword, which causes output of only the last event to arrive into an output batch.
 				</para>
 			    <programlisting>select * from StockTickEvent.win:time(30) output last every 5 events</programlisting>
+
+				<para>
+					Using the <literal>first</literal> keyword you can be notified at the start of the interval. The allows to watch for situations such as a rate falling below a threshold
+					and only be informed every now and again after the specified output interval, but be informed the moment it first happens. 
+				</para>
+			    <programlisting>select * from TickRate.win:time(30) output first every 60 seconds where rate&lt;100</programlisting>
 
 		</sect2>
 
