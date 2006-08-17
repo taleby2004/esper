@@ -1,6 +1,15 @@
 Esper Changelog
 ===================
 
+Changes in version 1.0.5
+------------------------------------
+
+* (EQL) Added support for "first" keyword in output rate syntax for outputting the first matching event for an interval
+* (EQL and Pattern) Added support for XML events represented by a document object model (DOM) instances of org.w3c.dom.Node
+* (EQL and Pattern) Added support for Map events represented by a java.util.Map instances
+* (Docs and Examples) New AutoId RFID example for XML event processing, includes simulator for running from the command line 
+* (Docs and Examples) New chapter on Event Representation
+
 Changes in version 1.0.0
 ------------------------------------
 

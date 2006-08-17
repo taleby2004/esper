@@ -18,7 +18,7 @@ public class TestOutputLimitFirst extends TestCase
 	
 	protected void setUp()
 	{
-		epService = EPServiceProviderManager.getDefaultProvider();
+		epService = EPServiceProviderManager.getProvider("TestOutputLimitFirst");
 	}
 	
 	public void testTime()
