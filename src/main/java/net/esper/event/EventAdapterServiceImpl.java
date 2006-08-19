@@ -88,7 +88,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException
     {
-        MapEventType newEventType = new MapEventType(propertyTypes);
+        MapEventType newEventType = new MapEventType(propertyTypes, this);
 
         EventType existingType = eventTypes.get(eventTypeAlias);
         if (existingType != null)
@@ -111,7 +111,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public EventType createAnonymousMapType(Map<String, Class> propertyTypes) throws EventAdapterException
     {
-        return new MapEventType(propertyTypes);
+        return new MapEventType(propertyTypes, this);
     }
 
     public EventBean adapterForBean(Object event)

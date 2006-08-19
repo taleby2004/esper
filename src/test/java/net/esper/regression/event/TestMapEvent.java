@@ -8,10 +8,11 @@ import net.esper.client.*;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.bean.SupportBeanComplexProps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class TestMapEvents extends TestCase
+public class TestMapEvent extends TestCase
 {
     Map<String, String> properties;
     Map<String, Object> map;
@@ -22,12 +23,12 @@ public class TestMapEvents extends TestCase
         properties = new HashMap<String, String>();
         properties.put("myInt", "int");
         properties.put("myString", "string");
-        properties.put("beanA", SupportMarketDataBean.class.getName());
-        properties.put("beanB", SupportBean.class.getName());
+        properties.put("beanA", SupportBeanComplexProps.class.getName());
 
         map = new HashMap<String, Object>();
         map.put("myInt", 3);
         map.put("myString", "some string");
+        map.put("beanA", SupportBeanComplexProps.makeDefaultBean());
 
         Configuration configuration = new Configuration();
         configuration.addEventTypeAlias("myMapEvent", properties);
@@ -37,28 +38,20 @@ public class TestMapEvents extends TestCase
 
     public void testNestedObjects()
     {
-        String statementText = "select beanA.price as price, beanB.intPrimitive as intPrim from myMapEvent.win:length(5)";
+        String statementText = "select beanA.simpleProperty as simple," +
+                    "beanA.nested.nestedValue as nested," +
+                    "beanA.indexed[1] as indexed," +
+                    "beanA.nested.nestedNested.nestedNestedValue as nestednested " +
+                    "from myMapEvent.win:length(5)";
         EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeMapEvent(20, 30));
-        assertEquals(20, listener.getLastNewData()[0].get("price"));
-        assertEquals(30, listener.getLastNewData()[0].get("intPrim"));
-
+        epService.getEPRuntime().sendEvent(map, "myMapEvent");
+        assertEquals("nestedValue", listener.getLastNewData()[0].get("nested"));
+        assertEquals(2, listener.getLastNewData()[0].get("indexed"));
+        assertEquals("nestedNestedValue", listener.getLastNewData()[0].get("nestednested"));
         statement.stop();
-    }
-
-    private Map makeMapEvent(double price, int intPrimitive)
-    {
-        SupportBean beanB = new SupportBean();
-        beanB.setIntPrimitive(intPrimitive);
-
-        Map map = new HashMap();
-        map.put("beanA", new SupportMarketDataBean("", price, 0l, null));
-        map.put("beanB", beanB);
-
-        return map;
     }
 
     public void testQueryFields()
@@ -180,5 +173,5 @@ public class TestMapEvents extends TestCase
         }
     }
 
-    private static Log log = LogFactory.getLog(TestMapEvents.class);
+    private static Log log = LogFactory.getLog(TestMapEvent.class);
 }

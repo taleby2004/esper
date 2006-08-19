@@ -2,6 +2,7 @@ package net.esper.event;
 
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
+import net.esper.support.bean.SupportBeanComplexProps;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.event.SupportEventAdapterService;
 import junit.framework.TestCase;
@@ -19,17 +20,21 @@ public class TestMapEventBean extends TestCase
     private EventType eventType;
     private MapEventBean eventBean;
 
+    private SupportBeanComplexProps supportBean = SupportBeanComplexProps.makeDefaultBean();
+
     public void setUp()
     {
         testTypesMap = new HashMap<String, Class>();
         testTypesMap.put("aString", String.class);
         testTypesMap.put("anInt", Integer.class);
+        testTypesMap.put("myComplexBean", SupportBeanComplexProps.class);
 
         testValuesMap = new HashMap<String, Object>();
         testValuesMap.put("aString", "test");
         testValuesMap.put("anInt", 10);
+        testValuesMap.put("myComplexBean", supportBean);
 
-        eventType = new MapEventType(testTypesMap);
+        eventType = new MapEventType(testTypesMap, SupportEventAdapterService.getService());
         eventBean = new MapEventBean(testValuesMap, eventType);
     }
 
@@ -40,6 +45,8 @@ public class TestMapEventBean extends TestCase
 
         assertEquals("test", eventBean.get("aString"));
         assertEquals(10, eventBean.get("anInt"));
+
+        assertEquals("nestedValue", eventBean.get("myComplexBean.nested.nestedValue"));
 
         // test wrong property name
         try
@@ -114,18 +121,14 @@ public class TestMapEventBean extends TestCase
 
     public void testHash()
     {
-        // Check the normal non-null values
-        assertEquals("test".hashCode() ^
-                    (new Integer(10)).hashCode() ^
-                    "aString".hashCode() ^
-                    "anInt".hashCode(), eventBean.hashCode());
-
         // try out with a null value
         testValuesMap.put("aString", null);
+        testValuesMap.put("myComplexBean", null);
         eventBean = new MapEventBean(testValuesMap, eventType);
 
         assertEquals((new Integer(10)).hashCode() ^
-                    "anInt".hashCode(), eventBean.hashCode());    }
+                    "anInt".hashCode(), eventBean.hashCode());
+    }
 
     private static final Log log = LogFactory.getLog(TestMapEventBean.class);
 }

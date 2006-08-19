@@ -292,4 +292,32 @@ public class JavaClassHelper
         }
         return className;
     }
+
+    /**
+     * Returns true if the class passed in is a Java built-in data type (primitive or wrapper) including String.
+     * @param clazz to check
+     * @return true if built-in data type, or false if not
+     */
+    public static boolean isJavaBuiltinDataType(Class clazz)
+    {
+        Class clazzBoxed = getBoxedType(clazz);
+        if (isNumeric(clazzBoxed))
+        {
+            return true;
+        }
+        if (isBoolean(clazzBoxed))
+        {
+            return true;
+        }
+        if (clazzBoxed.equals(String.class))
+        {
+            return true;
+        }
+        if ((clazzBoxed.equals(char.class)) ||
+            (clazzBoxed.equals(Character.class)))
+        {
+            return true;
+        }
+        return false;
+    }
 }

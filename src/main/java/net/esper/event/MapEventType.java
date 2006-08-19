@@ -14,13 +14,16 @@ class MapEventType implements EventType
     private final Map<String, Class> types;     // Mapping of property name and type
     private Map<String, EventPropertyGetter> propertyGetters;   // Mapping of property name and getters
     private int hashCode;
+    private EventAdapterService eventAdapterService;
 
     /**
      * Constructor takes a map of property names and types.
      * @param propertyTypes is pairs of property name and type
      */
-    public MapEventType(Map<String, Class> propertyTypes)
+    public MapEventType(Map<String, Class> propertyTypes,
+                        EventAdapterService eventAdapterService)
     {
+        this.eventAdapterService = eventAdapterService;
         // copy the property names and types
         this.types = new HashMap<String, Class>();
         this.types.putAll(propertyTypes);
@@ -63,7 +66,31 @@ class MapEventType implements EventType
 
     public final Class getPropertyType(String propertyName)
     {
-        return types.get(propertyName);
+        Class result = types.get(propertyName);
+        if (result != null)
+        {
+            return result;
+        }
+
+        // see if this is a nested property
+        int index = propertyName.indexOf('.');
+        if (index == -1)
+        {
+            return null;
+        }
+
+        // Take apart the nested property into a map key and a nested value class property name
+        String propertyMap = propertyName.substring(0, index);
+        String propertyNested = propertyName.substring(index + 1, propertyName.length());
+        result = types.get(propertyMap);
+        if (result == null)
+        {
+            return null;
+        }
+
+        // ask the nested class to resolve the property
+        EventType nestedType = eventAdapterService.addBeanType(result.getName(), result);
+        return nestedType.getPropertyType(propertyNested);
     }
 
     public final Class getUnderlyingType()
@@ -73,7 +100,61 @@ class MapEventType implements EventType
 
     public EventPropertyGetter getGetter(final String propertyName)
     {
-        return propertyGetters.get(propertyName);
+        EventPropertyGetter getter = propertyGetters.get(propertyName);
+        if (getter != null)
+        {
+            return getter;
+        }
+
+        // see if this is a nested property
+        int index = propertyName.indexOf('.');
+        if (index == -1)
+        {
+            return null;
+        }
+
+        // Take apart the nested property into a map key and a nested value class property name
+        final String propertyMap = propertyName.substring(0, index);
+        String propertyNested = propertyName.substring(index + 1, propertyName.length());
+
+        Class result = types.get(propertyMap);
+        if (result == null)
+        {
+            return null;
+        }
+
+        // ask the nested class to resolve the property
+        EventType nestedType = eventAdapterService.addBeanType(result.getName(), result);
+        final EventPropertyGetter nestedGetter = nestedType.getGetter(propertyNested);
+        if (nestedGetter == null)
+        {
+            return null;
+        }
+
+        // construct getter for nested property
+        getter = new EventPropertyGetter()
+        {
+            public Object get(EventBean obj)
+            {
+                // The underlying is expected to be a map
+                if (!(obj.getUnderlying() instanceof Map))
+                {
+                    throw new PropertyAccessException("Mismatched property getter to event bean type, " +
+                            "the underlying data object is not of type java.lang.Map");
+                }
+
+                Map map = (Map) obj.getUnderlying();
+
+                // If the map does not contain the key, this is allowed and represented as null
+                Object value = map.get(propertyMap);
+
+                // Wrap object
+                EventBean event = MapEventType.this.eventAdapterService.adapterForBean(value);
+                return nestedGetter.get(event);
+            }
+        };
+
+        return getter;
     }
 
     public String[] getPropertyNames()
@@ -83,7 +164,8 @@ class MapEventType implements EventType
 
     public boolean isProperty(String propertyName)
     {
-        return types.containsKey(propertyName);
+        Class propertyType = getPropertyType(propertyName);
+        return propertyType != null;
     }
 
     public EventType[] getSuperTypes()

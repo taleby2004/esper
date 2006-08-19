@@ -1,6 +1,7 @@
 package net.esper.util;
 
 import junit.framework.TestCase;
+import net.esper.support.bean.SupportBean;
 
 public class TestJavaClassHelper extends TestCase
 {
@@ -185,6 +186,22 @@ public class TestJavaClassHelper extends TestCase
         for (int i = 0; i < tests.length; i++)
         {
             assertEquals(tests[i][0], JavaClassHelper.getBoxedClassName(tests[i][1]));
+        }
+    }
+
+    public void testIsJavaBuiltinDataType()
+    {
+        Class[] classesDataType = new Class[] {int.class, Long.class, double.class, boolean.class, Boolean.class,
+                char.class, Character.class, String.class};
+        Class[] classesNotDataType = new Class[] {SupportBean.class, Math.class, Class.class};
+
+        for (int i = 0; i < classesDataType.length; i++)
+        {
+            assertTrue(JavaClassHelper.isJavaBuiltinDataType(classesDataType[i]));
+        }
+        for (int i = 0; i < classesNotDataType.length; i++)
+        {
+            assertFalse(JavaClassHelper.isJavaBuiltinDataType(classesNotDataType[i]));
         }
     }
 
