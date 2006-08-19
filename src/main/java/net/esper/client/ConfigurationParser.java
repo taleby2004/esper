@@ -101,7 +101,7 @@ class ConfigurationParser {
             {
                 handleXMLDOM(aliasName, configuration, eventTypeElement);
             }
-            else if(eventTypeElement.getNodeName().equals("map")) 
+            else if(eventTypeElement.getNodeName().equals("java-util-map"))
             {
             	handleMap(aliasName, configuration, eventTypeElement);
             }
@@ -111,7 +111,7 @@ class ConfigurationParser {
     private static void handleMap(String aliasName, Configuration configuration, Element eventTypeElement)
     {
 		Map<String, String> propertyTypeNames = new LinkedHashMap<String, String>();
-		NodeList propertyList = eventTypeElement.getElementsByTagName("property");
+		NodeList propertyList = eventTypeElement.getElementsByTagName("map-property");
 		for (int i = 0; i < propertyList.getLength(); i++)
 	    {
 	        String name = propertyList.item(i).getAttributes().getNamedItem("name").getTextContent();
@@ -208,79 +208,6 @@ class ConfigurationParser {
             throw new EPException( resource + " not found" );
         }
         return stream;
-    }
-
-    private static String getChildTextByName(Element node, String elementName) {
-        Element child = ConfigurationParser.getChildElementByName(node, elementName);
-        return ConfigurationParser.getSimpleElementText(child);
-    }
-
-    private static String getSimpleElementText(Element node) {
-        StringBuffer sb = new StringBuffer();
-        NodeList children = node.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-            Node child = children.item(i);
-            if (child instanceof Text)
-                sb.append(child.getNodeValue());
-        }
-        return sb.toString();
-    }
-
-    private static Element getChildElementByName(Element element, String name) {
-
-        ConfigurationParser.ElementIterator iterator = new ConfigurationParser.ElementIterator(element.getChildNodes());
-        for (;iterator.hasNext();)
-        {
-            Element childElement = (Element) iterator.next();
-            if (childElement.getNodeName().equals(name))
-            {
-                return childElement;
-            }
-        }
-
-        String childElementNodes = ConfigurationParser.getChildElementNodeNames(element);
-        String childAllNodes = ConfigurationParser.getChildNodesToString(element);
-        throw new IllegalStateException("Error finding DOM element, element " + element + " does not contain element named '" + name +
-                "', child element nodes are: " + childElementNodes +
-                "', all child nodes are: " + childAllNodes
-                );
-    }
-
-    private static String getChildElementNodeNames(Element parentElement)
-    {
-        StringBuffer qnames = new StringBuffer();
-        String delimiter = "";
-
-        ConfigurationParser.ElementIterator iterator = new ConfigurationParser.ElementIterator(parentElement.getChildNodes());
-        for (;iterator.hasNext();)
-        {
-            Element childElement = (Element) iterator.next();
-            qnames.append(delimiter);
-            qnames.append(childElement.getNodeName());
-            delimiter = ",";
-        }
-
-        return qnames.toString();
-    }
-
-    private static String getChildNodesToString(Element parentElement)
-    {
-        StringBuffer qnames = new StringBuffer();
-        String delimiter = "";
-
-        NodeList nodes = parentElement.getChildNodes();
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            Node node = nodes.item(i);
-            qnames.append(delimiter);
-            qnames.append("node (");
-            qnames.append(i);
-            qnames.append(") : \n");
-            qnames.append(node.toString());
-            delimiter = ",";
-        }
-
-        return qnames.toString();
     }
 
     private static String getOptionalAttribute(Node node, String key)

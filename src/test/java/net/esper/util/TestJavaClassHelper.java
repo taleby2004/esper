@@ -169,6 +169,25 @@ public class TestJavaClassHelper extends TestCase
         tryInvalidGetRelational(boolean.class, int.class);
     }
 
+    public void testGetBoxedClassName() throws Exception
+    {
+        String[][] tests = new String[][] {
+                {Integer.class.getName(), int.class.getName()},
+                {Long.class.getName(), long.class.getName()},
+                {Short.class.getName(), short.class.getName()},
+                {Double.class.getName(), double.class.getName()},
+                {Float.class.getName(), float.class.getName()},
+                {Boolean.class.getName(), boolean.class.getName()},
+                {Byte.class.getName(), byte.class.getName()},
+                {Character.class.getName(), char.class.getName()}
+        };
+
+        for (int i = 0; i < tests.length; i++)
+        {
+            assertEquals(tests[i][0], JavaClassHelper.getBoxedClassName(tests[i][1]));
+        }
+    }
+
     private void tryInvalidGetRelational(Class classOne, Class classTwo)
     {
         try

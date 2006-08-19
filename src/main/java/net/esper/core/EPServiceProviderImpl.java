@@ -5,6 +5,7 @@ import net.esper.eql.expression.AutoImportService;
 import net.esper.eql.expression.AutoImportServiceImpl;
 import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterServiceImpl;
+import net.esper.util.JavaClassHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
             }
             catch (EventAdapterException ex)
             {
-                throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
             }
         }
         
@@ -56,7 +57,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
             }
             catch (EventAdapterException ex)
             {
-                throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
             }
         }
 
@@ -67,10 +68,11 @@ public class EPServiceProviderImpl implements EPServiceProvider
         }
         catch (IllegalArgumentException ex)
         {
-        	throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+        	throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
         }
-        
-        Map<String, Map<String, String>> mapAliases = configuration.getMapAliases();
+
+        // Add map event types
+        Map<String, Map<String, String>> mapAliases = configuration.getEventTypesMapEvents();
         for(Map.Entry<String, Map<String, String>> entry : mapAliases.entrySet())
         {
         	try
@@ -80,12 +82,8 @@ public class EPServiceProviderImpl implements EPServiceProvider
         	}
         	catch (EventAdapterException ex)
         	{
-        		throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
+        		throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
         	} 
-        	catch (ClassNotFoundException ex)
-			{
-        		throw new ConfigurationException("Error configuring engine:" + ex.getMessage(), ex);
-			}
         }
         
         initialize();
@@ -134,12 +132,32 @@ public class EPServiceProviderImpl implements EPServiceProvider
         services.getTimerService().startInternalClock();
     }
     
-    private Map<String, Class> createPropertyTypes(Map<String, String> propertyNames) throws ClassNotFoundException
+    private Map<String, Class> createPropertyTypes(Map<String, String> propertyNames)
     {
     	Map<String, Class> propertyTypes = new HashMap<String, Class>();
     	for(String property : propertyNames.keySet())
     	{
-    		propertyTypes.put(property, Class.forName(propertyNames.get(property)));
+            String className = propertyNames.get(property);
+
+            if ("string".equals(className))
+            {
+                className = String.class.getName();
+            }
+
+            // use the boxed type for primitives
+            String boxedClassName = JavaClassHelper.getBoxedClassName(className);
+
+            Class clazz = null;
+            try
+            {
+                clazz = Class.forName(boxedClassName);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                throw new EventAdapterException("Unable to load class '" + boxedClassName + "', class not found", ex);
+            }
+
+            propertyTypes.put(property, clazz);
     	}
     	return propertyTypes;
     }

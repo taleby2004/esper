@@ -1,7 +1,5 @@
 package net.esper.event;
 
-import net.esper.collection.InterchangeablePair;
-
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;

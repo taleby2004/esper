@@ -73,7 +73,7 @@ public class Configuration {
     }
 
     /**
-     * Add an alias for an event type.
+     * Add an alias for an event type represented by Java-bean plain-old Java object events.
      * @param eventTypeAlias is the alias for the event type
      * @param javaEventClass fully-qualified class name of the event type
      */
@@ -83,8 +83,7 @@ public class Configuration {
     }
 
     /**
-<<<<<<< .working
-     * Add an alias for an event.
+     * Add an alias for an event type that represents java.util.Map events.
      * @param eventTypeAlias is the alias for the event type
      * @param typeMap maps the name of each property in the Map event to the type (as a string) of its value in the Map object
      */
@@ -94,8 +93,7 @@ public class Configuration {
     }
     
     /**
-=======
-     * Add an alias for an event type.
+     * Add an alias for an event type that represents org.w3c.dom.Node events.
      * @param eventTypeAlias is the alias for the event type
      * @param xmlDOMEventTypeDesc descriptor containing property and mapping information for XML-DOM events
      */
@@ -105,7 +103,6 @@ public class Configuration {
     }
 
     /**
->>>>>>> .merge-right.r206
      * Add an import (a class or package). Adding will suppress the use of the default imports.
      * @param autoImport - the import to add
      */
@@ -129,17 +126,16 @@ public class Configuration {
     }
 
     /**
-<<<<<<< .working
-     * Returns the mapping of event type aliases to map objects.
-     * @return map type aliases
+     * Returns a map keyed by event type alias name, and values being the definition for the
+     * event type of the property names and types that make up the event.
+     * @return map of event type alias name and definition of event properties
      */
-    public Map<String, Map<String, String>> getMapAliases()
+    public Map<String, Map<String, String>> getEventTypesMapEvents()
     {
     	return mapAliases;
     }
     
     /**
-=======
      * Returns the mapping of event type alias to XML DOM event type information.
      * @return event type aliases mapping to XML DOM configs
      */
@@ -149,7 +145,6 @@ public class Configuration {
     }
 
     /**
->>>>>>> .merge-right.r206
      * Returns the class and package imports.
      * @return imported names
      */
@@ -268,8 +263,6 @@ public class Configuration {
     }
 
     /**
-=======
->>>>>>> .merge-right.r206
      * Returns an input stream from an application resource in the classpath.
      * <p>
      * The method first removes the '/' character from the resource name if

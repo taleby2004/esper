@@ -79,7 +79,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         postProcessEvent();
     }
     
-    public void sendEvent(Map<String, Object> map, String eventTypeAlias) throws EPException
+    public void sendEvent(Map map, String eventTypeAlias) throws EPException
     {
         if (map == null)
         {

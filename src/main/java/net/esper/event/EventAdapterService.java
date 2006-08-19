@@ -107,7 +107,7 @@ public interface EventAdapterService
      * @throws EventAdapterException if the alias has not been declared, or the event cannot be wrapped using that
      * alias's event type
      */
-    public EventBean adapterForMap(Map<String,Object> event, String eventTypeAlias) throws EventAdapterException;
+    public EventBean adapterForMap(Map event, String eventTypeAlias) throws EventAdapterException;
 
     /**
      * Create an event type based on the original type passed in adding one or more properties.

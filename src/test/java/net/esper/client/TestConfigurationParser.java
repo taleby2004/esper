@@ -50,11 +50,11 @@ public class TestConfigurationParser extends TestCase
         assertEquals(1, schemaDesc.getNamespacePrefixes().size());
         assertEquals("samples:schemas:simpleSchema", schemaDesc.getNamespacePrefixes().get("ss"));
     
-        assertEquals(1, config.getMapAliases().size());        
-        assertTrue(config.getMapAliases().keySet().contains("myMapEvent"));
+        assertEquals(1, config.getEventTypesMapEvents().size());
+        assertTrue(config.getEventTypesMapEvents().keySet().contains("MyMapEvent"));
         Map<String, String> expectedProps = new HashMap<String, String>();
-        expectedProps.put("myInt", "java.lang.Integer");
-        expectedProps.put("myString", "java.lang.String");
-        assertEquals(expectedProps, config.getMapAliases().get("myMapEvent"));
+        expectedProps.put("myInt", "int");
+        expectedProps.put("myString", "string");
+        assertEquals(expectedProps, config.getEventTypesMapEvents().get("MyMapEvent"));
     }
 }

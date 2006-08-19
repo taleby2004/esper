@@ -249,4 +249,47 @@ public class JavaClassHelper
         }
         return Long.class;
     }
+
+    /**
+     * Returns for the class name given the class name of the boxed (wrapped) type if
+     * the class name is one of the Java primitive types.
+     * @param className is a class name, a Java primitive type or other class
+     * @return boxed class name if Java primitive type, or just same class name passed in if not a primitive type
+     */
+    public static String getBoxedClassName(String className)
+    {
+        if (className.equals(char.class.getName()))
+        {
+            return Character.class.getName();
+        }
+        if (className.equals(byte.class.getName()))
+        {
+            return Byte.class.getName();
+        }
+        if (className.equals(short.class.getName()))
+        {
+            return Short.class.getName();
+        }
+        if (className.equals(int.class.getName()))
+        {
+            return Integer.class.getName();
+        }
+        if (className.equals(long.class.getName()))
+        {
+            return Long.class.getName();
+        }
+        if (className.equals(float.class.getName()))
+        {
+            return Float.class.getName();
+        }
+        if (className.equals(double.class.getName()))
+        {
+            return Double.class.getName();
+        }
+        if (className.equals(boolean.class.getName()))
+        {
+            return Boolean.class.getName();
+        }
+        return className;
+    }
 }

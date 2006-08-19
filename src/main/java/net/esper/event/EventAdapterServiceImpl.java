@@ -119,7 +119,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return beanEventAdapter.adapterForBean(event);
     }
 
-    public EventBean adapterForMap(Map<String,Object> event, String eventTypeAlias) throws EventAdapterException
+    public EventBean adapterForMap(Map event, String eventTypeAlias) throws EventAdapterException
     {
         EventType existingType = eventTypes.get(eventTypeAlias);
         if (existingType == null)
@@ -127,7 +127,9 @@ public class EventAdapterServiceImpl implements EventAdapterService
             throw new EventAdapterException("Event type alias '" + eventTypeAlias + "' has not been defined");
         }
 
-        return createMapFromValues(event, existingType);
+        Map<String, Object> eventMap = (Map<String, Object>) event;
+
+        return createMapFromValues(eventMap, existingType);
     }
 
     public EventBean createMapFromValues(Map<String, Object> properties, EventType eventType)
