@@ -49,7 +49,7 @@ public class Configuration {
 	 * The type aliases for events that result when maps are sent
 	 * into the engine.
 	 */
-	protected Map<String, Map<String, String>> mapAliases;
+	protected Map<String, Properties> mapAliases;
 	
 	/**
 	 * The java-style class and package name imports that
@@ -87,7 +87,7 @@ public class Configuration {
      * @param eventTypeAlias is the alias for the event type
      * @param typeMap maps the name of each property in the Map event to the type (as a string) of its value in the Map object
      */
-    public void addEventTypeAlias(String eventTypeAlias, Map<String, String> typeMap)
+    public void addEventTypeAlias(String eventTypeAlias, Properties typeMap)
     {
     	mapAliases.put(eventTypeAlias, typeMap);
     }
@@ -130,7 +130,7 @@ public class Configuration {
      * event type of the property names and types that make up the event.
      * @return map of event type alias name and definition of event properties
      */
-    public Map<String, Map<String, String>> getEventTypesMapEvents()
+    public Map<String, Properties> getEventTypesMapEvents()
     {
     	return mapAliases;
     }
@@ -312,7 +312,7 @@ public class Configuration {
     protected void reset()
     {
         eventClasses = new HashMap<String, String>();
-        mapAliases = new HashMap<String, Map<String, String>>();
+        mapAliases = new HashMap<String, Properties>();
         eventTypesXMLDOM = new HashMap<String, ConfigurationEventTypeXMLDOM>();
         imports = new ArrayList<String>();
         addDefaultImports();

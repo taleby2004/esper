@@ -129,8 +129,111 @@ select java.lang.Math.max(priceOne, priceTwo)</programlisting>
 
 		</sect2>
 
+		<sect2 id="config-java-util-map" revision="1">
+			<title>Events represented by <literal>java.util.Map</literal></title>
+			
+			<para>
+				The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names in pattern or EQL statements. Values can be of any type. JavaBean-style objects as values in a <literal>Map</literal> can also be processed by the engine. Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.
+			</para>
+			
+			<para>
+				Via configuration we provide an event type alias name for <literal>Map</literal> events for use in statements, and the event property names and types enabling the engine to validate properties in statements.
+			</para>
+			
+			<para>
+				The below snippet of XML configuration configures an event named <literal>MyMapEvent</literal>.
+			</para>
+
+			<programlisting><![CDATA[<event-type alias="MyMapEvent">
+  <java-util-map>
+    <map-property name="carId" class="int"/>
+    <map-property name="carType" class="string"/>
+    <map-property name="assembly" class="com.mycompany.Assembly"/>    
+  </java-util-map>
+</event-type>]]></programlisting>
+
+			<para>
+				This configuration defines the <literal>carId</literal> property of <literal>MyMapEvent</literal> events to be of type <literal>int</literal>, and the <literal>carType</literal> property to be of type <literal>java.util.String</literal>. The <literal>assembly</literal> property of the Map event will contain instances of <literal>com.mycompany.Assembly</literal> for the engine to query.
+			</para>
+
+			<para>
+				The valid list of values for the type definition via the <literal>class</literal> attribute is:
+			</para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						<literal>string</literal> or <literal>java.lang.String</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>char</literal> or <literal>java.lang.Character</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>byte</literal> or <literal>java.lang.Byte</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>short</literal> or <literal>java.lang.Short</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>int</literal> or <literal>java.lang.Integer</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>long</literal> or <literal>java.lang.Long</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>float</literal> or <literal>java.lang.Float</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>double</literal> or <literal>java.lang.Double</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>boolean</literal> or <literal>java.lang.Boolean</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Any fully-qualified Java class name that can be resolved by the engine via <literal>Class.forName</literal>
+					</para>
+				</listitem>
+			</itemizedlist>
+
+			<para>
+				 You can also use the configuration API to configure <literal>Map</literal> event types, as the short code snippet below demonstrates. 
+			</para>
+
+			<programlisting><![CDATA[Properties properties = new Properties();
+properties.put("carId", "int");
+properties.put("carType", "string");
+properties.put("assembly", Assembly.class.getName());
+
+Configuration configuration = new Configuration();
+configuration.addEventTypeAlias("MyMapEvent", properties);]]></programlisting>
+
+			<para>
+				Finally, here is a sample EQL statement that uses the configured <literal>MyMapEvent</literal> map event. This statement uses the <literal>chassisTag</literal> and <literal>numParts</literal> properties of <literal>Assembly</literal> objects in each map.
+			</para>
+			<programlisting>select carType, assembly.chassisTag, count(assembly.numParts) from MyMapEvent.win:time(60)</programlisting>
+
+		</sect2>
+		
 		<sect2 id="config-xml-dom" revision="1">
-			<title>XML Events represented by <literal>org.w3c.dom.Node</literal></title>
+			<title>Events represented by <literal>org.w3c.dom.Node</literal></title>
 			
 			<para>
 				Via this configuration item the Esper engine can natively process <literal>org.w3c.dom.Node</literal> instances, i.e. XML document object model (DOM) nodes.
@@ -265,19 +368,6 @@ configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 		  
 		</sect2>
 		
-		<sect2 id="config-eventtype-map" revision="1">
-			<title>Map Event Types</title>
-			
-			<para>
-				Via this configuration item the Esper engine can natively process <literal>java.util.Map</literal> instances as events.
-				Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.				
-			</para>
-			
-			<programlisting><![CDATA[
-				
-			]]></programlisting>
-		</sect2>
-
     </sect1>
 </chapter>
 

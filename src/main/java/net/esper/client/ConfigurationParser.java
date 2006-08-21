@@ -110,7 +110,7 @@ class ConfigurationParser {
     
     private static void handleMap(String aliasName, Configuration configuration, Element eventTypeElement)
     {
-		Map<String, String> propertyTypeNames = new LinkedHashMap<String, String>();
+		Properties propertyTypeNames = new Properties();
 		NodeList propertyList = eventTypeElement.getElementsByTagName("map-property");
 		for (int i = 0; i < propertyList.getLength(); i++)
 	    {

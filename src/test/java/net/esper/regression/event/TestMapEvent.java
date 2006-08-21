@@ -2,6 +2,7 @@ package net.esper.regression.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 import net.esper.client.*;
@@ -14,13 +15,13 @@ import org.apache.commons.logging.LogFactory;
 
 public class TestMapEvent extends TestCase
 {
-    Map<String, String> properties;
+    Properties properties;
     Map<String, Object> map;
     EPServiceProvider epService;
 
     protected void setUp()
     {
-        properties = new HashMap<String, String>();
+        properties = new Properties();
         properties.put("myInt", "int");
         properties.put("myString", "string");
         properties.put("beanA", SupportBeanComplexProps.class.getName());
@@ -79,7 +80,7 @@ public class TestMapEvent extends TestCase
 
     public void testPrimitivesTypes()
     {
-        properties = new HashMap<String, String>();
+        properties = new Properties();
         properties.put("myInt", int.class.getName());
         properties.put("byteArr", byte[].class.getName());
         properties.put("myInt2", "int");
@@ -96,7 +97,7 @@ public class TestMapEvent extends TestCase
 
     public void testInvalidConfig()
     {
-        properties = new HashMap<String, String>();
+        properties = new Properties();
         properties.put("astring", "XXXX");
 
         Configuration configuration = new Configuration();

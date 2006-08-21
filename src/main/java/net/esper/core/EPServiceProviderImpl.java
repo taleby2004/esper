@@ -9,6 +9,7 @@ import net.esper.util.JavaClassHelper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Service provider encapsulates the engine's services for runtime and administration interfaces.
@@ -45,7 +46,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
                 throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
             }
         }
-        
+
         // Add from the configuration the XML DOM aliases and type def
         Map<String, ConfigurationEventTypeXMLDOM> xmlDOMAliases = configuration.getEventTypesXMLDOM();
         for (Map.Entry<String, ConfigurationEventTypeXMLDOM> entry : xmlDOMAliases.entrySet())
@@ -64,28 +65,28 @@ public class EPServiceProviderImpl implements EPServiceProvider
         // Add auto-imports
         try
         {
-        	autoImportService = new AutoImportServiceImpl(configuration.getImports().toArray(new String[0]));
+            autoImportService = new AutoImportServiceImpl(configuration.getImports().toArray(new String[0]));
         }
         catch (IllegalArgumentException ex)
         {
-        	throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+            throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
         }
 
         // Add map event types
-        Map<String, Map<String, String>> mapAliases = configuration.getEventTypesMapEvents();
-        for(Map.Entry<String, Map<String, String>> entry : mapAliases.entrySet())
+        Map<String, Properties> mapAliases = configuration.getEventTypesMapEvents();
+        for(Map.Entry<String, Properties> entry : mapAliases.entrySet())
         {
-        	try
-        	{
-        		Map<String, Class> propertyTypes = createPropertyTypes(entry.getValue());
-        		eventAdapterService.addMapType(entry.getKey(), propertyTypes);
-        	}
-        	catch (EventAdapterException ex)
-        	{
-        		throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
-        	} 
+            try
+            {
+                Map<String, Class> propertyTypes = createPropertyTypes(entry.getValue());
+                eventAdapterService.addMapType(entry.getKey(), propertyTypes);
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+            }
         }
-        
+
         initialize();
     }
 
@@ -131,13 +132,13 @@ public class EPServiceProviderImpl implements EPServiceProvider
         // Start clocking
         services.getTimerService().startInternalClock();
     }
-    
-    private Map<String, Class> createPropertyTypes(Map<String, String> propertyNames)
+
+    private Map<String, Class> createPropertyTypes(Properties properties)
     {
-    	Map<String, Class> propertyTypes = new HashMap<String, Class>();
-    	for(String property : propertyNames.keySet())
-    	{
-            String className = propertyNames.get(property);
+        Map<String, Class> propertyTypes = new HashMap<String, Class>();
+        for(Object property : properties.keySet())
+        {
+            String className = (String) properties.get(property);
 
             if ("string".equals(className))
             {
@@ -157,8 +158,8 @@ public class EPServiceProviderImpl implements EPServiceProvider
                 throw new EventAdapterException("Unable to load class '" + boxedClassName + "', class not found", ex);
             }
 
-            propertyTypes.put(property, clazz);
-    	}
-    	return propertyTypes;
+            propertyTypes.put((String) property, clazz);
+        }
+        return propertyTypes;
     }
 }
