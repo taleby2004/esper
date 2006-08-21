@@ -28,7 +28,7 @@ Technology Introduction
 
 Features
 	
-	* Event Stream Processing
+    * Event Stream Processing
 
 		* Time-based, interval-based, length-based and sorted windows
 
@@ -38,11 +38,11 @@ Features
 
 		* Inner-joins and outer joins (left, right, full) of an unlimited number of windows
 
-		* Output rate limiting
+		* Output rate limiting and stabilizing
 
 		[]
         
-	* Event Pattern Matching
+    * Event Pattern Matching
 
 		* Logical and temporal event correlation
 
@@ -54,18 +54,20 @@ Features
 
 		[]
 	
-	* Supports both listener (push) and consumer (pull) model 
+    * Supports both listener (push) and consumer (pull) model 
 	
-	* Supports event-type inheritance and polymorphism as provided by the Java language
+    * Supports event-type inheritance and polymorphism as provided by the Java language
 	
-	* Event properties can be simple, indexed, mapped or nested
+    * Events can be plain Java objects, XML document object model (DOM) and java.util.Map including nested objects
+
+    * Event properties can be simple, indexed, mapped or nested - allows querying of deep Java object graphs and XML structures
 	
-	* Supports externally-supplied time as well as Java system time
+    * Supports externally-supplied time as well as Java system time	
 	
-	* Supports multiple independent Esper engines per JavaVM. Each engine instance itself is NOT multithread-safe, 
+    * Supports multiple independent Esper engines per JavaVM. Each engine instance itself is NOT multithread-safe, 
 	  requiring workload structuring per engine if necessary (also see FAQ on multithread-safety).
 	  
-	* Pluggable architecture for event pattern and event stream analysis user-defined functions
+    * Pluggable architecture for event pattern and event stream analysis user-defined functions
 	  
 	[]		
 
