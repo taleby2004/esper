@@ -12,10 +12,8 @@ mvn antlr:generate
 mvn jar:jar
 mvn install:install
 mvn javadoc:javadoc
-
-To release a version to SourceForge:
-XXX
 -->
+
 <project>
 	<modelVersion>4.0.0</modelVersion>
 	<name>Esper</name>
@@ -58,11 +56,6 @@ XXX
 		</dependency>
 	</dependencies>
 	<build>
-		<testResources>
-			<testResource>
-				<directory>etc</directory>
-			</testResource>
-		</testResources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -108,19 +101,12 @@ XXX
 					</systemProperties>
 				</configuration>
 			</plugin>
-			<!-- JavaDoc plug-in not working with JDK 5 and group yet
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<group>Core Packages org.apache.maven.plugin.javadoc.test1</group>
-					<group>net.esper.client,net.esper.client.time,net.esper.event,net.esper.indicator</group>
-					<group>"Extension API" </group>
-					<group>"Internal Implementation" net.esper.pattern</group>
-				</configuration>
-			</plugin>		
-			-->
 		</plugins>
+		<testResources>
+			<testResource>
+				<directory>etc</directory>
+			</testResource>
+		</testResources>
 	</build>
 	<distributionManagement>
 	  <site>

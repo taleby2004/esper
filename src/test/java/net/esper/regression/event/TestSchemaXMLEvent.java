@@ -110,7 +110,7 @@ public class TestSchemaXMLEvent extends TestCase
         Configuration configuration = new Configuration();
         ConfigurationEventTypeXMLDOM eventTypeMeta = new ConfigurationEventTypeXMLDOM();
         eventTypeMeta.setRootElementName("simpleEvent");
-        String schemaUri = ClassLoader.getSystemResource(CLASSLOADER_SCHEMA_URI).toString();
+        String schemaUri = TestSchemaXMLEvent.class.getClassLoader().getResource(CLASSLOADER_SCHEMA_URI).toString();
         eventTypeMeta.setSchemaResource(schemaUri);
         eventTypeMeta.addNamespacePrefix("ss", "samples:schemas:simpleSchema");
         eventTypeMeta.addXPathProperty("customProp", "count(/ss:simpleEvent/ss:nested3/ss:nested4)", XPathConstants.NUMBER);

@@ -64,7 +64,7 @@ public class AutoIdSimMain {
     public void run() throws SAXException, IOException
     {
         // load config - this defines the XML event types to be processed
-        URL url = ClassLoader.getSystemResource("esper.examples.cfg.xml");
+        URL url = AutoIdSimMain.class.getClassLoader().getResource("esper.examples.cfg.xml");
         Configuration config = new Configuration();
         config.configure(url);
 

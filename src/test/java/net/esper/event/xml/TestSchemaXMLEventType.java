@@ -17,7 +17,7 @@ public class TestSchemaXMLEventType extends TestCase {
 
     protected void setUp() throws Exception {
 
-        URL schemaUrl = ClassLoader.getSystemResource("regression/simpleSchema.xsd");
+        URL schemaUrl = TestSchemaXMLEventType.class.getClassLoader().getResource("regression/simpleSchema.xsd");
         ConfigurationEventTypeXMLDOM configNoNS = new ConfigurationEventTypeXMLDOM();
         configNoNS.setSchemaResource(schemaUrl.toString());
         configNoNS.setRootElementName("simpleEvent");
@@ -28,7 +28,7 @@ public class TestSchemaXMLEventType extends TestCase {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
 
-        Document noNSDoc = builderFactory.newDocumentBuilder().parse(ClassLoader.getSystemResourceAsStream("regression/simpleWithSchema.xml"));
+        Document noNSDoc = builderFactory.newDocumentBuilder().parse(TestSchemaXMLEventType.class.getClassLoader().getResourceAsStream("regression/simpleWithSchema.xml"));
         eventSchemaOne = new XMLEventBean(noNSDoc, eventTypeNoNS);
     }
 

@@ -19,7 +19,7 @@ public class TestRFIDTagsPerSensorStmt extends TestCase
     private SupportUpdateListener listener;
 
     public void setUp() {
-        URL url = ClassLoader.getSystemResource("esper.examples.cfg.xml");
+        URL url = TestRFIDTagsPerSensorStmt.class.getClassLoader().getResource("esper.examples.cfg.xml");
         Configuration config = new Configuration();
         config.configure(url);
 
@@ -36,7 +36,7 @@ public class TestRFIDTagsPerSensorStmt extends TestCase
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setNamespaceAware(true);
 
-        Document sensor1Doc = builderFactory.newDocumentBuilder().parse(ClassLoader.getSystemResourceAsStream("data/AutoIdSensor1.xml"));
+        Document sensor1Doc = builderFactory.newDocumentBuilder().parse(TestRFIDTagsPerSensorStmt.class.getClassLoader().getResourceAsStream("data/AutoIdSensor1.xml"));
         epService.getEPRuntime().sendEvent(sensor1Doc);
         assertReceived("urn:epc:1:4.16.36", 5);
     }

@@ -68,5 +68,10 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<testResources>
+			<testResource>
+				<directory>etc</directory>
+			</testResource>
+		</testResources>
 	</build>
 </project>
