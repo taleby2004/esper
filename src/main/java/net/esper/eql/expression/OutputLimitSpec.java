@@ -6,7 +6,25 @@ package net.esper.eql.expression;
  */
 public class OutputLimitSpec 
 {
-	public enum DisplayLimit { FIRST, LAST, ALL };
+    /**
+     * Enum controlling the type of output limiting.
+     */
+    public enum DisplayLimit {
+
+        /**
+         * Output first event.
+         */
+        FIRST,
+
+        /**
+         * Output last event.
+         */
+        LAST,
+
+        /**
+         * Output all events.
+         */
+        ALL };
 	
 	private final boolean isEventLimit;
 	private final DisplayLimit displayLimit;

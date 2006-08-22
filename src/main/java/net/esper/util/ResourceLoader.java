@@ -10,6 +10,13 @@ import java.net.MalformedURLException;
  */
 public class ResourceLoader
 {
+    /**
+     * Resolve a resource into a URL using the URL string or classpath-relative filename and
+     * using a name for any exceptions thrown.
+     * @param resourceName is the name for use in exceptions
+     * @param urlOrClasspathResource is a URL string or classpath-relative filename
+     * @return URL or null if resolution was unsuccessful
+     */
     public static URL resolveClassPathOrURLResource(String resourceName, String urlOrClasspathResource)
     {
         URL url = null;
@@ -43,8 +50,9 @@ public class ResourceLoader
      * <p>
      * If no input stream was returned, throw an Exception.
      *
-     * @param resource to get input stream for
-     * @return input stream for resource
+     * @param resourceName is the name for use in exceptions
+     * @param resource is the classpath-relative filename to resolve into a URL
+     * @return URL for resource
      */
     protected static URL getClasspathResourceAsURL(String resourceName, String resource)
     {

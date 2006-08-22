@@ -9,9 +9,9 @@ import org.apache.commons.logging.LogFactory;
  * of old events arrived is greater than a preset value.
  */
 public final class OutputConditionCount implements OutputCondition
-{
-	public static final boolean DO_OUTPUT = true;
-	public static final boolean FORCE_UPDATE = false;
+{    
+    private static final boolean DO_OUTPUT = true;
+	private static final boolean FORCE_UPDATE = false;
     
     private final int eventRate;
     private int newEventsCount;

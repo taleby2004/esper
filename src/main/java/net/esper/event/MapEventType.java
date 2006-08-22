@@ -19,6 +19,7 @@ class MapEventType implements EventType
     /**
      * Constructor takes a map of property names and types.
      * @param propertyTypes is pairs of property name and type
+     * @param eventAdapterService is 
      */
     public MapEventType(Map<String, Class> propertyTypes,
                         EventAdapterService eventAdapterService)

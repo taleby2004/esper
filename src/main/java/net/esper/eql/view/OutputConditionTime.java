@@ -12,9 +12,9 @@ import org.apache.commons.logging.LogFactory;
  * of every time interval of a given length.
  */
 public final class OutputConditionTime implements OutputCondition
-{
-	public static final boolean DO_OUTPUT = true;
-	public static final boolean FORCE_UPDATE = true;
+{    
+    private static final boolean DO_OUTPUT = true;
+	private static final boolean FORCE_UPDATE = true;
 	
     private final long msecIntervalSize;
     private final OutputCallback outputCallback;

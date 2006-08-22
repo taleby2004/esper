@@ -5,8 +5,8 @@ package net.esper.eql.view;
  */
 public class OutputConditionNull implements OutputCondition {
 
-	public static final boolean DO_OUTPUT = true;
-	public static final boolean FORCE_UPDATE = false;
+	private static final boolean DO_OUTPUT = true;
+	private static final boolean FORCE_UPDATE = false;
 	
 	private final OutputCallback outputCallback;
 	
