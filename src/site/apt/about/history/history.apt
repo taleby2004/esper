@@ -12,6 +12,31 @@ Change History
 	[]
 
 
+Version 1.0.5 (update)
+
+	Released August 22, 2006
+		
+* API changes
+
+    * Added methods to net.esper.client.Configuration and EPRuntime to configure and process XML DOM and Map events
+    
+* Major changes
+
+	* Added support for the "first" keyword in output rate limiting for outputting only the first matching event for an interval
+	
+	* Added support for XML events represented by a document object model (DOM) instances of org.w3c.dom.Node
+	
+	* Added support for Map events represented by a java.util.Map including object values
+	
+* Minor changes	
+
+	* New AutoId RFID example for XML event processing, includes simulator for running from the command line
+	
+	* New chapter on Event Representations
+	
+	[]
+
+
 Version 1.0.0 (final production)
 
 	Released July 24, 2006

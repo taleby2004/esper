@@ -1,5 +1,20 @@
 News
 
+* August 21, 2006  -  Esper 1.0.5 update
+
+    * Added support for the "first" keyword in output rate limiting for outputting only the first matching event for an interval
+    
+    * Added support for XML events represented by a document object model (DOM) instances of org.w3c.dom.Node
+    
+    * Added support for Map events represented by a java.util.Map including object values
+
+    * New AutoId RFID example for XML event processing, includes simulator for running from the command line 
+
+    * New reference manual chapter on Event Representations
+	
+    []
+    
+
 * July 24, 2006  -  Esper 1.0.0 final production
 
     * Added support for invoking Java library static methods, invoking user-defined static methods, and defining an auto-import list
