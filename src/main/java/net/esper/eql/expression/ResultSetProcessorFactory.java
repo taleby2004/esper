@@ -161,7 +161,7 @@ public class ResultSetProcessorFactory
 
         // (1)
         // There is no group-by clause and no aggregate functions with event properties in the select clause and having clause (simplest case)
-        if ((groupByNodes.size() == 0) && (propertiesAggregatedSelect.size() == 0) && (propertiesAggregatedHaving.size() == 0))
+        if ((groupByNodes.size() == 0) && (selectAggregateExprNodes.size() == 0) && (havingAggregateExprNodes.size() == 0))
         {
             // (1a)
             // There is no need to perform select expression processing, the single view itself (no join) generates
@@ -194,7 +194,7 @@ public class ResultSetProcessorFactory
             validateHaving(selectAggregateExprNodes, propertiesGroupBy, optionalHavingNode);
         }
 
-        if ((groupByNodes.size() == 0) && (propertiesAggregatedSelect.size() > 0))
+        if ((groupByNodes.size() == 0) && (selectAggregateExprNodes.size() > 0))
         {
             // (3)
             // There is no group-by clause and there are aggregate functions with event properties in the select clause (aggregation case)
@@ -361,7 +361,6 @@ public class ResultSetProcessorFactory
     {
         // Get a list of properties being aggregated in the clause.
         Set<Pair<Integer, String>> propertiesAggregated = new HashSet<Pair<Integer, String>>();
-
         for (ExprNode selectAggExprNode : aggregateNodes)
         {
             ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
