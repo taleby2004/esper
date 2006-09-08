@@ -8,6 +8,21 @@ import net.esper.event.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Test for N threads feeding events that affect M statements which employ a small time window.
+ * Each of the M statements is associated with a symbol and each event send hits exactly one
+ * statement only.
+ * <p>
+ * Thus the timer is fairly busy when active, competing with N application threads.
+ * Created for ESPER-59 Internal Threading Bugs Found.
+ * <p>
+ * Exceptions can occur in
+ *   (1) an application thread during sendEvent() outside of the listener, causes the test to fail
+ *   (2) an application thread during sendEvent() inside of the listener, causes assertion to fail
+ *   (3) the timer thread, causes an exception to be logged and assertion *may* fail
+ */
 public class TestMultithreadedTimeWin extends TestCase {
 
     private Thread[] threads;
@@ -17,7 +32,7 @@ public class TestMultithreadedTimeWin extends TestCase {
     {
         int numSymbols = 1;
         int numThreads = 4;
-        int numEventsPerThread = 500000;
+        int numEventsPerThread = 50000;
         double timeWindowSize = 0.2;
 
         // Set up threads, statements and listeners
@@ -72,9 +87,10 @@ public class TestMultithreadedTimeWin extends TestCase {
         // Create threads to send events
         threads = new Thread[numThreads];
         TimeWinRunnable[] runnables = new TimeWinRunnable[threads.length];
+        ReentrantLock lock = new ReentrantLock();
         for (int i = 0; i < threads.length; i++)
         {
-            runnables[i] = new TimeWinRunnable(i, epService.getEPRuntime(), symbols, numEvents);
+            runnables[i] = new TimeWinRunnable(i, epService.getEPRuntime(), lock, symbols, numEvents);
             threads[i] = new Thread(runnables[i]);
         }
     }
@@ -83,12 +99,14 @@ public class TestMultithreadedTimeWin extends TestCase {
     {
         private final int threadNum;
         private final EPRuntime epRuntime;
+        private final ReentrantLock sharedLock;
         private final String[] symbols;
         private final int numberOfEvents;
 
-        public TimeWinRunnable(int threadNum, EPRuntime epRuntime, String[] symbols, int numberOfEvents) {
+        public TimeWinRunnable(int threadNum, EPRuntime epRuntime, ReentrantLock sharedLock, String[] symbols, int numberOfEvents) {
             this.threadNum = threadNum;
             this.epRuntime = epRuntime;
+            this.sharedLock = sharedLock;
             this.symbols = symbols;
             this.numberOfEvents = numberOfEvents;
         }
@@ -102,7 +120,14 @@ public class TestMultithreadedTimeWin extends TestCase {
                 long volume = 1;
 
                 Object event = new SupportMarketDataBean(symbol, -1, volume, null);
-                epRuntime.sendEvent(event);
+
+                sharedLock.lock();
+                try {
+                    epRuntime.sendEvent(event);
+                }
+                finally {
+                    sharedLock.unlock();
+                }
             }
         }
     }

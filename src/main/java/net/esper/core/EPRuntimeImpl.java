@@ -184,22 +184,6 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         }
     }
 
-    private void processEventExclusive(Object event)
-    {
-        EventBean eventBean;
-
-        if (event instanceof EventBean)
-        {
-            eventBean = (EventBean) event;
-        }
-        else
-        {
-            eventBean = services.getEventAdapterService().adapterForBean(event);
-        }
-
-        services.getFilterService().evaluate(eventBean);
-    }
-
     private void processTimeEvent(TimerEvent event)
     {
         if (event instanceof TimerControlEvent)
@@ -257,7 +241,18 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         Object event;
         while ( (event = threadWorkQueue.next()) != null)
         {
-            processEventExclusive(event);
+            EventBean eventBean;
+            if (event instanceof EventBean)
+            {
+                eventBean = (EventBean) event;
+            }
+            else
+            {
+                eventBean = services.getEventAdapterService().adapterForBean(event);
+            }
+
+            services.getFilterService().evaluate(eventBean);
+
             dispatch();
         }
     }
