@@ -38,6 +38,18 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         threadWorkQueue = new ThreadWorkQueue();
     }
 
+    public void timerCallback()
+    {
+        if (log.isDebugEnabled())
+        {
+            log.debug(".timerCallback Evaluating scheduled callbacks");
+        }
+
+        long msec = System.currentTimeMillis();
+        CurrentTimeEvent currentTimeEvent = new CurrentTimeEvent(msec);
+        sendEvent(currentTimeEvent);
+    }
+
     public void sendEvent(Object event) throws EPException
     {
         if (event == null)
@@ -52,10 +64,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         }
 
         // Process event
-        processBeanEvent(event);
-
-        // Dispatch results, work off thread queue
-        postProcessEvent();
+        processEvent(event);
     }
 
     public void sendEvent(org.w3c.dom.Node document) throws EPException
@@ -73,12 +82,9 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
 
         // Get it wrapped up, process event
         EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
-        processWrappedEvent(eventBean);
-
-        // Dispatch results, work off thread queue
-        postProcessEvent();
+        processEvent(eventBean);
     }
-    
+
     public void sendEvent(Map map, String eventTypeAlias) throws EPException
     {
         if (map == null)
@@ -93,12 +99,9 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
 
         // Process event
         EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeAlias);
-        processBeanEvent(eventBean);
-
-        // Dispatch results, work off thread queue
-        postProcessEvent();
+        processEvent(eventBean);
     }
-    
+
     public int getNumEventsReceived()
     {
         return services.getFilterService().getNumEventsEvaluated();
@@ -139,42 +142,62 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         services.getEmitService().clearListeners();
     }
 
-    public void timerCallback()
-    {
-        if (log.isDebugEnabled())
-        {
-            log.debug(".timerCallback Evaluating scheduled callbacks");
-        }
-
-        long msec = System.currentTimeMillis();
-        CurrentTimeEvent currentTimeEvent = new CurrentTimeEvent(msec);
-        sendEvent(currentTimeEvent);
-    }
-
-    private void postProcessEvent() throws EPException
-    {
-        // Dispatch internal work items and results
-        dispatch();
-
-        // Work off the event queue if any events accumulated in there via a route()
-        Object event;
-        while ( (event = threadWorkQueue.next()) != null)
-        {
-            processBeanEvent(event);
-            dispatch();
-        }
-    }
-
-    private void processBeanEvent(Object event)
+    private void processEvent(Object event)
     {
         if (event instanceof TimerEvent)
         {
             processTimeEvent((TimerEvent) event);
+            return;
+        }
+
+        EventBean eventBean;
+
+        if (event instanceof EventBean)
+        {
+            eventBean = (EventBean) event;
         }
         else
         {
-            processUnwrappedEvent(event);
+            eventBean = services.getEventAdapterService().adapterForBean(event);
         }
+
+        // All events are processed by the filter service
+        try
+        {
+            timerRWLock.readLock().lock();
+
+            services.getFilterService().evaluate(eventBean);
+
+            // Dispatch internal work items and results
+            dispatch();
+
+            // Work off the event queue if any events accumulated in there via a route()
+            processThreadWorkQueue();
+        }
+        catch (RuntimeException ex)
+        {
+            throw new EPException(ex);
+        }
+        finally
+        {
+            timerRWLock.readLock().unlock();
+        }
+    }
+
+    private void processEventExclusive(Object event)
+    {
+        EventBean eventBean;
+
+        if (event instanceof EventBean)
+        {
+            eventBean = (EventBean) event;
+        }
+        else
+        {
+            eventBean = services.getEventAdapterService().adapterForBean(event);
+        }
+
+        services.getFilterService().evaluate(eventBean);
     }
 
     private void processTimeEvent(TimerEvent event)
@@ -212,6 +235,12 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         try
         {
             services.getSchedulingService().evaluate();
+
+            // Let listeners know of results
+            dispatch();
+
+            // Work off the event queue if any events accumulated in there via a route()
+            processThreadWorkQueue();
         }
         catch (RuntimeException ex)
         {
@@ -221,42 +250,15 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         {
             timerRWLock.writeLock().unlock();
         }
-
-        dispatch();
     }
 
-    private void processUnwrappedEvent(Object event)
+    private void processThreadWorkQueue()
     {
-        EventBean eventBean = null;
-
-        if (event instanceof EventBean)
+        Object event;
+        while ( (event = threadWorkQueue.next()) != null)
         {
-            eventBean = (EventBean) event;
-        }
-        else
-        {
-            eventBean = services.getEventAdapterService().adapterForBean(event);
-        }
-
-        processWrappedEvent(eventBean);
-    }
-
-    private void processWrappedEvent(EventBean eventBean)
-    {
-        // All events are processed by the filter service
-        try
-        {
-            timerRWLock.readLock().lock();
-
-            services.getFilterService().evaluate(eventBean);
-        }
-        catch (RuntimeException ex)
-        {
-            throw new EPException(ex);
-        }
-        finally
-        {
-            timerRWLock.readLock().unlock();
+            processEventExclusive(event);
+            dispatch();
         }
     }
 
