@@ -16,34 +16,41 @@ public class TestMultithreadedTimeWin extends TestCase {
     public void testMultithreaded() throws Exception
     {
         int numSymbols = 1;
-        int numThreads = 8;
-        int numEventsPerThread = 100000;
+        int numThreads = 4;
+        int numEventsPerThread = 500000;
+        double timeWindowSize = 0.2;
 
         // Set up threads, statements and listeners
-        setUp(numSymbols, numThreads, numEventsPerThread);
+        setUp(numSymbols, numThreads, numEventsPerThread, timeWindowSize);
 
         // Start threads
+        long startTime = System.currentTimeMillis();
         for (Thread thread : threads) {
             thread.run();
         }
 
         // Wait for completion
-        for (Thread thread1 : threads) {
-            thread1.join();
+        for (Thread thread : threads) {
+            thread.join();
         }
+        long endTime = System.currentTimeMillis();
 
         // Check listener results
         long totalReceived = 0;
-        long totalVolume = 0;
         for (ResultUpdateListener listener : listeners) {
             totalReceived += listener.getNumReceived();
-            totalVolume += listener.getLastVolume();
+            assertFalse(listener.isCaughtRuntimeException());
         }
-        assertEquals(numEventsPerThread * numThreads, totalReceived);
-        assertEquals(numEventsPerThread * numThreads, totalVolume);
+        double numTimeWindowAdvancements = (endTime - startTime) / 1000 / timeWindowSize;
+
+        log.info("Completed, expected=" + numEventsPerThread * numThreads +
+            " numTimeWindowAdvancements=" + numTimeWindowAdvancements +
+            " totalReceived=" + totalReceived);
+        assertTrue(totalReceived < numEventsPerThread * numThreads + numTimeWindowAdvancements + 1);
+        assertTrue(totalReceived >= numEventsPerThread * numThreads);
     }
 
-    private void setUp(int numSymbols, int numThreads, int numEvents)
+    private void setUp(int numSymbols, int numThreads, int numEvents, double timeWindowSize)
     {
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
@@ -56,7 +63,7 @@ public class TestMultithreadedTimeWin extends TestCase {
             symbols[i] = "S" + i;
             String viewExpr = "select symbol, sum(volume) as sumVol " +
                               "from " + SupportMarketDataBean.class.getName() +
-                              "(symbol='" + symbols[i] + "').win:time(1)";
+                              "(symbol='" + symbols[i] + "').win:time(" + timeWindowSize + ")";
             EPStatement testStmt = epService.getEPAdministrator().createEQL(viewExpr);
             listeners[i] = new ResultUpdateListener();
             testStmt.addListener(listeners[i]);
@@ -102,34 +109,44 @@ public class TestMultithreadedTimeWin extends TestCase {
 
     public static class ResultUpdateListener implements UpdateListener
     {
+        private boolean isCaughtRuntimeException;
         private int numReceived = 0;
         private String lastSymbol = null;
-        private long lastVolume;
 
         public void update(EventBean[] newEvents, EventBean[] oldEvents) {
 
-            Assert.assertEquals(1, newEvents.length);
-            numReceived += newEvents.length;
-
-            String symbol = (String) newEvents[0].get("symbol");
-            if (lastSymbol != null)
+            if ((newEvents == null) || (newEvents.length == 0))
             {
-                Assert.assertEquals(lastSymbol, symbol);
-            }
-            else
-            {
-                lastSymbol = symbol;
+                return;
             }
 
-            lastVolume = (Long) newEvents[0].get("sumVol");
+            try {
+                numReceived += newEvents.length;
+
+                String symbol = (String) newEvents[0].get("symbol");
+                if (lastSymbol != null)
+                {
+                    Assert.assertEquals(lastSymbol, symbol);
+                }
+                else
+                {
+                    lastSymbol = symbol;
+                }
+            }
+            catch (RuntimeException ex)
+            {
+                log.error("Unexpected exception querying results", ex);
+                isCaughtRuntimeException = true;
+                throw ex;
+            }
         }
 
         public int getNumReceived() {
             return numReceived;
         }
 
-        public long getLastVolume() {
-            return lastVolume;
+        public boolean isCaughtRuntimeException() {
+            return isCaughtRuntimeException;
         }
     }
 
