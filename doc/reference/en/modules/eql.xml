@@ -723,6 +723,11 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 		</para>
 
 		<para>
+			To merge event streams, simply use the same <literal>event_type_alias</literal> identifier in all EQL statements that merge their result event streams. Make sure to use the
+			same number and names of event properties and event property types match up.
+		</para>
+
+		<para>
 			Esper places the following restrictions on the <literal>insert into</literal> clause:
 		</para>
 		
