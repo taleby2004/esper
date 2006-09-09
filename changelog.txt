@@ -1,6 +1,13 @@
 Esper Changelog
 ===================
 
+Changes in version 1.1.0
+------------------------------------
+* fixed issue ESPER-56 "count(*) always returns 0"
+* fixed issue ESPER-59 "Internal Threading Bugs Found"
+* documentation enhancements
+ 
+ 
 Changes in version 1.0.5
 ------------------------------------
 
