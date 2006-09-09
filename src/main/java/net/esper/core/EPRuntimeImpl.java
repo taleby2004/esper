@@ -207,17 +207,17 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         // Evaluation of all time events is protected from regular event stream processing
         timerRWLock.writeLock().lock();
 
-        if (log.isDebugEnabled())
-        {
-            log.debug(".sendEvent Setting time and evaluating schedules");
-        }
-
-        CurrentTimeEvent current = (CurrentTimeEvent) event;
-        long currentTime = current.getTimeInMillis();
-        services.getSchedulingService().setTime(currentTime);
-
         try
         {
+            if (log.isDebugEnabled())
+            {
+                log.debug(".processTimeEvent Setting time and evaluating schedules");
+            }
+
+            CurrentTimeEvent current = (CurrentTimeEvent) event;
+            long currentTime = current.getTimeInMillis();
+            services.getSchedulingService().setTime(currentTime);
+
             services.getSchedulingService().evaluate();
 
             // Let listeners know of results
