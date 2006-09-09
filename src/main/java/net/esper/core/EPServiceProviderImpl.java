@@ -5,6 +5,7 @@ import net.esper.eql.expression.AutoImportService;
 import net.esper.eql.expression.AutoImportServiceImpl;
 import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterServiceImpl;
+import net.esper.event.EventAdapterService;
 import net.esper.util.JavaClassHelper;
 
 import java.util.HashMap;
@@ -20,8 +21,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
     private EPRuntimeImpl runtime;
     private EPAdministratorImpl admin;
 
-    private final EventAdapterServiceImpl eventAdapterService;
-    private final AutoImportService autoImportService;
+    private final ConfigurationSnapshot configSnapshot;
 
     /**
      * Constructor - initializes services.
@@ -30,63 +30,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
      */
     public EPServiceProviderImpl(Configuration configuration) throws ConfigurationException
     {
-        eventAdapterService = new EventAdapterServiceImpl();
-
-        // Add from the configuration the Java event class aliases
-        Map<String, String> javaClassAliases = configuration.getEventTypeAliases();
-        for (Map.Entry<String, String> entry : javaClassAliases.entrySet())
-        {
-            // Add Java class alias
-            try
-            {
-                eventAdapterService.addBeanType(entry.getKey(), entry.getValue());
-            }
-            catch (EventAdapterException ex)
-            {
-                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
-            }
-        }
-
-        // Add from the configuration the XML DOM aliases and type def
-        Map<String, ConfigurationEventTypeXMLDOM> xmlDOMAliases = configuration.getEventTypesXMLDOM();
-        for (Map.Entry<String, ConfigurationEventTypeXMLDOM> entry : xmlDOMAliases.entrySet())
-        {
-            // Add Java class alias
-            try
-            {
-                eventAdapterService.addXMLDOMType(entry.getKey(), entry.getValue());
-            }
-            catch (EventAdapterException ex)
-            {
-                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
-            }
-        }
-
-        // Add auto-imports
-        try
-        {
-            autoImportService = new AutoImportServiceImpl(configuration.getImports().toArray(new String[0]));
-        }
-        catch (IllegalArgumentException ex)
-        {
-            throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
-        }
-
-        // Add map event types
-        Map<String, Properties> mapAliases = configuration.getEventTypesMapEvents();
-        for(Map.Entry<String, Properties> entry : mapAliases.entrySet())
-        {
-            try
-            {
-                Map<String, Class> propertyTypes = createPropertyTypes(entry.getValue());
-                eventAdapterService.addMapType(entry.getKey(), propertyTypes);
-            }
-            catch (EventAdapterException ex)
-            {
-                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
-            }
-        }
-
+        configSnapshot = new ConfigurationSnapshot(configuration);
         initialize();
     }
 
@@ -105,9 +49,9 @@ public class EPServiceProviderImpl implements EPServiceProvider
         if (services != null)
         {
             services.getTimerService().stopInternalClock(false);
+            // Give the timer thread a little moment to catch up
             try
             {
-                // Give the timer thread a little moment to catch up
                 Thread.sleep(100);
             }
             catch (InterruptedException ex)
@@ -116,13 +60,17 @@ public class EPServiceProviderImpl implements EPServiceProvider
             }
         }
 
-        // New services
+        // Make services that depend on snapshot config entries
+        EventAdapterService eventAdapterService = makeEventAdapterService(configSnapshot);
+        AutoImportService autoImportService = makeAutoImportService(configSnapshot);
+
+        // New services context
         services = new EPServicesContext(eventAdapterService, autoImportService);
 
         // New runtime
         runtime = new EPRuntimeImpl(services);
 
-        // Configure services
+        // Configure services to use the new runtime
         services.setInternalEventRouter(runtime);
         services.getTimerService().setCallback(runtime);
 
@@ -131,9 +79,19 @@ public class EPServiceProviderImpl implements EPServiceProvider
 
         // Start clocking
         services.getTimerService().startInternalClock();
+
+        // Give the timer thread a little moment to start up
+        try
+        {
+            Thread.sleep(100);
+        }
+        catch (InterruptedException ex)
+        {
+            // No logic required here
+        }
     }
 
-    private Map<String, Class> createPropertyTypes(Properties properties)
+    private static Map<String, Class> createPropertyTypes(Properties properties)
     {
         Map<String, Class> propertyTypes = new HashMap<String, Class>();
         for(Object property : properties.keySet())
@@ -161,5 +119,110 @@ public class EPServiceProviderImpl implements EPServiceProvider
             propertyTypes.put((String) property, clazz);
         }
         return propertyTypes;
+    }
+
+    private static EventAdapterService makeEventAdapterService(ConfigurationSnapshot configSnapshot)
+    {
+        EventAdapterServiceImpl eventAdapterService = new EventAdapterServiceImpl();
+
+        // Add from the configuration the Java event class aliases
+        Map<String, String> javaClassAliases = configSnapshot.getJavaClassAliases();
+        for (Map.Entry<String, String> entry : javaClassAliases.entrySet())
+        {
+            // Add Java class alias
+            try
+            {
+                eventAdapterService.addBeanType(entry.getKey(), entry.getValue());
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+            }
+        }
+
+        // Add from the configuration the XML DOM aliases and type def
+        Map<String, ConfigurationEventTypeXMLDOM> xmlDOMAliases = configSnapshot.getXmlDOMAliases();
+        for (Map.Entry<String, ConfigurationEventTypeXMLDOM> entry : xmlDOMAliases.entrySet())
+        {
+            // Add Java class alias
+            try
+            {
+                eventAdapterService.addXMLDOMType(entry.getKey(), entry.getValue());
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+            }
+        }
+
+        // Add map event types
+        Map<String, Properties> mapAliases = configSnapshot.getMapAliases();
+        for(Map.Entry<String, Properties> entry : mapAliases.entrySet())
+        {
+            try
+            {
+                Map<String, Class> propertyTypes = createPropertyTypes(entry.getValue());
+                eventAdapterService.addMapType(entry.getKey(), propertyTypes);
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+            }
+        }
+
+        return eventAdapterService;
+    }
+
+    private static AutoImportService makeAutoImportService(ConfigurationSnapshot configSnapshot)
+    {
+        AutoImportService autoImportService = null;
+
+        // Add auto-imports
+        try
+        {
+            autoImportService = new AutoImportServiceImpl(configSnapshot.getAutoImports());
+        }
+        catch (IllegalArgumentException ex)
+        {
+            throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+        }
+
+        return autoImportService;
+    }
+
+    public final class ConfigurationSnapshot
+    {
+        private Map<String, String> javaClassAliases = new HashMap<String, String>();
+        private Map<String, ConfigurationEventTypeXMLDOM> xmlDOMAliases = new HashMap<String, ConfigurationEventTypeXMLDOM>();
+        private String[] autoImports;
+        private Map<String, Properties> mapAliases = new HashMap<String, Properties>();
+
+        public ConfigurationSnapshot(Configuration configuration)
+        {
+            javaClassAliases.putAll(configuration.getEventTypeAliases());
+            xmlDOMAliases.putAll(configuration.getEventTypesXMLDOM());
+            autoImports = configuration.getImports().toArray(new String[0]);
+            mapAliases.putAll(configuration.getEventTypesMapEvents());
+        }
+
+        public Map<String, String> getJavaClassAliases()
+        {
+            return javaClassAliases;
+        }
+
+        public Map<String, ConfigurationEventTypeXMLDOM> getXmlDOMAliases()
+        {
+            return xmlDOMAliases;
+        }
+
+        public String[] getAutoImports()
+        {
+            return autoImports;
+        }
+
+        public Map<String, Properties> getMapAliases()
+        {
+            return mapAliases;
+        }
     }
 }
