@@ -1,4 +1,4 @@
-<!--
+ <!--
 Use these lifecyle phases :
 mvn compile
 mvn test
@@ -99,6 +99,7 @@ mvn javadoc:javadoc
 							<value>etc/infoonly_log4j.xml</value>
 						</property>
 					</systemProperties>
+					<argline>-Xms256m -Xmx256m</argline>
 				</configuration>
 			</plugin>
 		</plugins>
