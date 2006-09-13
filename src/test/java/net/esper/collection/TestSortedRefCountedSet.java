@@ -1,10 +1,15 @@
 package net.esper.collection;
 
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.Random;
 
 public class TestSortedRefCountedSet extends TestCase
 {
     private SortedRefCountedSet<String> refSet;
+    private Random random = new Random();
 
     public void setUp()
     {
@@ -106,4 +111,39 @@ public class TestSortedRefCountedSet extends TestCase
             // expected
         }
     }
+
+    public void testMemoryUse()
+    {
+        SortedRefCountedSet<Double> set = new SortedRefCountedSet<Double>();
+
+        long memoryBefore = Runtime.getRuntime().freeMemory();
+        Runtime.getRuntime().gc();
+        
+        for (int i = 0; i < 100; i++)
+        {
+            performLoop(i, set);
+
+            Runtime.getRuntime().gc();
+            long memoryAfter = Runtime.getRuntime().freeMemory();
+
+            log.info("Memory before=" + memoryBefore +
+                        " after=" + memoryAfter +
+                        " delta=" + (memoryAfter - memoryBefore));
+
+            assertTrue(memoryBefore + 10000 <= memoryAfter);
+        }
+    }
+
+    private void performLoop(int loop, SortedRefCountedSet<Double> set)
+    {
+        for (int i = 0; i < 1000; i++)
+        {
+            double price = 500000 + 4900 * random.nextDouble();
+            set.add(price);
+            set.remove(price);
+        }
+    }
+
+
+    private static Log log = LogFactory.getLog(TestSortedRefCountedSet.class);
 }

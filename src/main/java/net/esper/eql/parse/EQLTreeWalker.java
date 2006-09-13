@@ -7,7 +7,6 @@ import net.esper.eql.expression.*;
 import net.esper.type.*;
 import net.esper.collection.Pair;
 import net.esper.event.EventAdapterService;
-import antlr.ASTFactory;
 import antlr.collections.AST;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -499,11 +498,13 @@ public class EQLTreeWalker extends EQLBaseWalker
         ExprNode minMaxNode;
         if ((!isDistinct) && (node.getNumberOfChildren() > 1))
         {
+            // use the row function
             minMaxNode = new ExprMinMaxRowNode(minMaxTypeEnum);
         }
         else
         {
-            minMaxNode = new ExprMinMaxAggrNode(true, minMaxTypeEnum);
+            // use the aggregation function
+            minMaxNode = new ExprMinMaxAggrNode(isDistinct, minMaxTypeEnum);
         }
         astNodeMap.put(node, minMaxNode);
     }
