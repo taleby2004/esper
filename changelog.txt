@@ -6,8 +6,9 @@ Changes in version 1.1.0
 * fixed issue ESPER-56 "count(*) always returns 0"
 * fixed issue ESPER-59 "Internal Threading Bugs Found"
 * fixed issue ESPER-57 "Initialize not resetting types declare via "insert into""
+* fixed issue ESPER-61 "Having clause not applied in query without group-by and without aggregation functions"
 * documentation enhancements
- 
+
  
 Changes in version 1.0.5
 ------------------------------------

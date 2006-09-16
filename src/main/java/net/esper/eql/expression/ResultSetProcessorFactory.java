@@ -155,6 +155,12 @@ public class ResultSetProcessorFactory
         // Validate that group-by is filled with sensible nodes (identifiers, and not part of aggregates selected, no aggregates)
         validateGroupBy(groupByNodes, propertiesAggregatedSelect, propertiesGroupBy);
 
+        // Validate the having-clause (selected aggregate nodes and all in group-by are allowed)
+        if (optionalHavingNode != null)
+        {
+            validateHaving(selectAggregateExprNodes, propertiesGroupBy, optionalHavingNode);
+        }
+
         // Determine if any output rate limiting must be performed early while processing results
         boolean isOutputLimiting = outputLimitSpec != null;
         boolean isOutputLimitLastOnly = outputLimitSpec != null ? outputLimitSpec.isDisplayLastOnly() : false;
@@ -166,7 +172,7 @@ public class ResultSetProcessorFactory
             // (1a)
             // There is no need to perform select expression processing, the single view itself (no join) generates
             // events in the desired format, therefore there is no output processor. There are no order-by expressions.
-            if (selectExprProcessor == null && orderByNodes.isEmpty())
+            if (selectExprProcessor == null && orderByNodes.isEmpty() && optionalHavingNode == null)
             {
                 log.debug(".getProcessor Using no result processor");
                 return null;
@@ -177,7 +183,7 @@ public class ResultSetProcessorFactory
             // directly generating one row, and no need to update aggregate state since there is no aggregate function.
             // There might be some order-by expressions.
             log.debug(".getProcessor Using ResultSetProcessorSimple");
-            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, isOutputLimiting, isOutputLimitLastOnly);
+            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         // (2)
@@ -185,13 +191,7 @@ public class ResultSetProcessorFactory
         if ((selectionList.size() == 0) && (propertiesAggregatedHaving.size() == 0))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
-            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, isOutputLimiting, isOutputLimitLastOnly);
-        }
-
-        // Validate the having-clause (selected aggregate nodes and all in group-by are allowed)
-        if (optionalHavingNode != null)
-        {
-            validateHaving(selectAggregateExprNodes, propertiesGroupBy, optionalHavingNode);
+            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
         if ((groupByNodes.size() == 0) && (selectAggregateExprNodes.size() > 0))
@@ -300,18 +300,21 @@ public class ResultSetProcessorFactory
             }
         }
 
-        // Any non-aggregated properties must occur in the group-by clause
-        ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
-        havingNode.accept(visitor);
-        List<Pair<Integer, String>> allPropertiesHaving = visitor.getExprProperties();
-        Set<Pair<Integer, String>> aggPropertiesHaving = getAggregatedProperties(aggregateNodesHaving);
-        allPropertiesHaving.removeAll(aggPropertiesHaving);
-        allPropertiesHaving.removeAll(propertiesGroupedBy);
-
-        if (allPropertiesHaving.size() > 0)
+        // Any non-aggregated properties must occur in the group-by clause (if there is one)
+        if (propertiesGroupedBy.size() > 0)
         {
-            String name = allPropertiesHaving.iterator().next().getSecond();
-            throw new ExprValidationException("Non-aggregated property '" + name + "' in the HAVING clause must occur in the group-by clause");
+            ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
+            havingNode.accept(visitor);
+            List<Pair<Integer, String>> allPropertiesHaving = visitor.getExprProperties();
+            Set<Pair<Integer, String>> aggPropertiesHaving = getAggregatedProperties(aggregateNodesHaving);
+            allPropertiesHaving.removeAll(aggPropertiesHaving);
+            allPropertiesHaving.removeAll(propertiesGroupedBy);
+
+            if (allPropertiesHaving.size() > 0)
+            {
+                String name = allPropertiesHaving.iterator().next().getSecond();
+                throw new ExprValidationException("Non-aggregated property '" + name + "' in the HAVING clause must occur in the group-by clause");
+            }
         }
     }
 

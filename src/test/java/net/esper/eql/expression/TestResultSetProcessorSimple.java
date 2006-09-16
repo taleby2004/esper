@@ -30,16 +30,16 @@ public class TestResultSetProcessorSimple extends TestCase
 
 		outputLimitSpecAll = new OutputLimitSpec(1, DisplayLimit.ALL);
 		assertFalse(outputLimitSpecAll.isDisplayLastOnly());
-		outputProcessorAll = new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, true, false);
+		outputProcessorAll = new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, null, true, false);
 
 		outputLimitSpecLast = new OutputLimitSpec(1, DisplayLimit.LAST);
 		assertTrue(outputLimitSpecLast.isDisplayLastOnly());
-		outputProcessorLast = new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, true, true);
+		outputProcessorLast = new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, null, true, true);
     }
 
     public void testUpdateAll() throws Exception
     {
-        assertNull(ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, (EventBean[]) null, false, false));
+        assertNull(ResultSetProcessorSimple.getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, (EventBean[]) null, false, false));
 
         EventBean testEvent1 = makeEvent(10, 5, 6);
 	    EventBean testEvent2 = makeEvent(11, 6, 7);
@@ -70,7 +70,7 @@ public class TestResultSetProcessorSimple extends TestCase
 
     public void testProcessAll() throws Exception
     {
-        assertNull(ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, new HashSet<MultiKey<EventBean>>(), false, false));
+        assertNull(ResultSetProcessorSimple.getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, new HashSet<MultiKey<EventBean>>(), false, false));
 
         EventBean testEvent1 = makeEvent(10, 5, 6);
 	    EventBean testEvent2 = makeEvent(11, 6, 7);
@@ -119,7 +119,7 @@ public class TestResultSetProcessorSimple extends TestCase
 
 	public void testProcessLast() throws Exception
 	{
-        assertNull(ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, new HashSet<MultiKey<EventBean>>(), false, false));
+        assertNull(ResultSetProcessorSimple.getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, new HashSet<MultiKey<EventBean>>(), false, false));
 
         EventBean testEvent1 = makeEvent(10, 5, 6);
 	    EventBean testEvent2 = makeEvent(11, 6, 7);
@@ -146,7 +146,7 @@ public class TestResultSetProcessorSimple extends TestCase
 
 	public void testUpdateLast() throws Exception
 	{
-	       assertNull(ResultSetProcessorSimple.getSelectListEvents(selectExprProcessor, orderByProcessor, (EventBean[]) null, false, false));
+	       assertNull(ResultSetProcessorSimple.getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, (EventBean[]) null, false, false));
 
 	        EventBean testEvent1 = makeEvent(10, 5, 6);
 		    EventBean testEvent2 = makeEvent(11, 6, 7);

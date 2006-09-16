@@ -11,6 +11,7 @@ import net.esper.event.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import junit.framework.TestCase;
+import junit.framework.Assert;
 
 public class TestHavingNoGroupBy extends TestCase
 {
@@ -55,6 +56,110 @@ public class TestHavingNoGroupBy extends TestCase
         runAssertion();
     }
 
+    public void testNoAggregationJoinHaving()
+    {
+        runNoAggregationJoin("having");
+    }
+
+    public void testNoAggregationJoinWhere()
+    {
+        runNoAggregationJoin("where");
+    }
+
+    private void runNoAggregationJoin(String filterClause)
+    {
+        String viewExpr = "select a.price as aPrice, b.price as bPrice, Math.max(a.price, b.price) - Math.min(a.price, b.price) as spread " +
+                          "from " + SupportMarketDataBean.class.getName() + "(symbol='SYM1').win:length(1) as a, " +
+                                    SupportMarketDataBean.class.getName() + "(symbol='SYM2').win:length(1) as b " +
+                          filterClause + " Math.max(a.price, b.price) - Math.min(a.price, b.price) >= 1.4";
+
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        sendPriceEvent("SYM1", 20);
+        assertFalse(testListener.isInvoked());
+
+        sendPriceEvent("SYM2", 10);
+        assertNewSpreadEvent(20, 10, 10);
+
+        sendPriceEvent("SYM2", 20);
+        assertOldSpreadEvent(20, 10, 10);
+
+        sendPriceEvent("SYM2", 20);
+        sendPriceEvent("SYM2", 20);
+        sendPriceEvent("SYM1", 20);
+        assertFalse(testListener.isInvoked());
+
+        sendPriceEvent("SYM1", 18.7);
+        assertFalse(testListener.isInvoked());
+
+        sendPriceEvent("SYM2", 20);
+        assertFalse(testListener.isInvoked());
+
+        sendPriceEvent("SYM1", 18.5);
+        assertNewSpreadEvent(18.5, 20, 1.5d);
+
+        sendPriceEvent("SYM2", 16);
+        assertOldNewSpreadEvent(18.5, 20, 1.5d, 18.5, 16, 2.5d);
+
+        sendPriceEvent("SYM1", 12);
+        assertOldNewSpreadEvent(18.5, 16, 2.5d, 12, 16, 4);
+    }
+
+    private void assertOldNewSpreadEvent(double oldaprice, double oldbprice, double oldspread,
+                                         double newaprice, double newbprice, double newspread)
+    {
+        Assert.assertEquals(1, testListener.getOldDataList().size());
+        Assert.assertEquals(1, testListener.getLastOldData().length);
+        Assert.assertEquals(1, testListener.getNewDataList().size());   // since event null is put into the list
+        Assert.assertEquals(1, testListener.getLastNewData().length);
+
+        EventBean oldEvent = testListener.getLastOldData()[0];
+        EventBean newEvent = testListener.getLastNewData()[0];
+
+        compareSpreadEvent(oldEvent, oldaprice, oldbprice, oldspread);
+        compareSpreadEvent(newEvent, newaprice, newbprice, newspread);
+
+        testListener.reset();
+    }
+
+    private void assertOldSpreadEvent(double aprice, double bprice, double spread)
+    {
+        Assert.assertEquals(1, testListener.getOldDataList().size());
+        Assert.assertEquals(1, testListener.getLastOldData().length);
+        Assert.assertEquals(1, testListener.getNewDataList().size());   // since event null is put into the list
+        Assert.assertNull(testListener.getLastNewData());
+
+        EventBean event = testListener.getLastOldData()[0];
+
+        compareSpreadEvent(event, aprice, bprice, spread);
+        testListener.reset();
+    }
+
+    private void assertNewSpreadEvent(double aprice, double bprice, double spread)
+    {
+        Assert.assertEquals(1, testListener.getNewDataList().size());
+        Assert.assertEquals(1, testListener.getLastNewData().length);
+        Assert.assertEquals(1, testListener.getOldDataList().size());
+        Assert.assertNull(testListener.getLastOldData());
+
+        EventBean event = testListener.getLastNewData()[0];
+        compareSpreadEvent(event, aprice, bprice, spread);
+        testListener.reset();
+    }
+
+    private void compareSpreadEvent(EventBean event, double aprice, double bprice, double spread)
+    {
+        assertEquals(aprice, event.get("aPrice"));
+        assertEquals(bprice, event.get("bPrice"));
+        assertEquals(spread, event.get("spread"));
+    }
+
+    private void sendPriceEvent(String symbol, double price)
+    {
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean(symbol, price, -1L, null));
+    }
+
     private void runAssertion()
     {
         // assert select result type
@@ -86,7 +191,7 @@ public class TestHavingNoGroupBy extends TestCase
     }
 
     private void assertNewEvents(String symbol,
-                              Double newPrice, Double newAvgPrice
+                                 Double newPrice, Double newAvgPrice
                               )
     {
         EventBean[] oldData = testListener.getLastOldData();
@@ -103,7 +208,7 @@ public class TestHavingNoGroupBy extends TestCase
     }
 
     private void assertOldEvents(String symbol,
-                              Double oldPrice, Double oldAvgPrice
+                                 Double oldPrice, Double oldAvgPrice
                               )
     {
         EventBean[] oldData = testListener.getLastOldData();

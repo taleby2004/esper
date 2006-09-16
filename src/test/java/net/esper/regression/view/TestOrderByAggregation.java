@@ -84,14 +84,14 @@ public class TestOrderByAggregation extends TestCase {
 		epService.initialize();
 		
 		statementString = "select symbol, max(sum(price)) from " +
-		SupportMarketDataBean.class.getName() + ".win:length(10) " +
-		"output every 6 events " + 
-		"order by symbol"; 
+                            SupportMarketDataBean.class.getName() + ".win:length(10) " +
+                            "output every 6 events " +
+                            "order by symbol";
 		createAndSendAggregate(statementString);
 		orderValuesBySymbolAggregateAll();
 		assertValues(symbols, "symbol");
-		assertValues(prices, "max(distinct sum(price))");
-		assertOnlyProperties(Arrays.asList(new String[] {"symbol", "max(distinct sum(price))"}));
+		assertValues(prices, "max(sum(price))");
+		assertOnlyProperties(Arrays.asList(new String[] {"symbol", "max(sum(price))"}));
 		clearValues();
 		
 		epService.initialize();
@@ -163,8 +163,8 @@ public class TestOrderByAggregation extends TestCase {
     	sendJoinEvents();
     	orderValuesBySymbolAggregateAll();
     	assertValues(symbols, "symbol");
-    	assertValues(prices, "max(distinct sum(price))");
-    	assertOnlyProperties(Arrays.asList(new String[] {"symbol", "max(distinct sum(price))"}));
+    	assertValues(prices, "max(sum(price))");
+    	assertOnlyProperties(Arrays.asList(new String[] {"symbol", "max(sum(price))"}));
     	clearValues();
     	
     	epService.initialize();

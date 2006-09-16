@@ -1,7 +1,6 @@
 package net.esper.eql.expression;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,27 +17,32 @@ import net.esper.event.EventType;
  */
 public class ResultSetProcessorSimple implements ResultSetProcessor
 {
-	 private static final Log log = LogFactory.getLog(ResultSetProcessorSimple.class);
+	private static final Log log = LogFactory.getLog(ResultSetProcessorSimple.class);
+
     private final SelectExprProcessor selectExprProcessor;
     private final boolean isOutputLimiting;
     private final boolean isOutputLimitLastOnly;
 	private final OrderByProcessor orderByProcessor;
+    private final ExprNode optionalHavingExpr;
 
     /**
      * Ctor.
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * @param orderByProcessor - for sorting the outgoing events according to the order-by clause
+     * @param optionalHavingNode - having clause expression node
      * @param isOutputLimiting - true to indicate we are output limiting and must keep producing
      * a row per group even if groups didn't change
      * @param isOutputLimitLastOnly - true if output limiting and interested in last event only
      */
     public ResultSetProcessorSimple(SelectExprProcessor selectExprProcessor,
                                     OrderByProcessor orderByProcessor,
+                                    ExprNode optionalHavingNode,
                                     boolean isOutputLimiting,
                                     boolean isOutputLimitLastOnly)
     {
     	this.selectExprProcessor = selectExprProcessor;
     	this.orderByProcessor = orderByProcessor;
+        this.optionalHavingExpr = optionalHavingNode;
         this.isOutputLimiting = isOutputLimiting;
         this.isOutputLimitLastOnly = isOutputLimitLastOnly;
     }
@@ -50,16 +54,27 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
 
     public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
     {
-    	EventBean[] selectOldEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly);
-    	EventBean[] selectNewEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly);
+    	EventBean[] selectOldEvents = null;
+        EventBean[] selectNewEvents = null;
 
+        if (optionalHavingExpr == null)
+        {
+            selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly);
+            selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly);
+        }
+        else
+        {
+            selectOldEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, oldEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly);
+            selectNewEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, newEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly);
+        }
+        
     	return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
     }
 
     public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData)
     {
-    	EventBean[] selectOldEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly);
-    	EventBean[] selectNewEvents = getSelectListEvents(selectExprProcessor, orderByProcessor, newData, isOutputLimiting, isOutputLimitLastOnly);
+    	EventBean[] selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly);
+    	EventBean[] selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newData, isOutputLimiting, isOutputLimitLastOnly);
 
     	return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
     }
@@ -74,7 +89,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
     {
         if (isOutputLimiting)
         {
@@ -173,7 +188,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectListEvents(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
     {
         if (isOutputLimiting)
         {
@@ -212,6 +227,109 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         else
         {
         	return result;
+        }
+    }
+
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    {
+        if (isOutputLimiting)
+        {
+    	    events = ResultSetProcessorSimple.applyOutputLimit(events, isOutputLimitLastOnly);
+        }
+
+        if (events == null)
+        {
+            return null;
+        }
+
+        LinkedList<EventBean> result = new LinkedList<EventBean>();
+        List<EventBean[]> eventGenerators = null;
+        if(orderByProcessor != null)
+        {
+        	eventGenerators = new ArrayList<EventBean[]>();
+        }
+
+        EventBean[] eventsPerStream = new EventBean[1];
+        for (int i = 0; i < events.length; i++)
+        {
+            eventsPerStream[0] = events[i];
+
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream);
+            if (!passesHaving)
+            {
+                continue;
+            }
+
+            result.add(exprProcessor.process(eventsPerStream));
+            if(orderByProcessor != null)
+            {
+            	eventGenerators.add(new EventBean[] { events[i] });
+            }
+        }
+
+        if (result.size() > 0)
+        {
+        	if(orderByProcessor != null)
+        	{
+                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]));
+        	}
+        	else
+        	{
+        		return result.toArray(new EventBean[0]);
+        	}
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    {
+        if (isOutputLimiting)
+        {
+    	    events = ResultSetProcessorSimple.applyOutputLimit(events, isOutputLimitLastOnly);
+        }
+
+        LinkedList<EventBean> result = new LinkedList<EventBean>();
+        List<EventBean[]> eventGenerators = null;
+        if(orderByProcessor != null)
+        {
+        	eventGenerators = new ArrayList<EventBean[]>();
+        }
+
+        for (MultiKey<EventBean> key : events)
+        {
+            EventBean[] eventsPerStream = key.getArray();
+
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream);
+            if (!passesHaving)
+            {
+                continue;
+            }
+
+            EventBean resultEvent = exprProcessor.process(eventsPerStream);
+            result.add(resultEvent);
+            if(orderByProcessor != null)
+            {
+            	eventGenerators.add(eventsPerStream);
+            }
+        }
+
+        if (result.size() > 0)
+        {
+        	if(orderByProcessor != null)
+        	{
+                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]));
+        	}
+        	else
+        	{
+        		return result.toArray(new EventBean[0]);
+        	}
+        }
+        else
+        {
+            return null;
         }
     }
 }
