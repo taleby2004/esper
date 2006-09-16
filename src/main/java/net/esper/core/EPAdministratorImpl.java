@@ -8,14 +8,12 @@ import net.esper.event.EventType;
 import net.esper.eql.parse.*;
 import net.esper.eql.generated.EQLStatementParser;
 import net.esper.eql.generated.EQLBaseWalker;
-import net.esper.eql.expression.*;
-import net.esper.collection.Pair;
+import net.esper.eql.spec.StatementSpec;
+import net.esper.eql.spec.PatternStreamSpec;
 import net.esper.util.DebugFacility;
+import net.esper.pattern.EvalRootNode;
 
 import java.util.Map;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.HashMap;
 
 import antlr.TokenStreamException;
 import antlr.RecognitionException;
@@ -81,7 +79,7 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         // Parse and walk
         AST ast = ParseHelper.parse(expression, patternParseRule);
-        EQLPatternTreeWalker walker = new EQLPatternTreeWalker(services.getEventAdapterService());
+        EQLTreeWalker walker = new EQLTreeWalker(services.getEventAdapterService());
 
         try
         {
@@ -104,11 +102,16 @@ public class EPAdministratorImpl implements EPAdministrator
         }
 
         // Build event type of aggregate event representing the pattern
-        Map<String, EventType> eventTypes = walker.getTaggedEventTypes();
-        Map<String, Class> types = getUnderlyingTypes(eventTypes);
-        EventType eventType = services.getEventAdapterService().createAnonymousMapType(types);
+        // TODO checking if more then 1, comments in code
+        PatternStreamSpec patternStreamSpec = (PatternStreamSpec) walker.getStatementSpec().getStreamSpecs().get(0);
 
-        EPPatternStmtStartMethod startMethod = new EPPatternStmtStartMethod(services, walker.getRootNode());
+        EvalRootNode rootNode = new EvalRootNode();
+        rootNode.addChildNode(patternStreamSpec.getEvalNode());
+        EPPatternStmtStartMethod startMethod = new EPPatternStmtStartMethod(services, rootNode);
+
+        // generate event type
+        Map<String, EventType> eventTypes = patternStreamSpec.getTaggedEventTypes();
+        EventType eventType = services.getEventAdapterService().createAnonymousMapTypeUnd(eventTypes);
 
         EPPatternStatementImpl patternStatement = new EPPatternStatementImpl(expression,
                 eventType, services.getDispatchService(), services.getEventAdapterService(), startMethod);
@@ -141,48 +144,13 @@ public class EPAdministratorImpl implements EPAdministrator
             DebugFacility.dumpAST(walker.getAST());
         }
 
-        // Compile list of selection elements
-        List<Pair<ExprNode, String>> rawSelectionList = walker.getSelectListExpressions();
-        List<SelectExprElement> selectClause = new LinkedList<SelectExprElement>();
-        for (Pair<ExprNode, String> raw : rawSelectionList)
-        {
-            selectClause.add(new SelectExprElement(raw.getFirst(), raw.getSecond()));
-        }
 
         // Create start method
-        List<StreamSpec> fromClause = walker.getStreamSpecs();
-        List<OuterJoinDesc> outerJoinClauses = walker.getOuterJoinDescList();
-        ExprNode whereClause = walker.getFilterRootNode();
-        List<ExprNode> groupByNodes = walker.getGroupByExpressions();
-        ExprNode havingClause = walker.getHavingExprRootNode();
-        OutputLimitSpec outputClause = walker.getOutputLimitSpec();
-        InsertIntoDesc insertIntoDesc = walker.getInsertIntoDesc();
-        List<Pair<ExprNode, Boolean>> orderByClause = walker.getOrderByList();
-
-        EPEQLStmtStartMethod startMethod = new EPEQLStmtStartMethod(insertIntoDesc, selectClause, fromClause,
-                outerJoinClauses, whereClause, groupByNodes, havingClause, outputClause, orderByClause, eqlStatement, services);
+        StatementSpec statementSpec = walker.getStatementSpec();
+        EPEQLStmtStartMethod startMethod = new EPEQLStmtStartMethod(statementSpec, eqlStatement, services);
 
         return new EPEQLStatementImpl(eqlStatement, services.getDispatchService(), startMethod);
     }
-
-    /**
-     * Return a map of property name and types for a given map of property name and event type,
-     * by extracting the underlying type for the event types.
-     * @param types is the various event types returned.
-     * @return map of property name and type
-     */
-    private static Map<String, Class> getUnderlyingTypes(Map<String, EventType> types)
-    {
-        Map<String, Class> classes = new HashMap<String, Class>();
-
-        for (Map.Entry<String, EventType> type : types.entrySet())
-        {
-            classes.put(type.getKey(), type.getValue().getUnderlyingType());
-        }
-
-        return classes;
-    }
-
 
     private static Log log = LogFactory.getLog(EPAdministratorImpl.class);
 }

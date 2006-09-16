@@ -3,6 +3,8 @@ package net.esper.eql.expression;
 import net.esper.util.JavaClassHelper;
 import net.esper.event.EventBean;
 import net.esper.collection.Pair;
+import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.StreamTypeService;
 
 import java.util.List;
 import java.util.Iterator;

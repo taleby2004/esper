@@ -1,6 +1,7 @@
 package net.esper.support.eql;
 
 import net.esper.eql.expression.*;
+import net.esper.eql.core.StreamTypeService;
 import net.esper.type.ArithTypeEnum;
 import net.esper.type.RelationalOpEnum;
 import net.esper.collection.Pair;

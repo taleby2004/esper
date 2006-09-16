@@ -16,6 +16,7 @@ import static net.esper.support.eql.SupportExprNodeFactory.*;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.eql.parse.ASTFilterSpecHelper;
+import net.esper.eql.core.StreamTypeService;
 import net.esper.event.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

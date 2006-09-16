@@ -4,12 +4,21 @@ import net.esper.filter.FilterSpec;
 import net.esper.view.ViewSpec;
 import net.esper.eql.generated.EQLBaseWalker;
 import net.esper.eql.expression.*;
+import net.esper.eql.spec.*;
 import net.esper.type.*;
 import net.esper.collection.Pair;
 import net.esper.event.EventAdapterService;
+import net.esper.event.EventType;
+import net.esper.pattern.*;
+import net.esper.pattern.observer.ObserverEnum;
+import net.esper.pattern.observer.ObserverFactory;
+import net.esper.pattern.guard.GuardEnum;
+import net.esper.pattern.guard.GuardFactory;
+import net.esper.util.ConstructorHelper;
 import antlr.collections.AST;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.beanutils.ConstructorUtils;
 
 import java.util.*;
 
@@ -19,20 +28,21 @@ import java.util.*;
  */
 public class EQLTreeWalker extends EQLBaseWalker
 {
-    private Map<AST, ExprNode> astNodeMap;
-    private EventAdapterService eventAdapterService;
+    // services required
+    private final EventAdapterService eventAdapterService;
 
-    private List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
-    private OutputLimitSpec outputLimitSpec;
+    // private holding areas for accumulated info
+    private final Map<AST, ExprNode> astExprNodeMap = new HashMap<AST, ExprNode>();
+    private final Map<AST, EvalNode> astPatternNodeMap = new HashMap<AST, EvalNode>();
+    private final Map<String, EventType> taggedEventTypes = new HashMap<String, EventType>(); // Stores types for filters with tags
     private FilterSpec filterSpec;
-    private List<StreamSpec> streamSpecs = new LinkedList<StreamSpec>();
-    private List<Pair<ExprNode, String>> selectListExpressions = new LinkedList<Pair<ExprNode, String>>();
-    private List<ExprNode> groupByExpressions = new LinkedList<ExprNode>();
-    private ExprNode filterExprRootNode;
-    private ExprNode havingExprRootNode;
-    private List<OuterJoinDesc> outerJoinDescList = new LinkedList<OuterJoinDesc>();
-    private InsertIntoDesc insertIntoDesc;
-    private List<Pair<ExprNode, Boolean>> orderByList = new LinkedList<Pair<ExprNode, Boolean>>();
+    private final List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
+
+    // Pattern indicator dictates behavior for some AST nodes
+    private boolean isProcessingPattern;
+
+    // AST Walk result
+    private final StatementSpec statementSpec;
 
     /**
      * Ctor.
@@ -41,87 +51,25 @@ public class EQLTreeWalker extends EQLBaseWalker
     public EQLTreeWalker(EventAdapterService eventAdapterService)
     {
         this.eventAdapterService = eventAdapterService;
-        astNodeMap = new HashMap<AST, ExprNode>();
+        statementSpec = new StatementSpec();
     }
 
     /**
-     * Returns the FROM-clause stream definitions.
-     * @return list of stream specifications
+     * Returns statement specification.
+     * @return statement spec.
      */
-    public List<StreamSpec> getStreamSpecs()
+    public StatementSpec getStatementSpec()
     {
-        return streamSpecs;
+        return statementSpec;
     }
 
-    /**
-     * Returns SELECT-clause list of expressions.
-     * @return list of expressions and optional name
-     */
-    public List<Pair<ExprNode, String>> getSelectListExpressions()
+    protected void setIsPatternWalk(boolean isPatternWalk)
     {
-        return selectListExpressions;
-    }
-
-    /**
-     * Returns the WHERE-clause root node of filter expression.
-     * @return filter expression root node
-     */
-    public ExprNode getFilterRootNode()
-    {
-        return filterExprRootNode;
-    }
-
-    /**
-     * Returns the LEFT/RIGHT/FULL OUTER JOIN-type and property name descriptor, if applicable. Returns null if regular join.
-     * @return outer join type, stream names and property names
-     */
-    public List<OuterJoinDesc> getOuterJoinDescList()
-    {
-        return outerJoinDescList;
-    }
-
-    /**
-     * Returns list of group-by expressions.
-     * @return group-by expression nodes as specified in group-by clause
-     */
-    public List<ExprNode> getGroupByExpressions()
-    {
-        return groupByExpressions;
-    }
-
-    /**
-     * Returns expression root node representing the having-clause, if present, or null if no having clause was supplied.
-     * @return having-clause expression top node
-     */
-    public ExprNode getHavingExprRootNode()
-    {
-        return havingExprRootNode;
-    }
-
-    /**
-     * Returns the output limit definition, if any.
-     * @return output limit spec
-     */
-    public OutputLimitSpec getOutputLimitSpec()
-    {
-        return outputLimitSpec;
-    }
-
-    /**
-     * Return a descriptor with the insert-into event name and optional list of columns.
-     * @return insert into specification
-     */
-    public InsertIntoDesc getInsertIntoDesc()
-    {
-        return insertIntoDesc;
-    }
-
-    /**
-     * Returns the list of order-by expression as specified in the ORDER BY clause.
-     * @return Returns the orderByList.
-     */
-    public List<Pair<ExprNode, Boolean>> getOrderByList() {
-        return orderByList;
+        if (log.isDebugEnabled())
+        {
+            log.debug(".setIsPatternWalk " + isPatternWalk);
+        }
+        isProcessingPattern = isPatternWalk;
     }
 
     /**
@@ -138,22 +86,27 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         switch (node.getType())
         {
+            case STREAM_EXPR:
+                leaveStreamExpr(node);
+                break;
+            case EVENT_FILTER_EXPR:
+                leaveFilter(node);
+                break;
+            case PATTERN_INCL_EXPR:
+                return;
+            case VIEW_EXPR:
+                leaveView(node);
+                break;
             case SELECTION_EXPR:
                 return;
             case SELECTION_ELEMENT_EXPR:
                 leaveSelectionElement(node);
                 break;
-            case EVENT_FILTER_EXPR:
-                leaveFilter(node);
-                break;
-            case VIEW_EXPR:
-                leaveView(node);
-                break;
-            case STREAM_EXPR:
-                leaveStream(node);
-                break;
             case EVENT_PROP_EXPR:
-                leaveEventPropertyExpr(node);
+                if (!isProcessingPattern)
+                {
+                    leaveEventPropertyExpr(node);
+                }
                 break;
             case EVAL_AND_EXPR:
                 leaveJoinAndExpr(node);
@@ -233,7 +186,7 @@ public class EQLTreeWalker extends EQLBaseWalker
             case SEC_LIMIT_EXPR:
             case MIN_LIMIT_EXPR:
             	leaveOutputLimit(node);
-            	break;    
+            	break;
             case INSERTINTO_EXPR:
             	leaveInsertInto(node);
             	break;
@@ -246,6 +199,24 @@ public class EQLTreeWalker extends EQLBaseWalker
             case CASE2:
                 leaveCaseNode(node, true);
                 break;
+            case EVERY_EXPR:
+                leaveEvery(node);
+                break;
+            case FOLLOWED_BY_EXPR:
+                leaveFollowedBy(node);
+                break;
+            case OR_EXPR:
+                leaveOr(node);
+                break;
+            case AND_EXPR:
+                leaveAnd(node);
+                break;
+            case GUARD_EXPR:
+                leaveGuard(node);
+                break;
+            case OBSERVER_EXPR:
+                leaveObserver(node);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + "'");
@@ -253,18 +224,37 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         // For each AST child node of this AST node that generated an ExprNode add the child node to the expression node.
         // This is for automatic expression tree building.
-        ExprNode thisEvalNode = astNodeMap.get(node);
+        ExprNode thisEvalNode = astExprNodeMap.get(node);
 
         // Loop over all child nodes for this node.
         AST childNode = node.getFirstChild();
         do {
-            ExprNode childEvalNode = astNodeMap.get(childNode);
+            ExprNode childEvalNode = astExprNodeMap.get(childNode);
             // If there was an expression node generated for the child node, and there is a current expression node,
             // add it to the current expression node (thisEvalNode)
             if ((childEvalNode != null) && (thisEvalNode != null))
             {
                 thisEvalNode.addChildNode(childEvalNode);
-                astNodeMap.remove(childNode);
+                astExprNodeMap.remove(childNode);
+            }
+            // Next child node
+            if (childNode != null)
+            {
+                childNode = childNode.getNextSibling();
+            }
+        }
+        while (childNode != null);
+
+        // For each AST child node of this AST node that generated an EvalNode add the EvalNode as a child
+        EvalNode thisPatternNode = astPatternNodeMap.get(node);
+
+        childNode = node.getFirstChild();
+        do {
+            EvalNode childEvalNode = astPatternNodeMap.get(childNode);
+            if (childEvalNode != null)
+            {
+                thisPatternNode.addChildNode(childEvalNode);
+                astPatternNodeMap.remove(childNode);
             }
             // Next child node
             if (childNode != null)
@@ -276,29 +266,59 @@ public class EQLTreeWalker extends EQLBaseWalker
     }
 
     /**
+     * End processing of the AST tree for stand-alone pattern expressions.
+     * @throws ASTWalkException
+     */
+    protected void endPattern() throws ASTWalkException
+    {
+        log.debug(".endPattern");
+
+        if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.size() == 0)))
+        {
+            throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child elements for root");
+        }
+
+        // Get expression node sub-tree from the AST nodes placed so far
+        EvalNode evalNode = astPatternNodeMap.values().iterator().next();
+
+        PatternStreamSpec streamSpec = new PatternStreamSpec(evalNode, taggedEventTypes, new LinkedList<ViewSpec>(), null);
+        statementSpec.getStreamSpecs().add(streamSpec);
+
+        taggedEventTypes.clear();
+        astPatternNodeMap.clear();
+    }
+
+    /**
      * End processing of the AST tree, check that expression nodes found their homes.
      * @throws ASTWalkException
      */
     protected void end() throws ASTWalkException
     {
-        if (astNodeMap.size() > 1)
+        log.debug(".end");
+
+        if (astExprNodeMap.size() > 1)
         {
             throw new ASTWalkException("Unexpected AST tree contains left over child elements," +
                     " not all expression nodes have been removed from AST-to-expression nodes map");
+        }
+        if (astPatternNodeMap.size() > 1)
+        {
+            throw new ASTWalkException("Unexpected AST tree contains left over child elements," +
+                    " not all pattern nodes have been removed from AST-to-pattern nodes map");
         }
     }
 
     private void leaveSelectionElement(AST node) throws ASTWalkException
     {
         log.debug(".leaveSelectionElement");
-        if ((astNodeMap.size() > 1) || ((astNodeMap.size() == 0)))
+        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.size() == 0)))
         {
             throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
         }
 
         // Get expression node sub-tree from the AST nodes placed so far
-        ExprNode exprNode = astNodeMap.values().iterator().next();
-        astNodeMap.clear();
+        ExprNode exprNode = astExprNodeMap.values().iterator().next();
+        astExprNodeMap.clear();
 
         // Get list element name
         String optionalName = null;
@@ -308,7 +328,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         // Add as selection element
-        selectListExpressions.add(new Pair<ExprNode, String>(exprNode, optionalName));
+        statementSpec.getSelectListExpressions().add(new SelectExprElementSpec(exprNode, optionalName));
     }
 
     private void leaveView(AST node) throws ASTWalkException
@@ -318,38 +338,50 @@ public class EQLTreeWalker extends EQLBaseWalker
         viewSpecs.add(spec);
     }
 
-    private void leaveFilter(AST node)
+    private void leaveStreamExpr(AST node)
     {
-        log.debug(".leaveFilter");
+        log.debug(".leaveStreamExpr");
 
-        filterSpec = ASTFilterSpecHelper.buildSpec(node, null, eventAdapterService);
-
-        // clear the sub-nodes for the filter since the event property expressions have been processed
-        // by building the spec
-        astNodeMap.clear();
-    }
-
-    private void leaveStream(AST node)
-    {
-        log.debug(".leaveStream");
-
-        // The stream name node is an identifier
+        // Determine the optional stream name
+        // Search for identifier node that carries the stream name in an "from Class.win:time().std:doit() as StreamName"
         AST streamNameNode = node.getFirstChild().getNextSibling();
         while ((streamNameNode != null) && (streamNameNode.getType() != IDENT))
         {
             streamNameNode = streamNameNode.getNextSibling();
         }
-
-        // Stream name is optional
         String streamName = null;
         if (streamNameNode != null)
         {
             streamName = streamNameNode.getText();
         }
 
-        StreamSpec streamSpec = new StreamSpec(filterSpec, viewSpecs, streamName);
-        viewSpecs = new LinkedList<ViewSpec>();
-        streamSpecs.add(streamSpec);
+        // Convert to a stream specification instance
+        StreamSpec streamSpec = null;
+        // If the first subnode is a filter node, we have a filter stream specification
+        if (node.getFirstChild().getType() == EVENT_FILTER_EXPR)
+        {
+            streamSpec = new FilterStreamSpec(filterSpec, viewSpecs, streamName);
+        }
+        else  if (node.getFirstChild().getType() == PATTERN_INCL_EXPR)
+        {
+            if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.size() == 0)))
+            {
+                throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child elements for root");
+            }
+
+            // Get expression node sub-tree from the AST nodes placed so far
+            EvalNode evalNode = astPatternNodeMap.values().iterator().next();
+
+            streamSpec = new PatternStreamSpec(evalNode, taggedEventTypes, viewSpecs, streamName);
+            taggedEventTypes.clear();
+            astPatternNodeMap.clear();
+        }
+        else
+        {
+            throw new ASTWalkException("Unexpected AST child node to stream expression, type=" + node.getFirstChild().getType());
+        }
+        viewSpecs.clear();
+        statementSpec.getStreamSpecs().add(streamSpec);
     }
 
     private void leaveEventPropertyExpr(AST node)
@@ -383,27 +415,27 @@ public class EQLTreeWalker extends EQLBaseWalker
             identNode = new ExprIdentNode(propertyName, streamOrNestedPropertyName);
         }
 
-        astNodeMap.put(node, identNode);
+        astExprNodeMap.put(node, identNode);
     }
 
-    private void leaveLibFunction(AST node) 
+    private void leaveLibFunction(AST node)
     {
     	log.debug(".leaveLibFunction");
-    	
+
     	if(node.getNumberOfChildren() < 2)
     	{
     		throw new IllegalArgumentException("Illegal method invocation");
     	}
-    	
+
     	AST itor = node.getFirstChild();
     	String className = itor.getText();
 
     	itor = itor.getNextSibling();
     	String methodName = itor.getText();
-    	
-    	astNodeMap.put(node, new ExprStaticMethodNode(className, methodName));
+
+    	astExprNodeMap.put(node, new ExprStaticMethodNode(className, methodName));
 	}
-    
+
     private void leaveJoinEqualsExpr(AST node)
     {
         log.debug(".leaveJoinEqualsExpr");
@@ -415,28 +447,28 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         ExprEqualsNode identNode = new ExprEqualsNode(isNot);
-        astNodeMap.put(node, identNode);
+        astExprNodeMap.put(node, identNode);
     }
 
     private void leaveJoinAndExpr(AST node)
     {
         log.debug(".leaveJoinAndExpr");
         ExprAndNode identNode = new ExprAndNode();
-        astNodeMap.put(node, identNode);
+        astExprNodeMap.put(node, identNode);
     }
 
     private void leaveJoinOrExpr(AST node)
     {
         log.debug(".leaveJoinOrExpr");
         ExprOrNode identNode = new ExprOrNode();
-        astNodeMap.put(node, identNode);
+        astExprNodeMap.put(node, identNode);
     }
 
     private void leaveConstant(AST node)
     {
         log.debug(".leaveConstant");
         ExprConstantNode constantNode = new ExprConstantNode(ASTConstantHelper.parse(node));
-        astNodeMap.put(node, constantNode);
+        astExprNodeMap.put(node, constantNode);
     }
 
     private void leaveMath(AST node)
@@ -467,7 +499,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         ExprMathNode mathNode = new ExprMathNode(arithTypeEnum);
-        astNodeMap.put(node, mathNode);
+        astExprNodeMap.put(node, mathNode);
     }
 
     // Min/Max nodes can be either an aggregate or a per-row function depending on the number or arguments
@@ -512,7 +544,7 @@ public class EQLTreeWalker extends EQLBaseWalker
             // use the aggregation function
             minMaxNode = new ExprMinMaxAggrNode(isDistinct, minMaxTypeEnum);
         }
-        astNodeMap.put(node, minMaxNode);
+        astExprNodeMap.put(node, minMaxNode);
     }
 
     private void leaveAggregate(AST node)
@@ -551,7 +583,7 @@ public class EQLTreeWalker extends EQLBaseWalker
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized aggregate node type");
         }
 
-        astNodeMap.put(node, aggregateNode);
+        astExprNodeMap.put(node, aggregateNode);
     }
 
     private void leaveRelationalOp(AST node)
@@ -579,7 +611,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         ExprRelationalOpNode mathNode = new ExprRelationalOpNode(relationalOpEnum);
-        astNodeMap.put(node, mathNode);
+        astExprNodeMap.put(node, mathNode);
     }
 
     private void leaveBitWise(AST node)
@@ -603,44 +635,44 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
 	    ExprBitWiseNode bwNode = new ExprBitWiseNode(bitWiseOpEnum);
-	    astNodeMap.put(node, bwNode);       
+	    astExprNodeMap.put(node, bwNode);
     }
 
     private void leaveWhereClause()
     {
         log.debug(".leaveWhereClause");
 
-        if (astNodeMap.size() != 1)
+        if (astExprNodeMap.size() != 1)
         {
             throw new IllegalStateException("Where clause generated zero or more then one expression nodes");
         }
 
         // Just assign the single root ExprNode not consumed yet
-        filterExprRootNode = astNodeMap.values().iterator().next();
-        astNodeMap.clear();
+        statementSpec.setFilterExprRootNode(astExprNodeMap.values().iterator().next());
+        astExprNodeMap.clear();
     }
 
     private void leaveHavingClause()
     {
         log.debug(".leaveHavingClause");
 
-        if (astNodeMap.size() != 1)
+        if (astExprNodeMap.size() != 1)
         {
             throw new IllegalStateException("Having clause generated zero or more then one expression nodes");
         }
 
         // Just assign the single root ExprNode not consumed yet
-        havingExprRootNode = astNodeMap.values().iterator().next();
-        astNodeMap.clear();
+        statementSpec.setHavingExprRootNode(astExprNodeMap.values().iterator().next());
+        astExprNodeMap.clear();
     }
 
     private void leaveOutputLimit(AST node) throws ASTWalkException
     {
         log.debug(".leaveOutputLimit");
 
-        outputLimitSpec = ASTOutputLimitHelper.buildSpec(node);
+        statementSpec.setOutputLimitSpec(ASTOutputLimitHelper.buildSpec(node));
     }
-    
+
     private void leaveOuterJoin(AST node)
     {
         log.debug(".leaveOuterJoin");
@@ -662,15 +694,15 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         // get subnodes representing the expression
-        ExprIdentNode left = (ExprIdentNode) astNodeMap.get(node.getFirstChild());
-        ExprIdentNode right = (ExprIdentNode) astNodeMap.get(node.getFirstChild().getNextSibling());
+        ExprIdentNode left = (ExprIdentNode) astExprNodeMap.get(node.getFirstChild());
+        ExprIdentNode right = (ExprIdentNode) astExprNodeMap.get(node.getFirstChild().getNextSibling());
 
         // remove from AST-to-expression node map
-        astNodeMap.remove(node.getFirstChild());
-        astNodeMap.remove(node.getFirstChild().getNextSibling());
+        astExprNodeMap.remove(node.getFirstChild());
+        astExprNodeMap.remove(node.getFirstChild().getNextSibling());
 
         OuterJoinDesc outerJoinDesc = new OuterJoinDesc(joinType, left, right);
-        outerJoinDescList.add(outerJoinDesc);
+        statementSpec.getOuterJoinDescList().add(outerJoinDesc);
     }
 
     private void leaveGroupBy(AST node)
@@ -678,7 +710,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         log.debug(".leaveGroupBy");
 
         // there must be some expressions under the group by in our map
-        if (astNodeMap.size() < 1)
+        if (astExprNodeMap.size() < 1)
         {
             throw new IllegalStateException("Group-by clause generated no expression nodes");
         }
@@ -689,19 +721,19 @@ public class EQLTreeWalker extends EQLBaseWalker
         while (child != null)
         {
             // get top expression node for the child node
-            ExprNode exprNode = astNodeMap.get(child);
+            ExprNode exprNode = astExprNodeMap.get(child);
 
             if (exprNode == null)
             {
                 throw new IllegalStateException("Expression node as a result of group-by child node not found in collection");
             }
 
-            groupByExpressions.add(exprNode);
+            statementSpec.getGroupByExpressions().add(exprNode);
             child = child.getNextSibling();
         }
 
         // Clear the map - all expression node should be gone
-        astNodeMap.clear();
+        astExprNodeMap.clear();
     }
 
     private void leaveInsertInto(AST node)
@@ -724,7 +756,7 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         // alias
         String eventAliasName = child.getText();
-        insertIntoDesc = new InsertIntoDesc(isIStream, eventAliasName);
+        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(isIStream, eventAliasName);
 
         // optional columns
         child = child.getNextSibling();
@@ -738,19 +770,21 @@ public class EQLTreeWalker extends EQLBaseWalker
                 child = child.getNextSibling();
             }
         }
+
+        statementSpec.setInsertIntoDesc(insertIntoDesc);
     }
 
     private void leaveOrderByElement(AST node) throws ASTWalkException
     {
         log.debug(".leaveOrderByElement");
-        if ((astNodeMap.size() > 1) || ((astNodeMap.size() == 0)))
+        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.size() == 0)))
         {
             throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
         }
 
         // Get expression node sub-tree from the AST nodes placed so far
-        ExprNode exprNode = astNodeMap.values().iterator().next();
-        astNodeMap.clear();
+        ExprNode exprNode = astExprNodeMap.values().iterator().next();
+        astExprNodeMap.clear();
 
         // Get optional ascending or descending qualifier
         boolean descending = false;
@@ -760,19 +794,140 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         // Add as order-by element
-        orderByList.add(new Pair<ExprNode, Boolean>(exprNode, descending));
-    }
-
-    private void leaveNot(AST node)
-    {
-        ExprNotNode notNode = new ExprNotNode();
-        astNodeMap.put(node, notNode);
+        statementSpec.getOrderByList().add(new Pair<ExprNode, Boolean>(exprNode, descending));
     }
 
     private void leaveConcat(AST node)
     {
         ExprConcatNode concatNode = new ExprConcatNode();
-        astNodeMap.put(node, concatNode);
+        astExprNodeMap.put(node, concatNode);
+    }
+
+    private void leaveEvery(AST node)
+    {
+        log.debug(".leaveEvery");
+        EvalEveryNode everyNode = new EvalEveryNode();
+        astPatternNodeMap.put(node, everyNode);
+    }
+
+    private void leaveFilter(AST node)
+    {
+        log.debug(".leaveFilter");
+
+        if (isProcessingPattern)
+        {
+            FilterSpec spec = ASTFilterSpecHelper.buildSpec(node, taggedEventTypes, eventAdapterService);
+            String optionalTag = ASTFilterSpecHelper.getEventNameTag(node);
+            EvalFilterNode filterNode = new EvalFilterNode(spec, optionalTag);
+            EventType eventType = spec.getEventType();
+
+            if (optionalTag != null)
+            {
+                EventType existingType = taggedEventTypes.get(optionalTag);
+                if ((existingType != null) && (existingType != eventType))
+                {
+                    throw new IllegalArgumentException("Tag '" + optionalTag + "' for event type " + eventType.getUnderlyingType().getName() +
+                            " has already been used for events of type " + existingType.getUnderlyingType().getName());
+                }
+                taggedEventTypes.put(optionalTag, eventType);
+            }
+
+            astPatternNodeMap.put(node, filterNode);
+        }
+        else
+        {
+            filterSpec = ASTFilterSpecHelper.buildSpec(node, null, eventAdapterService);
+
+            // clear the sub-nodes for the filter since the event property expressions have been processed
+            // by building the spec
+            astExprNodeMap.clear();
+        }
+    }
+
+    private void leaveFollowedBy(AST node)
+    {
+        log.debug(".leaveFollowedBy");
+        EvalFollowedByNode fbNode = new EvalFollowedByNode();
+        astPatternNodeMap.put(node, fbNode);
+    }
+
+    private void leaveAnd(AST node)
+    {
+        log.debug(".leaveAnd");
+        EvalAndNode andNode = new EvalAndNode();
+        astPatternNodeMap.put(node, andNode);
+    }
+
+    private void leaveOr(AST node)
+    {
+        log.debug(".leaveOr");
+        EvalOrNode orNode = new EvalOrNode();
+        astPatternNodeMap.put(node, orNode);
+    }
+
+    private void leaveNot(AST node)
+    {
+        log.debug(".leaveNot");
+
+        if (isProcessingPattern)
+        {
+            EvalNotNode notNode = new EvalNotNode();
+            astPatternNodeMap.put(node, notNode);
+        }
+        else
+        {
+            ExprNotNode notNode = new ExprNotNode();
+            astExprNodeMap.put(node, notNode);
+        }
+    }
+
+    private void leaveGuard(AST node) throws ASTWalkException
+    {
+        log.debug(".leaveGuard");
+
+        // Get the object information from AST
+        AST startGuard = node.getFirstChild().getNextSibling();
+        String objectNamespace = startGuard.getText();
+        String objectName = startGuard.getNextSibling().getText();
+
+        List<Object> objectParams = new LinkedList<Object>();
+
+        AST child = startGuard.getNextSibling().getNextSibling();
+        while (child != null)
+        {
+            Object object = ASTParameterHelper.makeParameter(child);
+            objectParams.add(object);
+            child = child.getNextSibling();
+        }
+
+        // From object name construct guard factory
+        GuardEnum guardEnum = GuardEnum.forName(objectNamespace, objectName);
+        if (guardEnum == null)
+        {
+            throw new ASTWalkException("Guard in namespace " + objectNamespace + " and name " + objectName +
+                    " is not a known guard");
+        }
+
+        GuardFactory guardFactory = null;
+        try
+        {
+            guardFactory = (GuardFactory) ConstructorUtils.invokeConstructor(guardEnum.getClazz(), objectParams.toArray());
+
+            if (log.isDebugEnabled())
+            {
+                log.debug(".create Successfully instantiated guard");
+            }
+        }
+        catch (Exception e)
+        {
+            String message = "Error invoking constructor for guard '" + objectName;
+            message += "', invalid parameter list for the object";
+            log.fatal(".leaveObserver " + message, e);
+            throw new ASTWalkException(message);
+        }
+
+        EvalGuardNode guardNode = new EvalGuardNode(guardFactory);
+        astPatternNodeMap.put(node, guardNode);
     }
 
     private void leaveCaseNode(AST node_, boolean incase2_)
@@ -786,12 +941,12 @@ public class EQLTreeWalker extends EQLBaseWalker
             log.debug(".leaveCaseNode");
         }
 
-        if (astNodeMap.size() == 0)
+        if (astExprNodeMap.size() == 0)
         {
             throw new ASTWalkException("Unexpected AST tree contains zero child element for case node");
         }
         AST childNode = node_.getFirstChild();
-        if ((astNodeMap.size() == 1) && (childNode.getType() != WHEN))
+        if ((astExprNodeMap.size() == 1) && (childNode.getType() != WHEN))
         {
             throw new ASTWalkException("AST tree doesn not contain at least when node for case node");
         }
@@ -816,7 +971,7 @@ public class EQLTreeWalker extends EQLBaseWalker
                             previousNode.setNextSibling(downChildNode);
                         }
                     }
-                    ExprNode downEvalChildNode = astNodeMap.get(downChildNode);
+                    ExprNode downEvalChildNode = astExprNodeMap.get(downChildNode);
                     if ((downChildNode != null) && (downEvalChildNode != null))
                     {
                         AST actionNode = downChildNode.getNextSibling();
@@ -829,7 +984,7 @@ public class EQLTreeWalker extends EQLBaseWalker
                         }
                         else
                         {
-                            ExprNode actionEvalNode = astNodeMap.get(actionNode);
+                            ExprNode actionEvalNode = astExprNodeMap.get(actionNode);
                             exprNodeList.add(new Pair<ExprNode, ExprNode>(downEvalChildNode, actionEvalNode));
                         }
                     }
@@ -843,7 +998,58 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         ExprCaseNode caseNode = new ExprCaseNode(incase2_, exprNodeList);
-        astNodeMap.put(node_, caseNode);
+        astExprNodeMap.put(node_, caseNode);
+    }
+
+    private void leaveObserver(AST node) throws ASTWalkException
+    {
+        log.debug(".leaveObserver");
+
+        // Get the object information from AST
+        String objectNamespace = node.getFirstChild().getText();
+        String objectName = node.getFirstChild().getNextSibling().getText();
+
+        int numNodes = node.getNumberOfChildren();
+        Object[] observerParameters = new Object[numNodes - 2];
+
+        AST child = node.getFirstChild().getNextSibling().getNextSibling();
+        int index = 0;
+        while (child != null)
+        {
+            Object object = ASTParameterHelper.makeParameter(child);
+            observerParameters[index++] = object;
+            child = child.getNextSibling();
+        }
+
+        // From object name construct observer factory
+        ObserverEnum observerEnum = ObserverEnum.forName(objectNamespace, objectName);
+        if (observerEnum == null)
+        {
+            throw new ASTWalkException("EventObserver in namespace " + objectNamespace + " and name " + objectName +
+                    " is not a known observer");
+        }
+
+        ObserverFactory observerFactory = null;
+        try
+        {
+            Object obsFactory = ConstructorHelper.invokeConstructor(observerEnum.getClazz(), observerParameters);
+            observerFactory = (ObserverFactory) obsFactory;
+
+            if (log.isDebugEnabled())
+            {
+                log.debug(".create Successfully instantiated observer");
+            }
+        }
+        catch (Exception e)
+        {
+            String message = "Error invoking constructor for observer '" + objectNamespace + ":" + objectName;
+            message += "', invalid parameter list for the object";
+            log.fatal(".leaveObserver " + message, e);
+            throw new ASTWalkException(message);
+        }
+
+        EvalObserverNode observerNode = new EvalObserverNode(observerFactory);
+        astPatternNodeMap.put(node, observerNode);
     }
 
     private static final Log log = LogFactory.getLog(EQLTreeWalker.class);

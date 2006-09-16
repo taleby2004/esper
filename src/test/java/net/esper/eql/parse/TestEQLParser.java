@@ -14,7 +14,12 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select a & b from " + className + "().win:lenght(10)";
+        String pattern = "a=" + className + " -> b=" + className;
+        //String expression = "select * from pattern [" + pattern + "].win:length(100).std:someview()";
+        //String expression = "select * from " + className + ".win:length(100).std:someview()";
+        //String expression = "select * from " + className;
+        //String expression = "select * from pattern [" + pattern + "]";
+        String expression = "select * from pattern [" + pattern + "] as A, pattern [" + pattern + "] as B";
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
@@ -58,7 +63,6 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid(className + "().win:lenght(\"s')");
 
         assertIsInvalid("select MAX(intBoxed) from " + className + "().std:win(20)");
-        assertIsInvalid("select * from xxx");
         assertIsInvalid("select * from com.xxx().std:win(3) where a not is null");
         assertIsInvalid("select * from com.xxx().std:win(3) where a = not null");
         assertIsInvalid("select * from com.xxx().std:win(3) where not not");
@@ -217,6 +221,13 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("insert into MyEvent (a, b, c) select 1 from b.win:length(1)");
         assertIsValid("insert istream into MyEvent select 1 from b.win:length(1)");
         assertIsValid("insert rstream into MyEvent select 1 from b.win:length(1)");
+
+        // pattern inside EQL
+        assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "]");
+        assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "] as xyz");
+        assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100) as xyz");
+        assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100).std:someview() as xyz");
+        assertIsValid("select * from xxx");
     }
 
     public void testBitWiseCases() throws Exception
