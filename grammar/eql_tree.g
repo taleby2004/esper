@@ -133,6 +133,20 @@ valueExpr
 	|   evalExprChoice
 	|	f:builtinFunc { leaveNode(#f); }
 	|   l:libFunc { leaveNode(#l); }
+	|	cs:caseExpr { leaveNode(#cs); }
+	;
+
+caseExpr
+	: #(CASE whenExpr  (whenExpr)* (elseExpr)?)
+	| #(CASE2 valueExpr whenExpr (whenExpr)* (elseExpr)?)
+	;
+
+whenExpr
+	: #(WHEN valueExpr valueExpr)	
+	;
+
+elseExpr
+	: #(ELSE valueExpr)	
 	;
 
 builtinFunc

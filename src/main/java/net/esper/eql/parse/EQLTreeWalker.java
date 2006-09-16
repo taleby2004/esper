@@ -240,6 +240,12 @@ public class EQLTreeWalker extends EQLBaseWalker
             case CONCAT:
             	leaveConcat(node);
             	break;
+            case CASE:
+                leaveCaseNode(node, false);
+                break;
+            case CASE2:
+                leaveCaseNode(node, true);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + "'");
@@ -767,6 +773,77 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
         ExprConcatNode concatNode = new ExprConcatNode();
         astNodeMap.put(node, concatNode);
+    }
+
+    private void leaveCaseNode(AST node_, boolean incase2_)
+    {
+        if (incase2_)
+        {
+            log.debug(".leaveCase2Node");
+        }
+        else
+        {
+            log.debug(".leaveCaseNode");
+        }
+
+        if (astNodeMap.size() == 0)
+        {
+            throw new ASTWalkException("Unexpected AST tree contains zero child element for case node");
+        }
+        AST childNode = node_.getFirstChild();
+        if ((astNodeMap.size() == 1) && (childNode.getType() != WHEN))
+        {
+            throw new ASTWalkException("AST tree doesn not contain at least when node for case node");
+        }
+        List<Pair<ExprNode, ExprNode>> exprNodeList = new LinkedList<Pair<ExprNode, ExprNode>>();
+        AST previousNode = node_;
+        while (childNode != null)
+        {
+            if (childNode != null)
+            {
+                if ((childNode.getType() == WHEN) || (childNode.getType() == ELSE))
+                {
+                    // Expression is when X then Y else Z
+                    AST downChildNode = childNode.getFirstChild();
+                    if (previousNode == node_)
+                    {
+                        previousNode.setFirstChild(downChildNode);
+                    }
+                    else
+                    {
+                        if (previousNode != null)
+                        {
+                            previousNode.setNextSibling(downChildNode);
+                        }
+                    }
+                    ExprNode downEvalChildNode = astNodeMap.get(downChildNode);
+                    if ((downChildNode != null) && (downEvalChildNode != null))
+                    {
+                        AST actionNode = downChildNode.getNextSibling();
+                        previousNode = actionNode;
+                        // There is no sibling for the child node of else node.
+                        // The child node of the else node is the action node.
+                        if (actionNode == null)
+                        {
+                            exprNodeList.add(new Pair<ExprNode, ExprNode>(null, downEvalChildNode));
+                        }
+                        else
+                        {
+                            ExprNode actionEvalNode = astNodeMap.get(actionNode);
+                            exprNodeList.add(new Pair<ExprNode, ExprNode>(downEvalChildNode, actionEvalNode));
+                        }
+                    }
+                }
+                else
+                {
+                    previousNode = childNode;
+                }
+                childNode = childNode.getNextSibling();
+            }
+        }
+
+        ExprCaseNode caseNode = new ExprCaseNode(incase2_, exprNodeList);
+        astNodeMap.put(node_, caseNode);
     }
 
     private static final Log log = LogFactory.getLog(EQLTreeWalker.class);
