@@ -1,9 +1,9 @@
 package net.esper.eql.expression;
 
-import net.esper.type.MinMaxTypeEnum;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.core.AutoImportService;
 import net.esper.util.JavaClassHelper;
+import net.esper.util.CoercionException;
 import net.esper.event.EventBean;
 
 /**
@@ -12,6 +12,7 @@ import net.esper.event.EventBean;
 public class ExprCoalesceNode extends ExprNode
 {
     private Class resultType;
+    private boolean[] isNumericCoercion;
 
     public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService) throws ExprValidationException
     {
@@ -20,6 +21,7 @@ public class ExprCoalesceNode extends ExprNode
             throw new ExprValidationException("Coalesce node must have at least 2 child nodes");
         }
 
+        // get child expression types
         Class[] childTypes = new Class[getChildNodes().size()];
         int count = 0;
         for (ExprNode child : this.getChildNodes())
@@ -29,7 +31,33 @@ public class ExprCoalesceNode extends ExprNode
             count++;
         }
 
-        resultType = JavaClassHelper.getCommonCoercionType(childTypes);
+        // determine coercion type
+        try {
+            resultType = JavaClassHelper.getCommonCoercionType(childTypes);
+        }
+        catch (CoercionException ex)
+        {
+            throw new ExprValidationException("Implicit conversion not allowed: " + ex.toString());
+        }
+
+        // determine which child nodes
+        isNumericCoercion = new boolean[getChildNodes().size()];
+        count = 0;
+        for (ExprNode child : this.getChildNodes())
+        {
+            if ((JavaClassHelper.getBoxedType(child.getType()) != resultType) &&
+                (child.getType() != null) && (resultType != null))
+            {
+                if (!JavaClassHelper.isNumeric(resultType))
+                {
+                    throw new ExprValidationException("Implicit conversion from datatype '" +
+                            resultType +
+                            "' to " + child.getType() + " is not allowed");
+                }
+                isNumericCoercion[count] = true;
+            }
+            count++;
+        }
     }
 
     public Class getType() throws ExprValidationException
@@ -39,13 +67,26 @@ public class ExprCoalesceNode extends ExprNode
 
     public Object evaluate(EventBean[] eventsPerStream)
     {
-        Number valueChildOne = (Number) this.getChildNodes().get(0).evaluate(eventsPerStream);
-        Number valueChildTwo = (Number) this.getChildNodes().get(1).evaluate(eventsPerStream);
+        Object value = null;
 
-        if ((valueChildOne == null) || (valueChildTwo == null))
+        // Look for the first non-null return value
+        int count = 0;
+        for (ExprNode childNode : this.getChildNodes())
         {
-            return null;
+            value = childNode.evaluate(eventsPerStream);
+
+            if (value != null)
+            {
+                // Check if we need to coerce
+                if (isNumericCoercion[count])
+                {
+                    return JavaClassHelper.coerceNumber((Number)value, resultType);
+                }
+                return value;
+            }
+            count++;
         }
+
         return null;
     }
 
@@ -67,8 +108,6 @@ public class ExprCoalesceNode extends ExprNode
         {
             return false;
         }
-
-        ExprCoalesceNode other = (ExprCoalesceNode) node;
 
         return true;
     }

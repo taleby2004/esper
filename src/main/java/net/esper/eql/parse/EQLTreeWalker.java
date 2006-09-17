@@ -152,6 +152,9 @@ public class EQLTreeWalker extends EQLBaseWalker
             case MIN:
                 leaveMinMax(node);
                 break;
+            case COALESCE:
+                leaveCoalesce(node);
+                break;
             case NOT_EXPR:
                 leaveNot(node);
                 break;
@@ -545,6 +548,14 @@ public class EQLTreeWalker extends EQLBaseWalker
             minMaxNode = new ExprMinMaxAggrNode(isDistinct, minMaxTypeEnum);
         }
         astExprNodeMap.put(node, minMaxNode);
+    }
+
+    private void leaveCoalesce(AST node)
+    {
+        log.debug(".leaveCoalesce");
+
+        ExprNode coalesceNode = new ExprCoalesceNode();
+        astExprNodeMap.put(node, coalesceNode);
     }
 
     private void leaveAggregate(AST node)

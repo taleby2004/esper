@@ -3,6 +3,7 @@ package net.esper.regression.view;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPStatement;
 import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPStatementException;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_S0;
@@ -28,7 +29,112 @@ public class TestPerRowFunc extends TestCase
         epService.initialize();
     }
 
-    public void testGetEventType()
+    public void testCoalesceBeans()
+    {
+        epService.initialize();
+        String viewExpr = "select coalesce(a.string, b.string) as myString, coalesce(a, b) as myBean" +
+                          " from pattern [every (a=" + SupportBean.class.getName() + "(string='s0') or b=" + SupportBean.class.getName() + "(string='s1'))]";
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        SupportBean event = sendEvent("s0");
+        EventBean eventReceived = testListener.assertOneGetNewAndReset();
+        assertEquals("s0", eventReceived.get("myString"));
+        assertSame(event, eventReceived.get("myBean"));
+
+        event = sendEvent("s1");
+        eventReceived = testListener.assertOneGetNewAndReset();
+        assertEquals("s1", eventReceived.get("myString"));
+        assertSame(event, eventReceived.get("myBean"));
+    }
+
+    public void testCoalesceLong()
+    {
+        setupCoalesce("coalesce(longBoxed, intBoxed, shortBoxed)");
+        assertEquals(Long.class, selectTestView.getEventType().getPropertyType("result"));
+
+        sendEvent(1L, 2, (short) 3);
+        assertEquals(1L, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendBoxedEvent(null, 2, null);
+        assertEquals(2L, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendBoxedEvent(null, null, Short.parseShort("3"));
+        assertEquals(3L, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendBoxedEvent(null, null, null);
+        assertEquals(null, testListener.assertOneGetNewAndReset().get("result"));
+    }
+
+    public void testCoalesceDouble()
+    {
+        setupCoalesce("coalesce(null, byteBoxed, shortBoxed, intBoxed, longBoxed, floatBoxed, doubleBoxed)");
+        assertEquals(Double.class, selectTestView.getEventType().getPropertyType("result"));
+
+        sendEventWithDouble(null, null, null, null, null, null);
+        assertEquals(null, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendEventWithDouble(null, Short.parseShort("2"), null, null, null, 1d);
+        assertEquals(2d, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendEventWithDouble(null, null, null, null, null, 100d);
+        assertEquals(100d, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendEventWithDouble(null, null, null, null, 10f, 100d);
+        assertEquals(10d, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendEventWithDouble(null, null, 1, 5l, 10f, 100d);
+        assertEquals(1d, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendEventWithDouble(Byte.parseByte("3"), null, null, null, null, null);
+        assertEquals(3d, testListener.assertOneGetNewAndReset().get("result"));
+
+        sendEventWithDouble(null, null, null, 5l, 10f, 100d);
+        assertEquals(5d, testListener.assertOneGetNewAndReset().get("result"));
+    }
+
+    private void setupCoalesce(String coalesceExpr)
+    {
+        epService.initialize();
+        String viewExpr = "select " + coalesceExpr + " as result" +
+                          " from " + SupportBean.class.getName() + ".win:length(1000) ";
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+    }
+
+    public void testCoalesceInvalid()
+    {
+        String viewExpr = "select coalesce(null, null) as result" +
+                          " from " + SupportBean.class.getName() + ".win:length(3) ";
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        assertEquals(null, selectTestView.getEventType().getPropertyType("result"));
+
+        tryCoalesceInvalid("coalesce(intPrimitive)");
+        tryCoalesceInvalid("coalesce(intPrimitive, string)");
+        tryCoalesceInvalid("coalesce(intPrimitive, xxx)");
+        tryCoalesceInvalid("coalesce(intPrimitive, booleanBoxed)");
+        tryCoalesceInvalid("coalesce(charPrimitive, longBoxed)");
+        tryCoalesceInvalid("coalesce(charPrimitive, string, string)");
+        tryCoalesceInvalid("coalesce(string, longBoxed)");
+        tryCoalesceInvalid("coalesce(null, longBoxed, string)");
+        tryCoalesceInvalid("coalesce(null, null, boolBoxed, 1l)");
+    }
+
+    private void tryCoalesceInvalid(String coalesceExpr)
+    {
+        String viewExpr = "select " + coalesceExpr + " as result" +
+                          " from " + SupportBean.class.getName() + ".win:length(3) ";
+
+        try {
+            selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        }
+        catch (EPStatementException ex)
+        {
+            // expected
+        }
+    }
+
+    public void testMinMaxEventType()
     {
         setUpMinMax();
         EventType type = selectTestView.getEventType();
@@ -39,7 +145,7 @@ public class TestPerRowFunc extends TestCase
         assertEquals(Long.class, type.getPropertyType("myMaxEx"));
     }
 
-    public void testWindowStats()
+    public void testMinMaxWindowStats()
     {
         setUpMinMax();
         testListener.reset();
@@ -115,12 +221,37 @@ public class TestPerRowFunc extends TestCase
         selectTestView.addListener(testListener);
     }
 
+    private SupportBean sendEvent(String string)
+    {
+        SupportBean bean = new SupportBean();
+        bean.setString(string);
+        epService.getEPRuntime().sendEvent(bean);
+        return bean;
+    }
+
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
+    {
+        sendBoxedEvent(longBoxed, intBoxed, shortBoxed);
+    }
+
+    private void sendBoxedEvent(Long longBoxed, Integer intBoxed, Short shortBoxed)
     {
         SupportBean bean = new SupportBean();
         bean.setLongBoxed(longBoxed);
         bean.setIntBoxed(intBoxed);
         bean.setShortBoxed(shortBoxed);
+        epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendEventWithDouble(Byte byteBoxed, Short shortBoxed, Integer intBoxed, Long longBoxed, Float floatBoxed, Double doubleBoxed)
+    {
+        SupportBean bean = new SupportBean();
+        bean.setByteBoxed(byteBoxed);
+        bean.setShortBoxed(shortBoxed);
+        bean.setIntBoxed(intBoxed);
+        bean.setLongBoxed(longBoxed);
+        bean.setFloatBoxed(floatBoxed);
+        bean.setDoubleBoxed(doubleBoxed);
         epService.getEPRuntime().sendEvent(bean);
     }
 

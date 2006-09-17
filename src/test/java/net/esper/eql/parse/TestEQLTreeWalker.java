@@ -105,6 +105,13 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals(6.11, tryExpression("min(6.11, 6.12)"));
         assertEquals(6.10, tryExpression("min(6.11, 6.12, 6.1)"));
         assertEquals("ab", tryExpression("'a'||'b'"));
+        assertEquals(null, tryExpression("coalesce(null, null)"));
+        assertEquals(1, tryExpression("coalesce(null, 1)"));
+        assertEquals(1l, tryExpression("coalesce(null, 1l)"));
+        assertEquals("a", tryExpression("coalesce(null, 'a', 'b')"));
+        assertEquals(13.5d, tryExpression("coalesce(null, null, 3*4.5)"));
+        assertEquals(true, tryExpression("coalesce(null, true)"));
+        assertEquals(5, tryExpression("coalesce(5, null, 6)"));
     }
 
     public void testWalkEQLMath() throws Exception

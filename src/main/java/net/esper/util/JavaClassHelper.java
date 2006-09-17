@@ -1,5 +1,8 @@
 package net.esper.util;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * Helper for questions about Java classes such as
  * <p> what is the boxed type for a primitive type
@@ -125,13 +128,14 @@ public class JavaClassHelper
      * @return coerced type
      */
     public static Class getArithmaticCoercionType(Class typeOne, Class typeTwo)
+            throws CoercionException
     {
         Class boxedOne = getBoxedType(typeOne);
         Class boxedTwo = getBoxedType(typeTwo);
 
         if (!isNumeric(boxedOne) || !isNumeric(boxedTwo))
         {
-            throw new IllegalArgumentException("Cannot coerce types " + typeOne + " and " + typeTwo);
+            throw new CoercionException("Cannot coerce types " + typeOne + " and " + typeTwo);
         }
 
         if ((boxedOne == Double.class) || (boxedTwo == Double.class))
@@ -325,12 +329,33 @@ public class JavaClassHelper
         return false;
     }
 
+    // null values are allowed and represent and unknown type
     public static Class getCommonCoercionType(Class[] types)
-            throws IllegalArgumentException
+            throws CoercionException
     {
         if (types.length < 1)
         {
             throw new IllegalArgumentException("Unexpected zero length array");
+        }
+        if (types.length == 1)
+        {
+            return getBoxedType(types[0]);
+        }
+
+        // Reduce to non-null types
+        List<Class> nonNullTypes = new LinkedList<Class>();
+        for (int i = 0; i < types.length; i++)
+        {
+            if (types[i] != null)
+            {
+                nonNullTypes.add(types[i]);
+            }
+        }
+        types = nonNullTypes.toArray(new Class[0]);
+
+        if (types.length == 0)
+        {
+            return null;    // only null types, result is null
         }
         if (types.length == 1)
         {
@@ -344,7 +369,7 @@ public class JavaClassHelper
             {
                 if (types[i] != String.class)
                 {
-                    throw new IllegalArgumentException("Cannot coerce to String type " + types[i]);
+                    throw new CoercionException("Cannot coerce to String type " + types[i]);
                 }
             }
             return String.class;
@@ -363,7 +388,7 @@ public class JavaClassHelper
             {
                 if (types[i] != Boolean.class)
                 {
-                    throw new IllegalArgumentException("Cannot coerce to Boolean type " + types[i]);
+                    throw new CoercionException("Cannot coerce to Boolean type " + types[i]);
                 }
             }
             return Boolean.class;
@@ -376,23 +401,38 @@ public class JavaClassHelper
             {
                 if (types[i] != Character.class)
                 {
-                    throw new IllegalArgumentException("Cannot coerce to Boolean type " + types[i]);
+                    throw new CoercionException("Cannot coerce to Boolean type " + types[i]);
                 }
             }
             return Character.class;
         }
 
+        // Check if all the same non-Java builtin type, i.e. Java beans etc.
+        if (!isJavaBuiltinDataType(types[0]))
+        {
+            for (int i = 0; i < types.length; i++)
+            {
+                if (types[i] != types[0])
+                {
+                    throw new CoercionException("Cannot coerce to type " + types[0]);
+                }
+            }
+            return types[0];
+        }
+
         // Test for numeric
         if (!isNumeric(types[0]))
         {
-            throw new IllegalArgumentException("Cannot coerce to numeric type " + types[0]);
+            throw new CoercionException("Cannot coerce to numeric type " + types[0]);
         }
 
-        // Use arithmatic coercion type as the final authority
-        Class result = null;
-        for (int i = 0; i < types.length - 1; i++)
+        // Use arithmatic coercion type as the final authority, considering all types
+        Class result = getArithmaticCoercionType(types[0], types[1]);;
+        int count = 2;
+        while(count < types.length)
         {
-            result = getArithmaticCoercionType(types[i], types[i + 1]);
+            result = getArithmaticCoercionType(result, types[count]);
+            count++;
         }
         return result;
     }

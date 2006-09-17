@@ -110,16 +110,17 @@ public class TestJavaClassHelper extends TestCase
             JavaClassHelper.getArithmaticCoercionType(String.class, float.class);
             fail();
         }
-        catch (IllegalArgumentException ex)
+        catch (CoercionException ex)
         {
             // Expected
         }
+        
         try
         {
             JavaClassHelper.getArithmaticCoercionType(int.class, boolean.class);
             fail();
         }
-        catch (IllegalArgumentException ex)
+        catch (CoercionException ex)
         {
             // Expected
         }
@@ -224,10 +225,17 @@ public class TestJavaClassHelper extends TestCase
         assertEquals(Boolean.class, JavaClassHelper.getCommonCoercionType(new Class[] {boolean.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {long.class}));
 
+        assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {String.class, null}));
         assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {String.class, String.class}));
         assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {String.class, String.class, String.class}));
+        assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {String.class, String.class, null}));
+        assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, String.class, null}));
+        assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, String.class, String.class}));
+        assertEquals(String.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, null, String.class, String.class}));
+
         assertEquals(Boolean.class, JavaClassHelper.getCommonCoercionType(new Class[] {Boolean.class, Boolean.class}));
         assertEquals(Boolean.class, JavaClassHelper.getCommonCoercionType(new Class[] {Boolean.class, boolean.class}));
+        assertEquals(Boolean.class, JavaClassHelper.getCommonCoercionType(new Class[] {boolean.class, Boolean.class}));
         assertEquals(Boolean.class, JavaClassHelper.getCommonCoercionType(new Class[] {boolean.class, boolean.class}));
         assertEquals(Boolean.class, JavaClassHelper.getCommonCoercionType(new Class[] {Boolean.class, boolean.class, boolean.class}));
         assertEquals(Integer.class, JavaClassHelper.getCommonCoercionType(new Class[] {int.class, byte.class, int.class}));
@@ -236,22 +244,50 @@ public class TestJavaClassHelper extends TestCase
         assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, Byte.class, Double.class}));
         assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {Long.class, Double.class, Double.class}));
         assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {double.class, byte.class}));
+        assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {double.class, byte.class, null}));
         assertEquals(Float.class, JavaClassHelper.getCommonCoercionType(new Class[] {float.class, float.class}));
         assertEquals(Float.class, JavaClassHelper.getCommonCoercionType(new Class[] {float.class, int.class}));
         assertEquals(Float.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, int.class, Float.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, int.class, long.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {long.class, int.class}));
+        assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {long.class, int.class, int.class, int.class, byte.class, short.class}));
+        assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {long.class, null, int.class, null, int.class, int.class, null, byte.class, short.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, int.class, long.class}));
         assertEquals(Character.class, JavaClassHelper.getCommonCoercionType(new Class[] {char.class, char.class, char.class}));
+        assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {int.class, int.class, int.class, long.class, int.class, int.class}));
+        assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {int.class, long.class, int.class, double.class, int.class, int.class}));
+        assertEquals(null, JavaClassHelper.getCommonCoercionType(new Class[] {null, null}));
+        assertEquals(null, JavaClassHelper.getCommonCoercionType(new Class[] {null, null, null}));
+        assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {SupportBean.class, null, null}));
+        assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, SupportBean.class, null}));
+        assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, SupportBean.class}));
+        assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, null, SupportBean.class}));
+        assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {SupportBean.class, null, SupportBean.class, SupportBean.class}));
 
-        tryInvalidGetCommonCoercionType(new Class[] {});
         tryInvalidGetCommonCoercionType(new Class[] {String.class, Boolean.class});
         tryInvalidGetCommonCoercionType(new Class[] {String.class, String.class, Boolean.class});
         tryInvalidGetCommonCoercionType(new Class[] {Boolean.class, String.class, Boolean.class});
         tryInvalidGetCommonCoercionType(new Class[] {Boolean.class, Boolean.class, String.class});
         tryInvalidGetCommonCoercionType(new Class[] {long.class, Boolean.class, String.class});
         tryInvalidGetCommonCoercionType(new Class[] {double.class, long.class, String.class});
+        tryInvalidGetCommonCoercionType(new Class[] {null, double.class, long.class, String.class});
         tryInvalidGetCommonCoercionType(new Class[] {String.class, String.class, long.class});
+        tryInvalidGetCommonCoercionType(new Class[] {String.class, SupportBean.class});
+        tryInvalidGetCommonCoercionType(new Class[] {boolean.class, null, null, String.class});
+        tryInvalidGetCommonCoercionType(new Class[] {int.class, null, null, String.class});
+        tryInvalidGetCommonCoercionType(new Class[] {SupportBean.class, Boolean.class});
+        tryInvalidGetCommonCoercionType(new Class[] {String.class, SupportBean.class});
+        tryInvalidGetCommonCoercionType(new Class[] {SupportBean.class, String.class, SupportBean.class});
+
+        try
+        {
+            JavaClassHelper.getCommonCoercionType(new Class[0]);
+            fail();
+        }
+        catch (IllegalArgumentException ex)
+        {
+            // expected
+        }
     }
 
     private void tryInvalidGetCommonCoercionType(Class[] types)
@@ -261,7 +297,7 @@ public class TestJavaClassHelper extends TestCase
             JavaClassHelper.getCommonCoercionType(types);
             fail();
         }
-        catch (IllegalArgumentException ex)
+        catch (CoercionException ex)
         {
             // expected
         }

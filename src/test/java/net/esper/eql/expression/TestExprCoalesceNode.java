@@ -51,22 +51,51 @@ public class TestExprCoalesceNode extends TestCase
 
     public void testValidate() throws Exception
     {
+        ExprCoalesceNode coalesceNode = new ExprCoalesceNode();
+        coalesceNode.addChildNode(new SupportExprNode(1));
+
         // Test too few nodes under this node
         try
         {
-            coalesceNodes[0].validate(null, null);
+            coalesceNode.validate(null, null);
             fail();
         }
-        catch (IllegalStateException ex)
+        catch (ExprValidationException ex)
+        {
+            // Expected
+        }
+
+        // Test node result type not fitting
+        coalesceNode.addChildNode(new SupportExprNode("s"));
+        try
+        {
+            coalesceNode.validate(null, null);
+            fail();
+        }
+        catch (ExprValidationException ex)
         {
             // Expected
         }
     }
 
-    public void testEvaluateEquals() throws Exception
+    public void testEvaluate() throws Exception
     {
-        assertEquals(coalesceNodes[0], coalesceNodes[1]);
-        assertFalse(coalesceNodes[0].equals(new ExprEqualsNode(true)));
+        for (int i = 0; i < coalesceNodes.length; i++)
+        {
+            coalesceNodes[i].validate(null, null);
+        }
+
+        assertEquals(4L, coalesceNodes[0].evaluate(null));
+        assertEquals("a", coalesceNodes[1].evaluate(null));
+        assertEquals(true, coalesceNodes[2].evaluate(null));
+        assertEquals('b', coalesceNodes[3].evaluate(null));
+        assertEquals(5D, coalesceNodes[4].evaluate(null));
+    }
+
+    public void testEquals() throws Exception
+    {
+        assertFalse(coalesceNodes[0].equalsNode(new ExprEqualsNode(true)));
+        assertTrue(coalesceNodes[0].equalsNode(coalesceNodes[1]));
     }
 
     public void testToExpressionString() throws Exception

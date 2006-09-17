@@ -367,7 +367,7 @@ builtinFunc
 	| MEDIAN^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| STDDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
-	| COALESCE LPAREN! expression COMMA! expression (COMMA! expression)* RPAREN!
+	| COALESCE^ LPAREN! expression COMMA! expression (COMMA! expression)* RPAREN!
 	;
 	
 eventPropertyOrLibFunction
