@@ -20,6 +20,10 @@ public class JavaClassHelper
         {
             return Boolean.class;
         }
+        if (clazz == char.class)
+        {
+            return Character.class;
+        }
         if (clazz == double.class)
         {
             return Double.class;
@@ -319,5 +323,77 @@ public class JavaClassHelper
             return true;
         }
         return false;
+    }
+
+    public static Class getCommonCoercionType(Class[] types)
+            throws IllegalArgumentException
+    {
+        if (types.length < 1)
+        {
+            throw new IllegalArgumentException("Unexpected zero length array");
+        }
+        if (types.length == 1)
+        {
+            return getBoxedType(types[0]);
+        }
+
+        // Check if all String
+        if (types[0] == String.class)
+        {
+            for (int i = 0; i < types.length; i++)
+            {
+                if (types[i] != String.class)
+                {
+                    throw new IllegalArgumentException("Cannot coerce to String type " + types[i]);
+                }
+            }
+            return String.class;
+        }
+
+        // Convert to boxed types
+        for (int i = 0; i < types.length; i++)
+        {
+            types[i] = getBoxedType(types[i]);
+        }
+
+        // Check if all boolean
+        if (types[0] == Boolean.class)
+        {
+            for (int i = 0; i < types.length; i++)
+            {
+                if (types[i] != Boolean.class)
+                {
+                    throw new IllegalArgumentException("Cannot coerce to Boolean type " + types[i]);
+                }
+            }
+            return Boolean.class;
+        }
+
+        // Check if all char
+        if (types[0] == Character.class)
+        {
+            for (int i = 0; i < types.length; i++)
+            {
+                if (types[i] != Character.class)
+                {
+                    throw new IllegalArgumentException("Cannot coerce to Boolean type " + types[i]);
+                }
+            }
+            return Character.class;
+        }
+
+        // Test for numeric
+        if (!isNumeric(types[0]))
+        {
+            throw new IllegalArgumentException("Cannot coerce to numeric type " + types[0]);
+        }
+
+        // Use arithmatic coercion type as the final authority
+        Class result = null;
+        for (int i = 0; i < types.length - 1; i++)
+        {
+            result = getArithmaticCoercionType(types[i], types[i + 1]);
+        }
+        return result;
     }
 }

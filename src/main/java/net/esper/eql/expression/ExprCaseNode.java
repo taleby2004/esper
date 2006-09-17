@@ -7,58 +7,23 @@ import net.esper.eql.core.AutoImportService;
 import net.esper.eql.core.StreamTypeService;
 
 import java.util.List;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Created by IntelliJ IDEA.
- * User: MYSELF
- * Date: Jul 29, 2006
- * Time: 1:34:00 PM
- * To change this template use File | Settings | File Templates.
+ * Represents the case-when-then-else control flow function is an expression tree.
  */
-
-
 public class ExprCaseNode extends ExprNode
 {
+    private boolean isCase2;
+    private List<Pair<ExprNode,ExprNode>> whenThenNodeList;
 
-    private boolean _inCase2;
-    private List<Pair<ExprNode,ExprNode>> _exprNodeList;
-
-    public ExprCaseNode(boolean caseFlag_, List<Pair<ExprNode,ExprNode>> exprNodeList_)
+    public ExprCaseNode(boolean isCase2, List<Pair<ExprNode,ExprNode>> exprNodeList)
     {
-        _inCase2 = caseFlag_;
-        _exprNodeList = exprNodeList_;
+        this.isCase2 = isCase2;
+        whenThenNodeList = exprNodeList;
     }
-
-
-    public String toExpressionString()
-     {
-         StringBuffer buffer = new StringBuffer();
-         buffer.append(" case ");
-         if (_inCase2)
-         {
-            buffer.append(this.getChildNodes().getFirst().toExpressionString());
-         }
-         for (Pair<ExprNode,ExprNode> p : _exprNodeList)
-         {
-             if (p.getFirst() == null)
-             {
-                buffer.append(" else ");
-             }
-             else
-             {
-                buffer.append(" when ");
-                buffer.append(p.getFirst().toExpressionString());
-                buffer.append(" then ");
-             }
-             buffer.append(p.getSecond().toExpressionString());
-         }
-         buffer.append(" end");
-         return buffer.toString();
-     }
 
     public boolean equalsNode(ExprNode node_)
     {
@@ -66,103 +31,23 @@ public class ExprCaseNode extends ExprNode
         {
             return false;
         }
-        ExprCaseNode otherExprCaseNode = (ExprCaseNode) node_;
-        if ((!getChildNodes().isEmpty()) && (getChildNodes().getFirst() != null))
-        {
-            ExprNode valueExpr = getChildNodes().getFirst();
-            if (!otherExprCaseNode.getChildNodes().isEmpty())
-            {
-                ExprNode otherValueExpr =  otherExprCaseNode.getChildNodes().getFirst();
-                if (!valueExpr.equalsNode(otherValueExpr))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-        }
 
-        List<Pair<ExprNode,ExprNode>> otherExprNodeList = otherExprCaseNode._exprNodeList;
-        if ((_exprNodeList.size()) !=  otherExprNodeList.size())
-        {
-            return false;
-        }
-        Pair<ExprNode,ExprNode>[] t1 = _exprNodeList.toArray(new Pair[0]);
-        Pair<ExprNode,ExprNode>[] t2 = otherExprNodeList.toArray(new Pair[0]);
-        int i =0;
-         while(i<t1.length)
-        {
-            Pair<ExprNode,ExprNode> p1 = t1[i];
-            Pair<ExprNode,ExprNode> p2 = t2[i];
-            if ((p1.getFirst()) == null)
-            {
-                if (p2.getFirst() !=null)
-                {
-                    // First case expression and it is the else part
-                    // The second case expression should have the else expression at same place.
-                    return false;
-                }
-                // Compare the else expressions ofr both case expressions.
-                if ((p1.getSecond() == null) || (p2.getSecond() == null))
-                {
-                    return false;
-                }
-                if ( !(p1.getSecond().equalsNode(p2.getSecond())))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                // The condition part of the first case expression is not null.
-                // We assume that the same is true for the second case expression.
-                // Let's compare them including the action parts.
-                if ( !(p1.getFirst().equalsNode(p2.getFirst())))
-                {
-                    return false;
-                }
-                // This should not happen, the validate method should take care of this checking.
-                // Still we make sure this is still verified.
-                if ((p1.getSecond() == null) || (p2.getSecond() == null))
-                {
-                    return false;
-                }
-                if ( !(p1.getSecond().equalsNode(p2.getSecond())))
-                {
-                    return false;
-                }
-            }
-            i++;
-        }
-        return true;
+        ExprCaseNode otherExprCaseNode = (ExprCaseNode) node_;
+        return this.isCase2 == otherExprCaseNode.isCase2;
     }
 
    public void validate(StreamTypeService streamTypeService_, AutoImportService autoImportService) throws ExprValidationException
     {
-        if ((_exprNodeList == null) || (_exprNodeList.size() == 0))
+        if ((whenThenNodeList == null) || (whenThenNodeList.size() == 0))
         {
             throw new ExprValidationException("The Case node requires at least one child expression");
         }
-
-        // If the case expression has an evaluation expression
-        // like in: case expr when expr then expr else expr
-        // validate it.
-        // TODO: remove me
-
-        /*
-        if ((!getChildNodes().isEmpty()) && (getChildNodes().getFirst() != null))
-        {
-            getChildNodes().getFirst().validate(streamTypeService_);
-        }
-        */
 
         // Sub-nodes must be at least one when expression
         // A when node as its condition part not null
         boolean noWhenExpr = true;
         int oneElse = 0;
-        for (Pair<ExprNode, ExprNode> p : _exprNodeList)
+        for (Pair<ExprNode, ExprNode> p : whenThenNodeList)
         {
             if (p.getFirst() != null) {
                 // TODO: remove comment
@@ -202,16 +87,15 @@ public class ExprCaseNode extends ExprNode
 
     public Class getType(EventBean[] eventsPerStream_)
     {
-
         ExprNode elseNode = null;
 
-        for (Pair<ExprNode, ExprNode> p : _exprNodeList)
+        for (Pair<ExprNode, ExprNode> p : whenThenNodeList)
         {
             ExprNode actionNode = p.getSecond();
             if (p.getFirst() != null)
             {
                 ExprNode conditionNode = p.getFirst();
-                if (!_inCase2)
+                if (!isCase2)
                 {
                     // This is a "when condition then action" statement
                     // The first when node for which the condition true,
@@ -275,13 +159,13 @@ public class ExprCaseNode extends ExprNode
     {
         ExprNode elseNode = null;
 
-        for (Pair<ExprNode, ExprNode> p : _exprNodeList)
+        for (Pair<ExprNode, ExprNode> p : whenThenNodeList)
         {
             ExprNode actionNode = p.getSecond();
             if (p.getFirst() != null)
             {
                 ExprNode conditionNode = p.getFirst();
-                if (!_inCase2)
+                if (!isCase2)
                 {
                     // This is a "when condition then action" statement
                     // The first when node for which the condition true,
@@ -383,7 +267,6 @@ public class ExprCaseNode extends ExprNode
             }
         }
 
-
         if ((typeOne == String.class) && (typeTwo == String.class))
         {
             return ((((String)objectOne).intern()) == (((String)objectTwo).intern()));
@@ -417,42 +300,33 @@ public class ExprCaseNode extends ExprNode
         return ((((Number) objectOne).intValue()) == (((Number) objectTwo).intValue()));
     }
 
-     public List<Pair<ExprNode,ExprNode>> getExprNodeList()
-     {
-         return _exprNodeList;
-     }
-
-    public Pair<ExprNode,ExprNode> getExprNodeList(int ndx_)
+    public String toExpressionString()
     {
-        if (_exprNodeList == null)
-        {
-            return null;
-        }
-        if (ndx_ > (_exprNodeList.size()) )
-        {
-            return null;
-        }
-        return _exprNodeList.get(ndx_);
+         StringBuffer buffer = new StringBuffer();
+         buffer.append("case");
+         if (isCase2)
+         {
+            buffer.append(" ");
+            buffer.append(this.getChildNodes().getFirst().toExpressionString());
+         }
+         for (Pair<ExprNode,ExprNode> p : whenThenNodeList)
+         {
+             if (p.getFirst() == null)
+             {
+                buffer.append(" else ");
+             }
+             else
+             {
+                buffer.append(" when ");
+                buffer.append(p.getFirst().toExpressionString());
+                buffer.append(" then ");
+             }
+             buffer.append(p.getSecond().toExpressionString());
+         }
+         buffer.append(" end");
+         return buffer.toString();
     }
 
-    public boolean setExprNodeList(int ndx_, Pair<ExprNode,ExprNode> pair_)
-    {
-        if (_exprNodeList == null)
-        {
-            return false;
-        }
-        if (ndx_ > (_exprNodeList.size()) )
-        {
-            return false;
-        }
-       _exprNodeList.set(ndx_, pair_);
-        return true;
-    }
-
-    public void clearExprNodeList()
-    {
-        _exprNodeList.clear();
-    }
     private static final Log log = LogFactory.getLog(ExprCaseNode.class);
 }
 

@@ -112,6 +112,8 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("insert into A (,) select 1 from b.win:length(1)");
         assertIsInvalid("insert into A(,a) select 1 from b.win:length(1)");
         assertIsInvalid("insert xxx into A(,a) select 1 from b.win:length(1)");
+
+        assertIsInvalid("select coalesce(tick.price) from x");
     }
 
     public void testValidCases() throws Exception
@@ -228,6 +230,11 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100) as xyz");
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100).std:someview() as xyz");
         assertIsValid("select * from xxx");
+
+        // coalesce
+        assertIsValid("select coalesce(tick.price, 0) from x");
+        assertIsValid("select coalesce(tick.price, null, -1) from x");
+        assertIsValid("select coalesce(tick.price, tick.price, tick.price, tick.price) from x");
     }
 
     public void testBitWiseCases() throws Exception

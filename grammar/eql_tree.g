@@ -166,6 +166,7 @@ builtinFunc
 	|	#(MEDIAN (DISTINCT)? valueExpr)
 	|	#(STDDEV (DISTINCT)? valueExpr)
 	|	#(AVEDEV (DISTINCT)? valueExpr)
+	| 	#(COALESCE valueExpr valueExpr (valueExpr)* )
 	;
 	
 arithmeticExpr
