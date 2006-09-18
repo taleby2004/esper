@@ -4,10 +4,6 @@ import net.esper.eql.expression.*;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.type.ArithTypeEnum;
 import net.esper.type.RelationalOpEnum;
-import net.esper.collection.Pair;
-
-import java.util.List;
-import java.util.LinkedList;
 
 public class SupportExprNodeFactory
 {
@@ -174,67 +170,60 @@ public class SupportExprNodeFactory
         return opNode;
     }
 
-    public static ExprCaseNode makeCaseNode() throws Exception
+    public static ExprCaseNode makeCaseSyntax1Node() throws Exception
     {
-        // Build:
-        // case when (so.floatPrimitive>s1.shortBoxed) then count(5)
-        //      when (so.LongPrimitive>s1.intPrimitive) then (25 + 130.5)
-        //      else (3*3)
+        // Build (case 1 expression):
+        // case when s0.intPrimitive = 1 then "a"
+        //      when s0.intPrimitive = 2 then "b"
+        //      else "c"
         // end
-        List<Pair<ExprNode, ExprNode>> listExprNode = new LinkedList<Pair<ExprNode, ExprNode>>();
+        ExprCaseNode caseNode = new ExprCaseNode(false);
 
-        ExprNode[] identNodes = new ExprNode[4];
-        identNodes[0] = makeIdentNode("intPrimitive","s1");
-        identNodes[1] = makeIdentNode("floatPrimitive", "s0");
-        identNodes[2] = makeIdentNode("shortBoxed", "s1");
-        identNodes[3] = makeIdentNode("longPrimitive", "s0");
+        ExprNode node = makeEqualsNode("intPrimitive", "s0", 1);
+        caseNode.addChildNode(node);
+        caseNode.addChildNode(new SupportExprNode("a"));
 
-        ExprNode node1 =  makeRelationalOpNode(RelationalOpEnum.GT, identNodes[1], identNodes[2]);
-        ExprNode node2 = makeCountNode(5, Integer.class);
-        listExprNode.add(new Pair<ExprNode, ExprNode>(node1,node2));
+        node = makeEqualsNode("intPrimitive", "s0", 2);
+        caseNode.addChildNode(node);
+        caseNode.addChildNode(new SupportExprNode("b"));
 
-        node1 = makeRelationalOpNode(RelationalOpEnum.GT, identNodes[3], identNodes[0]);
-        node2 = makeMathNode(ArithTypeEnum.ADD, new Integer(25), new Double(130.5));
-        listExprNode.add(new Pair<ExprNode, ExprNode>(node1,node2));
+        caseNode.addChildNode(new SupportExprNode("c"));
 
-        node2 = makeMathNode(ArithTypeEnum.MULTIPLY, new Integer(3), new Integer(3));
-        listExprNode.add(new Pair<ExprNode, ExprNode>(null,node2));
+        validate(caseNode);
 
-        ExprCaseNode node = new ExprCaseNode(false, listExprNode);
-        return (node);
+        return caseNode;
     }
 
-    public static ExprCaseNode makeCase2Node() throws Exception
+    public static ExprCaseNode makeCaseSyntax2Node() throws Exception
     {
-        // Build:
+        // Build (case 2 expression):
         // case s0.intPrimitive
-        //   when s1.intBoxed then count(5)
-        //   when (5*2) then (s0.intPrimitive*4)
-        //   else (10*20)
+        //   when 1 then "a"
+        //   when 2 then "b"
+        //   else "c"
         // end
-        List<Pair<ExprNode, ExprNode>> listExprNode = new LinkedList<Pair<ExprNode, ExprNode>>();
+        ExprCaseNode caseNode = new ExprCaseNode(true);
+        caseNode.addChildNode(makeIdentNode("intPrimitive","s0"));
 
-        ExprNode[] identNodes = new ExprNode[2];
-        identNodes[0] = makeIdentNode("intPrimitive","s0");
-        identNodes[1] = makeIdentNode("intBoxed", "s1");
+        caseNode.addChildNode(new SupportExprNode(1));
+        caseNode.addChildNode(new SupportExprNode("a"));
+        caseNode.addChildNode(new SupportExprNode(2));
+        caseNode.addChildNode(new SupportExprNode("b"));
+        caseNode.addChildNode(new SupportExprNode("c"));
 
-        ExprNode countNode = makeCountNode(5, Integer.class);
-        listExprNode.add(new Pair<ExprNode, ExprNode>(identNodes[1],countNode));
+        validate(caseNode);
 
-        ExprNode[] mathNodes = new  ExprNode[2];
-        mathNodes[0] = makeMathNode(ArithTypeEnum.MULTIPLY, new Integer(5), new Integer(2));
-        mathNodes[1] = new ExprMathNode(ArithTypeEnum.MULTIPLY);
-        mathNodes[1].addChildNode(identNodes[0]);
-        mathNodes[1].addChildNode(new SupportExprNode(new Double(4.0)));
-        validate(mathNodes[1]);
+        return (caseNode);
+    }
 
-        listExprNode.add(new Pair<ExprNode, ExprNode>(mathNodes[0],mathNodes[1]));
-        mathNodes[0] = makeMathNode(ArithTypeEnum.MULTIPLY, new Double(10.0), new Double(20.0));
-        listExprNode.add(new Pair<ExprNode, ExprNode>(null,mathNodes[0]));
-
-        ExprCaseNode node = new ExprCaseNode(true, listExprNode);
-        node.addChildNode(identNodes[0]);
-        return (node);
+    private static ExprEqualsNode makeEqualsNode(String ident1, String stream1, Object value) throws Exception
+    {
+        ExprEqualsNode topNode = new ExprEqualsNode(false);
+        ExprIdentNode i1_1 = new ExprIdentNode(ident1, stream1);
+        SupportExprNode constantNode = new SupportExprNode(value);
+        topNode.addChildNode(i1_1);
+        topNode.addChildNode(constantNode);
+        return topNode;
     }
 
     private static void validate(ExprNode topNode) throws Exception

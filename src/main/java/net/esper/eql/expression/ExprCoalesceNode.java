@@ -26,8 +26,7 @@ public class ExprCoalesceNode extends ExprNode
         int count = 0;
         for (ExprNode child : this.getChildNodes())
         {
-            Class childType = child.getType();
-            childTypes[count] = childType;
+            childTypes[count] = child.getType();
             count++;
         }
 
@@ -37,10 +36,10 @@ public class ExprCoalesceNode extends ExprNode
         }
         catch (CoercionException ex)
         {
-            throw new ExprValidationException("Implicit conversion not allowed: " + ex.toString());
+            throw new ExprValidationException("Implicit conversion not allowed: " + ex.getMessage());
         }
 
-        // determine which child nodes
+        // determine which child nodes need numeric coercion
         isNumericCoercion = new boolean[getChildNodes().size()];
         count = 0;
         for (ExprNode child : this.getChildNodes())

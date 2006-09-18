@@ -44,6 +44,10 @@ public class ExprConstantNode extends ExprNode
         {
             return "\"" + value + "\"";
         }
+        if (value == null)
+        {
+            return "null";
+        }
         return value.toString();
     }
 

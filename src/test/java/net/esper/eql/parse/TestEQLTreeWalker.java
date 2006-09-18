@@ -112,6 +112,7 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals(13.5d, tryExpression("coalesce(null, null, 3*4.5)"));
         assertEquals(true, tryExpression("coalesce(null, true)"));
         assertEquals(5, tryExpression("coalesce(5, null, 6)"));
+        assertEquals(2, tryExpression("(case 1 when 1 then 2 end)"));
     }
 
     public void testWalkEQLMath() throws Exception

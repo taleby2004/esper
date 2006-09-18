@@ -119,7 +119,7 @@ public class TestSortedRefCountedSet extends TestCase
         long memoryBefore = Runtime.getRuntime().freeMemory();
         Runtime.getRuntime().gc();
         
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 2; i++)
         {
             performLoop(i, set);
 

@@ -66,6 +66,10 @@ public class SupportExprNode extends ExprNode
 
     public String toExpressionString()
     {
+        if (value instanceof String)
+        {
+            return "\"" + value + "\"";
+        }
         return value.toString();
     }
 

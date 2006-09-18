@@ -23,9 +23,9 @@ public class TestExprConcatNode extends TestCase
         concatNode = new ExprConcatNode();
         concatNode.addChildNode(new SupportExprNode("a"));
         concatNode.addChildNode(new SupportExprNode("b"));
-        assertEquals("(a||b)", concatNode.toExpressionString());
+        assertEquals("(\"a\"||\"b\")", concatNode.toExpressionString());
         concatNode.addChildNode(new SupportExprNode("c"));
-        assertEquals("(a||b||c)", concatNode.toExpressionString());
+        assertEquals("(\"a\"||\"b\"||\"c\")", concatNode.toExpressionString());
     }
 
     public void testValidate()

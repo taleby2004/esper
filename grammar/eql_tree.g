@@ -145,16 +145,8 @@ valueExpr
 	;
 
 caseExpr
-	: #(CASE whenExpr  (whenExpr)* (elseExpr)?)
-	| #(CASE2 valueExpr whenExpr (whenExpr)* (elseExpr)?)
-	;
-
-whenExpr
-	: #(WHEN valueExpr valueExpr)	
-	;
-
-elseExpr
-	: #(ELSE valueExpr)	
+	: #(CASE (valueExpr)*)
+	| #(CASE2 (valueExpr)*)
 	;
 
 builtinFunc

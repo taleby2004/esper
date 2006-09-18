@@ -135,7 +135,7 @@ public class JavaClassHelper
 
         if (!isNumeric(boxedOne) || !isNumeric(boxedTwo))
         {
-            throw new CoercionException("Cannot coerce types " + typeOne + " and " + typeTwo);
+            throw new CoercionException("Cannot coerce types " + typeOne.getName() + " and " + typeTwo.getName());
         }
 
         if ((boxedOne == Double.class) || (boxedTwo == Double.class))
@@ -369,7 +369,7 @@ public class JavaClassHelper
             {
                 if (types[i] != String.class)
                 {
-                    throw new CoercionException("Cannot coerce to String type " + types[i]);
+                    throw new CoercionException("Cannot coerce to String type " + types[i].getName());
                 }
             }
             return String.class;
@@ -388,7 +388,7 @@ public class JavaClassHelper
             {
                 if (types[i] != Boolean.class)
                 {
-                    throw new CoercionException("Cannot coerce to Boolean type " + types[i]);
+                    throw new CoercionException("Cannot coerce to Boolean type " + types[i].getName());
                 }
             }
             return Boolean.class;
@@ -401,7 +401,7 @@ public class JavaClassHelper
             {
                 if (types[i] != Character.class)
                 {
-                    throw new CoercionException("Cannot coerce to Boolean type " + types[i]);
+                    throw new CoercionException("Cannot coerce to Boolean type " + types[i].getName());
                 }
             }
             return Character.class;
@@ -414,7 +414,7 @@ public class JavaClassHelper
             {
                 if (types[i] != types[0])
                 {
-                    throw new CoercionException("Cannot coerce to type " + types[0]);
+                    throw new CoercionException("Cannot coerce to type " + types[0].getName());
                 }
             }
             return types[0];
@@ -423,7 +423,7 @@ public class JavaClassHelper
         // Test for numeric
         if (!isNumeric(types[0]))
         {
-            throw new CoercionException("Cannot coerce to numeric type " + types[0]);
+            throw new CoercionException("Cannot coerce to numeric type " + types[0].getName());
         }
 
         // Use arithmatic coercion type as the final authority, considering all types

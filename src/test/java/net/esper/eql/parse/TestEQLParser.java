@@ -14,12 +14,9 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String pattern = "a=" + className + " -> b=" + className;
-        //String expression = "select * from pattern [" + pattern + "].win:length(100).std:someview()";
-        //String expression = "select * from " + className + ".win:length(100).std:someview()";
-        //String expression = "select * from " + className;
-        //String expression = "select * from pattern [" + pattern + "]";
-        String expression = "select * from pattern [" + pattern + "] as A, pattern [" + pattern + "] as B";
+        //String expression = "select case intPrimitive when 1 then null when 2 then 2 else 3 end " + "from " + className;
+        String expression = "select case when 1 then null when 2 then 2 else 3 end from " + className;
+        //String expression = "select case 1 when 1 then 2 end from " + className;
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);

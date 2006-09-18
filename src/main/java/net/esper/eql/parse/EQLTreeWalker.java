@@ -941,75 +941,51 @@ public class EQLTreeWalker extends EQLBaseWalker
         astPatternNodeMap.put(node, guardNode);
     }
 
-    private void leaveCaseNode(AST node_, boolean incase2_)
+    private void leaveCaseNode(AST node, boolean inCase2)
     {
-        if (incase2_)
-        {
-            log.debug(".leaveCase2Node");
-        }
-        else
-        {
-            log.debug(".leaveCaseNode");
-        }
+        log.debug(".leaveCase2Node inCase2=" + inCase2);
 
         if (astExprNodeMap.size() == 0)
         {
             throw new ASTWalkException("Unexpected AST tree contains zero child element for case node");
         }
-        AST childNode = node_.getFirstChild();
+        AST childNode = node.getFirstChild();
         if ((astExprNodeMap.size() == 1) && (childNode.getType() != WHEN))
         {
             throw new ASTWalkException("AST tree doesn not contain at least when node for case node");
         }
-        List<Pair<ExprNode, ExprNode>> exprNodeList = new LinkedList<Pair<ExprNode, ExprNode>>();
-        AST previousNode = node_;
+
+        // Refactor WHEN, THEN and ELSE child nodes to list
+        ExprCaseNode caseNode = new ExprCaseNode(inCase2);
+        astExprNodeMap.put(node, caseNode);
+
+        /*
         while (childNode != null)
         {
-            if (childNode != null)
-            {
-                if ((childNode.getType() == WHEN) || (childNode.getType() == ELSE))
-                {
-                    // Expression is when X then Y else Z
-                    AST downChildNode = childNode.getFirstChild();
-                    if (previousNode == node_)
-                    {
-                        previousNode.setFirstChild(downChildNode);
-                    }
-                    else
-                    {
-                        if (previousNode != null)
-                        {
-                            previousNode.setNextSibling(downChildNode);
-                        }
-                    }
-                    ExprNode downEvalChildNode = astExprNodeMap.get(downChildNode);
-                    if ((downChildNode != null) && (downEvalChildNode != null))
-                    {
-                        AST actionNode = downChildNode.getNextSibling();
-                        previousNode = actionNode;
-                        // There is no sibling for the child node of else node.
-                        // The child node of the else node is the action node.
-                        if (actionNode == null)
-                        {
-                            exprNodeList.add(new Pair<ExprNode, ExprNode>(null, downEvalChildNode));
-                        }
-                        else
-                        {
-                            ExprNode actionEvalNode = astExprNodeMap.get(actionNode);
-                            exprNodeList.add(new Pair<ExprNode, ExprNode>(downEvalChildNode, actionEvalNode));
-                        }
-                    }
-                }
-                else
-                {
-                    previousNode = childNode;
-                }
-                childNode = childNode.getNextSibling();
-            }
-        }
 
-        ExprCaseNode caseNode = new ExprCaseNode(incase2_, exprNodeList);
-        astExprNodeMap.put(node_, caseNode);
+            if ((childNode.getType() != WHEN) && (childNode.getType() != ELSE))
+            {
+                throw new ASTWalkException("Unexpected child node of CASE encountered with type " + childNode.getType());
+            }
+
+            if (childNode.getType() == ELSE)
+            {
+                ExprNode elseChild = astExprNodeMap.get(childNode.getFirstChild());
+                exprNodeList.add(new Pair<ExprNode, ExprNode>(null, elseChild));
+                astExprNodeMap.remove(childNode.getFirstChild());
+            }
+            if (childNode.getType() == WHEN)
+            {
+                ExprNode whenChild = astExprNodeMap.get(childNode.getFirstChild());
+                ExprNode thenChild = astExprNodeMap.get(childNode.getFirstChild().getNextSibling());
+                exprNodeList.add(new Pair<ExprNode, ExprNode>(whenChild, thenChild));
+                astExprNodeMap.remove(childNode.getFirstChild());
+                astExprNodeMap.remove(childNode.getFirstChild().getNextSibling());
+            }
+
+            childNode = childNode.getNextSibling();
+        }
+        */
     }
 
     private void leaveObserver(AST node) throws ASTWalkException

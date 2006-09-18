@@ -274,11 +274,11 @@ caseExpression
 	;
 
 whenClause
-	: (WHEN^ expression THEN! expression)
+	: (WHEN! expression THEN! expression)
 	;
 
 elseClause
-	: (ELSE^ expression)
+	: (ELSE! expression)
 	;
 
 evalOrExpression
