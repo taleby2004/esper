@@ -49,7 +49,7 @@ public interface EventAdapterService
      * Creates a new anonymous EventType instance for an event type that contains a map of name value pairs.
      * The method accepts a Map that contains the property names as keys and EventType objects as the values.
      * The EventType instances represent the property types whose underlying class is used to set the type,
-     * via method {@see createAnonymousMapType}.
+     * via method createAnonymousMapType.
      * @param propertyTypes is a map of String to EventType objects
      * @return EventType implementation for map field names and value types which are the underlying types to the event type passed in
      */

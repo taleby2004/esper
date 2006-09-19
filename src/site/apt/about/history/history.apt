@@ -22,7 +22,7 @@ Version 1.1.0 (update)
     
 * Major changes
 
-	* Added support for pattern expressions in EQL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EQL)
+    * Added support for pattern expressions in EQL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EQL)
 	
     * Added 'case' control flow function
     
