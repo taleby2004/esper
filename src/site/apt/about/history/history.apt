@@ -12,6 +12,37 @@ Change History
 	[]
 
 
+Version 1.1.0 (update)
+
+	Released September 19, 2006
+		
+* API changes
+
+	* None
+    
+* Major changes
+
+	* Added support for pattern expressions in EQL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EQL)
+	
+    * Added 'case' control flow function
+    
+    * Added 'coalesce' comparison function	
+	
+* Minor changes	
+
+    * fixed issue ESPER-56 "count(*) always returns 0"
+    
+    * fixed issue ESPER-59 "Internal Threading Bugs Found"
+    
+    * fixed issue ESPER-57 "Initialize not resetting types declared via 'insert into'"
+    
+    * fixed issue ESPER-61 "Having clause not applied in query without group-by and without aggregation functions"
+    
+    * documentation enhancements
+	
+	[]
+
+
 Version 1.0.5 (update)
 
 	Released August 22, 2006

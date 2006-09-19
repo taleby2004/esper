@@ -1,5 +1,18 @@
 News
 
+* September 19, 2006  -  Esper 1.1.0 update
+
+    * Added support for pattern expressions in EQL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EQL)
+
+    * Added 'case' control flow function
+
+    * Added 'coalesce' comparison function
+
+    * Bug fixes to reported issues (see history)
+	
+    []
+    
+
 * August 21, 2006  -  Esper 1.0.5 update
 
     * Added support for the "first" keyword in output rate limiting for outputting only the first matching event for an interval

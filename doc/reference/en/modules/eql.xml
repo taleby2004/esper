@@ -875,7 +875,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 				</thead>
 				<tbody>
 					<row>
-						<entry>max(<emphasis>expression</emphasis>, <emphasis>expression</emphasis>, [, <emphasis>expression</emphasis> [,...]])</entry>
+						<entry><synopsis>max(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
 						<entry>
 							<para>
 								Returns the highest numeric value among the 2 or more comma-separated expressions.
@@ -883,7 +883,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 						</entry>
 					</row>
 					<row>
-						<entry>min(<emphasis>expression</emphasis>, <emphasis>expression</emphasis>, [, <emphasis>expression</emphasis> [,...]])</entry>
+						<entry><synopsis>min(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
 						<entry>
 							<para>
 								Returns the lowest numeric value among the 2 or more comma-separated expressions.
@@ -891,10 +891,35 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 						</entry>
 					</row>
 					<row>
-						<entry>coalesce(<emphasis>expression</emphasis>, <emphasis>expression</emphasis>, [, <emphasis>expression</emphasis> [,...]])</entry>
+						<entry><synopsis>coalesce(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis>
+					</entry>
 						<entry>
 							<para>
 								Returns the first non-<literal>null</literal> value in the list, or <literal>null</literal> if there are no non-<literal>null</literal> values.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry><synopsis>case <emphasis>value</emphasis> 
+  when <emphasis>compare_value</emphasis> then <emphasis>result</emphasis>
+  [when <emphasis>compare_value</emphasis> then <emphasis>result</emphasis> ...] 
+  [else <emphasis>result</emphasis>] 
+  end </synopsis></entry>
+						<entry>
+							<para>
+								Returns <literal>result</literal> where the first <literal>value</literal> equals <literal>compare_value</literal>. 
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry><synopsis>case 
+  when <emphasis>condition</emphasis> then <emphasis>result</emphasis>
+  [when <emphasis>condition</emphasis> then <emphasis>result</emphasis> ...] 
+  [else <emphasis>result</emphasis>] 
+  end</synopsis></entry>
+						<entry>
+							<para>
+								Returns the <literal>result</literal> for the first condition that is true.
 							</para>
 						</entry>
 					</row>
@@ -902,15 +927,64 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			</tgroup>
 		</table>
 
-        <para>
-            An example showing the use of the <literal>min</literal> single-row function is below.
-        </para>
+		<sect2 id="eql-single-row-function-ref-minmax">
+			<title>The <literal>Min</literal> and <literal>Max</literal> Functions</title>
 
-		<programlisting>select symbol, min(ticks.timestamp, news.timestamp) as minT
-from StockTickEvent.win:time(30) as ticks, 
-     NewsEvent.win:time(30) as news
-where ticks.symbol = news.symbol
-</programlisting>
+			<para>
+				The <literal>min</literal> and <literal>max</literal> function take two or more parameters that itself can be expressions. The <literal>min</literal> function returns the lowest numeric value among the 2 or more comma-separated expressions, while the <literal>max</literal> function returns the highest numeric value.
+				The return type is the compatible aggregated type of all return values.
+			</para>
+
+			<para>
+				The next example shows the <literal>max</literal> function that has a <literal>Double</literal> return type and returns the value 1.1.
+			</para>
+			<programlisting>select max(1, 1.1, 2 * 0.5) from ...</programlisting>
+
+			<para>
+				The <literal>min</literal> function returns the lowest value. The statement below uses the function to determine the smaller of two timestamp values.
+			</para>
+	
+			<programlisting>select symbol, min(ticks.timestamp, news.timestamp) as minT
+	from StockTickEvent.win:time(30) as ticks, NewsEvent.win:time(30) as news
+	where ticks.symbol = news.symbol</programlisting>
+		</sect2>
+
+		<sect2 id="eql-single-row-function-ref-coalesce">
+			<title>The <literal>Coalesce</literal> Function</title>
+
+			<para>
+				The result of the <literal>coalesce</literal> function is the first expression in a list of expressions that returns a non-null value. The return type is the compatible aggregated type of all return values.
+			</para>
+			
+			<para>
+				This example returns a String-typed result of value 'foo'.
+			</para>
+			<programlisting>select coalesce(null, 'foo') from ...</programlisting>
+			
+		</sect2>
+
+		<sect2 id="eql-single-row-function-ref-case">
+			<title>The <literal>Case</literal> Control Flow Function</title>
+
+			<para>
+				The <literal>case</literal> control flow function has two versions. The first version takes a value and a list of compare values to compare against, and returns the result where the first value equals the compare value. The second version takes a list of conditions and returns the result for the first condition that is true.
+			</para>
+
+			<para>
+				The return type of a <literal>case</literal> expression is the compatible aggregated type of all return values.
+			</para>
+			
+			<para>
+				The example below shows the first version of a <literal>case</literal> statement. It has a <literal>String</literal> return type and returns the value 'one'.
+			</para>
+			<programlisting>select case 1 when 1 then 'one' when 2 then 'two' else 'more' end from ...</programlisting>
+				
+			<para>
+				The second version of the <literal>case</literal> function takes a list of conditions. The next example has a <literal>Boolean</literal> return type and returns the boolean value true.
+			</para>				
+			<programlisting>select case when 1>0 then true else false end from ...</programlisting>
+		</sect2>
+		
 	</sect1>		
 
 	<sect1 id="eql-operator-ref">
