@@ -1,12 +1,15 @@
 package net.esper.eql.core;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.event.EventAdapterService;
-import net.esper.eql.spec.SelectExprElementSpec;
+import net.esper.eql.spec.SelectExprElementUnnamedSpec;
 import net.esper.eql.spec.InsertIntoDesc;
+import net.esper.eql.spec.SelectExprElementNamedSpec;
 import net.esper.eql.core.SelectExprEvalProcessor;
 import net.esper.eql.core.SelectExprJoinWildcardProcessor;
 import net.esper.eql.core.SelectExprProcessor;
@@ -26,7 +29,7 @@ public class SelectExprProcessorFactory
      * @return select-clause expression processor
      * @throws net.esper.eql.expression.ExprValidationException to indicate the select expression cannot be validated
      */
-    public static SelectExprProcessor getProcessor(List<SelectExprElementSpec> selectionList,
+    public static SelectExprProcessor getProcessor(List<SelectExprElementNamedSpec> selectionList,
                                                    InsertIntoDesc insertIntoDesc,
                                                    StreamTypeService typeService,
                                                    EventAdapterService eventAdapterService)
@@ -56,12 +59,31 @@ public class SelectExprProcessorFactory
         }
 
         // Verify the name used is unique
-        SelectExprElementSpec.verifyNameUniqueness(selectionList);
+        verifyNameUniqueness(selectionList);
 
         // Construct processor
         log.debug(".getProcessor Using SelectExprEvalProcessor");
         return new SelectExprEvalProcessor(selectionList, insertIntoDesc, eventAdapterService);
     }
+
+    /**
+     * Verify that each given name occurs exactly one.
+     * @param selectionList is the list of select items to verify names
+     * @throws net.esper.eql.expression.ExprValidationException thrown if a name occured more then once
+     */
+    protected static void verifyNameUniqueness(List<SelectExprElementNamedSpec> selectionList) throws ExprValidationException
+    {
+        Set<String> names = new HashSet<String>();
+        for (SelectExprElementNamedSpec element : selectionList)
+        {
+            if (names.contains(element.getAssignedName()))
+            {
+                throw new ExprValidationException("Property alias name '" + element.getAssignedName() + "' appears more then once in select clause");
+            }
+            names.add(element.getAssignedName());
+        }
+    }
+
 
     private static final Log log = LogFactory.getLog(SelectExprProcessorFactory.class);
 }

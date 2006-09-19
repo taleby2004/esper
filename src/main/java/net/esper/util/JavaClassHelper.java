@@ -126,6 +126,7 @@ public class JavaClassHelper
      * @param typeOne
      * @param typeTwo
      * @return coerced type
+     * @throws CoercionException if types don't allow coercion
      */
     public static Class getArithmaticCoercionType(Class typeOne, Class typeTwo)
             throws CoercionException
@@ -330,6 +331,24 @@ public class JavaClassHelper
     }
 
     // null values are allowed and represent and unknown type
+
+    /**
+     * Determines a common denominator type to which one or more types can be casted or coerced.
+     * For use in determining the result type in certain expressions (coalesce, case).
+     * <p>
+     * Null values are allowed as part of the input and indicate a 'null' constant value
+     * in an expression tree. Such as value doesn't have any type and can be ignored in
+     * determining a result type.
+     * <p>
+     * For numeric types, determines a coercion type that all types can be converted to
+     * via the method getArithmaticCoercionType.
+     * <p>
+     * Indicates that there is no common denominator type by throwing {@link CoercionException}.
+     * @param types is an array of one or more types, which can be Java built-in (primitive or wrapper)
+     * or user types
+     * @return common denominator type if any can be found, for use in comparison
+     * @throws CoercionException
+     */
     public static Class getCommonCoercionType(Class[] types)
             throws CoercionException
     {

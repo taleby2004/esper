@@ -23,7 +23,7 @@ public interface ViewService
     /**
      * Removes a view discoupling the view and any of it's parent views up the tree to the last shared parent view.
      * @param eventStream - the event stream that originates the raw events
-     * @param viewable - the view (should be the last in a chain) to remove
+     * @param view - the view (should be the last in a chain) to remove
      */
     public void remove(EventStream eventStream, Viewable view);
 }

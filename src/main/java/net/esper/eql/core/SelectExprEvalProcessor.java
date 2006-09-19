@@ -1,8 +1,8 @@
 package net.esper.eql.core;
 
 import net.esper.event.*;
-import net.esper.eql.spec.SelectExprElementSpec;
 import net.esper.eql.spec.InsertIntoDesc;
+import net.esper.eql.spec.SelectExprElementNamedSpec;
 import net.esper.eql.expression.ExprNode;
 import net.esper.eql.expression.ExprValidationException;
 
@@ -26,7 +26,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
      * @param insertIntoDesc - descriptor for insert-into clause contains column names overriding select clause names
      * @throws net.esper.eql.expression.ExprValidationException thrown if any of the expressions don't validate
      */
-    public SelectExprEvalProcessor(List<SelectExprElementSpec> selectionList,
+    public SelectExprEvalProcessor(List<SelectExprElementNamedSpec> selectionList,
                                    InsertIntoDesc insertIntoDesc,
                                    EventAdapterService eventAdapterService) throws ExprValidationException
     {
@@ -37,9 +37,9 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             throw new IllegalArgumentException("Empty selection list not supported");
         }
 
-        for (SelectExprElementSpec entry : selectionList)
+        for (SelectExprElementNamedSpec entry : selectionList)
         {
-            if (entry.getAsName() == null)
+            if (entry.getAssignedName() == null)
             {
                 throw new IllegalArgumentException("Expected name for each expression has not been supplied");
             }
@@ -55,7 +55,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         init(selectionList, insertIntoDesc, eventAdapterService);
     }
 
-    private void init(List<SelectExprElementSpec> selectionList,
+    private void init(List<SelectExprElementNamedSpec> selectionList,
                       InsertIntoDesc insertIntoDesc,
                       EventAdapterService eventAdapterService)
         throws ExprValidationException
@@ -77,7 +77,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             columnNames = new String[selectionList.size()];
             for (int i = 0; i < selectionList.size(); i++)
             {
-                columnNames[i] = selectionList.get(i).getAsName();
+                columnNames[i] = selectionList.get(i).getAssignedName();
             }
         }
 
@@ -126,7 +126,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
     }
 
     private static void verifyInsertInto(InsertIntoDesc insertIntoDesc,
-                                         List<SelectExprElementSpec> selectionList)
+                                         List<SelectExprElementNamedSpec> selectionList)
         throws ExprValidationException
     {
         // Verify all column names are unique

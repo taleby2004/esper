@@ -155,6 +155,18 @@ public class TestInvalidView extends TestCase
         // mismatched type on coalesce columns
         exceptionText = getStatementExceptionView("select coalesce(boolBoxed, string) from " + SupportBean.class.getName() + ".win:length(1) as aStr");
         assertEquals("Error starting view: Implicit conversion not allowed: Cannot coerce to Boolean type java.lang.String [select coalesce(boolBoxed, string) from net.esper.support.bean.SupportBean.win:length(1) as aStr]", exceptionText);
+
+        // mismatched case compare type
+        exceptionText = getStatementExceptionView("select case boolPrimitive when 1 then true end from " + SupportBean.class.getName() + ".win:length(1) as aStr");
+        assertEquals("Error starting view: Implicit conversion not allowed: Cannot coerce to Boolean type java.lang.Integer [select case boolPrimitive when 1 then true end from net.esper.support.bean.SupportBean.win:length(1) as aStr]", exceptionText);
+
+        // mismatched case result type
+        exceptionText = getStatementExceptionView("select case when 1=2 then 1 when 1=3 then true end from " + SupportBean.class.getName() + ".win:length(1) as aStr");
+        assertEquals("Error starting view: Implicit conversion not allowed: Cannot coerce types java.lang.Integer and java.lang.Boolean [select case when 1=2 then 1 when 1=3 then true end from net.esper.support.bean.SupportBean.win:length(1) as aStr]", exceptionText);
+
+        // case expression not returning bool
+        exceptionText = getStatementExceptionView("select case when 3 then 1 end from " + SupportBean.class.getName() + ".win:length(1) as aStr");
+        assertEquals("Error starting view: Case node 'when' expressions must return a boolean value [select case when 3 then 1 end from net.esper.support.bean.SupportBean.win:length(1) as aStr]", exceptionText);
     }
 
     public void testInvalidView()

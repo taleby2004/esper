@@ -3,7 +3,7 @@ Esper Changelog
 
 Changes in version 1.1.0
 ------------------------------------
-* (EQL) Added support for pattern expressions in EQL statements
+* (EQL) Added support for pattern expressions in EQL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EQL)
 * (EQL) Added 'case' control flow function
 * (EQL) Added 'coalesce' comparison function
 * fixed issue ESPER-56 "count(*) always returns 0"

@@ -108,7 +108,7 @@ public class TestStaticFunctions extends TestCase
 		assertEquals(Integer.valueOf("6"), result);
 		
 		statementText = "select java.lang.String.valueOf(\'a\') " + stream;
-		result = createStatementAndGetProperty("java.lang.String.valueOf(\'a\')");
+		result = createStatementAndGetProperty("java.lang.String.valueOf(\"a\")");
 		assertEquals(String.valueOf('a'), result);
 	}
 	

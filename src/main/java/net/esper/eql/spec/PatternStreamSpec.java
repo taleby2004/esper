@@ -3,7 +3,6 @@ package net.esper.eql.spec;
 import net.esper.pattern.EvalNode;
 import net.esper.event.EventType;
 import net.esper.view.ViewSpec;
-import net.esper.eql.spec.StreamSpec;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -39,11 +38,19 @@ public class PatternStreamSpec extends StreamSpec
         this.taggedEventTypes = copy;
     }
 
+    /**
+     * Returns the pattern expression evaluation node for the top pattern operator.
+     * @return parent pattern expression node
+     */
     public EvalNode getEvalNode()
     {
         return evalNode;
     }
 
+    /**
+     * Returns event types tagged in the pattern expression.
+     * @return map of tag and event type tagged in pattern expression
+     */
     public Map<String, EventType> getTaggedEventTypes()
     {
         return taggedEventTypes;

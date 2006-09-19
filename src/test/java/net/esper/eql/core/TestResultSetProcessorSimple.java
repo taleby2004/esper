@@ -59,18 +59,18 @@ public class TestResultSetProcessorSimple extends TestCase
         EventBean[] oldEvents = result.getSecond();
 
         assertEquals(2, newEvents.length);
-        assertEquals(10d, newEvents[0].get("s0.doubleBoxed"));
-        assertEquals(30, newEvents[0].get("result"));
+        assertEquals(10d, newEvents[0].get("resultOne"));
+        assertEquals(30, newEvents[0].get("resultTwo"));
 
-	    assertEquals(11d, newEvents[1].get("s0.doubleBoxed"));
-	    assertEquals(42, newEvents[1].get("result"));
+	    assertEquals(11d, newEvents[1].get("resultOne"));
+	    assertEquals(42, newEvents[1].get("resultTwo"));
 
         assertEquals(2, oldEvents.length);
-        assertEquals(20d, oldEvents[0].get("s0.doubleBoxed"));
-        assertEquals(2, oldEvents[0].get("result"));
+        assertEquals(20d, oldEvents[0].get("resultOne"));
+        assertEquals(2, oldEvents[0].get("resultTwo"));
 
-	    assertEquals(21d, oldEvents[1].get("s0.doubleBoxed"));
-	    assertEquals(12, oldEvents[1].get("result"));
+	    assertEquals(21d, oldEvents[1].get("resultOne"));
+	    assertEquals(12, oldEvents[1].get("resultTwo"));
     }
 
     public void testProcessAll() throws Exception
@@ -92,18 +92,18 @@ public class TestResultSetProcessorSimple extends TestCase
         EventBean[] oldEvents = result.getSecond();
 
         assertEquals(2, newEvents.length);
-        assertEquals(10d, newEvents[0].get("s0.doubleBoxed"));
-        assertEquals(30, newEvents[0].get("result"));
+        assertEquals(10d, newEvents[0].get("resultOne"));
+        assertEquals(30, newEvents[0].get("resultTwo"));
 
-	    assertEquals(11d, newEvents[1].get("s0.doubleBoxed"));
-	    assertEquals(42, newEvents[1].get("result"));
+	    assertEquals(11d, newEvents[1].get("resultOne"));
+	    assertEquals(42, newEvents[1].get("resultTwo"));
 
         assertEquals(2, oldEvents.length);
-        assertEquals(20d, oldEvents[0].get("s0.doubleBoxed"));
-        assertEquals(2, oldEvents[0].get("result"));
+        assertEquals(20d, oldEvents[0].get("resultOne"));
+        assertEquals(2, oldEvents[0].get("resultTwo"));
 
-	    assertEquals(21d, oldEvents[1].get("s0.doubleBoxed"));
-	    assertEquals(12, oldEvents[1].get("result"));
+	    assertEquals(21d, oldEvents[1].get("resultOne"));
+	    assertEquals(12, oldEvents[1].get("resultTwo"));
     }
 
     private Set<MultiKey<EventBean>> makeEventSet(EventBean event)
@@ -141,12 +141,12 @@ public class TestResultSetProcessorSimple extends TestCase
         EventBean[] oldEvents = result.getSecond();
 
         assertEquals(1, newEvents.length);
-	    assertEquals(11d, newEvents[0].get("s0.doubleBoxed"));
-	    assertEquals(42, newEvents[0].get("result"));
+	    assertEquals(11d, newEvents[0].get("resultOne"));
+	    assertEquals(42, newEvents[0].get("resultTwo"));
 
         assertEquals(1, oldEvents.length);
-	    assertEquals(21d, oldEvents[0].get("s0.doubleBoxed"));
-	    assertEquals(12, oldEvents[0].get("result"));
+	    assertEquals(21d, oldEvents[0].get("resultOne"));
+	    assertEquals(12, oldEvents[0].get("resultTwo"));
 	}
 
 	public void testUpdateLast() throws Exception
@@ -166,11 +166,11 @@ public class TestResultSetProcessorSimple extends TestCase
 	        EventBean[] oldEvents = result.getSecond();
 
 	        assertEquals(1, newEvents.length);
-		    assertEquals(11d, newEvents[0].get("s0.doubleBoxed"));
-		    assertEquals(42, newEvents[0].get("result"));
+		    assertEquals(11d, newEvents[0].get("resultOne"));
+		    assertEquals(42, newEvents[0].get("resultTwo"));
 
 	        assertEquals(1, oldEvents.length);
-		    assertEquals(21d, oldEvents[0].get("s0.doubleBoxed"));
-		    assertEquals(12, oldEvents[0].get("result"));
+		    assertEquals(21d, oldEvents[0].get("resultOne"));
+		    assertEquals(12, oldEvents[0].get("resultTwo"));
 	}
 }

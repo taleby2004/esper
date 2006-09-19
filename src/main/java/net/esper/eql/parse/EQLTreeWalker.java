@@ -331,7 +331,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         // Add as selection element
-        statementSpec.getSelectListExpressions().add(new SelectExprElementSpec(exprNode, optionalName));
+        statementSpec.getSelectListExpressions().add(new SelectExprElementUnnamedSpec(exprNode, optionalName));
     }
 
     private void leaveView(AST node) throws ASTWalkException

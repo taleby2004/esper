@@ -11,9 +11,8 @@ import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportSelectExprFactory;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.event.SupportEventAdapterService;
-import net.esper.eql.spec.SelectExprElementSpec;
 import net.esper.eql.spec.InsertIntoDesc;
-import net.esper.eql.core.SelectExprEvalProcessor;
+import net.esper.eql.spec.SelectExprElementNamedSpec;
 
 public class TestSelectExprEvalProcessor extends TestCase
 {
@@ -22,7 +21,7 @@ public class TestSelectExprEvalProcessor extends TestCase
 
     public void setUp() throws Exception
     {
-        List<SelectExprElementSpec> selectList = SupportSelectExprFactory.makeNoAggregateSelectList();
+        List<SelectExprElementNamedSpec> selectList = SupportSelectExprFactory.makeNoAggregateSelectList();
         EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
 
         methodOne = new SelectExprEvalProcessor(selectList, null, eventAdapterService);
@@ -37,9 +36,9 @@ public class TestSelectExprEvalProcessor extends TestCase
     public void testGetResultEventType()
     {
         EventType type = methodOne.getResultEventType();
-        assertTrue(Arrays.equals(type.getPropertyNames(), new String[] {"s0.doubleBoxed", "result"}));
-        assertEquals(Double.class, type.getPropertyType("s0.doubleBoxed"));
-        assertEquals(Integer.class, type.getPropertyType("result"));
+        assertTrue(Arrays.equals(type.getPropertyNames(), new String[] {"resultOne", "resultTwo"}));
+        assertEquals(Double.class, type.getPropertyType("resultOne"));
+        assertEquals(Integer.class, type.getPropertyType("resultTwo"));
 
         type = methodTwo.getResultEventType();
         assertTrue(Arrays.equals(type.getPropertyNames(), new String[] {"a", "b"}));
@@ -52,8 +51,8 @@ public class TestSelectExprEvalProcessor extends TestCase
         EventBean[] events = new EventBean[] {makeEvent(8.8, 3, 4)};
 
         EventBean result = methodOne.process(events);
-        assertEquals(8.8d, result.get("s0.doubleBoxed"));
-        assertEquals(12, result.get("result"));
+        assertEquals(8.8d, result.get("resultOne"));
+        assertEquals(12, result.get("resultTwo"));
 
         result = methodTwo.process(events);
         assertEquals(8.8d, result.get("a"));

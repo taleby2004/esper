@@ -8,7 +8,8 @@ import net.esper.eql.expression.ExprNodeIdentifierVisitor;
 import net.esper.eql.expression.ExprAggregateNode;
 import net.esper.eql.spec.OutputLimitSpec;
 import net.esper.eql.spec.InsertIntoDesc;
-import net.esper.eql.spec.SelectExprElementSpec;
+import net.esper.eql.spec.SelectExprElementUnnamedSpec;
+import net.esper.eql.spec.SelectExprElementNamedSpec;
 
 import java.util.*;
 
@@ -58,7 +59,7 @@ public class ResultSetProcessorFactory
      * @return result set processor instance
      * @throws net.esper.eql.expression.ExprValidationException
      */
-    public static ResultSetProcessor getProcessor(List<SelectExprElementSpec> selectionList,
+    public static ResultSetProcessor getProcessor(List<SelectExprElementUnnamedSpec> selectionList,
                                                   InsertIntoDesc insertIntoDesc,
                                                	  List<ExprNode> groupByNodes,
                                                	  ExprNode optionalHavingNode,
@@ -82,14 +83,24 @@ public class ResultSetProcessorFactory
         expandAliases(selectionList, orderByList);
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
+        List<SelectExprElementNamedSpec> namedSelectionList = new LinkedList<SelectExprElementNamedSpec>();
         for (int i = 0; i < selectionList.size(); i++)
         {
-        	SelectExprElementSpec element = selectionList.get(i);
-        	String asName = element.getAsName();
-        	ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, autoImportService);
-        	SelectExprElementSpec validatedElement = new SelectExprElementSpec(validatedExpression, asName);
-            selectionList.set(i, validatedElement);
+            // validate element
+            SelectExprElementUnnamedSpec element = selectionList.get(i);
+            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, autoImportService);
+
+            // determine an element name if none assigned
+            String asName = element.getOptionalAsName();
+            if (asName == null)
+            {
+                asName = validatedExpression.toExpressionString();
+            }
+
+            SelectExprElementNamedSpec validatedElement = new SelectExprElementNamedSpec(validatedExpression, asName);
+            namedSelectionList.add(validatedElement);
         }
+        selectionList = null;
 
         // Validate group-by expressions, if any (could be empty list for no group-by)
         for (int i = 0; i < groupByNodes.size(); i++)
@@ -114,7 +125,7 @@ public class ResultSetProcessorFactory
 
         // Get the select expression nodes
         List<ExprNode> selectNodes = new ArrayList<ExprNode>();
-        for(SelectExprElementSpec element : selectionList)
+        for(SelectExprElementNamedSpec element : namedSelectionList)
         {
         	selectNodes.add(element.getSelectExpression());
         }
@@ -128,7 +139,7 @@ public class ResultSetProcessorFactory
 
         // Determine aggregate functions used in select, if any
         List<ExprAggregateNode> selectAggregateExprNodes = new LinkedList<ExprAggregateNode>();
-        for (SelectExprElementSpec element : selectionList)
+        for (SelectExprElementNamedSpec element : namedSelectionList)
         {
             ExprAggregateNode.getAggregatesBottomUp(element.getSelectExpression(), selectAggregateExprNodes);
         }
@@ -138,11 +149,11 @@ public class ResultSetProcessorFactory
         AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, hasGroupBy, optionalHavingNode, orderByNodes);
 
         // Construct the processor for sorting output events
-        OrderByProcessor orderByProcessor = OrderByProcessorFactory.getProcessor(selectionList,
+        OrderByProcessor orderByProcessor = OrderByProcessorFactory.getProcessor(namedSelectionList,
                 groupByNodes, orderByList, aggregationService, eventAdapterService);
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectionList, insertIntoDesc, typeService, eventAdapterService);
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(namedSelectionList, insertIntoDesc, typeService, eventAdapterService);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesAggregatedSelect = getAggregatedProperties(selectAggregateExprNodes);
@@ -195,7 +206,7 @@ public class ResultSetProcessorFactory
 
         // (2)
         // A wildcard select-clause has been specified and the group-by is ignored since no aggregation functions are used, and no having clause
-        if ((selectionList.size() == 0) && (propertiesAggregatedHaving.size() == 0))
+        if ((namedSelectionList.size() == 0) && (propertiesAggregatedHaving.size() == 0))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
             return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
@@ -237,7 +248,7 @@ public class ResultSetProcessorFactory
         }
 
         // Wildcard select-clause means we do not have all selected properties in the group
-        if (selectionList.size() == 0)
+        if (namedSelectionList.size() == 0)
         {
             allInGroupBy = false;
         }
@@ -255,7 +266,7 @@ public class ResultSetProcessorFactory
         }
 
         // Wildcard select-clause means that all order-by props in the select expression
-        if (selectionList.size() == 0)
+        if (namedSelectionList.size() == 0)
         {
             allInSelect = true;
         }
@@ -405,11 +416,11 @@ public class ResultSetProcessorFactory
         return propertiesGroupBy;
     }
 
-    private static void expandAliases(List<SelectExprElementSpec> selectionList, List<Pair<ExprNode, Boolean>> orderByList)
+    private static void expandAliases(List<SelectExprElementUnnamedSpec> selectionList, List<Pair<ExprNode, Boolean>> orderByList)
     {
-    	for(SelectExprElementSpec selectElement : selectionList)
+    	for(SelectExprElementUnnamedSpec selectElement : selectionList)
     	{
-    		String alias = selectElement.getAsName();
+    		String alias = selectElement.getOptionalAsName();
     		if(alias != null)
     		{
     			ExprNode fullExpr = selectElement.getSelectExpression();

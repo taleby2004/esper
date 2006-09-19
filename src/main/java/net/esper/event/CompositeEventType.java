@@ -3,10 +3,21 @@ package net.esper.event;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Event type for events that itself have event properties that are event wrappers.
+ * <p>
+ * For use in pattern expression statements in which multiple events match a pattern. There the
+ * composite event indicates that the whole patterns matched, and indicates the
+ * individual events that caused the pattern as event properties to the event.
+ */
 public class CompositeEventType implements EventType
 {
     private final Map<String, EventType> taggedEventTypes;
 
+    /**
+     * Ctor.
+     * @param taggedEventTypes is a map of name tags and event type per tag 
+     */
     public CompositeEventType(Map<String, EventType> taggedEventTypes)
     {
         this.taggedEventTypes = taggedEventTypes;

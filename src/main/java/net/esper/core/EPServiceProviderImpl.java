@@ -190,6 +190,10 @@ public class EPServiceProviderImpl implements EPServiceProvider
         return autoImportService;
     }
 
+    /**
+     * Snapshot of Configuration is held for re-initializing engine state
+     * from prior configuration values that may have been muted.
+     */
     public final class ConfigurationSnapshot
     {
         private Map<String, String> javaClassAliases = new HashMap<String, String>();
@@ -197,6 +201,13 @@ public class EPServiceProviderImpl implements EPServiceProvider
         private String[] autoImports;
         private Map<String, Properties> mapAliases = new HashMap<String, Properties>();
 
+        /**
+         * Ctor.
+         * <p>
+         * Copies information out of configuration performing a deep copy
+         * to preserve configs.
+         * @param configuration is the client configuration holder
+         */
         public ConfigurationSnapshot(Configuration configuration)
         {
             javaClassAliases.putAll(configuration.getEventTypeAliases());
@@ -205,21 +216,37 @@ public class EPServiceProviderImpl implements EPServiceProvider
             mapAliases.putAll(configuration.getEventTypesMapEvents());
         }
 
+        /**
+         * Returns event type alias to Java class name mapping.
+         * @return map of alias to class name
+         */
         public Map<String, String> getJavaClassAliases()
         {
             return javaClassAliases;
         }
 
+        /**
+         * Returns map of event alias and XML DOM configs.
+         * @return event alias to XML DOM config mapping
+         */
         public Map<String, ConfigurationEventTypeXMLDOM> getXmlDOMAliases()
         {
             return xmlDOMAliases;
         }
 
+        /**
+         * Returns list of automatic import packages and classes.
+         * @return automatic imports, or zero-length array if none
+         */
         public String[] getAutoImports()
         {
             return autoImports;
         }
 
+        /**
+         * Returns a map of event type alias to Map-event type properties.
+         * @return alias to event properties mapping for Map event types
+         */
         public Map<String, Properties> getMapAliases()
         {
             return mapAliases;

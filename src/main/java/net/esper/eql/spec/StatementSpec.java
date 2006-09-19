@@ -7,10 +7,13 @@ import net.esper.eql.expression.ExprNode;
 import java.util.List;
 import java.util.LinkedList;
 
+/**
+ * Specification object representing a complete EQL statement including all EQL constructs.
+ */
 public class StatementSpec
 {
     private InsertIntoDesc insertIntoDesc;
-    private List<SelectExprElementSpec> selectListExpressions = new LinkedList<SelectExprElementSpec>();
+    private List<SelectExprElementUnnamedSpec> selectListExpressions = new LinkedList<SelectExprElementUnnamedSpec>();
     private List<StreamSpec> streamSpecs = new LinkedList<StreamSpec>();
     private List<OuterJoinDesc> outerJoinDescList = new LinkedList<OuterJoinDesc>();
     private ExprNode filterExprRootNode;
@@ -32,7 +35,7 @@ public class StatementSpec
      * Returns SELECT-clause list of expressions.
      * @return list of expressions and optional name
      */
-    public List<SelectExprElementSpec> getSelectListExpressions()
+    public List<SelectExprElementUnnamedSpec> getSelectListExpressions()
     {
         return selectListExpressions;
     }
@@ -99,21 +102,37 @@ public class StatementSpec
         return orderByList;
     }
 
+    /**
+     * Sets the output limiting definition.
+     * @param outputLimitSpec defines the rules for output limiting
+     */
     public void setOutputLimitSpec(OutputLimitSpec outputLimitSpec)
     {
         this.outputLimitSpec = outputLimitSpec;
     }
 
+    /**
+     * Sets the where clause filter expression node.
+     * @param filterExprRootNode the where clause expression
+     */
     public void setFilterExprRootNode(ExprNode filterExprRootNode)
     {
         this.filterExprRootNode = filterExprRootNode;
     }
 
+    /**
+     * Sets the having-clause filter expression node.
+     * @param havingExprRootNode the having-clause expression
+     */
     public void setHavingExprRootNode(ExprNode havingExprRootNode)
     {
         this.havingExprRootNode = havingExprRootNode;
     }
 
+    /**
+     * Sets the definition for any insert-into clause.
+     * @param insertIntoDesc is the descriptor for insert-into rules
+     */
     public void setInsertIntoDesc(InsertIntoDesc insertIntoDesc)
     {
         this.insertIntoDesc = insertIntoDesc;

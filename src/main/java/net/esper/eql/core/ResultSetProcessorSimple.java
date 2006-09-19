@@ -231,6 +231,19 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         }
     }
 
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * <p>
+     * Also applies a having clause.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param orderByProcessor - for sorting output events according to the order-by clause
+     * @param events - input events
+     * @param optionalHavingNode - supplies the having-clause expression
+     * @param isOutputLimiting - true to indicate that we limit output
+     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
+     * @return output events, one for each input event
+     */
     protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
     {
         if (isOutputLimiting)
@@ -285,6 +298,19 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         }
     }
 
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * <p>
+     * Also applies a having clause.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param orderByProcessor - for sorting output events according to the order-by clause
+     * @param events - input events
+     * @param optionalHavingNode - supplies the having-clause expression
+     * @param isOutputLimiting - true to indicate that we limit output
+     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
+     * @return output events, one for each input event
+     */
     protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
     {
         if (isOutputLimiting)

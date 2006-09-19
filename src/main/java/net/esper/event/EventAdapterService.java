@@ -135,6 +135,20 @@ public interface EventAdapterService
      */
     public EventBean adapterForDOM(Node node);
 
+    /**
+     * Creates an unnamed composite event type with event properties that are name-value pairs
+     * with values being other event types. Pattern statement generate events of such type.
+     * @param taggedEventTypes is a map of name keys and event type values
+     * @return event type representing a composite event
+     */
     public EventType createAnonymousCompositeType(Map<String, EventType> taggedEventTypes);
+
+    /**
+     * Creates a wrapper for a composite event type. The wrapper wraps an event that
+     * consists of name-value pairs in which the values are other already-wrapped events.
+     * @param eventType is the composite event type
+     * @param taggedEvents is the name-event map
+     * @return wrapper for composite event
+     */
     public EventBean adapterForCompositeEvent(EventType eventType, Map<String, EventBean> taggedEvents);
 }

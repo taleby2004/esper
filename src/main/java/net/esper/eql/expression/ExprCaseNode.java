@@ -27,6 +27,12 @@ public class ExprCaseNode extends ExprNode
     private Class coercionType;
     private boolean mustCoerce;
 
+    /**
+     * Ctor.
+     * @param isCase2 is an indicator of which Case statement we are working on.
+     * <p> True indicates a 'Case2' statement with syntax "case a when a1 then b1 else b2".
+     * <p> False indicates a 'Case1' statement with syntax "case when a=a1 then b1 else b2".
+     */
     public ExprCaseNode(boolean isCase2)
     {
         this.isCase2 = isCase2;

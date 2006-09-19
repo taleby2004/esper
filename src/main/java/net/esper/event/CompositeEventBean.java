@@ -2,11 +2,21 @@ package net.esper.event;
 
 import java.util.Map;
 
+/**
+ * Event bean wrapper for events that consists of a Map of name tags as key values and
+ * event bean wrappers as value objects, for use by pattern expressions.
+ */
 public class CompositeEventBean implements EventBean
 {
     private final Map<String, EventBean> wrappedEvents;
     private final EventType eventType;
 
+    /**
+     * Ctor.
+     * @param wrappedEvents is the event properties map with keys being the property name tages
+     * and values the wrapped event
+     * @param eventType is the event type instance for the wrapper
+     */
     public CompositeEventBean(Map<String, EventBean> wrappedEvents, EventType eventType)
     {
         this.wrappedEvents = wrappedEvents;

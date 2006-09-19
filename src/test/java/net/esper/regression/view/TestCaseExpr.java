@@ -10,6 +10,7 @@ import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.event.EventBean;
 
 import net.esper.support.bean.SupportEnum;
+import net.esper.support.bean.SupportBeanWithEnum;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -411,6 +412,72 @@ public class TestCaseExpr extends TestCase
         assertEquals(16f, event.get("p1"));
     }
 
+    public void testCaseSyntax2EnumChecks()
+    {
+       String caseExpr = "select case supportEnum " +
+                 " when net.esper.support.bean.SupportEnum.getValueForEnum(0) then 1 " +
+                 " when net.esper.support.bean.SupportEnum.getValueForEnum(1) then 2 " +
+                 " end as p1 " +
+                 " from " + SupportBeanWithEnum.class.getName() + ".win:length(10)";
+
+        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        selectTestCase.addListener(testListener);
+        assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType("p1"));
+
+        sendSupportBeanEvent("a", SupportEnum.ENUM_VALUE_1);
+        EventBean event = testListener.getAndResetLastNewData()[0];
+        assertEquals(1, event.get("p1"));
+
+        sendSupportBeanEvent("b", SupportEnum.ENUM_VALUE_2);
+        event = testListener.getAndResetLastNewData()[0];
+        assertEquals(2, event.get("p1"));
+
+        sendSupportBeanEvent("c", SupportEnum.ENUM_VALUE_3);
+        event = testListener.getAndResetLastNewData()[0];
+        assertEquals(null, event.get("p1"));
+    }
+
+    public void testCaseSyntax2EnumResult()
+    {
+       String caseExpr = "select case intPrimitive * 2 " +
+                 " when 2 then net.esper.support.bean.SupportEnum.getValueForEnum(0) " +
+                 " when 4 then net.esper.support.bean.SupportEnum.getValueForEnum(1) " +
+                 " else net.esper.support.bean.SupportEnum.getValueForEnum(2) " +
+                 " end as p1 " +
+                 " from " + SupportBean.class.getName() + ".win:length(10)";
+
+        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        selectTestCase.addListener(testListener);
+        assertEquals(SupportEnum.class, selectTestCase.getEventType().getPropertyType("p1"));
+
+        sendSupportBeanEvent(1);
+        EventBean event = testListener.getAndResetLastNewData()[0];
+        assertEquals(SupportEnum.ENUM_VALUE_1, event.get("p1"));
+
+        sendSupportBeanEvent(2);
+        event = testListener.getAndResetLastNewData()[0];
+        assertEquals(SupportEnum.ENUM_VALUE_2, event.get("p1"));
+
+        sendSupportBeanEvent(3);
+        event = testListener.getAndResetLastNewData()[0];
+        assertEquals(SupportEnum.ENUM_VALUE_3, event.get("p1"));
+    }
+
+    public void testCaseSyntax2NoAsName()
+    {
+        String caseSubExpr = "case intPrimitive when 1 then 0 end";
+        String caseExpr = "select " + caseSubExpr +
+                 " from " + SupportBean.class.getName() + ".win:length(10)";
+
+        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        selectTestCase.addListener(testListener);
+        assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType(caseSubExpr));
+
+        sendSupportBeanEvent(1);
+        EventBean event = testListener.getAndResetLastNewData()[0];
+        assertEquals(0, event.get(caseSubExpr));
+    }
+
     private void sendSupportBeanEvent(boolean b_, Boolean boolBoxed_, int i_, Integer intBoxed_, long l_, Long longBoxed_,
                                       char c_, Character charBoxed_, short s_, Short shortBoxed_, byte by_, Byte byteBoxed_,
                                       float f_, Float floatBoxed_, double d_, Double doubleBoxed_, String str_, SupportEnum enum_)
@@ -465,6 +532,12 @@ public class TestCaseExpr extends TestCase
     {
         SupportBean event = new SupportBean();
         event.setBoolBoxed(boolBoxed);
+        epService.getEPRuntime().sendEvent(event);
+    }
+
+    private void sendSupportBeanEvent(String string, SupportEnum supportEnum)
+    {
+        SupportBeanWithEnum event = new SupportBeanWithEnum(string, supportEnum);
         epService.getEPRuntime().sendEvent(event);
     }
 

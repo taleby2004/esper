@@ -20,6 +20,7 @@ public final class PatternContext
      * @param filterService implementation for filtering service
      * @param scheduleBucket schedule buckets for use by scheduling service for ordering scheduling callbacks for pattern statements 
      * @param schedulingService implementation for schedule evaluation
+     * @param eventAdapterService service for event adapters or wrappers
      */
     public PatternContext(FilterService filterService, SchedulingService schedulingService, ScheduleBucket scheduleBucket, EventAdapterService eventAdapterService)
     {
@@ -56,6 +57,10 @@ public final class PatternContext
         return scheduleBucket;
     }
 
+    /**
+     * Returns teh service providing event adaptering or wrapping.
+     * @return event adapter service
+     */
     public EventAdapterService getEventAdapterService()
     {
         return eventAdapterService;

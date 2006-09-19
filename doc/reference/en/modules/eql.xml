@@ -890,6 +890,14 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 							</para>
 						</entry>
 					</row>
+					<row>
+						<entry>coalesce(<emphasis>expression</emphasis>, <emphasis>expression</emphasis>, [, <emphasis>expression</emphasis> [,...]])</entry>
+						<entry>
+							<para>
+								Returns the first non-<literal>null</literal> value in the list, or <literal>null</literal> if there are no non-<literal>null</literal> values.
+							</para>
+						</entry>
+					</row>
 				</tbody>
 			</tgroup>
 		</table>
