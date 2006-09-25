@@ -3,6 +3,17 @@ package net.esper.regression.pattern;
 import junit.framework.*;
 import net.esper.regression.support.*;
 import net.esper.support.bean.SupportBeanConstants;
+import net.esper.support.bean.SupportCallEvent;
+import net.esper.support.util.SupportUpdateListener;
+import net.esper.client.*;
+import net.esper.event.EventBean;
+
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class TestFollowedByOperator extends TestCase implements SupportBeanConstants
 {
@@ -81,4 +92,53 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         PatternTestHarness util = new PatternTestHarness(events, testCaseList);
         util.runTest();
     }
+
+    public void testFollowedByTimer() throws ParseException
+    {
+        Configuration config = new Configuration();
+        config.addEventTypeAlias("CallEvent", SupportCallEvent.class.getName());
+        EPServiceProvider epService = EPServiceProviderManager.getProvider("testFollowedByTimer", config);
+        epService.initialize();
+
+        String expression = "select * from pattern " +
+          "[every A=CallEvent -> every B=CallEvent(dest=A.dest, startTime in [A.startTime:A.endTime]) where timer:within (7200000)]" +
+          "where B.source != A.source";
+        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        SupportCallEvent eventOne = sendEvent(epService.getEPRuntime(), 2000002601, "18", "123456789014795", dateToLong("2005-09-26 13:02:53.200"), dateToLong("2005-09-26 13:03:34.400"));
+        SupportCallEvent eventTwo = sendEvent(epService.getEPRuntime(), 2000002607, "20", "123456789014795", dateToLong("2005-09-26 13:03:17.300"), dateToLong("2005-09-26 13:03:58.600"));
+
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertSame(eventOne, event.get("A"));
+        assertSame(eventTwo, event.get("B"));
+
+        SupportCallEvent eventThree = sendEvent(epService.getEPRuntime(), 2000002610, "22", "123456789014795", dateToLong("2005-09-26 13:03:31.300"), dateToLong("2005-09-26 13:04:12.100"));
+        assertEquals(1, listener.getNewDataList().size());
+        assertEquals(2, listener.getLastNewData().length);
+        event = listener.getLastNewData()[0];
+        assertSame(eventOne, event.get("A"));
+        assertSame(eventThree, event.get("B"));
+        event = listener.getLastNewData()[1];
+        assertSame(eventTwo, event.get("A"));
+        assertSame(eventThree, event.get("B"));
+    }
+
+    private long dateToLong(String dateText) throws ParseException
+    {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date date = format.parse(dateText);
+        log.debug(".dateToLong out=" + date.toString());
+        return date.getTime();
+    }
+
+    private SupportCallEvent sendEvent(EPRuntime runtime, long callId, String source, String destination, long startTime, long endTime)
+    {
+        SupportCallEvent event = new SupportCallEvent(callId, source, destination, startTime, endTime);
+        runtime.sendEvent(event);
+        return event;
+    }
+
+    private static Log log = LogFactory.getLog(TestFollowedByOperator.class);
 }
