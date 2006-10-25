@@ -40,7 +40,8 @@ tokens
 //----------------------------------------------------------------------------
 startEQLExpressionRule
 	:	(insertIntoExpr)?
-		selectionListExpr streamExpression (streamExpression (outerJoin)* )*
+		selectClause 
+		fromClause
 		(whereClause)?
 		(groupByClause)?
 		(havingClause)?
@@ -57,9 +58,17 @@ insertIntoExprCol
 	:	#(i:INSERTINTO_EXPRCOL IDENT (IDENT)* )
 	;
 
-selectionListExpr
-	:	#(s:SELECTION_EXPR selectionListElement (selectionListElement)* )
+selectClause
+	:	#(s:SELECTION_EXPR (RSTREAM | ISTREAM)? (STAR | selectionList) { leaveNode(#s); })
 	|	STAR
+	;
+
+fromClause
+	:	streamExpression (streamExpression (outerJoin)* )*
+	;
+	
+selectionList
+	:	selectionListElement (selectionListElement)*
 	;
 	
 selectionListElement
@@ -142,11 +151,23 @@ valueExpr
 	|	f:builtinFunc { leaveNode(#f); }
 	|   l:libFunc { leaveNode(#l); }
 	|	cs:caseExpr { leaveNode(#cs); }
+	|	in:inExpr { leaveNode(#in); }
+	|	b:betweenExpr { leaveNode(#b); }
 	;
 
 caseExpr
 	: #(CASE (valueExpr)*)
 	| #(CASE2 (valueExpr)*)
+	;
+	
+inExpr
+	: #(IN_SET valueExpr valueExpr (valueExpr)*)
+	| #(NOT_IN_SET valueExpr valueExpr (valueExpr)*)
+	;
+	
+betweenExpr
+	: #(BETWEEN valueExpr valueExpr valueExpr)
+	| #(NOT_BETWEEN valueExpr valueExpr (valueExpr)*)
 	;
 
 builtinFunc
@@ -189,7 +210,7 @@ exprChoice
 	|	patternOp
 	| 	#( a:EVERY_EXPR exprChoice { leaveNode(#a); } )
 	| 	#( n:NOT_EXPR exprChoice { leaveNode(#n); } )
-	| 	#( g:GUARD_EXPR exprChoice IDENT IDENT (constant)* { leaveNode(#g); } )
+	| 	#( g:GUARD_EXPR exprChoice IDENT IDENT (constant | time_period)* { leaveNode(#g); } )
 	;
 	
 patternOp
@@ -213,11 +234,12 @@ filterParam
 	
 filterParamComparator
 	:	#(EQUALS filterAtom)
+	|	#(NOT_EQUAL filterAtom)
 	|	#(LT filterAtom)
 	|	#(LE filterAtom)
 	|	#(GT filterAtom)
 	|	#(GE filterAtom)
-	|	#(IN (LPAREN|LBRACK) (constant|filterIdentifier) (constant|filterIdentifier) (RPAREN|RBRACK))
+	|	#(IN_SET (LPAREN|LBRACK) (constant|filterIdentifier) (constant|filterIdentifier) (RPAREN|RBRACK))
 	;
 	
 filterAtom
@@ -225,7 +247,7 @@ filterAtom
 	|	filterIdentifier;
 	
 filterIdentifier
-	:	#(EVENT_FILTER_IDENT IDENT IDENT)
+	:	#(EVENT_FILTER_IDENT IDENT eventPropertyExpr)
 	;	
 	
 eventPropertyExpr
@@ -252,12 +274,45 @@ singleParameter
 	| 	constant
 	| 	#( NUMERIC_PARAM_RANGE NUM_INT NUM_INT)
 	| 	#( NUMERIC_PARAM_FREQUENCY NUM_INT)
+	| 	time_period
 	;
 
 numericParameterList
 	: 	NUM_INT
 	| 	#( NUMERIC_PARAM_RANGE NUM_INT NUM_INT)
 	| 	#( NUMERIC_PARAM_FREQUENCE NUM_INT)
+	;
+
+time_period
+	: 	#( TIME_PERIOD timePeriodDef )
+	;
+	
+timePeriodDef
+	: 	dayPart (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
+	|	hourPart (minutePart)? (secondPart)? (millisecondPart)?
+	|	minutePart (secondPart)? (millisecondPart)?
+	|	secondPart (millisecondPart)?
+	|	millisecondPart
+	;
+	
+dayPart
+	:	#( DAY_PART number)
+	;
+
+hourPart
+	:	#( HOUR_PART number)
+	;
+
+minutePart
+	:	#( MINUTE_PART number)
+	;
+
+secondPart
+	:	#( SECOND_PART number)
+	;
+
+millisecondPart
+	:	#( MILLISECOND_PART number)
 	;
 
 constant

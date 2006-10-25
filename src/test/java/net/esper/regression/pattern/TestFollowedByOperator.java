@@ -7,6 +7,17 @@ import net.esper.support.bean.SupportCallEvent;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.client.*;
 import net.esper.event.EventBean;
+import net.esper.support.bean.SupportBean_A;
+import net.esper.support.bean.SupportBean_B;
+import net.esper.support.bean.SupportBean_C;
+import net.esper.support.util.SupportUpdateListener;
+import net.esper.client.Configuration;
+import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPServiceProvider;
+import net.esper.client.EPStatement;
+import net.esper.client.time.TimerControlEvent;
+import net.esper.client.time.CurrentTimeEvent;
+import net.esper.event.EventBean;
 
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
@@ -93,6 +104,61 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         util.runTest();
     }
 
+    public void testFollowedByWithNot()
+    {
+        Configuration config = new Configuration();
+        config.addEventTypeAlias("A", SupportBean_A.class.getName());
+        config.addEventTypeAlias("B", SupportBean_B.class.getName());
+        config.addEventTypeAlias("C", SupportBean_C.class.getName());
+
+        EPServiceProvider epService = EPServiceProviderManager.getProvider("TestCheckinStmt", config);
+        epService.initialize();
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+
+        String stmt =
+          "select * from pattern [" +
+            " every a=A -> (timer:interval(10 seconds) and not (B(id=a.id) or C(id=a.id)))" +
+          "] ";
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().createEQL(stmt);
+        statement.addListener(listener);
+
+        // test case where no Completed or Cancel event arrives
+        sendTimer(0, epService);
+        SupportBean_A eventA = sendA("A1", epService);
+        sendTimer(9999, epService);
+        assertFalse(listener.isInvoked());
+        sendTimer(10000, epService);
+        EventBean received = listener.assertOneGetNewAndReset();
+        assertEquals(eventA, received.get("a"));
+
+        // test case where Completed event arrives within the time set
+        sendTimer(20000, epService);
+        eventA = sendA("A2", epService);
+        sendTimer(29999, epService);
+        sendB("A2", epService);
+        sendTimer(30000, epService);
+        assertFalse(listener.isInvoked());
+
+        // test case where Cancelled event arrives within the time set
+        sendTimer(30000, epService);
+        eventA = sendA("A3", epService);
+        sendTimer(30000, epService);
+        sendC("A3", epService);
+        sendTimer(40000, epService);
+        assertFalse(listener.isInvoked());
+
+        // test case where no matching Completed or Cancel event arrives
+        eventA = sendA("A4", epService);
+        sendA("A5", epService);
+        sendB("B4", epService);
+        sendC("A5", epService);
+        sendTimer(50000, epService);
+        received = listener.assertOneGetNewAndReset();
+        assertEquals(eventA, received.get("a"));
+    }
+
     public void testFollowedByTimer() throws ParseException
     {
         Configuration config = new Configuration();
@@ -138,6 +204,31 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         SupportCallEvent event = new SupportCallEvent(callId, source, destination, startTime, endTime);
         runtime.sendEvent(event);
         return event;
+    }
+
+    private SupportBean_A sendA(String id, EPServiceProvider epService)
+    {
+        SupportBean_A a = new SupportBean_A(id);
+        epService.getEPRuntime().sendEvent(a);
+        return a;
+    }
+
+    private void sendB(String id, EPServiceProvider epService)
+    {
+        SupportBean_B b = new SupportBean_B(id);
+        epService.getEPRuntime().sendEvent(b);
+    }
+
+    private void sendC(String id, EPServiceProvider epService)
+    {
+        SupportBean_C c = new SupportBean_C(id);
+        epService.getEPRuntime().sendEvent(c);
+    }
+
+    private void sendTimer(long time, EPServiceProvider epService)
+    {
+        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        epService.getEPRuntime().sendEvent(event);
     }
 
     private static Log log = LogFactory.getLog(TestFollowedByOperator.class);

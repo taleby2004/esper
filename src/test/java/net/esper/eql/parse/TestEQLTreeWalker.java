@@ -10,6 +10,7 @@ import net.esper.support.event.SupportEventAdapterService;
 import net.esper.eql.expression.*;
 import net.esper.view.ViewSpec;
 import net.esper.filter.FilterSpec;
+import net.esper.filter.FilterOperator;
 import net.esper.eql.spec.*;
 import net.esper.type.OuterJoinType;
 import net.esper.event.EventAdapterService;
@@ -526,7 +527,7 @@ public class TestEQLTreeWalker extends TestCase
 
     public void testWalkPattern() throws Exception
     {
-        String text = "every g=" + SupportBean.class.getName() + "(string=\"IBM\") where timer:within(20)";
+        String text = "every g=" + SupportBean.class.getName() + "(string=\"IBM\", intPrimitive != 1) where timer:within(20)";
 
         EQLTreeWalker walker = parseAndWalkPattern(text);
 
@@ -548,7 +549,10 @@ public class TestEQLTreeWalker extends TestCase
 
         assertEquals("g", filterNode.getEventAsName());
         assertEquals(0, filterNode.getChildNodes().size());
-        assertEquals(1, filterNode.getFilterSpec().getParameters().size());
+        assertEquals(2, filterNode.getFilterSpec().getParameters().size());
+        assertEquals("intPrimitive", filterNode.getFilterSpec().getParameters().get(1).getPropertyName());
+        assertEquals(FilterOperator.NOT_EQUAL, filterNode.getFilterSpec().getParameters().get(1).getFilterOperator());
+        assertEquals(1, filterNode.getFilterSpec().getParameters().get(1).getFilterValue(null));
 
         assertEquals(1, patternStreamSpec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, patternStreamSpec.getTaggedEventTypes().get("g").getUnderlyingType());
@@ -571,6 +575,21 @@ public class TestEQLTreeWalker extends TestCase
         final String EVENT = SupportBean_N.class.getName();
         String text = "na=" + EVENT + "() -> every nb=" + EVENT + "(doublePrimitive in [0:na.doublePrimitive])";
         parseAndWalkPattern(text);
+    }
+
+    public void testWalkIStreamRStreamSelect() throws Exception
+    {
+        String text = "select rstream 'a' from " + SupportBean_N.class.getName();
+        EQLTreeWalker walker = parseAndWalkEQL(text);
+        assertEquals(SelectClauseStreamSelectorEnum.RSTREAM_ONLY, walker.getStatementSpec().getSelectStreamSelectorEnum());
+
+        text = "select istream 'a' from " + SupportBean_N.class.getName();
+        walker = parseAndWalkEQL(text);
+        assertEquals(SelectClauseStreamSelectorEnum.ISTREAM_ONLY, walker.getStatementSpec().getSelectStreamSelectorEnum());
+
+        text = "select 'a' from " + SupportBean_N.class.getName();
+        walker = parseAndWalkEQL(text);
+        assertEquals(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH, walker.getStatementSpec().getSelectStreamSelectorEnum());
     }
 
     public void testWalkPatternNoPackage() throws Exception
@@ -602,6 +621,68 @@ public class TestEQLTreeWalker extends TestCase
         {
             log.debug(".testWalkTypesInvalid Expected exception, msg=" + ex.getMessage());
         }
+    }
+
+    public void testWalkPatternIntervals() throws Exception
+    {
+        Object[][] intervals = {
+                {"1E2 milliseconds", 0.1d},
+                {"11 millisecond", 11/1000d},
+                {"1.1 msec", 1.1/1000d},
+                {"5 seconds", 5d},
+                {"0.1 second", 0.1d},
+                {"135L sec", 135d},
+                {"1.4 minutes", 1.4 * 60d},
+                {"11 minute", 11 * 60d},
+                {"123.2 min", 123.2 * 60d},
+                {".2 hour", .2 * 60 * 60d},
+                {"11.2 hours", 11.2 * 60 * 60d},
+                {"2 day", 2 * 24 * 60 * 60d},
+                {"11.2 days", 11.2 * 24 * 60 * 60d},
+                {"1 days 6 hours 2 minutes 4 seconds 3 milliseconds",
+                            1*24*60*60 + 6*60*60 + 2*60 + 4 + 3/1000d},
+                {"0.2 day 3.3 hour 1E3 minute 0.33 second 10000 millisecond",
+                            0.2d*24*60*60 + 3.3d*60*60 + 1E3*60 + 0.33 + 10000/1000},
+                {"0.2 day 3.3 hour 1E3 min 0.33 sec 10000 msec",
+                            0.2d*24*60*60 + 3.3d*60*60 + 1E3*60 + 0.33 + 10000/1000},
+                {"1.01 hour 2 sec", 1.01d*60*60 + 2},
+                {"0.02 day 5 msec", 0.02d*24*60*60 + 5/1000d},
+                {"66 min 4 sec", 66*60 + 4d},
+        };
+
+        for (int i = 0; i < intervals.length; i++)
+        {
+            String interval = (String) intervals[i][0];
+            double result = tryInterval(interval);
+            double expected = (Double) intervals[i][1];
+            double delta = result - expected;
+            assertTrue("Interval '" + interval + "' expected=" + expected + " actual=" + result, Math.abs(delta) < 0.0000001);
+        }
+    }
+
+    public void testWalkInAndBetween() throws Exception
+    {
+        assertFalse((Boolean) tryRelationalOp("1 in (2,3)"));
+        assertTrue((Boolean) tryRelationalOp("1 in (2,3,1)"));
+        assertTrue((Boolean) tryRelationalOp("1 not in (2,3)"));
+
+        assertTrue((Boolean) tryRelationalOp("1 between 0 and 2"));
+        assertFalse((Boolean) tryRelationalOp("-1 between 0 and 2"));
+        assertFalse((Boolean) tryRelationalOp("1 not between 0 and 2"));
+        assertTrue((Boolean) tryRelationalOp("-1 not between 0 and 2"));
+    }
+
+    private double tryInterval(String interval) throws Exception
+    {
+        String text = "select * from " + SupportBean.class.getName() + ".win:time(" + interval + ")";
+
+        EQLTreeWalker walker = parseAndWalkEQL(text);
+        ViewSpec viewSpec = ((FilterStreamSpec) walker.getStatementSpec().getStreamSpecs().get(0)).getViewSpecs().get(0);
+        assertEquals("win", viewSpec.getObjectNamespace());
+        assertEquals("time", viewSpec.getObjectName());
+        assertEquals(1, viewSpec.getObjectParameters().size());
+        TimePeriodParameter timePeriodParameter = (TimePeriodParameter) viewSpec.getObjectParameters().get(0);
+        return timePeriodParameter.getNumSeconds();
     }
 
     private String tryWalkGetPropertyPattern(String stmt) throws Exception

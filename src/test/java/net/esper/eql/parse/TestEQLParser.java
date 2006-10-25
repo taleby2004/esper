@@ -14,9 +14,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        //String expression = "select case intPrimitive when 1 then null when 2 then 2 else 3 end " + "from " + className;
-        String expression = "select case when 1 then null when 2 then 2 else 3 end from " + className;
-        //String expression = "select case 1 when 1 then 2 end from " + className;
+        String expression = "select 1 from " + className + " where intPrimitive between 1*2 and 5";
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
@@ -111,6 +109,32 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("insert xxx into A(,a) select 1 from b.win:length(1)");
 
         assertIsInvalid("select coalesce(tick.price) from x");
+
+        // time periods
+        assertIsInvalid("select * from x.win:time(sec 99)");
+        assertIsInvalid("select * from x.win:time(99 min min)");
+        assertIsInvalid("select * from x.win:time(88 sec day)");
+        assertIsInvalid("select * from x.win:time(1 sec 88 days)");
+        assertIsInvalid("select * from x.win:time(1 day 2 hours 1 day)");
+
+        // in
+        assertIsInvalid("select * from x where a in()");
+        assertIsInvalid("select * from x where a in(a,)");
+        assertIsInvalid("select * from x where a in(,a)");
+        assertIsInvalid("select * from x where a in(, ,)");
+        assertIsInvalid("select * from x where a in not(1,2)");
+
+        // between
+        assertIsInvalid("select * from x where between a");
+        assertIsInvalid("select * from x where between and b");
+        assertIsInvalid("select * from x where between in and b");
+        assertIsInvalid("select * from x where between");
+
+        // TODO: like
+        //assertIsInvalid("select * from x where like");
+        //assertIsInvalid("select * from x where like escape");
+        //assertIsInvalid("select * from x where like a escape");
+        //assertIsInvalid("select * from x where escape");
     }
 
     public void testValidCases() throws Exception
@@ -124,8 +148,8 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid(preFill + "().win:lenght(4)");
         assertIsValid(preFill + "().win:lenght(\"\",5)");
         assertIsValid(preFill + "().win:lenght(10.9,1E30,-4.4,\"\",5)");
-        assertIsValid(preFill + "().win:lenght(4).n:c(3.3, -3.3).n:d(\"price\")");
-        assertIsValid(preFill + "().win:lenght().n:c().n:d().n:e().n:f().n:g().n:h(2.0)");
+        assertIsValid(preFill + "().win:lenght(4).n:c(3.3, -3.3).n:some(\"price\")");
+        assertIsValid(preFill + "().win:lenght().n:c().n:da().n:e().n:f().n:g().n:xh(2.0)");
         assertIsValid(preFill + "().win:lenght({\"s\"})");
         assertIsValid(preFill + "().win:lenght({\"a\",\"b\"})");
         assertIsValid(preFill + "().win:lenght({\"a\",\"b\",\"c\"})");
@@ -136,6 +160,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid(preFill + "().win:some_window('count','l','a').std:lastevent('s','tyr')");
         assertIsValid(preFill + "().win:some_view({'count'},'l','a')");
         assertIsValid(preFill + "().win:some_view({})");
+        assertIsValid(preFill + "(string != 'test').win:lenght(100)");
 
         assertIsValid("select max(intPrimitive, intBoxed) from " + className + "().std:win(20)");
         assertIsValid("select max(intPrimitive, intBoxed, longBoxed) from " + className + "().std:win(20)");
@@ -227,11 +252,73 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100) as xyz");
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100).std:someview() as xyz");
         assertIsValid("select * from xxx");
+        assertIsValid("select rstream * from xxx");
+        assertIsValid("select istream * from xxx");
+        assertIsValid("select rstream 1, 2 from xxx");
+        assertIsValid("select istream 1, 2 from xxx");
 
         // coalesce
         assertIsValid("select coalesce(tick.price, 0) from x");
         assertIsValid("select coalesce(tick.price, null, -1) from x");
         assertIsValid("select coalesce(tick.price, tick.price, tick.price, tick.price) from x");
+
+        // time intervals
+        assertIsValid("select * from x.win:time(1 seconds)");
+        assertIsValid("select * from x.win:time(1.5 second)");
+        assertIsValid("select * from x.win:time(120230L sec)");
+        assertIsValid("select * from x.win:time(1.5d milliseconds)");
+        assertIsValid("select * from x.win:time(1E30 millisecond)");
+        assertIsValid("select * from x.win:time(1.0 msec)");
+        assertIsValid("select * from x.win:time(0001 minutes)");
+        assertIsValid("select * from x.win:time(.1 minute)");
+        assertIsValid("select * from x.win:time(1.1111001 min)");
+        assertIsValid("select * from x.win:time(5 hours)");
+        assertIsValid("select * from x.win:time(5 hour)");
+        assertIsValid("select * from x.win:time(5 days)");
+        assertIsValid("select * from x.win:time(5 day)");
+        assertIsValid("select * from x.win:time(5 days 2 hours 88 minutes 1 seconds 9.8 milliseconds)");
+        assertIsValid("select * from x.win:time(5 day 2 hour 88 minute 1 second 9.8 millisecond)");
+        assertIsValid("select * from x.win:time(5 days 2 hours 88 minutes 1 seconds)");
+        assertIsValid("select * from x.win:time(5 days 2 hours 88 minutes)");
+        assertIsValid("select * from x.win:time(5 days 2 hours)");
+        assertIsValid("select * from x.win:time(2 hours 88 minutes 1 seconds 9.8 milliseconds)");
+        assertIsValid("select * from x.win:time(2 hours 88 minutes 1 seconds)");
+        assertIsValid("select * from x.win:time(2 hours 88 minutes)");
+        assertIsValid("select * from x.win:time(88 minutes 1 seconds 9.8 milliseconds)");
+        assertIsValid("select * from x.win:time(88 minutes 1 seconds)");
+        assertIsValid("select * from x.win:time(1 seconds 9.8 milliseconds)");
+        assertIsValid("select * from x.win:time(1 seconds 9.8 milliseconds).win:goodie(1 sec)");
+        assertIsValid("select * from x.win:time(1 seconds 9.8 milliseconds).win:goodie(1 sec).win:otto(1.1 days 1.1 msec)");
+
+        // in
+        assertIsValid("select * from x where a in('a')");
+        assertIsValid("select * from x where abc in ('a', 'b')");
+        assertIsValid("select * from x where abc in (8*2, 1.001, 'a' || 'b', coalesce(0,null), null)");
+        assertIsValid("select * from x where abc in (sum(x), max(2,2), true)");
+        assertIsValid("select * from x where abc in (y,z, y+z)");
+        assertIsValid("select * from x where abc not in (1)");
+        assertIsValid("select * from x where abc not in (1, 2, 3)");
+        assertIsValid("select * from x where abc*2/dog not in (1, 2, 3)");
+
+        // between
+        assertIsValid("select * from x where abc between 1 and 10");
+        assertIsValid("select * from x where abc between 'a' and 'x'");
+        assertIsValid("select * from x where abc between 1.1 and 1E1000");
+        assertIsValid("select * from x where abc between a and b");
+        assertIsValid("select * from x where abc between a*2 and sum(b)");
+        assertIsValid("select * from x where abc*3 between a*2 and sum(b)");
+
+        // TODO: like
+        /*
+        assertIsValid("select * from x where abc like 'dog'");
+        assertIsValid("select * from x where abc like '.dog'");
+        assertIsValid("select * from x where abc like '*dog'");
+        assertIsValid("select * from x where abc like '[a-z]dog'");
+        assertIsValid("select * from x where abc like '[a-z]dog' escape 's'");
+        assertIsValid("select * from x where abc like '[a-z]dog' escape 's'");
+        assertIsValid("select * from x where abc like '[a-z]dog' escape \"a\"");
+        assertIsValid("select * from x where abc||'hairdo' like 'dog'");
+        */
     }
 
     public void testBitWiseCases() throws Exception

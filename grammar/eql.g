@@ -15,7 +15,10 @@ options
 // language tokens
 tokens
 {
-	IN="in";	
+	IN_SET="in";
+	BETWEEN="between";
+	//LIKE="like";
+	ESCAPE="escape";
 	OR_EXPR="or";
 	AND_EXPR="and";
 	NOT_EXPR="not";
@@ -109,6 +112,15 @@ tokens
 	CONCAT;	
 	LIB_FUNCTION;
 	UNARY_MINUS;
+	TIME_PERIOD;
+	DAY_PART;
+	HOUR_PART;
+	MINUTE_PART;
+	SECOND_PART;
+	MILLISECOND_PART;
+	NOT_IN_SET;
+	NOT_BETWEEN;
+	//NOT_LIKE;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -157,7 +169,7 @@ constant
 //----------------------------------------------------------------------------
 eqlExpression 
 	:	(INSERT! insertIntoExpr)?
-		SELECT! selectionListExpr
+		SELECT! selectClause
 		FROM! streamExpression (regularJoin | outerJoinList)
 		(WHERE! whereClause)?
 		(GROUP! BY! groupByListExpr)?
@@ -204,10 +216,13 @@ whereClause
 		{ #whereClause = #([WHERE_EXPR,"whereClause"], #whereClause); }
 	;
 	
-selectionListExpr
-	:	STAR
-	|	selectionListElement (COMMA! selectionListElement)*
-		{ #selectionListExpr = #([SELECTION_EXPR,"selectionListExpr"], #selectionListExpr); }
+selectClause
+	:	(r:RSTREAM! | i:ISTREAM!)? (s:STAR | l:selectionList)
+		{ #selectClause = #([SELECTION_EXPR,"selectClause"], #r, #i, #s, #l); }
+	;
+
+selectionList 	
+	:	selectionListElement (COMMA! selectionListElement)*
 	;
 
 selectionListElement
@@ -326,7 +341,31 @@ evalEqualsExpression
 	;
 	
 evalRelationalExpression
-	: concatenationExpr ( (LT^|GT^|LE^|GE^) concatenationExpr )*
+	: concatenationExpr 
+		( 
+			( ( (LT^|GT^|LE^|GE^) concatenationExpr )* )
+	| 		(n:NOT_EXPR!)? 
+			(
+				// Represent the optional NOT prefix using the token type by
+				// testing 'n' and setting the token type accordingly.
+				(i:IN_SET^ {
+						#i.setType( (n == null) ? IN_SET : NOT_IN_SET);
+						#i.setText( (n == null) ? "in" : "not in");
+					}
+					(LPAREN! expression (COMMA! expression)* RPAREN!))
+				| (b:BETWEEN^ {
+						#b.setType( (n == null) ? BETWEEN : NOT_BETWEEN);
+						#b.setText( (n == null) ? "between" : "not between");
+					}
+					betweenList )
+// TODO: implement like
+//				| (l:LIKE^ {
+//						#l.setType( (n == null) ? LIKE : NOT_LIKE);
+//						#l.setText( (n == null) ? "like" : "not like");
+//					}
+//					concatenationExpr likeEscape)
+			)	
+		)
 	;
 		
 concatenationExpr
@@ -351,7 +390,6 @@ unaryExpression
 	| LPAREN! expression RPAREN!
 	| builtinFunc
 	;
-
 
 builtinFunc
 	: (MAX^ | MIN^) LPAREN! (ALL! | DISTINCT)? expression (COMMA! expression (COMMA! expression)* )? RPAREN!
@@ -388,7 +426,15 @@ funcIdent
 	
 libFunctionArgs
 	: expression (COMMA! expression)*
-	;	
+	;
+	
+betweenList
+	: concatenationExpr AND_EXPR! concatenationExpr
+	;
+
+likeEscape
+	: (ESCAPE^ concatenationExpr)?
+	;
 
 //----------------------------------------------------------------------------
 // Pattern event expressions / event pattern operators
@@ -465,6 +511,7 @@ singleParameter
 	| 	frequencyOperand
 	|	STAR^
 	|	constant
+	|	time_period
 	;
 
 frequencyOperand
@@ -550,16 +597,16 @@ filterParameter
 	;
 	
 filterParamConstant 
-	:	(EQUALS^ | LT^ | LE^ | GE^ | GT^) (constant | filterIdentifier)
+	:	(EQUALS^ | NOT_EQUAL^ | LT^ | LE^ | GE^ | GT^) (constant | filterIdentifier)
 	;
 
 filterParamRange 
-	: 	IN^ (l1:LPAREN! | l2:LBRACK!) (c:constant | f1:filterIdentifier) COLON! (constant | filterIdentifier) (r1:RPAREN! | r2:RBRACK!)
-       { #filterParamRange = #(IN, #l1, #l2, #c, #f1, #r1, #r2); }
+	: 	IN_SET^ (l1:LPAREN! | l2:LBRACK!) (c:constant | f1:filterIdentifier) COLON! (constant | filterIdentifier) (r1:RPAREN! | r2:RBRACK!)
+       { #filterParamRange = #(IN_SET, #l1, #l2, #c, #f1, #r1, #r2); }
 	;    
 
 filterIdentifier
-	:	IDENT DOT! IDENT
+	:	IDENT DOT! eventProperty
 		{ #filterIdentifier = #([EVENT_FILTER_IDENT,"filterIdentifier"], #filterIdentifier); }
 	;
 	
@@ -575,6 +622,43 @@ eventPropertyAtomic
 		{ #eventPropertyAtomic = #([EVENT_PROP_INDEXED,"eventPropertyIndexed"], #eventPropertyAtomic); }
 	|	IDENT LPAREN! (STRING_LITERAL | QUOTED_STRING_LITERAL) RPAREN!
 		{ #eventPropertyAtomic = #([EVENT_PROP_MAPPED,"eventPropertyMapped"], #eventPropertyAtomic); }
+	;
+
+time_period 	
+	:	
+	(	
+		dayPart (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
+	|	hourPart (minutePart)? (secondPart)? (millisecondPart)?
+	|	minutePart (secondPart)? (millisecondPart)?
+	|	secondPart (millisecondPart)?
+	|	millisecondPart
+	)
+		{ #time_period = #([TIME_PERIOD,"time_period"], #time_period); }
+	;
+
+dayPart
+	:	number ("days"! | "day"!)
+		{ #dayPart = #([DAY_PART,"dayPart"], #dayPart); }
+	;
+
+hourPart 
+	:	number ("hours"! | "hour"!)
+		{ #hourPart = #([HOUR_PART,"hourPart"], #hourPart); }
+	;
+
+minutePart 
+	:	number ("minutes"! | "minute"! | "min"!)
+		{ #minutePart = #([MINUTE_PART,"minutePart"], #minutePart); }
+	;
+	
+secondPart 
+	:	number ("seconds"! | "second"! | "sec"!)
+		{ #secondPart = #([SECOND_PART,"secondPart"], #secondPart); }
+	;
+	
+millisecondPart 
+	:	number ("milliseconds"! | "millisecond"! | "msec"!)
+		{ #millisecondPart = #([MILLISECOND_PART,"millisecondPart"], #millisecondPart); }
 	;
 	
 //----------------------------------------------------------------------------

@@ -15,6 +15,7 @@ import net.esper.view.ViewServiceContext;
 import net.esper.schedule.ScheduleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.client.EPException;
+import net.esper.eql.parse.TimePeriodParameter;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -93,6 +94,15 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
 
     /**
      * Constructor.
+     * @param timeTimePeriod is the number of seconds to batch events for.
+     */
+    public TimeBatchView(TimePeriodParameter timeTimePeriod)
+    {
+        this(timeTimePeriod.getNumSeconds());
+    }
+
+    /**
+     * Constructor.
      * @param secIntervalSize is the number of seconds to batch events for
      * @param referencePoint is the reference point onto which to base intervals.
      */
@@ -100,6 +110,16 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
     {
         this(secIntervalSize);
         this.initialReferencePoint = referencePoint;
+    }
+
+    /**
+     * Constructor.
+     * @param timeTimePeriod is the number of seconds to batch events for
+     * @param referencePoint is the reference point onto which to base intervals.
+     */
+    public TimeBatchView(TimePeriodParameter timeTimePeriod, Long referencePoint)
+    {
+        this(timeTimePeriod.getNumSeconds(), referencePoint);
     }
 
     /**

@@ -28,7 +28,10 @@ public class PropertyHelper
         FastMethod fastMethod = null;
         try
         {
-            fastMethod = fastClass.getMethod(method);
+            if (fastClass != null)
+            {
+                fastMethod = fastClass.getMethod(method);
+            }
         }
         catch (Throwable ex)
         {
@@ -43,7 +46,7 @@ public class PropertyHelper
         }
         else
         {
-            getter = new ReflectionPropertyGetter(method);
+            getter = new ReflectionPropMethodGetter(method);
         }
 
         return getter;
@@ -113,7 +116,10 @@ public class PropertyHelper
         // add removed entries to separate list
         for (EventPropertyDescriptor desc : properties)
         {
-            if (desc.getPropertyName().equals("class"))
+            if ((desc.getPropertyName().equals("class")) ||
+                (desc.getPropertyName().equals("getClass")) ||
+                (desc.getPropertyName().equals("toString")) ||
+                (desc.getPropertyName().equals("hashCode")))
             {
                 toRemove.add(desc);
             }

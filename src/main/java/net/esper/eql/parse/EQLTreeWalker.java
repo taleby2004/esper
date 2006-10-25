@@ -98,7 +98,8 @@ public class EQLTreeWalker extends EQLBaseWalker
                 leaveView(node);
                 break;
             case SELECTION_EXPR:
-                return;
+                leaveSelectClause(node);
+                break;
             case SELECTION_ELEMENT_EXPR:
                 leaveSelectionElement(node);
                 break;
@@ -219,6 +220,14 @@ public class EQLTreeWalker extends EQLBaseWalker
                 break;
             case OBSERVER_EXPR:
                 leaveObserver(node);
+                break;
+            case IN_SET:
+            case NOT_IN_SET:
+                leaveIn(node);
+                break;
+            case BETWEEN:
+            case NOT_BETWEEN:
+                leaveBetween(node);
                 break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
@@ -478,30 +487,30 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
         log.debug(".leaveMath");
 
-        ArithTypeEnum arithTypeEnum;
+        MathArithTypeEnum mathArithTypeEnum;
 
         switch (node.getType())
         {
             case DIV :
-                arithTypeEnum = ArithTypeEnum.DIVIDE;
+                mathArithTypeEnum = MathArithTypeEnum.DIVIDE;
                 break;
             case STAR :
-                arithTypeEnum = ArithTypeEnum.MULTIPLY;
+                mathArithTypeEnum = MathArithTypeEnum.MULTIPLY;
                 break;
             case PLUS :
-                arithTypeEnum = ArithTypeEnum.ADD;
+                mathArithTypeEnum = MathArithTypeEnum.ADD;
                 break;
             case MINUS :
-                arithTypeEnum = ArithTypeEnum.SUBTRACT;
+                mathArithTypeEnum = MathArithTypeEnum.SUBTRACT;
                 break;
             case MOD :
-                arithTypeEnum = ArithTypeEnum.MODULO;
+                mathArithTypeEnum = MathArithTypeEnum.MODULO;
                 break;
             default :
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized math node type");
         }
 
-        ExprMathNode mathNode = new ExprMathNode(arithTypeEnum);
+        ExprMathNode mathNode = new ExprMathNode(mathArithTypeEnum);
         astExprNodeMap.put(node, mathNode);
     }
 
@@ -876,6 +885,22 @@ public class EQLTreeWalker extends EQLBaseWalker
         astPatternNodeMap.put(node, orNode);
     }
 
+    private void leaveIn(AST node)
+    {
+        log.debug(".leaveIn");
+
+        ExprInNode inNode = new ExprInNode(node.getType() == NOT_IN_SET);
+        astExprNodeMap.put(node, inNode);
+    }
+
+    private void leaveBetween(AST node)
+    {
+        log.debug(".leaveBetween");
+
+        ExprBetweenNode betweenNode = new ExprBetweenNode(node.getType() == NOT_BETWEEN);
+        astExprNodeMap.put(node, betweenNode);
+    }
+
     private void leaveNot(AST node)
     {
         log.debug(".leaveNot");
@@ -926,14 +951,14 @@ public class EQLTreeWalker extends EQLBaseWalker
 
             if (log.isDebugEnabled())
             {
-                log.debug(".create Successfully instantiated guard");
+                log.debug(".leaveGuard Successfully instantiated guard");
             }
         }
         catch (Exception e)
         {
             String message = "Error invoking constructor for guard '" + objectName;
             message += "', invalid parameter list for the object";
-            log.fatal(".leaveObserver " + message, e);
+            log.fatal(".leaveGuard " + message, e);
             throw new ASTWalkException(message);
         }
 
@@ -955,37 +980,8 @@ public class EQLTreeWalker extends EQLBaseWalker
             throw new ASTWalkException("AST tree doesn not contain at least when node for case node");
         }
 
-        // Refactor WHEN, THEN and ELSE child nodes to list
         ExprCaseNode caseNode = new ExprCaseNode(inCase2);
         astExprNodeMap.put(node, caseNode);
-
-        /*
-        while (childNode != null)
-        {
-
-            if ((childNode.getType() != WHEN) && (childNode.getType() != ELSE))
-            {
-                throw new ASTWalkException("Unexpected child node of CASE encountered with type " + childNode.getType());
-            }
-
-            if (childNode.getType() == ELSE)
-            {
-                ExprNode elseChild = astExprNodeMap.get(childNode.getFirstChild());
-                exprNodeList.add(new Pair<ExprNode, ExprNode>(null, elseChild));
-                astExprNodeMap.remove(childNode.getFirstChild());
-            }
-            if (childNode.getType() == WHEN)
-            {
-                ExprNode whenChild = astExprNodeMap.get(childNode.getFirstChild());
-                ExprNode thenChild = astExprNodeMap.get(childNode.getFirstChild().getNextSibling());
-                exprNodeList.add(new Pair<ExprNode, ExprNode>(whenChild, thenChild));
-                astExprNodeMap.remove(childNode.getFirstChild());
-                astExprNodeMap.remove(childNode.getFirstChild().getNextSibling());
-            }
-
-            childNode = childNode.getNextSibling();
-        }
-        */
     }
 
     private void leaveObserver(AST node) throws ASTWalkException
@@ -1037,6 +1033,21 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         EvalObserverNode observerNode = new EvalObserverNode(observerFactory);
         astPatternNodeMap.put(node, observerNode);
+    }
+
+    private void leaveSelectClause(AST node)
+    {
+        log.debug(".leaveSelectClause");
+
+        int nodeType = node.getFirstChild().getType();
+        if (nodeType == RSTREAM)
+        {
+            statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.RSTREAM_ONLY);
+        }
+        if (nodeType == ISTREAM)
+        {
+            statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        }
     }
 
     private static final Log log = LogFactory.getLog(EQLTreeWalker.class);
