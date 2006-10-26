@@ -117,6 +117,20 @@ select feed, max(cnt) as maxCount, min(cnt) as minCount from TicksPerSecond.win:
       </answer>
     </faq>    
 
+    <faq id="absence-1">
+      <question>How do I detect the absence of an event?</question>
+      <answer>
+        <p>
+          Use a pattern to detect the absence of an event. The below pattern fires if an event A is not followed by an event B
+          within 10 seconds.
+        </p>
+	    <div class="source"><pre>select * from pattern [every EventA -> (timer:interval(10 sec) and not EventB)]</pre></div>      
+
+        <p>
+    	  Outer joins are also a good way to detect missing events. A solution with an outer join was discussed above.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
 </faqs>
