@@ -17,7 +17,8 @@ tokens
 {
 	IN_SET="in";
 	BETWEEN="between";
-	//LIKE="like";
+	LIKE="like";
+	REGEXP="regexp";
 	ESCAPE="escape";
 	OR_EXPR="or";
 	AND_EXPR="and";
@@ -68,6 +69,7 @@ tokens
 	RSTREAM="rstream";
 	ISTREAM="istream";
 	PATTERN="pattern";
+	SQL="sql";
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
    	NUMERIC_PARAM_FREQUENCY;   	
@@ -82,6 +84,7 @@ tokens
    	OBSERVER_EXPR;
    	VIEW_EXPR;
    	PATTERN_INCL_EXPR;
+   	DATABASE_JOIN_EXPR;
    	WHERE_EXPR;
    	HAVING_EXPR;
 	EVAL_BITWISE_EXPR;
@@ -120,7 +123,11 @@ tokens
 	MILLISECOND_PART;
 	NOT_IN_SET;
 	NOT_BETWEEN;
-	//NOT_LIKE;
+	NOT_LIKE;
+	NOT_REGEXP;
+   	DBSELECT_EXPR;
+   	DBFROM_CLAUSE;
+   	DBWHERE_CLAUSE;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -157,11 +164,15 @@ constant
 	:	(m:MINUS! | PLUS!)? n:number { #constant.setType(#n.getType()); 
 	                                   #constant.setText( (m == null) ? #n.getText() : "-" + #n.getText()); 
 	                                 }
-	|	STRING_LITERAL { #constant.setType(STRING_TYPE); }
-	|	QUOTED_STRING_LITERAL { #constant.setType(STRING_TYPE); }
+	|   stringconstant
     |   "true" { #constant.setType(BOOL_TYPE); }
     |   "false" { #constant.setType(BOOL_TYPE); }
     |	"null" { #constant.setType(NULL_TYPE); #constant.setText(null); }
+	;
+
+stringconstant
+	:   STRING_LITERAL { #stringconstant.setType(STRING_TYPE); }
+	|	QUOTED_STRING_LITERAL { #stringconstant.setType(STRING_TYPE); }
 	;
 
 //----------------------------------------------------------------------------
@@ -231,7 +242,7 @@ selectionListElement
 	;
 		
 streamExpression
-	:	(eventFilterExpression | patternInclusionExpression)
+	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression)
 		(DOT! viewExpression (DOT! viewExpression)*)? (AS! IDENT | IDENT)?
 		{ #streamExpression = #([STREAM_EXPR,"streamExpression"], #streamExpression); }
 	;
@@ -241,6 +252,11 @@ patternInclusionExpression
 		{ #patternInclusionExpression = #([PATTERN_INCL_EXPR,"patternInclusionExpression"], #patternInclusionExpression); }
 	;
 	
+databaseJoinExpression
+	:	SQL! COLON! IDENT LBRACK! (STRING_LITERAL | QUOTED_STRING_LITERAL) RBRACK!
+		{ #databaseJoinExpression = #([DATABASE_JOIN_EXPR,"databaseJoinExpression"], #databaseJoinExpression); }
+	;	
+
 viewExpression
 	:	IDENT COLON! IDENT LPAREN! (parameterSet)? RPAREN!
 		{ 
@@ -358,12 +374,16 @@ evalRelationalExpression
 						#b.setText( (n == null) ? "between" : "not between");
 					}
 					betweenList )
-// TODO: implement like
-//				| (l:LIKE^ {
-//						#l.setType( (n == null) ? LIKE : NOT_LIKE);
-//						#l.setText( (n == null) ? "like" : "not like");
-//					}
-//					concatenationExpr likeEscape)
+				| (l:LIKE^ {
+					#l.setType( (n == null) ? LIKE : NOT_LIKE);
+						#l.setText( (n == null) ? "like" : "not like");
+					}
+					concatenationExpr (ESCAPE! stringconstant)?)
+				| (r:REGEXP^ {
+					#r.setType( (n == null) ? REGEXP : NOT_REGEXP);
+						#r.setText( (n == null) ? "regexp" : "not regexp");
+					}
+					concatenationExpr)
 			)	
 		)
 	;
@@ -385,15 +405,14 @@ multiplyExpression
 	
 unaryExpression
 	: MINUS^ {#MINUS.setType(UNARY_MINUS);} eventProperty
-	| eventPropertyOrLibFunction
 	| constant
 	| LPAREN! expression RPAREN!
+	| eventPropertyOrLibFunction
 	| builtinFunc
 	;
 
 builtinFunc
-	: (MAX^ | MIN^) LPAREN! (ALL! | DISTINCT)? expression (COMMA! expression (COMMA! expression)* )? RPAREN!
-	| SUM^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+	: SUM^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| AVG^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| COUNT^ LPAREN!
 		(
@@ -406,6 +425,12 @@ builtinFunc
 	| STDDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| COALESCE^ LPAREN! expression COMMA! expression (COMMA! expression)* RPAREN!
+	// MIN and MAX can also be "Math.min" static function and "min(price)" aggregation function and "min(a, b, c...)" built-in function
+	// therefore handled in code via libFunction as below
+	;
+	
+maxFunc
+	: (MAX^ | MIN^) LPAREN! expression (COMMA! expression (COMMA! expression)* )? RPAREN!
 	;
 	
 eventPropertyOrLibFunction
@@ -414,7 +439,7 @@ eventPropertyOrLibFunction
 	;
 	
 libFunction
-	: classIdentifierNonGreedy DOT! funcIdent LPAREN! (libFunctionArgs)? RPAREN!
+	: (classIdentifierNonGreedy DOT!)? funcIdent LPAREN! (libFunctionArgs)? RPAREN!
 	{ #libFunction = #([LIB_FUNCTION,"libFunction"], #libFunction); }	
 	;	
 	
@@ -425,15 +450,11 @@ funcIdent
 	;
 	
 libFunctionArgs
-	: expression (COMMA! expression)*
+	: (ALL! | DISTINCT)? expression (COMMA! expression)*
 	;
 	
 betweenList
 	: concatenationExpr AND_EXPR! concatenationExpr
-	;
-
-likeEscape
-	: (ESCAPE^ concatenationExpr)?
 	;
 
 //----------------------------------------------------------------------------
@@ -779,12 +800,6 @@ ML_COMMENT
 		"*/"
 		{$setType(Token.SKIP);}
 	;
-
-
-// character literals - replaced by quoted string
-//CHAR_LITERAL
-//	:	'\'' ( ESC | ~('\''|'\n'|'\r'|'\\') ) '\''
-//	;
 
 // string literals
 STRING_LITERAL

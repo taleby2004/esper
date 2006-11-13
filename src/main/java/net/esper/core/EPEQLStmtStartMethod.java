@@ -19,6 +19,7 @@ import net.esper.eql.view.InternalRouteView;
 import net.esper.eql.view.IStreamRStreamSelectorView;
 import net.esper.eql.spec.*;
 import net.esper.eql.core.*;
+import net.esper.eql.db.PollingViewableFactory;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.view.*;
@@ -28,6 +29,7 @@ import net.esper.pattern.PatternContext;
 import net.esper.pattern.PatternStopCallback;
 import net.esper.pattern.EvalRootNode;
 import net.esper.pattern.PatternMatchCallback;
+import net.esper.util.StopCallback;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,27 +80,31 @@ public class EPEQLStmtStartMethod
         String[] streamNames = determineStreamNames(statementSpec.getStreamSpecs());
         EventType[] streamTypes = new EventType[statementSpec.getStreamSpecs().size()];
         Viewable[] streamViews = new Viewable[streamTypes.length];
-        final List<PatternStopCallback> patternStopCallbacks = new LinkedList<PatternStopCallback>();
+        final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
 
         // Create streams and views
         for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)
         {
             StreamSpec streamSpec = statementSpec.getStreamSpecs().get(i);
-            EventStream eventStream = null;
 
             // Create stream based on a filter specification
             if (streamSpec instanceof FilterStreamSpec)
             {
                 FilterStreamSpec filterStreamSpec = (FilterStreamSpec) streamSpec;
-                eventStream = services.getStreamService().createStream(filterStreamSpec.getFilterSpec(), services.getFilterService());
+                EventStream eventStream = services.getStreamService().createStream(filterStreamSpec.getFilterSpec(), services.getFilterService());
+
+                // Cascade views onto the (filter or pattern) stream
+                streamViews[i] = services.getViewService().createView(eventStream, streamSpec.getViewSpecs(), viewContext);
             }
             // Create stream based on a pattern expression
-            else
+            else if (streamSpec instanceof PatternStreamSpec)
             {
                 PatternStreamSpec patternStreamSpec = (PatternStreamSpec) streamSpec;
                 final EventType eventType = services.getEventAdapterService().createAnonymousCompositeType(patternStreamSpec.getTaggedEventTypes());
                 final EventStream sourceEventStream = new ZeroDepthStream(eventType);
-                eventStream = sourceEventStream;
+
+                // Cascade views onto the (filter or pattern) stream
+                streamViews[i] = services.getViewService().createView(sourceEventStream, streamSpec.getViewSpecs(), viewContext);
 
                 EvalRootNode rootNode = new EvalRootNode();
                 rootNode.addChildNode(patternStreamSpec.getEvalNode());
@@ -113,11 +119,25 @@ public class EPEQLStmtStartMethod
                 };
 
                 PatternStopCallback patternStopCallback = rootNode.start(callback, patternContext);
-                patternStopCallbacks.add(patternStopCallback);
+                stopCallbacks.add(patternStopCallback);
+            }
+            else if (streamSpec instanceof DBStatementStreamSpec)
+            {
+                DBStatementStreamSpec sqlStreamSpec = (DBStatementStreamSpec) streamSpec;
+                HistoricalEventViewable historicalEventViewable = PollingViewableFactory.createDBStatementView(i, sqlStreamSpec, services.getDatabaseRefService(), services.getEventAdapterService());
+                streamViews[i] = historicalEventViewable;
+                if (streamSpec.getViewSpecs().size() > 0)
+                {
+                    throw new ExprValidationException("Historical data joins do not allow views onto the data, view '"
+                            + streamSpec.getViewSpecs().get(0).getObjectNamespace() + ":" + streamSpec.getViewSpecs().get(0).getObjectName() + "' is not valid in this context");
+                }
+                stopCallbacks.add(historicalEventViewable);
+            }
+            else
+            {
+                throw new ExprValidationException("Unknown stream specification");
             }
 
-            // Cascade views onto the (filter or pattern) stream
-            streamViews[i] = services.getViewService().createView(eventStream, streamSpec.getViewSpecs(), viewContext);
             streamTypes[i] = streamViews[i].getEventType();
         }
 
@@ -134,15 +154,25 @@ public class EPEQLStmtStartMethod
                         services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), services.getFilterService());
                     }
                 }
-                for (PatternStopCallback patternStopCallback : patternStopCallbacks)
+                for (StopCallback stopCallback : stopCallbacks)
                 {
-                    patternStopCallback.stop();
+                    stopCallback.stop();
                 }
             }
         };
 
         // Construct type information per stream
         StreamTypeService typeService = new StreamTypeServiceImpl(streamTypes, streamNames);
+
+        // Validate any views that require validation
+        for (Viewable viewable : streamViews)
+        {
+            if (viewable instanceof ValidatedView)
+            {
+                ValidatedView validatedView = (ValidatedView) viewable;
+                validatedView.validate(typeService);
+            }
+        }
 
         // Get the service for resolving class names 
         AutoImportService autoImportService = services.getAutoImportService();
@@ -171,7 +201,7 @@ public class EPEQLStmtStartMethod
         }
         else
         {
-            finalView = handleJoin(streamNames, streamTypes, streamViews, optionalResultSetProcessor);
+            finalView = handleJoin(streamNames, streamTypes, streamViews, optionalResultSetProcessor, statementSpec.getSelectStreamSelectorEnum());
         }
 
         // Hook up internal event route for insert-into if required
@@ -195,10 +225,12 @@ public class EPEQLStmtStartMethod
     private Viewable handleJoin(String[] streamNames,
                                 EventType[] streamTypes,
                                 Viewable[] streamViews,
-                                ResultSetProcessor optionalResultSetProcessor)
+                                ResultSetProcessor optionalResultSetProcessor,
+                                SelectClauseStreamSelectorEnum selectStreamSelectorEnum)
+            throws ExprValidationException
     {
         // Handle joins
-        JoinSetComposer composer = JoinSetComposerFactory.makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), streamTypes, streamNames);
+        JoinSetComposer composer = JoinSetComposerFactory.makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), streamTypes, streamNames, streamViews, selectStreamSelectorEnum);
         JoinSetFilter filter = new JoinSetFilter(statementSpec.getFilterRootNode());
         OutputProcessView indicatorView = new OutputProcessView(optionalResultSetProcessor, statementSpec.getStreamSpecs().size(), statementSpec.getOutputLimitSpec(), viewContext);
 
@@ -291,7 +323,7 @@ public class EPEQLStmtStartMethod
             int streamIdRight = outerJoinDesc.getRightNode().getStreamId();
             if (streamIdLeft == streamIdRight)
             {
-                String message = "Outer join ON-clause must cannot refer to properties of the same stream";
+                String message = "Outer join ON-clause cannot refer to properties of the same stream";
                 throw new EPStatementException("Error validating expression: " + message, eqlStatement);
             }
 

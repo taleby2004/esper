@@ -86,13 +86,17 @@ outerJoinIdent
 	;
 
 streamExpression
-	:	#(v:STREAM_EXPR (eventFilterExpr | patternInclusionExpression) (viewListExpr)? (IDENT)? { leaveNode(#v); } )
+	:	#(v:STREAM_EXPR (eventFilterExpr | patternInclusionExpression | databaseJoinExpression) (viewListExpr)? (IDENT)? { leaveNode(#v); } )
 	;
 
 patternInclusionExpression
 	:	#(p:PATTERN_INCL_EXPR { setIsPatternWalk(true); } exprChoice { setIsPatternWalk(false); leaveNode(#p); } )
 	;
-
+	
+databaseJoinExpression
+	:	#(d:DATABASE_JOIN_EXPR IDENT (STRING_LITERAL | QUOTED_STRING_LITERAL))
+	;
+	
 viewListExpr
 	:	viewExpr (viewExpr)*
 	;
@@ -153,6 +157,8 @@ valueExpr
 	|	cs:caseExpr { leaveNode(#cs); }
 	|	in:inExpr { leaveNode(#in); }
 	|	b:betweenExpr { leaveNode(#b); }
+	|	li:likeExpr { leaveNode(#li); }
+	|	r:regExpExpr { leaveNode(#r); }
 	;
 
 caseExpr
@@ -169,11 +175,19 @@ betweenExpr
 	: #(BETWEEN valueExpr valueExpr valueExpr)
 	| #(NOT_BETWEEN valueExpr valueExpr (valueExpr)*)
 	;
+	
+likeExpr
+	: #(LIKE valueExpr valueExpr (valueExpr)?)
+	| #(NOT_LIKE valueExpr valueExpr (valueExpr)?)
+	;
 
+regExpExpr
+	: #(REGEXP valueExpr valueExpr)
+	| #(NOT_REGEXP valueExpr valueExpr)
+	;
+	
 builtinFunc
-	: 	#(MAX (DISTINCT)? valueExpr (valueExpr (valueExpr)*)? )
-	| 	#(MIN (DISTINCT)? valueExpr (valueExpr (valueExpr)*)? )
-	|	#(SUM (DISTINCT)? valueExpr)
+	: 	#(SUM (DISTINCT)? valueExpr)
 	|	#(AVG (DISTINCT)? valueExpr)
 	|	#(COUNT ((DISTINCT)? valueExpr)? )
 	|	#(MEDIAN (DISTINCT)? valueExpr)
@@ -195,7 +209,7 @@ arithmeticExpr
 	;
 	
 libFunc
-	:  #(LIB_FUNCTION CLASS_IDENT IDENT (valueExpr)*)
+	:  #(LIB_FUNCTION (CLASS_IDENT)? IDENT (DISTINCT)? (valueExpr)*)
 	;
 	
 //----------------------------------------------------------------------------

@@ -69,6 +69,12 @@ public class Configuration {
 	 */
 	protected List<String> imports;
 
+    /**
+     * The java-style class and package name imports that
+     * will be used to resolve partial class names.
+     */
+    protected Map<String, ConfigurationDBRef> databaseReferences;
+
 	/**
 	 * True until the user calls addAutoImport().
 	 */
@@ -122,6 +128,16 @@ public class Configuration {
     public void addEventTypeAlias(String eventTypeAlias, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
     {
         eventTypesXMLDOM.put(eventTypeAlias, xmlDOMEventTypeDesc);
+    }
+
+    /**
+     * Add a database reference with a given database name.
+     * @param name is the database name
+     * @param configurationDBRef descriptor containing database connection and access policy information
+     */
+    public void addDatabaseReference(String name, ConfigurationDBRef configurationDBRef)
+    {
+        databaseReferences.put(name, configurationDBRef);
     }
 
     /**
@@ -196,7 +212,16 @@ public class Configuration {
 		return imports;
 	}
 
-	/**
+    /**
+     * Returns a map of string database names to database configuration options.
+     * @return map of database configurations
+     */
+    public Map<String, ConfigurationDBRef> getDatabaseReferences()
+    {
+        return databaseReferences;
+    }
+
+    /**
 	 * Use the configuration specified in an application
 	 * resource named <tt>esper.cfg.xml</tt>.
      * @return Configuration initialized from the resource
@@ -358,6 +383,7 @@ public class Configuration {
         mapAliases = new HashMap<String, Properties>();
         eventTypesXMLDOM = new HashMap<String, ConfigurationEventTypeXMLDOM>();
         eventTypesLegacy = new HashMap<String, ConfigurationEventTypeLegacy>();
+        databaseReferences = new HashMap<String, ConfigurationDBRef>();
         imports = new ArrayList<String>();
         addDefaultImports();
         isUsingDefaultImports = true;

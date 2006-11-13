@@ -3,10 +3,15 @@ package net.esper.core;
 import net.esper.client.*;
 import net.esper.eql.core.AutoImportService;
 import net.esper.eql.core.AutoImportServiceImpl;
+import net.esper.eql.db.DatabaseConfigService;
+import net.esper.eql.db.DatabaseConfigServiceImpl;
 import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterServiceImpl;
 import net.esper.event.EventAdapterService;
 import net.esper.util.JavaClassHelper;
+import net.esper.schedule.SchedulingService;
+import net.esper.schedule.SchedulingServiceProvider;
+import net.esper.schedule.ScheduleBucket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,11 +63,14 @@ public class EPServiceProviderImpl implements EPServiceProvider
         }
 
         // Make services that depend on snapshot config entries
+        SchedulingService schedulingService = SchedulingServiceProvider.newService();
         EventAdapterService eventAdapterService = makeEventAdapterService(configSnapshot);
         AutoImportService autoImportService = makeAutoImportService(configSnapshot);
+        DatabaseConfigService databaseConfigService = makeDatabaseRefService(configSnapshot, schedulingService);
 
         // New services context
-        EPServicesContext services = new EPServicesContext(eventAdapterService, autoImportService);
+        EPServicesContext services = new EPServicesContext(schedulingService,
+                eventAdapterService, autoImportService, databaseConfigService);
 
         // New runtime
         EPRuntimeImpl runtime = new EPRuntimeImpl(services);
@@ -208,6 +216,25 @@ public class EPServiceProviderImpl implements EPServiceProvider
         return autoImportService;
     }
 
+    private static DatabaseConfigService makeDatabaseRefService(ConfigurationSnapshot configSnapshot,
+                                                          SchedulingService schedulingService)
+    {
+        DatabaseConfigService databaseConfigService = null;
+
+        // Add auto-imports
+        try
+        {
+            ScheduleBucket allStatementsBucket = schedulingService.allocateBucket();
+            databaseConfigService = new DatabaseConfigServiceImpl(configSnapshot.getDatabaseRefs(), schedulingService, allStatementsBucket);
+        }
+        catch (IllegalArgumentException ex)
+        {
+            throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+        }
+
+        return databaseConfigService;
+    }
+
     /**
      * Snapshot of Configuration is held for re-initializing engine state
      * from prior configuration values that may have been muted.
@@ -219,6 +246,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
         private Map<String, ConfigurationEventTypeLegacy> legacyAliases = new HashMap<String, ConfigurationEventTypeLegacy>();
         private String[] autoImports;
         private Map<String, Properties> mapAliases = new HashMap<String, Properties>();
+        private Map<String, ConfigurationDBRef> databaseRefs = new HashMap<String, ConfigurationDBRef>();
 
         /**
          * Ctor.
@@ -234,6 +262,7 @@ public class EPServiceProviderImpl implements EPServiceProvider
             autoImports = configuration.getImports().toArray(new String[0]);
             mapAliases.putAll(configuration.getEventTypesMapEvents());
             legacyAliases.putAll(configuration.getEventTypesLegacy());
+            databaseRefs.putAll(configuration.getDatabaseReferences());
         }
 
         /**
@@ -279,6 +308,15 @@ public class EPServiceProviderImpl implements EPServiceProvider
         public Map<String, ConfigurationEventTypeLegacy> getLegacyAliases()
         {
             return legacyAliases;
+        }
+
+        /**
+         * Returns a map of database name to database configuration.
+         * @return database configs
+         */
+        public Map<String, ConfigurationDBRef> getDatabaseRefs()
+        {
+            return databaseRefs;
         }
     }
 

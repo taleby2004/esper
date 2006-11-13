@@ -4,9 +4,11 @@ import net.esper.event.EventBean;
 import net.esper.collection.MultiKey;
 import net.esper.collection.UniformPair;
 import net.esper.eql.join.table.EventTable;
+import net.esper.eql.spec.SelectClauseStreamSelectorEnum;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 /**
  * Implements the function to determine a join result set using tables/indexes and query strategy
@@ -16,19 +18,23 @@ public class JoinSetComposerImpl implements JoinSetComposer
 {
     private final EventTable[][] repositories;
     private final QueryStrategy[] queryStrategies;
+    private final SelectClauseStreamSelectorEnum selectStreamSelectorEnum;
 
-    private Set<MultiKey<EventBean>> oldResults = new HashSet<MultiKey<EventBean>>();
-    private Set<MultiKey<EventBean>> newResults = new HashSet<MultiKey<EventBean>>();
+    // Set semantic eliminates duplicates in result set, use Linked set to preserve order
+    private Set<MultiKey<EventBean>> oldResults = new LinkedHashSet<MultiKey<EventBean>>();
+    private Set<MultiKey<EventBean>> newResults = new LinkedHashSet<MultiKey<EventBean>>();
 
     /**
      * Ctor.
      * @param repositories - for each stream an array of (indexed/unindexed) tables for lookup.
      * @param queryStrategies - for each stream a strategy to execute the join
+     * @param selectStreamSelectorEnum - indicator for rstream or istream-only, for optimization
      */
-    public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies)
+    public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies, SelectClauseStreamSelectorEnum selectStreamSelectorEnum)
     {
         this.repositories = repositories;
         this.queryStrategies = queryStrategies;
+        this.selectStreamSelectorEnum = selectStreamSelectorEnum;
     }
 
     public UniformPair<Set<MultiKey<EventBean>>> join(EventBean[][] newDataPerStream, EventBean[][] oldDataPerStream)
@@ -37,11 +43,14 @@ public class JoinSetComposerImpl implements JoinSetComposer
         newResults.clear();
 
         // join old data
-        for (int i = 0; i < oldDataPerStream.length; i++)
+        if (!selectStreamSelectorEnum.equals(SelectClauseStreamSelectorEnum.ISTREAM_ONLY))
         {
-            if (oldDataPerStream[i] != null)
+            for (int i = 0; i < oldDataPerStream.length; i++)
             {
-                queryStrategies[i].lookup(oldDataPerStream[i], oldResults);
+                if (oldDataPerStream[i] != null)
+                {
+                    queryStrategies[i].lookup(oldDataPerStream[i], oldResults);
+                }
             }
         }
 
@@ -70,11 +79,14 @@ public class JoinSetComposerImpl implements JoinSetComposer
         }
 
         // join new data
-        for (int i = 0; i < newDataPerStream.length; i++)
+        if (!selectStreamSelectorEnum.equals(SelectClauseStreamSelectorEnum.RSTREAM_ONLY))
         {
-            if (newDataPerStream[i] != null)
+            for (int i = 0; i < newDataPerStream.length; i++)
             {
-                queryStrategies[i].lookup(newDataPerStream[i], newResults);
+                if (newDataPerStream[i] != null)
+                {
+                    queryStrategies[i].lookup(newDataPerStream[i], newResults);
+                }
             }
         }
 

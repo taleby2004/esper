@@ -149,10 +149,6 @@ public class EQLTreeWalker extends EQLBaseWalker
             case GE:
                 leaveRelationalOp(node);
                 break;
-            case MAX:
-            case MIN:
-                leaveMinMax(node);
-                break;
             case COALESCE:
                 leaveCoalesce(node);
                 break;
@@ -228,6 +224,14 @@ public class EQLTreeWalker extends EQLBaseWalker
             case BETWEEN:
             case NOT_BETWEEN:
                 leaveBetween(node);
+                break;
+            case LIKE:
+            case NOT_LIKE:
+                leaveLike(node);
+                break;
+            case REGEXP:
+            case NOT_REGEXP:
+                leaveRegexp(node);
                 break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
@@ -374,7 +378,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         {
             streamSpec = new FilterStreamSpec(filterSpec, viewSpecs, streamName);
         }
-        else  if (node.getFirstChild().getType() == PATTERN_INCL_EXPR)
+        else if (node.getFirstChild().getType() == PATTERN_INCL_EXPR)
         {
             if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.size() == 0)))
             {
@@ -387,6 +391,13 @@ public class EQLTreeWalker extends EQLBaseWalker
             streamSpec = new PatternStreamSpec(evalNode, taggedEventTypes, viewSpecs, streamName);
             taggedEventTypes.clear();
             astPatternNodeMap.clear();
+        }
+        else if (node.getFirstChild().getType() == DATABASE_JOIN_EXPR)
+        {
+            AST dbchildNode = node.getFirstChild().getFirstChild();
+            String dbName = dbchildNode.getText();
+            String sqlWithParams = StringValue.parseString(dbchildNode.getNextSibling().getText().trim());
+            streamSpec = new DBStatementStreamSpec(streamName, viewSpecs, dbName, sqlWithParams);
         }
         else
         {
@@ -434,19 +445,29 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
     	log.debug(".leaveLibFunction");
 
-    	if(node.getNumberOfChildren() < 2)
+    	if(node.getNumberOfChildren() < 1)
     	{
-    		throw new IllegalArgumentException("Illegal method invocation");
+    		throw new IllegalArgumentException("Illegal number of child nodes for lib function");
     	}
 
-    	AST itor = node.getFirstChild();
-    	String className = itor.getText();
+        String childNodeText = node.getFirstChild().getText();
+        if ((childNodeText.equals("max")) || (childNodeText.equals("min")))
+        {
+            handleMinMax(node);
+            return;
+        }
 
-    	itor = itor.getNextSibling();
-    	String methodName = itor.getText();
-
-    	astExprNodeMap.put(node, new ExprStaticMethodNode(className, methodName));
-	}
+        if (node.getFirstChild().getType() == CLASS_IDENT)
+        {
+            String className = node.getFirstChild().getText();
+            String methodName = node.getFirstChild().getNextSibling().getText();
+            astExprNodeMap.put(node, new ExprStaticMethodNode(className, methodName));
+        }
+        else
+        {
+            throw new IllegalStateException("Unknown method named '" + node.getFirstChild().getText() + "' could not be resolved"); 
+        }
+    }
 
     private void leaveJoinEqualsExpr(AST node)
     {
@@ -515,38 +536,43 @@ public class EQLTreeWalker extends EQLBaseWalker
     }
 
     // Min/Max nodes can be either an aggregate or a per-row function depending on the number or arguments
-    private void leaveMinMax(AST node)
+    private void handleMinMax(AST libNode)
     {
-        log.debug(".leaveMinMax");
+        log.debug(".handleMinMax");
 
+        // Determine min or max
+        AST childNode = libNode.getFirstChild();
         MinMaxTypeEnum minMaxTypeEnum;
-
-        switch (node.getType())
+        if (childNode.getText().equals("min"))
         {
-            case MIN :
-                minMaxTypeEnum = MinMaxTypeEnum.MIN;
-                break;
-            case MAX :
-                minMaxTypeEnum = MinMaxTypeEnum.MAX;
-                break;
-            default :
-                throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized min max node type");
+            minMaxTypeEnum = MinMaxTypeEnum.MIN;
+        }
+        else if (childNode.getText().equals("max"))
+        {
+            minMaxTypeEnum = MinMaxTypeEnum.MAX;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Node type " + childNode.getType() + " " + childNode.getText() + " not a recognized min max node");
         }
 
+        // Determine distinct or not
+        AST nextNode = childNode.getNextSibling();
         boolean isDistinct = false;
-        if (node.getFirstChild().getType() == DISTINCT)
+        if (nextNode.getType() == DISTINCT)
         {
             isDistinct = true;
         }
 
-        if ((node.getNumberOfChildren() > 2) && (isDistinct))
+        // Error if more then 3 nodes with distinct since it's an aggregate function
+        if ((libNode.getNumberOfChildren() > 3) && (isDistinct))
         {
             throw new ASTWalkException("The distinct keyword is not valid in per-row min and max " +
                     "functions with multiple sub-expressions");
         }
 
         ExprNode minMaxNode;
-        if ((!isDistinct) && (node.getNumberOfChildren() > 1))
+        if ((!isDistinct) && (libNode.getNumberOfChildren() > 2))
         {
             // use the row function
             minMaxNode = new ExprMinMaxRowNode(minMaxTypeEnum);
@@ -556,7 +582,7 @@ public class EQLTreeWalker extends EQLBaseWalker
             // use the aggregation function
             minMaxNode = new ExprMinMaxAggrNode(isDistinct, minMaxTypeEnum);
         }
-        astExprNodeMap.put(node, minMaxNode);
+        astExprNodeMap.put(libNode, minMaxNode);
     }
 
     private void leaveCoalesce(AST node)
@@ -899,6 +925,24 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         ExprBetweenNode betweenNode = new ExprBetweenNode(node.getType() == NOT_BETWEEN);
         astExprNodeMap.put(node, betweenNode);
+    }
+
+    private void leaveLike(AST node)
+    {
+        log.debug(".leaveLike");
+
+        boolean isNot = node.getType() == NOT_LIKE;
+        ExprLikeNode likeNode = new ExprLikeNode(isNot);
+        astExprNodeMap.put(node, likeNode);
+    }
+
+    private void leaveRegexp(AST node)
+    {
+        log.debug(".leaveRegexp");
+
+        boolean isNot = node.getType() == NOT_REGEXP;
+        ExprRegexpNode regExpNode = new ExprRegexpNode(isNot);
+        astExprNodeMap.put(node, regExpNode);
     }
 
     private void leaveNot(AST node)

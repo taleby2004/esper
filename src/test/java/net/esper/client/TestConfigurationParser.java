@@ -73,5 +73,36 @@ public class TestConfigurationParser extends TestCase
         assertEquals(1, legacy.getMethodProperties().size());
         assertEquals("myAccessorMethod", legacy.getMethodProperties().get(0).getAccessorMethodName());
         assertEquals("mymethodprop", legacy.getMethodProperties().get(0).getName());
+
+        // assert database reference - data source config
+        assertEquals(2, config.getDatabaseReferences().size());
+        ConfigurationDBRef configDBRef = config.getDatabaseReferences().get("mydb1");
+        ConfigurationDBRef.DataSourceConnection dsDef = (ConfigurationDBRef.DataSourceConnection) configDBRef.getConnectionFactoryDesc();
+        assertEquals("java:comp/env/jdbc/mydb", dsDef.getContextLookupName());
+        assertEquals("{java.naming.provider.url=iiop://localhost:1050, java.naming.factory.initial=com.myclass.CtxFactory}", dsDef.getEnvProperties().toString());
+        assertEquals(ConfigurationDBRef.ConnectionLifecycleEnum.POOLED, configDBRef.getConnectionLifecycleEnum());
+        assertNull(configDBRef.getConnectionSettings().getAutoCommit());
+        assertNull(configDBRef.getConnectionSettings().getCatalog());
+        assertNull(configDBRef.getConnectionSettings().getReadOnly());
+        assertNull(configDBRef.getConnectionSettings().getTransactionIsolation());
+        ConfigurationDBRef.LRUCacheDesc lruCache = (ConfigurationDBRef.LRUCacheDesc) configDBRef.getDataCacheDesc();
+        assertEquals(10, lruCache.getSize());
+
+        // assert database reference - driver manager config
+        configDBRef = config.getDatabaseReferences().get("mydb2");
+        ConfigurationDBRef.DriverManagerConnection dmDef = (ConfigurationDBRef.DriverManagerConnection) configDBRef.getConnectionFactoryDesc();
+        assertEquals("my.sql.Driver", dmDef.getClassName());
+        assertEquals("jdbc:mysql://localhost", dmDef.getUrl());
+        assertEquals("myuser1", dmDef.getOptionalUserName());
+        assertEquals("mypassword1", dmDef.getOptionalPassword());
+        assertEquals("{user=myuser2, password=mypassword2, somearg=someargvalue}", dmDef.getOptionalProperties().toString());
+        assertEquals(ConfigurationDBRef.ConnectionLifecycleEnum.RETAIN, configDBRef.getConnectionLifecycleEnum());
+        assertEquals(false, configDBRef.getConnectionSettings().getAutoCommit().booleanValue());
+        assertEquals("test", configDBRef.getConnectionSettings().getCatalog());
+        assertEquals(Boolean.TRUE, configDBRef.getConnectionSettings().getReadOnly());
+        assertEquals(new Integer(3), configDBRef.getConnectionSettings().getTransactionIsolation());
+        ConfigurationDBRef.ExpiryTimeCacheDesc expCache = (ConfigurationDBRef.ExpiryTimeCacheDesc) configDBRef.getDataCacheDesc();
+        assertEquals(60.5, expCache.getMaxAgeSeconds());
+        assertEquals(120.1, expCache.getPurgeIntervalSeconds());
     }
 }

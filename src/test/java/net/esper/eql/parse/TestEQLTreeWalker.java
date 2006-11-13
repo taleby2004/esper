@@ -270,7 +270,10 @@ public class TestEQLTreeWalker extends TestCase
     public void testAggregateFunction() throws Exception
     {
         String fromClause = "from " + SupportBean_N.class.getName() + "().win:lenght(10) as win1";
-        String text = "select sum(intPrimitive)," +
+        String text = "select max(distinct intPrimitive) " + fromClause;
+        parseAndWalkEQL(text);
+
+        text = "select sum(intPrimitive)," +
                 "sum(distinct doubleBoxed)," +
                 "avg(doubleBoxed)," +
                 "avg(distinct doubleBoxed)," +
@@ -670,6 +673,46 @@ public class TestEQLTreeWalker extends TestCase
         assertFalse((Boolean) tryRelationalOp("-1 between 0 and 2"));
         assertFalse((Boolean) tryRelationalOp("1 not between 0 and 2"));
         assertTrue((Boolean) tryRelationalOp("-1 not between 0 and 2"));
+    }
+
+    public void testWalkLikeRegex() throws Exception
+    {
+        assertTrue((Boolean) tryRelationalOp("'abc' like 'a__'"));
+        assertFalse((Boolean) tryRelationalOp("'abcd' like 'a__'"));
+
+        assertFalse((Boolean) tryRelationalOp("'abcde' not like 'a%'"));
+        assertTrue((Boolean) tryRelationalOp("'bcde' not like 'a%'"));
+
+        assertTrue((Boolean) tryRelationalOp("'a_' like 'a!_' escape '!'"));
+        assertFalse((Boolean) tryRelationalOp("'ab' like 'a!_' escape '!'"));
+
+        assertFalse((Boolean) tryRelationalOp("'a' not like 'a'"));
+        assertTrue((Boolean) tryRelationalOp("'a' not like 'ab'"));
+    }
+
+    public void testWalkStaticFunc() throws Exception
+    {
+        String text = "select MyClass.someFunc(1) from SupportBean_N";
+        EQLTreeWalker walker = parseAndWalkEQL(text);
+
+        SelectExprElementUnnamedSpec spec = walker.getStatementSpec().getSelectListExpressions().get(0);
+        ExprStaticMethodNode staticMethod = (ExprStaticMethodNode) spec.getSelectExpression();
+        assertEquals("MyClass", staticMethod.getClassName());
+        assertEquals("someFunc", staticMethod.getMethodName());
+    }
+
+    public void testWalkDBJoinStatement() throws Exception
+    {
+        String className = SupportBean.class.getName();
+        String sql = "select a from b where $x.id=c.d";
+        String expression = "select * from " + className + ", sql:mydb ['" + sql + "']";
+
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        StatementSpec statementSpec = walker.getStatementSpec();
+        assertEquals(2, statementSpec.getStreamSpecs().size());
+        DBStatementStreamSpec dbSpec = (DBStatementStreamSpec) statementSpec.getStreamSpecs().get(1);
+        assertEquals("mydb", dbSpec.getDatabaseName());
+        assertEquals(sql, dbSpec.getSqlWithSubsParams());
     }
 
     private double tryInterval(String interval) throws Exception
