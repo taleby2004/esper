@@ -1,4 +1,4 @@
-About Esper
+About Esper and Event Stream Intelligence
 
 	Esper is a 100% Java component for CEP and ESP applications. 
 
@@ -39,8 +39,9 @@ Features
 		* Inner-joins and outer joins (left, right, full) of an unlimited number of windows
 
 		* Output rate limiting and stabilizing
-
+		
 		[]
+		
         
     * Event Pattern Matching
 
@@ -50,17 +51,24 @@ Features
 
 		* Lifecyle of pattern can be controlled by timer and via operators
 
-		* Pattern-matched events provided to listeners
+        * Pattern-matched events provided to listeners
 
-		[]
+        []
+
+    * Event Representations
+	
+        * Supports event-type inheritance and polymorphism as provided by the Java language
+
+        * Events can be plain Java objects, XML document object model (DOM) and java.util.Map including nested objects
+
+        * Event properties can be simple, indexed, mapped or nested - allows querying of deep Java object graphs and XML structures
+
+        []
+        
+
+    * Relational database access via SQL-query joins with event streams; LRU and expiry-time query result caches
 	
     * Supports both listener (push) and consumer (pull) model 
-	
-    * Supports event-type inheritance and polymorphism as provided by the Java language
-	
-    * Events can be plain Java objects, XML document object model (DOM) and java.util.Map including nested objects
-
-    * Event properties can be simple, indexed, mapped or nested - allows querying of deep Java object graphs and XML structures
 	
     * Supports externally-supplied time as well as Java system time	
 	

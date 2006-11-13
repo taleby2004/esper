@@ -22,6 +22,7 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
      * Ctor.
      * @param mapDatabaseRef is a map of database name and database configuration entries
      * @param schedulingService is for scheduling callbacks for a cache
+     * @param scheduleBucket is a system bucket for all scheduling callbacks for caches
      */
     public DatabaseConfigServiceImpl(Map<String, ConfigurationDBRef> mapDatabaseRef,
                                      SchedulingService schedulingService,

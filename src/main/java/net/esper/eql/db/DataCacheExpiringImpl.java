@@ -30,6 +30,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
      * @param maxAgeSec is the maximum age in seconds
      * @param purgeIntervalSec is the purge interval in seconds
      * @param schedulingService is a service for call backs at a scheduled time, for purging
+     * @param scheduleSlot slot for scheduling callbacks for this cache
      */
     public DataCacheExpiringImpl(double maxAgeSec, double purgeIntervalSec, SchedulingService schedulingService,
                                  ScheduleSlot scheduleSlot)
@@ -84,7 +85,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
     }
 
     /**
-     * Returns the purge interval in milliseconds
+     * Returns the purge interval in milliseconds.
      * @return millisecond purge interval
      */
     protected long getPurgeIntervalMSec()
@@ -92,6 +93,10 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
         return purgeIntervalMSec;
     }
 
+    /**
+     * Returns the current cache size.
+     * @return cache size
+     */
     protected long getSize()
     {
         return cache.size();

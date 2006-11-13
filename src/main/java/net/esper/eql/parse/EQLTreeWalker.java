@@ -63,6 +63,10 @@ public class EQLTreeWalker extends EQLBaseWalker
         return statementSpec;
     }
 
+    /**
+     * Set to indicate that we are walking a pattern.
+     * @param isPatternWalk is true if walking a pattern
+     */
     protected void setIsPatternWalk(boolean isPatternWalk)
     {
         if (log.isDebugEnabled())

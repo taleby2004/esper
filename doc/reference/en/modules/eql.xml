@@ -994,7 +994,12 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 			</para>
 
 			<para>
-				Substitution parameters in the SQL query string take the form <literal>${<emphasis>event_property_name</emphasis>}</literal>. The engine resolves <emphasis>event_property_name</emphasis> at statement execution time to the actual event property value supplied by the events in the joined event stream.
+				Substitution parameters in the SQL query string take the form <literal>${</literal><emphasis>event_property_name</emphasis><literal>}</literal>. The engine resolves <emphasis>event_property_name</emphasis> at statement execution time to the actual event property value supplied by the events in the joined event stream.
+			</para>
+
+			<para>
+				The engine determines the type of the SQL query output columns by means of the result set metadata that your database software returns for the statement. The actual 
+				query results are obtained via the <literal>getObject</literal> on <literal>java.sql.ResultSet</literal>.
 			</para>
 
 			<para>

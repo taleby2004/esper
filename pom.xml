@@ -54,6 +54,11 @@ mvn javadoc:javadoc
 			<artifactId>junit</artifactId>
 			<version>3.8.1</version>
 		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>3.1.14</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
