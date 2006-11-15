@@ -100,7 +100,9 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        log.debug(".evaluateFalse");        
+        log.debug(".evaluateFalse Child node has indicated permanently false");
+        fromNode.quit();
+        nodes.remove(fromNode);
     }
 
     public final void quit()

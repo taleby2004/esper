@@ -2,22 +2,16 @@ package net.esper.regression.pattern;
 
 import junit.framework.*;
 import net.esper.regression.support.*;
-import net.esper.support.bean.SupportBeanConstants;
-import net.esper.support.bean.SupportCallEvent;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.client.*;
 import net.esper.event.EventBean;
-import net.esper.support.bean.SupportBean_A;
-import net.esper.support.bean.SupportBean_B;
-import net.esper.support.bean.SupportBean_C;
-import net.esper.support.util.SupportUpdateListener;
+import net.esper.support.bean.*;
 import net.esper.client.Configuration;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPStatement;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.CurrentTimeEvent;
-import net.esper.event.EventBean;
 
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
@@ -124,13 +118,16 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         EPStatement statement = epService.getEPAdministrator().createEQL(stmt);
         statement.addListener(listener);
 
-        // test case where no Completed or Cancel event arrives
+        SupportBean_A eventA = null;
+        EventBean received = null;
         sendTimer(0, epService);
-        SupportBean_A eventA = sendA("A1", epService);
+
+        // test case where no Completed or Cancel event arrives
+        eventA = sendA("A1", epService);
         sendTimer(9999, epService);
         assertFalse(listener.isInvoked());
         sendTimer(10000, epService);
-        EventBean received = listener.assertOneGetNewAndReset();
+        received = listener.assertOneGetNewAndReset();
         assertEquals(eventA, received.get("a"));
 
         // test case where Completed event arrives within the time set
@@ -151,7 +148,6 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
 
         // test case where no matching Completed or Cancel event arrives
         eventA = sendA("A4", epService);
-        sendA("A5", epService);
         sendB("B4", epService);
         sendC("A5", epService);
         sendTimer(50000, epService);
@@ -189,6 +185,41 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         event = listener.getLastNewData()[1];
         assertSame(eventTwo, event.get("A"));
         assertSame(eventThree, event.get("B"));
+    }
+
+    public void testMemoryRFIDEvent()
+    {
+        Configuration config = new Configuration();
+        config.addEventTypeAlias("LR", SupportRFIDEvent.class.getName());
+        EPServiceProvider epService = EPServiceProviderManager.getProvider("testMemoryRFIDEvent", config);
+        epService.initialize();
+
+        String expression =
+            "select 'Tag May Be Broken' as alert, " +
+                "tagMayBeBroken.mac, " +
+                "tagMayBeBroken.zoneID " +
+            "from pattern [" +
+                "every tagMayBeBroken=LR -> (timer:interval(10 sec) and not LR(mac=tagMayBeBroken.mac))" +
+            "]";
+
+        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        for (int i = 0; i < 10000; i++)
+        {
+            /*
+            if (i % 1000 == 0)
+            {
+                log.info(".testMemoryRFIDEvent now at " + i);
+            }
+            */
+            SupportRFIDEvent event = new SupportRFIDEvent("a", "111");
+            epService.getEPRuntime().sendEvent(event);
+
+            event = new SupportRFIDEvent("a", "111");
+            epService.getEPRuntime().sendEvent(event);
+        }
     }
 
     private long dateToLong(String dateText) throws ParseException

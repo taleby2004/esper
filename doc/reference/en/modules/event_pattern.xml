@@ -67,6 +67,12 @@
 			</para>
 						
 			<para>
+				The example above assigned the tags <literal>spike</literal> and <literal>error</literal> to the events in the pattern. The tags are important since the
+				engine only places tagged events into the output event(s) that a pattern generates, and that the engine supplies to listeners of the pattern statement. The tags can
+				further be selected in the select-clause of an EQL statement as discussed in <xref linkend="eql-from-clause-patterns"/>.
+			</para>
+
+			<para>
 				Pattern statements are created via the <literal>EPAdministrator</literal> interface. The <literal>EPAdministrator</literal> interface allows to create pattern statements in two ways:
 				Pattern statements that want to make use of the EQL <literal>select</literal> clause or any other EQL constructs use the <literal>createEQL</literal> method to create a statement that specifies one or more pattern expressions. EQL statements that use patterns are described in more detail in <xref linkend="eql-from-clause-patterns"/>. Use the syntax as shown in below example.
 			</para>

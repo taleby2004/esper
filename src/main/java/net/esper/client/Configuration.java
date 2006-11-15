@@ -113,13 +113,33 @@ public class Configuration {
     /**
      * Add an alias for an event type that represents java.util.Map events.
      * @param eventTypeAlias is the alias for the event type
-     * @param typeMap maps the name of each property in the Map event to the type (as a string) of its value in the Map object
+     * @param typeMap maps the name of each property in the Map event to the type
+     * (fully qualified classname) of its value in Map event instances.
      */
     public void addEventTypeAlias(String eventTypeAlias, Properties typeMap)
     {
     	mapAliases.put(eventTypeAlias, typeMap);
     }
     
+    /**
+     * Add an alias for an event type that represents java.util.Map events, taking a Map of
+     * event property and class name as a parameter.
+     * <p>
+     * This method is provided for convenience and is same in function to method
+     * taking a Properties object that contain fully qualified class name as values.
+     * @param eventTypeAlias is the alias for the event type
+     * @param typeMap maps the name of each property in the Map event to the type of its value in the Map object
+     */
+    public void addEventTypeAlias(String eventTypeAlias, Map<String, Class> typeMap)
+    {
+        Properties properties = new Properties();
+        for (Map.Entry<String, Class> entry : typeMap.entrySet())
+        {
+            properties.put(entry.getKey(), entry.getValue().getName());
+        }
+        addEventTypeAlias(eventTypeAlias, properties);
+    }
+
     /**
      * Add an alias for an event type that represents org.w3c.dom.Node events.
      * @param eventTypeAlias is the alias for the event type

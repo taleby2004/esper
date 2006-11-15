@@ -20,7 +20,7 @@ import java.util.Properties;
 /**
  * Service provider encapsulates the engine's services for runtime and administration interfaces.
  */
-public class EPServiceProviderImpl implements EPServiceProvider
+public class EPServiceProviderImpl implements EPServiceProviderSPI
 {
     private volatile EPServiceEngine engine;
     private final ConfigurationSnapshot configSnapshot;
@@ -44,6 +44,16 @@ public class EPServiceProviderImpl implements EPServiceProvider
     public EPAdministrator getEPAdministrator()
     {
         return engine.getAdmin();
+    }
+
+    public EventAdapterService getEventAdapterService()
+    {
+        return engine.getServices().getEventAdapterService();
+    }
+
+    public SchedulingService getSchedulingService()
+    {
+        return engine.getServices().getSchedulingService();
     }
 
     public void initialize()
