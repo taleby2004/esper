@@ -276,7 +276,7 @@ milliseconds-part : <emphasis>number</emphasis> ("milliseconds" | "millisecond" 
 				<para>
 					The below example is a filter criteria list that removes events based on category, price and grade.
 				</para>
-			 <programlisting><![CDATA[from mypackage.RfidEvent(category="Perishable", price<1.00, grade in [1, 2])]]></programlisting>
+			 <programlisting><![CDATA[from mypackage.RfidEvent(category="Perishable", price<1.00, grade in [1:2])]]></programlisting>
 			</sect3>
 		</sect2>
 		
