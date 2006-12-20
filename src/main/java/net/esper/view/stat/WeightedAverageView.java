@@ -55,10 +55,7 @@ public final class WeightedAverageView extends ViewSupport implements ContextAwa
     public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
         this.viewServiceContext = viewServiceContext;
-
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), double.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        eventType = createEventType(viewServiceContext);
     }
 
     public void setParent(Viewable parent)
@@ -187,4 +184,13 @@ public final class WeightedAverageView extends ViewSupport implements ContextAwa
                 " fieldName=" + fieldNameX +
                 " fieldNameWeight=" + fieldNameWeight;
     }
+
+    protected static EventType createEventType(ViewServiceContext viewServiceContext)
+    {
+        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        schemaMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), double.class);
+        EventType eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        return eventType;
+    }
+
 }

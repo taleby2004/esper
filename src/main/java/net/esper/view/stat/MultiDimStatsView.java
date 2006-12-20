@@ -76,10 +76,7 @@ public final class MultiDimStatsView extends ViewSupport implements ContextAware
     public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
         this.viewServiceContext = viewServiceContext;
-
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        eventType = createEventType(viewServiceContext);
     }
 
     /**
@@ -332,5 +329,13 @@ public final class MultiDimStatsView extends ViewSupport implements ContextAware
         return eventBean;
     }
 
+    protected static EventType createEventType(ViewServiceContext viewServiceContext)
+    {
+        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
+        EventType eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        return eventType;
+    }
+    
     private static final Log log = LogFactory.getLog(MultiDimStatsView.class);
 }

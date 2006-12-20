@@ -100,9 +100,7 @@ public class MultiDimStatsViewFactory implements ViewFactory
             }
         }
 
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        eventType = MultiDimStatsView.createEventType(viewServiceContext);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)

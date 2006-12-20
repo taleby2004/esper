@@ -42,10 +42,7 @@ public class WeightedAverageViewFactory implements ViewFactory
         {
             throw new ViewAttachException(result);
         }
-
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), double.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        eventType = WeightedAverageView.createEventType(viewServiceContext);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)

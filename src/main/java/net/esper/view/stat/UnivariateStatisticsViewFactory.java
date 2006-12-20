@@ -39,15 +39,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         {
             throw new ViewAttachException(result);
         }
-
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), long.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), double.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(eventTypeMap);
+        eventType = UnivariateStatisticsView.createEventType(viewServiceContext);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)
@@ -84,5 +76,5 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         }
 
         return true;
-    }
+    }    
 }

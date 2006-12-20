@@ -1,6 +1,7 @@
 package net.esper.view.stat;
 
 import net.esper.event.EventType;
+import net.esper.view.ViewServiceContext;
 
 /**
  * A view that calculates correlation on two fields. The view uses internally a {@link CorrelationBean}
@@ -34,7 +35,7 @@ public final class CorrelationView extends BaseBivariateStatisticsView
     {
         if (eventType == null)
         {
-            eventType = viewServiceContext.getEventAdapterService().addBeanType(CorrelationBean.class.getName(), CorrelationBean.class);
+            eventType = createEventType(viewServiceContext);
         }
         return eventType;
     }
@@ -44,6 +45,11 @@ public final class CorrelationView extends BaseBivariateStatisticsView
         return this.getClass().getName() +
                 " fieldX=" + this.getFieldNameX() +
                 " fieldY=" + this.getFieldNameY();
+    }
+
+    protected static EventType createEventType(ViewServiceContext viewServiceContext)
+    {
+        return viewServiceContext.getEventAdapterService().addBeanType(CorrelationBean.class.getName(), CorrelationBean.class);
     }
 }
 

@@ -5,8 +5,6 @@ import net.esper.event.EventType;
 import net.esper.eql.core.ViewResourceCallback;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 public class SizeViewFactory implements ViewFactory
 {
@@ -23,9 +21,7 @@ public class SizeViewFactory implements ViewFactory
 
     public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), long.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        eventType = SizeView.createEventType(viewServiceContext);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)

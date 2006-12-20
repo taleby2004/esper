@@ -40,7 +40,7 @@ public class CorrelationViewFactory implements ViewFactory
             throw new ViewAttachException(result);
         }
 
-        eventType = viewServiceContext.getEventAdapterService().addBeanType(CorrelationBean.class.getName(), CorrelationBean.class);
+        eventType = CorrelationView.createEventType(viewServiceContext);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)

@@ -1,6 +1,7 @@
 package net.esper.view.stat;
 
 import net.esper.view.stat.RegressionBean;
+import net.esper.view.ViewServiceContext;
 import net.esper.event.EventType;
 import net.esper.event.BeanEventAdapter;
 
@@ -36,7 +37,7 @@ public final class RegressionLinestView extends BaseBivariateStatisticsView
     {
         if (eventType == null)
         {
-            eventType = viewServiceContext.getEventAdapterService().addBeanType(RegressionBean.class.getName(), RegressionBean.class);
+            eventType = createEventType(viewServiceContext);
         }
         return eventType;
     }
@@ -46,6 +47,11 @@ public final class RegressionLinestView extends BaseBivariateStatisticsView
         return this.getClass().getName() +
                 " fieldX=" + this.getFieldNameX() +
                 " fieldY=" + this.getFieldNameY();
+    }
+
+    protected static EventType createEventType(ViewServiceContext viewServiceContext)
+    {
+        return viewServiceContext.getEventAdapterService().addBeanType(RegressionBean.class.getName(), RegressionBean.class);
     }
 }
 

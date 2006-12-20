@@ -41,7 +41,7 @@ public class RegressionLinestViewFactory implements ViewFactory
             throw new ViewAttachException(result);
         }
 
-        eventType = viewServiceContext.getEventAdapterService().addBeanType(RegressionBean.class.getName(), RegressionBean.class);
+        eventType = RegressionLinestView.createEventType(viewServiceContext);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)

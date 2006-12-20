@@ -8,6 +8,7 @@ import net.esper.collection.SingleEventIterator;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.view.*;
+import net.esper.view.stat.CorrelationBean;
 
 /**
  * This view is a very simple view presenting the number of elements in a stream or view.
@@ -35,10 +36,7 @@ public final class SizeView extends ViewSupport implements ContextAwareView
     public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
         this.viewServiceContext = viewServiceContext;
-
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
-        schemaMap.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), long.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
+        this.eventType = createEventType(viewServiceContext);
     }
 
     public final EventType getEventType()
@@ -83,5 +81,12 @@ public final class SizeView extends ViewSupport implements ContextAwareView
     public final String toString()
     {
         return this.getClass().getName();
+    }
+
+    protected static EventType createEventType(ViewServiceContext viewServiceContext)
+    {
+        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        schemaMap.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), long.class);
+        return viewServiceContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }
 }

@@ -47,15 +47,7 @@ public final class UnivariateStatisticsView extends ViewSupport implements Conte
     public void setViewServiceContext(ViewServiceContext viewServiceContext)
     {
         this.viewServiceContext = viewServiceContext;
-
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), long.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), double.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), double.class);
-        eventType = viewServiceContext.getEventAdapterService().createAnonymousMapType(eventTypeMap);
+        eventType = createEventType(viewServiceContext);
     }
 
     public void setParent(Viewable parent)
@@ -152,4 +144,16 @@ public final class UnivariateStatisticsView extends ViewSupport implements Conte
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), baseStatisticsBean.getXAverage());
         return eventAdapterService.createMapFromValues(result, eventType);
     }
+
+    protected static EventType createEventType(ViewServiceContext viewServiceContext)
+    {
+        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), long.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(), double.class);
+        return viewServiceContext.getEventAdapterService().createAnonymousMapType(eventTypeMap);
+    }    
 }
