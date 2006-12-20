@@ -14,7 +14,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select myclass.googlex(1) from " + className;
+        String expression = "select * from " + className + "(intPrimitive in [1:2])";
         //String expression = "select googlex(1) from " + className;
 
         log.debug(".testDisplayAST parsing: " + expression);
@@ -145,6 +145,12 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("select * from x, sql:xx ");
         assertIsInvalid("select * from x, sql:xx [' dsfsdf \"]");
         assertIsInvalid("select * from x, sql:xx [\"sfsf ']");
+
+        // Previous and prior function
+        assertIsInvalid("select prev(10, a*b) from x");
+        assertIsInvalid("select prev(price, a*b) from x");
+        assertIsInvalid("select prior(10) from x");
+        assertIsInvalid("select prior(price, a*b) from x");
     }
 
     public void testValidCases() throws Exception
@@ -153,6 +159,14 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         String preFill = "select * from " + className;
 
         assertIsValid(preFill + "(string='test',intPrimitive=20).win:lenght(100)");
+        assertIsValid(preFill + "(string in ('b', 'a'))");
+        assertIsValid(preFill + "(string in ('b'))");
+        assertIsValid(preFill + "(string in ('b', 'c', 'x'))");
+        assertIsValid(preFill + "(string in [1:2))");
+        assertIsValid(preFill + "(string in [1:2])");
+        assertIsValid(preFill + "(string in (1:2))");
+        assertIsValid(preFill + "(string in (1:2])");
+        assertIsValid(preFill + "(intPrimitive between 1 and 2)");
         assertIsValid(preFill + "().win:lenght()");
         assertIsValid(preFill + "().win:lenght(4,5)");
         assertIsValid(preFill + "().win:lenght(4)");
@@ -340,6 +354,16 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select * from x, sql:mydb ['whetever SQL $x.id google']");
         assertIsValid("select * from x, sql:mydb ['']");
         assertIsValid("select * from x, sql:mydb ['   ']");
+
+        // Previous and prior function
+        assertIsValid("select prev(10, price) from x");
+        assertIsValid("select prev(0, price) from x");
+        assertIsValid("select prev(1000, price) from x");
+        assertIsValid("select prev(index, price) from x");
+        assertIsValid("select prior(10, price) from x");
+        assertIsValid("select prior(0, price) from x");
+        assertIsValid("select prior(1000, price) from x");
+        assertIsValid("select prior(2, symbol) from x");
     }
 
     public void testBitWiseCases() throws Exception

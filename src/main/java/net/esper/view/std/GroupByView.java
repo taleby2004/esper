@@ -50,15 +50,6 @@ public final class GroupByView extends ViewSupport implements ContextAwareView
 
     /**
      * Constructor.
-     * @param groupFieldName is the field from which to pull the value to group by
-     */
-    public GroupByView(String groupFieldName)
-    {
-        this.groupFieldNames = new String[] { groupFieldName };
-    }
-
-    /**
-     * Constructor.
      * @param groupFieldNames is the fields from which to pull the values to group by
      */
     public GroupByView(String[] groupFieldNames)
@@ -108,20 +99,6 @@ public final class GroupByView extends ViewSupport implements ContextAwareView
     public final void setGroupFieldNames(String[] groupFieldNames)
     {
         this.groupFieldNames = groupFieldNames;
-    }
-
-    public final String attachesTo(Viewable parentView)
-    {
-        // Attaches to just about anything as long as all the fields exists
-        for (int i = 0; i < groupFieldNames.length; i++)
-        {
-            String message = PropertyCheckHelper.exists(parentView.getEventType(), groupFieldNames[i]);
-            if (message != null)
-            {
-                return message;
-            }
-        }
-        return null;
     }
 
     public final EventType getEventType()

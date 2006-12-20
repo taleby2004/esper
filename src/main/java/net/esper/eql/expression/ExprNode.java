@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.eql.core.AutoImportService;
 import net.esper.eql.core.StreamTypeService;
+import net.esper.eql.core.ViewResourceDelegate;
 
 /**
  * Superclass for filter nodes in a filter expression tree. Allow
@@ -46,22 +47,24 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator
      * root, might be replaced in the process.
      * @param streamTypeService - serves stream type information
      * @param autoImportService - for resolving class names in library method invocations
+     * @param viewResourceDelegate - delegates for view resources to expression nodes
      * @throws ExprValidationException when the validation fails
      * @return the root node of the validated subtree, possibly 
      *         different than the root node of the unvalidated subtree 
      */
-    public ExprNode getValidatedSubtree(StreamTypeService streamTypeService, AutoImportService autoImportService) throws ExprValidationException
+    public ExprNode getValidatedSubtree(StreamTypeService streamTypeService, AutoImportService autoImportService,
+                                        ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         ExprNode result = this;
 
         for (int i = 0; i < childNodes.size(); i++)
         {
-            childNodes.set(i, childNodes.get(i).getValidatedSubtree(streamTypeService, autoImportService));
+            childNodes.set(i, childNodes.get(i).getValidatedSubtree(streamTypeService, autoImportService, viewResourceDelegate));
         }
 
         try
         {
-            validate(streamTypeService, autoImportService);
+            validate(streamTypeService, autoImportService, viewResourceDelegate);
         }
         catch(ExprValidationException e)
         {
@@ -198,7 +201,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator
         // Validate
         try
         {
-            result.validate(streamTypeService, autoImportService);
+            result.validate(streamTypeService, autoImportService, null);
         }
         catch(ExprValidationException e)
         {

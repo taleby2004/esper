@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.view.ViewSupport;
-import net.esper.view.Viewable;
+import net.esper.collection.ViewUpdatedCollection;
 
 /**
  * This view is a moving window extending the specified number of elements into the past.
@@ -14,6 +14,7 @@ import net.esper.view.Viewable;
 public final class LengthWindowView extends ViewSupport implements DataWindowView
 {
     private int size = 0;
+    private ViewUpdatedCollection viewUpdatedCollection;
     private final LinkedList<EventBean> events = new LinkedList<EventBean>();
 
     /**
@@ -26,8 +27,9 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.
      * @param size is the specified number of elements into the past
+     * @param viewUpdatedCollection is a collection that the view must update when receiving events  
      */
-    public LengthWindowView(int size)
+    public LengthWindowView(int size, ViewUpdatedCollection viewUpdatedCollection)
     {
         if (size < 1)
         {
@@ -35,6 +37,12 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         }
 
         this.size = size;
+        this.viewUpdatedCollection = viewUpdatedCollection;
+    }
+
+    public boolean isEmpty()
+    {
+        return events.size() == 0;
     }
 
     /**
@@ -55,10 +63,14 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         this.size = size;
     }
 
-    public final String attachesTo(Viewable parentView)
+    public ViewUpdatedCollection getViewUpdatedCollection()
     {
-        // Attaches to just about anything
-        return null;
+        return viewUpdatedCollection;
+    }
+
+    public void setViewUpdatedCollection(IStreamRandomAccess viewUpdatedCollection)
+    {
+        this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
     public final EventType getEventType()
@@ -92,6 +104,10 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         }
 
         // If there are child views, fire update method
+        if (viewUpdatedCollection != null)
+        {
+            viewUpdatedCollection.update(newData, oldData);
+        }
         if (this.hasViews())
         {
             updateChildren(newData, expiredArr);

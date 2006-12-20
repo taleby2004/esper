@@ -56,8 +56,9 @@ public class ResultSetProcessorFactory
      * @param insertIntoDesc - descriptor for insert-into clause information
      * @param eventAdapterService - wrapping service for events
      * @param autoImportService - for resolving class names
+     * @param viewResourceDelegate - delegates views resource factory to expression resources requirements
      * @return result set processor instance
-     * @throws net.esper.eql.expression.ExprValidationException
+     * @throws ExprValidationException when any of the expressions is invalid
      */
     public static ResultSetProcessor getProcessor(List<SelectExprElementUnnamedSpec> selectionList,
                                                   InsertIntoDesc insertIntoDesc,
@@ -67,7 +68,8 @@ public class ResultSetProcessorFactory
                                                	  List<Pair<ExprNode, Boolean>> orderByList,
                                                   StreamTypeService typeService,
                                                   EventAdapterService eventAdapterService,
-                                                  AutoImportService autoImportService)
+                                                  AutoImportService autoImportService,
+                                                  ViewResourceDelegate viewResourceDelegate)
             throws ExprValidationException
     {
         if (log.isDebugEnabled())
@@ -88,7 +90,7 @@ public class ResultSetProcessorFactory
         {
             // validate element
             SelectExprElementUnnamedSpec element = selectionList.get(i);
-            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, autoImportService);
+            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, autoImportService, viewResourceDelegate);
 
             // determine an element name if none assigned
             String asName = element.getOptionalAsName();
@@ -105,13 +107,13 @@ public class ResultSetProcessorFactory
         // Validate group-by expressions, if any (could be empty list for no group-by)
         for (int i = 0; i < groupByNodes.size(); i++)
         {
-            groupByNodes.set(i, groupByNodes.get(i).getValidatedSubtree(typeService, autoImportService));
+            groupByNodes.set(i, groupByNodes.get(i).getValidatedSubtree(typeService, autoImportService, viewResourceDelegate));
         }
 
         // Validate having clause, if present
         if (optionalHavingNode != null)
         {
-            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, autoImportService);
+            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, autoImportService, viewResourceDelegate);
         }
 
         // Validate order-by expressions, if any (could be empty list for no order-by)
@@ -119,7 +121,7 @@ public class ResultSetProcessorFactory
         {
         	ExprNode orderByNode = orderByList.get(i).getFirst();
         	Boolean isDescending = orderByList.get(i).getSecond();
-        	Pair<ExprNode, Boolean> validatedPair = new Pair<ExprNode, Boolean>(orderByNode.getValidatedSubtree(typeService, autoImportService), isDescending);
+        	Pair<ExprNode, Boolean> validatedPair = new Pair<ExprNode, Boolean>(orderByNode.getValidatedSubtree(typeService, autoImportService, viewResourceDelegate), isDescending);
         	orderByList.set(i, validatedPair);
         }
 

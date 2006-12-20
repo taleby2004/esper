@@ -1,6 +1,6 @@
 package net.esper.eql.core;
 
-import net.esper.collection.MultiKey;
+import net.esper.collection.MultiKeyUntyped;
 import net.esper.event.EventBean;
 
 /**
@@ -15,9 +15,10 @@ public interface OrderByProcessor {
 	 * be computed from the generating events.
 	 * @param outgoingEvents - the events to be sorted
 	 * @param generatingEvents - the events that generated the output events (each event has a corresponding array of generating events per different event streams)
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
 	 * @return an array containing the output events in sorted order
 	 */
-	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents);
+	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, boolean isNewData);
 
 	/**
 	 * Sort the output events, using the provided group-by keys for 
@@ -26,7 +27,8 @@ public interface OrderByProcessor {
 	 * @param outgoingEvents - the events to sort
 	 * @param generatingEvents - the events that generated the output events (each event has a corresponding array of generating events per different event streams)
 	 * @param groupByKeys - the keys to use for determining the group-by group of output events 
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
 	 * @return an array containing the output events in sorted order
 	 */
-	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, MultiKey[] groupByKeys);
+	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, MultiKeyUntyped[] groupByKeys, boolean isNewData);
 }	

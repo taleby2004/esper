@@ -15,7 +15,7 @@ import net.esper.view.ViewFieldEnum;
 import net.esper.view.ViewSupport;
 import net.esper.view.ViewServiceContext;
 
-public class TestSinglePointStatisticsView extends TestCase
+public class TestUnivariateStatisticsView extends TestCase
 {
     UnivariateStatisticsView myView;
     SupportBeanClassView childView;
@@ -63,19 +63,6 @@ public class TestSinglePointStatisticsView extends TestCase
         stream.insert(marketData);
         checkOld(3, 31.5, 10.5, 1.08012345, 1.322875656, 1.75);
         checkNew(3, 30.5, 10.16666667, 1.312334646, 1.607275127, 2.583333333);
-    }
-
-    public void testViewAttachesTo()
-    {
-        UnivariateStatisticsView view = new UnivariateStatisticsView("symbol");
-
-        // The symbol field in the parent is not a number, expect an error on attach
-        SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
-        assertTrue(view.attachesTo(parent) != null);
-
-        // Try a non-existing field name
-        view = new UnivariateStatisticsView("dummy");
-        assertTrue(view.attachesTo(parent) != null);
     }
 
     public void testGetSchema()

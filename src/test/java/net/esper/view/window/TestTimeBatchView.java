@@ -25,25 +25,13 @@ public class TestTimeBatchView extends TestCase
     public void setUp()
     {
         // Set up length window view and a test child view
-        myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d);
+        myView = new TimeBatchView(TEST_INTERVAL_MSEC, null, null);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
 
         // Set the scheduling service to use
         schedulingServiceStub = new SupportSchedulingServiceImpl();
         myView.setViewServiceContext(SupportViewContextFactory.makeContext(schedulingServiceStub));
-    }
-
-    public void testIncorrectUse()
-    {
-        try
-        {
-            myView = new TimeBatchView(99);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
     }
 
     public void testViewPushNoRefPoint()
@@ -161,7 +149,7 @@ public class TestTimeBatchView extends TestCase
         long startTime = 50000;
         schedulingServiceStub.setTime(startTime);
 
-        myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d, 1505L);
+        myView = new TimeBatchView(TEST_INTERVAL_MSEC, 1505L, null);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
         myView.setViewServiceContext(SupportViewContextFactory.makeContext(schedulingServiceStub));
@@ -186,16 +174,6 @@ public class TestTimeBatchView extends TestCase
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{events.get("A1"), events.get("A2"), events.get("A3")});
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(TEST_INTERVAL_MSEC) != null);
-    }
-
-    public void testViewAttachesTo()
-    {
-        // Should attach to anything
-        TimeBatchView view = new TimeBatchView(200000);
-        SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
-        assertTrue(view.attachesTo(parent) == null);
-        parent.addView(view);
-        assertTrue(view.getEventType() == parent.getEventType());
     }
 
     public void testComputeWaitMSec()
@@ -240,7 +218,7 @@ public class TestTimeBatchView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        myView = new TimeBatchView(TEST_INTERVAL_MSEC / 1000d);
+        myView = new TimeBatchView(TEST_INTERVAL_MSEC, null, null);
 
         ViewServiceContext context = SupportViewContextFactory.makeContext();
         SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
@@ -251,20 +229,5 @@ public class TestTimeBatchView extends TestCase
         assertEquals(myView.getMsecIntervalSize(), copied.getMsecIntervalSize());
         assertEquals(myView.getInitialReferencePoint(), copied.getInitialReferencePoint());
         assertEquals(myView.getViewServiceContext(), copied.getViewServiceContext());
-    }
-
-    public void testConstructors()
-    {
-        myView = new TimeBatchView(8.12);
-        assertEquals(8120, myView.getMsecIntervalSize());
-        assertNull(myView.getInitialReferencePoint());
-
-        myView = new TimeBatchView(0.23, 10000L);
-        assertEquals(230, myView.getMsecIntervalSize());
-        assertEquals(10000l, (long) myView.getInitialReferencePoint());
-
-        myView = new TimeBatchView((int) 10, 20000L);
-        assertEquals(10000, myView.getMsecIntervalSize());
-        assertEquals(20000l, (long) myView.getInitialReferencePoint());
     }
 }

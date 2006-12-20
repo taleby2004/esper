@@ -87,31 +87,8 @@ public final class MultiDimStatsView extends ViewSupport implements ContextAware
      * @param derivedMeasures is an array of ViewFieldEnum names defining the measures to derive
      * @param measureField defines the field supplying measures
      * @param columnField defines the field supplying column dimension members
-     */
-    public MultiDimStatsView(String[] derivedMeasures, String measureField, String columnField)
-    {
-        this(derivedMeasures, measureField, columnField, null, null);
-    }
-
-    /**
-     * Constructor.
-     * @param derivedMeasures is an array of ViewFieldEnum names defining the measures to derive
-     * @param measureField defines the field supplying measures
-     * @param columnField defines the field supplying column dimension members
-     * @param rowField defines the field supplying row dimension members
-     */
-    public MultiDimStatsView(String[] derivedMeasures, String measureField, String columnField, String rowField)
-    {
-        this(derivedMeasures, measureField, columnField, rowField, null);
-    }
-
-    /**
-     * Constructor.
-     * @param derivedMeasures is an array of ViewFieldEnum names defining the measures to derive
-     * @param measureField defines the field supplying measures
-     * @param columnField defines the field supplying column dimension members
-     * @param rowField defines the field supplying row dimension members
-     * @param pageField defines the field supplying page dimension members
+     * @param rowField defines an optional field supplying row dimension members
+     * @param pageField defines an optional field supplying page dimension members
      */
     public MultiDimStatsView(String[] derivedMeasures, String measureField, String columnField, String rowField, String pageField)
     {
@@ -219,45 +196,6 @@ public final class MultiDimStatsView extends ViewSupport implements ContextAware
     protected final MultidimCube<BaseStatisticsBean> getFactCube()
     {
         return multidimCube;
-    }
-
-    public final String attachesTo(Viewable parentViewable)
-    {
-        String message = PropertyCheckHelper.checkNumeric(parentViewable.getEventType(), measureField);
-        if (message != null)
-        {
-            return message;
-        }
-
-        message = PropertyCheckHelper.exists(parentViewable.getEventType(), columnField);
-        if (message != null)
-        {
-            return message;
-        }
-
-        if (rowField != null)
-        {
-            message = PropertyCheckHelper.exists(parentViewable.getEventType(), rowField);
-            if (message != null)
-            {
-                return message;
-            }
-        }
-
-        if (pageField != null)
-        {
-            return PropertyCheckHelper.exists(parentViewable.getEventType(), pageField);
-        }
-
-        for (String measureName : derivedMeasures)
-        {
-            if (Arrays.binarySearch(ViewFieldEnum.MULTIDIM_OLAP__MEASURES, measureName) < 0)
-            {
-                return "Derived measure named '" + measureName + "' is not a valid measure";
-            }
-        }
-
-        return null;
     }
 
     public final void setParent(Viewable parent)

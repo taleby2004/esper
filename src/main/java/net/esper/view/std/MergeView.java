@@ -37,15 +37,6 @@ public final class MergeView extends ViewSupport implements ParentAwareView, Con
 
     /**
      * Constructor.
-     * @param groupFieldName is the field from which to pull the value to group by
-     */
-    public MergeView(String groupFieldName)
-    {
-        this.groupFieldNames = new String[] {groupFieldName};
-    }
-
-    /**
-     * Constructor.
      * @param groupFieldNames is the fields from which to pull the value to group by
      */
     public MergeView(String groupFieldNames[])
@@ -115,12 +106,6 @@ public final class MergeView extends ViewSupport implements ParentAwareView, Con
     public final void addParentView(AddPropertyValueView parentView)
     {
         parentViews.add(parentView);
-    }
-
-    public final String attachesTo(Viewable parentView)
-    {
-        // Attaches to just about anything
-        return null;
     }
 
     public void setParentAware(List<View> parentViews)

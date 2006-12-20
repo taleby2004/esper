@@ -715,6 +715,13 @@ public class TestEQLTreeWalker extends TestCase
         assertEquals(sql, dbSpec.getSqlWithSubsParams());
     }
 
+    public void testRangeBetweenAndIn() throws Exception
+    {
+        String className = SupportBean.class.getName();
+        String expression = "select * from " + className + "(intPrimitive in [1:2], intBoxed in (1,2), doubleBoxed between 2 and 3)";
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+    }
+
     private double tryInterval(String interval) throws Exception
     {
         String text = "select * from " + SupportBean.class.getName() + ".win:time(" + interval + ")";
@@ -774,8 +781,8 @@ public class TestEQLTreeWalker extends TestCase
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         ExprNode exprNode = walker.getStatementSpec().getFilterRootNode().getChildNodes().get(0);
         ExprBitWiseNode bitWiseNode = (ExprBitWiseNode) (exprNode);
-        bitWiseNode.getValidatedSubtree(null, null);
-        return bitWiseNode.evaluate(null);
+        bitWiseNode.getValidatedSubtree(null, null, null);
+        return bitWiseNode.evaluate(null, false);
     }
 
     private Object tryExpression(String equation) throws Exception
@@ -784,8 +791,8 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         ExprNode exprNode = (walker.getStatementSpec().getFilterRootNode().getChildNodes().get(0));
-        exprNode = exprNode.getValidatedSubtree(null, null);
-        return exprNode.evaluate(null);
+        exprNode = exprNode.getValidatedSubtree(null, null, null);
+        return exprNode.evaluate(null, false);
     }
 
     private Object tryRelationalOp(String subExpr) throws Exception
@@ -794,8 +801,8 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         ExprNode filterExprNode = walker.getStatementSpec().getFilterRootNode();
-        filterExprNode.getValidatedSubtree(null, null);
-        return filterExprNode.evaluate(null);
+        filterExprNode.getValidatedSubtree(null, null, null);
+        return filterExprNode.evaluate(null, false);
     }
 
     private static final Log log = LogFactory.getLog(TestEQLTreeWalker.class);

@@ -1,5 +1,7 @@
 package net.esper.view;
 
+import net.esper.event.EventType;
+
 import java.util.List;
 
 /**
@@ -7,18 +9,35 @@ import java.util.List;
  */
 public interface ViewService
 {
-    /**
-     * Creates a chain of views returning the last view in the chain.
-     * @param eventStream - the event stream that originates the raw events
-     * @param viewSpecList - the specification for the chain to be created
+    /*
+     * Returns a chain of view factories that can be used to obtain the final event type,
+     * and that can later be used to actually create the chain of views or reuse existing views.
+     * <p>
+     * Does not actually hook up the view factories or views against the event stream, but creates view
+     * factories and sets parameters on each view factory as supplied. Determines if
+     * view factories are compatible in the chain via the attach method.
+     * @param parentEventType - is the event type of the event stream that originates the raw events
+     * @param viewSpecList - the specification for each view factory in the chain to be created
      * @param context - dependent services
-     * @return last view in chain
-     * @throws ViewProcessingException thrown if a view cannot be created
+     * @throws ViewProcessingException thrown if a view factory doesn't take parameters as supplied,
+     * or cannot hook onto it's parent view or event stream
      */
-    public Viewable createView(EventStream eventStream,
-                           List<ViewSpec> viewSpecList,
-                           ViewServiceContext context)
-        throws ViewProcessingException;
+    public ViewFactoryChain createFactories(EventType parentEventType, List<ViewSpec> viewSpecList, ViewServiceContext context)
+            throws ViewProcessingException;
+
+    /**
+     * Creates the views given a chain of view factories.
+     * <p>
+     * Attempts to reuse compatible views under then parent event stream viewable as
+     * indicated by each view factories reuse method.
+     * @param eventStreamViewable is the event stream to hook into
+     * @param viewFactoryChain defines the list of view factorys to call makeView or canReuse on
+     * @param context provides services
+     * @return last viewable in chain, or the eventStreamViewable if no view factories are supplied
+     */
+    public Viewable createViews(Viewable eventStreamViewable,
+                                List<ViewFactory> viewFactoryChain,
+                                ViewServiceContext context);
 
     /**
      * Removes a view discoupling the view and any of it's parent views up the tree to the last shared parent view.

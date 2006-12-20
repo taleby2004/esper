@@ -7,7 +7,6 @@ import java.util.*;
 import java.text.SimpleDateFormat;
 
 import net.esper.view.ViewSupport;
-import net.esper.view.Viewable;
 import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
 import net.esper.event.EventType;
@@ -15,8 +14,8 @@ import net.esper.event.EventBean;
 import net.esper.schedule.ScheduleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.collection.TimeWindow;
+import net.esper.collection.ViewUpdatedCollection;
 import net.esper.client.EPException;
-import net.esper.eql.parse.TimePeriodParameter;
 
 /**
  * This view is a moving timeWindow extending the specified amount of milliseconds into the past.
@@ -34,8 +33,9 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private long millisecondsBeforeExpiry;
+    private TimeWindow timeWindow = new TimeWindow();
+    private ViewUpdatedCollection viewUpdatedCollection;
 
-    private final TimeWindow timeWindow = new TimeWindow();
     private ViewServiceContext viewServiceContext;
     private ScheduleSlot scheduleSlot;
 
@@ -48,42 +48,14 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
 
     /**
      * Constructor.
-     * @param secondsBeforeExpiry is the number of seconds before events gets pushed
+     * @param millisecondsBeforeExpiry is the number of milliseconds before events gets pushed
      * out of the timeWindow as oldData in the update method.
+     * @param viewUpdatedCollection is a collection the view must update when receiving events
      */
-    public TimeWindowView(int secondsBeforeExpiry)
+    public TimeWindowView(long millisecondsBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection)
     {
-        if (secondsBeforeExpiry < 1)
-        {
-            throw new IllegalArgumentException("Time window view requires a millisecond size of at least 100 msec");
-        }
-
-        this.millisecondsBeforeExpiry = 1000 * secondsBeforeExpiry;
-    }
-
-    /**
-     * Constructor.
-     * @param secondsBeforeExpiry is the number of seconds before events gets pushed
-     * out of the timeWindow as oldData in the update method.
-     */
-    public TimeWindowView(double secondsBeforeExpiry)
-    {
-        if (secondsBeforeExpiry <= 0.1)
-        {
-            throw new IllegalArgumentException("Time window view requires a millisecond size of at least 100 msec");
-        }
-
-        this.millisecondsBeforeExpiry = Math.round(1000d * secondsBeforeExpiry);
-    }
-
-    /**
-     * Constructor.
-     * @param timePeriod is the number of seconds before events gets pushed
-     * out of the timeWindow as oldData in the update method.
-     */
-    public TimeWindowView(TimePeriodParameter timePeriod)
-    {
-        this(timePeriod.getNumSeconds());
+        this.millisecondsBeforeExpiry = millisecondsBeforeExpiry;
+        this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
     /**
@@ -104,10 +76,14 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
         this.millisecondsBeforeExpiry = millisecondsBeforeExpiry;
     }
 
-    public final String attachesTo(Viewable parentView)
+    public ViewUpdatedCollection getViewUpdatedCollection()
     {
-        // Attaches to any parent view
-        return null;
+        return viewUpdatedCollection;
+    }
+
+    public void setViewUpdatedCollection(IStreamRandomAccess viewUpdatedCollection)
+    {
+        this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
     public final EventType getEventType()
@@ -145,6 +121,11 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
             timeWindow.add(timestamp, newData[i]);
         }
 
+        if (viewUpdatedCollection != null)
+        {
+            viewUpdatedCollection.update(newData, null);
+        }
+
         // update child views
         if (this.hasViews())
         {
@@ -176,7 +157,12 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
         {
             if ((expired != null) && (expired.size() > 0))
             {
-                updateChildren(null, expired.toArray(new EventBean[0]));
+                EventBean[] oldEvents = expired.toArray(new EventBean[0]);
+                if (viewUpdatedCollection != null)
+                {
+                    viewUpdatedCollection.update(null, oldEvents);
+                }
+                updateChildren(null, oldEvents);
             }
         }
 
@@ -237,6 +223,11 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
         this.viewServiceContext = viewServiceContext;
         this.scheduleSlot = viewServiceContext.getScheduleBucket().allocateSlot();
     }
+
+    public boolean isEmpty()
+    {
+        return timeWindow.isEmpty();
+    }    
 
     private static final Log log = LogFactory.getLog(TimeWindowView.class);
 }

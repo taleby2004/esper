@@ -7,9 +7,8 @@ import net.esper.view.Viewable;
 import net.esper.event.EventPropertyGetter;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.view.PropertyCheckHelper;
 import net.esper.collection.TimeWindow;
-import net.esper.eql.parse.TimePeriodParameter;
+import net.esper.collection.ViewUpdatedCollection;
 
 /**
  * View for a moving window extending the specified amount of time into the past, driven entirely by external timing
@@ -36,6 +35,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     private EventPropertyGetter timestampFieldGetter;
 
     private final TimeWindow timeWindow = new TimeWindow();
+    private ViewUpdatedCollection viewUpdatedCollection;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -47,42 +47,19 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     /**
      * Constructor.
      * @param timestampFieldName is the field name containing a long timestamp value
-     * @param secondsBeforeExpiry is the number of seconds
-     */
-    public ExternallyTimedWindowView(String timestampFieldName, long secondsBeforeExpiry)
-    {
-        this(timestampFieldName, (double)secondsBeforeExpiry);
-    }
-
-    /**
-     * Constructor.
-     * @param timestampFieldName is the field name containing a long timestamp value
      * that should be in ascending order for the natural order of events and is intended to reflect
      * System.currentTimeInMillis but does not necessarily have to.
-     * @param secondsBeforeExpiry is the number of seconds before events gets pushed
+     * @param msecBeforeExpiry is the number of milliseconds before events gets pushed
      * out of the window as oldData in the update method. The view compares
      * each events timestamp against the newest event timestamp and those with a delta
      * greater then secondsBeforeExpiry are pushed out of the window.
+     * @param viewUpdatedCollection is a collection that the view must update when receiving events
      */
-    public ExternallyTimedWindowView(String timestampFieldName, double secondsBeforeExpiry)
+    public ExternallyTimedWindowView(String timestampFieldName, long msecBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection)
     {
         this.timestampFieldName = timestampFieldName;
-        this.millisecondsBeforeExpiry = Math.round(secondsBeforeExpiry * 1000d);
-
-        if (millisecondsBeforeExpiry <= 0)
-        {
-            throw new IllegalArgumentException("Externally timed window does not allow a zero or negative parameter for the millisecond window length");
-        }
-    }
-
-    /**
-     * Constructor - implemented via (String, long) constructor.
-     * @param timestampFieldName is the field name containing a long timestamp value
-     * @param timePeriodParameter is the number of milliseconds before events gets pushed
-     */
-    public ExternallyTimedWindowView(String timestampFieldName, TimePeriodParameter timePeriodParameter)
-    {
-        this(timestampFieldName, timePeriodParameter.getNumSeconds());
+        this.millisecondsBeforeExpiry = msecBeforeExpiry;
+        this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
     /**
@@ -130,11 +107,6 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
         this.millisecondsBeforeExpiry = millisecondsBeforeExpiry;
     }
 
-    public final String attachesTo(Viewable parentView)
-    {
-        return PropertyCheckHelper.checkLong(parentView.getEventType(), timestampFieldName);
-    }
-
     public final EventType getEventType()
     {
         // The schema is the parent view's schema
@@ -160,20 +132,24 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
         List<EventBean> expired = null;
         if (timestamp != -1)
         {
-            expired = timeWindow.expireEvents(timestamp - millisecondsBeforeExpiry);
+            expired = timeWindow.expireEvents(timestamp - millisecondsBeforeExpiry + 1);
+        }
+
+        EventBean[] oldDataUpdate = null;
+        if ((expired != null) && (expired.size() > 0))
+        {
+            oldDataUpdate = expired.toArray(new EventBean[0]);
+        }
+
+        if (viewUpdatedCollection != null)
+        {
+            viewUpdatedCollection.update(newData, oldDataUpdate);
         }
 
         // If there are child views, fire update method
         if (this.hasViews())
         {
-            if ((expired != null) && (expired.size() > 0))
-            {
-                updateChildren(newData, expired.toArray(new EventBean[0]));
-            }
-            else
-            {
-                updateChildren(newData, null);
-            }
+            updateChildren(newData, oldDataUpdate);
         }
     }
 
@@ -193,5 +169,10 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     {
         Number num = (Number) timestampFieldGetter.get(obj);
         return num.longValue();
+    }
+
+    public boolean isEmpty()
+    {
+        return timeWindow.isEmpty();
     }
 }

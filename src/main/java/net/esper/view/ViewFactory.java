@@ -1,105 +1,70 @@
 package net.esper.view;
 
-import org.apache.commons.beanutils.ConstructorUtils;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import net.esper.event.EventType;
+import net.esper.eql.core.ViewResourceCallback;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 /**
- * Static factory for creating view instances based on a view specification and a given parent view.
+ * Factory interface for a factory responsible for creating a {@link View} instance and for determining
+ * if an existing view meets requirements.
  */
-public final class ViewFactory
+public interface ViewFactory
 {
     /**
-     * Instantiates a view based on view name and parameters stored in the view spec, and attempts to
-     * hook it up with a parent view.
-     * @param parentView is the parent view to hook the new view into
-     * @param spec contains view name and parameters
-     * @return instantiated and hooked-up view
-     * @throws ViewProcessingException if the view name is wrong, parameters don't match view constructors, or
-     * the view refuses to hook up with its parent
+     * Indicates user EQL query view parameters to the view factory.
+     * @param viewParameters is the objects representing the view parameters
+     * @throws ViewParameterException if the parameters don't match view parameter needs
      */
-    protected static View create(Viewable parentView, ViewSpec spec)
-        throws ViewProcessingException
-    {
-        if (log.isDebugEnabled())
-        {
-            log.debug(".create Creating view, parentView.class=" + parentView.getClass().getName() +
-                    "  spec=" + spec.toString());
-        }
+    public void setViewParameters(List<Object> viewParameters) throws ViewParameterException;
 
-        // Determine view class
-        ViewEnum viewEnum = ViewEnum.forName(spec.getObjectNamespace(), spec.getObjectName());
+    /**
+     * Attaches the factory to a parent event type such that the factory can validate
+     * attach requirements and determine an event type for resulting views.
+     * @param parentEventType is the parent event stream's or view factory's event type
+     * @param viewServiceContext contains the services needed for creating a new event type
+     * @param optionalParentFactory is null when there is no parent view factory, or contains the
+     * parent view factory
+     * @throws ViewAttachException is thrown to indicate that this view factories's view would not play
+     * with the parent view factories view
+     */
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException;
 
-        if (viewEnum == null)
-        {
-            String message = "View name '" + spec.getObjectName() + "' is not a known view name";
-            log.fatal(".create " + message);
-            throw new ViewProcessingException(message);
-        }
+    /**
+     * Returns true if the view factory can make views that provide a view resource with the
+     * given capability.
+     * @param viewCapability is the view resource needed
+     * @return true to indicate that the view can provide the resource, or false if not
+     */
+    public boolean canProvideCapability(ViewCapability viewCapability);
 
-        Object[] arguments = spec.getObjectParameters().toArray();
+    /**
+     * Indicates to the view factory to provide the view resource indicated.
+     * @param viewCapability is the required resource descriptor
+     * @param resourceCallback is the callback to use to supply the resource needed
+     */
+    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback);
 
-        // If the view requires parameters, the empty argument list would be a problem
-        // since all views are also Java beans
-        if ((arguments.length == 0) && (viewEnum.isRequiresParameters()))
-        {
-            String message = "No parameters have been supplied for view " + spec.getObjectName();
-            throw new ViewProcessingException(message);
-        }
+    /**
+     * Create a new view.
+     * @param viewServiceContext contains view services
+     * @return new view
+     */
+    public View makeView(ViewServiceContext viewServiceContext);
 
-        View view = null;
-        try
-        {
-            view = (View) ConstructorUtils.invokeConstructor(viewEnum.getClazz(), arguments);
+    /**
+     * Returns the event type that the view that is created by the view factory would create for events posted
+     * by the view.
+     * @return event type of view's created by the view factory
+     */
+    public EventType getEventType();
 
-            if (log.isDebugEnabled())
-            {
-                log.debug(".create Successfully instantiated view");
-            }
-        }
-        catch (NoSuchMethodException e)
-        {
-            String message = "Error invoking constructor for view '" + spec.getObjectName();
-            message += "', the view parameter list is not valid for the view";
-            log.fatal(".create " + message);
-            throw new ViewProcessingException(message, e);
-        }
-        catch (IllegalAccessException e)
-        {
-            String message = "Error invoking constructor for view '" + spec.getObjectName();
-            message += "', no invocation access";
-            log.fatal(".create " + message);
-            throw new ViewProcessingException(message, e);
-        }
-        catch (InvocationTargetException e)
-        {
-            String message = "Error invoking constructor for view '" + spec.getObjectName();
-            message += "', invocation threw exception: " + e.getCause().getMessage();
-            log.fatal(".create " + message);
-            throw new ViewProcessingException(message, e);
-        }
-        catch (InstantiationException e)
-        {
-            String message = "Error invoking constructor for view '" + spec.getObjectName();
-            message += "', could not instantiateChain";
-            log.fatal(".create " + message);
-            throw new ViewProcessingException(message, e);
-        }
-
-        // Ask view if it can indeed hook into the parent
-        String errorMessage = view.attachesTo(parentView);
-        if (errorMessage != null)
-        {
-            String message = "Cannot attach view, the view '" + spec.getObjectName() +
-                    "' is incompatible to its parent view, explanation: " + errorMessage;
-            log.fatal(".create " + message);
-            throw new ViewProcessingException(message);
-        }
-
-        return view;
-    }
-
-    private static final Log log = LogFactory.getLog(ViewFactory.class);
+    /**
+     * Determines if the given view could be used instead of creating a new view,
+     * requires the view factory to compare view type, parameters and other capabilities provided.
+     * @param view is the candidate view to compare to
+     * @return true if the given view can be reused instead of creating a new view, or false to indicate
+     * the view is not right for reuse
+     */
+    public boolean canReuse(View view);
 }

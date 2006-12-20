@@ -60,7 +60,12 @@ public enum FilterOperator
     /**
      * Range includes high endpoint but not low endpoint, i.e. (a,b]
      */
-    RANGE_HALF_CLOSED;
+    RANGE_HALF_CLOSED,
+
+    /**
+     * List of values using the 'in' operator
+     */
+    IN_LIST_OF_VALUES;
 
     private final static String EQUAL_OP = "=";
     private final static String NOT_EQUAL_OP = "!=";
@@ -103,7 +108,7 @@ public enum FilterOperator
 
     /**
      * Parse the comparison operator returning null if not a valid operator.
-     * @param operator
+     * @param operator is the lesser then or other compare op
      * @return FilterOperator or null if not valid
      */
     public static FilterOperator parseComparisonOperator(String operator)

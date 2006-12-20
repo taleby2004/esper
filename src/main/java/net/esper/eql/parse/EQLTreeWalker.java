@@ -126,6 +126,7 @@ public class EQLTreeWalker extends EQLBaseWalker
             case WHERE_EXPR:
                 leaveWhereClause();
                 break;
+            case NUM_INT:
             case INT_TYPE:
             case LONG_TYPE:
             case BOOL_TYPE:
@@ -237,6 +238,12 @@ public class EQLTreeWalker extends EQLBaseWalker
             case NOT_REGEXP:
                 leaveRegexp(node);
                 break;
+            case PREVIOUS:
+                leavePrevious(node);
+                break;
+            case PRIOR:
+                leavePrior(node);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + "'");
@@ -283,6 +290,22 @@ public class EQLTreeWalker extends EQLBaseWalker
             }
         }
         while (childNode != null);
+    }
+
+    private void leavePrevious(AST node)
+    {
+        log.debug(".leavePrevious");
+
+        ExprPreviousNode previousNode = new ExprPreviousNode();
+        astExprNodeMap.put(node, previousNode);
+    }
+
+    private void leavePrior(AST node)
+    {
+        log.debug(".leavePrior");
+
+        ExprPriorNode priorNode = new ExprPriorNode();
+        astExprNodeMap.put(node, priorNode);
     }
 
     /**

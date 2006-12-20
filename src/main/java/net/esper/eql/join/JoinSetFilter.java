@@ -28,8 +28,8 @@ public class JoinSetFilter implements JoinSetProcessor
         // Filter
         if (filterExprNode != null)
         {
-            filter(filterExprNode, newEvents);
-            filter(filterExprNode, oldEvents);
+            filter(filterExprNode, newEvents, true);
+            filter(filterExprNode, oldEvents, false);
         }
     }
 
@@ -37,15 +37,16 @@ public class JoinSetFilter implements JoinSetProcessor
      * Filter event by applying the filter nodes evaluation method.
      * @param filterExprNode - top node of the filter expression tree.
      * @param events - set of tuples of events
+     * @param isNewData - true to indicate filter new data (istream) and not old data (rstream) 
      */
-    protected static void filter(ExprNode filterExprNode, Set<MultiKey<EventBean>> events)
+    protected static void filter(ExprNode filterExprNode, Set<MultiKey<EventBean>> events, boolean isNewData)
     {
         for (Iterator<MultiKey<EventBean>> it = events.iterator(); it.hasNext();)
         {
             MultiKey<EventBean> key = it.next();
             EventBean[] eventArr = key.getArray();
 
-            boolean matched = (Boolean) filterExprNode.evaluate(eventArr);
+            boolean matched = (Boolean) filterExprNode.evaluate(eventArr, isNewData);
 
             if (!matched)
             {

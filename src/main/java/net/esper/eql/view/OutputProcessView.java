@@ -6,8 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.esper.collection.MultiKey;
-import net.esper.collection.Pair;
+import net.esper.collection.*;
 import net.esper.eql.spec.OutputLimitSpec;
 import net.esper.eql.core.ResultSetProcessor;
 import net.esper.eql.join.JoinSetIndicator;
@@ -227,18 +226,12 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
     {
     	if(resultSetProcessor != null)
     	{
-    		throw new UnsupportedOperationException();
+            return new TransformEventIterator(parent.iterator(), new OutputProcessTransform(resultSetProcessor));
     	}
     	else 
     	{
     		return parent.iterator();
     	}
-    }
-
-
-    public String attachesTo(Viewable parentViewable)
-    {
-        return null;
     }
 
     private OutputCallback getCallbackToLocal(int streamCount)
@@ -264,6 +257,24 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
                     OutputProcessView.this.continueOutputProcessingJoin(doOutput, forceUpdate);
                 }
             };
+        }
+    }
+
+    public class OutputProcessTransform implements TransformEventMethod
+    {
+        private final ResultSetProcessor resultSetProcessor;
+        private final EventBean[] newData;
+
+        public OutputProcessTransform(ResultSetProcessor resultSetProcessor) {
+            this.resultSetProcessor = resultSetProcessor;
+            newData = new EventBean[1];
+        }
+
+        public EventBean transform(EventBean event)
+        {
+            newData[0] = event;
+            Pair<EventBean[], EventBean[]> pair = resultSetProcessor.processViewResult(newData, null);
+            return pair.getFirst()[0];
         }
     }
 }

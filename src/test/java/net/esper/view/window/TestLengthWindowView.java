@@ -21,7 +21,7 @@ public class TestLengthWindowView extends TestCase
     public void setUp()
     {
         // Set up length window view and a test child view
-        myView = new LengthWindowView(5);
+        myView = new LengthWindowView(5, null);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
     }
@@ -30,7 +30,7 @@ public class TestLengthWindowView extends TestCase
     {
         try
         {
-            myView = new LengthWindowView(0);
+            myView = new LengthWindowView(0, null);
         }
         catch (IllegalArgumentException ex)
         {
@@ -101,16 +101,6 @@ public class TestLengthWindowView extends TestCase
         SupportViewDataChecker.checkOldData(childView, makeArray(events, new String[]{ "h2" }));
         SupportViewDataChecker.checkNewData(childView,makeArray(events, new String[]{ "i0" }));
         ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),makeArray(events, new String[]{ "h3", "h4", "h5", "h6", "i0" }));
-    }
-
-    public void testViewAttachesTo()
-    {
-        // Should attach to anything
-        LengthWindowView view = new LengthWindowView(20);
-        SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
-        assertTrue(view.attachesTo(parent) == null);
-        parent.addView(view);
-        assertTrue(view.getEventType() == parent.getEventType());
     }
 
     public void testCopyView() throws Exception

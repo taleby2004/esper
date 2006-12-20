@@ -1,8 +1,7 @@
 package net.esper.eql.core;
 
-import net.esper.collection.MultiKey;
+import net.esper.collection.MultiKeyUntyped;
 import net.esper.event.EventBean;
-import net.esper.eql.core.AggregationServiceBase;
 import net.esper.eql.expression.ExprEvaluator;
 
 /**
@@ -20,25 +19,25 @@ public class AggregationServiceGroupAllImpl extends AggregationServiceBase
         super(evaluators, aggregators);
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKey optionalGroupKeyPerRow)
+    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow)
     {
         for (int j = 0; j < evaluators.length; j++)
         {
-            Object columnResult = evaluators[j].evaluate(eventsPerStream);
+            Object columnResult = evaluators[j].evaluate(eventsPerStream, true);
             aggregators[j].enter(columnResult);
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKey optionalGroupKeyPerRow)
+    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow)
     {
         for (int j = 0; j < evaluators.length; j++)
         {
-            Object columnResult = evaluators[j].evaluate(eventsPerStream);
+            Object columnResult = evaluators[j].evaluate(eventsPerStream, false);
             aggregators[j].leave(columnResult);
         }
     }
 
-    public void setCurrentRow(MultiKey groupKey)
+    public void setCurrentRow(MultiKeyUntyped groupKey)
     {
         // no action needed - this implementation does not group and the current row is the single group
     }

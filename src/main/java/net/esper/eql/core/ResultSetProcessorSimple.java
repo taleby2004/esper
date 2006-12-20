@@ -60,13 +60,13 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
 
         if (optionalHavingExpr == null)
         {
-            selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly);
-            selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly);
+            selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly, false);
+            selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly, true);
         }
         else
         {
-            selectOldEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, oldEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly);
-            selectNewEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, newEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly);
+            selectOldEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, oldEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly, false);
+            selectNewEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, newEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly, true);
         }
 
         return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
@@ -74,8 +74,8 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
 
     public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData)
     {
-        EventBean[] selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly);
-        EventBean[] selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newData, isOutputLimiting, isOutputLimitLastOnly);
+        EventBean[] selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly, false);
+        EventBean[] selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newData, isOutputLimiting, isOutputLimitLastOnly, true);
 
         return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
     }
@@ -88,9 +88,10 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param events - input events
      * @param isOutputLimiting - true to indicate that we limit output
      * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData)
     {
         if (isOutputLimiting)
         {
@@ -121,7 +122,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
             }
             else
             {
-                result[i] = exprProcessor.process(eventsPerStream);
+                result[i] = exprProcessor.process(eventsPerStream, isNewData);
             }
 
             if(orderByProcessor != null)
@@ -132,7 +133,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
 
         if(orderByProcessor != null)
         {
-            return orderByProcessor.sort(result, eventGenerators);
+            return orderByProcessor.sort(result, eventGenerators, isNewData);
         }
         else
         {
@@ -187,9 +188,10 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param events - input events
      * @param isOutputLimiting - true to indicate that we limit output
      * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData)
     {
         if (isOutputLimiting)
         {
@@ -213,7 +215,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         for (MultiKey<EventBean> key : events)
         {
             EventBean[] eventsPerStream = key.getArray();
-            result[count] = exprProcessor.process(eventsPerStream);
+            result[count] = exprProcessor.process(eventsPerStream, isNewData);
             if(orderByProcessor != null)
             {
                 eventGenerators[count] = eventsPerStream;
@@ -223,7 +225,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
 
         if(orderByProcessor != null)
         {
-            return orderByProcessor.sort(result, eventGenerators);
+            return orderByProcessor.sort(result, eventGenerators, isNewData);
         }
         else
         {
@@ -242,9 +244,10 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param optionalHavingNode - supplies the having-clause expression
      * @param isOutputLimiting - true to indicate that we limit output
      * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData)
     {
         if (isOutputLimiting)
         {
@@ -268,13 +271,13 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         {
             eventsPerStream[0] = events[i];
 
-            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream);
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
             if (!passesHaving)
             {
                 continue;
             }
 
-            result.add(exprProcessor.process(eventsPerStream));
+            result.add(exprProcessor.process(eventsPerStream, isNewData));
             if(orderByProcessor != null)
             {
                 eventGenerators.add(new EventBean[] { events[i] });
@@ -285,7 +288,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         {
             if(orderByProcessor != null)
             {
-                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]));
+                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]), isNewData);
             }
             else
             {
@@ -309,9 +312,10 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param optionalHavingNode - supplies the having-clause expression
      * @param isOutputLimiting - true to indicate that we limit output
      * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly)
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData)
     {
         if (isOutputLimiting)
         {
@@ -329,13 +333,13 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         {
             EventBean[] eventsPerStream = key.getArray();
 
-            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream);
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
             if (!passesHaving)
             {
                 continue;
             }
 
-            EventBean resultEvent = exprProcessor.process(eventsPerStream);
+            EventBean resultEvent = exprProcessor.process(eventsPerStream, isNewData);
             result.add(resultEvent);
             if(orderByProcessor != null)
             {
@@ -347,7 +351,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         {
             if(orderByProcessor != null)
             {
-                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]));
+                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]), isNewData);
             }
             else
             {

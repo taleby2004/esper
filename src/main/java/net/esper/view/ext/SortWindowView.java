@@ -9,8 +9,7 @@ import net.esper.util.MultiKeyComparator;
 import net.esper.view.ViewSupport;
 import net.esper.view.Viewable;
 import net.esper.view.window.DataWindowView;
-import net.esper.view.PropertyCheckHelper;
-import net.esper.collection.MultiKey;
+import net.esper.collection.MultiKeyUntyped;
 import net.esper.event.EventPropertyGetter;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
@@ -36,8 +35,9 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
     private Boolean[] isDescendingValues;
     private int sortWindowSize = 0;
 
-    private TreeMap<MultiKey, LinkedList<EventBean>> sortedEvents;
+    private TreeMap<MultiKeyUntyped, LinkedList<EventBean>> sortedEvents;
     private int eventCount;
+    private IStreamSortedRandomAccess optionalSortedRandomAccess;
 
     /**
      * Default constructor - required by all views to adhere to the Java bean specification.
@@ -46,43 +46,18 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
     {
     }
 
-    /**
-     * Constructor.
-     * @param propertiesAndDirections - an array of the form [String, Boolean, ...],
-     * 		  where each String represents a property name, and each Boolean indicates 
-     * 	      whether to sort in descending order on that property
-     * @param size is the specified number of elements to keep in the sort
-     */
-    public SortWindowView(Object[] propertiesAndDirections, int size)
+    public SortWindowView(String[] sortFieldNames, Boolean[] descendingValues, int sortWindowSize,
+                          IStreamSortedRandomAccess optionalSortedRandomAccess)
     {
-    	if(propertiesAndDirections == null || propertiesAndDirections.length < 2)
-    	{
-    		throw new IllegalArgumentException("The sort view must sort on at least one property");
-    	}
+        this.sortFieldNames = sortFieldNames;
+        this.isDescendingValues = descendingValues;
+        this.sortWindowSize = sortWindowSize;
+        this.optionalSortedRandomAccess = optionalSortedRandomAccess;
 
-    	if ((size < 1) || (size > Integer.MAX_VALUE))
-    	{
-    		throw new IllegalArgumentException("Illegal argument for sortWindowSize of length window");
-    	}
-
-    	setNamesAndIsDescendingValues(propertiesAndDirections);
-    	this.sortWindowSize = size;
-
-    	Comparator<MultiKey> comparator = new MultiKeyComparator(isDescendingValues);
-    	sortedEvents = new TreeMap<MultiKey, LinkedList<EventBean>>(comparator);
+        Comparator<MultiKeyUntyped> comparator = new MultiKeyComparator(isDescendingValues);
+        sortedEvents = new TreeMap<MultiKeyUntyped, LinkedList<EventBean>>(comparator);
     }
     
-    /**
-     * Ctor.
-     * @param propertyName - the property to sort on
-     * @param isDescending - true if the property should be sorted in descending order
-     * @param size - the number of elements to keep in the sort
-     */
-    public SortWindowView(String propertyName, boolean isDescending, int size)
-    {
-    	this(new Object[] {propertyName, isDescending}, size);
-    }
-
     public void setParent(Viewable parent)
     {
         super.setParent(parent);
@@ -124,7 +99,17 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         return sortWindowSize;
     }
 
-   /**
+    public IStreamSortedRandomAccess getOptionalSortedRandomAccess()
+    {
+        return optionalSortedRandomAccess;
+    }
+
+    public void setOptionalSortedRandomAccess(IStreamSortedRandomAccess optionalSortedRandomAccess)
+    {
+        this.optionalSortedRandomAccess = optionalSortedRandomAccess;
+    }
+
+    /**
     * Set the sort order for the sort properties.
     * @param isDescendingValues - the direction to sort in for each sort property
     */
@@ -148,22 +133,6 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
 		this.sortWindowSize = sortWindowSize;
 	}
 
-	public final String attachesTo(Viewable parentView)
-    {
-        // Attaches to parent views where the sort fields exist and implement Comparable
-    	String result = null;
-    	for(String name : sortFieldNames)
-    	{
-    		result = PropertyCheckHelper.exists(parentView.getEventType(), name);
-
-    		if(result != null)
-    		{
-    			break;
-    		}
-    	}
-    	return result;
-    }
-
     public final EventType getEventType()
     {
         // The schema is the parent view's schema
@@ -185,7 +154,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         {
             for (int i = 0; i < oldData.length; i++)
             {
-                MultiKey sortValues = getSortValues(oldData[i]);
+                MultiKeyUntyped sortValues = getSortValues(oldData[i]);
                 boolean result = remove(sortValues, oldData[i]);
                 if (result)
                 {
@@ -200,7 +169,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         {
             for (int i = 0; i < newData.length; i++)
             {
-                MultiKey sortValues = getSortValues(newData[i]);
+                MultiKeyUntyped sortValues = getSortValues(newData[i]);
                 add(sortValues, newData[i]);
                 eventCount++;
             }
@@ -213,7 +182,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
             for (int i = 0; i < removeCount; i++)
             {
                 // Remove the last element of the last key - sort order is key and then natural order of arrival
-                MultiKey lastKey = sortedEvents.lastKey();
+                MultiKeyUntyped lastKey = sortedEvents.lastKey();
                 LinkedList<EventBean> events = sortedEvents.get(lastKey);
                 EventBean event = events.removeLast();
                 eventCount--;
@@ -234,6 +203,10 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         }
 
         // If there are child views, fire update method
+        if (optionalSortedRandomAccess != null)
+        {
+            optionalSortedRandomAccess.refresh(sortedEvents, eventCount, sortWindowSize);
+        }
         if (this.hasViews())
         {
             EventBean[] expiredArr = null;
@@ -259,7 +232,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
                 " sortWindowSize=" + sortWindowSize;
     }
 
-    private void add(MultiKey key, EventBean bean)
+    private void add(MultiKeyUntyped key, EventBean bean)
     {
         LinkedList<EventBean> listOfBeans = sortedEvents.get(key);
         if (listOfBeans != null)
@@ -273,7 +246,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         sortedEvents.put(key, listOfBeans);
     }
 
-    private boolean remove(MultiKey key, EventBean bean)
+    private boolean remove(MultiKeyUntyped key, EventBean bean)
     {
         LinkedList<EventBean> listOfBeans = sortedEvents.get(key);
         if (listOfBeans == null)
@@ -288,26 +261,8 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         }
         return result;
     }
-    
-    private void setNamesAndIsDescendingValues(Object[] propertiesAndDirections)
-    {
-    	if(propertiesAndDirections.length % 2 != 0)
-    	{
-    		throw new IllegalArgumentException("Each property to sort by must have an isDescending boolean qualifier");
-    	}
 
-    	int length = propertiesAndDirections.length / 2;
-    	sortFieldNames = new String[length];
-    	isDescendingValues  = new Boolean[length];
-    	
-    	for(int i = 0; i < length; i++)
-    	{
-    		sortFieldNames[i] = (String)propertiesAndDirections[2*i];
-    		isDescendingValues[i] = (Boolean)propertiesAndDirections[2*i + 1];
-    	}
-    }
-    
-    private MultiKey<Object> getSortValues(EventBean event)
+    private MultiKeyUntyped getSortValues(EventBean event)
     {
     	Object[] result = new Object[sortFieldGetters.length];
     	int count = 0;
@@ -315,7 +270,12 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
     	{
     		result[count++] = getter.get(event);
     	}
-    	return new MultiKey<Object>(result);
+    	return new MultiKeyUntyped(result);
+    }
+
+    public boolean isEmpty()
+    {
+        return sortedEvents.size() == 0;
     }
 
     private static final Log log = LogFactory.getLog(SortWindowView.class);

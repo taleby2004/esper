@@ -8,14 +8,13 @@ import java.text.SimpleDateFormat;
 
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.view.Viewable;
 import net.esper.view.ViewSupport;
 import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
 import net.esper.schedule.ScheduleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.client.EPException;
-import net.esper.eql.parse.TimePeriodParameter;
+import net.esper.collection.ViewUpdatedCollection;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -32,13 +31,14 @@ import net.esper.eql.parse.TimePeriodParameter;
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  * In that case also, no next callback is scheduled with the scheduling service until the next event arrives.
  */
-public final class TimeBatchView extends ViewSupport implements ContextAwareView
+public final class TimeBatchView extends ViewSupport implements ContextAwareView, DataWindowView
 {
     private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     // View parameters
     private long msecIntervalSize;
     private Long initialReferencePoint;
+    private ViewUpdatedCollection viewUpdatedCollection;
 
     // Current running parameters
     private Long currentReferencePoint;
@@ -57,69 +57,16 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
 
     /**
      * Constructor.
-     * @param secIntervalSize is the number of seconds to batch events for.
+     * @param msecIntervalSize is the number of milliseconds to batch events for
+     * @param referencePoint is the reference point onto which to base intervals, or null if
+     * there is no such reference point supplied
+     * @param viewUpdatedCollection is a collection that the view must update when receiving events
      */
-    public TimeBatchView(int secIntervalSize)
+    public TimeBatchView(long msecIntervalSize, Long referencePoint, ViewUpdatedCollection viewUpdatedCollection)
     {
-        if (secIntervalSize < 1)
-        {
-            throw new IllegalArgumentException("Time batch view requires a millisecond interval size of at least 100 msec");
-        }
-        this.msecIntervalSize = 1000 * secIntervalSize;
-    }
-
-    /**
-     * Constructor.
-     * @param secIntervalSize is the number of milliseconds to batch events for
-     * @param referencePoint is the reference point onto which to base intervals.
-     */
-    public TimeBatchView(int secIntervalSize, Long referencePoint)
-    {
-        this(secIntervalSize);
+        this.msecIntervalSize = msecIntervalSize;
         this.initialReferencePoint = referencePoint;
-    }
-
-    /**
-     * Constructor.
-     * @param secIntervalSize is the number of seconds to batch events for.
-     */
-    public TimeBatchView(double secIntervalSize)
-    {
-        if (secIntervalSize < 0.1)
-        {
-            throw new IllegalArgumentException("Time batch view requires a millisecond interval size of at least 100 msec");
-        }
-        this.msecIntervalSize = Math.round(1000 * secIntervalSize);
-    }
-
-    /**
-     * Constructor.
-     * @param timeTimePeriod is the number of seconds to batch events for.
-     */
-    public TimeBatchView(TimePeriodParameter timeTimePeriod)
-    {
-        this(timeTimePeriod.getNumSeconds());
-    }
-
-    /**
-     * Constructor.
-     * @param secIntervalSize is the number of seconds to batch events for
-     * @param referencePoint is the reference point onto which to base intervals.
-     */
-    public TimeBatchView(double secIntervalSize, Long referencePoint)
-    {
-        this(secIntervalSize);
-        this.initialReferencePoint = referencePoint;
-    }
-
-    /**
-     * Constructor.
-     * @param timeTimePeriod is the number of seconds to batch events for
-     * @param referencePoint is the reference point onto which to base intervals.
-     */
-    public TimeBatchView(TimePeriodParameter timeTimePeriod, Long referencePoint)
-    {
-        this(timeTimePeriod.getNumSeconds(), referencePoint);
+        this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
     /**
@@ -149,6 +96,16 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         return initialReferencePoint;
     }
 
+    public ViewUpdatedCollection getViewUpdatedCollection()
+    {
+        return viewUpdatedCollection;
+    }
+
+    public void setViewUpdatedCollection(IStreamRandomAccess viewUpdatedCollection)
+    {
+        this.viewUpdatedCollection = viewUpdatedCollection;
+    }
+
     /**
      * Sets the reference point to use to anchor interval start and end dates to.
      * @param initialReferencePoint is the millisecond reference point.
@@ -156,12 +113,6 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
     public final void setInitialReferencePoint(Long initialReferencePoint)
     {
         this.initialReferencePoint = initialReferencePoint;
-    }
-
-    public final String attachesTo(Viewable parentView)
-    {
-        // Attaches to any parent view
-        return null;
     }
 
     public final EventType getEventType()
@@ -261,6 +212,10 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
             }
 
             // Post new data (current batch) and old data (prior batch)
+            if (viewUpdatedCollection != null)
+            {
+                viewUpdatedCollection.update(newData, oldData);
+            }
             if ((newData != null) || (oldData != null))
             {
                 updateChildren(newData, oldData);
@@ -288,7 +243,17 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         currentBatch = new LinkedList<EventBean>();
     }
 
-
+    public boolean isEmpty()
+    {
+        if (lastBatch != null)
+        {
+            if (lastBatch.size() != 0)
+            {
+                return false;
+            }
+        }
+        return currentBatch.size() == 0;
+    }
 
     public final Iterator<EventBean> iterator()
     {
