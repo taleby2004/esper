@@ -19,7 +19,6 @@ public class TestEventPatternParser extends TestCase implements EqlTokenTypes
         SupportParserHelper.displayAST(ast);
     }
 
-    // TODO
     public void testInvalidCases() throws Exception
     {
         // Base vocabulary

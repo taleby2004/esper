@@ -60,13 +60,13 @@ public class TestMultiDimStatsViewFactory extends TestCase
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         factory.setViewParameters(Arrays.asList(new Object[] {new String[] {"stddev"}, "price", "volume"}));
-        factory.attach(parentType, SupportViewContextFactory.makeContext(), null);
+        factory.attach(parentType, SupportViewContextFactory.makeContext(), null, null);
         assertEquals(Cube.class, factory.getEventType().getPropertyType(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName()));
 
         try
         {
             factory.setViewParameters(Arrays.asList(new Object[] {new String[] {"stddev"}, "xxx", "y"}));
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)

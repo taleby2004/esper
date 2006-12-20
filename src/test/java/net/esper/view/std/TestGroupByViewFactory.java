@@ -6,7 +6,6 @@ import java.util.Arrays;
 
 import net.esper.view.ViewParameterException;
 import net.esper.view.ViewAttachException;
-import net.esper.view.window.TimeWindowView;
 import net.esper.support.view.SupportViewContextFactory;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.bean.SupportMarketDataBean;
@@ -53,12 +52,12 @@ public class TestGroupByViewFactory extends TestCase
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         factory.setViewParameters(Arrays.asList(new Object[] {"price"}));
-        factory.attach(parentType, null, null);
+        factory.attach(parentType, null, null, null);
 
         try
         {
             factory.setViewParameters(Arrays.asList(new Object[] {"xxx"}));
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)

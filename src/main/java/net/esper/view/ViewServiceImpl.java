@@ -35,11 +35,15 @@ public final class ViewServiceImpl implements ViewService
         List<ViewFactory> viewFactories = ViewServiceHelper.instantiateFactoryChain(viewSpecList, context);
 
         ViewFactory parentViewFactory = null;
+        List<ViewFactory> attachedViewFactories = new LinkedList<ViewFactory>();
         for (int i = 0; i < viewFactories.size(); i++)
         {
+            ViewFactory factoryToAttach = viewFactories.get(i);
             try
             {
-                viewFactories.get(i).attach(parentEventType, context, parentViewFactory);
+                factoryToAttach.attach(parentEventType, context, parentViewFactory, attachedViewFactories);
+                attachedViewFactories.add(viewFactories.get(i));
+                parentEventType = factoryToAttach.getEventType(); 
             }
             catch (ViewAttachException ex)
             {

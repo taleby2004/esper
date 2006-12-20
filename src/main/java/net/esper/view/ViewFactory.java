@@ -25,10 +25,14 @@ public interface ViewFactory
      * @param viewServiceContext contains the services needed for creating a new event type
      * @param optionalParentFactory is null when there is no parent view factory, or contains the
      * parent view factory
+     * @param parentViewFactories is a list of all the parent view factories or empty list if there are none
      * @throws ViewAttachException is thrown to indicate that this view factories's view would not play
      * with the parent view factories view
      */
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException;
+    public void attach(EventType parentEventType,
+                       ViewServiceContext viewServiceContext,
+                       ViewFactory optionalParentFactory,
+                       List<ViewFactory> parentViewFactories) throws ViewAttachException;
 
     /**
      * Returns true if the view factory can make views that provide a view resource with the

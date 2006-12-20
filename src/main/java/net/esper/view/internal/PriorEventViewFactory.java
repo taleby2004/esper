@@ -25,7 +25,7 @@ public class PriorEventViewFactory implements ViewFactory
         throw new UnsupportedOperationException("View not available through EQL");
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         eventType = parentEventType;
     }

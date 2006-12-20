@@ -18,7 +18,7 @@ public class GroupByViewFactory implements ViewFactory
         groupFieldNames = getFieldNameParams(viewParameters, "Group-by");
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         // Attaches to just about anything as long as all the fields exists
         for (int i = 0; i < groupFieldNames.length; i++)
@@ -31,6 +31,12 @@ public class GroupByViewFactory implements ViewFactory
         }
 
         this.eventType = parentEventType;
+    }
+
+
+    public String[] getGroupFieldNames()
+    {
+        return groupFieldNames;
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)

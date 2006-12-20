@@ -27,7 +27,7 @@ public class TestMergeView extends TestCase
     public void setUp()
     {
         // Set up length window view and a test child view
-        myView = new MergeView(new String[] {"symbol"});
+        myView = new MergeView(new String[] {"symbol"}, null);
         myView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
@@ -67,30 +67,6 @@ public class TestMergeView extends TestCase
         MergeView copied = (MergeView) ViewSupport.shallowCopyView(myView);
         assertEquals(myView.getGroupFieldNames(), copied.getGroupFieldNames());
         assertEquals(myView.getEventType(), someEventType);
-    }
-
-    public void testEventType()
-    {
-        SupportBeanClassView topView = new SupportBeanClassView(SupportBean.class);
-        GroupByView groupByView = new GroupByView(new String[] {"intPrimitive"});
-
-        SizeView sizeView = new SizeView();
-        sizeView.setViewServiceContext(SupportViewContextFactory.makeContext());
-
-        MergeView mergeView = new MergeView(new String[] {"intPrimitive"});
-        mergeView.setViewServiceContext(SupportViewContextFactory.makeContext());
-
-        topView.addView(groupByView);
-        groupByView.addView(sizeView);
-        sizeView.addView(mergeView);        
-
-        List<View> parents = new LinkedList<View>();
-        parents.add(topView);
-        parents.add(groupByView);
-        mergeView.setParentAware(parents);
-
-        EventType eventType = mergeView.getEventType();
-        assertEquals(int.class, eventType.getPropertyType("intPrimitive"));
     }
 
     private EventBean makeTradeBean(String symbol, int price)

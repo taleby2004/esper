@@ -35,7 +35,7 @@ public class WeightedAverageViewFactory implements ViewFactory
         fieldNameWeight = (String) viewParameters.get(1);
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         String result = PropertyCheckHelper.checkNumeric(parentEventType, fieldNameX, fieldNameWeight);
         if (result != null)

@@ -10,6 +10,7 @@ import java.util.Arrays;
 public class MergeViewFactory implements ViewFactory
 {
     private String[] fieldNames;
+    private Class[] fieldTypes;
     private EventType eventType;
 
     public void setViewParameters(List<Object> viewParameters) throws ViewParameterException
@@ -17,9 +18,35 @@ public class MergeViewFactory implements ViewFactory
         fieldNames = GroupByViewFactory.getFieldNameParams(viewParameters, "Group-by-merge");
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
-        this.eventType = parentEventType;
+        // Find the group by view matching the merge view
+        ViewFactory groupByViewFactory = null;
+        for (ViewFactory parentView : parentViewFactories)
+        {
+            if (!(parentView instanceof GroupByViewFactory))
+            {
+                continue;
+            }
+            GroupByViewFactory candidateGroupByView = (GroupByViewFactory) parentView;
+            if (Arrays.equals(candidateGroupByView.getGroupFieldNames(), this.fieldNames))
+            {
+                groupByViewFactory = candidateGroupByView;
+            }
+        }
+
+        if (groupByViewFactory == null)
+        {
+            throw new ViewAttachException("Group by view for this merge view could not be found among parent views");
+        }
+
+        fieldTypes = new Class[fieldNames.length];
+        for (int i = 0; i < fieldTypes.length; i++)
+        {
+            fieldTypes[i] = groupByViewFactory.getEventType().getPropertyType(fieldNames[i]);
+        }
+        eventType = viewServiceContext.getEventAdapterService().createAddToEventType(
+                parentEventType, fieldNames, fieldTypes);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)
@@ -34,7 +61,7 @@ public class MergeViewFactory implements ViewFactory
 
     public View makeView(ViewServiceContext viewServiceContext)
     {
-        return new MergeView(fieldNames);
+        return new MergeView(fieldNames, eventType);
     }
 
     public EventType getEventType()

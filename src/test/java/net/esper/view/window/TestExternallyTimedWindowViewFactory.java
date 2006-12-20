@@ -48,7 +48,7 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         factory.setViewParameters(Arrays.asList(new Object[] {"dummy", 20}));
         try
         {
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)
@@ -59,7 +59,7 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         factory.setViewParameters(Arrays.asList(new Object[] {"string", 20}));
         try
         {
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)
@@ -68,7 +68,7 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         }
 
         factory.setViewParameters(Arrays.asList(new Object[] {"longPrimitive", 20}));
-        factory.attach(parentType, null, null);
+        factory.attach(parentType, null, null, null);
 
         assertSame(parentType, factory.getEventType());
     }

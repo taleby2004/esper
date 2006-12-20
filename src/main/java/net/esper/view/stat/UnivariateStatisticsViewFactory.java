@@ -32,7 +32,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         fieldName = (String) viewParameters.get(0);
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         String result = PropertyCheckHelper.checkNumeric(parentEventType, fieldName);
         if (result != null)

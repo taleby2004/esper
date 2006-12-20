@@ -45,13 +45,13 @@ public class TestUnivariateStatisticsViewFactory extends TestCase
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         factory.setViewParameters(Arrays.asList(new Object[] {"price"}));
-        factory.attach(parentType, SupportViewContextFactory.makeContext(), null);
+        factory.attach(parentType, SupportViewContextFactory.makeContext(), null, null);
         assertEquals(double.class, factory.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName()));
 
         try
         {
             factory.setViewParameters(Arrays.asList(new Object[] {"xxx"}));
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)

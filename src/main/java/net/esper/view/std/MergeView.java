@@ -20,11 +20,10 @@ import net.esper.collection.IterablesListIterator;
  * The parent view of this view is generally the AddPropertyValueView that adds the grouped-by information
  * back into the data.
  */
-public final class MergeView extends ViewSupport implements ParentAwareView, ContextAwareView
+public final class MergeView extends ViewSupport implements ContextAwareView
 {
     private final LinkedList<View> parentViews = new LinkedList<View>();
     private String[] groupFieldNames;
-    private Class[] groupFieldTypes;
     private EventType eventType;
     private ViewServiceContext viewServiceContext;
 
@@ -39,9 +38,10 @@ public final class MergeView extends ViewSupport implements ParentAwareView, Con
      * Constructor.
      * @param groupFieldNames is the fields from which to pull the value to group by
      */
-    public MergeView(String groupFieldNames[])
+    public MergeView(String groupFieldNames[], EventType resultEventType)
     {
         this.groupFieldNames = groupFieldNames;
+        this.eventType = resultEventType;
     }
 
     /**
@@ -82,61 +82,12 @@ public final class MergeView extends ViewSupport implements ParentAwareView, Con
     }
 
     /**
-     * Returns types of fields used in the group-by.
-     * @return types for group-by fields
-     */
-    public Class[] getGroupFieldTypes()
-    {
-        return groupFieldTypes;
-    }
-
-    /**
-     * Sets types of fields used in the group-by.
-     * @param groupFieldTypes - types for group-by fields
-     */
-    public void setGroupFieldType(Class[] groupFieldTypes)
-    {
-        this.groupFieldTypes = groupFieldTypes;
-    }
-
-    /**
      * Add a parent data merge view.
      * @param parentView is the parent data merge view to add
      */
     public final void addParentView(AddPropertyValueView parentView)
     {
         parentViews.add(parentView);
-    }
-
-    public void setParentAware(List<View> parentViews)
-    {
-        // Find the group by view matching the merge view
-        View groupByView = null;
-        for (View parentView : parentViews)
-        {
-            if (!(parentView instanceof GroupByView))
-            {
-                continue;
-            }
-            GroupByView candidateGroupByView = (GroupByView) parentView;
-            if (Arrays.equals(candidateGroupByView.getGroupFieldNames(), this.getGroupFieldNames()))
-            {
-                groupByView = candidateGroupByView;
-            }
-        }
-
-        if (groupByView == null)
-        {
-            throw new IllegalStateException("Group by view for this merge view could not be found among parent views");
-        }
-
-        groupFieldTypes = new Class[groupFieldNames.length];
-        for (int i = 0; i < groupFieldTypes.length; i++)
-        {
-            groupFieldTypes[i] = groupByView.getEventType().getPropertyType(groupFieldNames[i]);
-        }
-        eventType = viewServiceContext.getEventAdapterService().createAddToEventType(
-                this.getParent().getEventType(), groupFieldNames, groupFieldTypes);
     }
 
     public final EventType getEventType()

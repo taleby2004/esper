@@ -68,7 +68,7 @@ public class MultiDimStatsViewFactory implements ViewFactory
         }
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         String message = PropertyCheckHelper.checkNumeric(parentEventType, measureField);
         if (message != null)

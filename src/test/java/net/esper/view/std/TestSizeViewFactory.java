@@ -5,7 +5,6 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 
 import net.esper.view.ViewParameterException;
-import net.esper.view.window.TimeWindowView;
 import net.esper.support.view.SupportViewContextFactory;
 
 public class TestSizeViewFactory extends TestCase

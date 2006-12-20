@@ -47,13 +47,13 @@ public class TestRegressionLinestViewFactory extends TestCase
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         factory.setViewParameters(Arrays.asList(new Object[] {"price", "volume"}));
-        factory.attach(parentType, SupportViewContextFactory.makeContext(), null);
+        factory.attach(parentType, SupportViewContextFactory.makeContext(), null, null);
         assertEquals(double.class, factory.getEventType().getPropertyType(ViewFieldEnum.REGRESSION__SLOPE.getName()));
 
         try
         {
             factory.setViewParameters(Arrays.asList(new Object[] {"xxx", "y"}));
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)

@@ -87,15 +87,6 @@ public class ViewServiceHelper
                 ((ContextAwareView) currentView).setViewServiceContext(context);
             }
 
-            // New views get their ParentAwareView interface invoked if required
-            if (currentView instanceof ParentAwareView)
-            {
-                List<View> parentViewList = new LinkedList<View>();
-                parentViewList.addAll(existingParentViews);
-                parentViewList.addAll(newViews);
-                ((ParentAwareView) currentView).setParentAware(parentViewList);
-            }
-
             // Next parent is the new view
             parent = currentView;
         }

@@ -33,7 +33,7 @@ public class RegressionLinestViewFactory implements ViewFactory
         fieldNameY = (String) viewParameters.get(1);
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         String result = PropertyCheckHelper.checkNumeric(parentEventType, fieldNameX, fieldNameY);
         if (result != null)

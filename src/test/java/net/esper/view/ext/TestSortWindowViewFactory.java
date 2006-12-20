@@ -42,12 +42,12 @@ public class TestSortWindowViewFactory extends TestCase
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         factory.setViewParameters(Arrays.asList(new Object[] {"price", true, 100}));
-        factory.attach(parentType, SupportViewContextFactory.makeContext(), null);
+        factory.attach(parentType, SupportViewContextFactory.makeContext(), null, null);
 
         try
         {
             factory.setViewParameters(Arrays.asList(new Object[] {"xxx", true, 100}));
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)

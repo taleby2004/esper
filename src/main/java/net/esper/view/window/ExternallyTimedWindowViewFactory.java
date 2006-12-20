@@ -55,7 +55,7 @@ public class ExternallyTimedWindowViewFactory implements ViewFactory
         }
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         String message = PropertyCheckHelper.checkLong(parentEventType, timestampFieldName);
         if (message != null)

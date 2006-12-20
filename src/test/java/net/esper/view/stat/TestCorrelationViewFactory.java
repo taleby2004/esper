@@ -8,9 +8,7 @@ import net.esper.support.view.SupportViewContextFactory;
 import net.esper.view.ViewFieldEnum;
 import net.esper.view.ViewAttachException;
 import net.esper.view.ViewParameterException;
-import net.esper.view.std.UniqueByPropertyView;
 import net.esper.view.std.SizeView;
-import net.esper.view.window.TimeWindowView;
 
 import java.util.Arrays;
 
@@ -49,13 +47,13 @@ public class TestCorrelationViewFactory extends TestCase
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 
         factory.setViewParameters(Arrays.asList(new Object[] {"price", "volume"}));
-        factory.attach(parentType, SupportViewContextFactory.makeContext(), null);
+        factory.attach(parentType, SupportViewContextFactory.makeContext(), null, null);
         assertEquals(double.class, factory.getEventType().getPropertyType(ViewFieldEnum.CORRELATION__CORRELATION.getName()));
 
         try
         {
             factory.setViewParameters(Arrays.asList(new Object[] {"xxx", "y"}));
-            factory.attach(parentType, null, null);
+            factory.attach(parentType, null, null, null);
             fail();
         }
         catch (ViewAttachException ex)

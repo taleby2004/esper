@@ -26,7 +26,7 @@ public class TestGroupByView extends TestCase
 
         SupportBeanClassView childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
-        MergeView myMergeView = new MergeView(new String[]{"symbol"});
+        MergeView myMergeView = new MergeView(new String[]{"symbol"}, null);
 
         ultimateChildView = new SupportBeanClassView(SupportMarketDataBean.class);
 
@@ -128,7 +128,7 @@ public class TestGroupByView extends TestCase
         }
 
         // Invalid for child node is a merge node - doesn't make sense to group and merge only
-        MergeView mergeViewOne = new MergeView(new String[] {"symbol"});
+        MergeView mergeViewOne = new MergeView(new String[] {"symbol"}, null);
         groupView.addView(mergeViewOne);
         try
         {
@@ -148,7 +148,7 @@ public class TestGroupByView extends TestCase
         sizeView_1.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         groupView.addView(sizeView_1);
-        mergeViewOne = new MergeView(new String[] {"symbol"});
+        mergeViewOne = new MergeView(new String[] {"symbol"}, null);
         sizeView_1.addView(mergeViewOne);
 
         List<View> subViews = GroupByView.makeSubViews(groupView, groupByValue, viewServiceContext);

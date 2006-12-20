@@ -30,7 +30,7 @@ public class UniqueByPropertyViewFactory implements ViewFactory
         propertyName = (String) parameter;
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory) throws ViewAttachException
+    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         // Attaches to just about anything as long as the field exists
         String message = PropertyCheckHelper.exists(parentEventType, propertyName);
