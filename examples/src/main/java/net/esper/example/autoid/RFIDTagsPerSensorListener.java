@@ -9,7 +9,10 @@ public class RFIDTagsPerSensorListener implements UpdateListener
 {
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        logRate(newEvents[0]);
+        if (newEvents != null)
+        {
+            logRate(newEvents[0]);
+        }
     }
 
     private void logRate(EventBean event)

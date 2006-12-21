@@ -22,38 +22,38 @@ public class TestDatabaseQueryResultCache extends TestCase
     {
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setExpiryTimeCache(1.0d, Double.MAX_VALUE);
-        tryCache(configDB, 2000, 1000, false);
+        tryCache(configDB, 3000, 1000, false);
     }
 
     public void testLRUCache()
     {
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setLRUCache(100);
-        tryCache(configDB, 1500, 1000, false);
+        tryCache(configDB, 2000, 1000, false);
     }
 
-    public void testLRUCache100k()
+    public void testLRUCache25k()
     {
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setLRUCache(100);
-        tryCache(configDB, 5000, 100000, false);
+        tryCache(configDB, 7000, 25000, false);
     }
 
-    public void testExpireCache100k()
+    public void testExpireCache25k()
     {
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setExpiryTimeCache(2, 2);
-        tryCache(configDB, 5000, 100000, false);
+        tryCache(configDB, 7000, 25000, false);
     }
 
     public void testExpireRandomKeys()
     {
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setExpiryTimeCache(1, 1);
-        tryCache(configDB, 5000, 50000, true);
+        tryCache(configDB, 7000, 25000, true);
     }
 
-    public void tryCache(ConfigurationDBRef configDB, long assertMaximumTime, int numEvents, boolean useRandomLookupKey)
+    private void tryCache(ConfigurationDBRef configDB, long assertMaximumTime, int numEvents, boolean useRandomLookupKey)
     {
         Configuration configuration = new Configuration();
         configuration.addDatabaseReference("MyDB", configDB);

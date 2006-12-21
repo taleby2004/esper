@@ -265,7 +265,7 @@ public class TestPriorFunction extends TestCase
         {
             if (i % 10000 == 0)
             {
-                System.out.println(i);
+                //System.out.println(i);
             }
 
             sendMarketEvent(Integer.toString(random.nextInt()), 4);
@@ -292,7 +292,7 @@ public class TestPriorFunction extends TestCase
         {
             if (i % 10000 == 0)
             {
-                System.out.println(i);
+                //System.out.println(i);
             }
 
             sendMarketEvent(Integer.toString(random.nextInt()), 4);

@@ -1,25 +1,9 @@
- <!--
-Use these lifecyle phases :
-mvn compile
-mvn test
-mvn package
-mvn install
-mvn site
-mvn site-deploy
-
-Use these plugin goals (plugin:goal or pluginGroupId:pluginArtifactId:pluginVersion:goal)
-mvn antlr:generate
-mvn jar:jar
-mvn install:install
-mvn javadoc:javadoc
--->
-
 <project>
 	<modelVersion>4.0.0</modelVersion>
-	<name>Esper</name>
+	<name>Esper IO</name>
 	<artifactId>esper-esperio</artifactId>
 	<groupId>esper-esperio</groupId>
-	<version>1.3.0</version>
+	<version>1.4.0</version>
 	<packaging>jar</packaging>
 	<description>Esper CEP engine for Java - Input Output Adapters</description>
 	<inceptionYear>2005</inceptionYear>
@@ -27,7 +11,7 @@ mvn javadoc:javadoc
 		<dependency>
 			<groupId>esper</groupId>
 			<artifactId>esper</artifactId>
-			<version>1.3.0</version>
+			<version>1.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>

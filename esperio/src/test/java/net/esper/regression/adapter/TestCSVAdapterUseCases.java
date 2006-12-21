@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
-import java.net.URL;
 
 public class TestCSVAdapterUseCases extends TestCase
 {
@@ -149,7 +148,11 @@ public class TestCSVAdapterUseCases extends TestCase
         tradeProps.put("symbol", String.class);
         tradeProps.put("notional", Double.class);
 
-        epService = EPServiceProviderManager.getProvider("testCoordinated");
+        Configuration config = new Configuration();
+        config.addEventTypeAlias("TradeEvent", tradeProps);
+        config.addEventTypeAlias("PriceEvent", priceProps);
+
+        epService = EPServiceProviderManager.getProvider("testCoordinated", config);
         epService.initialize();
 
         AdapterInputSource sourceOne = new AdapterInputSource(CSV_FILENAME_TIMESTAMPED_PRICES);
@@ -164,7 +167,7 @@ public class TestCSVAdapterUseCases extends TestCase
         inputTwoSpec.setPropertyTypes(tradeProps);
         CSVInputAdapter inputTwo = new CSVInputAdapter(inputTwoSpec);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, price, volume from TradeEvent.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, notional from TradeEvent.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

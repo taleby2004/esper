@@ -1,0 +1,58 @@
+<project name="esper" default="info" basedir=".">
+
+	<!-- Name of project and version, used to create filenames -->
+	<property name="Name" value="Esper"/>
+	<property name="name" value="esper"/>
+	<property name="patchlevel" value=""/>
+	<property name="fullversion" value="1.x.${patchlevel}"/>
+	<property name="fullname" value="${name}-1.x"/>
+
+	<property name="dist.dir" value=".."/>
+	<property name="lib.dir" value="lib"/>
+	<property name="src.dir" value="src/main/java"/>
+	<property name="generated.src" value="target/generated-sources/antlr"/>
+	<property name="doc.dir" value="doc"/>
+	<property name="doc.api.dir" value="${doc.dir}/api"/>
+	<property name="dist.api.dir" value="doc/javadoc/api"/>
+
+	<property name="dist_excludes" value="$target/site/**, target/*classes*/**, target/*reports*/**, eg/target/**, intellij/**, doc/reference/support/**, eg/terminalsvc/terminalsvc-ear/target/example-terminalsvc-ear-1.0/**"/>
+
+	<target name="info" description="The master build is done my Maven">
+		<echo message="Please use Maven 2 to build Esper and related components. Maven build instructions are available on the website." />
+	</target>
+
+	<target name="touch_all" description="Update timestamp all artifacts">
+		<touch>
+			<fileset dir="src">
+				<include name="**/*.java"/>
+			</fileset>
+		</touch>
+	</target>
+
+	<target name="source_zip" description="Zip up dev artifacts">
+		<echo message="Building a zip of the development artifacts" />
+		<zip zipfile="${dist.dir}/${fullname}-dev-artifacts.zip" basedir="." excludes="**/target/**, **/lib/**, **/doc/javadoc/**, **/doc/build/**, **/doc/reference/support/**,**/doc/reference/build/**, **/*.jar, **/*.ear, **/*.war" />
+	</target>
+	
+	<target name="dist_zip" description="Zip up distribution" depends="touch_all">
+		<echo message="Building a zip for distribution" />
+		<zip zipfile="${dist.dir}/${fullname}.zip">
+			<zipfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
+		</zip>
+	</target>
+
+	<target name="dist_tar" description="Tar up distribution" depends="touch_all">
+		<property name="tar-file" value="${dist.dir}/${fullname}.tar"/>
+		<echo message="Building a tar for distribution" />
+		<fixcrlf srcdir="eg/etc"
+		       eol="lf"
+		       eof="remove"
+		       includes="**/*.sh"/>
+		<tar longfile="gnu" tarfile="${tar-file}">
+			<tarfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="eg/etc/*.sh"/>
+		</tar>
+		<gzip zipfile="${tar-file}.gz" src="${tar-file}" />			
+	</target>
+	
+</project>
