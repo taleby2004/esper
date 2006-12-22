@@ -14,7 +14,7 @@ import java.util.Map;
 public class DataCacheLRUImpl implements DataCache
 {
     private final int cacheSize;
-    private final float hashTableLoadFactor = 0.75f;
+    private static final float hashTableLoadFactor = 0.75f;
     private final LinkedHashMap<MultiKey<Object>, List<EventBean>> cache;
 
     /**

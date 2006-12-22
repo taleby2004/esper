@@ -174,7 +174,7 @@ public class NStreamOuterQueryPlanBuilder
         }
 
         // if we are a leaf node, we are done
-        if (navigableStreams.size() == 0)
+        if (navigableStreams.isEmpty())
         {
             substreamsPerStream.put(streamNum, new int[0]);
             return;

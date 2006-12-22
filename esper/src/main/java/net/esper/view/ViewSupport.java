@@ -69,7 +69,7 @@ public abstract class ViewSupport implements View
 
     public final boolean hasViews()
     {
-        return (children.size() > 0);
+        return (!children.isEmpty());
     }
 
     /**
@@ -215,7 +215,7 @@ public abstract class ViewSupport implements View
         {
             for (View child : parentViewable.getViews())
             {
-                log.debug(".dumpChildViews " + prefix + " " + child.toString());
+                log.debug(".dumpChildViews " + prefix + ' ' + child.toString());
                 dumpChildViews(prefix + "  ", child);
             }
         }

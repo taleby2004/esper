@@ -122,21 +122,21 @@ public class ExprMinMaxRowNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(minMaxTypeEnum.getExpressionText());
-        buffer.append("(");
+        buffer.append('(');
 
         buffer.append(this.getChildNodes().get(0).toExpressionString());
-        buffer.append(",");
+        buffer.append(',');
         buffer.append(this.getChildNodes().get(1).toExpressionString());
 
         for (int i = 2; i < this.getChildNodes().size(); i++)
         {
-            buffer.append(",");
+            buffer.append(',');
             buffer.append(this.getChildNodes().get(i).toExpressionString());
         }
 
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

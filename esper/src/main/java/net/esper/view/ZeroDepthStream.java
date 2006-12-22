@@ -81,7 +81,7 @@ public final class ZeroDepthStream implements EventStream
 
     public final boolean hasViews()
     {
-        return (children.size() > 0);
+        return (!children.isEmpty());
     }
 
     private static final Log log = LogFactory.getLog(ZeroDepthStream.class);

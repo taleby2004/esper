@@ -86,13 +86,13 @@ public final class MultidimCubeImpl<V> implements MultidimCube<V>
         }
 
         // If members already existed, disallow setting members
-        if (memberKeys.size() != 0)
+        if (!memberKeys.isEmpty())
         {
             throw new IllegalArgumentException("Cannot add dimension members - dimension members already existed, merge not supported");
         }
 
         // If ordinals (cells) already existed, disallow setting members
-        if (ordinals.size() != 0)
+        if (!ordinals.isEmpty())
         {
             throw new IllegalArgumentException("Cannot add dimension members - cells already existed, merge not supported");
         }

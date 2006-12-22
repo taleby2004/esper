@@ -91,7 +91,7 @@ public class SortedDoubleVector
     {
         if (values.size() > 2)
         {
-            int startIndex = values.size() / 2;
+            int startIndex = values.size() >> 1;
             double startValue = values.get(startIndex);
             int insertAt = -1;
 
@@ -151,52 +151,55 @@ public class SortedDoubleVector
 
     private int findInsertIndex(int lowerBound, int upperBound, double value)
     {
-        if (upperBound == lowerBound)
+        while (true)
         {
-            double valueLowerBound = values.get(lowerBound);
-            if (value <= valueLowerBound)
+            if (upperBound == lowerBound)
             {
-                return lowerBound;
+                double valueLowerBound = values.get(lowerBound);
+                if (value <= valueLowerBound)
+                {
+                    return lowerBound;
+                }
+                else
+                {
+                    return lowerBound + 1;
+                }
+            }
+
+            if (upperBound - lowerBound == 1)
+            {
+                double valueLowerBound = values.get(lowerBound);
+                if (value <= valueLowerBound)
+                {
+                    return lowerBound;
+                }
+
+                double valueUpperBound = values.get(upperBound);
+                if (value > valueUpperBound)
+                {
+                    return upperBound + 1;
+                }
+
+                return upperBound;
+            }
+
+            int nextMiddle = lowerBound + ((upperBound - lowerBound) >> 1);
+            double valueAtMiddle = values.get(nextMiddle);
+
+            if (value < valueAtMiddle)
+            {
+                // find in lower half
+                upperBound = nextMiddle - 1;
+            }
+            else if (value > valueAtMiddle)
+            {
+                // find in upper half
+                lowerBound = nextMiddle;
             }
             else
             {
-                return lowerBound + 1;
+                return nextMiddle;
             }
-        }
-
-        if (upperBound - lowerBound == 1)
-        {
-            double valueLowerBound = values.get(lowerBound);
-            if (value <= valueLowerBound)
-            {
-                return lowerBound;
-            }
-
-            double valueUpperBound = values.get(upperBound);
-            if (value > valueUpperBound)
-            {
-                return upperBound + 1;
-            }
-
-            return upperBound;
-        }
-
-        int nextMiddle = lowerBound + (upperBound - lowerBound) / 2;
-        double valueAtMiddle = values.get(nextMiddle);
-
-        if (value < valueAtMiddle)
-        {
-            // find in lower half
-            return findInsertIndex(lowerBound, nextMiddle - 1, value);
-        }
-        else if (value > valueAtMiddle)
-        {
-            // find in upper half
-            return findInsertIndex(nextMiddle, upperBound, value);
-        }
-        else
-        {
-            return nextMiddle;
         }
     }
 }

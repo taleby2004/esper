@@ -90,9 +90,10 @@ public final class MatchedEventMap
         return true;
     }
 
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public String toString()
     {
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
         int count = 0;
 
         for (Map.Entry<String, EventBean> entry : events.entrySet())

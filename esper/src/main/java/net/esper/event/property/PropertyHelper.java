@@ -39,7 +39,7 @@ public class PropertyHelper
         }
 
         // Construct the appropriate property getter CGLib or reflect
-        EventPropertyGetter getter = null;
+        EventPropertyGetter getter;
         if (fastMethod != null)
         {
             getter = new CGLibPropertyGetter(fastMethod);

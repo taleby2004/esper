@@ -178,7 +178,7 @@ public class ConfigurationDBRef
     /**
      * Supplies connectioon-level settings for a given database name.
      */
-    public class ConnectionSettings
+    public static class ConnectionSettings
     {
         private Boolean autoCommit;
         private String catalog;
@@ -281,7 +281,7 @@ public class ConfigurationDBRef
     /**
      * Connection factory settings for using a DataSource.
      */
-    public class DataSourceConnection implements ConnectionFactoryDesc
+    public static class DataSourceConnection implements ConnectionFactoryDesc
     {
         private String contextLookupName;
         private Properties envProperties;
@@ -319,7 +319,7 @@ public class ConfigurationDBRef
     /**
      * Connection factory settings for using a DriverManager.
      */
-    public class DriverManagerConnection implements ConnectionFactoryDesc
+    public static class DriverManagerConnection implements ConnectionFactoryDesc
     {
         private String className;
         private String url;
@@ -428,7 +428,7 @@ public class ConfigurationDBRef
     /**
      * LRU cache settings.
      */
-    public class LRUCacheDesc implements DataCacheDesc
+    public static class LRUCacheDesc implements DataCacheDesc
     {
         private int size;
 
@@ -459,7 +459,7 @@ public class ConfigurationDBRef
     /**
      * Expiring cache settings.
      */
-    public class ExpiryTimeCacheDesc implements DataCacheDesc
+    public static class ExpiryTimeCacheDesc implements DataCacheDesc
     {
         private double maxAgeSeconds;
         private double purgeIntervalSeconds;

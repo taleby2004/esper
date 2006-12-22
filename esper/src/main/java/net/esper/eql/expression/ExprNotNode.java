@@ -40,10 +40,10 @@ public class ExprNotNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("NOT(");
         buffer.append(this.getChildNodes().get(0).toExpressionString());
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

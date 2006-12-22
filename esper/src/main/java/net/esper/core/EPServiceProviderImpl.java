@@ -249,7 +249,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      * Snapshot of Configuration is held for re-initializing engine state
      * from prior configuration values that may have been muted.
      */
-    public final class ConfigurationSnapshot
+    public static final class ConfigurationSnapshot
     {
         private Map<String, String> javaClassAliases = new HashMap<String, String>();
         private Map<String, ConfigurationEventTypeXMLDOM> xmlDOMAliases = new HashMap<String, ConfigurationEventTypeXMLDOM>();
@@ -330,7 +330,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         }
     }
 
-    private class EPServiceEngine
+    private static class EPServiceEngine
     {
         private EPServicesContext services;
         private EPRuntimeImpl runtime;

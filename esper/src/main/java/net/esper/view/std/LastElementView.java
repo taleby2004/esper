@@ -72,7 +72,7 @@ public class LastElementView extends ViewSupport
         // If there are child views, fire update method
         if (this.hasViews())
         {
-            if (oldDataToPost.size() > 0)
+            if (!oldDataToPost.isEmpty())
             {
                 updateChildren(newData, oldDataToPost.toArray(new EventBean[0]));
             }

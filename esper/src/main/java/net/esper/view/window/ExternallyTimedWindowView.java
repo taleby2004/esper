@@ -136,7 +136,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
         }
 
         EventBean[] oldDataUpdate = null;
-        if ((expired != null) && (expired.size() > 0))
+        if ((expired != null) && (!expired.isEmpty()))
         {
             oldDataUpdate = expired.toArray(new EventBean[0]);
         }

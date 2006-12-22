@@ -107,14 +107,14 @@ public class ExprBitWiseNode extends ExprNode {
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("(");
+        StringBuilder buffer = new StringBuilder();
+        buffer.append('(');
 
         buffer.append(getChildNodes().get(0).toExpressionString());
         buffer.append(_bitWiseOpEnum.getComputeDescription());
         buffer.append(getChildNodes().get(1).toExpressionString());
 
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

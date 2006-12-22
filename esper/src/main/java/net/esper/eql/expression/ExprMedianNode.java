@@ -103,7 +103,7 @@ public class ExprMedianNode extends ExprAggregateNode
                 return vector.getValue(0);
             }
 
-            int middle = vector.size() / 2;
+            int middle = vector.size() >> 1;
             if (vector.size() % 2 == 0)
             {
                 return (vector.getValue(middle - 1) + vector.getValue(middle)) / 2;

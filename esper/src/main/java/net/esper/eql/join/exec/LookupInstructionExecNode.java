@@ -14,6 +14,7 @@ import java.util.Arrays;
  * Execution for a set of lookup instructions and for a set of result assemble instructions to perform
  * joins and construct a complex result.
  */
+@SuppressWarnings({"StringContatenationInLoop"})
 public class LookupInstructionExecNode extends ExecNode
 {
     private final int rootStream;
@@ -164,7 +165,7 @@ public class LookupInstructionExecNode extends ExecNode
     /**
      * Receives result rows posted by result set assembly nodes.
      */
-    public class MyResultAssembler implements ResultAssembler
+    public static class MyResultAssembler implements ResultAssembler
     {
         private final int rootStream;
 

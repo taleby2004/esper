@@ -31,7 +31,7 @@ public final class EvalObserverNode extends EvalNode
             log.debug(".newState");
         }
 
-        if (getChildNodes().size() != 0)
+        if (!getChildNodes().isEmpty())
         {
             throw new IllegalStateException("Expected number of child nodes incorrect, expected no child nodes, found "
                     + getChildNodes().size());

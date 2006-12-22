@@ -105,11 +105,11 @@ public class ExprCaseNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("case");
         if (isCase2)
         {
-            buffer.append(" ");
+            buffer.append(' ');
             buffer.append(this.getChildNodes().getFirst().toExpressionString());
         }
         for (UniformPair<ExprNode> p : whenThenNodeList)
@@ -140,11 +140,11 @@ public class ExprCaseNode extends ExprNode
         }
 
         whenThenNodeList = new LinkedList<UniformPair<ExprNode>>();
-        int numWhenThen = children.length / 2;
+        int numWhenThen = children.length >> 1;
         for (int i = 0; i < numWhenThen; i++)
         {
-            ExprNode whenExpr = children[i * 2];
-            ExprNode thenExpr = children[i * 2 + 1];
+            ExprNode whenExpr = children[(i << 1)];
+            ExprNode thenExpr = children[(i << 1) + 1];
             if (whenExpr.getType() != Boolean.class)
             {
                 throw new ExprValidationException("Case node 'when' expressions must return a boolean value");
@@ -157,6 +157,7 @@ public class ExprCaseNode extends ExprNode
         }
     }
 
+    @SuppressWarnings({"MultiplyOrDivideByPowerOfTwo"})
     private void validateCaseTwo() throws ExprValidationException
     {
         // Case 2 expression example:

@@ -178,7 +178,7 @@ class ConfigurationParser {
                 else
                 {
                     throw new IllegalArgumentException("Invalid xpath property type for property '" +
-                        propertyName + "' and type '" + propertyType + "'");
+                        propertyName + "' and type '" + propertyType + '\'');
                 }
                 xmlDOMEventTypeDesc.addXPathProperty(propertyName, xPath, xpathConstantType);
             }
@@ -235,6 +235,7 @@ class ConfigurationParser {
         }
     }
 
+    @SuppressWarnings({"ObjectAllocationInLoop"})
     private static void handleDatabaseRefs(Configuration configuration, Element parentNode)
     {
         NodeList dbRefNodes = parentNode.getElementsByTagName("database-reference");

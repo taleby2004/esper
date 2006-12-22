@@ -167,7 +167,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      */
     protected static Set<MultiKey<EventBean>> applyOutputLimit(Set<MultiKey<EventBean>> eventSet, boolean isOutputLimitLastOnly)
     {
-        if(isOutputLimitLastOnly && eventSet != null && eventSet.size() > 0)
+        if(isOutputLimitLastOnly && eventSet != null && !eventSet.isEmpty())
         {
             Object[] events = eventSet.toArray();
             Set<MultiKey<EventBean>> resultSet = new LinkedHashSet<MultiKey<EventBean>>();
@@ -284,7 +284,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
             }
         }
 
-        if (result.size() > 0)
+        if (!result.isEmpty())
         {
             if(orderByProcessor != null)
             {
@@ -347,7 +347,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
             }
         }
 
-        if (result.size() > 0)
+        if (!result.isEmpty())
         {
             if(orderByProcessor != null)
             {

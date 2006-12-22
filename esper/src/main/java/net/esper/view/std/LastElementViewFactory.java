@@ -13,7 +13,7 @@ public class LastElementViewFactory implements ViewFactory
     public void setViewParameters(List<Object> viewParameters) throws ViewParameterException
     {
         String errorMessage = "'Last element' view does not take any parameters";
-        if (viewParameters.size() != 0)
+        if (!viewParameters.isEmpty())
         {
             throw new ViewParameterException(errorMessage);
         }

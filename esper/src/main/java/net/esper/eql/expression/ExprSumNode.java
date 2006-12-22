@@ -62,7 +62,7 @@ public class ExprSumNode extends ExprAggregateNode
      * @param type is the class for which to generate an aggregator for
      * @return aggregator for the type
      */
-    private Aggregator getSumComputer(Class type)
+    private static Aggregator getSumComputer(Class type)
     {
         if ((type == Long.class) || (type == long.class))
         {

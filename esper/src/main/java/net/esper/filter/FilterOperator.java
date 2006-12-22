@@ -63,9 +63,34 @@ public enum FilterOperator
     RANGE_HALF_CLOSED,
 
     /**
+     * Inverted-Range contains neither endpoint, i.e. (a,b)
+     */
+    NOT_RANGE_OPEN,
+
+    /**
+     * Inverted-Range contains low and high endpoint, i.e. [a,b]
+     */
+    NOT_RANGE_CLOSED,
+
+    /**
+     * Inverted-Range includes low endpoint but not high endpoint, i.e. [a,b)
+     */
+    NOT_RANGE_HALF_OPEN,
+
+    /**
+     * Inverted-Range includes high endpoint but not low endpoint, i.e. (a,b]
+     */
+    NOT_RANGE_HALF_CLOSED,
+
+    /**
      * List of values using the 'in' operator
      */
-    IN_LIST_OF_VALUES;
+    IN_LIST_OF_VALUES,
+
+    /**
+     * Non-in list of values using the 'not in' operator
+     */
+    NOT_IN_LIST_OF_VALUES;
 
     private final static String EQUAL_OP = "=";
     private final static String NOT_EQUAL_OP = "!=";
@@ -75,7 +100,7 @@ public enum FilterOperator
     private final static String GREATER_EQUAL_OP = ">=";
 
     /**
-     * Returns true for range operator, false if not a range operator.
+     * Returns true for all range operators, false if not a range operator.
      * @return true for ranges, false for anyting else
      */
     public boolean isRangeOperator()
@@ -84,6 +109,22 @@ public enum FilterOperator
             (this == FilterOperator.RANGE_OPEN) ||
             (this == FilterOperator.RANGE_HALF_OPEN) ||
             (this == FilterOperator.RANGE_HALF_CLOSED))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true for inverted range operators, false if not an inverted range operator.
+     * @return true for inverted ranges, false for anyting else
+     */
+    public boolean isInvertedRangeOperator()
+    {
+        if ((this == FilterOperator.NOT_RANGE_CLOSED) ||
+            (this == FilterOperator.NOT_RANGE_OPEN) ||
+            (this == FilterOperator.NOT_RANGE_HALF_OPEN) ||
+            (this == FilterOperator.NOT_RANGE_HALF_CLOSED))
         {
             return true;
         }
@@ -150,22 +191,52 @@ public enum FilterOperator
      * Parse the range operator from booleans describing whether the start or end values are exclusive.
      * @param isInclusiveFirst true if low endpoint is inclusive, false if not
      * @param isInclusiveLast true if high endpoint is inclusive, false if not
+     * @param isNot is true if this is an inverted range, or false if a regular range
      * @return FilterOperator for the combination inclusive or exclusive
      */
-    public static FilterOperator parseRangeOperator(boolean isInclusiveFirst, boolean isInclusiveLast)
+    public static FilterOperator parseRangeOperator(boolean isInclusiveFirst, boolean isInclusiveLast, boolean isNot)
     {
         if (isInclusiveFirst && isInclusiveLast)
         {
-            return FilterOperator.RANGE_CLOSED;
+            if (isNot)
+            {
+                return FilterOperator.NOT_RANGE_CLOSED;
+            }
+            else
+            {
+                return FilterOperator.RANGE_CLOSED;
+            }
         }
         if (isInclusiveFirst && !isInclusiveLast)
         {
-            return FilterOperator.RANGE_HALF_OPEN;
+            if (isNot)
+            {
+                return FilterOperator.NOT_RANGE_HALF_OPEN;
+            }
+            else
+            {
+                return FilterOperator.RANGE_HALF_OPEN;
+            }
         }
         if (isInclusiveLast)
         {
-            return FilterOperator.RANGE_HALF_CLOSED;
+            if (isNot)
+            {
+                return FilterOperator.NOT_RANGE_HALF_CLOSED;
+            }
+            else
+            {
+                return FilterOperator.RANGE_HALF_CLOSED;
+            }
         }
-        return FilterOperator.RANGE_OPEN;
+        if (isNot)
+        {
+            return FilterOperator.NOT_RANGE_OPEN;    
+        }
+        else
+        {
+            return FilterOperator.RANGE_OPEN;
+        }
+
     }
 }

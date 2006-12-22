@@ -61,7 +61,7 @@ public abstract class EPStatementSupport implements EPListenable
         }
 
         listeners.remove(listener);
-        if (listeners.size() == 0)
+        if (listeners.isEmpty())
         {
             listenerStop();
         }

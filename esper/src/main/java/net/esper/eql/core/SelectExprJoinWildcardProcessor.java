@@ -1,7 +1,6 @@
 package net.esper.eql.core;
 
 import net.esper.event.*;
-import net.esper.util.AssertionFacility;
 
 import java.util.*;
 
@@ -44,7 +43,10 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         Map<String, Object> tuple = new HashMap<String, Object>();
         for (int i = 0; i < streamNames.length; i++)
         {
-            AssertionFacility.assertTrue(streamNames[i] != null, "Event name for stream " + i + " is null");
+            if (streamNames[i] == null)
+            {
+                throw new IllegalStateException("Event name for stream " + i + " is null");
+            }
 
             if (eventsPerStream[i] != null)
             {

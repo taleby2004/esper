@@ -32,19 +32,19 @@ public class RangeValueEventProp implements FilterSpecParamRangeValue
         if (type == null)
         {
             throw new IllegalStateException("Matching event type named " +
-                    "'" + resultEventAsName + "' not found in event result set");
+                    '\'' + resultEventAsName + "' not found in event result set");
         }
 
         Class propertyClass = type.getPropertyType(resultEventProperty);
         if (propertyClass == null)
         {
             throw new IllegalStateException("Property " + resultEventProperty + " of event type " +
-                    "'" + resultEventAsName + "' not found");
+                    '\'' + resultEventAsName + "' not found");
         }
         if (!JavaClassHelper.isNumeric(propertyClass))
         {
             throw new IllegalStateException("Property " + resultEventProperty + " of event type " +
-                    "'" + resultEventAsName + "' is not numeric");
+                    '\'' + resultEventAsName + "' is not numeric");
         }
     }
 
@@ -54,21 +54,21 @@ public class RangeValueEventProp implements FilterSpecParamRangeValue
         if (event == null)
         {
             throw new IllegalStateException("Matching event named " +
-                    "'" + resultEventAsName + "' not found in event result set");
+                    '\'' + resultEventAsName + "' not found in event result set");
         }
 
         Number value = (Number) event.get(resultEventProperty);
         if (value == null)
         {
             throw new IllegalStateException("Event property named " +
-                    "'" + resultEventAsName + "." + resultEventProperty + "' returned null value");            
+                    '\'' + resultEventAsName + '.' + resultEventProperty + "' returned null value");
         }
         return value.doubleValue();
     }
 
     public final String toString()
     {
-        return "resultEventProp=" + resultEventAsName + "." + resultEventProperty;
+        return "resultEventProp=" + resultEventAsName + '.' + resultEventProperty;
     }
 
     public boolean equals(Object obj)

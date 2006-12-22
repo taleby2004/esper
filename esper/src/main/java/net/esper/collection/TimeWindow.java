@@ -41,7 +41,7 @@ public final class TimeWindow implements Iterable
         }
 
         // Empty window
-        if (window.size() == 0)
+        if (window.isEmpty())
         {
             LinkedList<EventBean> listOfBeans = new LinkedList<EventBean>();
             listOfBeans.add(bean);
@@ -74,7 +74,7 @@ public final class TimeWindow implements Iterable
      */
     public final List<EventBean> expireEvents(long expireBefore)
     {
-        if (window.size() == 0)
+        if (window.isEmpty())
         {
             return null;
         }
@@ -95,7 +95,7 @@ public final class TimeWindow implements Iterable
             resultBeans.addAll(pair.getSecond());
             window.removeFirst();
 
-            if (window.size() == 0)
+            if (window.isEmpty())
             {
                 break;
             }
@@ -104,7 +104,7 @@ public final class TimeWindow implements Iterable
         }
         while (pair.getFirst() < expireBefore);
 
-        if (window.size() == 0)
+        if (window.isEmpty())
         {
             oldestTimestamp = null;
         }
@@ -141,6 +141,6 @@ public final class TimeWindow implements Iterable
      */
     public final boolean isEmpty()
     {
-        return window.size() == 0;
+        return window.isEmpty();
     }
 }

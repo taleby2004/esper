@@ -42,7 +42,7 @@ public final class FilterServiceImpl implements FilterService
         List<FilterCallback> matches = new LinkedList<FilterCallback>();
         eventTypeIndex.matchEvent(eventBean, matches);
 
-        if (matches.size() == 0)
+        if (matches.isEmpty())
         {
             return;
         }

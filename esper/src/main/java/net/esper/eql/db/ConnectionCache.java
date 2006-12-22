@@ -56,7 +56,7 @@ public abstract class ConnectionCache
      * Close resources.
      * @param pair is the resources to close.
      */
-    protected void close(Pair<Connection, PreparedStatement> pair)
+    protected static void close(Pair<Connection, PreparedStatement> pair)
     {
         log.info(".close Closing statement and connection");
         try
@@ -107,7 +107,7 @@ public abstract class ConnectionCache
         }
         catch (SQLException ex)
         {
-            throw new EPException("Error preparing statement '" + sql + "'", ex);
+            throw new EPException("Error preparing statement '" + sql + '\'', ex);
         }
 
         return new Pair<Connection, PreparedStatement>(connection, preparedStatement);

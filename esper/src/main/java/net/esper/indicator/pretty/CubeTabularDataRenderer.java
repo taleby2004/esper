@@ -73,7 +73,7 @@ public final class CubeTabularDataRenderer
             {
                 TabularData tableData = renderTable(cube, ordinalOffset * i);
                 String renderedMember = DimensionMemberRenderHelper.renderMember(dimension[3].getMembers()[i]);
-                String renderedTable = TABLE_NAME + " " + i + " : " + renderedMember;
+                String renderedTable = TABLE_NAME + ' ' + i + " : " + renderedMember;
 
                 renderedCube.put(renderedTable, tableData);
             }
@@ -243,14 +243,14 @@ public final class CubeTabularDataRenderer
         columnNameList.add(ROW_INDEX_COLUMN_NAME);
 
         // Add a column for the row key
-        columnNameList.add(renderColumnId(1) + " " + KEY_COLUMN_NAME);
+        columnNameList.add(renderColumnId(1) + ' ' + KEY_COLUMN_NAME);
 
         // Add a column for each member of the column dimension
         for (int memberIndex = 0; memberIndex < columnDimension.getMembers().length; memberIndex++)
         {
             DimensionMember dimensionMember = columnDimension.getMembers()[memberIndex];
             int columnIndex = memberIndex + 2;
-            String rendered = renderColumnId(columnIndex) + " " + DimensionMemberRenderHelper.renderMember(dimensionMember);
+            String rendered = renderColumnId(columnIndex) + ' ' + DimensionMemberRenderHelper.renderMember(dimensionMember);
             columnNameList.add(rendered);
         }
 
@@ -283,7 +283,7 @@ public final class CubeTabularDataRenderer
 
     private static String renderColumnId(int columnId)
     {
-        String result = "(" + columnId + ")";
+        String result = "(" + columnId + ')';
         return result;
     }
 

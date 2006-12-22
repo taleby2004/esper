@@ -23,9 +23,9 @@ public class CartesianUtil
                                            List<EventBean[]> resultList)
     {
 
-        if ((streamTwo == null) || (streamTwo.size() == 0))
+        if ((streamTwo == null) || (streamTwo.isEmpty()))
         {
-            if ((streamOne == null) || (streamOne.size() == 0))
+            if ((streamOne == null) || (streamOne.isEmpty()))
             {
                 return;
             }
@@ -33,7 +33,7 @@ public class CartesianUtil
             return;
         }
 
-        if ((streamOne == null) || (streamOne.size() == 0))
+        if ((streamOne == null) || (streamOne.isEmpty()))
         {
             resultList.addAll(streamTwo);
             return;

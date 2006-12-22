@@ -83,7 +83,7 @@ public abstract class BaseAssemblyNode implements ResultAssembler
      */
     public void addChild(BaseAssemblyNode childNode)
     {
-        childNode.setParentAssembler(this);
+        childNode.parentNode = this;
         childNodes.add(childNode);
     }
 
@@ -176,7 +176,7 @@ public abstract class BaseAssemblyNode implements ResultAssembler
         recursiveAggregateEnter(topNode, nodesPerLevel, 1);
 
         // Done if none found
-        if (nodesPerLevel.size() == 0)
+        if (nodesPerLevel.isEmpty())
         {
             throw new IllegalStateException("Empty collection for nodes per level");
         }
@@ -199,7 +199,7 @@ public abstract class BaseAssemblyNode implements ResultAssembler
     private static void recursiveAggregateEnter(BaseAssemblyNode currentNode, Map<Integer, List<BaseAssemblyNode>> nodesPerLevel, int currentLevel)
     {
         // ask all child nodes to enter themselves
-        for (BaseAssemblyNode node : currentNode.getChildNodes())
+        for (BaseAssemblyNode node : currentNode.childNodes)
         {
             recursiveAggregateEnter(node, nodesPerLevel, currentLevel + 1);
         }

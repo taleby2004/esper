@@ -70,11 +70,11 @@ public class SchemaXMLPropertyParser implements EqlTokenTypes
             prefix = "";
         }
         else {
-            prefix = prefix + ":";
+            prefix = prefix + ':';
         }
 
-        StringBuffer xPathBuf = new StringBuffer();
-        xPathBuf.append("/");
+        StringBuilder xPathBuf = new StringBuilder();
+        xPathBuf.append('/');
         xPathBuf.append(prefix);
         xPathBuf.append(rootElementName);
 
@@ -150,7 +150,7 @@ public class SchemaXMLPropertyParser implements EqlTokenTypes
         if (prefix == null)
             prefix = "";
         else
-            prefix = prefix + ":";
+            prefix = prefix + ':';
         switch (child.getType())
         {
             case EVENT_PROP_SIMPLE:
@@ -190,7 +190,7 @@ public class SchemaXMLPropertyParser implements EqlTokenTypes
             prefix = "";
         }
         else {
-            prefix = prefix + ":";
+            prefix = prefix + ':';
         }
 
         switch (child.getType())
@@ -199,14 +199,14 @@ public class SchemaXMLPropertyParser implements EqlTokenTypes
                 if ((particle.getMaxOccurs() > 1) || particle.getMaxOccursUnbounded()) {
                     throw new PropertyAccessException("Simple property not allowed in repeating elements");
                 }
-                return new Pair<String, QName>("/" + prefix + child.getFirstChild().getText(), type);
+                return new Pair<String, QName>('/' + prefix + child.getFirstChild().getText(), type);
 
             case EVENT_PROP_MAPPED:
                 if (!((particle.getMaxOccurs() > 1) || (particle.getMaxOccursUnbounded()))) {
                     throw new PropertyAccessException("Element " + child.getFirstChild().getText() + " is not a collection, cannot be used as mapped property");
                 }
                 String key = StringValue.parseString(child.getFirstChild().getNextSibling().getText());
-                return new Pair<String, QName>("/" + prefix + child.getFirstChild().getText() + "[@id='" + key + "']", type);
+                return new Pair<String, QName>('/' + prefix + child.getFirstChild().getText() + "[@id='" + key + "']", type);
 
             case EVENT_PROP_INDEXED:
                 if (!((particle.getMaxOccurs() > 1) || (particle.getMaxOccursUnbounded()))) {
@@ -214,7 +214,7 @@ public class SchemaXMLPropertyParser implements EqlTokenTypes
                 }
                 int index = IntValue.parseString(child.getFirstChild().getNextSibling().getText());
                 int xPathPosition = index + 1;
-                return new Pair<String, QName>("/" + prefix + child.getFirstChild().getText() + "[position() = " + xPathPosition + "]", type);
+                return new Pair<String, QName>('/' + prefix + child.getFirstChild().getText() + "[position() = " + xPathPosition + ']', type);
 
             default:
                 throw new IllegalStateException("Event property AST node not recognized, type=" + child.getType());

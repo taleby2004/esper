@@ -183,7 +183,7 @@ public class ExprIdentNode extends ExprNode
         }
 
         // try to resolve the property name to a nested property 's0.p0'
-        String propertyNameCandidate = streamOrPropertyName + "." + unresolvedPropertyName;
+        String propertyNameCandidate = streamOrPropertyName + '.' + unresolvedPropertyName;
         try
         {
             propertyInfo = streamTypeService.resolveByPropertyName(propertyNameCandidate);
@@ -220,10 +220,10 @@ public class ExprIdentNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         if (streamOrPropertyName != null)
         {
-            buffer.append(streamOrPropertyName + ".");
+            buffer.append(streamOrPropertyName).append('.');
         }
         buffer.append(unresolvedPropertyName);
 

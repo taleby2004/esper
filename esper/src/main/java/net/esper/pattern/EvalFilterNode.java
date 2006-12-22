@@ -21,7 +21,7 @@ public final class EvalFilterNode extends EvalNode
             log.debug(".newState");
         }
 
-        if (getChildNodes().size() != 0)
+        if (!getChildNodes().isEmpty())
         {
             throw new IllegalStateException("Expected number of child nodes incorrect, expected no child nodes, found "
                     + getChildNodes().size());
@@ -61,9 +61,10 @@ public final class EvalFilterNode extends EvalNode
         return eventAsName;
     }
 
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public final String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("EvalFilterNode spec=" + this.filterSpec.toString());
         buffer.append(" eventAsName=" + this.eventAsName);
         return buffer.toString();

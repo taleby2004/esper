@@ -154,7 +154,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         }
 
         // If we have an empty window about to be filled for the first time, schedule a callback
-        if (currentBatch.size() == 0)
+        if (currentBatch.isEmpty())
         {
             if (currentReferencePoint == null)
             {
@@ -202,11 +202,11 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
             // Convert to object arrays
             EventBean[] newData = null;
             EventBean[] oldData = null;
-            if (currentBatch.size() > 0)
+            if (!currentBatch.isEmpty())
             {
                 newData = currentBatch.toArray(new EventBean[0]);
             }
-            if ((lastBatch != null) && (lastBatch.size() > 0))
+            if ((lastBatch != null) && (!lastBatch.isEmpty()))
             {
                 oldData = lastBatch.toArray(new EventBean[0]);
             }
@@ -233,7 +233,7 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
 
         // Only if there have been any events in this or the last interval do we schedule a callback,
         // such as to not waste resources when no events arrive.
-        if ((currentBatch.size() > 0) || ((lastBatch != null) && (lastBatch.size() > 0)))
+        if ((!currentBatch.isEmpty()) || ((lastBatch != null) && (!lastBatch.isEmpty())))
         {
             scheduleCallback();
             isCallbackScheduled = true;
@@ -247,12 +247,12 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
     {
         if (lastBatch != null)
         {
-            if (lastBatch.size() != 0)
+            if (!lastBatch.isEmpty())
             {
                 return false;
             }
         }
-        return currentBatch.size() == 0;
+        return currentBatch.isEmpty();
     }
 
     public final Iterator<EventBean> iterator()

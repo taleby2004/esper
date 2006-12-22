@@ -69,7 +69,7 @@ public class SortedRefCountedSet<K>
      */
     public K maxValue()
     {
-        if (refSet.size() == 0)
+        if (refSet.isEmpty())
         {
             return null;
         }
@@ -82,7 +82,7 @@ public class SortedRefCountedSet<K>
      */
     public K minValue()
     {
-        if (refSet.size() == 0)
+        if (refSet.isEmpty())
         {
             return null;
         }

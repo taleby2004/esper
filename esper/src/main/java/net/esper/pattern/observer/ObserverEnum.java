@@ -63,7 +63,7 @@ public enum ObserverEnum
     {
         for (ObserverEnum observerEnum : ObserverEnum.values())
         {
-            if ((observerEnum.getNamespace().equals(namespace)) && (observerEnum.getName().equals(name)))
+            if ((observerEnum.namespace.equals(namespace)) && (observerEnum.name.equals(name)))
             {
                 return observerEnum;
             }

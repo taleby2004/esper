@@ -151,7 +151,7 @@ public class ConfigurationEventTypeLegacy
     /**
      * Encapsulates information about an accessor field backing a named event property.
      */
-    public class LegacyFieldPropDesc
+    public static class LegacyFieldPropDesc
     {
         private String name;
         private String accessorFieldName;
@@ -189,7 +189,7 @@ public class ConfigurationEventTypeLegacy
     /**
      * Encapsulates information about an accessor method backing a named event property.
      */
-    public class LegacyMethodPropDesc
+    public static class LegacyMethodPropDesc
     {
         private String name;
         private String accessorMethodName;

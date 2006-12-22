@@ -1,9 +1,8 @@
 package net.esper.regression.adapter;
 
-import net.esper.client.EPServiceProvider;
-import net.esper.client.EPServiceProviderManager;
-import net.esper.client.Configuration;
-import net.esper.client.EPStatement;
+import net.esper.client.*;
+import net.esper.client.time.TimerControlEvent;
+import net.esper.client.time.CurrentTimeEvent;
 import net.esper.adapter.AdapterInputSource;
 import net.esper.adapter.InputAdapter;
 import net.esper.adapter.AdapterCoordinatorImpl;
@@ -154,29 +153,54 @@ public class TestCSVAdapterUseCases extends TestCase
 
         epService = EPServiceProviderManager.getProvider("testCoordinated", config);
         epService.initialize();
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
-        AdapterInputSource sourceOne = new AdapterInputSource(CSV_FILENAME_TIMESTAMPED_PRICES);
-        CSVInputAdapterSpec inputOneSpec = new CSVInputAdapterSpec(sourceOne, "PriceEvent");
-        inputOneSpec.setTimestampColumn("timestamp");
-        inputOneSpec.setPropertyTypes(priceProps);
-        CSVInputAdapter inputOne = new CSVInputAdapter(inputOneSpec);
+        AdapterInputSource sourcePrices = new AdapterInputSource(CSV_FILENAME_TIMESTAMPED_PRICES);
+        CSVInputAdapterSpec inputPricesSpec = new CSVInputAdapterSpec(sourcePrices, "PriceEvent");
+        inputPricesSpec.setTimestampColumn("timestamp");
+        inputPricesSpec.setPropertyTypes(priceProps);
+        CSVInputAdapter inputPrices = new CSVInputAdapter(inputPricesSpec);
 
-        AdapterInputSource sourceTwo = new AdapterInputSource(CSV_FILENAME_TIMESTAMPED_TRADES);
-        CSVInputAdapterSpec inputTwoSpec = new CSVInputAdapterSpec(sourceTwo, "TradeEvent");
-        inputTwoSpec.setTimestampColumn("timestamp");
-        inputTwoSpec.setPropertyTypes(tradeProps);
-        CSVInputAdapter inputTwo = new CSVInputAdapter(inputTwoSpec);
+        AdapterInputSource sourceTrades = new AdapterInputSource(CSV_FILENAME_TIMESTAMPED_TRADES);
+        CSVInputAdapterSpec inputTradesSpec = new CSVInputAdapterSpec(sourceTrades, "TradeEvent");
+        inputTradesSpec.setTimestampColumn("timestamp");
+        inputTradesSpec.setPropertyTypes(tradeProps);
+        CSVInputAdapter inputTrades = new CSVInputAdapter(inputTradesSpec);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, notional from TradeEvent.win:length(100)");
-        SupportUpdateListener listener = new SupportUpdateListener();
-        stmt.addListener(listener);
+        EPStatement stmtPrices = epService.getEPAdministrator().createEQL("select symbol, price from PriceEvent.win:length(100)");
+        SupportUpdateListener listenerPrice = new SupportUpdateListener();
+        stmtPrices.addListener(listenerPrice);
+        EPStatement stmtTrade = epService.getEPAdministrator().createEQL("select symbol, notional from TradeEvent.win:length(100)");
+        SupportUpdateListener listenerTrade = new SupportUpdateListener();
+        stmtTrade.addListener(listenerTrade);
 
         AdapterCoordinator coordinator = new AdapterCoordinatorImpl(epService, true);
-        coordinator.coordinate(inputOne);
-        coordinator.coordinate(inputTwo);
+        coordinator.coordinate(inputPrices);
+        coordinator.coordinate(inputTrades);
         coordinator.start();
 
-        assertEquals(1, listener.getNewDataList().size());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(400));
+        assertFalse(listenerTrade.isInvoked());
+        assertFalse(listenerPrice.isInvoked());
+
+        // invoke read of events at 500 (see CSV)
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+        assertEquals(1, listenerTrade.getNewDataList().size());
+        assertEquals(1, listenerPrice.getNewDataList().size());
+        listenerTrade.reset(); listenerPrice.reset();
+
+        // invoke read of price events at 1500 (see CSV)
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
+        assertEquals(0, listenerTrade.getNewDataList().size());
+        assertEquals(1, listenerPrice.getNewDataList().size());
+        listenerTrade.reset(); listenerPrice.reset();
+
+        // invoke read of trade events at 2500 (see CSV)
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(3000));
+        assertEquals(1, listenerTrade.getNewDataList().size());
+        assertEquals(0, listenerPrice.getNewDataList().size());
+        listenerTrade.reset(); listenerPrice.reset();
     }
 
     private Configuration makeConfig(String typeName)

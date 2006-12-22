@@ -192,7 +192,7 @@ public final class FilterParamIndexCompare extends FilterParamIndex
 
     private void updateBounds()
     {
-        if (constantsMap.size() == 0)
+        if (constantsMap.isEmpty())
         {
             lowerBounds = null;
             upperBounds = null;

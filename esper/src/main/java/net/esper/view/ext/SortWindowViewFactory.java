@@ -157,6 +157,7 @@ public class SortWindowViewFactory implements ViewFactory
         return other.isEmpty();
     }
 
+    @SuppressWarnings({"MultiplyOrDivideByPowerOfTwo"})
     private void setNamesAndIsDescendingValues(Object[] propertiesAndDirections)
     {
         if(propertiesAndDirections.length % 2 != 0)

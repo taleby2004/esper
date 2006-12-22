@@ -41,7 +41,7 @@ public class SchemaUtil {
             case XSSimpleType.PRIMITIVE_DECIMAL:
                 return XPathConstants.NUMBER;
             default:
-                throw new EPException("Unexpected schema simple type encountered '" + definition.getPrimitiveKind() + "'");
+                throw new EPException("Unexpected schema simple type encountered '" + definition.getPrimitiveKind() + '\'');
         }
     }
 
@@ -56,12 +56,12 @@ public class SchemaUtil {
     {
         XSNamedMap elements;
 
-        if ((namespace != null) && !namespace.equals(""))
+        if ((namespace != null) && namespace.length() != 0)
         {
             elements = schema.getComponentsByNamespace(XSConstants.ELEMENT_DECLARATION,namespace);
             if (elements == null)
             {
-                throw new EPException("Empty element declaration list returned by schema for namespace '" + namespace + "'");
+                throw new EPException("Empty element declaration list returned by schema for namespace '" + namespace + '\'');
             }
         }
         else
@@ -78,10 +78,10 @@ public class SchemaUtil {
             }
         }
 
-        String text = "Could not find root element declaration in schema using element name '" + elementName + "'";
+        String text = "Could not find root element declaration in schema using element name '" + elementName + '\'';
         if (namespace != null)
         {
-            text = text + " in namespace '" + namespace + "'";
+            text = text + " in namespace '" + namespace + '\'';
         }
         throw new EPException(text);
     }

@@ -111,7 +111,7 @@ public abstract class ExprAggregateNode extends ExprNode
         recursiveAggregateEnter(topNode, aggregateExprPerLevel, 1);
 
         // Done if none found
-        if (aggregateExprPerLevel.size() == 0)
+        if (aggregateExprPerLevel.isEmpty())
         {
             return;
         }
@@ -212,25 +212,25 @@ public abstract class ExprAggregateNode extends ExprNode
      */
     public final String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(getAggregationFunctionName());
-        buffer.append("(");
+        buffer.append('(');
 
         if (isDistinct)
         {
             buffer.append("distinct ");
         }
 
-        if (this.getChildNodes().size() > 0)
+        if (!this.getChildNodes().isEmpty())
         {
             buffer.append(this.getChildNodes().get(0).toExpressionString());
         }
         else
         {
-            buffer.append("*");            
+            buffer.append('*');
         }
 
-        buffer.append(")");
+        buffer.append(')');
 
         return buffer.toString();
     }

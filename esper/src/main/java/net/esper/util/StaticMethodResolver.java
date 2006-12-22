@@ -198,7 +198,7 @@ public class StaticMethodResolver
 					appendString = ", ";
 				}
 			}
-			throw new NoSuchMethodException("Unknown method " + className + "." + methodName + "(" + params + ")");
+			throw new NoSuchMethodException("Unknown method " + className + '.' + methodName + '(' + params + ')');
 		}
 	}
 	

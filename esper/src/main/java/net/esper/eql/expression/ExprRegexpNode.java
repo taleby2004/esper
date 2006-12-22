@@ -78,7 +78,7 @@ public class ExprRegexpNode extends ExprNode
             }
             catch (PatternSyntaxException ex)
             {
-                throw new EPException("Error compiling regex pattern '" + patternText + "'", ex);
+                throw new EPException("Error compiling regex pattern '" + patternText + '\'', ex);
             }
         }
         else
@@ -96,7 +96,7 @@ public class ExprRegexpNode extends ExprNode
                 }
                 catch (PatternSyntaxException ex)
                 {
-                    throw new EPException("Error compiling regex pattern '" + patternText + "'", ex);
+                    throw new EPException("Error compiling regex pattern '" + patternText + '\'', ex);
                 }
             }
         }
@@ -139,7 +139,7 @@ public class ExprRegexpNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         buffer.append(this.getChildNodes().get(0).toExpressionString());
 

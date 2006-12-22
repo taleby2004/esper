@@ -72,12 +72,12 @@ public enum ViewFieldEnum
      * Measures in an OLAP cube.
      */
     public static final String[] MULTIDIM_OLAP__MEASURES = {
-            ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(),
-            ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(),
-            ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(),
-            ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(),
-            ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(),
-            ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName()
+            ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.name
         };
 
     static

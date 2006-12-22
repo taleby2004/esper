@@ -58,7 +58,7 @@ public enum GuardEnum
     {
         for (GuardEnum guardEnum : GuardEnum.values())
         {
-            if ((guardEnum.getNamespace().equals(namespace)) && (guardEnum.getName().equals(name)))
+            if ((guardEnum.namespace.equals(namespace)) && (guardEnum.name.equals(name)))
             {
                 return guardEnum;
             }

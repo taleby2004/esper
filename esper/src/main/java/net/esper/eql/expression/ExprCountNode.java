@@ -24,7 +24,7 @@ public class ExprCountNode extends ExprAggregateNode
     public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         // Empty child node list signals count(*)
-        if (this.getChildNodes().size() == 0)
+        if (this.getChildNodes().isEmpty())
         {
             computer = new DatapointAggregator();
         }

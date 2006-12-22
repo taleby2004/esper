@@ -67,7 +67,7 @@ public class PriorEventViewFactory implements ViewFactory
     {
         ViewUpdatedCollection viewUpdatedCollection = null;
 
-        if (callbacksPerIndex.size() == 0)
+        if (callbacksPerIndex.isEmpty())
         {
             throw new IllegalStateException("No resources requested");
         }
@@ -135,7 +135,7 @@ public class PriorEventViewFactory implements ViewFactory
         return false;
     }
 
-    public class RelativeAccessImpl implements RelativeAccessByEventNIndex
+    public static class RelativeAccessImpl implements RelativeAccessByEventNIndex
     {
         private final RelativeAccessByEventNIndex buffer;
         private final int relativeIndex;

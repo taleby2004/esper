@@ -37,6 +37,7 @@ public final class MergeView extends ViewSupport implements ContextAwareView
     /**
      * Constructor.
      * @param groupFieldNames is the fields from which to pull the value to group by
+     * @param resultEventType is passed by the factory as the factory adds the merged fields to an event type
      */
     public MergeView(String groupFieldNames[], EventType resultEventType)
     {

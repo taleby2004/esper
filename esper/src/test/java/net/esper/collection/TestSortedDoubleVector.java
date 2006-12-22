@@ -258,9 +258,9 @@ public class TestSortedDoubleVector extends TestCase
     private int findIndex(double[] data, double value)
     {
         vector.getValues().clear();
-        for (int i = 0; i < data.length; i++)
+        for (double aData : data)
         {
-            vector.getValues().add(data[i]);
+            vector.getValues().add(aData);
         }
         return vector.findInsertIndex(value);
     }

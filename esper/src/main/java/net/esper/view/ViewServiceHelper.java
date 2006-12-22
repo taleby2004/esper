@@ -121,7 +121,7 @@ public class ViewServiceHelper
         }
 
         // The viewToRemove is a direct child view of the stream
-        if (viewPath.size() == 0)
+        if (viewPath.isEmpty())
         {
             boolean isViewRemoved = parentViewable.removeView( (View) viewToRemove);
 
@@ -197,7 +197,7 @@ public class ViewServiceHelper
 
         boolean foundMatch = false;
 
-        if (viewFactories.size() == 0)
+        if (viewFactories.isEmpty())
         {
             return new Pair<Viewable, List<View>>(rootViewable, new LinkedList<View>());
         }
@@ -223,7 +223,7 @@ public class ViewServiceHelper
                 break;
             }
         }
-        while ((foundMatch) && (viewFactories.size() > 0));
+        while ((foundMatch) && (!viewFactories.isEmpty()));
 
         return new Pair<Viewable, List<View>>(currentParent, matchedViewList);
     }
@@ -246,7 +246,7 @@ public class ViewServiceHelper
             }
             catch (ViewParameterException e)
             {
-                throw new ViewProcessingException("Error in view '" + spec.getObjectNamespace() + ":" + spec.getObjectName() +
+                throw new ViewProcessingException("Error in view '" + spec.getObjectNamespace() + ':' + spec.getObjectName() +
                         "', " + e.getMessage());
             }
         }

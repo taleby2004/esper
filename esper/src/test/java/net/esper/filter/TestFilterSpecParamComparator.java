@@ -29,6 +29,8 @@ public class TestFilterSpecParamComparator extends TestCase
         FilterValueSetParamImpl param7 = new FilterValueSetParamImpl("f", FilterOperator.GREATER, null);
         FilterValueSetParamImpl param8 = new FilterValueSetParamImpl("g", FilterOperator.NOT_EQUAL, null);
         FilterValueSetParamImpl param9 = new FilterValueSetParamImpl("h", FilterOperator.IN_LIST_OF_VALUES, null);
+        FilterValueSetParamImpl param10 = new FilterValueSetParamImpl("i", FilterOperator.NOT_RANGE_CLOSED, null);
+        FilterValueSetParamImpl param11 = new FilterValueSetParamImpl("j", FilterOperator.NOT_IN_LIST_OF_VALUES, null);
 
         // Compare same comparison types
         assertTrue(comparator.compare(param1, param2) == -1);
@@ -57,6 +59,14 @@ public class TestFilterSpecParamComparator extends TestCase
         assertTrue(comparator.compare(param9, param4) == -1);
         assertTrue(comparator.compare(param9, param9) == 0);
         assertTrue(comparator.compare(param9, param1) == 1);
+
+        // inverted range is lower rank
+        assertTrue(comparator.compare(param10, param1) == 1);
+        assertTrue(comparator.compare(param10, param8) == -1);
+
+        // not-in is lower rank
+        assertTrue(comparator.compare(param11, param1) == 1);
+        assertTrue(comparator.compare(param11, param8) == -1);
     }
 
     public void testCompareAll()

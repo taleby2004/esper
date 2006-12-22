@@ -1,7 +1,6 @@
 package net.esper.dispatch;
 
 import net.esper.support.dispatch.SupportDispatchable;
-import net.esper.util.AssertionException;
 import junit.framework.TestCase;
 import java.util.List;
 
@@ -42,16 +41,6 @@ public class TestDispatchServiceImpl extends TestCase
     {
         SupportDispatchable disOne = new SupportDispatchable();
         service.addExternal(disOne);
-
-        try
-        {
-            service.addExternal(disOne);
-            fail();
-        }
-        catch (AssertionException ex)
-        {
-            // Expected
-        }
 
         service.dispatch();
         assertEquals(1, disOne.getAndResetNumExecuted());

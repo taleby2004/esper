@@ -167,7 +167,7 @@ public enum ViewEnum
     {
         for (ViewEnum viewEnum : ViewEnum.values())
         {
-            if ((viewEnum.getNamespace().equals(namespace)) && (viewEnum.getName().equals(name)))
+            if ((viewEnum.namespace.equals(namespace)) && (viewEnum.name.equals(name)))
             {
                 return viewEnum;
             }

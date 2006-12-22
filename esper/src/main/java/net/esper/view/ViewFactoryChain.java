@@ -20,7 +20,7 @@ public class ViewFactoryChain
 
     public EventType getEventType()
     {
-        if (viewFactoryChain.size() == 0)
+        if (viewFactoryChain.isEmpty())
         {
             return streamEventType;
         }

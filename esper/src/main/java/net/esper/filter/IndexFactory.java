@@ -44,17 +44,27 @@ public class IndexFactory
             return index;
         }
 
-        // Handle all RANGE comparisons
+        // Handle all normal and inverted RANGE comparisons
         if (filterOperator.isRangeOperator())
         {
             index = new FilterParamIndexRange(propertyName, filterOperator, eventType);
             return index;
         }
+        if (filterOperator.isInvertedRangeOperator())
+        {
+            index = new FilterParamIndexNotRange(propertyName, filterOperator, eventType);
+            return index;
+        }
 
-        // Handle all IN comparisons
+        // Handle all IN and NOT IN comparisons
         if (filterOperator == FilterOperator.IN_LIST_OF_VALUES)
         {
             index = new FilterParamIndexIn(propertyName, eventType);
+            return index;
+        }
+        if (filterOperator == FilterOperator.NOT_IN_LIST_OF_VALUES)
+        {
+            index = new FilterParamIndexNotIn(propertyName, eventType);
             return index;
         }
 

@@ -17,6 +17,7 @@ import java.util.Map;
  */
 public final class EPServiceProviderManager
 {
+    @SuppressWarnings({"CollectionWithoutInitialCapacity"})
     private static Map<String, EPServiceProvider> runtimes = new HashMap<String, EPServiceProvider>();
 
     /**

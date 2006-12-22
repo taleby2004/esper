@@ -58,7 +58,7 @@ public class SimpleXMLEventType extends BaseXMLEventType {
         }
         catch (XPathExpressionException e)
         {
-            throw new EPException("Error constructing XPath expression from property name '" + property + "'", e);
+            throw new EPException("Error constructing XPath expression from property name '" + property + '\'', e);
         }
 
         getter = new XPathPropertyGetter(property, xPathExpression, XPathConstants.STRING);

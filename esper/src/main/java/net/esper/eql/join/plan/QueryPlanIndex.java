@@ -58,10 +58,7 @@ public class QueryPlanIndex
     {
         int numElements = indexProps.length;
         String[][] newProps = new String[numElements + 1][];
-        for (int i = 0; i < numElements; i++)
-        {
-            newProps[i] = indexProps[i];
-        }
+        System.arraycopy(indexProps, 0, newProps, 0, numElements);
         newProps[numElements] = indexProperties;
 
         indexProps = newProps;
@@ -76,10 +73,10 @@ public class QueryPlanIndex
             return "indexProperties=null";
         }
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int i = 0; i < indexProps.length; i++)
         {
-            buf.append("indexProperties(" + i + ")=" + Arrays.toString(indexProps[i]) + " ");
+            buf.append("indexProperties(").append(i).append(")=").append(Arrays.toString(indexProps[i])).append(' ');
         }
 
         return buf.toString();
@@ -90,14 +87,15 @@ public class QueryPlanIndex
      * @param indexSpecs - define indexes
      * @return readable format of index info
      */
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public static String print(QueryPlanIndex[] indexSpecs)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("QueryPlanIndex[]\n");
 
         for (int i = 0; i < indexSpecs.length; i++)
         {
-            buffer.append("  index spec " + i + " : " + indexSpecs[i].toString() + "\n");
+            buffer.append("  index spec " + i + " : " + indexSpecs[i].toString() + '\n');
         }
 
         return buffer.toString();

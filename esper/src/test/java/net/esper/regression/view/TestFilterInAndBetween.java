@@ -98,8 +98,27 @@ public class TestFilterInAndBetween extends TestCase
         tryExpr("(intBoxed in (2:4])", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {false, false, false, true, true, false, false});
         tryExpr("(intBoxed in [2:4))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {false, false, true, true, false, false, false});
         tryExpr("(intBoxed in (2:4))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {false, false, false, true, false, false, false});
+
     }
 
+    public void testNotInExpr()
+    {
+        tryExpr("(string not in ('a', 'b'))", "string", new String[] {"a", "x", "b", "y"}, new boolean [] {false, true, false, true});
+        tryExpr("(boolPrimitive not in (false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {true, false});
+        tryExpr("(boolPrimitive not in (false, false, false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {true, false});
+        tryExpr("(boolPrimitive not in (false, true, false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {false, false});
+        tryExpr("(intBoxed not in (4, 6, 1))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, false, true, true, false, true, false});
+        tryExpr("(intBoxed not in (3))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, true, false, true, true, true});
+        tryExpr("(longBoxed not in (3))", "longBoxed", new Object[] {0L, 1L, 2L, 3L, 4L, 5L, 6L}, new boolean [] {true, true, true, false, true, true, true});
+        tryExpr("(intBoxed not between 4 and 6)", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, true, true, false, false, false});
+        tryExpr("(intBoxed not between 2 and 1)", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, false, false, true, true, true, true});
+        tryExpr("(intBoxed not between 4 and -1)", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {false, false, false, false, false, true, true});
+        tryExpr("(intBoxed not in [2:4])", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, false, false, false, true, true});
+        tryExpr("(intBoxed not in (2:4])", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, true, false, false, true, true});
+        tryExpr("(intBoxed not in [2:4))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, false, false, true, true, true});
+        tryExpr("(intBoxed not in (2:4))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, true, false, true, true, true});
+    }
+    
     public void testReuse()
     {
         String expr = "select * from " + SupportBean.class.getName() + "(intBoxed in [2:4])";
@@ -134,6 +153,27 @@ public class TestFilterInAndBetween extends TestCase
         exprOne = "select * from " + SupportBean.class.getName() + "(intBoxed in (1, 2, 3), longPrimitive >= 0)";
         exprTwo = "select * from " + SupportBean.class.getName() + "(intBoxed in (3, 4), intPrimitive >= 0)";
         exprThree = "select * from " + SupportBean.class.getName() + "(intBoxed in (3), bytePrimitive < 1)";
+        tryReuse(new String[] {exprOne, exprTwo, exprThree});
+    }
+
+    public void testReuseNot()
+    {
+        String expr = "select * from " + SupportBean.class.getName() + "(intBoxed not in [1:2])";
+        tryReuse(new String[] {expr, expr});
+
+        String exprOne = "select * from " + SupportBean.class.getName() + "(intBoxed in (3, 1, 3))";
+        String exprTwo = "select * from " + SupportBean.class.getName() + "(intBoxed not in (2, 1))";
+        String exprThree = "select * from " + SupportBean.class.getName() + "(intBoxed not between 0 and -3)";
+        tryReuse(new String[] {exprOne, exprTwo, exprThree});
+
+        exprOne = "select * from " + SupportBean.class.getName() + "(intBoxed not in (1, 4, 5))";
+        exprTwo = "select * from " + SupportBean.class.getName() + "(intBoxed not in (1, 4, 5))";
+        exprThree = "select * from " + SupportBean.class.getName() + "(intBoxed not in (4, 5, 1))";
+        tryReuse(new String[] {exprOne, exprTwo, exprThree});
+
+        exprOne = "select * from " + SupportBean.class.getName() + "(intBoxed not in (3:4))";
+        exprTwo = "select * from " + SupportBean.class.getName() + "(intBoxed not in [1:3))";
+        exprThree = "select * from " + SupportBean.class.getName() + "(intBoxed not in (1,1,1,33))";
         tryReuse(new String[] {exprOne, exprTwo, exprThree});
     }
 

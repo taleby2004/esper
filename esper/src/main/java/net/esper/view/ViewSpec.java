@@ -97,9 +97,10 @@ public final class ViewSpec
         return true;
     }
 
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public final String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("objectName=" + objectName + "  objectParameters=(");
         char delimiter = ' ';
 
@@ -112,7 +113,7 @@ public final class ViewSpec
             }
         }
         
-        buffer.append(")");
+        buffer.append(')');
 
         return buffer.toString();
     }

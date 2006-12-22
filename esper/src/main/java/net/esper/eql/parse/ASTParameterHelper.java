@@ -139,7 +139,7 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
             child = child.getNextSibling();
         }
 
-        if (nodeTypes.size() == 0)
+        if (nodeTypes.isEmpty())
         {
             return new Object[0];
         }

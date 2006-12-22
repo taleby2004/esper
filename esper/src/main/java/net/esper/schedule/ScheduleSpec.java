@@ -12,14 +12,14 @@ public final class ScheduleSpec
 {
     // Per unit hold the set of valid integer values, or null if wildcarded.
     // The seconds unit is optional.
-    private final Map<ScheduleUnit, SortedSet<Integer>> unitValues;
+    private final EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues;
 
     /**
      * Constructor - validates that all mandatory schedule.
      * @param unitValues are the values for each minute, hour, day, month etc.
      * @throws IllegalArgumentException - if validation of value set per unit fails
      */
-    public ScheduleSpec(Map<ScheduleUnit, SortedSet<Integer>> unitValues) throws IllegalArgumentException
+    public ScheduleSpec(EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues) throws IllegalArgumentException
     {
         validate(unitValues);
 
@@ -34,7 +34,7 @@ public final class ScheduleSpec
      */
     public ScheduleSpec()
     {
-        unitValues = new HashMap<ScheduleUnit, SortedSet<Integer>>();
+        unitValues = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         unitValues.put(ScheduleUnit.MINUTES, null);
         unitValues.put(ScheduleUnit.HOURS, null);
         unitValues.put(ScheduleUnit.DAYS_OF_MONTH, null);
@@ -46,7 +46,7 @@ public final class ScheduleSpec
      * Return map of ordered set of valid schedule values for minute, hour, day, month etc. units
      * @return map of 5 or 6 entries each with a set of integers
      */
-    public final Map<ScheduleUnit, SortedSet<Integer>> getUnitValues()
+    public final EnumMap<ScheduleUnit, SortedSet<Integer>> getUnitValues()
     {
         return unitValues;
     }
@@ -67,9 +67,10 @@ public final class ScheduleSpec
         set.add(value);
     }
 
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public final String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (ScheduleUnit element : ScheduleUnit.values())
         {
             if (!unitValues.containsKey(element))

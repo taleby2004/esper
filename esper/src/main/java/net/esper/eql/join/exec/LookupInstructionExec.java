@@ -155,7 +155,7 @@ public class LookupInstructionExec
         return hasOneResultRow;
     }
 
-    private int[] toArray(List<Integer> list)
+    private static int[] toArray(List<Integer> list)
     {
         int[] arr = new int[list.size()];
         int count = 0;
@@ -170,6 +170,7 @@ public class LookupInstructionExec
      * Output the instruction.
      * @param writer is the write to output to
      */
+    @SuppressWarnings({"StringContatenationInLoop"})
     public void print(IndentWriter writer)
     {
         writer.println("LookupInstructionExec" +

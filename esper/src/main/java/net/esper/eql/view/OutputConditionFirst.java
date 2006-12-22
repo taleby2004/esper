@@ -45,7 +45,7 @@ public class OutputConditionFirst implements OutputCondition
 		innerCondition.updateOutputCondition(newEventsCount, oldEventsCount);
 	}
 	
-	private OutputLimitSpec createInnerSpec(OutputLimitSpec outputLimitSpec)
+	private static OutputLimitSpec createInnerSpec(OutputLimitSpec outputLimitSpec)
 	{
 		if(outputLimitSpec.isEventLimit())
 		{

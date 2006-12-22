@@ -84,6 +84,6 @@ public class IndexedTableLookupStrategy implements TableLookupStrategy
     public String toString()
     {
         return "IndexedTableLookupStrategy indexProps=" + Arrays.toString(properties) +
-                " index=(" + index + ")";
+                " index=(" + index + ')';
     }
 }

@@ -147,7 +147,7 @@ public class ResultSetProcessorFactory
         }
 
         // Construct the appropriate aggregation service
-        boolean hasGroupBy = groupByNodes.size() > 0;
+        boolean hasGroupBy = !groupByNodes.isEmpty();
         AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, hasGroupBy, optionalHavingNode, orderByNodes);
 
         // Construct the processor for sorting output events
@@ -187,7 +187,7 @@ public class ResultSetProcessorFactory
 
         // (1)
         // There is no group-by clause and no aggregate functions with event properties in the select clause and having clause (simplest case)
-        if ((groupByNodes.size() == 0) && (selectAggregateExprNodes.size() == 0) && (havingAggregateExprNodes.size() == 0))
+        if ((groupByNodes.isEmpty()) && (selectAggregateExprNodes.isEmpty()) && (havingAggregateExprNodes.isEmpty()))
         {
             // (1a)
             // There is no need to perform select expression processing, the single view itself (no join) generates
@@ -208,18 +208,18 @@ public class ResultSetProcessorFactory
 
         // (2)
         // A wildcard select-clause has been specified and the group-by is ignored since no aggregation functions are used, and no having clause
-        if ((namedSelectionList.size() == 0) && (propertiesAggregatedHaving.size() == 0))
+        if ((namedSelectionList.isEmpty()) && (propertiesAggregatedHaving.isEmpty()))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
             return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
-        if ((groupByNodes.size() == 0) && (selectAggregateExprNodes.size() > 0))
+        if ((groupByNodes.isEmpty()) && (!selectAggregateExprNodes.isEmpty()))
         {
             // (3)
             // There is no group-by clause and there are aggregate functions with event properties in the select clause (aggregation case)
             // and all event properties are aggregated (all properties are under aggregation functions).
-            if (nonAggregatedProps.size() == 0)
+            if (nonAggregatedProps.isEmpty())
             {
                 log.debug(".getProcessor Using ResultSetProcessorRowForAll");
                 return new ResultSetProcessorRowForAll(selectExprProcessor, aggregationService, optionalHavingNode);
@@ -233,7 +233,7 @@ public class ResultSetProcessorFactory
         }
 
         // Handle group-by cases
-        if (groupByNodes.size() == 0)
+        if (groupByNodes.isEmpty())
         {
             throw new IllegalStateException("Unexpected empty group-by expression list");
         }
@@ -250,7 +250,7 @@ public class ResultSetProcessorFactory
         }
 
         // Wildcard select-clause means we do not have all selected properties in the group
-        if (namedSelectionList.size() == 0)
+        if (namedSelectionList.isEmpty())
         {
             allInGroupBy = false;
         }
@@ -268,7 +268,7 @@ public class ResultSetProcessorFactory
         }
 
         // Wildcard select-clause means that all order-by props in the select expression
-        if (namedSelectionList.size() == 0)
+        if (namedSelectionList.isEmpty())
         {
             allInSelect = true;
         }
@@ -321,7 +321,7 @@ public class ResultSetProcessorFactory
         }
 
         // Any non-aggregated properties must occur in the group-by clause (if there is one)
-        if (propertiesGroupedBy.size() > 0)
+        if (!propertiesGroupedBy.isEmpty())
         {
             ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
             havingNode.accept(visitor);
@@ -330,7 +330,7 @@ public class ResultSetProcessorFactory
             allPropertiesHaving.removeAll(aggPropertiesHaving);
             allPropertiesHaving.removeAll(propertiesGroupedBy);
 
-            if (allPropertiesHaving.size() > 0)
+            if (!allPropertiesHaving.isEmpty())
             {
                 String name = allPropertiesHaving.iterator().next().getSecond();
                 throw new ExprValidationException("Non-aggregated property '" + name + "' in the HAVING clause must occur in the group-by clause");
@@ -348,7 +348,7 @@ public class ResultSetProcessorFactory
         for (ExprNode groupByNode : groupByNodes)
         {
             ExprAggregateNode.getAggregatesBottomUp(groupByNode, aggNodes);
-            if (aggNodes.size() > 0)
+            if (!aggNodes.isEmpty())
             {
                 throw new ExprValidationException("Group-by expressions cannot contain aggregate functions");
             }
@@ -409,7 +409,7 @@ public class ResultSetProcessorFactory
             propertiesGroupBy.addAll(propertiesNode);
 
             // For each group-by expression node, require at least one property.
-            if (propertiesNode.size() == 0)
+            if (propertiesNode.isEmpty())
             {
                 throw new ExprValidationException("Group-by expressions must refer to property names");
             }

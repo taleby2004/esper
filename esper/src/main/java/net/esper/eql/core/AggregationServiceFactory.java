@@ -29,7 +29,7 @@ public class AggregationServiceFactory
                                                 List<ExprNode> sortByNodes)
     {
         // No aggregates used, we do not need this service
-        if (aggregateExprNodes.size() == 0)
+        if (aggregateExprNodes.isEmpty())
         {
         	return new AggregationServiceNull();
         }
@@ -48,7 +48,7 @@ public class AggregationServiceFactory
             }
 
             // Use the evaluation node under the aggregation node to obtain the aggregation value
-            if (aggregateNode.getChildNodes().size() > 0)
+            if (!aggregateNode.getChildNodes().isEmpty())
             {
                 evaluators[index] = aggregateNode.getChildNodes().get(0);
             }

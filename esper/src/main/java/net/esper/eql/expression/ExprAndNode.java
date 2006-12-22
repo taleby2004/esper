@@ -49,8 +49,8 @@ public class ExprAndNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("(");
+        StringBuilder buffer = new StringBuilder();
+        buffer.append('(');
 
         String appendStr = "";
         for (ExprNode child : this.getChildNodes())
@@ -60,7 +60,7 @@ public class ExprAndNode extends ExprNode
             appendStr = " AND ";
         }
 
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

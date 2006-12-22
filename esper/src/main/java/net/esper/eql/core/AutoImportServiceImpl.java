@@ -33,7 +33,8 @@ public class AutoImportServiceImpl implements AutoImportService
 		}
 	}
 
-	public Class resolveClass(String className) 
+	@SuppressWarnings({"StringContatenationInLoop"})
+    public Class resolveClass(String className)
 	throws ClassNotFoundException
 	{
 		// Attempt to retrieve the class with the name as-is
@@ -59,7 +60,7 @@ public class AutoImportServiceImpl implements AutoImportService
 			else
 			{
 				// Import is a package name
-				String prefixedClassName = getPackageName(importName) + "." + className;
+				String prefixedClassName = getPackageName(importName) + '.' + className;
 				try
 				{
 					return Class.forName(prefixedClassName);
@@ -94,20 +95,20 @@ public class AutoImportServiceImpl implements AutoImportService
 		imports.add(importName);
 	}
 	
-	private boolean isClassName(String importName)
+	private static boolean isClassName(String importName)
 	{
 		String classNameRegEx = "(\\w+\\.)*\\w+";
 		return importName.matches(classNameRegEx);
 	}
 	
-	private boolean isPackageName(String importName)
+	private static boolean isPackageName(String importName)
 	{
 		String classNameRegEx = "(\\w+\\.)+\\*";
 		return importName.matches(classNameRegEx);
 	}
 	
 	// Strip off the final ".*"
-	private String getPackageName(String importName)
+	private static String getPackageName(String importName)
 	{
 		return importName.substring(0, importName.length() - 2);
 	}

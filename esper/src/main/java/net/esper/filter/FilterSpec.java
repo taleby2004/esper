@@ -70,9 +70,10 @@ public final class FilterSpec
         return new FilterValueSetImpl(eventType, valueList);
     }
 
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public final String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("FilterSpec type=" + this.eventType);
         buffer.append(" parameters=" + Arrays.toString(parameters.toArray()));
         return buffer.toString();

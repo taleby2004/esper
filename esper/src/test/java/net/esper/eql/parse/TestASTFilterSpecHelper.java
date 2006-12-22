@@ -116,6 +116,25 @@ public class TestASTFilterSpecHelper extends TestCase
         assertEquals("myname", getEventNameTag(expression));
     }
 
+    public void testValidNotRange() throws Exception
+    {
+        String expression = "myname=" + SupportBean.class.getName() + "(intPrimitive not in [1:2], intBoxed not in (2:6])";
+
+        FilterSpec spec = getFilterSpec(expression, null);
+        assertEquals(SupportBean.class, spec.getEventType().getUnderlyingType());
+        assertEquals(2, spec.getParameters().size());
+
+        FilterSpecParam param = spec.getParameters().get(0);
+        assertEquals("intPrimitive", param.getPropertyName());
+        assertEquals(FilterOperator.NOT_RANGE_CLOSED, param.getFilterOperator());
+
+        param = spec.getParameters().get(1);
+        assertEquals("intBoxed", param.getPropertyName());
+        assertEquals(FilterOperator.NOT_RANGE_HALF_CLOSED, param.getFilterOperator());
+
+        assertEquals("myname", getEventNameTag(expression));
+    }
+
     public void testValidBetween() throws Exception
     {
         String expression = SupportBean.class.getName() + "(intPrimitive between 4 and 6)";
@@ -124,6 +143,16 @@ public class TestASTFilterSpecHelper extends TestCase
         FilterSpecParam param = spec.getParameters().get(0);
         assertEquals("intPrimitive", param.getPropertyName());
         assertEquals(FilterOperator.RANGE_CLOSED, param.getFilterOperator());
+    }
+
+    public void testValidNotBetween() throws Exception
+    {
+        String expression = SupportBean.class.getName() + "(intPrimitive not between 4 and 6)";
+
+        FilterSpec spec = getFilterSpec(expression, null);
+        FilterSpecParam param = spec.getParameters().get(0);
+        assertEquals("intPrimitive", param.getPropertyName());
+        assertEquals(FilterOperator.NOT_RANGE_CLOSED, param.getFilterOperator());
     }
 
     public void testValidInListOfValues() throws Exception
@@ -145,6 +174,19 @@ public class TestASTFilterSpecHelper extends TestCase
         InSetOfValuesEventProp propValue = (InSetOfValuesEventProp) vparam.getListOfValues().get(2);
         assertEquals("asName", propValue.getResultEventAsName());
         assertEquals("intBoxed", propValue.getResultEventProperty());
+    }
+
+    public void testValidNotInListOfValues() throws Exception
+    {
+        String expression = SupportBean.class.getName() + "(intPrimitive not in (3, 5, asName.intBoxed))";
+
+        Map<String, EventType> taggedEventTypes = new HashMap<String, EventType>();
+        taggedEventTypes.put("asName", SupportEventTypeFactory.createBeanType(SupportBean.class));
+
+        FilterSpec spec = getFilterSpec(expression, taggedEventTypes);
+        FilterSpecParam param = spec.getParameters().get(0);
+        assertEquals("intPrimitive", param.getPropertyName());
+        assertEquals(FilterOperator.NOT_IN_LIST_OF_VALUES, param.getFilterOperator());
     }
 
     public void testValidRangeUseResult() throws Exception

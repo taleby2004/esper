@@ -51,7 +51,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
             log.debug(".start Starting followed-by expression for the first child");
         }
 
-        if (nodes.size() == 0)
+        if (nodes.isEmpty())
         {
             throw new IllegalStateException("Followed by state node is inactive");
         }
@@ -81,7 +81,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
         if (index == (numChildNodes - 1))
         {
             boolean isFollowedByQuitted = false;
-            if (nodes.size() == 0)
+            if (nodes.isEmpty())
             {
                 isFollowedByQuitted = true;
             }

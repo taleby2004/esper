@@ -53,7 +53,7 @@ public class EPEQLStatementImpl extends EPStatementSupport implements EPStatemen
             throw new IllegalStateException("View statement already stopped");
         }
 
-        if (this.getListeners().size() > 0)
+        if (!this.getListeners().isEmpty())
         {
             parentView.removeView(dispatchChildView);
         }
@@ -89,7 +89,7 @@ public class EPEQLStatementImpl extends EPStatementSupport implements EPStatemen
         parentView = pair.getFirst();
         stopMethod = pair.getSecond();
 
-        if (this.getListeners().size() > 0)
+        if (!this.getListeners().isEmpty())
         {
             parentView.addView(dispatchChildView);
         }

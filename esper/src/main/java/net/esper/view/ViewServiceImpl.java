@@ -70,7 +70,7 @@ public final class ViewServiceImpl implements ViewService
         Viewable parentViewable = resultPair.getFirst();
         List<View> existingParentViews = resultPair.getSecond();
 
-        if (viewFactories.size() == 0)
+        if (viewFactories.isEmpty())
         {
             if (log.isDebugEnabled())
             {

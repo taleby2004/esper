@@ -39,7 +39,7 @@ public class QueryPlan
 
     public String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("QueryPlanNode\n");
         buffer.append(QueryPlanIndex.print(indexSpecs));
         buffer.append(QueryPlanNode.print(execNodeSpecs));

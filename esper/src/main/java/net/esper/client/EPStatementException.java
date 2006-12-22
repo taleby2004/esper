@@ -45,11 +45,13 @@ public class EPStatementException extends EPException
     }
 
     public String getMessage() {
-        String msg = super.getMessage();
+        StringBuilder msg = new StringBuilder(super.getMessage());
         if (expression != null)
         {
-            msg += " [" + expression + ']';
+            msg.append(" [");
+            msg.append(expression);
+            msg.append(']');
         }
-        return msg;
+        return msg.toString();
     }
 }

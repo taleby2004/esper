@@ -25,6 +25,12 @@ public class FilterSpecParamComparator implements Comparator<FilterValueSetParam
             FilterOperator.LESS_OR_EQUAL,
             FilterOperator.GREATER_OR_EQUAL,
             FilterOperator.GREATER,
+            FilterOperator.NOT_RANGE_CLOSED,
+            FilterOperator.NOT_RANGE_HALF_CLOSED,
+            FilterOperator.NOT_RANGE_HALF_OPEN,
+            FilterOperator.NOT_RANGE_OPEN,
+            FilterOperator.NOT_IN_LIST_OF_VALUES,
+            FilterOperator.NOT_EQUAL,
      };
 
     private static int[] filterSortOrder;

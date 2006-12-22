@@ -104,7 +104,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
         }
         catch (SQLException ex)
         {
-            throw new EPException("Error executing statement '" + preparedStatementText + "'", ex);
+            throw new EPException("Error executing statement '" + preparedStatementText + '\'', ex);
         }
 
         // generate events for result set
@@ -126,7 +126,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
         }
         catch (SQLException ex)
         {
-            throw new EPException("Error reading results for statement '" + preparedStatementText + "'", ex);
+            throw new EPException("Error reading results for statement '" + preparedStatementText + '\'', ex);
         }
 
         try
@@ -135,7 +135,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
         }
         catch (SQLException ex)
         {
-            throw new EPException("Error closing statement '" + preparedStatementText + "'", ex);
+            throw new EPException("Error closing statement '" + preparedStatementText + '\'', ex);
         }
 
         return rows;

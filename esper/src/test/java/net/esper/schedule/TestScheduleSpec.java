@@ -5,17 +5,14 @@ import junit.framework.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.SortedSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.*;
 
 public class TestScheduleSpec extends TestCase
 {
     public void testValidate()
     {
         // Test all units missing
-        Map<ScheduleUnit, SortedSet<Integer>> unitValues = new HashMap<ScheduleUnit, SortedSet<Integer>>();
+        EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         assertInvalid(unitValues);
 
         // Test one unit missing
@@ -43,7 +40,7 @@ public class TestScheduleSpec extends TestCase
 
     public void testCompress()
     {
-        Map<ScheduleUnit, SortedSet<Integer>> unitValues = new HashMap<ScheduleUnit, SortedSet<Integer>>();
+        EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         unitValues = (new ScheduleSpec()).getUnitValues();
 
         // Populate Month with all valid values
@@ -59,7 +56,7 @@ public class TestScheduleSpec extends TestCase
         assertTrue(spec.getUnitValues().get(ScheduleUnit.MONTHS) == null);
     }
 
-    private void assertInvalid(Map<ScheduleUnit, SortedSet<Integer>> unitValues)
+    private void assertInvalid(EnumMap<ScheduleUnit, SortedSet<Integer>> unitValues)
     {
         try
         {

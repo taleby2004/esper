@@ -43,7 +43,7 @@ public class ExprConstantNode extends ExprNode
     {
         if (value instanceof String)
         {
-            return "\"" + value + "\"";
+            return "\"" + value + '\"';
         }
         if (value == null)
         {

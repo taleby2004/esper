@@ -20,7 +20,7 @@ public class EventBeanUtility
      */
     public static EventBean[] flatten(Vector<EventBean[]> eventVector)
     {
-        if (eventVector.size() == 0)
+        if (eventVector.isEmpty())
         {
             return null;
         }

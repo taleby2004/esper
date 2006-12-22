@@ -42,7 +42,7 @@ public class PropertyListBuilderPublic implements PropertyListBuilder
         return result;
     }
 
-    private void addPublicMethods(List<EventPropertyDescriptor> result, Class clazz)
+    private static void addPublicMethods(List<EventPropertyDescriptor> result, Class clazz)
     {
         Method[] methods = clazz.getMethods();
         for (int i = 0; i < methods.length; i++)
@@ -72,7 +72,7 @@ public class PropertyListBuilderPublic implements PropertyListBuilder
         PropertyHelper.removeJavaProperties(result);
     }
 
-    private void addPublicFields(List<EventPropertyDescriptor> result, Class clazz)
+    private static void addPublicFields(List<EventPropertyDescriptor> result, Class clazz)
     {
         Field[] fields = clazz.getFields();
         for (int i = 0; i < fields.length; i++)

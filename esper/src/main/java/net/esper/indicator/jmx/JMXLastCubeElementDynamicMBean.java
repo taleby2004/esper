@@ -69,7 +69,7 @@ public final class JMXLastCubeElementDynamicMBean implements JMXLastElementObser
             log.debug (".setCube Cells...");
             for (String attribute : cells.keySet())
             {
-                log.debug (".setCube Cell " + attribute + "=" + cells.get(attribute));
+                log.debug (".setCube Cell " + attribute + '=' + cells.get(attribute));
             }
         }
 
@@ -80,7 +80,7 @@ public final class JMXLastCubeElementDynamicMBean implements JMXLastElementObser
             log.debug (".setCube Tables...");
             for (String attribute : tables.keySet())
             {
-                log.debug (".setCube Table " + attribute + "=" + tables.get(attribute));
+                log.debug (".setCube Table " + attribute + '=' + tables.get(attribute));
             }
         }
 

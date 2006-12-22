@@ -37,7 +37,7 @@ public class IndexTreePath
      */
     public final Pair<FilterParamIndex, Object> removeFirst()
     {
-        if (indizes.size() > 0)
+        if (!indizes.isEmpty())
         {
             return indizes.removeFirst();
         }

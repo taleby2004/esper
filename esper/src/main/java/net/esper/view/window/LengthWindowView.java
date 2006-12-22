@@ -42,7 +42,7 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
 
     public boolean isEmpty()
     {
-        return events.size() == 0;
+        return events.isEmpty();
     }
 
     /**

@@ -78,12 +78,12 @@ public class ExprStaticMethodNode extends ExprNode
 
 	public String toExpressionString() 
 	{
-		StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 		buffer.append(className);
-		buffer.append(".");
+		buffer.append('.');
 		buffer.append(methodName);
 
-		buffer.append("(");		
+		buffer.append('(');
 		String appendString = "";
 		for(ExprNode child : getChildNodes())
 		{
@@ -91,7 +91,7 @@ public class ExprStaticMethodNode extends ExprNode
 			buffer.append(child.toExpressionString());
 			appendString = ", ";
 		}
-		buffer.append(")");
+		buffer.append(')');
 		
 		return buffer.toString();
 	}

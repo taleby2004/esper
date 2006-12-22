@@ -92,13 +92,13 @@ public class ExprCoalesceNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 2; i < this.getChildNodes().size(); i++)
         {
-            buffer.append(",");
+            buffer.append(',');
             buffer.append(this.getChildNodes().get(i).toExpressionString());
         }
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

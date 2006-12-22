@@ -44,13 +44,13 @@ public final class CubeCellStringRenderer
 
     private static String renderMembers(DimensionMember[] members)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String memberDelimiter = "";
 
         for (int i = 0; i < members.length; i++)
         {
             String renderedValues = DimensionMemberRenderHelper.renderMember(members[i]);
-            buffer.append(memberDelimiter + renderedValues);
+            buffer.append(memberDelimiter).append(renderedValues);
             memberDelimiter = MEMBER_DELIMITER;
         }
 

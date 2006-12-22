@@ -63,8 +63,8 @@ public class GroupByViewFactory implements ViewFactory
     {
         String[] fieldNames = null;
 
-        String errorMessage = "'" + viewName + "' view requires a list of String values or a String-array as parameter";
-        if (viewParameters.size() == 0)
+        String errorMessage = '\'' + viewName + "' view requires a list of String values or a String-array as parameter";
+        if (viewParameters.isEmpty())
         {
             throw new ViewParameterException(errorMessage);
         }

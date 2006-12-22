@@ -61,7 +61,7 @@ public class ExprConcatNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String delimiter = "(";
         for (ExprNode child : this.getChildNodes())
         {
@@ -69,7 +69,7 @@ public class ExprConcatNode extends ExprNode
             buffer.append(child.toExpressionString());
             delimiter = "||";
         }
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

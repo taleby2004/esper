@@ -72,7 +72,7 @@ public class HistoricalDataQueryStrategy implements QueryStrategy
         for (List<EventBean> rowsPerLookup : result)
         {
             // In an outer join 
-            if ((isOuterJoin) && (rowsPerLookup.size() == 0))
+            if ((isOuterJoin) && (rowsPerLookup.isEmpty()))
             {
                 EventBean[] resultRow = new EventBean[2];
                 resultRow[myStreamNumber] = lookupEvents[count];

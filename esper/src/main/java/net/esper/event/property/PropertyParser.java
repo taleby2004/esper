@@ -39,11 +39,11 @@ public class PropertyParser implements EqlTokenTypes
         }
         catch (TokenStreamException e)
         {
-            throw new PropertyAccessException("Failed to parse property name '" + propertyName + "'", e);
+            throw new PropertyAccessException("Failed to parse property name '" + propertyName + '\'', e);
         }
         catch (RecognitionException e)
         {
-            throw new PropertyAccessException("Failed to parse property name '" + propertyName + "'", e);
+            throw new PropertyAccessException("Failed to parse property name '" + propertyName + '\'', e);
         }
 
         AST ast = parser.getAST();

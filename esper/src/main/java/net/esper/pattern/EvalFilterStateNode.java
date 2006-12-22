@@ -125,9 +125,10 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterCa
         return data;
     }
 
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public final String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("EvalFilterStateNode spec=" + this.filterSpec);
         buffer.append(" tag=" + this.filterSpec);
         return buffer.toString();

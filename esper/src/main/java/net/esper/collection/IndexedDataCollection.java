@@ -48,7 +48,7 @@ public final class IndexedDataCollection
         }
 
         boolean result = listOfBeans.remove(bean);
-        if (listOfBeans.size() == 0)
+        if (listOfBeans.isEmpty())
         {
             eventIndex.remove(key);
         }

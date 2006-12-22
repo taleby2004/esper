@@ -50,6 +50,7 @@ public class ConfigurationEventTypeXMLDOM
     /**
      * Ctor.
      */
+    @SuppressWarnings({"CollectionWithoutInitialCapacity"})
     public ConfigurationEventTypeXMLDOM()
     {
         xPathProperties = new HashMap<String, XPathPropertyDesc>();
@@ -173,7 +174,7 @@ public class ConfigurationEventTypeXMLDOM
     /**
      * Descriptor class for event properties that are resolved via XPath-expression.
      */
-    public class XPathPropertyDesc
+    public static class XPathPropertyDesc
     {
         private String name;
         private String xpath;

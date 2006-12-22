@@ -36,7 +36,7 @@ public class SelectExprProcessorFactory
         throws ExprValidationException
     {
         // Determin wildcard processor (select *)
-        if (selectionList.size() == 0)
+        if (selectionList.isEmpty())
         {
             // Wildcard and insert-into not allowed as combination
             if (insertIntoDesc != null)

@@ -227,11 +227,16 @@ else
 								use the <literal>in </literal> keyword and round <literal>()</literal> or square brackets <literal>[]</literal> to control how endpoints are included
 							</para>
 						</listitem>
+						<listitem>
+							<para>
+								for inverted ranges use the <literal>not</literal> keyword and the <literal>between</literal> or <literal>in</literal> keywords
+							</para>
+						</listitem>
 					</itemizedlist>
 				</listitem>
 				<listitem>
 					<para>
-						list-of-values checks using the <literal>in</literal> keyword followed by a comma-separated list of values
+						list-of-values checks using the <literal>in</literal> keyword or the <literal>not in </literal> keywords followed by a comma-separated list of values
 					</para>
 				</listitem>
 			</itemizedlist>
@@ -276,18 +281,33 @@ else
 				The <literal>between</literal> keyword is equivalent for closed ranges. The same filter using the <literal>between</literal> keyword is:
 			</para>
             <programlisting><![CDATA[mypackage.RfidEvent(x between 100 and 200, y between 0 and 50)]]></programlisting>
+
+			<para>
+				The <literal>not</literal> keyword can be used to determine if a value falls outside a given range:
+			</para>
+            <programlisting><![CDATA[mypackage.RfidEvent(x not in [0:100])]]></programlisting>
+
+			<para>
+				The equivalent statement using the <literal>between</literal> keyword is:
+			</para>
+            <programlisting><![CDATA[mypackage.RfidEvent(x not between 0 and 100)]]></programlisting>
 		</sect2>
         
         <sect2 id="pattern-filter-in" >
             <title>The 'in' Keyword</title>
 			<para>
-				The 'in' keyword for filter criteria determines if a given value matches any value in a list of values.
+				The <literal>in</literal> keyword for filter criteria determines if a given value matches any value in a list of values.
 			 </para>
 
 			<para>
-				In this example we are interested in RFID events where the category matches any the given values:
+				In this example we are interested in RFID events where the category matches any of the given values:
 			</para>
             <programlisting><![CDATA[mypackage.RfidEvent(category in ('Perishable', 'Container'))]]></programlisting>
+
+			<para>
+				By using the <literal>not in </literal>keywords we can filter events with a property value that does not match any of the values in a list of values:
+			 </para>
+            <programlisting><![CDATA[mypackage.RfidEvent(category not in ('Household', 'Electrical'))]]></programlisting>
 		</sect2>
 
         <sect2 id="pattern-filter-examples" >

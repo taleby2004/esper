@@ -52,7 +52,7 @@ public class NestedIterationNode extends QueryPlanNode
 
     public ExecNode makeExec(EventTable[][] indexPerStream, EventType[] streamTypes)
     {
-        if (childNodes.size() == 0)
+        if (childNodes.isEmpty())
         {
             throw new IllegalStateException("Zero child nodes for nested iteration");
         }

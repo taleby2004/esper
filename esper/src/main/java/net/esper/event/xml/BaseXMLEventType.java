@@ -84,7 +84,7 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
         }
         catch (XPathExpressionException ex)
         {
-            throw new EPException("XPath expression could not be compiled for expression '" + xpathExpression + "'", ex);
+            throw new EPException("XPath expression could not be compiled for expression '" + xpathExpression + '\'', ex);
         }
 
         setExplicitProperties(getters);

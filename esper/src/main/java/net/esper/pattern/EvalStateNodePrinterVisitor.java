@@ -21,7 +21,7 @@ public final class EvalStateNodePrinterVisitor implements EvalStateNodeVisitor
 
     private static String indent(int level)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < level; i++)
         {
             buffer.append("  ");

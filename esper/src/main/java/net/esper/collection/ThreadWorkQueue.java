@@ -20,7 +20,7 @@ public class ThreadWorkQueue
      * Adds event to the end of the event queue.
      * @param event to add
      */
-    public void add(Object event)
+    public static void add(Object event)
     {
         LinkedList<Object> queue = threadQueue.get();
         queue.addLast(event);
@@ -30,7 +30,7 @@ public class ThreadWorkQueue
      * Adds event to the front of the queue.
      * @param event to add
      */
-    public void addFront(Object event)
+    public static void addFront(Object event)
     {
         LinkedList<Object> queue = threadQueue.get();
         queue.addFirst(event);
@@ -40,7 +40,7 @@ public class ThreadWorkQueue
      * Returns the next event to getSelectListEvents, or null if there are no more events.
      * @return next event to getSelectListEvents
      */
-    public Object next()
+    public static Object next()
     {
         LinkedList<Object> queue = threadQueue.get();
         return queue.poll();

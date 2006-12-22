@@ -249,7 +249,7 @@ public class Configuration {
      */
 	public Configuration configure() throws EPException
     {
-		configure("/" + ESPER_DEFAULT_CONFIG);
+		configure('/' + ESPER_DEFAULT_CONFIG);
 		return this;
 	}
 
@@ -284,7 +284,7 @@ public class Configuration {
      * @return input stream for resource
      * @throws EPException thrown to indicate error reading configuration
      */
-    protected InputStream getConfigurationInputStream(String resource) throws EPException
+    protected static InputStream getConfigurationInputStream(String resource) throws EPException
     {
         log.debug( "Configuration resource: " + resource );
         return getResourceAsStream(resource);
@@ -397,6 +397,7 @@ public class Configuration {
     /**
      * Reset to an empty configuration.
      */
+    @SuppressWarnings({"CollectionWithoutInitialCapacity"})
     protected void reset()
     {
         eventClasses = new HashMap<String, String>();

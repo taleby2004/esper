@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Starts and provides the stop method for EQL statements.
  */
+@SuppressWarnings({"ObjectAllocationInLoop"})
 public class EPEQLStmtStartMethod
 {
     private final StatementSpec statementSpec;
@@ -124,10 +125,10 @@ public class EPEQLStmtStartMethod
             // Create view factories and parent view based on a database SQL statement
             else if (streamSpec instanceof DBStatementStreamSpec)
             {
-                if (streamSpec.getViewSpecs().size() > 0)
+                if (!streamSpec.getViewSpecs().isEmpty())
                 {
                     throw new ExprValidationException("Historical data joins do not allow views onto the data, view '"
-                            + streamSpec.getViewSpecs().get(0).getObjectNamespace() + ":" + streamSpec.getViewSpecs().get(0).getObjectName() + "' is not valid in this context");
+                            + streamSpec.getViewSpecs().get(0).getObjectNamespace() + ':' + streamSpec.getViewSpecs().get(0).getObjectName() + "' is not valid in this context");
                 }
 
                 DBStatementStreamSpec sqlStreamSpec = (DBStatementStreamSpec) streamSpec;
@@ -237,6 +238,7 @@ public class EPEQLStmtStartMethod
         return new Pair<Viewable, EPStatementStopMethod>(finalView, stopMethod);
     }
 
+    @SuppressWarnings({"ObjectAllocationInLoop"})
     private Viewable handleJoin(String[] streamNames,
                                 EventType[] streamTypes,
                                 Viewable[] streamViews,
@@ -271,6 +273,7 @@ public class EPEQLStmtStartMethod
      * @param streams - stream specifications
      * @return array of stream names
      */
+    @SuppressWarnings({"StringContatenationInLoop"})
     protected static String[] determineStreamNames(List<StreamSpec> streams)
     {
         String[] streamNames = new String[streams.size()];
@@ -286,6 +289,7 @@ public class EPEQLStmtStartMethod
         return streamNames;
     }
 
+    @SuppressWarnings({"StringContatenationInLoop"})
     private void validateNodes(StreamTypeService typeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate)
     {
         if (statementSpec.getFilterRootNode() != null)
@@ -301,7 +305,7 @@ public class EPEQLStmtStartMethod
                 // Make sure there is no aggregation in the where clause
                 List<ExprAggregateNode> aggregateNodes = new LinkedList<ExprAggregateNode>();
                 ExprAggregateNode.getAggregatesBottomUp(optionalFilterNode, aggregateNodes);
-                if (aggregateNodes.size() > 0)
+                if (!aggregateNodes.isEmpty())
                 {
                     throw new ExprValidationException("An aggregate function may not appear in a WHERE clause (use the HAVING clause)");
                 }

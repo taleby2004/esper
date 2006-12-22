@@ -155,7 +155,7 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
         // If there are child views, fire update method
         if (this.hasViews())
         {
-            if ((expired != null) && (expired.size() > 0))
+            if ((expired != null) && (!expired.isEmpty()))
             {
                 EventBean[] oldEvents = expired.toArray(new EventBean[0]);
                 if (viewUpdatedCollection != null)

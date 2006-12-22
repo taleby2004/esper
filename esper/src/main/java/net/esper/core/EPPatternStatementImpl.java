@@ -64,7 +64,7 @@ public class EPPatternStatementImpl extends EPStatementSupport implements Patter
         EventBean aggregateEvent = eventAdapterService.createMapFromUnderlying(matchEvent, eventType);
         lastEvent = aggregateEvent;
 
-        if (getListeners().size() > 0)
+        if (!getListeners().isEmpty())
         {
             // The dispatch has no data after initialization and after it fired
             if (!(dispatch.hasData()))

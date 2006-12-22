@@ -107,7 +107,7 @@ public final class IndexTreeBuilder
         }
 
         // If no parameters are specified, add to current node, and done
-        if (remainingParameters.size() == 0)
+        if (remainingParameters.isEmpty())
         {
             currentNode.getNodeRWLock().writeLock().lock();
             currentNode.add(filterCallback);
@@ -353,7 +353,7 @@ public final class IndexTreeBuilder
 
         // The index does not currently have this filterCallback value,
         // if there are no remaining parameters, create a node
-        if (remainingParameters.size() == 0)
+        if (remainingParameters.isEmpty())
         {
             FilterCallbackSetNode node = new FilterCallbackSetNode();
             addToNode(node, treePathInfo);
@@ -426,15 +426,15 @@ public final class IndexTreeBuilder
 
     private String printRemainingParameters()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         int count = 0;
         for (FilterValueSetParam parameter : remainingParameters)
         {
-            buffer.append("  param(" + count + ")");
-            buffer.append(" property=" + parameter.getPropertyName());
-            buffer.append(" operator=" + parameter.getFilterOperator());
-            buffer.append(" value=" + parameter.getFilterForValue());
+            buffer.append("  param(").append(count).append(')');
+            buffer.append(" property=").append(parameter.getPropertyName());
+            buffer.append(" operator=").append(parameter.getFilterOperator());
+            buffer.append(" value=").append(parameter.getFilterForValue());
             count++;
         }
 

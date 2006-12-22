@@ -39,7 +39,7 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
         ConfigurationDBRef config = mapDatabaseRef.get(databaseName);
         if (config == null)
         {
-            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + "'");
+            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + '\'');
         }
 
         DatabaseConnectionFactory connectionFactory = getConnectionFactory(databaseName);
@@ -67,7 +67,7 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
         ConfigurationDBRef config = mapDatabaseRef.get(databaseName);
         if (config == null)
         {
-            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + "'");
+            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + '\'');
         }
 
         ConfigurationDBRef.ConnectionSettings settings = (ConfigurationDBRef.ConnectionSettings) config.getConnectionSettings();
@@ -92,7 +92,7 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
         ConfigurationDBRef config = mapDatabaseRef.get(databaseName);
         if (config == null)
         {
-            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + "'");
+            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + '\'');
         }
 
         // default is no cache

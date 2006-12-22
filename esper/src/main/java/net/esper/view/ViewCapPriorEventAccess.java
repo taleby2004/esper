@@ -28,7 +28,7 @@ public class ViewCapPriorEventAccess implements ViewCapability
 
     public boolean inspect(List<ViewFactory> viewFactories)
     {
-        boolean unboundStream = viewFactories.size() == 0;
+        boolean unboundStream = viewFactories.isEmpty();
 
         // Find the prior event view to see if it has already been added
         PriorEventViewFactory factory = null;

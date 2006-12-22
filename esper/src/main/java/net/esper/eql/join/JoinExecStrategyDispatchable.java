@@ -54,7 +54,7 @@ public class JoinExecStrategyDispatchable implements Dispatchable, BufferObserve
         joinExecutionStrategy.join(newDataPerStream, oldDataPerStream);
     }
 
-    private EventBean[] getBufferData(FlushedEventBuffer buffer)
+    private static EventBean[] getBufferData(FlushedEventBuffer buffer)
     {
         if (buffer == null)
         {

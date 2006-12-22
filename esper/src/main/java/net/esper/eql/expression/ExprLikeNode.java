@@ -142,7 +142,7 @@ public class ExprLikeNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(this.getChildNodes().get(0).toExpressionString());
 
         if (isNot)

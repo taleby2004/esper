@@ -150,7 +150,7 @@ public final class UniqueByPropertyView extends ViewSupport
         // If there are child views, fire update method
         if (this.hasViews())
         {
-            if (postOldData.size() == 0)
+            if (postOldData.isEmpty())
             {
                 updateChildren(newData, null);
             }

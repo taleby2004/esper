@@ -35,7 +35,7 @@ public class TimerAtObserverFactory implements ObserverFactory
             throw new IllegalArgumentException("Invalid number of parameters for timer:at");
         }
 
-        Map<ScheduleUnit, SortedSet<Integer>> unitMap = new HashMap<ScheduleUnit, SortedSet<Integer>>();
+        EnumMap<ScheduleUnit, SortedSet<Integer>> unitMap = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         unitMap.put(ScheduleUnit.MINUTES, computeValues(args[0], ScheduleUnit.MINUTES));
         unitMap.put(ScheduleUnit.HOURS, computeValues(args[1], ScheduleUnit.HOURS));
         unitMap.put(ScheduleUnit.DAYS_OF_WEEK, computeValues(args[2], ScheduleUnit.DAYS_OF_WEEK));
@@ -48,7 +48,7 @@ public class TimerAtObserverFactory implements ObserverFactory
         spec = new ScheduleSpec(unitMap);
     }
 
-    private SortedSet<Integer> computeValues(Object unitParameter, ScheduleUnit unit)
+    private static SortedSet<Integer> computeValues(Object unitParameter, ScheduleUnit unit)
     {
         if (unitParameter instanceof Integer)
         {

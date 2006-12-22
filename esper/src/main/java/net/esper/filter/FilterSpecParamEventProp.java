@@ -62,7 +62,7 @@ public final class FilterSpecParamEventProp extends FilterSpecParam
         if (type == null)
         {
             throw new IllegalStateException("Event named '" +
-                    "'" + resultEventAsName + "' not found in event pattern result set");
+                    '\'' + resultEventAsName + "' not found in event pattern result set");
         }
         return type.getPropertyType(resultEventProperty);
     }    
@@ -73,7 +73,7 @@ public final class FilterSpecParamEventProp extends FilterSpecParam
         if (event == null)
         {
             throw new IllegalStateException("Event named '" +
-                    "'" + resultEventAsName + "' not found in event pattern result set");
+                    '\'' + resultEventAsName + "' not found in event pattern result set");
         }
 
         Object value = event.get(resultEventProperty);

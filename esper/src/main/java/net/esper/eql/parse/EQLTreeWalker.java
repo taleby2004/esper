@@ -246,7 +246,7 @@ public class EQLTreeWalker extends EQLBaseWalker
                 break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
-                        "' with text '" + node.getText() + "'");
+                        "' with text '" + node.getText() + '\'');
         }
 
         // For each AST child node of this AST node that generated an ExprNode add the child node to the expression node.
@@ -316,7 +316,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
         log.debug(".endPattern");
 
-        if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.size() == 0)))
+        if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.isEmpty())))
         {
             throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child elements for root");
         }
@@ -354,7 +354,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     private void leaveSelectionElement(AST node) throws ASTWalkException
     {
         log.debug(".leaveSelectionElement");
-        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.size() == 0)))
+        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.isEmpty())))
         {
             throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
         }
@@ -407,7 +407,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
         else if (node.getFirstChild().getType() == PATTERN_INCL_EXPR)
         {
-            if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.size() == 0)))
+            if ((astPatternNodeMap.size() > 1) || ((astPatternNodeMap.isEmpty())))
             {
                 throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child elements for root");
             }
@@ -580,7 +580,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
         else
         {
-            throw new IllegalArgumentException("Node type " + childNode.getType() + " " + childNode.getText() + " not a recognized min max node");
+            throw new IllegalArgumentException("Node type " + childNode.getType() + ' ' + childNode.getText() + " not a recognized min max node");
         }
 
         // Determine distinct or not
@@ -850,7 +850,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     private void leaveOrderByElement(AST node) throws ASTWalkException
     {
         log.debug(".leaveOrderByElement");
-        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.size() == 0)))
+        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.isEmpty())))
         {
             throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
         }
@@ -1027,10 +1027,11 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
         catch (Exception e)
         {
-            String message = "Error invoking constructor for guard '" + objectName;
-            message += "', invalid parameter list for the object";
+            StringBuilder message = new StringBuilder("Error invoking constructor for guard '");
+            message.append(objectName);
+            message.append("', invalid parameter list for the object");
             log.fatal(".leaveGuard " + message, e);
-            throw new ASTWalkException(message);
+            throw new ASTWalkException(message.toString());
         }
 
         EvalGuardNode guardNode = new EvalGuardNode(guardFactory);
@@ -1041,7 +1042,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
         log.debug(".leaveCase2Node inCase2=" + inCase2);
 
-        if (astExprNodeMap.size() == 0)
+        if (astExprNodeMap.isEmpty())
         {
             throw new ASTWalkException("Unexpected AST tree contains zero child element for case node");
         }
@@ -1096,10 +1097,13 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
         catch (Exception e)
         {
-            String message = "Error invoking constructor for observer '" + objectNamespace + ":" + objectName;
-            message += "', invalid parameter list for the object";
+            StringBuilder message = new StringBuilder("Error invoking constructor for observer '");
+            message.append(objectNamespace);
+            message.append(':');
+            message.append(objectName);
+            message.append("', invalid parameter list for the object");
             log.fatal(".leaveObserver " + message, e);
-            throw new ASTWalkException(message);
+            throw new ASTWalkException(message.toString());
         }
 
         EvalObserverNode observerNode = new EvalObserverNode(observerFactory);

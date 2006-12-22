@@ -121,7 +121,7 @@ public class ExprBetweenNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         Iterator<ExprNode> it = this.getChildNodes().iterator();
         buffer.append(it.next().toExpressionString());
@@ -141,7 +141,7 @@ public class ExprBetweenNode extends ExprNode
         return buffer.toString();
     }
 
-    private ExprBetweenComp makeComputer(Class compareType)
+    private static ExprBetweenComp makeComputer(Class compareType)
     {
         ExprBetweenComp computer = null;
 
@@ -165,7 +165,7 @@ public class ExprBetweenNode extends ExprNode
         public boolean isBetween(Object value, Object lower, Object upper);
     }
 
-    private class ExprBetweenCompString implements ExprBetweenComp
+    private static class ExprBetweenCompString implements ExprBetweenComp
     {
         public boolean isBetween(Object value, Object lower, Object upper)
         {
@@ -203,7 +203,7 @@ public class ExprBetweenNode extends ExprNode
         }
     }
 
-    private class ExprBetweenCompDouble implements ExprBetweenComp
+    private static class ExprBetweenCompDouble implements ExprBetweenComp
     {
         public boolean isBetween(Object value, Object lower, Object upper)
         {
@@ -231,7 +231,7 @@ public class ExprBetweenNode extends ExprNode
         }
     }
 
-    private class ExprBetweenCompLong implements ExprBetweenComp
+    private static class ExprBetweenCompLong implements ExprBetweenComp
     {
         public boolean isBetween(Object value, Object lower, Object upper)
         {

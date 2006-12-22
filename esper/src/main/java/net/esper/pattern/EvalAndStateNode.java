@@ -97,7 +97,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         List<MatchedEventMap> result = generateMatchEvents(matchEvent, fromNode, eventsPerChild);
 
         // Check if this is quitting
-        boolean quitted = (activeChildNodes.size() == 0);
+        boolean quitted = (activeChildNodes.isEmpty());
         if (quitted)
         {
             quit();

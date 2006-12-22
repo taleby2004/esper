@@ -59,7 +59,7 @@ public class SchemaXMLEventType extends BaseXMLEventType {
         }
         catch (Exception ex)
         {
-            throw new EPException("Failed to read schema '" + schemaResource + "'", ex);
+            throw new EPException("Failed to read schema '" + schemaResource + '\'', ex);
         }
 
         // Use the root namespace for resolving the root element
@@ -96,7 +96,7 @@ public class SchemaXMLEventType extends BaseXMLEventType {
 
         if (xsModel == null)
         {
-            throw new EPException("Failed to read schema via URL '" + schemaResource + "'");
+            throw new EPException("Failed to read schema via URL '" + schemaResource + '\'');
         }
     }
 
@@ -126,7 +126,7 @@ public class SchemaXMLEventType extends BaseXMLEventType {
             return getter;
         }
         catch (XPathExpressionException e) {
-            throw new EPException("Error constructing XPath expression from property name '" + property + "'", e);
+            throw new EPException("Error constructing XPath expression from property name '" + property + '\'', e);
         }
     }
 

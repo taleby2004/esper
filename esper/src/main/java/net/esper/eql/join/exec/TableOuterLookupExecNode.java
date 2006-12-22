@@ -43,13 +43,10 @@ public class TableOuterLookupExecNode extends ExecNode
 
         // If no events are found, since this is an outer join, create a result row leaving the
         // joined event as null.
-        if ((joinedEvents == null) || (joinedEvents.size() == 0))
+        if ((joinedEvents == null) || (joinedEvents.isEmpty()))
         {
             EventBean[] events = new EventBean[prefillPath.length];
-            for (int i = 0; i < events.length; i++)
-            {
-                events[i] = prefillPath[i];
-            }
+            System.arraycopy(prefillPath, 0, events, 0, events.length);
             result.add(events);
 
             return;
@@ -59,10 +56,7 @@ public class TableOuterLookupExecNode extends ExecNode
         for (EventBean joinedEvent : joinedEvents)
         {
             EventBean[] events = new EventBean[prefillPath.length];
-            for (int i = 0; i < events.length; i++)
-            {
-                events[i] = prefillPath[i];
-            }
+            System.arraycopy(prefillPath, 0, events, 0, events.length);
             events[indexedStream] = joinedEvent;
             result.add(events);
         }

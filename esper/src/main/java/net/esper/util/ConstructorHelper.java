@@ -133,7 +133,7 @@ public class ConstructorHelper
         for (int i = 0, size = ctors.length; i < size; i++)
         {
             Class[] ctorParams = ctors[i].getParameterTypes();
-            log.debug(".invokeConstructor Constructor " + i + " " + Arrays.toString(ctorParams));
+            log.debug(".invokeConstructor Constructor " + i + ' ' + Arrays.toString(ctorParams));
         }
     }
 

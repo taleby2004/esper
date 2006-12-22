@@ -63,7 +63,7 @@ public class PollingViewableFactory
         }
         catch (DatabaseConfigException ex)
         {
-            String text = "Error connecting to database '" + databaseName + "'";
+            String text = "Error connecting to database '" + databaseName + '\'';
             log.error(text, ex);
             throw new ExprValidationException(text + ", reason: " + ex.getMessage());
         }
@@ -75,7 +75,7 @@ public class PollingViewableFactory
         }
         catch (DatabaseConfigException ex)
         {
-            String text = "Error connecting to database '" + databaseName + "'";
+            String text = "Error connecting to database '" + databaseName + '\'';
             log.error(text, ex);
             throw new ExprValidationException(text + ", reason: " + ex.getMessage());
         }
@@ -96,7 +96,7 @@ public class PollingViewableFactory
             {
                 // don't handle
             }
-            String text = "Error executing statement '" + preparedStatementText + "'";
+            String text = "Error executing statement '" + preparedStatementText + '\'';
             log.error(text, ex);
             throw new ExprValidationException(text + ", reason: " + ex.getMessage());
         }
@@ -129,7 +129,7 @@ public class PollingViewableFactory
             {
                 // don't handle
             }
-            String text = "Error obtaining parameter metadata from prepared statement '" + preparedStatementText + "'";
+            String text = "Error obtaining parameter metadata from prepared statement '" + preparedStatementText + '\'';
             log.error(text, ex);
             throw new ExprValidationException(text + ", please check the statement, reason: " + ex.getMessage());
         }
@@ -239,7 +239,7 @@ public class PollingViewableFactory
 
     private static String createPreparedStatement(List<PlaceholderParser.Fragment> parseFragements)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (PlaceholderParser.Fragment fragment : parseFragements)
         {
             if (!fragment.isParameter())
@@ -248,7 +248,7 @@ public class PollingViewableFactory
             }
             else
             {
-                buffer.append("?");
+                buffer.append('?');
             }
         }
         return buffer.toString();

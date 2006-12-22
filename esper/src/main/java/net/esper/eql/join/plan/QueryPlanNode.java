@@ -31,9 +31,10 @@ public abstract class QueryPlanNode
      * @param execNodeSpecs - plans to print
      * @return readable text with plans
      */
+    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend", "StringContatenationInLoop"})
     public static String print(QueryPlanNode[] execNodeSpecs)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("QueryPlanNode[]\n");
 
         for (int i = 0; i < execNodeSpecs.length; i++)

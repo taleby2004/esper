@@ -32,7 +32,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
     {
         this.eventAdapterService = eventAdapterService;
 
-        if (selectionList.size() == 0)
+        if (selectionList.isEmpty())
         {
             throw new IllegalArgumentException("Empty selection list not supported");
         }
@@ -68,7 +68,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
 
         // Get column names
-        if ((insertIntoDesc != null) && (insertIntoDesc.getColumnNames().size() > 0))
+        if ((insertIntoDesc != null) && (!insertIntoDesc.getColumnNames().isEmpty()))
         {
             columnNames = insertIntoDesc.getColumnNames().toArray(new String[0]);
         }
@@ -141,7 +141,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
 
         // Verify number of columns matches the select clause
-        if ( (insertIntoDesc.getColumnNames().size() > 0) &&
+        if ( (!insertIntoDesc.getColumnNames().isEmpty()) &&
              (insertIntoDesc.getColumnNames().size() != selectionList.size()) )
         {
             throw new ExprValidationException("Number of supplied values in the select clause does not match insert-into clause");

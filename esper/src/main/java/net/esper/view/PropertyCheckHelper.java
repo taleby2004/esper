@@ -20,7 +20,7 @@ public final class PropertyCheckHelper
 
         if (clazz == null)
         {
-            return "Parent view does not contain a field named '" + fieldName + "'";
+            return "Parent view does not contain a field named '" + fieldName + '\'';
         }
 
         return null;
@@ -39,14 +39,14 @@ public final class PropertyCheckHelper
 
         if (clazz == null)
         {
-            return "Parent view does not contain a field named '" + fieldNameOne + "'";
+            return "Parent view does not contain a field named '" + fieldNameOne + '\'';
         }
 
         clazz = getClass(type, fieldNameTwo);
 
         if (clazz == null)
         {
-            return "Parent view does not contain a field named '" + fieldNameTwo + "'";
+            return "Parent view does not contain a field named '" + fieldNameTwo + '\'';
         }
 
         return null;
@@ -93,7 +93,7 @@ public final class PropertyCheckHelper
 
         if (clazz == null)
         {
-            return "Parent view does not contain a field named '" + longFieldName + "'";
+            return "Parent view does not contain a field named '" + longFieldName + '\'';
         }
 
         if ((clazz != Long.class) && (clazz != long.class))
@@ -123,7 +123,7 @@ public final class PropertyCheckHelper
 
         if (clazz == null)
         {
-            return "Parent view does not contain a field named '" + numericFieldName + "'";
+            return "Parent view does not contain a field named '" + numericFieldName + '\'';
         }
 
         if (!JavaClassHelper.isNumeric(clazz))

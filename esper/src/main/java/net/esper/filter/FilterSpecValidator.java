@@ -41,7 +41,7 @@ public class FilterSpecValidator
             // Check value not null
             if (param.getFilterValueClass(optionalTaggedEventTypes) == null)
             {
-                throw new ASTFilterSpecValidationException("Null filter-for value supplied for property named '" + property + "'");
+                throw new ASTFilterSpecValidationException("Null filter-for value supplied for property named '" + property + '\'');
             }
 
             // Check numeric
@@ -49,7 +49,7 @@ public class FilterSpecValidator
             {
                 if (!(JavaClassHelper.isNumeric(type)))
                 {
-                    throw new ASTFilterSpecValidationException("Invalid operator for non-numeric property named '" + property + "'");
+                    throw new ASTFilterSpecValidationException("Invalid operator for non-numeric property named '" + property + '\'');
                 }
             }
 
@@ -63,7 +63,7 @@ public class FilterSpecValidator
                 {
                     throw new ASTFilterSpecValidationException("Type mismatch for property named '" + property +
                             "', supplied type of '" + param.getFilterValueClass(optionalTaggedEventTypes).getName() +
-                            "' does not match property type '" + type.getName() + "'");
+                            "' does not match property type '" + type.getName() + '\'');
                 }
             }
         }

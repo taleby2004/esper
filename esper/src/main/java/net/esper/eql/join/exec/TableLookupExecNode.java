@@ -48,10 +48,7 @@ public class TableLookupExecNode extends ExecNode
         for (EventBean joinedEvent : joinedEvents)
         {
             EventBean[] events = new EventBean[prefillPath.length];
-            for (int i = 0; i < events.length; i++)
-            {
-                events[i] = prefillPath[i];
-            }
+            System.arraycopy(prefillPath, 0, events, 0, events.length);
             events[indexedStream] = joinedEvent;
             result.add(events);
         }

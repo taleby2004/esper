@@ -92,7 +92,7 @@ class MapEventBean implements EventBean
 
         final MapEventBean other = (MapEventBean) otherObject;
 
-        if (other.getEventType() != eventType)
+        if (other.eventType != eventType)
         {
             return false;
         }

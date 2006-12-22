@@ -165,9 +165,9 @@ public class QueryGraph
             addedEquivalency = false;
 
             // For each stream-to-stream combination
-            for (int lookupStream = 0; lookupStream < queryGraph.getNumStreams(); lookupStream++)
+            for (int lookupStream = 0; lookupStream < queryGraph.numStreams; lookupStream++)
             {
-                for (int indexedStream = 0; indexedStream < queryGraph.getNumStreams(); indexedStream++)
+                for (int indexedStream = 0; indexedStream < queryGraph.numStreams; indexedStream++)
                 {
                     if (lookupStream == indexedStream)
                     {
@@ -229,7 +229,7 @@ public class QueryGraph
     {
         boolean addedEquivalency = false;
 
-        for (int otherStream = 0; otherStream < queryGraph.getNumStreams(); otherStream++)
+        for (int otherStream = 0; otherStream < queryGraph.numStreams; otherStream++)
         {
             if ((otherStream == lookupStream) || (otherStream == indexedStream))
             {
@@ -270,7 +270,7 @@ public class QueryGraph
     /**
      * Property lists stored as a value for each stream-to-stream relationship.
      */
-    public class GraphValue
+    public static class GraphValue
     {
         private List<String> propertiesLeft;
         private List<String> propertiesRight;

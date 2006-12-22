@@ -231,7 +231,7 @@ public final class GroupByView extends ViewSupport implements ContextAwareView
             subViewList.add(copyChildView);
 
             // Make the sub views for child copying from the original to the child
-            copySubViews(groupView.getGroupFieldNames(), groupByValues, originalChildView, copyChildView,
+            copySubViews(groupView.groupFieldNames, groupByValues, originalChildView, copyChildView,
                     viewServiceContext);
         }
 

@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * Factory for building a {@link JoinSetComposer} from analyzing filter nodes, for
  * fast join tuple result set composition.
  */
+@SuppressWarnings({"StringContatenationInLoop"})
 public class JoinSetComposerFactory
 {
     /**
@@ -90,7 +91,7 @@ public class JoinSetComposerFactory
 
             boolean isOuterJoin = false;
             ExprEqualsNode equalsNode = null;
-            if (outerJoinDescList.size() > 0)
+            if (!outerJoinDescList.isEmpty())
             {
                 OuterJoinDesc outerJoinDesc = outerJoinDescList.get(0);
                 if (outerJoinDesc.getOuterJoinType().equals(OuterJoinType.FULL))

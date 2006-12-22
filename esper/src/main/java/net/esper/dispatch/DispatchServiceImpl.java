@@ -4,8 +4,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 import java.util.LinkedList;
 
-import net.esper.util.AssertionFacility;
-
 /**
  * Implements dispatch service using a thread-local linked list of Dispatchable instances.
  */
@@ -44,16 +42,12 @@ public class DispatchServiceImpl implements DispatchService
         addToQueue(dispatchable, dispatchQueue);
     }
 
-    private void addToQueue(Dispatchable dispatchable, LinkedList<Dispatchable> dispatchQueue)
+    private static void addToQueue(Dispatchable dispatchable, LinkedList<Dispatchable> dispatchQueue)
     {
-        // Make sure the same dispatchable is added once.
-        // Could this be a performance problem when the list gets large, it should not get large.
-        AssertionFacility.assertFalse(dispatchQueue.contains(dispatchable), "Dispatchable instance already in queue");
-
         dispatchQueue.add(dispatchable);
     }
 
-    private void dispatchFromQueue(LinkedList<Dispatchable> dispatchQueue)
+    private static void dispatchFromQueue(LinkedList<Dispatchable> dispatchQueue)
     {
         if (log.isDebugEnabled())
         {

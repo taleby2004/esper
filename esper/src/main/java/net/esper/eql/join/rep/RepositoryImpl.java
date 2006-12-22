@@ -51,7 +51,7 @@ public class RepositoryImpl implements Repository
 
     public void addResult(Cursor cursor, Set<EventBean> lookupResults, int resultStream)
     {
-        if (lookupResults.size() == 0)
+        if (lookupResults.isEmpty())
         {
             throw new IllegalArgumentException("Attempting to add zero results");
         }

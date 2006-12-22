@@ -119,7 +119,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
         isScheduled = false;
     }
 
-    private class Item
+    private static class Item
     {
         private List<EventBean> data;
         private long time;

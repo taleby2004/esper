@@ -51,7 +51,7 @@ public final class FilterSpecParamIn extends FilterSpecParam
             inListConstantsOnly = new MultiKeyUntyped(constants);
         }
 
-        if (!(filterOperator == FilterOperator.IN_LIST_OF_VALUES))
+        if ((filterOperator != FilterOperator.IN_LIST_OF_VALUES) && ((filterOperator != FilterOperator.NOT_IN_LIST_OF_VALUES)))
         {
             throw new IllegalArgumentException("Illegal filter operator " + filterOperator + " supplied to " +
                     "in-values filter parameter");
@@ -99,7 +99,7 @@ public final class FilterSpecParamIn extends FilterSpecParam
 
     public final String toString()
     {
-        return super.toString() + "  in=(listOfValues=" + listOfValues.toString() + ")";
+        return super.toString() + "  in=(listOfValues=" + listOfValues.toString() + ')';
     }
 
     public boolean equals(Object obj)

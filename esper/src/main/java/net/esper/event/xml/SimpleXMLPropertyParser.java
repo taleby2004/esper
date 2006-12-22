@@ -38,8 +38,8 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
     {
         AST ast = parse(propertyName);
 
-        StringBuffer xPathBuf = new StringBuffer();
-        xPathBuf.append("/");
+        StringBuilder xPathBuf = new StringBuilder();
+        xPathBuf.append('/');
         xPathBuf.append(rootElementName);
 
         if (ast.getNumberOfChildren() == 1)
@@ -58,7 +58,7 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
         }
 
         String xPath = xPathBuf.toString();
-        log.debug(".parse For property '" + propertyName + "' the xpath is '" + xPath + "'");
+        log.debug(".parse For property '" + propertyName + "' the xpath is '" + xPath + '\'');
 
         return xPathFactory.newXPath().compile(xPath);
     }
@@ -68,13 +68,13 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
         switch (child.getType())
         {
             case EVENT_PROP_SIMPLE:
-                return "/" + child.getFirstChild().getText();
+                return '/' + child.getFirstChild().getText();
             case EVENT_PROP_MAPPED:
                 String key = StringValue.parseString(child.getFirstChild().getNextSibling().getText());
-                return "/" + child.getFirstChild().getText() + "[@id='" + key + "']";
+                return '/' + child.getFirstChild().getText() + "[@id='" + key + "']";
             case EVENT_PROP_INDEXED:
                 int index = IntValue.parseString(child.getFirstChild().getNextSibling().getText());
-                return "/" + child.getFirstChild().getText() + "[position() = " + index + "]";
+                return '/' + child.getFirstChild().getText() + "[position() = " + index + ']';
             default:
                 throw new IllegalStateException("Event property AST node not recognized, type=" + child.getType());
         }
@@ -96,11 +96,11 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
         }
         catch (TokenStreamException e)
         {
-            throw new PropertyAccessException("Failed to parse property name '" + propertyName + "'", e);
+            throw new PropertyAccessException("Failed to parse property name '" + propertyName + '\'', e);
         }
         catch (RecognitionException e)
         {
-            throw new PropertyAccessException("Failed to parse property name '" + propertyName + "'", e);
+            throw new PropertyAccessException("Failed to parse property name '" + propertyName + '\'', e);
         }
 
         return parser.getAST();

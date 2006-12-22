@@ -188,7 +188,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
                 eventCount--;
 
                 // Clear out entry if not used
-                if (events.size() == 0)
+                if (events.isEmpty())
                 {
                     sortedEvents.remove(lastKey);
                 }
@@ -210,7 +210,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         if (this.hasViews())
         {
             EventBean[] expiredArr = null;
-            if (removedEvents.size() > 0)
+            if (!removedEvents.isEmpty())
             {
                 expiredArr = removedEvents.toArray(new EventBean[0]);
             }
@@ -255,7 +255,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
         }
 
         boolean result = listOfBeans.remove(bean);
-        if (listOfBeans.size() == 0)
+        if (listOfBeans.isEmpty())
         {
             sortedEvents.remove(key);
         }
@@ -275,7 +275,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView
 
     public boolean isEmpty()
     {
-        return sortedEvents.size() == 0;
+        return sortedEvents.isEmpty();
     }
 
     private static final Log log = LogFactory.getLog(SortWindowView.class);

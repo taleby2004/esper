@@ -54,7 +54,7 @@ public final class JMXLastEventIndicator implements UpdateListener
         String objectName = domainName;
         if (keyProperties.length() != 0)
         {
-            objectName += ":" + keyProperties + ",indexProperty=" + indexProperty;
+            objectName += ':' + keyProperties + ",indexProperty=" + indexProperty;
         }
         else
         {

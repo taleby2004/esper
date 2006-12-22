@@ -40,7 +40,7 @@ public class QueryPlanBuilder
         QueryGraph queryGraph = new QueryGraph(numStreams);
 
         // For outer joins the query graph will just contain outer join relationships
-        if (outerJoinDescList.size() != 0)
+        if (!outerJoinDescList.isEmpty())
         {
             OuterJoinAnalyzer.analyze(outerJoinDescList, queryGraph);
             log.debug(methodName + " After outer join queryGraph=\n" + queryGraph);
@@ -64,7 +64,7 @@ public class QueryPlanBuilder
         if (numStreams == 2)
         {
             OuterJoinType outerJoinType = null;
-            if (outerJoinDescList.size() != 0)
+            if (!outerJoinDescList.isEmpty())
             {
                 outerJoinType = outerJoinDescList.get(0).getOuterJoinType();
             }
@@ -78,7 +78,7 @@ public class QueryPlanBuilder
             return queryPlan;
         }
 
-        if (outerJoinDescList.size() == 0)
+        if (outerJoinDescList.isEmpty())
         {
             QueryPlan queryPlan = NStreamQueryPlanBuilder.build(queryGraph);
 

@@ -121,6 +121,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator
      * Recursively print out all nodes.
      * @param prefix is printed out for naming the printed info
      */
+    @SuppressWarnings({"StringContatenationInLoop"})
     public final void dumpDebug(String prefix)
     {
         log.debug(".dumpDebug " + prefix + this.toString());
@@ -142,7 +143,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator
      */
     public static boolean deepEquals(ExprNode nodeOne, ExprNode nodeTwo)
     {
-        if (nodeOne.getChildNodes().size() != nodeTwo.getChildNodes().size())
+        if (nodeOne.childNodes.size() != nodeTwo.childNodes.size())
         {
             return false;
         }
@@ -150,10 +151,10 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator
         {
             return false;
         }
-        for (int i = 0; i < nodeOne.getChildNodes().size(); i++)
+        for (int i = 0; i < nodeOne.childNodes.size(); i++)
         {
-            ExprNode childNodeOne = nodeOne.getChildNodes().get(i);
-            ExprNode childNodeTwo = nodeTwo.getChildNodes().get(i);
+            ExprNode childNodeOne = nodeOne.childNodes.get(i);
+            ExprNode childNodeTwo = nodeTwo.childNodes.get(i);
 
             if (!ExprNode.deepEquals(childNodeOne, childNodeTwo))
             {
@@ -172,7 +173,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator
         StringBuffer name = new StringBuffer(identNode.getUnresolvedPropertyName());
         if(identNode.getStreamOrPropertyName() != null)
         {
-            name.insert(0, identNode.getStreamOrPropertyName() + ".");
+            name.insert(0, identNode.getStreamOrPropertyName() + '.');
         }
 
         // Parse the string to see if it looks like a method invocation

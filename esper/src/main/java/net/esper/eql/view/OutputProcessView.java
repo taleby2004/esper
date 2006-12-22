@@ -137,8 +137,8 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
 		log.debug(".continueOutputProcessingView");			
 
 		// Get the arrays of new and old events, or null if none
-		EventBean[] newEvents = newEventsList.size() > 0 ? newEventsList.toArray(new EventBean[0]) : null;
-		EventBean[] oldEvents = oldEventsList.size() > 0 ? oldEventsList.toArray(new EventBean[0]) : null;		
+		EventBean[] newEvents = !newEventsList.isEmpty() ? newEventsList.toArray(new EventBean[0]) : null;
+		EventBean[] oldEvents = !oldEventsList.isEmpty() ? oldEventsList.toArray(new EventBean[0]) : null;
 
 		
 		if(resultSetProcessor != null)
@@ -260,7 +260,7 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
         }
     }
 
-    public class OutputProcessTransform implements TransformEventMethod
+    public static class OutputProcessTransform implements TransformEventMethod
     {
         private final ResultSetProcessor resultSetProcessor;
         private final EventBean[] newData;

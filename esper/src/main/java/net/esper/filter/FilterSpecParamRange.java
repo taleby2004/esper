@@ -28,7 +28,7 @@ public final class FilterSpecParamRange extends FilterSpecParam
         this.min = min;
         this.max = max;
 
-        if (!(filterOperator.isRangeOperator()))
+        if (!(filterOperator.isRangeOperator()) && (!(filterOperator.isInvertedRangeOperator())))
         {
             throw new IllegalArgumentException("Illegal filter operator " + filterOperator + " supplied to " +
                     "range filter parameter");
@@ -51,7 +51,7 @@ public final class FilterSpecParamRange extends FilterSpecParam
 
     public final String toString()
     {
-        return super.toString() + "  range=(min=" + min.toString() + ",max=" + max.toString() + ")";
+        return super.toString() + "  range=(min=" + min.toString() + ",max=" + max.toString() + ')';
     }
 
     public boolean equals(Object obj)

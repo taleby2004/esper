@@ -719,7 +719,10 @@ public class TestEQLTreeWalker extends TestCase
     {
         String className = SupportBean.class.getName();
         String expression = "select * from " + className + "(intPrimitive in [1:2], intBoxed in (1,2), doubleBoxed between 2 and 3)";
-        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        parseAndWalkEQL(expression);
+
+        expression = "select * from " + className + "(intPrimitive not in [1:2], intBoxed not in (1,2), doubleBoxed not between 2 and 3)";
+        parseAndWalkEQL(expression);
     }
 
     private double tryInterval(String interval) throws Exception

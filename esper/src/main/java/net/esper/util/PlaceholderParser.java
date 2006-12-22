@@ -63,7 +63,7 @@ public class PlaceholderParser
                 continue;
             }
 
-            int endIndex = parseString.indexOf("}", startIndex);
+            int endIndex = parseString.indexOf('}', startIndex);
             if (endIndex == -1)
             {
                 throw new PlaceholderParseException("Syntax error in property: " + parseString.substring(startIndex, parseString.length()));

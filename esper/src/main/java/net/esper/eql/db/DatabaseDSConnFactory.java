@@ -40,7 +40,7 @@ public class DatabaseDSConnFactory implements DatabaseConnectionFactory
         InitialContext ctx = null;
         try
         {
-            if (envProps.size() > 0)
+            if (!envProps.isEmpty())
             {
                 ctx = new InitialContext(envProps);
             }
@@ -62,12 +62,12 @@ public class DatabaseDSConnFactory implements DatabaseConnectionFactory
         }
         catch (NamingException ex)
         {
-            throw new DatabaseConfigException("Error looking up data source in context using name '" + lookupName + "'", ex);
+            throw new DatabaseConfigException("Error looking up data source in context using name '" + lookupName + '\'', ex);
         }
 
         if (ds == null)
         {
-            throw new DatabaseConfigException("Null data source obtained through context using name '" + lookupName + "'");
+            throw new DatabaseConfigException("Null data source obtained through context using name '" + lookupName + '\'');
         }
 
         Connection connection = null;

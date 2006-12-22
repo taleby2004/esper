@@ -110,7 +110,7 @@ public class ExprInNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String delimiter = "";
 
         Iterator<ExprNode> it = this.getChildNodes().iterator();
@@ -133,7 +133,7 @@ public class ExprInNode extends ExprNode
         }
         while (it.hasNext());
 
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

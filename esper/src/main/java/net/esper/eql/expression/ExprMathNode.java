@@ -81,14 +81,14 @@ public class ExprMathNode extends ExprNode
 
     public String toExpressionString()
     {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("(");
+        StringBuilder buffer = new StringBuilder();
+        buffer.append('(');
 
         buffer.append(this.getChildNodes().get(0).toExpressionString());
         buffer.append(mathArithTypeEnum.getExpressionText());
         buffer.append(this.getChildNodes().get(1).toExpressionString());
 
-        buffer.append(")");
+        buffer.append(')');
         return buffer.toString();
     }
 

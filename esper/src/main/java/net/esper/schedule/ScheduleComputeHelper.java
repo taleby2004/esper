@@ -62,99 +62,103 @@ public final class ScheduleComputeHelper
 
     private static Date compute(ScheduleSpec spec, long afterTimeInMillis)
     {
-		Calendar after = Calendar.getInstance();
-        after.setTimeInMillis(afterTimeInMillis);
-
-        ScheduleCalendar result = new ScheduleCalendar();
-        result.setMilliseconds(after.get(Calendar.MILLISECOND));
-
-        SortedSet<Integer> minutesSet = spec.getUnitValues().get(ScheduleUnit.MINUTES);
-        SortedSet<Integer> hoursSet = spec.getUnitValues().get(ScheduleUnit.HOURS);
-        SortedSet<Integer> monthsSet = spec.getUnitValues().get(ScheduleUnit.MONTHS);
-        SortedSet<Integer> secondsSet = null;
-        boolean isSecondsSpecified = false;
-
-        if (spec.getUnitValues().containsKey(ScheduleUnit.SECONDS))
+        while (true)
         {
-            isSecondsSpecified = true;
-            secondsSet = spec.getUnitValues().get(ScheduleUnit.SECONDS);
-        }
+            Calendar after = Calendar.getInstance();
+            after.setTimeInMillis(afterTimeInMillis);
 
-        if (isSecondsSpecified)
-        {
-            result.setSecond(nextValue(secondsSet, after.get(Calendar.SECOND)));
-            if (result.getSecond() == -1)
+            ScheduleCalendar result = new ScheduleCalendar();
+            result.setMilliseconds(after.get(Calendar.MILLISECOND));
+
+            SortedSet<Integer> minutesSet = spec.getUnitValues().get(ScheduleUnit.MINUTES);
+            SortedSet<Integer> hoursSet = spec.getUnitValues().get(ScheduleUnit.HOURS);
+            SortedSet<Integer> monthsSet = spec.getUnitValues().get(ScheduleUnit.MONTHS);
+            SortedSet<Integer> secondsSet = null;
+            boolean isSecondsSpecified = false;
+
+            if (spec.getUnitValues().containsKey(ScheduleUnit.SECONDS))
+            {
+                isSecondsSpecified = true;
+                secondsSet = spec.getUnitValues().get(ScheduleUnit.SECONDS);
+            }
+
+            if (isSecondsSpecified)
+            {
+                result.setSecond(nextValue(secondsSet, after.get(Calendar.SECOND)));
+                if (result.getSecond() == -1)
+                {
+                    result.setSecond(nextValue(secondsSet, 0));
+                    after.add(Calendar.MINUTE, 1);
+                }
+            }
+
+            result.setMinute(nextValue(minutesSet, after.get(Calendar.MINUTE)));
+            if (result.getMinute() != after.get(Calendar.MINUTE))
             {
                 result.setSecond(nextValue(secondsSet, 0));
-                after.add(Calendar.MINUTE, 1);
             }
-        }
-
-        result.setMinute(nextValue(minutesSet, after.get(Calendar.MINUTE)));
-        if (result.getMinute() != after.get(Calendar.MINUTE))
-        {
-			result.setSecond(nextValue(secondsSet, 0));
-        }
-        if (result.getMinute() == -1)
-        {
-            result.setMinute(nextValue(minutesSet, 0));
-            after.add(Calendar.HOUR_OF_DAY, 1);
-        }
-
-        result.setHour(nextValue(hoursSet, after.get(Calendar.HOUR_OF_DAY)));
-        if (result.getHour() != after.get(Calendar.HOUR_OF_DAY))
-        {
-			result.setSecond(nextValue(secondsSet, 0));
-            result.setMinute(nextValue(minutesSet, 0));
-        }
-        if (result.getHour() == -1)
-        {
-            result.setHour(nextValue(hoursSet, 0));
-            after.add(Calendar.DAY_OF_MONTH, 1);
-        }
-
-        // This call may change second, minute and/or hour parameters
-        // They may be reset to minimum values if the day rolled
-        result.setDayOfMonth(determineDayOfMonth(spec, after, result));
-
-        boolean dayMatchRealDate = false;
-        while (!dayMatchRealDate)
-        {
-            if (checkDayValidInMonth(result.getDayOfMonth(), after.get(Calendar.MONTH), after.get(Calendar.YEAR)))
+            if (result.getMinute() == -1)
             {
-                dayMatchRealDate = true;
+                result.setMinute(nextValue(minutesSet, 0));
+                after.add(Calendar.HOUR_OF_DAY, 1);
             }
-            else
-            {
-                after.add(Calendar.MONTH, 1);
-            }
-        }
 
-        int currentMonth = after.get(Calendar.MONTH) + 1;
-        result.setMonth(nextValue(monthsSet, currentMonth));
-        if (result.getMonth() != currentMonth)
-        {
-            result.setSecond(nextValue(secondsSet, 0));
-            result.setMinute(nextValue(minutesSet, 0));
-            result.setHour(nextValue(hoursSet, 0));
+            result.setHour(nextValue(hoursSet, after.get(Calendar.HOUR_OF_DAY)));
+            if (result.getHour() != after.get(Calendar.HOUR_OF_DAY))
+            {
+                result.setSecond(nextValue(secondsSet, 0));
+                result.setMinute(nextValue(minutesSet, 0));
+            }
+            if (result.getHour() == -1)
+            {
+                result.setHour(nextValue(hoursSet, 0));
+                after.add(Calendar.DAY_OF_MONTH, 1);
+            }
+
+            // This call may change second, minute and/or hour parameters
+            // They may be reset to minimum values if the day rolled
             result.setDayOfMonth(determineDayOfMonth(spec, after, result));
-        }
-        if (result.getMonth() == -1)
-        {
-            result.setMonth(nextValue(monthsSet, 0));
-            after.add(Calendar.YEAR, 1);
-        }
 
-        // Perform a last valid date check, if failing, try to compute a new date based on this altered after date
-        int year = after.get(Calendar.YEAR);
-        if (!(checkDayValidInMonth(result.getDayOfMonth(), result.getMonth() - 1, year)))
-        {
-            return compute(spec, after.getTimeInMillis());
-        }
+            boolean dayMatchRealDate = false;
+            while (!dayMatchRealDate)
+            {
+                if (checkDayValidInMonth(result.getDayOfMonth(), after.get(Calendar.MONTH), after.get(Calendar.YEAR)))
+                {
+                    dayMatchRealDate = true;
+                }
+                else
+                {
+                    after.add(Calendar.MONTH, 1);
+                }
+            }
 
-        Date resultDate = getTime(result, after.get(Calendar.YEAR));
-        return resultDate;
-	}
+            int currentMonth = after.get(Calendar.MONTH) + 1;
+            result.setMonth(nextValue(monthsSet, currentMonth));
+            if (result.getMonth() != currentMonth)
+            {
+                result.setSecond(nextValue(secondsSet, 0));
+                result.setMinute(nextValue(minutesSet, 0));
+                result.setHour(nextValue(hoursSet, 0));
+                result.setDayOfMonth(determineDayOfMonth(spec, after, result));
+            }
+            if (result.getMonth() == -1)
+            {
+                result.setMonth(nextValue(monthsSet, 0));
+                after.add(Calendar.YEAR, 1);
+            }
+
+            // Perform a last valid date check, if failing, try to compute a new date based on this altered after date
+            int year = after.get(Calendar.YEAR);
+            if (!(checkDayValidInMonth(result.getDayOfMonth(), result.getMonth() - 1, year)))
+            {
+                afterTimeInMillis = after.getTimeInMillis();
+                continue;
+            }
+
+            Date resultDate = getTime(result, after.get(Calendar.YEAR));
+            return resultDate;
+        }
+    }
 
     /*
      * Determine the next valid day of month based on the given specification of valid days in month and
@@ -287,7 +291,7 @@ public final class ScheduleComputeHelper
 
         SortedSet<Integer> tailSet = valueSet.tailSet(startValue + 1);
 
-        if (tailSet.size() == 0)
+        if (tailSet.isEmpty())
         {
             return -1;
         }

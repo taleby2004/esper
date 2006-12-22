@@ -36,11 +36,11 @@ public class DatabaseDMConnFactory implements DatabaseConnectionFactory
         }
         catch (ClassNotFoundException ex)
         {
-            throw new DatabaseConfigException("Error loading driver class '" + driverClassName + "'", ex);
+            throw new DatabaseConfigException("Error loading driver class '" + driverClassName + '\'', ex);
         }
         catch (RuntimeException ex)
         {
-            throw new DatabaseConfigException("Error loading driver class '" + driverClassName + "'", ex);
+            throw new DatabaseConfigException("Error loading driver class '" + driverClassName + '\'', ex);
         }
     }
 
@@ -58,11 +58,11 @@ public class DatabaseDMConnFactory implements DatabaseConnectionFactory
         {
             String user = driverConfig.getOptionalUserName();
             String pwd = driverConfig.getOptionalPassword();
-            if ((user == null) && (pwd == null) && (properties.size() == 0))
+            if ((user == null) && (pwd == null) && (properties.isEmpty()))
             {
                 connection = DriverManager.getConnection(url);
             }
-            else if (properties.size() > 0)
+            else if (!properties.isEmpty())
             {
                 connection = DriverManager.getConnection(url, properties);
             }

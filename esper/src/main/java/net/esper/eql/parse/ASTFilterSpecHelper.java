@@ -141,7 +141,7 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
         {
             return createRelationalOpParam(propertyName, primitiveValue, filterCompareNode);
         }
-        else if (nodeType == EVENT_FILTER_RANGE)
+        else if ((nodeType == EVENT_FILTER_RANGE) || (nodeType == EVENT_FILTER_NOT_RANGE))
         {
             if (!JavaClassHelper.isNumeric(propertyType))
             {
@@ -152,7 +152,7 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
             }
             return createRangeParam(propertyName, primitiveValue, filterCompareNode);
         }
-        else if (nodeType == EVENT_FILTER_BETWEEN)
+        else if ((nodeType == EVENT_FILTER_BETWEEN) || (nodeType == EVENT_FILTER_NOT_BETWEEN))
         {
             if (!JavaClassHelper.isNumeric(propertyType))
             {
@@ -163,7 +163,7 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
             }
             return createBetweenParam(propertyName, primitiveValue, filterCompareNode);
         }
-        else if (nodeType == EVENT_FILTER_IN)
+        else if ((nodeType == EVENT_FILTER_IN) || (nodeType == EVENT_FILTER_NOT_IN))
         {
             return createInParam(propertyName, primitiveValue, propertyType, filterCompareNode);
         }
@@ -180,7 +180,7 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
      */
     protected static String getPropertyName(AST propertyNameExprChildNode)
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         String delimiter = "";
         AST child = propertyNameExprChildNode;
 
@@ -194,15 +194,15 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
                     break;
                 case EVENT_PROP_MAPPED:
                     buffer.append(child.getFirstChild().getText());
-                    buffer.append("(");
+                    buffer.append('(');
                     buffer.append(child.getFirstChild().getNextSibling().getText());
-                    buffer.append(")");
+                    buffer.append(')');
                     break;
                 case EVENT_PROP_INDEXED:
                     buffer.append(child.getFirstChild().getText());
-                    buffer.append("[");
+                    buffer.append('[');
                     buffer.append(child.getFirstChild().getNextSibling().getText());
-                    buffer.append("]");
+                    buffer.append(']');
                     break;
                 default:
                     throw new IllegalStateException("Event property AST node not recognized, type=" + child.getType());
@@ -265,6 +265,12 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
     private static FilterSpecParam createRangeParam(String propertyName, PrimitiveValue primitiveValue, AST filterParamNode)
         throws ASTFilterSpecValidationException
     {
+        boolean isNotRange = false;
+        if (filterParamNode.getType() == EVENT_FILTER_NOT_RANGE)
+        {
+            isNotRange = true;
+        }
+
         // Deal with Ranges
         AST ast = filterParamNode.getFirstChild();
         boolean lowInclusive = ast.getType() == LBRACK;
@@ -290,7 +296,7 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
         ast = ast.getNextSibling();
         boolean highInclusive = ast.getType() == RBRACK;
 
-        FilterOperator operator = FilterOperator.parseRangeOperator(lowInclusive, highInclusive);
+        FilterOperator operator = FilterOperator.parseRangeOperator(lowInclusive, highInclusive, isNotRange);
         
         return new FilterSpecParamRange(propertyName, operator, valueMin, valueMax);
     }
@@ -298,6 +304,12 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
     private static FilterSpecParam createBetweenParam(String propertyName, PrimitiveValue primitiveValue, AST filterParamNode)
         throws ASTFilterSpecValidationException
     {
+        FilterOperator filterOperator = FilterOperator.RANGE_CLOSED;
+        if (filterParamNode.getType() == EVENT_FILTER_NOT_BETWEEN)
+        {
+            filterOperator = FilterOperator.NOT_RANGE_CLOSED;
+        }
+
         // Deal with Between (closed range)
         AST ast = filterParamNode.getFirstChild();
 
@@ -318,12 +330,18 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
         }
         FilterSpecParamRangeValue valueMax = getRangePoint(ast, primitiveValue);
 
-        return new FilterSpecParamRange(propertyName, FilterOperator.RANGE_CLOSED, valueMin, valueMax);
+        return new FilterSpecParamRange(propertyName, filterOperator, valueMin, valueMax);
     }
 
     private static FilterSpecParam createInParam(String propertyName, PrimitiveValue primitiveValue, Class propertyType, AST filterParamNode)
         throws ASTFilterSpecValidationException
     {
+        FilterOperator filterOperator = FilterOperator.IN_LIST_OF_VALUES;
+        if (filterParamNode.getType() == EVENT_FILTER_NOT_IN)
+        {
+            filterOperator = FilterOperator.NOT_IN_LIST_OF_VALUES;
+        }
+
         // Deal with an 'in' list of values
         AST ast = filterParamNode.getFirstChild();
 
@@ -369,7 +387,7 @@ public class ASTFilterSpecHelper implements EqlTokenTypes
         }
         while (ast != null);
 
-        return new FilterSpecParamIn(propertyName, FilterOperator.IN_LIST_OF_VALUES, listOfValues, isAllConstants, propertyType);
+        return new FilterSpecParamIn(propertyName, filterOperator, listOfValues, isAllConstants, propertyType);
     }
 
     private static FilterSpecParamRangeValue getRangePoint(AST ast, PrimitiveValue primitiveValue)
