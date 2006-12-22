@@ -28,7 +28,7 @@ public class TestEvalAndStateNode extends TestCase
         MatchedEventMap beginState = new MatchedEventMap();
         beginState.add("0", events.get("0"));
 
-        Vector<List<MatchedEventMap>> listArray = new Vector<List<MatchedEventMap>>();
+        ArrayList<List<MatchedEventMap>> listArray = new ArrayList<List<MatchedEventMap>>();
         listArray.add(0, makeList("a", "b"));
         listArray.add(1, makeList("c", "d"));
         listArray.add(2, makeList("e", "f"));

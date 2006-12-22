@@ -1,6 +1,6 @@
 package net.esper.collection;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Sorted, reference-counting set based on a TreeMap implementation that stores keys and a reference counter for
@@ -9,14 +9,14 @@ import java.util.Vector;
  */
 public class SortedDoubleVector
 {
-    private Vector<Double> values;
+    private ArrayList<Double> values;
 
     /**
      * Constructor.
      */
     public SortedDoubleVector()
     {
-        values = new Vector<Double>();
+        values = new ArrayList<Double>();
     }
 
     /**
@@ -68,15 +68,15 @@ public class SortedDoubleVector
         {
             throw new IllegalStateException("Value not found in collection");
         }
-        values.removeElementAt(index);
+        values.remove(index);
         return;
     }
 
     /**
-     * Returns underlying vector, for testing purposes only.
-     * @return vector with double values
+     * Returns underlying ArrayList, for testing purposes only.
+     * @return sorted double values list
      */
-    protected Vector<Double> getValues()
+    protected ArrayList<Double> getValues()
     {
         return values;
     }

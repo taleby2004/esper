@@ -136,7 +136,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
                                                               Hashtable<EvalStateNode, List<MatchedEventMap>> eventsPerChild)
     {
         // Place event list for each child state node into an array, excluding the node where the event came from
-        Vector<List<MatchedEventMap>> listArray = new Vector<List<MatchedEventMap>>();
+        ArrayList<List<MatchedEventMap>> listArray = new ArrayList<List<MatchedEventMap>>();
         int index = 0;
         for (Map.Entry<EvalStateNode, List<MatchedEventMap>> entry : eventsPerChild.entrySet())
         {
@@ -161,7 +161,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
      * @param result is the resulting list of MatchedEventMap
      * @param matchEvent is the start MatchedEventMap to generate from
      */
-    protected final static void generateMatchEvents(Vector<List<MatchedEventMap>> eventList,
+    protected final static void generateMatchEvents(ArrayList<List<MatchedEventMap>> eventList,
                                                    int index,
                                                    List<MatchedEventMap> result,
                                                    MatchedEventMap matchEvent)

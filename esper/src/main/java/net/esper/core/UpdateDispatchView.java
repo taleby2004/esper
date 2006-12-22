@@ -2,7 +2,7 @@ package net.esper.core;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Vector;
+import java.util.LinkedList;
 
 import net.esper.client.UpdateListener;
 import net.esper.dispatch.DispatchService;
@@ -11,7 +11,6 @@ import net.esper.event.EventBean;
 import net.esper.event.EventBeanUtility;
 import net.esper.event.EventType;
 import net.esper.view.ViewSupport;
-import net.esper.view.Viewable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +25,8 @@ public class UpdateDispatchView extends ViewSupport implements Dispatchable
     private final DispatchService dispatchService;
     private boolean isDispatchWaiting;
 
-    private Vector<EventBean[]> lastNewEvents = new Vector<EventBean[]>();
-    private Vector<EventBean[]> lastOldEvents = new Vector<EventBean[]>();
+    private LinkedList<EventBean[]> lastNewEvents = new LinkedList<EventBean[]>();
+    private LinkedList<EventBean[]> lastOldEvents = new LinkedList<EventBean[]>();
 
     /**
      * Ctor.

@@ -1,11 +1,10 @@
 package net.esper.view.std;
 
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.LinkedList;
 
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.view.Viewable;
 import net.esper.view.ViewSupport;
 import net.esper.collection.SingleEventIterator;
 
@@ -51,7 +50,7 @@ public class LastElementView extends ViewSupport
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        Vector<EventBean> oldDataToPost = new Vector<EventBean>();
+        LinkedList<EventBean> oldDataToPost = new LinkedList<EventBean>();
 
         if ((newData != null) && (newData.length != 0))
         {

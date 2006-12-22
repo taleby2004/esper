@@ -3,14 +3,14 @@ package net.esper.collection;
 import net.esper.event.EventBean;
 import net.esper.event.EventBeanUtility;
 
-import java.util.Vector;
+import java.util.LinkedList;
 
 /**
  * Buffer for events - accumulates events until flushed.
  */
 public class FlushedEventBuffer
 {
-    private Vector<EventBean[]> remainEvents = new Vector<EventBean[]>();
+    private LinkedList<EventBean[]> remainEvents = new LinkedList<EventBean[]>();
 
     /**
      * Add an event array to buffer.

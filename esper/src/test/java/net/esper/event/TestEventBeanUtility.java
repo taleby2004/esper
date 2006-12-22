@@ -3,7 +3,6 @@ package net.esper.event;
 import java.util.*;
 
 import junit.framework.TestCase;
-import net.esper.collection.Pair;
 import net.esper.collection.MultiKeyUntyped;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.event.SupportEventBeanFactory;
@@ -15,7 +14,7 @@ public class TestEventBeanUtility extends TestCase
     {
         // test many arrays
         EventBean[] testEvents = makeEventArray(new String[] {"a1", "a2", "b1", "b2", "b3", "c1", "c2"});
-        Vector<EventBean[]> eventVector = new Vector<EventBean[]>();
+        LinkedList<EventBean[]> eventVector = new LinkedList<EventBean[]>();
         eventVector.add(new EventBean[] {testEvents[0], testEvents[1]});
         eventVector.add(new EventBean[] {testEvents[2]});
         eventVector.add(new EventBean[] {testEvents[3], testEvents[4], testEvents[5]});

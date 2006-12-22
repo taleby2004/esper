@@ -1,6 +1,5 @@
 package net.esper.event;
 
-import net.esper.collection.Pair;
 import net.esper.collection.MultiKeyUntyped;
 
 import java.util.*;
@@ -18,7 +17,7 @@ public class EventBeanUtility
      * @param eventVector vector
      * @return array with all events
      */
-    public static EventBean[] flatten(Vector<EventBean[]> eventVector)
+    public static EventBean[] flatten(LinkedList<EventBean[]> eventVector)
     {
         if (eventVector.isEmpty())
         {
@@ -31,18 +30,17 @@ public class EventBeanUtility
         }
 
         int totalElements = 0;
-        for (int i = 0; i < eventVector.size(); i++)
+        for (EventBean[] arr : eventVector)
         {
-            totalElements += eventVector.get(i).length;
+            totalElements += arr.length;
         }
 
         EventBean[] result = new EventBean[totalElements];
         int destPos = 0;
-        for (int i = 0; i < eventVector.size(); i++)
+        for (EventBean[] arr : eventVector)
         {
-            EventBean[] src = eventVector.get(i);
-            System.arraycopy(src, 0, result, destPos, src.length);
-            destPos += eventVector.get(i).length;
+            System.arraycopy(arr, 0, result, destPos, arr.length);
+            destPos += arr.length;
         }
 
         return result;
