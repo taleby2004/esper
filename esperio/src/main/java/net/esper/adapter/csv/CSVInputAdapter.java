@@ -78,7 +78,7 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 
 	/**
 	 * Ctor for adapters that will be passed to an AdapterCoordinator.
-	 * @param adapterSpec
+	 * @param adapterSpec contains parameters that specify the behavior of the input adapter
 	 */
 	public CSVInputAdapter(CSVInputAdapterSpec adapterSpec)
 	{
@@ -88,7 +88,7 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 	/**
 	 * Ctor for adapters that will be passed to an AdapterCoordinator.
 	 * @param adapterInputSource - the parameters for this adapter
-	 * @param eventTypeAlias
+	 * @param eventTypeAlias - the event type alias name that the input adapter generates events for
 	 */
 	public CSVInputAdapter(AdapterInputSource adapterInputSource, String eventTypeAlias)
 	{

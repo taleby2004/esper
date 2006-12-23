@@ -38,7 +38,7 @@ public class CSVSource
 	
 	/**
 	 * Close the underlying resource.
-	 * @throws IOException
+	 * @throws IOException to indicate an io error
 	 */
 	public void close() throws IOException
 	{
@@ -55,7 +55,7 @@ public class CSVSource
 	/**
 	 * Read from the underlying resource.
 	 * @return the result of the read
-	 * @throws IOException
+	 * @throws IOException for io errors
 	 */
 	public int read() throws IOException
 	{
@@ -80,7 +80,7 @@ public class CSVSource
 	
 	/**
 	 * Reset to the last mark position.
-	 * @throws IOException
+	 * @throws IOException for io errors
 	 */
 	public void resetToMark() throws IOException
 	{
@@ -96,8 +96,8 @@ public class CSVSource
 	
 	/**
 	 * Set the mark position.
-	 * @param readAheadLimit
-	 * @throws IOException
+	 * @param readAheadLimit is the maximum number of read-ahead events
+	 * @throws IOException when an io error occurs
 	 */
 	public void mark(int readAheadLimit) throws IOException
 	{

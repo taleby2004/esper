@@ -37,7 +37,7 @@ public interface InputAdapter
 	 * Destroy the InputAdapter, stopping the sending of all events and releasing all the 
 	 * resources, and disallowing any further state changes on the InputAdapter.
 	 */
-	public void destroy() throws EPException;
+	public void destroy();
 	
 	/**
 	 * Get the state of this InputAdapter.

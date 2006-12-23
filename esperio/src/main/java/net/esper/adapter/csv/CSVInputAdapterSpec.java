@@ -30,7 +30,8 @@ public class CSVInputAdapterSpec
 	}
 
 	/**
-	 * @param eventsPerSec
+     * Sets the number of events per seconds.
+	 * @param eventsPerSec number of events to send per second
 	 */
 	public void setEventsPerSec(int eventsPerSec)
 	{
@@ -38,7 +39,7 @@ public class CSVInputAdapterSpec
 	}
 
 	/**
-	 * @param propertyOrder - the propertyOrder to set
+	 * @param propertyOrder - the property order of the properties in the CSV file
 	 */
 	public void setPropertyOrder(String[] propertyOrder)
 	{

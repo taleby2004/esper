@@ -60,7 +60,7 @@ public class AdapterStateManager
 	
 	/**
 	 * Transition into the STARTED state (from the PAUSED state).
-	 * @throws IllegalStateTransitionException
+	 * @throws IllegalStateTransitionException if the state transition is not allowed
 	 */
 	public void resume() throws IllegalStateTransitionException
 	{

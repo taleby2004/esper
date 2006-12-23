@@ -126,14 +126,20 @@ milliseconds-part : <emphasis>number</emphasis> ("milliseconds" | "millisecond" 
 			<synopsis>select * from <emphasis>stream_def</emphasis></synopsis>
 
 			<para>
-				The following statement selects all univariate statistics properties for the last 30 seconds of IBM stock ticks for price.
+				The following statement selects univariate statistics for the last 30 seconds of IBM stock ticks for price.
 			</para>
-			<programlisting><![CDATA[select * from StockTick(symbol='IBM').win:time(30 sec).stat:uni('price')
-]]></programlisting>
+			<programlisting><![CDATA[select * from StockTick(symbol='IBM').win:time(30 sec).stat:uni('price')]]></programlisting>
 
 			<para>
 				In a join statement, using the <literal>select *</literal> syntax selects event properties that contain the events representing the joined streams themselves.
 			</para>
+
+			<para>
+				The <literal>*</literal> wildcard and expressions can also be combined in a <literal>select</literal> clause. The combination selects all event properties and in addition the computed values
+				as specified by any additional expressions that are part of the <literal>select</literal> clause. Here is an example that selects all properties of stock tick events plus a computed product of price and volume that the 
+				statement names 'pricevolume':
+			</para>
+			<programlisting><![CDATA[select *, price * volume as pricevolume from StockTick(symbol='IBM')]]></programlisting>
 		</sect2>
 
         <sect2 id="eql-select-event-props" >
