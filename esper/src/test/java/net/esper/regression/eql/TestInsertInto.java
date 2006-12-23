@@ -1,16 +1,18 @@
 package net.esper.regression.eql;
 
+import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.client.EPStatementException;
-import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.CurrentTimeEvent;
-import net.esper.support.util.SupportUpdateListener;
+import net.esper.client.time.TimerControlEvent;
+import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.bean.SupportBeanSimple;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;
-import junit.framework.TestCase;
+import net.esper.support.util.SupportUpdateListener;
 
 public class TestInsertInto extends TestCase
 {
@@ -39,6 +41,21 @@ public class TestInsertInto extends TestCase
 
         runAsserts(stmtText);
     }
+    
+    public void testVariantOneWildcard()
+    {
+        String stmtText = "insert into Event_1 (delta, product) " +
+        "select * from " + SupportBean.class.getName() + ".win:length(100)";
+
+        try{
+        	epService.getEPAdministrator().createEQL(stmtText);
+        	fail();
+        }
+        catch(EPStatementException ex)
+        {
+        	// Expected
+        }
+    }
 
     public void testVariantOneJoin()
     {
@@ -50,6 +67,24 @@ public class TestInsertInto extends TestCase
 
         runAsserts(stmtText);
     }
+    
+    public void testVariantOneJoinWildcard()
+    {
+        String stmtText = "insert into Event_1 (delta, product) " +
+        "select * " +
+        "from " + SupportBean.class.getName() + ".win:length(100) as s0," +
+                  SupportBean_A.class.getName() + ".win:length(100) as s1 " +
+        " where s0.string = s1.id";
+        
+        try{
+        	epService.getEPAdministrator().createEQL(stmtText);
+        	fail();
+        }
+        catch(EPStatementException ex)
+        {
+        	// Expected
+        }
+    }
 
     public void testVariantTwo()
     {
@@ -58,6 +93,33 @@ public class TestInsertInto extends TestCase
                       "from " + SupportBean.class.getName() + ".win:length(100)";
 
         runAsserts(stmtText);
+    }
+    
+    public void testVariantTwoWildcard() throws InterruptedException
+    {
+        String stmtText = "insert into event1 select * from " + SupportBean.class.getName() + ".win:length(100)";
+        String otherText = "select * from event1.win:length(10)";
+        
+        // Attach listener to feed
+        EPStatement stmtOne = epService.getEPAdministrator().createEQL(stmtText);
+        SupportUpdateListener listenerOne = new SupportUpdateListener();
+        stmtOne.addListener(listenerOne);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(otherText);
+        SupportUpdateListener listenerTwo = new SupportUpdateListener();
+        stmtTwo.addListener(listenerTwo);
+        
+        sendEvent(10, 11);
+        assertTrue(listenerOne.getAndClearIsInvoked());
+        assertEquals(1, listenerOne.getLastNewData().length);
+        assertEquals(10, listenerOne.getLastNewData()[0].get("intPrimitive"));
+        assertEquals(11, listenerOne.getLastNewData()[0].get("intBoxed"));
+        assertEquals(18, listenerOne.getLastNewData()[0].getEventType().getPropertyNames().length);
+ 
+        assertTrue(listenerTwo.getAndClearIsInvoked());
+        assertEquals(1, listenerTwo.getLastNewData().length);
+        assertEquals(10, listenerTwo.getLastNewData()[0].get("intPrimitive"));
+        assertEquals(11, listenerTwo.getLastNewData()[0].get("intBoxed"));
+        assertEquals(18, listenerTwo.getLastNewData()[0].getEventType().getPropertyNames().length);
     }
 
     public void testVariantTwoJoin()
@@ -69,6 +131,39 @@ public class TestInsertInto extends TestCase
                         " where s0.string = s1.id";
 
         runAsserts(stmtText);
+    }
+    
+    public void testVariantTwoJoinWildcard()
+    {
+        String textOne = "insert into event2 select * " +
+        		          "from " + SupportBean.class.getName() + ".win:length(100) as s0, " +
+        		          SupportBean_A.class.getName() + ".win:length(5) as s1 " + 
+        		          "where s0.string = s1.id";
+        String textTwo = "select * from event2.win:length(10)";
+        
+        // Attach listener to feed
+        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        SupportUpdateListener listenerOne = new SupportUpdateListener();
+        stmtOne.addListener(listenerOne);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
+        SupportUpdateListener listenerTwo = new SupportUpdateListener();
+        stmtTwo.addListener(listenerTwo);
+        
+        // send event for joins to match on
+        epService.getEPRuntime().sendEvent(new SupportBean_A("myId"));
+        
+        sendEvent(10, 11);
+        assertTrue(listenerOne.getAndClearIsInvoked());
+        assertEquals(1, listenerOne.getLastNewData().length);
+        assertEquals(2, listenerOne.getLastNewData()[0].getEventType().getPropertyNames().length);
+        assertTrue(listenerOne.getLastNewData()[0].getEventType().isProperty("s0"));
+        assertTrue(listenerOne.getLastNewData()[0].getEventType().isProperty("s1"));
+        
+        assertTrue(listenerTwo.getAndClearIsInvoked());
+        assertEquals(1, listenerTwo.getLastNewData().length);
+        assertEquals(2, listenerTwo.getLastNewData()[0].getEventType().getPropertyNames().length);
+        assertTrue(listenerTwo.getLastNewData()[0].getEventType().isProperty("s0"));
+        assertTrue(listenerTwo.getLastNewData()[0].getEventType().isProperty("s1"));
     }
 
     public void testInvalidStreamUsed()
@@ -141,11 +236,54 @@ public class TestInsertInto extends TestCase
         assertEquals("DEF", feedListener.getNewDataList().get(1)[0].get("mySymbol"));
         assertEquals(191.0, feedListener.getNewDataList().get(1)[0].get("pricesum"));
     }
+    
+    public void testStaggeredWithWildcard()
+    {
+    	String statementOne = "insert into streamA select * from " + SupportBeanSimple.class.getName() + ".win:length(5)";
+    	String statementTwo = "insert into streamB select *, myInt+myInt as summed, myString||myString as concat from streamA.win:length(5)";
+    	String statementThree = "insert into streamC select * from streamB.win:length(5)";
+    	
+    	SupportUpdateListener listenerOne = new SupportUpdateListener();
+    	SupportUpdateListener listenerTwo = new SupportUpdateListener();
+    	SupportUpdateListener listenerThree = new SupportUpdateListener();
+    	
+    	epService.getEPAdministrator().createEQL(statementOne).addListener(listenerOne);
+    	epService.getEPAdministrator().createEQL(statementTwo).addListener(listenerTwo);
+    	epService.getEPAdministrator().createEQL(statementThree).addListener(listenerThree);
+    	
+    	sendSimpleEvent("one", 1);
+    	assertSimple(listenerOne, "one", 1, null, 0);
+    	assertSimple(listenerTwo, "one", 1, "oneone", 2);
+    	assertSimple(listenerThree, "one", 1, "oneone", 2);
+    	
+    	sendSimpleEvent("two", 2);
+    	assertSimple(listenerOne, "two", 2, null, 0);
+    	assertSimple(listenerTwo, "two", 2, "twotwo", 4);
+    	assertSimple(listenerThree, "two", 2, "twotwo", 4);
+    }
+    
+    private void assertSimple(SupportUpdateListener listener, String myString, int myInt, String additionalString, int additionalInt)
+    {
+    	assertTrue(listener.getAndClearIsInvoked());
+    	EventBean eventBean = listener.getLastNewData()[0];
+    	assertEquals(myString, eventBean.get("myString"));
+    	assertEquals(myInt, eventBean.get("myInt"));
+    	if(additionalString != null)
+    	{
+    		assertEquals(additionalString, eventBean.get("concat"));
+    		assertEquals(additionalInt, eventBean.get("summed"));
+    	}
+    }
 
     private void sendEvent(String symbol, double price)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, null, null);
         epService.getEPRuntime().sendEvent(bean);
+    }
+    
+    private void sendSimpleEvent(String string, int val)
+    {
+    	epService.getEPRuntime().sendEvent(new SupportBeanSimple(string, val));
     }
 
     private void runAsserts(String stmtText)
@@ -159,13 +297,13 @@ public class TestInsertInto extends TestCase
 
         // Attach delta statement to statement and add listener
         stmtText = "select min(delta) as minD, max(delta) as maxD " +
-                   "from Event_1.win:time(60 seconds)";
+                   "from Event_1.win:time(60)";
         stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(resultListenerDelta);
 
         // Attach prodict statement to statement and add listener
         stmtText = "select min(product) as minP, max(product) as maxP " +
-                   "from Event_1.win:time(60 seconds)";
+                   "from Event_1.win:time(60)";
         stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(resultListenerProduct);
 

@@ -104,6 +104,9 @@ public class EQLTreeWalker extends EQLBaseWalker
             case SELECTION_EXPR:
                 leaveSelectClause(node);
                 break;
+            case WILDCARD_SELECT:
+            	leaveWildcardSelect();
+            	break;
             case SELECTION_ELEMENT_EXPR:
                 leaveSelectionElement(node);
                 break;
@@ -371,7 +374,13 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
 
         // Add as selection element
-        statementSpec.getSelectListExpressions().add(new SelectExprElementUnnamedSpec(exprNode, optionalName));
+        statementSpec.getSelectClauseSpec().add(new SelectExprElementUnnamedSpec(exprNode, optionalName));
+    }
+    
+    private void leaveWildcardSelect()
+    {
+    	log.debug(".leaveWildcardSelect");
+    	statementSpec.getSelectClauseSpec().setIsUsingWildcard(true);
     }
 
     private void leaveView(AST node) throws ASTWalkException

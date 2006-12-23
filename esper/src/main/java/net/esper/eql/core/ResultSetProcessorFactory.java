@@ -1,17 +1,24 @@
 package net.esper.eql.core;
 
-import net.esper.collection.Pair;
-import net.esper.event.EventAdapterService;
-import net.esper.eql.expression.ExprNode;
-import net.esper.eql.expression.ExprValidationException;
-import net.esper.eql.expression.ExprNodeIdentifierVisitor;
-import net.esper.eql.expression.ExprAggregateNode;
-import net.esper.eql.spec.OutputLimitSpec;
-import net.esper.eql.spec.InsertIntoDesc;
-import net.esper.eql.spec.SelectExprElementUnnamedSpec;
-import net.esper.eql.spec.SelectExprElementNamedSpec;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
-import java.util.*;
+import net.esper.collection.Pair;
+import net.esper.eql.expression.ExprAggregateNode;
+import net.esper.eql.expression.ExprNode;
+import net.esper.eql.expression.ExprNodeIdentifierVisitor;
+import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.spec.InsertIntoDesc;
+import net.esper.eql.spec.OutputLimitSpec;
+import net.esper.eql.spec.SelectClauseSpec;
+import net.esper.eql.spec.SelectExprElementNamedSpec;
+import net.esper.eql.spec.SelectExprElementUnnamedSpec;
+import net.esper.event.EventAdapterService;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +54,7 @@ public class ResultSetProcessorFactory
     /**
      * Returns the result set process for the given select expression, group-by clause and
      * having clause given a set of types describing each stream in the from-clause.
-     * @param selectionList - represents select clause and thus the expression nodes listed in the select, or empty if wildcard
+     * @param selectClauseSpec - represents select clause and thus the expression nodes listed in the select, or empty if wildcard
      * @param groupByNodes - represents the expressions to group-by events based on event properties, or empty if no group-by was specified
      * @param optionalHavingNode - represents the having-clause boolean filter criteria
      * @param outputLimitSpec - indicates whether to output all or only the last event
@@ -60,7 +67,7 @@ public class ResultSetProcessorFactory
      * @return result set processor instance
      * @throws ExprValidationException when any of the expressions is invalid
      */
-    public static ResultSetProcessor getProcessor(List<SelectExprElementUnnamedSpec> selectionList,
+    public static ResultSetProcessor getProcessor(SelectClauseSpec selectClauseSpec,
                                                   InsertIntoDesc insertIntoDesc,
                                                	  List<ExprNode> groupByNodes,
                                                	  ExprNode optionalHavingNode,
@@ -75,21 +82,22 @@ public class ResultSetProcessorFactory
         if (log.isDebugEnabled())
         {
             log.debug(".getProcessor Getting processor for " +
-                    " selectionList=" + Arrays.toString(selectionList.toArray()) +
+                    " selectionList=" + selectClauseSpec.getSelectList() +
+                    " isUsingWildcard=" + selectClauseSpec.isUsingWildcard() + 
                     " groupByNodes=" + Arrays.toString(groupByNodes.toArray()) +
                     " optionalHavingNode=" + optionalHavingNode);
         }
 
         // Expand any instances of select-clause aliases in the
         // order-by clause with the full expression
-        expandAliases(selectionList, orderByList);
+        expandAliases(selectClauseSpec.getSelectList(), orderByList);
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
         List<SelectExprElementNamedSpec> namedSelectionList = new LinkedList<SelectExprElementNamedSpec>();
-        for (int i = 0; i < selectionList.size(); i++)
+        for (int i = 0; i < selectClauseSpec.getSelectList().size(); i++)
         {
             // validate element
-            SelectExprElementUnnamedSpec element = selectionList.get(i);
+            SelectExprElementUnnamedSpec element = selectClauseSpec.getSelectList().get(i);
             ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, autoImportService, viewResourceDelegate);
 
             // determine an element name if none assigned
@@ -102,7 +110,8 @@ public class ResultSetProcessorFactory
             SelectExprElementNamedSpec validatedElement = new SelectExprElementNamedSpec(validatedExpression, asName);
             namedSelectionList.add(validatedElement);
         }
-        selectionList = null;
+        boolean isUsingWildcard = selectClauseSpec.isUsingWildcard();
+        selectClauseSpec = null;
 
         // Validate group-by expressions, if any (could be empty list for no group-by)
         for (int i = 0; i < groupByNodes.size(); i++)
@@ -155,7 +164,7 @@ public class ResultSetProcessorFactory
                 groupByNodes, orderByList, aggregationService, eventAdapterService);
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(namedSelectionList, insertIntoDesc, typeService, eventAdapterService);
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(namedSelectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesAggregatedSelect = getAggregatedProperties(selectAggregateExprNodes);

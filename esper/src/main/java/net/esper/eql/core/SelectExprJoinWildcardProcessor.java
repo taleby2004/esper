@@ -1,5 +1,7 @@
 package net.esper.eql.core;
 
+import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.spec.InsertIntoDesc;
 import net.esper.event.*;
 
 import java.util.*;
@@ -18,8 +20,10 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
      * @param streamNames - name of each stream
      * @param streamTypes - type of each stream
      * @param eventAdapterService - service for generating events and handling event types
+     * @param insertIntoDesc - describes the insert-into clause
+     * @throws ExprValidationException 
      */
-    public SelectExprJoinWildcardProcessor(String[] streamNames, EventType[] streamTypes, EventAdapterService eventAdapterService)
+    public SelectExprJoinWildcardProcessor(String[] streamNames, EventType[] streamTypes, EventAdapterService eventAdapterService, InsertIntoDesc insertIntoDesc) throws ExprValidationException
     {
         if ((streamNames.length < 2) || (streamTypes.length < 2) || (streamNames.length != streamTypes.length))
         {
@@ -35,7 +39,23 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         {
             eventTypeMap.put(streamNames[i], streamTypes[i].getUnderlyingType());
         }
-        resultEventType = eventAdapterService.createAnonymousMapType(eventTypeMap);
+
+        // If we have an alias for this type, add it
+        if (insertIntoDesc != null)
+        {
+        	try
+            {
+                resultEventType = eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), eventTypeMap);
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ExprValidationException(ex.getMessage());
+            }
+        }
+        else
+        {
+            resultEventType = eventAdapterService.createAnonymousMapType(eventTypeMap);
+        }
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData)

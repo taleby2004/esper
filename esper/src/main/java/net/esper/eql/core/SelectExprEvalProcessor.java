@@ -8,31 +8,44 @@ import net.esper.eql.expression.ExprValidationException;
 
 import java.util.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Processor for select-clause expressions that handles a list of selection items represented by
  * expression nodes. Computes results based on matching events.
  */
 public class SelectExprEvalProcessor implements SelectExprProcessor
 {
+	private static final Log log = LogFactory.getLog(SelectExprEvalProcessor.class);
+	
     private ExprNode[] expressionNodes;
     private String[] columnNames;
     private EventType resultEventType;
     private final EventAdapterService eventAdapterService;
+    private final boolean isUsingWildcard;
+    private boolean singleStreamWrapper;
+    private SelectExprJoinWildcardProcessor joinWildcardProcessor;
 
     /**
      * Ctor.
      * @param selectionList - list of select-clause items
-     * @param eventAdapterService - service for generating events and handling event types
      * @param insertIntoDesc - descriptor for insert-into clause contains column names overriding select clause names
+     * @param isUsingWildcard - true if the wildcard (*) appears in the select clause
+     * @param typeService -service for information about streams
+     * @param eventAdapterService - service for generating events and handling event types
      * @throws net.esper.eql.expression.ExprValidationException thrown if any of the expressions don't validate
      */
     public SelectExprEvalProcessor(List<SelectExprElementNamedSpec> selectionList,
                                    InsertIntoDesc insertIntoDesc,
+                                   boolean isUsingWildcard, 
+                                   StreamTypeService typeService, 
                                    EventAdapterService eventAdapterService) throws ExprValidationException
     {
         this.eventAdapterService = eventAdapterService;
+        this.isUsingWildcard = isUsingWildcard;
 
-        if (selectionList.isEmpty())
+        if (selectionList.size() == 0 && !isUsingWildcard)
         {
             throw new IllegalArgumentException("Empty selection list not supported");
         }
@@ -50,13 +63,40 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         {
             verifyInsertInto(insertIntoDesc, selectionList);
         }
-
+        
+        // Build a subordinate wildcard processor for joins
+        if(typeService.getStreamNames().length > 1 && isUsingWildcard)
+        {
+        	joinWildcardProcessor = new SelectExprJoinWildcardProcessor(typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, null);
+        }
+        
+        // Resolve underlying event type in the case of wildcard select
+        EventType underlyingType = null;
+        if(isUsingWildcard)
+        {
+        	if(joinWildcardProcessor != null)
+        	{
+        		underlyingType = joinWildcardProcessor.getResultEventType();
+        	}
+        	else
+        	{
+        		underlyingType = typeService.getEventTypes()[0];
+        		if(underlyingType instanceof WrapperEventType)
+        		{
+        			singleStreamWrapper = true;
+        		}
+        	}
+        	log.debug(".ctor underlyingType==" + underlyingType);
+        }
+        log.debug(".ctor singleStreamWrapper=" + singleStreamWrapper);
+        
         // This function may modify
-        init(selectionList, insertIntoDesc, eventAdapterService);
+        init(selectionList, insertIntoDesc, underlyingType, eventAdapterService);
     }
 
     private void init(List<SelectExprElementNamedSpec> selectionList,
                       InsertIntoDesc insertIntoDesc,
+                      EventType eventType, 
                       EventAdapterService eventAdapterService)
         throws ExprValidationException
     {
@@ -94,7 +134,9 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         {
             try
             {
-                resultEventType = eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
+                resultEventType = isUsingWildcard ? 
+                		eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeAlias(), eventType, selPropertyTypes) :
+                			eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
             }
             catch (EventAdapterException ex)
             {
@@ -103,8 +145,11 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
         else
         {
-            resultEventType = eventAdapterService.createAnonymousMapType(selPropertyTypes);
+        	resultEventType = isUsingWildcard ? 
+        			eventAdapterService.createAnonymousWrapperType(eventType, selPropertyTypes) :
+        				eventAdapterService.createAnonymousMapType(selPropertyTypes);
         }
+        log.debug(".init resultEventType=" + resultEventType);
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData)
@@ -116,8 +161,28 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             props.put(columnNames[i], evalResult);
         }
 
-        EventBean event = eventAdapterService.createMapFromValues(props, resultEventType);
-        return event;
+        if(isUsingWildcard)
+        {
+        	// In case of a wildcard and single stream that is itself a 
+        	// wrapper bean, we also need to add the map properties
+        	if(singleStreamWrapper)
+        	{
+        		WrapperEventBean wrapper = (WrapperEventBean)eventsPerStream[0];
+        		if(wrapper != null)
+        		{
+        			wrapper.setUnderlyingIsMap(true);
+        			Map<String, Object> map = (Map<String, Object>)wrapper.getUnderlying();
+        			log.debug(".process additional properties=" + map);
+        			props.putAll(map);
+        			wrapper.setUnderlyingIsMap(false);
+        		}
+        	}
+        	return eventAdapterService.createWrapper(createUnderlying(eventsPerStream, isNewData), props, resultEventType);
+        }
+        else
+        {
+        	return eventAdapterService.createMapFromValues(props, resultEventType);
+        }
     }
 
     public EventType getResultEventType()
@@ -147,4 +212,17 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             throw new ExprValidationException("Number of supplied values in the select clause does not match insert-into clause");
         }
     }
+    
+    private Object createUnderlying(EventBean[] eventsPerStream, boolean isNewData)
+    {
+    	if(joinWildcardProcessor != null)
+    	{
+    		return joinWildcardProcessor.process(eventsPerStream, isNewData).getUnderlying();
+    	}
+    	else
+    	{
+    		return eventsPerStream[0].getUnderlying();
+    	}
+    }
+    
 }
