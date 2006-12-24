@@ -15,6 +15,7 @@ import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportBean_B;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.SupportUpdateListener;
+import net.esper.collection.Pair;
 
 
 public class TestModifiedWildcardSelect extends TestCase
@@ -32,9 +33,8 @@ public class TestModifiedWildcardSelect extends TestCase
 		insertListener = new SupportUpdateListener();
 		properties = new HashMap<String, Object>();
 	}
-	
-	public void testSingle() throws Exception
 
+	public void testSingle() throws Exception
 	{
 		String eventName = SupportBeanSimple.class.getName();  
 		String text = "select *, myString||myString as concat from " + eventName + ".win:length(5)";
@@ -188,31 +188,36 @@ public class TestModifiedWildcardSelect extends TestCase
 	
 	private void assertNoCommonProperties() throws InterruptedException
 	{
-		sendSimpleEvent("string");
-		sendMarketEvent("string");
-		Thread.sleep(50);
+		SupportBeanSimple eventSimple = sendSimpleEvent("string");
+		SupportMarketDataBean eventMarket = sendMarketEvent("string");
+
 		EventBean event = listener.getLastNewData()[0];
 		properties.put("concat", "stringstring");
 		assertProperties(listener);
-		assertNotNull(event.get("eventOne"));
-		assertNotNull(event.get("eventTwo"));
+		assertSame(eventSimple, event.get("eventOne"));
+		assertSame(eventMarket, event.get("eventTwo"));
 	}
 	
 	private void assertSimple() throws InterruptedException
 	{
-		sendSimpleEvent("string");
-		Thread.sleep(50);
-		assertEquals("stringstring", listener.getLastNewData()[0].get("concat"));
+		SupportBeanSimple event = sendSimpleEvent("string");
+
+        assertEquals("stringstring", listener.getLastNewData()[0].get("concat"));
 		properties.put("concat", "stringstring");
 		properties.put("myString", "string");
 		properties.put("myInt", 0);
 		assertProperties(listener);
-	}
+
+        assertEquals(Pair.class, listener.getLastNewData()[0].getEventType().getUnderlyingType());
+        assertTrue(listener.getLastNewData()[0].getUnderlying() instanceof Pair);
+        Pair pair = (Pair) listener.getLastNewData()[0].getUnderlying();
+        assertEquals(event, pair.getFirst());
+        assertEquals("stringstring", ((Map)pair.getSecond()).get("concat"));
+    }
 
 	private void assertCommonProperties() throws InterruptedException
 	{
 		sendABEvents("string");
-		Thread.sleep(50);
 		EventBean event = listener.getLastNewData()[0];
 		properties.put("concat", "stringstring");
 		assertProperties(listener);
@@ -223,7 +228,6 @@ public class TestModifiedWildcardSelect extends TestCase
 	private void assertCombinedProps() throws InterruptedException
 	{
 		sendCombinedProps();
-		Thread.sleep(50);
 		EventBean eventBean = listener.getLastNewData()[0];
 		
         assertEquals("0ma0", eventBean.get("indexed[0].mapped('0ma').value"));
@@ -246,17 +250,19 @@ public class TestModifiedWildcardSelect extends TestCase
 		}
 	}
 	
-	private void sendSimpleEvent(String s)
+	private SupportBeanSimple sendSimpleEvent(String s)
 	{
 	    SupportBeanSimple bean = new SupportBeanSimple(s, 0);
 	    epService.getEPRuntime().sendEvent(bean);
-	}
+        return bean;
+    }
 	
-	private void sendMarketEvent(String symbol)
+	private SupportMarketDataBean sendMarketEvent(String symbol)
 	{
 		SupportMarketDataBean bean = new SupportMarketDataBean(symbol, 0.0, 0L, null);
 		epService.getEPRuntime().sendEvent(bean);
-	}
+        return bean;
+    }
 	
 	private void sendABEvents(String id)
 	{

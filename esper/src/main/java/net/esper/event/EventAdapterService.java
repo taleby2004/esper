@@ -77,12 +77,12 @@ public interface EventAdapterService
     
     /**
      * Creata a wrapper around an event and some additional properties
-     * @param event is the underlying event
+     * @param event is the wrapped event
      * @param properties are the additional properties
      * @param eventType os the type metadata for any wrappers of this type
-     * @return
+     * @return wrapper event bean
      */
-    public EventBean createWrapper(Object event, Map<String, Object> properties, EventType eventType);
+    public EventBean createWrapper(EventBean event, Map<String, Object> properties, EventType eventType);
 
     /**
      * Create an aggregate event wrapper bean from a set of named events stored in a Map.

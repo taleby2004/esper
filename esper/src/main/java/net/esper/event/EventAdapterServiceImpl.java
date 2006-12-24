@@ -251,7 +251,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 	    return newEventType;
 	}
 
-	public EventBean createWrapper(Object event, Map<String, Object> properties, EventType eventType) 
+	public EventBean createWrapper(EventBean event, Map<String, Object> properties, EventType eventType) 
 	{
 		return new WrapperEventBean(event, properties, eventType);
 	}

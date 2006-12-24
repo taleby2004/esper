@@ -1,15 +1,17 @@
 package net.esper.event;
 
+import net.esper.collection.Pair;
+
 import java.util.Map;
 
 public class WrapperEventBean implements EventBean {
 
-	private final Object event;
-	private final Map map;
+	private final EventBean event;
+	private final Map<String, Object> map;
 	private final EventType eventType;
-	private boolean underlyingIsMap = false;
-	
-	public WrapperEventBean(Object event, Map<String, Object> properties, EventType eventType)
+    private Integer hashCode;
+
+    public WrapperEventBean(EventBean event, Map<String, Object> properties, EventType eventType)
 	{
 		this.event = event;
 		this.map = properties;		
@@ -33,31 +35,98 @@ public class WrapperEventBean implements EventBean {
 
 	public Object getUnderlying() 
 	{
-		if(underlyingIsMap)
-		{
-			return map;
-		}
-		return event;
+        return new Pair<Object, Map>(event.getUnderlying(), map);
 	}
 	
-	/**
-	 * Determine whether getUnderlying returns the event or
-	 * the map of additional properties.
-	 * @param underlyingIsMap - true if the next invocation of 
-	 * getUnderlying should return the map of additional properties
-	 * instead of the EventBean itself.
-	 */
-	public void setUnderlyingIsMap(boolean underlyingIsMap)
-	{
-		this.underlyingIsMap = underlyingIsMap;
-	}
-	
-	public String toString()
+    public Map getUnderlyingMap()
+    {
+        return map;
+    }
+
+    public EventBean getUnderlyingEvent()
+    {
+        return event;
+    }
+
+    public String toString()
 	{
         return "WrapperEventBean " +
         "[event=" + event + "] " + 
         "[properties=" + map + "]";
 	}
-	
 
+    public boolean equals(final Object otherObject)
+    {
+        if (otherObject == this)
+        {
+            return true;
+        }
+
+        if (otherObject == null)
+        {
+            return false;
+        }
+
+        if (getClass() != otherObject.getClass())
+        {
+            return false;
+        }
+
+        final WrapperEventBean other = (WrapperEventBean) otherObject;
+
+        if (other.eventType != eventType)
+        {
+            return false;
+        }
+
+        if (map.size() != other.map.size())
+        {
+            return false;
+        }
+
+        // Compare entry by entry
+        for (Map.Entry<String, Object> entry : map.entrySet())
+        {
+            final String name = entry.getKey();
+            final Object value = entry.getValue();
+            final Object otherValue = other.get(name);
+
+            if ((otherValue == null) && (value == null))
+            {
+                continue;
+            }
+
+            if ((otherValue == null) && (value != null))
+            {
+                return false;
+            }
+
+            if (!otherValue.equals(value))
+            {
+                return false;
+            }
+        }
+
+        return other.event.equals(this.event);
+    }
+
+    public int hashCode()
+    {
+        if (hashCode == null)
+        {
+            int hashCodeVal = 0;
+            for (Map.Entry<String, Object> entry : map.entrySet())
+            {
+                final String name = entry.getKey();
+                final Object value = entry.getValue();
+
+                if (value != null)
+                {
+                    hashCodeVal = hashCodeVal ^ name.hashCode() ^ value.hashCode();
+                }
+            }
+            hashCode = hashCodeVal ^ event.hashCode();
+        }
+        return hashCode;
+    }    
 }

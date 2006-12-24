@@ -137,14 +137,16 @@ class MapEventType implements EventType
         {
             public Object get(EventBean obj)
             {
+                Object underlying = obj.getUnderlying();
+                
                 // The underlying is expected to be a map
-                if (!(obj.getUnderlying() instanceof Map))
+                if (!(underlying instanceof Map))
                 {
                     throw new PropertyAccessException("Mismatched property getter to event bean type, " +
                             "the underlying data object is not of type java.lang.Map");
                 }
 
-                Map map = (Map) obj.getUnderlying();
+                Map map = (Map) underlying;
 
                 // If the map does not contain the key, this is allowed and represented as null
                 Object value = map.get(propertyMap);
@@ -161,6 +163,50 @@ class MapEventType implements EventType
         };
 
         return getter;
+    }
+
+    public Object getFromMap(String propertyName, Map values)
+    {
+        // if a known type, return value
+        if (types.get(propertyName) != null)
+        {
+            return values.get(propertyName);
+        }
+
+        // see if this is a nested property
+        int index = propertyName.indexOf('.');
+        if (index == -1)
+        {
+            return null;
+        }
+
+
+        // Take apart the nested property into a map key and a nested value class property name
+        final String propertyMap = propertyName.substring(0, index);
+        String propertyNested = propertyName.substring(index + 1, propertyName.length());
+
+        Class result = types.get(propertyMap);
+        if (result == null)
+        {
+            return null;
+        }
+
+        // ask the nested class to resolve the property
+        EventType nestedType = eventAdapterService.addBeanType(result.getName(), result);
+        final EventPropertyGetter nestedGetter = nestedType.getGetter(propertyNested);
+        if (nestedGetter == null)
+        {
+            return null;
+        }
+
+        // Wrap object
+        Object value = values.get(propertyMap);
+        if (value == null)
+        {
+            return null;
+        }
+        EventBean event = MapEventType.this.eventAdapterService.adapterForBean(value);
+        return nestedGetter.get(event);
     }
 
     public String[] getPropertyNames()

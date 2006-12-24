@@ -108,18 +108,20 @@ public class TestInsertInto extends TestCase
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
         
-        sendEvent(10, 11);
+        SupportBean event = sendEvent(10, 11);
         assertTrue(listenerOne.getAndClearIsInvoked());
         assertEquals(1, listenerOne.getLastNewData().length);
         assertEquals(10, listenerOne.getLastNewData()[0].get("intPrimitive"));
         assertEquals(11, listenerOne.getLastNewData()[0].get("intBoxed"));
         assertEquals(18, listenerOne.getLastNewData()[0].getEventType().getPropertyNames().length);
+        assertSame(event, listenerOne.getLastNewData()[0].getUnderlying());
  
         assertTrue(listenerTwo.getAndClearIsInvoked());
         assertEquals(1, listenerTwo.getLastNewData().length);
         assertEquals(10, listenerTwo.getLastNewData()[0].get("intPrimitive"));
         assertEquals(11, listenerTwo.getLastNewData()[0].get("intBoxed"));
         assertEquals(18, listenerTwo.getLastNewData()[0].getEventType().getPropertyNames().length);
+        assertSame(event, listenerTwo.getLastNewData()[0].getUnderlying());
     }
 
     public void testVariantTwoJoin()
@@ -148,22 +150,27 @@ public class TestInsertInto extends TestCase
         EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
-        
+
         // send event for joins to match on
-        epService.getEPRuntime().sendEvent(new SupportBean_A("myId"));
+        SupportBean_A eventA = new SupportBean_A("myId");
+        epService.getEPRuntime().sendEvent(eventA);
         
-        sendEvent(10, 11);
+        SupportBean eventOne = sendEvent(10, 11);
         assertTrue(listenerOne.getAndClearIsInvoked());
         assertEquals(1, listenerOne.getLastNewData().length);
         assertEquals(2, listenerOne.getLastNewData()[0].getEventType().getPropertyNames().length);
         assertTrue(listenerOne.getLastNewData()[0].getEventType().isProperty("s0"));
         assertTrue(listenerOne.getLastNewData()[0].getEventType().isProperty("s1"));
-        
+        assertSame(eventOne, listenerOne.getLastNewData()[0].get("s0"));
+        assertSame(eventA, listenerOne.getLastNewData()[0].get("s1"));
+
         assertTrue(listenerTwo.getAndClearIsInvoked());
         assertEquals(1, listenerTwo.getLastNewData().length);
         assertEquals(2, listenerTwo.getLastNewData()[0].getEventType().getPropertyNames().length);
         assertTrue(listenerTwo.getLastNewData()[0].getEventType().isProperty("s0"));
         assertTrue(listenerTwo.getLastNewData()[0].getEventType().isProperty("s1"));
+        assertSame(eventOne, listenerOne.getLastNewData()[0].get("s0"));
+        assertSame(eventA, listenerOne.getLastNewData()[0].get("s1"));
     }
 
     public void testInvalidStreamUsed()
@@ -355,12 +362,13 @@ public class TestInsertInto extends TestCase
         feedListener.reset();
     }
 
-    private void sendEvent(int intPrimitive, int intBoxed)
+    private SupportBean sendEvent(int intPrimitive, int intBoxed)
     {
         SupportBean bean = new SupportBean();
         bean.setString("myId");
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
+        return bean;
     }
 }

@@ -134,9 +134,14 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         {
             try
             {
-                resultEventType = isUsingWildcard ? 
-                		eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeAlias(), eventType, selPropertyTypes) :
-                			eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
+                if (isUsingWildcard)
+                {
+                    resultEventType = eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeAlias(), eventType, selPropertyTypes);
+                }
+                else
+                {
+                    resultEventType = eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
+                }
             }
             catch (EventAdapterException ex)
             {
@@ -145,15 +150,21 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
         else
         {
-        	resultEventType = isUsingWildcard ? 
-        			eventAdapterService.createAnonymousWrapperType(eventType, selPropertyTypes) :
-        				eventAdapterService.createAnonymousMapType(selPropertyTypes);
+            if (isUsingWildcard)
+            {
+        	    resultEventType = eventAdapterService.createAnonymousWrapperType(eventType, selPropertyTypes);
+            }
+            else
+            {
+                resultEventType = eventAdapterService.createAnonymousMapType(selPropertyTypes);
+            }
         }
         log.debug(".init resultEventType=" + resultEventType);
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData)
     {
+        // Evaluate all expressions and build a map of name-value pairs
         Map<String, Object> props = new HashMap<String, Object>();
         for (int i = 0; i < expressionNodes.length; i++)
         {
@@ -170,14 +181,12 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         		WrapperEventBean wrapper = (WrapperEventBean)eventsPerStream[0];
         		if(wrapper != null)
         		{
-        			wrapper.setUnderlyingIsMap(true);
-        			Map<String, Object> map = (Map<String, Object>)wrapper.getUnderlying();
+        			Map<String, Object> map = (Map<String, Object>)wrapper.getUnderlyingMap();
         			log.debug(".process additional properties=" + map);
         			props.putAll(map);
-        			wrapper.setUnderlyingIsMap(false);
         		}
         	}
-        	return eventAdapterService.createWrapper(createUnderlying(eventsPerStream, isNewData), props, resultEventType);
+        	return eventAdapterService.createWrapper(getEvent(eventsPerStream, isNewData), props, resultEventType);
         }
         else
         {
@@ -213,16 +222,15 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
     }
     
-    private Object createUnderlying(EventBean[] eventsPerStream, boolean isNewData)
+    private EventBean getEvent(EventBean[] eventsPerStream, boolean isNewData)
     {
-    	if(joinWildcardProcessor != null)
+        if(joinWildcardProcessor != null)
     	{
-    		return joinWildcardProcessor.process(eventsPerStream, isNewData).getUnderlying();
+    		return joinWildcardProcessor.process(eventsPerStream, isNewData);
     	}
     	else
     	{
-    		return eventsPerStream[0].getUnderlying();
+    		return eventsPerStream[0];
     	}
-    }
-    
+    }    
 }

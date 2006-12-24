@@ -32,9 +32,12 @@ public class TestWrapperEventBean extends TestCase
 		properties = new HashMap<String, Object>();
 		properties.put("string", "xx");
 		properties.put("int", 11);
-		
-		eventBeanSimple = eventService.createWrapper(new SupportBeanSimple("eventString", 0), properties, eventTypeSimple);
-		eventBeanCombined = eventService.createWrapper(SupportBeanCombinedProps.makeDefaultBean(), properties, eventTypeCombined);
+
+        EventBean wrappedSimple = eventService.adapterForBean(new SupportBeanSimple("eventString", 0));
+        eventBeanSimple = eventService.createWrapper(wrappedSimple, properties, eventTypeSimple);
+
+        EventBean wrappedCombined = eventService.adapterForBean(SupportBeanCombinedProps.makeDefaultBean());
+        eventBeanCombined = eventService.createWrapper(wrappedCombined, properties, eventTypeCombined);
 	}
 	
 	public void testGetSimple()

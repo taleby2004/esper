@@ -16,7 +16,7 @@ import net.esper.support.util.ArrayAssertionUtil;
 
 public class TestMapEventType extends TestCase
 {
-    private EventType eventType;
+    private MapEventType eventType;
     private EventAdapterService eventAdapterService;
 
     public void setUp()
@@ -157,6 +157,25 @@ public class TestMapEventType extends TestCase
         assertFalse(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
         mapTwo.put("myInt", int.class);
         assertTrue(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
+    }
+
+    public void testGetFromMap()
+    {
+        SupportBean nestedSupportBean = new SupportBean();
+        nestedSupportBean.setIntPrimitive(100);
+        SupportBeanComplexProps complexPropBean = SupportBeanComplexProps.makeDefaultBean();
+
+        Map<String, Object> valuesMap = new HashMap<String, Object>();
+        valuesMap.put("myInt", 20);
+        valuesMap.put("myString", "a");
+        valuesMap.put("mySupportBean", nestedSupportBean);
+        valuesMap.put("myComplexBean", complexPropBean);
+        valuesMap.put("myNullableSupportBean", null);
+        valuesMap.put("myNullableString", null);
+
+        assertEquals(20, eventType.getFromMap("myInt", valuesMap));
+        assertEquals(100, eventType.getFromMap("mySupportBean.intPrimitive", valuesMap));
+        assertEquals("nestedValue", eventType.getFromMap("myComplexBean.nested.nestedValue", valuesMap));
     }
 
     private static final Log log = LogFactory.getLog(TestMapEventType.class);
