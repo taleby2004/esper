@@ -165,7 +165,7 @@ class MapEventType implements EventType
         return getter;
     }
 
-    public Object getFromMap(String propertyName, Map values)
+    public Object getValue(String propertyName, Map values)
     {
         // if a known type, return value
         if (types.get(propertyName) != null)

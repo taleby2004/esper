@@ -173,9 +173,9 @@ public class TestMapEventType extends TestCase
         valuesMap.put("myNullableSupportBean", null);
         valuesMap.put("myNullableString", null);
 
-        assertEquals(20, eventType.getFromMap("myInt", valuesMap));
-        assertEquals(100, eventType.getFromMap("mySupportBean.intPrimitive", valuesMap));
-        assertEquals("nestedValue", eventType.getFromMap("myComplexBean.nested.nestedValue", valuesMap));
+        assertEquals(20, eventType.getValue("myInt", valuesMap));
+        assertEquals(100, eventType.getValue("mySupportBean.intPrimitive", valuesMap));
+        assertEquals("nestedValue", eventType.getValue("myComplexBean.nested.nestedValue", valuesMap));
     }
 
     private static final Log log = LogFactory.getLog(TestMapEventType.class);

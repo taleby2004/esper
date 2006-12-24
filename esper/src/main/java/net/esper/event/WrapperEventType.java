@@ -75,7 +75,7 @@ public class WrapperEventType implements EventType
                     }
                     WrapperEventBean wrapperEvent = (WrapperEventBean) event;
                     Map map = wrapperEvent.getUnderlyingMap();
-                    return underlyingMapType.getFromMap(property, map);
+                    return underlyingMapType.getValue(property, map);
                 }
             };
 		}
