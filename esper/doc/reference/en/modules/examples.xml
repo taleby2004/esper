@@ -9,7 +9,7 @@
         <title>Examples Overview</title>
         
 		<para>
-			This chapter outlines the examples that come with Esper in the <literal>eg/src</literal> folder of the distribution. The code for examples can be found in the <literal>net.esper.example</literal> packages.
+			This chapter outlines the examples that come with Esper in the <literal>examples/src</literal> folder of the distribution. The code for examples can be found in the <literal>net.esper.example</literal> packages.
 		</para>
     	
 		<para>
@@ -24,7 +24,7 @@
 			</listitem>
 			<listitem>
 				<para>
-                    Open a console window and change directory to esper/eg/etc.
+                    Open a console window and change directory to examples/etc.
                 </para>
 			</listitem>
 			<listitem>
@@ -40,7 +40,7 @@
 			<listitem>
 				<para>
                     Now you are ready to run the examples. Some examples require mandatory parameters. Further information to running
-                    each example can be found in the "eg" folder in file "readme.txt".
+                    each example can be found in the "examples/etc" folder in file "readme.txt".
                 </para>
 			</listitem>
 			<listitem>
@@ -52,7 +52,7 @@
 		</orderedlist>
 
 		<para>
-			JUnit tests exist for the example code. The JUnit test source code for the examples can be found in the <literal>eg/test</literal> folder. To build and run the example JUnit tests, use the Maven 2 goal <literal>test</literal>. The JUnit test source code can also be helpful in understanding the example and in the use of Esper APIs.
+			JUnit tests exist for the example code. The JUnit test source code for the examples can be found in the <literal>examples/test</literal> folder. To build and run the example JUnit tests, use the Maven 2 goal <literal>test</literal>. The JUnit test source code can also be helpful in understanding the example and in the use of Esper APIs.
 		</para>		
     </sect1>
 
@@ -67,7 +67,7 @@
 
 		<para>
 			The classes for this example live in package <literal>net.esper.example.marketdatafeed</literal>. 
-			Run "run_mktdatafeed.bat" (Windows) or "run_mktdatafeed.sh" (Unix) in the <literal>eg/etc</literal> folder 
+			Run "run_mktdatafeed.bat" (Windows) or "run_mktdatafeed.sh" (Unix) in the <literal>examples/etc</literal> folder 
 			to start the market data feed simulator. 			
 		</para>
 		
@@ -444,7 +444,7 @@ output all every 1 minutes]]></programlisting>
 			</para>
 
 			<para>
-				The complete example code can be found in the "eg/terminalsvc" folder of the distribution. The Java package name is net.esper.example.terminalsvc.
+				The complete example code can be found in the "examples/terminalsvc" folder of the distribution. The Java package name is net.esper.example.terminalsvc.
 			</para>
 			
 			<sect3 id="examples-terminalsvc-j2ee-running">
@@ -455,11 +455,11 @@ output all every 1 minutes]]></programlisting>
 				</para>
 
 				<para>
-					The application can be deployed by copying the ear file in the "eg/terminalsvc/terminalsvc-ear" folder to your JBoss deployment directory located under the JBoss home directory under "server/default/deploy".
+					The application can be deployed by copying the ear file in the "examples/terminalsvc/terminalsvc-ear" folder to your JBoss deployment directory located under the JBoss home directory under "server/default/deploy".
 				</para>
 
 				<para>
-					The example contains an event simulator and an event receiver that can be invoked from the command line. See the folder "eg/terminalsvc/etc" folder readme file and start scripts for Windows and Unix, and the documentation set for further information on the simulator.
+					The example contains an event simulator and an event receiver that can be invoked from the command line. See the folder "examples/terminalsvc/etc" folder readme file and start scripts for Windows and Unix, and the documentation set for further information on the simulator.
 				</para>
 			</sect3>
 
@@ -467,7 +467,7 @@ output all every 1 minutes]]></programlisting>
 				<title>Building the Example</title>
 
 				<para>
-					This example requires Maven 2 to build. To build the example, change directory to the folder "eg/terminalsvc" and type "mvn package". The instructions have been tested with JBoss AS 4.0.4.GA and Maven 2.0.4.
+					This example requires Maven 2 to build. To build the example, change directory to the folder "examples/terminalsvc" and type "mvn package". The instructions have been tested with JBoss AS 4.0.4.GA and Maven 2.0.4.
 				</para>
 
 				<para>
@@ -479,11 +479,11 @@ output all every 1 minutes]]></programlisting>
 				<title>Running the Event Simulator and Receiver</title>
 
 					<para>
-						The example also contains an event simulator that generates meaningful events. The simulator can be run from the directory "eg/terminalsvc/etc" via the command "run_terminalsvc_sender.bat" (Windows) and "run_terminalsvc_sender.sh" (Linux). The event simulator generates a batch of at least 200 events every 1 second. Randomly, with a chance of 1 in 10 for each batch of events, the simulator generates either an OutOfOrder or a LowPaper event for a random terminal. Each batch the simulator generates 100 random terminal ids and generates a Checkin event for each. It then generates either a Cancelled or a Completed event for each. With a chance of 1 in 1000, it generates an OutOfOrder event instead of the Cancelled or Completed event for a terminal.
+						The example also contains an event simulator that generates meaningful events. The simulator can be run from the directory "examples/terminalsvc/etc" via the command "run_terminalsvc_sender.bat" (Windows) and "run_terminalsvc_sender.sh" (Linux). The event simulator generates a batch of at least 200 events every 1 second. Randomly, with a chance of 1 in 10 for each batch of events, the simulator generates either an OutOfOrder or a LowPaper event for a random terminal. Each batch the simulator generates 100 random terminal ids and generates a Checkin event for each. It then generates either a Cancelled or a Completed event for each. With a chance of 1 in 1000, it generates an OutOfOrder event instead of the Cancelled or Completed event for a terminal.
 					</para>
 
 					<para>
-						The event receiver listens to the MDB-outcoming queue for alerts and prints these out to console. The receiver can be run from the directory "eg/terminalsvc/etc" via the command "run_terminalsvc_receiver.bat" (Windows) and "run_terminalsvc_receiver.sh" (Linux). 
+						The event receiver listens to the MDB-outcoming queue for alerts and prints these out to console. The receiver can be run from the directory "examples/terminalsvc/etc" via the command "run_terminalsvc_receiver.bat" (Windows) and "run_terminalsvc_receiver.sh" (Linux). 
 					</para>
 			</sect3>	
 		</sect2>
@@ -673,7 +673,7 @@ group by ID]]></programlisting>
 
         <para>
 			Linear Road simulates a toll system for the motor vehicle expressways of a large metropolitan area. The main event in this example is a car location report which the class
-			<literal>net.esper.example.linearroad.CarLocEvent</literal> represents. Currently the event stream joins are performed by JUnit test classes in the <literal>eg/test</literal> folder. See the <literal>net.esper.example.linearroad.TestAccidentNotify</literal> and the <literal>TestCarSegmentCount</literal> classes. Please consider this a work in progress.
+			<literal>net.esper.example.linearroad.CarLocEvent</literal> represents. Currently the event stream joins are performed by JUnit test classes in the <literal>examples/test</literal> folder. See the <literal>net.esper.example.linearroad.TestAccidentNotify</literal> and the <literal>TestCarSegmentCount</literal> classes. Please consider this a work in progress.
         </para>
         
 		<para>

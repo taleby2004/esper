@@ -16,7 +16,7 @@ then
   exit 0
 fi
 
-LIB=../../lib
+LIB=../../esper/lib
 
 CLASSPATH=.
 CLASSPATH=$CLASSPATH:../target/classes

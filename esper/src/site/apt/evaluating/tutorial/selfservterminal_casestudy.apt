@@ -194,7 +194,7 @@ where t1.timeMinute = t2.timeMinute
 	a similar application.
 	
 	Note that the example code implements only a subset of the statements in this case study, since many of the statements
-	are shown to provide a step-by-step explanation. The complete example code can be found in the "eg/terminalsvc" folder of the distribution. The Java package name is net.esper.example.terminalsvc. 
+	are shown to provide a step-by-step explanation. The complete example code can be found in the "examples/terminalsvc" folder of the distribution. The Java package name is net.esper.example.terminalsvc. 
 
   
 * Running the Example 
@@ -202,18 +202,18 @@ where t1.timeMinute = t2.timeMinute
 	The pre-build EAR file contains the MDB for deployment to a JBoss application server with default deployment options.
 	The JBoss default configuration provides 2 queues that this example utilizes: queue/A and queue/B.
 	
-	The application can be deployed by copying the ear file in the "eg/terminalsvc/terminalsvc-ear" folder to your JBoss 
+	The application can be deployed by copying the ear file in the "examples/terminalsvc/terminalsvc-ear" folder to your JBoss 
 	deployment directory located under the JBoss home directory under "server/default/deploy".
 	
 	The example contains an event simulator and a event receiver that can be invoked from the command line.
-	See the folder "eg/terminalsvc/etc" folder readme file and start scripts for Windows and Unix, and the documentation 
+	See the folder "examples/terminalsvc/etc" folder readme file and start scripts for Windows and Unix, and the documentation 
 	set for further information on the simulator.
 	
 			
 * Building the Example 
 
 	This example requires Maven 2 to build. To build the example, change directory to the folder 
-	"eg/terminalsvc" and type "mvn package".
+	"examples/terminalsvc" and type "mvn package".
 	
 	The Maven build packages the EAR file for deployment to a JBoss application server with default deployment options.
 	

@@ -136,7 +136,7 @@
           Esper can easily be embedded in any Java runtime including J2EE application servers or standalone Java applications. 
           Events in Esper can be represented as plain Java objects (POJO) eliminating the need to format, feed and receive events 
           into a separate possibly remote engine process. Esper is an entirely free open-source component available under the 
-          LPGL license. The open-source nature of Esper helps in tailoring the event processing language and other 
+          GNU GPL license. The open-source nature of Esper helps in tailoring the event processing language and other 
           community driven features.
         </p>
       </answer>

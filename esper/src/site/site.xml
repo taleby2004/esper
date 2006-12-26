@@ -21,7 +21,7 @@
 				<!-- <item name="Case Study" href="/evaluating/tutorial/selfservterminal_casestudy.html"/> -->
 				<item name="Longer Case Study" href="/evaluating/tutorial/transaction_casestudy.html"/>
 				<item name="Solution Patterns" href="/tutorial/faq/solution_patterns.html"/>
-				<item name="Download" href="http://dist.codehaus.org/esper"/>
+				<item name="Download" href="/evaluating/download/download.html"/>
 			</item>
 			<item name="Using Esper" href="/using/using.html" collapse="false">
 				<item name="FAQ" href="/using/faq/faq.html"/>

@@ -12,7 +12,7 @@ if not exist "%JAVA_HOME%\bin\java.exe" (
   goto EOF
 )
 
-set LIB=..\..\lib
+set LIB=..\..\esper\lib
 
 if not exist ..\..\esper-1.4.0.jar goto badenv_esperlib
 if not exist %LIB%\cglib-full-2.0.2.jar goto badenv

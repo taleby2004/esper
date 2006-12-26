@@ -6,7 +6,7 @@ In order to compile and run the samples please follow the below instructions:
 
 1. Make sure Java 1.5 or greater is installed and the JAVA_HOME environment variable is set
 
-2. Open a console window and change directory to esper\eg\etc
+2. Open a console window and change directory to esper/examples/etc
 
 3. Run "setenv.bat" (Windows) or "setenv.sh" (Unix) to verify your environment settings
 
