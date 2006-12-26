@@ -65,6 +65,9 @@ Features
 
         []
         
+    * Input Adapters
+    	
+    	* CSV input adapter reads comma-separated value formats, and can simulate multiple event streams with timed playback
 
     * Relational database access via SQL-query joins with event streams; LRU and expiry-time query result caches
 	

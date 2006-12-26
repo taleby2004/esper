@@ -20,8 +20,6 @@ public class TestComplexPropertyAccess extends TestCase
 
     public void testComplexProperties() throws Exception
     {
-        System.out.println(SupportBeanCombinedProps.makeDefaultBean().getArray()[0].getMapped("0ma").getValue());
-
         EventCollection events = EventCollectionFactory.getSetSixComplexProperties();
         CaseList testCaseList = new CaseList();
         EventExpressionCase testCase = null;

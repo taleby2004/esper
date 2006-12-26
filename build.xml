@@ -23,7 +23,7 @@
 
 	<target name="touch_all" description="Update timestamp all artifacts">
 		<touch>
-			<fileset dir="src">
+			<fileset dir=".">
 				<include name="**/*.java"/>
 			</fileset>
 		</touch>

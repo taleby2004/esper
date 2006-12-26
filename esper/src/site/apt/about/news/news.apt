@@ -2,7 +2,7 @@ News
 
 * December 26, 2006  -  Esper 1.4.0  and  EsperIO 1.4.0
 
-    * New Esper Input Adapter API for reading CSV (comma-separated value format) files 
+    * New Esper Input Adapter API named EsperIO for reading CSV (comma-separated value format) files 
       and running event simulations from timestamped CSV files (ESPER-6 Input Adapter for reading CSV files)
     
     * Added support for 'prior' and 'prev' (previous) operator (Enhancement request ESPER-25)

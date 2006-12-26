@@ -19,6 +19,7 @@ public class WrapperEventType implements EventType
 	private final MapEventType underlyingMapType;
 	private final String[] propertyNames;
     private final int hashCode;
+    private final boolean isNoMapProperties;
 
     public WrapperEventType(EventType eventType, Map<String, Class> properties, EventAdapterService eventAdapterService)
 	{
@@ -26,7 +27,8 @@ public class WrapperEventType implements EventType
 		
 		this.underlyingEventType = eventType;
 		this.underlyingMapType = new MapEventType(properties, eventAdapterService);
-        this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();  
+        this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
+        this.isNoMapProperties = properties.isEmpty();
 
         List<String> propertyNames = new ArrayList<String>();
 		for(String eventProperty : underlyingEventType.getPropertyNames())
@@ -113,8 +115,17 @@ public class WrapperEventType implements EventType
 
 	public Class getUnderlyingType() 
 	{
-		return Pair.class;
-	}
+        // If the additional properties are empty, such as when wrapping a native event by means of wildcard-only select
+        // then the underlying type is simply the wrapped type.
+        if (isNoMapProperties)
+        {
+            return underlyingEventType.getUnderlyingType();
+        }
+        else
+        {
+            return Pair.class;
+        }
+    }
 
 	public boolean isProperty(String property) 
 	{

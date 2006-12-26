@@ -4,11 +4,11 @@ Esper Changelog
 
 Changes in version 1.4.0
 ----------------------
+* New Esper Input Adapter API (EsperIO) for reading CSV (comma-separated value format) files and running event simulations from timestamped CSV files (ESPER-6 Input Adapter for reading CSV files)
 * (EQL) Support for 'prior' and 'prev' (previous) operator (Enhancement request ESPER-25)
 * (EQL) Support for 'in' and 'not in' list-of-value matching in filter expressions, 
         and for 'between' and 'not between' keywords, and 'not in' ranges (Enhancement request ESPER-66)
 * (EQL) Support for modifying events in a stream, i.e. wildcard and expressions combined in a select-clause and insert into (Enhancement request ESPER-67)
-* Added CSV file reader and simulator (ESPER-6 Input Adapter for reading CSV files)
 * Various documentation enhancements and performance tuning changes
 * Fixed issue ESPER-69 "Pull throws UnsupportedOperationException for statement not selecting wildcard"
 * Fixed issue ESPER-68 "Followed-by operator not releasing memory for dead sub-expressions"

@@ -1,8 +1,8 @@
 <project>
 	<modelVersion>4.0.0</modelVersion>
 	<name>Esper IO</name>
-	<artifactId>esper-esperio</artifactId>
-	<groupId>esper-esperio</groupId>
+	<artifactId>esperio</artifactId>
+	<groupId>esper</groupId>
 	<version>1.4.0</version>
 	<packaging>jar</packaging>
 	<description>Esper CEP engine for Java - Input Output Adapters</description>

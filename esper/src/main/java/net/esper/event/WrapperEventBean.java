@@ -35,8 +35,16 @@ public class WrapperEventBean implements EventBean {
 
 	public Object getUnderlying() 
 	{
-        return new Pair<Object, Map>(event.getUnderlying(), map);
-	}
+        // If wrapper is simply for the underlyingg with no additional properties, then return the underlying type 
+        if (map.isEmpty())
+        {
+            return event.getUnderlying();
+        }
+        else
+        {
+            return new Pair<Object, Map>(event.getUnderlying(), map);
+        }
+    }
 	
     public Map getUnderlyingMap()
     {
