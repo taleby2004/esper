@@ -8,7 +8,7 @@
 	<bookinfo>
 		<title>Esper Adapters - Java Event Stream Processor </title>
 		<subtitle>Esper Adapter Reference Documentation</subtitle>
-		<releaseinfo>1.3.0</releaseinfo>
+		<releaseinfo>1.4.0</releaseinfo>
 	</bookinfo>
 	<toc/>
 	<preface id="preface" revision="1">

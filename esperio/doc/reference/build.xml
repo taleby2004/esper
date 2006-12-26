@@ -20,7 +20,7 @@ Changes made:
     <property name="build.dir"             value="${basedir}/build"/>
 
     <!-- Support files for build process. -->
-    <property name="support.dir"           value="${imported.basedir}/support"/>
+    <property name="support.dir"           value="../../../esper/doc/reference/support"/>
 
     <!-- Base name for documentation artifacts. -->
     <property name="docname"               value="esper_adapter_reference"/>

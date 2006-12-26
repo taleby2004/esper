@@ -6,6 +6,7 @@ import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.bean.SupportBeanSimple;
 import net.esper.event.EventBean;
 
 public class TestInBetweenLikeExpr extends TestCase
