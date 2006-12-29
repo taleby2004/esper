@@ -3,6 +3,7 @@ package net.esper.regression.view;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPStatement;
 import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPException;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.CurrentTimeEvent;
 import net.esper.support.util.SupportUpdateListener;
@@ -87,6 +88,31 @@ public class TestAggregateRowForAll extends TestCase
         assertNull(testListener.getAndResetLastNewData()[0].get("mySum"));
     }
 
+    public void testSumDivideZero()
+    {
+        String eventName = SupportBean.class.getName();
+        String stmt;
+
+        stmt = "select ((sum(floatBoxed) - floatBoxed) / (count(*) - 1)) as laggingAvg  from " + eventName + " .win:time(60) as a";
+        selectTestView = epService.getEPAdministrator().createEQL(stmt);
+        selectTestView.addListener(testListener);
+        sendEventFloat(1.1f);
+
+        stmt = "select ((sum(intBoxed) - intBoxed) / (count(*) - 1)) as laggingAvg  from " + eventName + " .win:time(60) as a";
+        selectTestView = epService.getEPAdministrator().createEQL(stmt);
+        selectTestView.addListener(testListener);
+
+        try
+        {
+            sendEventInt(10);
+            fail();
+        }
+        catch (EPException ex)
+        {
+            // expected
+        }
+    }
+
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
     {
         SupportBean bean = new SupportBean();
@@ -100,6 +126,20 @@ public class TestAggregateRowForAll extends TestCase
     private void sendEvent(long longBoxed)
     {
         sendEvent(longBoxed, 0, (short)0);
+    }
+
+    private void sendEventInt(int intBoxed)
+    {
+        SupportBean bean = new SupportBean();
+        bean.setIntBoxed(intBoxed);
+        epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendEventFloat(float floatBoxed)
+    {
+        SupportBean bean = new SupportBean();
+        bean.setFloatBoxed(floatBoxed);
+        epService.getEPRuntime().sendEvent(bean);
     }
 
     private void sendTimerEvent(long msec)
