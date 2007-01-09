@@ -17,13 +17,6 @@ public interface EventAdapterService
     public EventType getEventType(String eventTypeAlias);
 
     /**
-     * Add a new alias for an existing type.
-     * @param eventTypeAlias is the event type alias name to add
-     * @param eventType is the event type for which to add the aias
-     */
-    public void addAliasForType(String eventTypeAlias, EventType eventType) throws EventAdapterException;
-
-    /**
      * Add an event type with the given alias and a given set of properties.
      * <p>
      * If the alias already exists with the same event property information, returns the

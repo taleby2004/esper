@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Starts and provides the stop method for EQL statements.
  */
-@SuppressWarnings({"ObjectAllocationInLoop"})
 public class EPEQLStmtStartMethod
 {
     private final StatementSpec statementSpec;
@@ -46,6 +45,7 @@ public class EPEQLStmtStartMethod
     private final ScheduleBucket scheduleBucket;
     private final EPServicesContext services;
     private final ViewServiceContext viewContext;
+    private final EPStatementHandle epStatementHandle;
 
     /**
      * Ctor.
@@ -53,20 +53,24 @@ public class EPEQLStmtStartMethod
      * may have been used in the statement, i.e. if defines the select clauses, insert into, outer joins etc.
      * @param eqlStatement is the expression text
      * @param services is the service instances for dependency injection
+     * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
      */
     public EPEQLStmtStartMethod(StatementSpec statementSpec,
                                 String eqlStatement,
-                                EPServicesContext services)
+                                EPServicesContext services,
+                                EPStatementHandle epStatementHandle)
     {
         this.statementSpec = statementSpec;
         this.services = services;
         this.eqlStatement = eqlStatement;
+        this.epStatementHandle = epStatementHandle;
 
         // Allocate the statement's schedule bucket which stays constant over it's lifetime.
         // The bucket allows callbacks for the same time to be ordered (within and across statements) and thus deterministic.
         scheduleBucket = services.getSchedulingService().allocateBucket();
 
-        viewContext = new ViewServiceContext(services.getSchedulingService(), scheduleBucket, services.getEventAdapterService());
+        viewContext = new ViewServiceContext(services.getSchedulingService(),
+                scheduleBucket, services.getEventAdapterService(), epStatementHandle);
     }
 
     /**
@@ -80,6 +84,7 @@ public class EPEQLStmtStartMethod
     {
         // Determine stream names for each stream - some streams may not have a name given
         String[] streamNames = determineStreamNames(statementSpec.getStreamSpecs());
+        final boolean isJoin = statementSpec.getStreamSpecs().size() > 1;
 
         int numStreams = streamNames.length;
         final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
@@ -95,7 +100,7 @@ public class EPEQLStmtStartMethod
             if (streamSpec instanceof FilterStreamSpec)
             {
                 FilterStreamSpec filterStreamSpec = (FilterStreamSpec) streamSpec;
-                eventStreamParentViewable[i] = services.getStreamService().createStream(filterStreamSpec.getFilterSpec(), services.getFilterService());
+                eventStreamParentViewable[i] = services.getStreamService().createStream(filterStreamSpec.getFilterSpec(), services.getFilterService(), epStatementHandle, isJoin);
                 unmaterializedViewChain[i] = services.getViewService().createFactories(eventStreamParentViewable[i].getEventType(), streamSpec.getViewSpecs(), viewContext);
             }
             // Create view factories and parent view based on a pattern expression
@@ -109,7 +114,7 @@ public class EPEQLStmtStartMethod
 
                 EvalRootNode rootNode = new EvalRootNode();
                 rootNode.addChildNode(patternStreamSpec.getEvalNode());
-                final PatternContext patternContext = new PatternContext(services.getFilterService(), services.getSchedulingService(), scheduleBucket, services.getEventAdapterService());
+                final PatternContext patternContext = new PatternContext(services.getFilterService(), services.getSchedulingService(), scheduleBucket, services.getEventAdapterService(), epStatementHandle);
 
                 PatternMatchCallback callback = new PatternMatchCallback() {
                     public void matchFound(Map<String, EventBean> matchEvent)
@@ -132,7 +137,7 @@ public class EPEQLStmtStartMethod
                 }
 
                 DBStatementStreamSpec sqlStreamSpec = (DBStatementStreamSpec) streamSpec;
-                HistoricalEventViewable historicalEventViewable = PollingViewableFactory.createDBStatementView(i, sqlStreamSpec, services.getDatabaseRefService(), services.getEventAdapterService());
+                HistoricalEventViewable historicalEventViewable = PollingViewableFactory.createDBStatementView(i, sqlStreamSpec, services.getDatabaseRefService(), services.getEventAdapterService(), epStatementHandle);
                 unmaterializedViewChain[i] = new ViewFactoryChain(historicalEventViewable.getEventType(), new LinkedList<ViewFactory>());
                 eventStreamParentViewable[i] = historicalEventViewable;
                 stopCallbacks.add(historicalEventViewable);
@@ -160,7 +165,7 @@ public class EPEQLStmtStartMethod
                     if (streamSpec instanceof FilterStreamSpec)
                     {
                         FilterStreamSpec filterStreamSpec = (FilterStreamSpec) streamSpec;
-                        services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), services.getFilterService());
+                        services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), services.getFilterService(), isJoin);
                     }
                 }
                 for (StopCallback stopCallback : stopCallbacks)
@@ -217,7 +222,7 @@ public class EPEQLStmtStartMethod
         }
         else
         {
-            finalView = handleJoin(streamNames, streamEventTypes, streamViews, optionalResultSetProcessor, statementSpec.getSelectStreamSelectorEnum());
+            finalView = handleJoin(streamNames, streamEventTypes, streamViews, optionalResultSetProcessor, statementSpec.getSelectStreamSelectorEnum(), epStatementHandle);
         }
 
         // Hook up internal event route for insert-into if required
@@ -243,7 +248,8 @@ public class EPEQLStmtStartMethod
                                 EventType[] streamTypes,
                                 Viewable[] streamViews,
                                 ResultSetProcessor optionalResultSetProcessor,
-                                SelectClauseStreamSelectorEnum selectStreamSelectorEnum)
+                                SelectClauseStreamSelectorEnum selectStreamSelectorEnum,
+                                EPStatementHandle epStatementHandle)
             throws ExprValidationException
     {
         // Handle joins
@@ -255,14 +261,15 @@ public class EPEQLStmtStartMethod
         JoinExecutionStrategy execution = new JoinExecutionStrategyImpl(composer, filter, indicatorView);
 
         // Hook up dispatchable with buffer and execution strategy
-        JoinExecStrategyDispatchable dispatchable = new JoinExecStrategyDispatchable(services.getDispatchService(), execution, statementSpec.getStreamSpecs().size());
+        JoinExecStrategyDispatchable joinStatementDispatch = new JoinExecStrategyDispatchable(execution, statementSpec.getStreamSpecs().size());
+        epStatementHandle.setOptionalDispatchable(joinStatementDispatch);
 
         // Create buffer for each view. Point buffer to dispatchable for join.
         for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)
         {
             BufferView buffer = new BufferView(i);
             streamViews[i].addView(buffer);
-            buffer.setObserver(dispatchable);
+            buffer.setObserver(joinStatementDispatch);
         }
 
         return indicatorView;

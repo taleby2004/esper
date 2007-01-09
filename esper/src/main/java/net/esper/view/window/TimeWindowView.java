@@ -11,11 +11,12 @@ import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.collection.TimeWindow;
 import net.esper.collection.ViewUpdatedCollection;
 import net.esper.client.EPException;
+import net.esper.core.EPStatementHandleCallback;
 
 /**
  * This view is a moving timeWindow extending the specified amount of milliseconds into the past.
@@ -76,11 +77,19 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
         this.millisecondsBeforeExpiry = millisecondsBeforeExpiry;
     }
 
+    /**
+     * Returns the (optional) collection handling random access to window contents for prior or previous events.
+     * @return buffer for events
+     */
     public ViewUpdatedCollection getViewUpdatedCollection()
     {
         return viewUpdatedCollection;
     }
 
+    /**
+     * Sets the buffer for keeping a reference to prior or previous events.
+     * @param viewUpdatedCollection buffer
+     */
     public void setViewUpdatedCollection(IStreamRandomAccess viewUpdatedCollection)
     {
         this.viewUpdatedCollection = viewUpdatedCollection;
@@ -193,13 +202,14 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
 
     private void scheduleCallback(long msecAfterCurrentTime)
     {
-        ScheduleCallback callback = new ScheduleCallback() {
+        ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger()
             {
                 TimeWindowView.this.expire();
             }
         };
-        viewServiceContext.getSchedulingService().add(msecAfterCurrentTime, callback, scheduleSlot);
+        EPStatementHandleCallback handle = new EPStatementHandleCallback(viewServiceContext.getEpStatementHandle(), callback);
+        viewServiceContext.getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
     }
 
     public final Iterator<EventBean> iterator()
@@ -224,6 +234,10 @@ public final class TimeWindowView extends ViewSupport implements ContextAwareVie
         this.scheduleSlot = viewServiceContext.getScheduleBucket().allocateSlot();
     }
 
+    /**
+     * Returns true if the window is empty, or false if not empty.
+     * @return true if empty
+     */
     public boolean isEmpty()
     {
         return timeWindow.isEmpty();

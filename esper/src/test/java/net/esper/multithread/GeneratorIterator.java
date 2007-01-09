@@ -1,4 +1,4 @@
-package net.esper.regression.mt;
+package net.esper.multithread;
 
 import net.esper.support.bean.SupportBean;
 
@@ -30,8 +30,9 @@ public class GeneratorIterator implements Iterator<Object>
         {
             throw new NoSuchElementException();
         }
+        SupportBean bean = new SupportBean(Integer.toString(numEvents), numEvents);
         numEvents++;
-        return new SupportBean();
+        return bean;
     }
 
     public void remove()

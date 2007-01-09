@@ -14,7 +14,6 @@ import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.view.ViewServiceContext;
 import net.esper.view.ViewSupport;
-import net.esper.view.Viewable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -260,11 +259,18 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
         }
     }
 
+    /**
+     * Method to transform an event based on the select expression.
+     */
     public static class OutputProcessTransform implements TransformEventMethod
     {
         private final ResultSetProcessor resultSetProcessor;
         private final EventBean[] newData;
 
+        /**
+         * Ctor.
+         * @param resultSetProcessor is applying the select expressions to the events for the transformation
+         */
         public OutputProcessTransform(ResultSetProcessor resultSetProcessor) {
             this.resultSetProcessor = resultSetProcessor;
             newData = new EventBean[1];

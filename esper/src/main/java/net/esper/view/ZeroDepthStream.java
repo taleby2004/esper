@@ -33,20 +33,12 @@ public final class ZeroDepthStream implements EventStream
             log.debug(".insert Received event, updating child views, event=" + event);
         }
 
-        int size = children.size();
-
-        EventBean[] events = new EventBean[] {event};
-
-        if (size == 1)
+        // Get a new array created rather then re-use the old one since some client listeners
+        // to this view may keep reference to the new data
+        EventBean[] row = new EventBean[]{event};
+        for (View childView : children)
         {
-            children.getFirst().update(events, null);
-        }
-        else
-        {
-            for (View child : children)
-            {
-                child.update(events, null);
-            }
+            childView.update(row, null);
         }
     }
 

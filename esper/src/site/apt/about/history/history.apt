@@ -12,6 +12,24 @@ Change History
 	[]
 
 
+Version 1.5.0 Update
+
+	Released January 11, 2007
+		
+* API changes
+
+    * None
+    
+* Major changes
+
+    * Multithread-safety for all operations provided by the administrative and runtime API. Client applications can perform multithreaded sends of events into the engine as well as create, start and stop statements during operation, while retaining full control over threading and efficiently sharing resources between statements
+    	
+* Minor changes	
+    
+    * Documentation enhancements
+
+
+
 Version 1.4.0 Update + Release of new EsperIO API
 
 	Released December 26, 2006

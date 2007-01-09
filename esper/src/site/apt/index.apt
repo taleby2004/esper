@@ -105,9 +105,9 @@ Known Limitations
 	
 	* Esper will not work with JavaVM versions 1.4.2 or below.
 	
-	* A Esper engine instance itself is NOT multithread-safe, i.e. 2 or more threads sending events to the
-	  same engine instance is not supported. However multiple engine instances with a maximum of one thread 
-	  per engine instance is supported.
+	* An Esper engine instance is multithread-safe, i.e. 2 or more threads sending events to the
+	  same engine instance is supported as of release 1.5. Multiple engine instances in the same Java JVM 
+	  has also been tested and is a supported configuration.
 	
 
 Summary

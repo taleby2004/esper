@@ -1,8 +1,7 @@
 package net.esper.filter;
 
 import net.esper.event.EventBean;
-import java.util.List;
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -24,33 +23,22 @@ public final class FilterServiceImpl implements FilterService
         indexBuilder = new EventTypeIndexBuilder(eventTypeIndex);
     }
 
-    public final void add(FilterValueSet filterValueSet, FilterCallback filterCallback)
+    public final void add(FilterValueSet filterValueSet, FilterHandle filterCallback)
     {
         indexBuilder.add(filterValueSet, filterCallback);
     }
 
-    public final void remove(FilterCallback filterCallback)
+    public final void remove(FilterHandle filterCallback)
     {
         indexBuilder.remove(filterCallback);
     }
 
-    public final void evaluate(EventBean eventBean)
+    public final void evaluate(EventBean eventBean, Collection<FilterHandle> matches)
     {
         numEventsEvaluated.incrementAndGet();
 
         // Finds all matching filters and return their callbacks
-        List<FilterCallback> matches = new LinkedList<FilterCallback>();
         eventTypeIndex.matchEvent(eventBean, matches);
-
-        if (matches.isEmpty())
-        {
-            return;
-        }
-
-        for (FilterCallback actionable : matches)
-        {
-            actionable.matchFound(eventBean);
-        }
     }
 
     public final int getNumEventsEvaluated()

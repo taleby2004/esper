@@ -1,6 +1,12 @@
 Esper Changelog
 ===================
 
+Changes in version 1.5.0
+----------------------
+* Multithread-safety for all operations provided by the administrative and runtime API. 
+  Client applications can perform multithreaded sends of events into the engine as well as create, start and stop statements during operation, while retaining full control over threading and efficiently sharing resources between statements (Enhancement Request ESPER-48 Multithread-safety)
+* Documentation enhancements
+
 
 Changes in version 1.4.0
 ----------------------

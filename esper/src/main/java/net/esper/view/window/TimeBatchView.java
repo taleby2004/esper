@@ -11,10 +11,11 @@ import net.esper.event.EventBean;
 import net.esper.view.ViewSupport;
 import net.esper.view.ContextAwareView;
 import net.esper.view.ViewServiceContext;
-import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.client.EPException;
 import net.esper.collection.ViewUpdatedCollection;
+import net.esper.core.EPStatementHandleCallback;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -96,11 +97,19 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         return initialReferencePoint;
     }
 
+    /**
+     * Returns the (optional) collection handling random access to window contents for prior or previous events.
+     * @return buffer for events
+     */
     public ViewUpdatedCollection getViewUpdatedCollection()
     {
         return viewUpdatedCollection;
     }
 
+    /**
+     * Sets the buffer for keeping a reference to prior or previous events.
+     * @param viewUpdatedCollection buffer
+     */
     public void setViewUpdatedCollection(IStreamRandomAccess viewUpdatedCollection)
     {
         this.viewUpdatedCollection = viewUpdatedCollection;
@@ -243,6 +252,10 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
         currentBatch = new LinkedList<EventBean>();
     }
 
+    /**
+     * Returns true if the window is empty, or false if not empty.
+     * @return true if empty
+     */
     public boolean isEmpty()
     {
         if (lastBatch != null)
@@ -282,13 +295,14 @@ public final class TimeBatchView extends ViewSupport implements ContextAwareView
                     " msecIntervalSize=" + msecIntervalSize);
         }
 
-        ScheduleCallback callback = new ScheduleCallback() {
+        ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger()
             {
                 TimeBatchView.this.sendBatch();
             }
         };
-        viewServiceContext.getSchedulingService().add(afterMSec, callback, scheduleSlot);
+        EPStatementHandleCallback handle = new EPStatementHandleCallback(viewServiceContext.getEpStatementHandle(), callback);
+        viewServiceContext.getSchedulingService().add(afterMSec, handle, scheduleSlot);
     }
 
     /**

@@ -1,6 +1,7 @@
 package net.esper.core;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.esper.client.EPListenable;
 import net.esper.client.UpdateListener;
@@ -10,23 +11,19 @@ import net.esper.client.UpdateListener;
  */
 public abstract class EPStatementSupport implements EPListenable
 {
-    private Set<UpdateListener> listeners = new LinkedHashSet<UpdateListener>();
-
     /**
-     * Called when the last listener is removed.
+     * Using a copy-on-write set here:
+     * When the engine dispatches events to a set of listeners, then while iterating through the set there
+     * may be listeners added or removed (the listener may remove itself).
+     * Additionally, events may be dispatched by multiple threads to the same listener.
      */
-    public abstract void listenerStop();
-
-    /**
-     * Called when the first listener is added.
-     */
-    public abstract void listenerStart();
+    private Set<UpdateListener> listeners = new CopyOnWriteArraySet<UpdateListener>();
 
     /**
      * Returns the set of listeners to the statement.
      * @return statement listeners
      */
-    public Set<UpdateListener> getListeners()
+    protected Set<UpdateListener> getListeners()
     {
         return listeners;
     }
@@ -43,10 +40,6 @@ public abstract class EPStatementSupport implements EPListenable
         }
 
         listeners.add(listener);
-        if (listeners.size() == 1)
-        {
-            listenerStart();
-        }
     }
 
     /**
@@ -61,10 +54,6 @@ public abstract class EPStatementSupport implements EPListenable
         }
 
         listeners.remove(listener);
-        if (listeners.isEmpty())
-        {
-            listenerStop();
-        }
     }
 
     /**
@@ -73,6 +62,5 @@ public abstract class EPStatementSupport implements EPListenable
     public void removeAllListeners()
     {
         listeners.clear();
-        listenerStop();
     }
 }

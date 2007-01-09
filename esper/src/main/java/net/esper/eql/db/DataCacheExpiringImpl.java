@@ -3,25 +3,27 @@ package net.esper.eql.db;
 import net.esper.event.EventBean;
 import net.esper.schedule.SchedulingService;
 import net.esper.schedule.ScheduleSlot;
-import net.esper.schedule.ScheduleCallback;
+import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.collection.MultiKey;
+import net.esper.core.EPStatementHandle;
+import net.esper.core.EPStatementHandleCallback;
 
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.Map;
 import java.util.Iterator;
 
 /**
  * Implements an expiry-time cache that evicts data when data becomes stale
  * after a given number of seconds.
  */
-public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
+public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 {
     private final long maxAgeMSec;
     private final long purgeIntervalMSec;
     private final SchedulingService schedulingService;
     private final ScheduleSlot scheduleSlot;
     private final WeakHashMap<MultiKey<Object>, Item> cache;
+    private final EPStatementHandle epStatementHandle;
 
     private boolean isScheduled;
 
@@ -31,15 +33,18 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
      * @param purgeIntervalSec is the purge interval in seconds
      * @param schedulingService is a service for call backs at a scheduled time, for purging
      * @param scheduleSlot slot for scheduling callbacks for this cache
+     * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
      */
     public DataCacheExpiringImpl(double maxAgeSec, double purgeIntervalSec, SchedulingService schedulingService,
-                                 ScheduleSlot scheduleSlot)
+                                 ScheduleSlot scheduleSlot,
+                                 EPStatementHandle epStatementHandle)
     {
         this.maxAgeMSec = (long) maxAgeSec * 1000;
         this.purgeIntervalMSec = (long) purgeIntervalSec * 1000;
         this.schedulingService = schedulingService;
         this.scheduleSlot = scheduleSlot;
         this.cache = new WeakHashMap<MultiKey<Object>, Item>();
+        this.epStatementHandle = epStatementHandle;
     }
 
     public List<EventBean> getCached(Object[] lookupKeys)
@@ -70,7 +75,8 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleCallback
 
         if (!isScheduled)
         {
-            schedulingService.add(purgeIntervalMSec, this, scheduleSlot);
+            EPStatementHandleCallback callback = new EPStatementHandleCallback(epStatementHandle, this);
+            schedulingService.add(purgeIntervalMSec, callback, scheduleSlot);
             isScheduled = true;
         }
     }

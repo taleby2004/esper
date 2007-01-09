@@ -38,25 +38,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventTypes.get(eventName);
     }
 
-    public void addAliasForType(String eventTypeAlias, EventType eventType) throws EventAdapterException
-    {
-        EventType existingType = eventTypes.get(eventTypeAlias);
-        if (existingType != null)
-        {
-            if (!existingType.equals(eventType))
-            {
-                throw new EventAdapterException("Event type named '" + eventTypeAlias +
-                    "' has already been declared with differing type information");
-            }
-            return;
-        }
-        else
-        {
-            eventTypes.put(eventTypeAlias, eventType);
-        }
-    }
-
-    public EventType addBeanType(String eventTypeAlias, Class clazz) throws EventAdapterException
+    public synchronized EventType addBeanType(String eventTypeAlias, Class clazz) throws EventAdapterException
     {
         EventType existingType = eventTypes.get(eventTypeAlias);
         if (existingType != null)
@@ -76,7 +58,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventType;
     }
 
-    public EventType addBeanType(String eventTypeAlias, String fullyQualClassName) throws EventAdapterException
+    public synchronized EventType addBeanType(String eventTypeAlias, String fullyQualClassName) throws EventAdapterException
     {
         EventType existingType = eventTypes.get(eventTypeAlias);
         if (existingType != null)
@@ -90,7 +72,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
                     "' has already been declared with differing type information");
         }
 
-        Class clazz = null;
+        Class clazz;
         try
         {
             clazz = Class.forName(fullyQualClassName);
@@ -106,7 +88,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventType;
     }
 
-    public EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException
+    public synchronized EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException
     {
         MapEventType newEventType = new MapEventType(propertyTypes, this);
 
@@ -226,7 +208,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
      * @param configurationEventTypeXMLDOM configures the event type schema and namespace and XPath
      * property information.
      */
-    public void addXMLDOMType(String eventTypeAlias, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
+    public synchronized void addXMLDOMType(String eventTypeAlias, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
         if (configurationEventTypeXMLDOM.getRootElementName() == null)
         {
@@ -246,7 +228,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         xmldomRootElementNames.put(configurationEventTypeXMLDOM.getRootElementName(), type);
     }
 
-    public EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException 
+    public synchronized EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException
 	{
 	    WrapperEventType newEventType = new WrapperEventType(underlyingEventType, propertyTypes, this);
 	
