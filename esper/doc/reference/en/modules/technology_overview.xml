@@ -103,6 +103,55 @@
 			Esper provides these two methods as alternatives through the same API.
         </para>
     </sect1>
+    
+	<sect1 id="required_3rd_party" revision="1">
+        <title>Required 3rd Party Libraries</title>
+        
+        <para>
+            Esper requires the following 3rd-party libraries at runtime:
+        </para>
+        
+		<itemizedlist spacing="compact">
+			<listitem>
+				<para>
+					ANTLR is the parser generator used for parsing and parse tree walking of the pattern and EQL syntax. Credit goes to Terence Parr at http://www.antlr.org. The ANTLR license is in the lib directory. The library is required for compile-time only.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					CGLIB is the code generation library for fast method calls. This open source software is under the Apache license. The Apache 2.0 license is in the lib directory.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					LOG4J and Apache commons logging are logging components. This open source software is under the Apache license. The Apache 2.0 license is in the lib directory.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					BeanUtils is a JavaBean manipulation library. This open source software is under the Apache license. The Apache 2.0 license is in the lib directory.
+				</para>
+			</listitem>
+		</itemizedlist>
+
+        <para>
+            Esper requires the following 3rd-party libraries at compile-time and for running the test suite:
+        </para>
+        
+		<itemizedlist spacing="compact">
+			<listitem>
+				<para>
+					JUnit is a great unit testing framework. Its license has also been placed in the lib directory. The library is required for build-time only.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					MySQL connector library is used for testing SQL integration and is required for running the automated test suite.
+				</para>
+			</listitem>
+		</itemizedlist>
+
+    </sect1>
 
 </chapter>
 

@@ -1,0 +1,183 @@
+<chapter id="outputmodel">
+
+    <title>Understanding the Output Model</title>
+
+    <sect1 id="outputmodel_intro" revision="1">
+        <title>Introduction</title>
+        
+        <para>
+			The Esper output model is continuous:  Update listeners to statements receive updated data as soon as the engine processes events for that statement, according to the statement's choice of event streams, views, filters and output rates.
+        </para>
+			
+        <para>
+			As outlined in <xref linkend="api"/> the interface for listeners is <literal>net.esper.client.UpdateListener</literal>. Implementations must provide a single <literal>update</literal> method that the engine invokes when results become available:
+        </para>
+        
+		<mediaobject>
+			<imageobject role="fo">
+				<imagedata fileref="images/refdoc_updatelistener.gif" format="GIF" align="center"/>
+			</imageobject>
+			<imageobject role="html">
+				<imagedata fileref="../shared/images/refdoc_updatelistener.gif" format="GIF" align="center"/>
+			</imageobject>
+		</mediaobject>
+
+        <para>
+			The engine provides statement results to update listeners by placing results in <literal>net.esper.event.EventBean</literal> instances. A typical listener implementation queries the <literal>EventBean</literal> instances via getter methods to obtain the statement-generated results. 
+        </para>
+
+		<mediaobject>
+			<imageobject role="fo">
+				<imagedata fileref="images/refdoc_eventbean.gif" format="GIF" align="center"/>
+			</imageobject>
+			<imageobject role="html">
+				<imagedata fileref="../shared/images/refdoc_eventbean.gif" format="GIF" align="center"/>
+			</imageobject>
+		</mediaobject>
+
+        <para>
+			The <literal>get</literal> method on the <literal>EventBean</literal> interface can be used to retrieve result columns by name. The property name supplied to the <literal>get</literal> method can also be used to query nested, indexed or array properties of object graphs as discussed in more detail in <xref linkend="event_representation"/>. 
+        </para>
+
+        <para>
+			The <literal>getUnderlying</literal> method on the <literal>EventBean</literal> interface allows update listeners to obtain the underlying event object. For wildcard selects, the underlying event is the event object that was sent into the engine via the <literal>sendEvent</literal> method. 
+			For joins and select clauses with expressions, the underlying object implements <literal>java.util.Map</literal>.
+        </para>
+
+	</sect1>
+	
+    <sect1 id="outputmodel_nowindow" revision="1">
+        <title>Output Example</title>
+        <para>
+			In this section we look at the output of a statement that selects an event stream without using a data window and without applying any filtering. The statement we consider is as follows:
+        </para>
+        
+        <programlisting><![CDATA[select * from Withdrawal]]></programlisting>
+
+        <para>
+			This statement selects from event stream <literal>Withdrawal</literal> all events. Every time the engine processes events of type <literal>Withdrawal</literal> or any sub-type of <literal>Withdrawal</literal> it invokes all update listeners handling the new event to each listener.
+        </para>
+        
+        <para>
+			The diagram below shows Withdrawal events 1 to 6 arriving over time. The number in paranthesis is the withdrawal amount, an event property that is used in later examples. The diagram shows the engine handing new events to an update listener as events arrive.
+        </para>
+
+        <figure id="outputmodel_nowindow_flow">
+			<title>Output  example for a simple statement</title>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/refdoc_nowindow.gif" format="GIF" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="../shared/images/refdoc_nowindow.gif" format="GIF" align="center"/>
+				</imageobject>
+			</mediaobject>
+        </figure>
+
+    </sect1>
+
+    <sect1 id="outputmodel_lengthwindow" revision="1">
+        <title>Data Windows</title>
+        <para>
+			Let's add a length window to the statement to illustrate the concept of data window and events entering and leaving a window:
+        </para>
+        
+        <programlisting><![CDATA[select * from Withdrawal.win:length(5)]]></programlisting>
+
+        <para>
+			The size of the length window is five events. The engine enters all arriving withdrawal events into the length window. When the length window is full, the oldest withdrawal event is pushed out the window. The engine indicates events entering the window as new events, and events leaving the window as old events. The next diagram illustrates how the length window contents change as events arrive and shows when events are posted to an update listener.
+        </para>
+
+        <figure id="outputmodel_lengthwindow_flow">
+			<title>Output  example for a simple statement</title>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/refdoc_lengthwindow.gif" format="GIF" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="../shared/images/refdoc_lengthwindow.gif" format="GIF" align="center"/>
+				</imageobject>
+			</mediaobject>
+        </figure>
+
+        <para>
+			Similar to a length window, a time window also keeps the most recent events up to a given time period. A time window of 5 seconds, for example, keeps the last 5 seconds of events. As seconds pass, the time window actively pushes the oldest events out of the window resulting in one or more old events posted to update listeners.
+        </para>
+
+    </sect1>
+
+    <sect1 id="outputmodel_filter" revision="1">
+        <title>Filters and Where-clauses</title>
+        <para>
+			Filters to event streams allow filtering events out of a given stream before events enter a data window. The statement below shows a filter that selects withdrawal events with an amount value of 200 or more.
+        </para>
+        
+        <programlisting><![CDATA[select * from Withdrawal(amount>=200).win:length(5)]]></programlisting>
+
+        <para>
+			With the filter any withdrawal events with amounts of less then 200 do not enter the length window and are therefore not passed to update listener:
+        </para>
+
+        <figure id="outputmodel_filter_flow">
+			<title>TODO</title>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/refdoc_filter.gif" format="GIF" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="../shared/images/refdoc_filter.gif" format="GIF" align="center"/>
+				</imageobject>
+			</mediaobject>
+			<caption>
+				<para>
+					djdjjdjd
+				</para>
+			</caption>
+        </figure>
+        
+        <para>
+			The where-clause and having-clause in statements eliminates potential result rows at a later stage in processing, after events have been processed into a statement's data window or other views.
+        </para>
+
+        <para>
+			The next statement applies a where-clause to withdrawal events:
+        </para>
+
+        <programlisting><![CDATA[select * from Withdrawal.win:length(5) where amount >= 200]]></programlisting>
+
+        <para>
+			The where-clause applies to both new events and old events. As the diagram below shows, events always enter the window however only events that pass the where-clause are handed to update listeners. Also,
+			as events leave the window these events are only posted to update listeners as old events if the old event passes the where clause.
+        </para>
+
+        <figure id="outputmodel_where">
+			<title>TODO</title>
+			<mediaobject>
+				<imageobject role="fo">
+					<imagedata fileref="images/refdoc_where.gif" format="GIF" align="center"/>
+				</imageobject>
+				<imageobject role="html">
+					<imagedata fileref="../shared/images/refdoc_where.gif" format="GIF" align="center"/>
+				</imageobject>
+			</mediaobject>
+			<caption>
+				<para>
+					djdjjdjd
+				</para>
+			</caption>
+        </figure>
+
+        <para>
+			Finally, consider the following statement that alerts when 2 withdrawal events have been received:
+        </para>
+        
+        <programlisting><![CDATA[select count(*) as mycount from Withdrawal having count(*) = 2]]></programlisting>
+
+        <para>
+	        When the engine encounters the second withdrawal event, it posts an new event to update listeners containing the count property.
+	        Additionally, when the engine encounters the third withdrawal event, it posts an old event to update listeners containing the count property.
+        </para>
+    </sect1>
+    
+</chapter>
+

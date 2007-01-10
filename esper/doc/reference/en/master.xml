@@ -3,15 +3,13 @@
                       "../support/docbook-dtd/docbookx.dtd" [
 	<!ENTITY technology_overview SYSTEM "modules/technology_overview.xml">
 	<!ENTITY configuration SYSTEM "modules/configuration.xml">
-	<!ENTITY architecture SYSTEM "modules/architecture.xml">
 	<!ENTITY api SYSTEM "modules/api.xml">
 	<!ENTITY event_representation SYSTEM "modules/event_representation.xml">
 	<!ENTITY examples SYSTEM "modules/examples.xml">
 	<!ENTITY event_pattern SYSTEM "modules/event_pattern.xml">
 	<!ENTITY EQL SYSTEM "modules/eql.xml">
-	<!ENTITY adapters SYSTEM "modules/adapters.xml">
-	<!ENTITY indicators SYSTEM "modules/indicators.xml">
 	<!ENTITY references SYSTEM "modules/references.xml">
+	<!ENTITY outputmodel SYSTEM "modules/outputmodel.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -70,17 +68,13 @@
 
     &api;
 
+    &outputmodel;
+
     &event_representation;
 
     &event_pattern;
 
     &EQL;
-
-    &adapters;
-
-    &indicators;
-
-    &architecture;
 
     &examples;
     

@@ -29,9 +29,11 @@
       <answer>
         <p>
           Esper uses the JUnit testing framework to automate testing of the system.
-          Esper's build process runs the currently around 1120 unit tests in 380 JUnit test classes when a build occurs.
+          Esper's build process runs the currently around 1350 unit test methods in 450 JUnit test classes when a build occurs.
           The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
-          individual classes and components.
+          individual classes and components. Tests are very detailed in asserting the expected results allowing us
+          to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
+          tests that assert performance of statements and configurability of the engine.
           See the package "net.esper.regression" in the test source folder as the entry point for
 		  end-to-end testing against the client API.
         </p>
@@ -45,36 +47,29 @@
       <question>Can I run it with multiple threads? What, if anything, is multithread-safe?</question>
       <answer>
         <p>
-          Esper supports multiple independent Esper engines per Java VM. Each engine instance itself is NOT multithread-safe.
-          In other words, for a given engine instance we do not currently guarantee the engine instance behaves the same 
-          in a multithreaded environment as in a single-threaded environment. 
+          All administrative and runtime operations are multithread-safe as of release 1.5 for all types of statements.
+          Applications can perform multithreaded sends of events into the engine as well as 
+          create, start and stop statements during operation, while retaining full control over threading and 
+          efficiently sharing resources between statements.
 		</p>
         <p>
-		  Applications using Esper can synchronize around the sendEvent() method. 
-		  No ThreadLocal data representing engine state remains after the sendEvent() method completes. 
-		  Thus multiple threads that synchronize posting events to the same engine instance is supported, with the following 
-		  limitations: (1) statement creation through the EPAdministrator interface, and statement start/stop must be avoided or synchronized 
-		    with the posting of events (2) Iterating (pulling) of statement results must be synchronized as well.
+          Specifically, all operations on EPRuntime, EPAdministrator and EPStatement interfaces are thread-safe.
 		</p>
         <p>
-          Applications can also segregate work to different engine instances allocating a thread to each engine instance.
+          Additionally, Esper supports multiple independent Esper engines per Java VM. Thus applications can 
+          segregate work to multiple engine instances allocating one or more threads to each engine instance.
 		</p>
         <p>
-          Applications that perform pure filtering of events via event pattern statement are also thread-safe.
-          In this scenario, the event pattern statement can only consist of a simple filter and no other operators.
-          Also, new patterns cannot be created and patterns cannot be removed while multiple threads
-          are used to send events in for filtering.
-        </p>
-        <p>
-          We plan to improve this in upcoming versions. 
-        </p>
+		  Iterating (pull-model) of result data by using a statement's iterate() method concurrently to the statement's
+		  processing of events can lead to ConcurrentModificationException and is not fail-fast in all cases.
+		</p>
       </answer>
     </faq>    
     <faq id="tested on OS">
       <question>What operating systems has it been tested on?</question>
       <answer>
         <p>
-          At this time the engine has only been tested on Windows XP using JDK 1.5 update 6.
+          The engine has been tested on Windows XP using JDK 1.5 update 10, and on SUSE Linux.
         </p>
       </answer>
     </faq>    

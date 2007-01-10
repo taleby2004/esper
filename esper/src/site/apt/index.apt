@@ -75,9 +75,18 @@ Features
 	
     * Supports externally-supplied time as well as Java system time	
 	
-    * Supports multiple independent Esper engines per JavaVM. Each engine instance itself is NOT multithread-safe, 
-	  requiring workload structuring per engine if necessary (also see FAQ on multithread-safety).
-	  
+    * Multithread-safe as of release 1.5
+    
+    	* Multithreaded sends of events into the engine
+    	
+    	* Create, start and stop statements during operation
+    	
+    	* Applications can retain full control over threading
+    	
+    	* Efficiently sharing resources between statements
+    	
+    * Supports multiple independent Esper engines per JavaVM
+    		  
     * Pluggable architecture for event pattern and event stream analysis user-defined functions
 	  
 	[]		
