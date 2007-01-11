@@ -93,7 +93,7 @@ public final class MergeView extends ViewSupport implements ContextAwareView
 
     public final EventType getEventType()
     {
-        // The schema is the parent view's schema plus the added field
+        // The schema is the parent view's type, or the type plus the added field(s)
         return eventType;
     }
 

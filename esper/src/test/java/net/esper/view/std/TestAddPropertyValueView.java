@@ -1,22 +1,18 @@
 package net.esper.view.std;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import junit.framework.TestCase;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
-import net.esper.event.BeanEventAdapter;
-import net.esper.support.bean.SupportMarketDataBean;
-import net.esper.support.view.SupportBeanClassView;
+import net.esper.support.event.SupportEventAdapterService;
+import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.support.view.SupportMapView;
 import net.esper.support.view.SupportSchemaNeutralView;
 import net.esper.support.view.SupportViewContextFactory;
-import net.esper.support.event.SupportEventTypeFactory;
-import net.esper.support.event.SupportEventBeanFactory;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.view.ViewSupport;
-import net.esper.view.ViewServiceContext;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestAddPropertyValueView extends TestCase
 {
@@ -27,13 +23,16 @@ public class TestAddPropertyValueView extends TestCase
 
     public void setUp()
     {
-        // Set up length window view and a test child view
-        myView = new AddPropertyValueView(new String[] {"symbol"}, new Object[] {"IBM"});
-        myView.setViewServiceContext(SupportViewContextFactory.makeContext());
-
         Map<String, Class> schema = new HashMap<String, Class>();
         schema.put("STDDEV", Double.class);
         parentEventType = SupportEventTypeFactory.createMapType(schema);
+
+        EventType mergeEventType = SupportEventAdapterService.getService().createAddToEventType(parentEventType,
+                new String[] {"symbol"}, new Class[] {String.class});
+
+        // Set up length window view and a test child view
+        myView = new AddPropertyValueView(new String[] {"symbol"}, new Object[] {"IBM"}, mergeEventType);
+        myView.setViewServiceContext(SupportViewContextFactory.makeContext());
 
         parentView = new SupportMapView(schema);
         parentView.addView(myView);

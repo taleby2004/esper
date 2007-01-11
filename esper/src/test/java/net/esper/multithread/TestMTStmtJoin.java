@@ -20,7 +20,12 @@ public class TestMTStmtJoin extends TestCase
 
     public void setUp()
     {
-        engine = EPServiceProviderManager.getDefaultProvider();
+        engine = EPServiceProviderManager.getProvider("TestMTStmtJoin");
+    }
+
+    public void tearDown()
+    {
+        engine.initialize();
     }
 
     public void testJoin() throws Exception
@@ -30,8 +35,8 @@ public class TestMTStmtJoin extends TestCase
                 "       " + EVENT_NAME + "(string='s1').win:length(1000000) as s1\n" +
                 "where s0.longPrimitive = s1.longPrimitive\n"
                 );
-        trySendAndReceive(4, stmt, 10000);
-        trySendAndReceive(2, stmt, 20000);
+        trySendAndReceive(4, stmt, 1000);
+        trySendAndReceive(2, stmt, 2000);
     }
 
     private void trySendAndReceive(int numThreads, EPStatement statement, int numRepeats) throws Exception

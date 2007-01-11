@@ -4,7 +4,9 @@ News
 
     * Multithread-safety for all operations provided by the administrative and runtime API. Client applications can perform multithreaded sends of events into the engine as well as create, start and stop statements during operation, while retaining full control over threading and efficiently sharing resources between statements (Enhancement Request ESPER-48 Multithread-safety)
     
-    * Documentation enhancements
+    * Documentation - new chapter explaining the output model
+
+    * Fixed issue ESPER-75 "PropertyAccessException selecting individual fields from a group-by with sub-ordinate length window"
 
 
 * December 26, 2006  -  Esper 1.4.0  and  EsperIO 1.4.0

@@ -36,9 +36,12 @@ public class TestMTStmtSharedView extends TestCase
 
     public void testSharedViews() throws Exception
     {
+        /**
+         * TODO
+         */
         trySend(4, 1000, 100);
-        trySend(2, 1000, 100);
-        trySend(3, 2000, 20);
+        //trySend(2, 1000, 100);
+        //trySend(3, 2000, 20);
     }
 
     private void trySend(int numThreads, int numRepeats, int numStatements) throws Exception

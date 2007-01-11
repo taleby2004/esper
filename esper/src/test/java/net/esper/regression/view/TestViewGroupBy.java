@@ -1,13 +1,15 @@
 package net.esper.regression.view;
 
 import junit.framework.TestCase;
+import net.esper.client.EPAdministrator;
+import net.esper.client.EPServiceProvider;
+import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPStatement;
+import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.util.EventPropertyAssertionUtil;
+import net.esper.support.util.SupportUpdateListener;
 
 import java.util.*;
-
-import net.esper.client.*;
-import net.esper.support.util.SupportUpdateListener;
-import net.esper.support.util.EventPropertyAssertionUtil;
-import net.esper.support.bean.SupportMarketDataBean;
 
 public class TestViewGroupBy extends TestCase
 {
@@ -36,8 +38,11 @@ public class TestViewGroupBy extends TestCase
 
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
-        EPAdministrator epAdmin = epService.getEPAdministrator();
+    }
 
+    public void testStats()
+    {
+        EPAdministrator epAdmin = epService.getEPAdministrator();
         String filter = "select * from " + SupportMarketDataBean.class.getName();
 
         priceLast3Stats = epAdmin.createEQL(filter + ".std:groupby('symbol').win:length(3).stat:uni('price')");
@@ -51,10 +56,7 @@ public class TestViewGroupBy extends TestCase
 
         volumeAllStats = epAdmin.createEQL(filter + ".std:groupby('symbol').stat:uni('volume')");
         volumeAllStats.addListener(volumeAllStatsListener);
-    }
 
-    public void testStats()
-    {
         Vector<Map<String, Object>> expectedList = new Vector<Map<String, Object>>();
         for (int i = 0; i < 3; i++)
         {
@@ -116,6 +118,21 @@ public class TestViewGroupBy extends TestCase
         expectedList.get(2).put("symbol", SYMBOL_GE);
         expectedList.get(2).put("average", 86d + 2d/3d);
         EventPropertyAssertionUtil.compare(priceLast3Stats.iterator(), expectedList);
+    }
+
+    public void testLengthWindowGrouped()
+    {
+        String stmtText = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".std:groupby('symbol').win:length(2)";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+        
+        sendEvent("IBM", 100);
+    }
+
+    private void sendEvent(String symbol, double price)
+    {
+        sendEvent(symbol, price, -1);
     }
 
     private void sendEvent(String symbol, double price, long volume)

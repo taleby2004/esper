@@ -250,7 +250,7 @@ public final class GroupByView extends ViewSupport implements ContextAwareView
                 if (Arrays.equals(mergeView.getGroupFieldNames(), groupFieldNames))
                 {
                     // We found our merge view - install a new data merge view on top of it
-                    AddPropertyValueView mergeDataView = new AddPropertyValueView(groupFieldNames, groupByValues);                    
+                    AddPropertyValueView mergeDataView = new AddPropertyValueView(groupFieldNames, groupByValues, mergeView.getEventType());                    
                     mergeDataView.setViewServiceContext(viewServiceContext);
 
                     // Add to the copied parent subview the view merge data view

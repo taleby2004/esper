@@ -195,8 +195,9 @@ milliseconds-part : <emphasis>number</emphasis> ("milliseconds" | "millisecond" 
 				If neither keyword is specified, the engine posts
 				insert stream events via the <literal>newEvents</literal> parameter to the <literal>update</literal> method of <literal>UpdateListener</literal> instances listening to 
 				the statement. The engine posts remove stream events to the <literal>oldEvents</literal> parameter of the <literal>update</literal> method.
-				The insert stream consists of the events entering the respective window(s) or stream(s), while the remove stream consists of the events leaving the respective window(s). 
-			</para>
+				The insert stream consists of the events entering the respective window(s) or stream(s) or aggregations, while the remove stream consists of the events leaving the respective window(s) or the changed aggregation result.
+				See <xref linkend="outputmodel"/> for more information on insert and remove streams.
+				</para>
 			
 			<para>
 				By specifying the <literal>istream</literal> keyword you can instruct the engine to only post insert stream events via the <literal>newEvents</literal> parameter to the <literal>update</literal> method on listeners. The engine will then not post any remove stream events, and the <literal>oldEvents</literal> parameter is always a null value.

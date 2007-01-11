@@ -26,8 +26,9 @@ Version 1.5.0 Update
     	
 * Minor changes	
     
-    * Documentation enhancements
+    * Documentation - new chapter explaining the output model
 
+    * Fixed issue ESPER-75 "PropertyAccessException selecting individual fields from a group-by with sub-ordinate length window"
 
 
 Version 1.4.0 Update + Release of new EsperIO API

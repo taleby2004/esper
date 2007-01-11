@@ -4,6 +4,7 @@ import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.SupportBean;
 import net.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
@@ -42,9 +43,45 @@ public class TestCountAll extends TestCase
         assertEquals(3L, listener.getLastNewData()[0].get("cnt"));
     }
 
+    public void testCountHaving()
+    {
+        String event = SupportBean.class.getName();
+        String statementText = "select sum(intPrimitive) as mysum from " + event + " having sum(intPrimitive) = 2";
+        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView.addListener(listener);
+
+        sendEvent();
+        assertFalse(listener.getAndClearIsInvoked());
+        sendEvent();
+        assertEquals(2, listener.assertOneGetNewAndReset().get("mysum"));
+        sendEvent();
+        assertEquals(2, listener.assertOneGetOldAndReset().get("mysum"));
+    }
+
+    public void testSumHaving()
+    {
+        String event = SupportBean.class.getName();
+        String statementText = "select count(*) as mysum from " + event + " having count(*) = 2";
+        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView.addListener(listener);
+
+        sendEvent();
+        assertFalse(listener.getAndClearIsInvoked());
+        sendEvent();
+        assertEquals(2L, listener.assertOneGetNewAndReset().get("mysum"));
+        sendEvent();
+        assertEquals(2L, listener.assertOneGetOldAndReset().get("mysum"));
+    }
+
     private void sendEvent(String symbol, Long volume)
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, 0, volume, null);
+        epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendEvent()
+    {
+        SupportBean bean = new SupportBean("", 1);
         epService.getEPRuntime().sendEvent(bean);
     }
 }

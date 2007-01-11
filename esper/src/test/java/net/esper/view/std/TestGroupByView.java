@@ -7,6 +7,7 @@ import net.esper.event.EventBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.view.*;
 import net.esper.support.event.SupportEventBeanFactory;
+import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.view.EventStream;
 import net.esper.view.View;
 import net.esper.view.ViewServiceContext;
@@ -26,7 +27,7 @@ public class TestGroupByView extends TestCase
 
         SupportBeanClassView childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
-        MergeView myMergeView = new MergeView(new String[]{"symbol"}, null);
+        MergeView myMergeView = new MergeView(new String[]{"symbol"}, SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class));
 
         ultimateChildView = new SupportBeanClassView(SupportMarketDataBean.class);
 
@@ -36,7 +37,6 @@ public class TestGroupByView extends TestCase
         myMergeView.addView(ultimateChildView);
 
         SupportBeanClassView.getInstances().clear();
-
     }
 
     public void testViewPush()

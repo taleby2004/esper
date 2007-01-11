@@ -34,6 +34,19 @@ public final class AddPropertyValueView extends ViewSupport implements ContextAw
     {
     }
 
+    /**
+     * Constructor.
+     * @param fieldNames is the name of the field that is added to any events received by this view.
+     * @param mergeValues is the values of the field that is added to any events received by this view.
+     * @param mergedResultEventType is the event type that the merge view reports to it's child views
+     */
+    public AddPropertyValueView(String[] fieldNames, Object[] mergeValues, EventType mergedResultEventType)
+    {
+        this.propertyNames = fieldNames;
+        this.propertyValues = mergeValues;
+        this.eventType = mergedResultEventType;
+    }
+
     public ViewServiceContext getViewServiceContext()
     {
         return viewServiceContext;
@@ -50,44 +63,16 @@ public final class AddPropertyValueView extends ViewSupport implements ContextAw
         {
             log.debug(".setParent parent=" + parent);
         }
-
         super.setParent(parent);
 
-        if (parent == null)
-        {
-            return;
-        }
-
-        // If the parent event type contains the merge fields, we use the same event type
-        if (parent.getEventType().isProperty(propertyNames[0]))
-        {
-            mustAddProperty = false;
-            eventType = parent.getEventType();
-        }
-        // If the parent event type does not contain the event type (generates a map or such like the statistics views)
-        // then we need to add in the merge field as an event property thus changing event types.
-        else
+        if (parent.getEventType() != eventType)
         {
             mustAddProperty = true;
-            Class[] propertyValueTypes = new Class[propertyValues.length];
-            for (int i = 0; i < propertyValueTypes.length; i++)
-            {
-                propertyValueTypes[i] = propertyValues[i].getClass();
-            }
-            eventType = viewServiceContext.getEventAdapterService().createAddToEventType(
-                    parent.getEventType(), propertyNames, propertyValueTypes);
         }
-    }
-
-    /**
-     * Constructor.
-     * @param fieldNames is the name of the field that is added to any events received by this view.
-     * @param mergeValues is the values of the field that is added to any events received by this view.
-     */
-    public AddPropertyValueView(String[] fieldNames, Object[] mergeValues)
-    {
-        this.propertyNames = fieldNames;
-        this.propertyValues = mergeValues;
+        else
+        {
+            mustAddProperty = false;
+        }
     }
 
     /**
@@ -167,6 +152,11 @@ public final class AddPropertyValueView extends ViewSupport implements ContextAw
     public final EventType getEventType()
     {
         return eventType;
+    }
+
+    public void setEventType(EventType eventType)
+    {
+        this.eventType = eventType;
     }
 
     public final Iterator<EventBean> iterator()

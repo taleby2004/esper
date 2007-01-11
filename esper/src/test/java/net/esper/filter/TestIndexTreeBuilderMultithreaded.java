@@ -148,7 +148,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
     private void performMultithreadedTest(FilterHandleSetNode topNode,
                              int numberOfThreads,
                              int numberOfRunnables,
-                             int numberOfSecondsSleep)
+                             int numberOfSecondsSleep) throws Exception
     {
         log.info(".performMultithreadedTest Loading thread pool work queue,numberOfRunnables=" + numberOfRunnables);
 
@@ -173,6 +173,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
                  "  completed=" + pool.getCompletedTaskCount());
 
         pool.shutdown();
+        pool.awaitTermination(1, TimeUnit.SECONDS);
 
         assertTrue(pool.getCompletedTaskCount() == numberOfRunnables);
     }
