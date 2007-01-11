@@ -64,16 +64,16 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
+					<argLine>-Xms256m -Xmx256m</argLine>
 					<includes>
 						<include>**/Test*.java</include>
 					</includes>
 					<systemProperties>
 						<property>
 							<name>log4j.configuration</name>
-							<value>etc/infoonly_log4j.xml</value>
+							<value>infoonly_log4j.xml</value>
 						</property>
 					</systemProperties>
-					<argline>-Xms256m -Xmx256m</argline>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -7,9 +7,12 @@ import net.esper.client.EPException;
 import net.esper.client.EPRuntime;
 import net.esper.client.EPServiceProvider;
 import net.esper.core.EPServiceProviderSPI;
+import net.esper.core.EPStatementHandleCallback;
+import net.esper.core.EPStatementHandle;
 import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.schedule.SchedulingService;
+import net.esper.util.ManagedLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -231,20 +234,21 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 	private void scheduleNextCallback()
 	{
 		ScheduleHandleCallback nextScheduleCallback = new ScheduleHandleCallback() { public void scheduledTrigger() { continueSendingEvents(); } };
-		ScheduleSlot nextScheduleSlot;
+        EPStatementHandleCallback scheduleCSVHandle = new EPStatementHandleCallback(new EPStatementHandle(new ManagedLock("CSV"), "AbstractCoordinatedAdapter"), nextScheduleCallback);
+        ScheduleSlot nextScheduleSlot;
 
 		if(eventsToSend.isEmpty())
 		{
 			log.debug(".scheduleNextCallback no events to send, scheduling callback in 100 ms");
 			nextScheduleSlot = new ScheduleSlot(0,0);
-			schedulingService.add(100, nextScheduleCallback, nextScheduleSlot);
+			schedulingService.add(100, scheduleCSVHandle, nextScheduleSlot);
 		}
 		else
 		{
 			long afterMsec = eventsToSend.first().getSendTime() - currentTime;
 			nextScheduleSlot = eventsToSend.first().getScheduleSlot();
 			log.debug(".scheduleNextCallback schedulingCallback in " + afterMsec + " milliseconds");
-			schedulingService.add(afterMsec, nextScheduleCallback, nextScheduleSlot);
+			schedulingService.add(afterMsec, scheduleCSVHandle, nextScheduleSlot);
 		}
 	}
 }

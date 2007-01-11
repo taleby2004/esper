@@ -62,7 +62,7 @@
 					<systemProperties>
 						<property>
 							<name>log4j.configuration</name>
-							<value>../etc/infoonly_log4j.xml</value>
+							<value>log4j_info.xml</value>
 						</property>
 					</systemProperties>
 				</configuration>
