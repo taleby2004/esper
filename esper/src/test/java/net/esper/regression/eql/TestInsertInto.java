@@ -8,10 +8,7 @@ import net.esper.client.EPStatementException;
 import net.esper.client.time.CurrentTimeEvent;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
-import net.esper.support.bean.SupportBean;
-import net.esper.support.bean.SupportBeanSimple;
-import net.esper.support.bean.SupportBean_A;
-import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.*;
 import net.esper.support.util.SupportUpdateListener;
 
 public class TestInsertInto extends TestCase
@@ -267,6 +264,56 @@ public class TestInsertInto extends TestCase
     	assertSimple(listenerOne, "two", 2, null, 0);
     	assertSimple(listenerTwo, "two", 2, "twotwo", 4);
     	assertSimple(listenerThree, "two", 2, "twotwo", 4);
+    }
+
+    public void testInsertIntoPlusPattern()
+    {
+        String stmtOneTxt = "insert into InZone " +
+                      "select 111 as statementId, mac, locationReportId " +
+                      "from " + SupportRFIDEvent.class.getName() + " " +
+                      "where mac in ('1','2','3') " +
+                      "and zoneID = '10'";
+        EPStatement stmtOne = epService.getEPAdministrator().createEQL(stmtOneTxt);
+        SupportUpdateListener listenerOne = new SupportUpdateListener();
+        stmtOne.addListener(listenerOne);
+
+        String stmtTwoTxt = "insert into OutOfZone " +
+                      "select 111 as statementId, mac, locationReportId " +
+                      "from " + SupportRFIDEvent.class.getName() + " " +
+                      "where mac in ('1','2','3') " +
+                      "and zoneID != '10'";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(stmtTwoTxt);
+        SupportUpdateListener listenerTwo = new SupportUpdateListener();
+        stmtTwo.addListener(listenerTwo);
+
+        String stmtThreeTxt = "select 111 as eventSpecId, A.locationReportId as locationReportId " +
+                      " from pattern [every A=InZone -> (timer:interval(1 sec) and not OutOfZone(mac=A.mac))]";
+        EPStatement stmtThree = epService.getEPAdministrator().createEQL(stmtThreeTxt);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmtThree.addListener(listener);
+
+        // try the alert case with 1 event for the mac in question
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        epService.getEPRuntime().sendEvent(new SupportRFIDEvent("LR1", "1", "10"));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals("LR1", event.get("locationReportId"));
+
+        listenerOne.reset();
+        listenerTwo.reset();
+
+        // try the alert case with 2 events for zone 10 within 1 second for the mac in question
+        epService.getEPRuntime().sendEvent(new SupportRFIDEvent("LR2", "2", "10"));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1500));
+        epService.getEPRuntime().sendEvent(new SupportRFIDEvent("LR3", "2", "10"));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
+
+        event = listener.assertOneGetNewAndReset();
+        assertEquals("LR2", event.get("locationReportId"));
     }
     
     private void assertSimple(SupportUpdateListener listener, String myString, int myInt, String additionalString, int additionalInt)

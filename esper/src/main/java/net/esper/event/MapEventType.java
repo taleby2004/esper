@@ -10,26 +10,32 @@ import java.util.Map;
  */
 class MapEventType implements EventType
 {
-	private final String[] propertyNames;       // Cache an array of property names so not to construct one frequently
+    private final String typeName;
+    private final String[] propertyNames;       // Cache an array of property names so not to construct one frequently
     private final Map<String, Class> types;     // Mapping of property name and type
     private Map<String, EventPropertyGetter> propertyGetters;   // Mapping of property name and getters
     private int hashCode;
     private EventAdapterService eventAdapterService;
 
     /**
-     * Constructor takes a map of property names and types.
+     * Constructor takes a type name, map of property names and types.
+     * @param typeName is the event type name used to distinquish map types that have the same property types,
+     * empty string for anonymous maps, or for insert-into statements generating map events
+     * the stream name
      * @param propertyTypes is pairs of property name and type
-     * @param eventAdapterService is 
+     * @param eventAdapterService is required for access to objects properties within map values
      */
-    public MapEventType(Map<String, Class> propertyTypes,
+    public MapEventType(String typeName,
+                        Map<String, Class> propertyTypes,
                         EventAdapterService eventAdapterService)
     {
+        this.typeName = typeName;
         this.eventAdapterService = eventAdapterService;
         // copy the property names and types
         this.types = new HashMap<String, Class>();
         this.types.putAll(propertyTypes);
 
-        hashCode = 0;
+        hashCode = typeName.hashCode();
         propertyNames = new String[types.size()];
         propertyGetters = new HashMap<String, EventPropertyGetter>();
 
@@ -233,7 +239,8 @@ class MapEventType implements EventType
     public String toString()
     {
         return "MapEventType " +
-                "propertyNames=" + Arrays.toString(propertyNames);
+                "typeName=" + typeName +
+                " propertyNames=" + Arrays.toString(propertyNames);
     }
 
     public boolean equals(Object obj)
@@ -250,8 +257,14 @@ class MapEventType implements EventType
 
         MapEventType other = (MapEventType) obj;
 
-        // Should have the same number of properties
+        // Should have the same type name
         if (other.types.size() != this.types.size())
+        {
+            return false;
+        }
+
+        // Should have the same number of properties
+        if (!other.typeName.equals(this.typeName))
         {
             return false;
         }

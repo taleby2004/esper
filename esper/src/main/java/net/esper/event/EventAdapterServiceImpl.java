@@ -90,7 +90,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public synchronized EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException
     {
-        MapEventType newEventType = new MapEventType(propertyTypes, this);
+        MapEventType newEventType = new MapEventType(eventTypeAlias, propertyTypes, this);
 
         EventType existingType = eventTypes.get(eventTypeAlias);
         if (existingType != null)
@@ -113,12 +113,12 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public EventType createAnonymousMapType(Map<String, Class> propertyTypes) throws EventAdapterException
     {
-        return new MapEventType(propertyTypes, this);
+        return new MapEventType("", propertyTypes, this);
     }
     
     public EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException
     {
-    	return new WrapperEventType(underlyingEventType, propertyTypes, this);
+    	return new WrapperEventType("", underlyingEventType, propertyTypes, this);
     }
 
     public EventBean adapterForBean(Object event)
@@ -230,7 +230,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public synchronized EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException
 	{
-	    WrapperEventType newEventType = new WrapperEventType(underlyingEventType, propertyTypes, this);
+	    WrapperEventType newEventType = new WrapperEventType(eventTypeAlias, underlyingEventType, propertyTypes, this);
 	
 	    EventType existingType = eventTypes.get(eventTypeAlias);
 	    if (existingType != null)

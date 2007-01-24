@@ -30,7 +30,7 @@ public class TestMapEventType extends TestCase
         testTypesMap.put("mySupportBean", SupportBean.class);
         testTypesMap.put("myComplexBean", SupportBeanComplexProps.class);
         testTypesMap.put("myNullableSupportBean", SupportBean.class);
-        eventType = new MapEventType(testTypesMap, eventAdapterService);
+        eventType = new MapEventType("", testTypesMap, eventAdapterService);
     }
 
     public void testGetPropertyNames()
@@ -139,24 +139,25 @@ public class TestMapEventType extends TestCase
         mapTwo.put("mySupportBean", SupportBean.class);
         mapTwo.put("myNullableSupportBean", SupportBean.class);
         mapTwo.put("myComplexBean", SupportBeanComplexProps.class);
-        assertFalse((new MapEventType(mapTwo, eventAdapterService)).equals(eventType));
+        assertFalse((new MapEventType("", mapTwo, eventAdapterService)).equals(eventType));
         mapTwo.put("myString", String.class);
         mapTwo.put("myNullableString", String.class);
 
         // compare, should equal
-        assertEquals(new MapEventType(mapTwo, eventAdapterService), eventType);
+        assertEquals(new MapEventType("", mapTwo, eventAdapterService), eventType);
+        assertFalse((new MapEventType("google", mapTwo, eventAdapterService)).equals(eventType));
 
         mapTwo.put("xx", int.class);
-        assertFalse(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
+        assertFalse(eventType.equals(new MapEventType("", mapTwo, eventAdapterService)));
         mapTwo.remove("xx");
-        assertTrue(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
+        assertTrue(eventType.equals(new MapEventType("", mapTwo, eventAdapterService)));
 
         mapTwo.put("myInt", Integer.class);
-        assertFalse(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
+        assertFalse(eventType.equals(new MapEventType("", mapTwo, eventAdapterService)));
         mapTwo.remove("myInt");
-        assertFalse(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
+        assertFalse(eventType.equals(new MapEventType("", mapTwo, eventAdapterService)));
         mapTwo.put("myInt", int.class);
-        assertTrue(eventType.equals(new MapEventType(mapTwo, eventAdapterService)));
+        assertTrue(eventType.equals(new MapEventType("", mapTwo, eventAdapterService)));
     }
 
     public void testGetFromMap()

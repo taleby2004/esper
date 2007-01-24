@@ -30,16 +30,17 @@ public class WrapperEventType implements EventType
 
     /**
      * Ctor.
+     * @param typeName is the event type alias name 
      * @param eventType is the event type of the wrapped events
      * @param properties is the additional properties this wrapper adds
      * @param eventAdapterService is the ser
      */
-    public WrapperEventType(EventType eventType, Map<String, Class> properties, EventAdapterService eventAdapterService)
+    public WrapperEventType(String typeName, EventType eventType, Map<String, Class> properties, EventAdapterService eventAdapterService)
 	{
 		checkForRepeatedPropertyNames(eventType, properties);
 		
 		this.underlyingEventType = eventType;
-		this.underlyingMapType = new MapEventType(properties, eventAdapterService);
+		this.underlyingMapType = new MapEventType(typeName, properties, eventAdapterService);
         this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
         this.isNoMapProperties = properties.isEmpty();
 

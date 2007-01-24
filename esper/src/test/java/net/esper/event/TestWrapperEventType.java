@@ -26,7 +26,7 @@ public class TestWrapperEventType extends TestCase
         properties.put("additionalString", String.class);
         properties.put("additionalInt", Integer.class);
         eventAdapterService = SupportEventAdapterService.getService();
-        eventType = new WrapperEventType(underlyingEventTypeOne, properties, eventAdapterService);
+        eventType = new WrapperEventType("mytype", underlyingEventTypeOne, properties, eventAdapterService);
 	}
 	
 	public void testInvalidRepeatedNames()
@@ -37,7 +37,7 @@ public class TestWrapperEventType extends TestCase
 		try
 		{	
 			// The myString property occurs in both the event and the map
-			eventType = new WrapperEventType(underlyingEventTypeOne, properties, eventAdapterService);
+			eventType = new WrapperEventType("mytype", underlyingEventTypeOne, properties, eventAdapterService);
 			fail();
 		}
 		catch(EPException ex)
@@ -73,16 +73,16 @@ public class TestWrapperEventType extends TestCase
 	public void testEquals()
 	{
 		Map<String, Class> otherProperties = new HashMap<String, Class>(properties);
-		EventType otherType = new WrapperEventType(underlyingEventTypeOne, otherProperties, eventAdapterService);
+		EventType otherType = new WrapperEventType("mytype", underlyingEventTypeOne, otherProperties, eventAdapterService);
 		assertTrue(eventType.equals(otherType));
 		assertTrue(otherType.equals(eventType));
 		
-		otherType = new WrapperEventType(underlyingEventTypeTwo, otherProperties, eventAdapterService);
+		otherType = new WrapperEventType("mytype", underlyingEventTypeTwo, otherProperties, eventAdapterService);
 		assertFalse(eventType.equals(otherType));
 		assertFalse(otherType.equals(eventType));
 		
 		otherProperties.put("anotherProperty", Integer.class);
-		otherType = new WrapperEventType(underlyingEventTypeOne, otherProperties, eventAdapterService);
+		otherType = new WrapperEventType("mytype", underlyingEventTypeOne, otherProperties, eventAdapterService);
 		assertFalse(eventType.equals(otherType));
 		assertFalse(otherType.equals(eventType));
 		

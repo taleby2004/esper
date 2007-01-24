@@ -1,6 +1,11 @@
 Esper Changelog
 ===================
 
+Changes in version 1.5.0a
+----------------------
+* Fixed issue ESPER-78 "Insert-into streams not using correct event type when same-typed streams"
+
+
 Changes in version 1.5.0
 ----------------------
 * Multithread-safety for all operations provided by the administrative and runtime API. 
