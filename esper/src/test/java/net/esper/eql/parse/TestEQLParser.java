@@ -14,7 +14,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select * from " + className + "(intPrimitive not in (1,2))";
+        String expression = "select * from " + className + "(intPrimitive = 2)";
         //String expression = "select googlex(1) from " + className;
 
         log.debug(".testDisplayAST parsing: " + expression);
@@ -367,6 +367,17 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select prior(0, price) from x");
         assertIsValid("select prior(1000, price) from x");
         assertIsValid("select prior(2, symbol) from x");
+
+        // array constants and expressions
+        assertIsValid("select {'a', 'b'} from x");
+        assertIsValid("select {'a'} from x");
+        assertIsValid("select {} from x");
+        assertIsValid("select {'a', 'b'} as yyy from x");
+        assertIsValid("select * from x where MyFunc.func({1,2}, xx)");
+        assertIsValid("select {1,2,3} from x");
+        assertIsValid("select {1.1,'2',3E5, 7L} from x");
+        assertIsValid("select * from x where oo = {1,2,3}");
+        assertIsValid("select {a, b}, {c, d} from x");
     }
 
     public void testBitWiseCases() throws Exception

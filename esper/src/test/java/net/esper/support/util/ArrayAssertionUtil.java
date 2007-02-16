@@ -58,6 +58,39 @@ public class ArrayAssertionUtil
     }
 
     /**
+     * Iterate through the views collection and check the presence of all values supplied in the exact same order,
+     * using the event bean underlying to compare
+     * @param iterator is the iterator to iterate over and check returned values
+     * @param expectedValues is an array of expected underlying events
+     */
+    public static void assertEqualsExactOrderUnderlying(Iterator<EventBean> iterator, Object[] expectedValues)
+    {
+        ArrayList<Object> underlyingValues = new ArrayList<Object>();
+        while (iterator.hasNext())
+        {
+            underlyingValues.add(iterator.next().getUnderlying());
+        }
+
+        try
+        {
+            iterator.next();
+            TestCase.fail();
+        }
+        catch (NoSuchElementException ex)
+        {
+            // Expected exception - next called after hasNext returned false, for testing
+        }
+
+        Object[] data = null;
+        if (underlyingValues.size() > 0)
+        {
+            data = underlyingValues.toArray();
+        }
+
+        assertEqualsExactOrder(data, expectedValues);
+    }
+
+    /**
      * Compare the objects in the two object arrays assuming the exact same order.
      * @param data is the data to assertEqualsExactOrder against
      * @param expectedValues is the expected values
@@ -88,6 +121,31 @@ public class ArrayAssertionUtil
      * @param expectedValues is the expected values
      */
     public static void assertEqualsExactOrder(int[] data, int[] expectedValues)
+    {
+        if ((expectedValues == null) && (data == null))
+        {
+            return;
+        }
+        if ( ((expectedValues == null) && (data != null)) ||
+             ((expectedValues != null) && (data == null)) )
+        {
+            TestCase.assertTrue(false);
+        }
+
+        TestCase.assertEquals(expectedValues.length, data.length);
+
+        for (int i = 0; i < expectedValues.length; i++)
+        {
+            TestCase.assertEquals(expectedValues[i], data[i]);
+        }
+    }
+
+    /**
+     * Compare the STring values in the two String arrays assuming the exact same order.
+     * @param data is the data to assertEqualsExactOrder against
+     * @param expectedValues is the expected values
+     */
+    public static void assertEqualsExactOrder(String[] data, String[] expectedValues)
     {
         if ((expectedValues == null) && (data == null))
         {
