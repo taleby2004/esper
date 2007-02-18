@@ -1,5 +1,20 @@
 News
 
+* February 17, 2007  -  Esper 1.6.0
+
+    * Added support for group-by and previous (ESPER-80 Prev function to consider grouped windows)
+    
+    * Added length window batch (ESPER-27 jumping/tumbling window)
+    
+    * Added support for array definition (Enhancement Request ESPER-76 Java array initialization syntax for constants)
+    	
+    * Removed dependency on Apache Common BeanUtils (commons-beanutils-1.7.0.jar)
+    
+    * Documentation - Output model illustrations for time windows and event model; Extensive description of built-in views
+
+    * Fixed issue ESPER-78 "Insert-into streams not using correct event type when same-typed streams"
+
+
 * January 11, 2007  -  Esper 1.5.0
 
     * Multithread-safety for all operations provided by the administrative and runtime API. Client applications can perform multithreaded sends of events into the engine as well as create, start and stop statements during operation, while retaining full control over threading and efficiently sharing resources between statements (Enhancement Request ESPER-48 Multithread-safety)

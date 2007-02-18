@@ -17,7 +17,7 @@ import java.util.Map;
  * If this event type is to add information to another wrapper event type (wrapper to wrapper), then it is the
  * responsibility of the creating logic to use the existing event type and add to it.
  * <p>
- * Uses a {@link MapEventType} to represent the mapped properties. This is because the additional properties
+ * Uses a the map event type {@link net.esper.event.MapEventType} to represent the mapped properties. This is because the additional properties
  * can also be beans or complex types and the Map event type handles these nicely.
  */
 public class WrapperEventType implements EventType

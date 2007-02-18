@@ -12,6 +12,31 @@ Change History
 	[]
 
 
+Version 1.6.0 Update
+
+	Released February 17, 2007
+		
+* API changes
+
+    * None
+    
+* Major changes
+
+    * Added support for group-by and previous (ESPER-80 Prev function to consider grouped windows)
+    
+    * Added length window batch (ESPER-27 jumping/tumbling window)
+    
+    * Added support for array definition (Enhancement Request ESPER-76 Java array initialization syntax for constants)
+    	
+    * Removed dependency on Apache Common BeanUtils (commons-beanutils-1.7.0.jar)
+
+* Minor changes	
+    
+    * Documentation - Output model illustrations for time windows and event model; Extensive description of built-in views
+
+    * Fixed issue ESPER-78 "Insert-into streams not using correct event type when same-typed streams"
+
+
 Version 1.5.0 Update
 
 	Released January 11, 2007
