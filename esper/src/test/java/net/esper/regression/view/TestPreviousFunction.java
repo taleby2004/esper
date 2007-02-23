@@ -25,6 +25,71 @@ public class TestPreviousFunction extends TestCase
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
+    public void testCountStar()
+    {
+        String text = "select count(*) as total, " +
+                      "prev(" + TestPreviousFunction.class.getName() + ".intToLong(count(*)) - 1, price) as firstPrice from " + SupportMarketDataBean.class.getName() + ".win:time(60)";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        stmt.addListener(testListener);
+
+        sendTimer(0);
+        sendMarketEvent("IBM", 75);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 1L, 75D);
+
+        sendMarketEvent("IBM", 76);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 2L, 75D);
+
+        sendTimer(10000);
+        sendMarketEvent("IBM", 77);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 3L, 75D);
+
+        sendTimer(20000);
+        sendMarketEvent("IBM", 78);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 4L, 75D);
+
+        sendTimer(50000);
+        sendMarketEvent("IBM", 79);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 5L, 75D);
+
+        sendTimer(60000);
+        assertEquals(1, testListener.getOldDataList().size());
+        EventBean[] oldData = testListener.getLastOldData();
+        assertEquals(2, oldData.length);
+        assertCountAndPrice(oldData[0], 5L, null);
+        testListener.reset();
+
+        sendMarketEvent("IBM", 80);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 4L, 77D);
+
+        sendTimer(65000);
+        assertFalse(testListener.isInvoked());
+
+        sendTimer(70000);
+        assertEquals(1, testListener.getOldDataList().size());
+        oldData = testListener.getLastOldData();
+        assertEquals(1, oldData.length);
+        assertCountAndPrice(oldData[0], 4L, null);
+        testListener.reset();
+
+        sendTimer(80000);
+        testListener.reset();
+
+        sendMarketEvent("IBM", 81);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 3L, 79D);
+
+        sendTimer(120000);
+        testListener.reset();
+
+        sendMarketEvent("IBM", 82);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 2L, 81D);
+
+        sendTimer(300000);
+        testListener.reset();
+
+        sendMarketEvent("IBM", 83);
+        assertCountAndPrice(testListener.assertOneGetNewAndReset(), 1L, 83D);
+    }
+
     public void testSortWindowPerGroup()
     {
         // descending sort
@@ -760,5 +825,23 @@ public class TestPreviousFunction extends TestCase
         assertEquals(symbol, event.get("symbol"));
         assertEquals(prevPrice, event.get("prevPrice"));
         assertEquals(prevPrevPrice, event.get("prevPrevPrice"));
+    }
+
+    private void assertCountAndPrice(EventBean event, Long total, Double price)
+    {
+        assertEquals(total, event.get("total"));
+        assertEquals(price, event.get("firstPrice"));
+    }
+
+    public static Integer intToLong(Long longValue)
+    {
+        if (longValue == null)
+        {
+            return null;
+        }
+        else
+        {
+            return longValue.intValue();
+        }
     }    
 }
