@@ -16,3 +16,15 @@ Download Esper
 	
 	Earlier versions of Esper can be downloaded from {{{http://dist.codehaus.org/esper}here}}.
 
+
+Download Esper Example
+~~~~~~~~~~~~~~~~~~~~~~
+
+	Esper examples are distributed with Esper bundled in binary form for your convenience.
+	You don't need to download Esper separately.
+
+*------------------------+----------------------------------------------------------------------------+-----------------------+
+|                        | Download                                                                   | Read related article
+*------------------------+----------------------------------------------------------------------------+-----------------------+
+| Terminal Service (JSE) | {{{http://dist.codehaus.org/esper/esper-example-terminalsvc-jse.zip}zip (includes Esper 1.6.0)}}  | http://TODO (published on February xx, 2007)
+*------------------------+----------------------------------------------------------------------------+-----------------------+
