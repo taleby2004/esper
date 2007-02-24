@@ -1,6 +1,11 @@
 Esper Changelog
 ===================
 
+Changes in version 1.7
+----------------------
+* Fixed issue ESPER-86 "selecting first element via prev and count(*)"
+
+
 Changes in version 1.6
 ----------------------
 * Added support for group-by and previous combination (ESPER-80 Prev function to consider grouped windows)

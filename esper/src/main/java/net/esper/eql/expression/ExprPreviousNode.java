@@ -43,8 +43,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
             }
 
             Number valueNumber = (Number) value;
-            if ( (JavaClassHelper.isFloatingPointNumber(valueNumber)) ||
-                 (valueNumber instanceof Long))
+            if (JavaClassHelper.isFloatingPointNumber(valueNumber))
             {
                 throw new ExprValidationException("Previous function requires an integer index parameter or expression");
             }
@@ -87,7 +86,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
             {
                 return null;
             }
-            index = (Integer) indexResult;
+            index = ((Number) indexResult).intValue();
         }
 
         // access based on index returned

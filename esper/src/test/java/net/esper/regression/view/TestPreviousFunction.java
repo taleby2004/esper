@@ -25,13 +25,28 @@ public class TestPreviousFunction extends TestCase
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
-    public void testCountStar()
+    public void testPrevCountStarWithStaticMethod()
     {
         String text = "select count(*) as total, " +
                       "prev(" + TestPreviousFunction.class.getName() + ".intToLong(count(*)) - 1, price) as firstPrice from " + SupportMarketDataBean.class.getName() + ".win:time(60)";
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
         stmt.addListener(testListener);
 
+        assertPrevCount();
+    }
+
+    public void testPrevCountStar()
+    {
+        String text = "select count(*) as total, " +
+                      "prev(count(*) - 1, price) as firstPrice from " + SupportMarketDataBean.class.getName() + ".win:time(60)";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        stmt.addListener(testListener);
+
+        assertPrevCount();
+    }
+
+    private void assertPrevCount()
+    {
         sendTimer(0);
         sendMarketEvent("IBM", 75);
         assertCountAndPrice(testListener.assertOneGetNewAndReset(), 1L, 75D);
