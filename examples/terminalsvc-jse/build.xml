@@ -20,6 +20,7 @@
 
     <target name="clean">
         <delete dir="${build.dir}"/>
+        <delete file="esper-example-terminalsvc-jse.zip"/>
     </target>
 
     <target name="run" depends="build">
@@ -27,6 +28,11 @@
             fork="true">
             <classpath location="etc"/><!-- for log4j.xml discovery -->
         </java>
+    </target>
+
+    <!-- use this target to zip the example code for distribution -->
+    <target name="release" depends="clean">
+        <zip basedir="." destfile="esper-example-terminalsvc-jse.zip" includes="**/*"/>        
     </target>
 
 </project>
