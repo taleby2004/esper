@@ -6,7 +6,7 @@
 
     <path id="lib.classpath">
         <fileset dir="${lib.dir}">
-            <include name="*/*.jar"/>
+            <include name="*.jar"/>
         </fileset>
         <pathelement location="${build.dir}"/>
     </path>
