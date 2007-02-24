@@ -1317,6 +1317,11 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			<programlisting>select prev(rank, symbol) from Trade.ext:sort(volume, true, 10), RankSelectionEvent</programlisting>
 
 			<para>
+				And the expression <literal>count(*) - 1</literal> allows us to select the oldest event in the length window:
+			</para>
+			<programlisting>select prev(count(*) - 1, price) from Trade.win:length(100)</programlisting>
+
+			<para>
 				The <literal>prev</literal> function returns a <literal>null</literal> value if the data window does not currently hold the i-th previous event. The example below illustrates this using a time batch window. Here the <literal>prev</literal>  
 				function returns a null value for any events in which the previous event is not in the same batch of events. Note that the <literal>prior</literal> function as discussed below can be used if a null value is not the desired result.
 			</para>
