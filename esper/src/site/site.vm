@@ -312,7 +312,7 @@
 	<div id="top">
 				<div id="icons">
 					<a href="$relativePath/index.html" title="Home page"><img src="$relativePath/images/home.gif" alt="Home" /></a>
-					<a href="http://www.espertech.com/contact/" title="Contact us"><img src="$relativePath/images/contact.gif" alt="Contact" /></a>
+					<a href="http://www.espertech.com/company/contact.php" title="Contact us"><img src="$relativePath/images/contact.gif" alt="Contact" /></a>
 				</div>
 				<a href="$relativePath/index.html" title="Home page">
 					<h1>Esper</h1>
