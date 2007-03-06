@@ -32,7 +32,7 @@ hr { height: 1px; border-style: none; color: #d0d0d0; background-color: #C0C0C0;
 
 /* maven apt source snip */
 pre {font-size: 1.2em; font-weight: bold; color:#000099;}
-.source { width: 603px; overflow: scroll; border: solid 1px #000099; padding: 10px;}
+.source { width: 602px; overflow: scroll; border: solid 1px #000099; padding: 10px;}
 
 /* 800 , 212 , 560 */ 
 .content { margin: 0px auto; width: 900px; }
