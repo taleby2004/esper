@@ -17,7 +17,7 @@ Download Esper
 	Earlier versions of Esper can be downloaded from {{{http://dist.codehaus.org/esper}here}}.
 
 
-Download Esper Example
+Download Article Example
 ~~~~~~~~~~~~~~~~~~~~~~
 
 	Esper examples are distributed with Esper bundled in binary form for your convenience.
@@ -26,5 +26,5 @@ Download Esper Example
 *------------------------+----------------------------------------------------------------------------+-----------------------+
 |                        | Download                                                                   | Read related article
 *------------------------+----------------------------------------------------------------------------+-----------------------+
-| Terminal Service (JSE) | {{{http://dist.codehaus.org/esper/esper-example-terminalsvc-jse.zip}zip (includes Esper 1.6.0)}}  | http://TODO (published on February xx, 2007)
+| Terminal Service (JSE) | {{{http://dist.codehaus.org/esper/esper-example-terminalsvc-jse.zip}zip (includes Esper 1.6.0)}}  | {{{http://www.onjava.com/pub/a/onjava/2007/03/07/esper-event-stream-processing-and-correlation.html}ONJava.com article titled "Esper: Event Stream Processing and Correlation" from 3/8/2007}}
 *------------------------+----------------------------------------------------------------------------+-----------------------+
