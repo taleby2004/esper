@@ -20,9 +20,10 @@ public final class ViewServiceImpl implements ViewService
     {
     }
 
-    public ViewFactoryChain createFactories(EventType parentEventType,
+    public ViewFactoryChain createFactories(int streamNum,
+                                            EventType parentEventType,
                                             List<ViewSpec> viewSpecDefinitions,
-                                            ViewServiceContext context)
+                                            StatementServiceContext context)
             throws ViewProcessingException
     {
         // Clone the view spec list to prevent parameter modification
@@ -32,7 +33,7 @@ public final class ViewServiceImpl implements ViewService
         ViewServiceHelper.addMergeViews(viewSpecList);
 
         // Instantiate factories, not making them aware of each other yet
-        List<ViewFactory> viewFactories = ViewServiceHelper.instantiateFactories(viewSpecList);
+        List<ViewFactory> viewFactories = ViewServiceHelper.instantiateFactories(streamNum, viewSpecList, context);
 
         ViewFactory parentViewFactory = null;
         List<ViewFactory> attachedViewFactories = new LinkedList<ViewFactory>();
@@ -61,7 +62,7 @@ public final class ViewServiceImpl implements ViewService
 
     public Viewable createViews(Viewable eventStreamViewable,
                                 List<ViewFactory> viewFactories,
-                                ViewServiceContext context)
+                                StatementServiceContext context)
     {
         // Attempt to find existing views under the stream that match specs.
         // The viewSpecList may have been changed by this method.

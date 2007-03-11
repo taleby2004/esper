@@ -3,9 +3,10 @@ package net.esper.view.stream;
 import junit.framework.TestCase;
 import net.esper.event.EventType;
 import net.esper.filter.FilterOperator;
-import net.esper.filter.FilterSpec;
+import net.esper.filter.FilterSpecCompiled;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.event.SupportEventTypeFactory;
+import net.esper.support.event.SupportEventAdapterService;
 import net.esper.support.filter.SupportFilterServiceImpl;
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.view.EventStream;
@@ -15,16 +16,16 @@ public class TestStreamFactorySvcImpl extends TestCase
     private StreamFactoryService streamFactoryService;
     private SupportFilterServiceImpl supportFilterService;
 
-    private FilterSpec[] filterSpecs;
+    private FilterSpecCompiled[] filterSpecs;
     private EventStream[] streams;
 
     public void setUp()
     {
         supportFilterService = new SupportFilterServiceImpl();
-        streamFactoryService = new StreamFactorySvcImpl();
+        streamFactoryService = new StreamFactorySvcImpl(SupportEventAdapterService.getService());
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
-        filterSpecs = new FilterSpec[3];
+        filterSpecs = new FilterSpecCompiled[3];
         filterSpecs[0] = SupportFilterSpecBuilder.build(eventType, new Object[] { "string", FilterOperator.EQUAL, "a" });
         filterSpecs[1] = SupportFilterSpecBuilder.build(eventType, new Object[] { "string", FilterOperator.EQUAL, "a" });
         filterSpecs[2] = SupportFilterSpecBuilder.build(eventType, new Object[] { "string", FilterOperator.EQUAL, "b" });

@@ -12,11 +12,15 @@ import java.util.List;
  */
 public class LengthWindowViewFactory implements ViewFactory
 {
-    private int size;
+    /**
+     * Size of length window.
+     */
+    protected int size;
+    
     private EventType eventType;
     private RandomAccessByIndexGetter randomAccessGetterImpl;
 
-    public void setViewParameters(List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {
         String errorMessage = "Length window view requires a single integer-type parameter";
         if (viewParameters.size() != 1)
@@ -43,7 +47,7 @@ public class LengthWindowViewFactory implements ViewFactory
         }
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
+    public void attach(EventType parentEventType, StatementServiceContext statementServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         this.eventType = parentEventType;
     }
@@ -73,7 +77,7 @@ public class LengthWindowViewFactory implements ViewFactory
         resourceCallback.setViewResource(randomAccessGetterImpl);
     }
 
-    public View makeView(ViewServiceContext viewServiceContext)
+    public View makeView(StatementServiceContext statementServiceContext)
     {
         IStreamRandomAccess randomAccess = null;
 

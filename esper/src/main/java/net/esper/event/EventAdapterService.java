@@ -10,11 +10,43 @@ import org.w3c.dom.Node;
 public interface EventAdapterService
 {
     /**
+     * Returns the event type id given an event type alias. The alias is expected to exist.
+     * <p> Use getExistsTypeByAlias to check if an alias exists.
+     * @param eventTypeAlias is the event name
+     * @return event type id
+     * @throws IllegalStateException to indicate that the alias does not exist. 
+     */
+    public String getIdByAlias(String eventTypeAlias);
+
+    /**
+     * Returns the event type given an event type id. The id is expected to exist.
+     * @param eventTypeID is the tyoe id
+     * @return event type
+     * @throws IllegalStateException to indicate that the id does not exist. 
+     */
+    public EventType getTypeById(String eventTypeID);
+
+    /**
+     * Returns the event type id given the event type, with the type expected to exist.
+     * @param eventType to return the id for
+     * @return event type id
+     * @throws IllegalStateException to indicate that the type does not exist.
+     */
+    public String getIdByType(EventType eventType);
+
+    /**
+     * Returns the first event type alias for a given event type id.
+     * @param eventTypeID is the type id
+     * @return the very first alias registered for an event type
+     */
+    public String getAliasById(String eventTypeID);
+
+    /**
      * Return the event type for a given event name, or null if none is registered for that name.
      * @param eventTypeAlias is the event type alias name to return type for
      * @return event type for named event, or null if unknown/unnamed type
      */
-    public EventType getEventType(String eventTypeAlias);
+    public EventType getExistsTypeByAlias(String eventTypeAlias);
 
     /**
      * Add an event type with the given alias and a given set of properties.
@@ -49,7 +81,7 @@ public interface EventAdapterService
      * The method accepts a Map that contains the property names as keys and Class objects as the values.
      * The Class instances represent the property types.
      * <p>
-     * New instances are created by this method on every invocation. Clients to this method need to
+     * New instances are createdStatement by this method on every invocation. Clients to this method need to
      * cache the returned EventType instance to reuse EventType's for same-typed events.
      * <p>
      * @param propertyTypes is a map of String to Class objects
@@ -178,7 +210,7 @@ public interface EventAdapterService
      * as well as the additional given properties.
      * @param underlyingEventType is the event type for the event type that this wrapper wraps
      * @param propertyTypes is the names and types of any additional properties 
-     * @return eventType is the type created
+     * @return eventType is the type createdStatement
      * @throws EventAdapterException if alias already exists and doesn't match this type's info
      */
     public EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException;

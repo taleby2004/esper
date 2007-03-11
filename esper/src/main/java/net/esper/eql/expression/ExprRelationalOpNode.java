@@ -24,6 +24,15 @@ public class ExprRelationalOpNode extends ExprNode
         this.relationalOpEnum = relationalOpEnum;
     }
 
+    /**
+     * Returns the type of relational op used.
+     * @return enum with relational op type
+     */
+    public RelationalOpEnum getRelationalOpEnum()
+    {
+        return relationalOpEnum;
+    }
+
     public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         // Must have 2 child nodes
@@ -41,13 +50,13 @@ public class ExprRelationalOpNode extends ExprNode
             if (!JavaClassHelper.isNumeric(typeOne))
             {
                 throw new ExprValidationException("Implicit conversion from datatype '" +
-                        typeOne.getName() +
+                        typeOne.getSimpleName() +
                         "' to numeric is not allowed");
             }
             if (!JavaClassHelper.isNumeric(typeTwo))
             {
                 throw new ExprValidationException("Implicit conversion from datatype '" +
-                        typeTwo.getName() +
+                        typeTwo.getSimpleName() +
                         "' to numeric is not allowed");
             }
         }

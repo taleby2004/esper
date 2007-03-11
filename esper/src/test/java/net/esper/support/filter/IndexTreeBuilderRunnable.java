@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.filter.*;
 import net.esper.event.EventBean;
+import net.esper.event.EventType;
 import net.esper.support.util.ObjectReservationSingleton;
 
 public class IndexTreeBuilderRunnable implements Runnable
@@ -17,12 +18,14 @@ public class IndexTreeBuilderRunnable implements Runnable
     protected final static Random random = new Random(System.currentTimeMillis());
 
     private FilterHandleSetNode topNode;
-    private Vector<FilterSpec> testFilterSpecs;
+    private Vector<FilterSpecCompiled> testFilterSpecs;
     private Vector<EventBean> matchedEvents;
     private Vector<EventBean> unmatchedEvents;
+    private final EventType eventType;
 
-    public IndexTreeBuilderRunnable(FilterHandleSetNode topNode, Vector<FilterSpec> testFilterSpecs, Vector<EventBean> matchedEvents, Vector<EventBean> unmatchedEvents)
+    public IndexTreeBuilderRunnable(EventType eventType, FilterHandleSetNode topNode, Vector<FilterSpecCompiled> testFilterSpecs, Vector<EventBean> matchedEvents, Vector<EventBean> unmatchedEvents)
     {
+        this.eventType = eventType;
         this.topNode = topNode;
         this.testFilterSpecs = testFilterSpecs;
         this.matchedEvents = matchedEvents;
@@ -34,7 +37,7 @@ public class IndexTreeBuilderRunnable implements Runnable
         long currentThreadId = Thread.currentThread().getId();
 
         // Choose one of filter specifications, randomly, then reserve to make sure no one else has the same
-        FilterSpec filterSpec = null;
+        FilterSpecCompiled filterSpec = null;
         EventBean unmatchedEvent = null;
         EventBean matchedEvent = null;
 

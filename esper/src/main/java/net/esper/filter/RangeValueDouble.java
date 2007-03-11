@@ -21,12 +21,16 @@ public class RangeValueDouble implements FilterSpecParamRangeValue
         this.doubleValue = doubleValue;
     }
 
-    public final void checkType(Map<String, EventType> taggedEventTypes)
+    public final Double getFilterValue(MatchedEventMap matchedEvents)
     {
-        return;
+        return doubleValue;
     }
 
-    public final double getFilterValue(MatchedEventMap matchedEvents)
+    /**
+     * Returns the constant value.
+     * @return constant
+     */
+    public double getDoubleValue()
     {
         return doubleValue;
     }

@@ -21,16 +21,16 @@ public class InSetOfValuesConstant implements FilterSpecParamInValue
         this.constant = constant;
     }
 
-    public final Class validate(Map<String, EventType> taggedEventTypes)
+    public final Object getFilterValue(MatchedEventMap matchedEvents)
     {
-        if (constant == null)
-        {
-            return null;
-        }
-        return constant.getClass();
+        return constant;
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents)
+    /**
+     * Returns the constant value.
+     * @return constant
+     */
+    public Object getConstant()
     {
         return constant;
     }

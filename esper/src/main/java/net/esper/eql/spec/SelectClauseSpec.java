@@ -1,14 +1,16 @@
 package net.esper.eql.spec;
 
+import net.esper.util.MetaDefItem;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Encapsulates the parsed select expressions in a select-clause in an EQL statement.
  */
-public class SelectClauseSpec
+public class SelectClauseSpec implements MetaDefItem
 {
-	private List<SelectExprElementUnnamedSpec> selectList;
+	private List<SelectExprElementRawSpec> selectList;
 	private boolean isUsingWildcard;
 
     /**
@@ -16,14 +18,14 @@ public class SelectClauseSpec
      */
     public SelectClauseSpec()
 	{
-		selectList = new ArrayList<SelectExprElementUnnamedSpec>();
+		selectList = new ArrayList<SelectExprElementRawSpec>();
 	}
 
     /**
      * Ctor.
      * @param selectList for a populates list of select expressions
      */
-    public SelectClauseSpec(List<SelectExprElementUnnamedSpec> selectList)
+    public SelectClauseSpec(List<SelectExprElementRawSpec> selectList)
 	{
 		this.selectList = selectList;
 	}
@@ -41,7 +43,7 @@ public class SelectClauseSpec
      * Adds an select expression within the select clause.
      * @param element is the expression to add 
      */
-    public void add(SelectExprElementUnnamedSpec element)
+    public void add(SelectExprElementRawSpec element)
 	{
 		selectList.add(element);
 	}
@@ -50,7 +52,7 @@ public class SelectClauseSpec
      * Returns the list of select expressions.
      * @return list of expressions
      */
-    public List<SelectExprElementUnnamedSpec> getSelectList()
+    public List<SelectExprElementRawSpec> getSelectList()
 	{
 		return selectList;
 	}

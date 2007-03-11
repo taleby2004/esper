@@ -81,6 +81,16 @@ public class Configuration {
 	private boolean isUsingDefaultImports = true;
 
     /**
+     * Optional classname to use for constructing services context.
+     */
+    protected String epServicesContextFactoryClassName;
+
+    /**
+     * List of configured plug-in views.
+     */
+    protected List<ConfigurationPlugInView> plugInViews;
+
+    /**
      * Constructs an empty configuration. The auto import values
      * are set by default to java.lang, java.math, java.text and
      * java.util.
@@ -88,6 +98,24 @@ public class Configuration {
     public Configuration()
     {
         reset();
+    }
+
+    /**
+     * Sets the class name of the services context factory class to use.
+     * @param epServicesContextFactoryClassName service context factory class name
+     */
+    public void setEPServicesContextFactoryClassName(String epServicesContextFactoryClassName)
+    {
+        this.epServicesContextFactoryClassName = epServicesContextFactoryClassName;
+    }
+
+    /**
+     * Returns the service context factory class name
+     * @return class name
+     */
+    public String getEPServicesContextFactoryClassName()
+    {
+        return epServicesContextFactoryClassName;
     }
 
     /**
@@ -239,6 +267,30 @@ public class Configuration {
     public Map<String, ConfigurationDBRef> getDatabaseReferences()
     {
         return databaseReferences;
+    }
+
+    /**
+     * Returns a list of configured plug-in views.
+     * @return list of plug-in view configs
+     */
+    public List<ConfigurationPlugInView> getPlugInViews()
+    {
+        return plugInViews;
+    }
+
+    /**
+     * Add a view for plug-in.
+     * @param namespace is the namespace the view should be available under
+     * @param name is the name of the view
+     * @param viewFactoryClass is the view factory class to use
+     */
+    public void addPlugInView(String namespace, String name, String viewFactoryClass)
+    {
+        ConfigurationPlugInView configurationPlugInView = new ConfigurationPlugInView();
+        configurationPlugInView.setNamespace(namespace);
+        configurationPlugInView.setName(name);
+        configurationPlugInView.setFactoryClassName(viewFactoryClass);
+        plugInViews.add(configurationPlugInView);
     }
 
     /**
@@ -408,6 +460,7 @@ public class Configuration {
         imports = new ArrayList<String>();
         addDefaultImports();
         isUsingDefaultImports = true;
+        plugInViews = new ArrayList<ConfigurationPlugInView>();
     }
 
     /**

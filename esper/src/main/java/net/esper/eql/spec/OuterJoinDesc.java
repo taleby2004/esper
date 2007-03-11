@@ -2,11 +2,12 @@ package net.esper.eql.spec;
 
 import net.esper.type.OuterJoinType;
 import net.esper.eql.expression.ExprIdentNode;
+import net.esper.util.MetaDefItem;
 
 /**
  * Contains the ON-clause criteria in an outer join.
  */
-public class OuterJoinDesc
+public class OuterJoinDesc implements MetaDefItem
 {
     private OuterJoinType outerJoinType;
     private ExprIdentNode leftNode;

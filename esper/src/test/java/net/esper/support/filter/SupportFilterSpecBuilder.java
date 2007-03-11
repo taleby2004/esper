@@ -2,15 +2,24 @@ package net.esper.support.filter;
 
 import net.esper.filter.*;
 import net.esper.event.EventType;
+import net.esper.support.event.SupportEventAdapterService;
 
 import java.util.List;
 import java.util.LinkedList;
 
 public class SupportFilterSpecBuilder
 {
-    public static FilterSpec build(EventType eventType, Object[] objects)
+    public static FilterSpecCompiled build(EventType eventType, Object[] objects)
     {
-        return new FilterSpec(eventType, buildList(objects));
+        String eventTypeId = SupportEventAdapterService.getService().getIdByType(eventType);
+        String eventTypeAlias = SupportEventAdapterService.getService().getAliasById(eventTypeId);
+        return new FilterSpecCompiled(eventType, buildList(objects));
+    }
+
+    public static FilterSpecCompiled build(String eventTypeId, String eventTypeAlias, Object[] objects)
+    {
+        EventType eventType = SupportEventAdapterService.getService().getTypeById(eventTypeId);
+        return new FilterSpecCompiled(eventType, buildList(objects));
     }
 
     public static List<FilterSpecParam> buildList(Object[] objects)

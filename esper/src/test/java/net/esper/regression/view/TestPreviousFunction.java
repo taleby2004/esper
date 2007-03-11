@@ -254,7 +254,7 @@ public class TestPreviousFunction extends TestCase
         testListener.reset();
 
         sendMarketEvent("IBM", 80);
-        
+
         eventsNew = testListener.getLastNewData();
         EventBean[] eventsOld = testListener.getLastOldData();
         assertEquals(3, eventsNew.length);
@@ -264,7 +264,7 @@ public class TestPreviousFunction extends TestCase
         assertReceived(eventsNew[2], "IBM", 79d, 78d);
         assertReceived(eventsOld[0], "IBM", null, null);
         assertReceived(eventsOld[1], "IBM", null, null);
-        assertReceived(eventsOld[2], "IBM", null, null);        
+        assertReceived(eventsOld[2], "IBM", null, null);
     }
 
     public void testTimeWindowPerGroup()
@@ -858,5 +858,5 @@ public class TestPreviousFunction extends TestCase
         {
             return longValue.intValue();
         }
-    }    
+    }
 }

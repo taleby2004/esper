@@ -17,7 +17,7 @@ public class TimeWindowViewFactory implements ViewFactory
     private RandomAccessByIndexGetter randomAccessGetterImpl;
     private EventType eventType;
 
-    public void setViewParameters(List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {
         String errorMessage = "Time window view requires a single numeric or time period parameter";
         if (viewParameters.size() != 1)
@@ -54,7 +54,7 @@ public class TimeWindowViewFactory implements ViewFactory
         }
     }
 
-    public void attach(EventType parentEventType, ViewServiceContext viewServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
+    public void attach(EventType parentEventType, StatementServiceContext statementServiceContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
     {
         this.eventType = parentEventType;
     }
@@ -71,6 +71,15 @@ public class TimeWindowViewFactory implements ViewFactory
         }
     }
 
+    /**
+     * Returns the number of millisecond before window contents expire.
+     * @return num msec
+     */
+    public long getMillisecondsBeforeExpiry()
+    {
+        return millisecondsBeforeExpiry;
+    }
+
     public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
     {
         if (!canProvideCapability(viewCapability))
@@ -84,7 +93,7 @@ public class TimeWindowViewFactory implements ViewFactory
         resourceCallback.setViewResource(randomAccessGetterImpl);
     }
 
-    public View makeView(ViewServiceContext viewServiceContext)
+    public View makeView(StatementServiceContext statementServiceContext)
     {
         IStreamRandomAccess randomAccess = null;
 
@@ -94,7 +103,7 @@ public class TimeWindowViewFactory implements ViewFactory
             randomAccessGetterImpl.updated(randomAccess);
         }
         
-        return new TimeWindowView(viewServiceContext, this, millisecondsBeforeExpiry, randomAccess);
+        return new TimeWindowView(statementServiceContext, this, millisecondsBeforeExpiry, randomAccess);
     }
 
     public EventType getEventType()

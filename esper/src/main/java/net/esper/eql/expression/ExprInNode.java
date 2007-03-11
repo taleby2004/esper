@@ -30,6 +30,15 @@ public class ExprInNode extends ExprNode
         this.isNotIn = isNotIn;
     }
 
+    /**
+     * Returns true for not-in, false for regular in
+     * @return false for "val in (a,b,c)" or true for "val not in (a,b,c)" 
+     */
+    public boolean isNotIn()
+    {
+        return isNotIn;
+    }
+
     public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         if (this.getChildNodes().size() < 2)
@@ -69,6 +78,15 @@ public class ExprInNode extends ExprNode
     public Class getType()
     {
         return Boolean.class;
+    }
+
+    /**
+     * Returns the coercion type to use if coercion is required.
+     * @return coercion type
+     */
+    public Class getCoercionType()
+    {
+        return coercionType;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)

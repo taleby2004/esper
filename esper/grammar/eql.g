@@ -6,7 +6,7 @@ header
 class EQLStatementParser extends Parser;
 options
 {
-	k = 3;                           // lookahead
+	k = 4;                           // lookahead
 	exportVocab=Eql;
 	buildAST = true;
     defaultErrorHandler=false;
@@ -139,6 +139,9 @@ tokens
    	DBFROM_CLAUSE;
    	DBWHERE_CLAUSE;
    	WILDCARD_SELECT;
+	INSERTINTO_STREAM_NAME;
+	IN_RANGE;
+	NOT_IN_RANGE;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -204,7 +207,7 @@ insertIntoExpr
 	:	(ISTREAM | RSTREAM)? INTO! IDENT (insertIntoColumnList)?
 		{ #insertIntoExpr = #([INSERTINTO_EXPR,"insertIntoExpr"], #insertIntoExpr); }
 	;
-	
+		
 insertIntoColumnList
 	: 	LPAREN! IDENT (COMMA! IDENT)* RPAREN!
 		{ #insertIntoColumnList = #([INSERTINTO_EXPRCOL,"insertIntoColumnList"], #insertIntoColumnList); }
@@ -376,11 +379,27 @@ evalRelationalExpression
 			(
 				// Represent the optional NOT prefix using the token type by
 				// testing 'n' and setting the token type accordingly.
-				(i:IN_SET^ {
-						#i.setType( (n == null) ? IN_SET : NOT_IN_SET);
-						#i.setText( (n == null) ? "in" : "not in");
+				(i:IN_SET^ 				
+					(LPAREN | LBRACK) expression	// brackets are for inclusive/exclusive
+						(
+							( col:COLON! (expression) )		// range
+							|
+							( (COMMA! expression)* )		// list of values
+						)
+					(RPAREN | RBRACK)	
+					{
+						if (col == null)
+						{
+							#i.setType( (n == null) ? IN_SET : NOT_IN_SET);
+							#i.setText( (n == null) ? "in" : "not in");
+						}
+						else
+						{
+							#i.setType( (n == null) ? IN_RANGE : NOT_IN_RANGE);
+							#i.setText( (n == null) ? "in range" : "not in range");
+						}
 					}
-					(LPAREN! expression (COMMA! expression)* RPAREN!))
+				)
 				| (b:BETWEEN^ {
 						#b.setType( (n == null) ? BETWEEN : NOT_BETWEEN);
 						#b.setText( (n == null) ? "between" : "not between");
@@ -399,7 +418,7 @@ evalRelationalExpression
 			)	
 		)
 	;
-		
+			
 concatenationExpr
 	: additiveExpression ( c:LOR! additiveExpression ( LOR! additiveExpression)* )?
 		{
@@ -629,64 +648,9 @@ classIdentifierNonGreedy
 	;	
 	
 filterParamSet
-    :   filterParameter (COMMA! filterParameter)*
+    :   expression (COMMA! expression)*
     ;
-   
-filterParameter
-	:	eventProperty (filterParamConstant | filterParamBetween | filterParamRangeAndIn)
-		{ #filterParameter = #([EVENT_FILTER_PARAM,"filterParameter"], #filterParameter); }
-	;
-	
-filterParamConstant 
-	:	(EQUALS^ | NOT_EQUAL^ | LT^ | LE^ | GE^ | GT^) (constant | filterIdentifier)
-	;
-
-// the 'in' can be a range - such as "in (a:b)" or "in [a:b]" or "in (a:b]" or "in [a:b)" (inclusive/exclusive)
-// the 'in' can be a set list-of-values such as "in (a, b, c)"
-filterParamRangeAndIn
-	: 	(n:NOT_EXPR!)? IN_SET! (LPAREN | LBRACK) (constant | filterIdentifier)	// brackets are for inclusive/exclusive
-		(
-			( col:COLON! (constant | filterIdentifier) )		// range
-			|
-			( (COMMA! (constant | filterIdentifier))* )			// list of values
-		)
-		(RPAREN | RBRACK)			
-		{ 
-			if (col != null)
-				if (n != null)				
-					#filterParamRangeAndIn = #([EVENT_FILTER_NOT_RANGE,"filterParamNotRange"], #filterParamRangeAndIn); 
-				else
-					#filterParamRangeAndIn = #([EVENT_FILTER_RANGE,"filterParamRange"], #filterParamRangeAndIn); 
-			else
-				if (n != null)				
-					#filterParamRangeAndIn = #([EVENT_FILTER_NOT_IN,"filterParamNotIn"], #filterParamRangeAndIn);
-				else
-					#filterParamRangeAndIn = #([EVENT_FILTER_IN,"filterParamIn"], #filterParamRangeAndIn);				
-		}
-	;    
-	
-filterParamBetween	// between being the same RANGE_CLOSED as "in [low:high] range as above with hard brackets 
-	: 	(n:NOT_EXPR!)? BETWEEN! (constant | filterIdentifier) AND_EXPR! (constant | filterIdentifier)
-		{ 
-			if (n != null)				
-				#filterParamBetween = #([EVENT_FILTER_NOT_BETWEEN,"filterParamNotBetween"], #filterParamBetween); 
-			else
-				#filterParamBetween = #([EVENT_FILTER_BETWEEN,"filterParamBetween"], #filterParamBetween); 
-		}
-	;    
-
-// change syntax to (a between (a:4))
-// more complex parsing logic
-
-filterParamInList
-	: 	(c:constant | f1:filterIdentifier) (COMMA! (constant | filterIdentifier))*
-	;    
-
-filterIdentifier
-	:	IDENT DOT! eventProperty
-		{ #filterIdentifier = #([EVENT_FILTER_IDENT,"filterIdentifier"], #filterIdentifier); }
-	;
-	
+   	
 eventProperty
 	:	eventPropertyAtomic (DOT! eventPropertyAtomic)* 
 		{ #eventProperty = #([EVENT_PROP_EXPR,"eventPropertyExpr"], #eventProperty); }
@@ -759,57 +723,53 @@ options {
 }
 
 // Operators
-FOLLOWED_BY		:	"->"	;
-EQUALS			:	'='		;
-SQL_NE			: 	"<>"	;
-
-// OPERATORS
-QUESTION		:	'?'		;
-LPAREN			:	'('		;
-RPAREN			:	')'		;
-LBRACK			:	'['		;
-RBRACK			:	']'		;
-LCURLY			:	'{'		;
-RCURLY			:	'}'		;
-COLON			:	':'		;
-COMMA			:	','		;
-//DOT			    :	'.'		;
-//ASSIGN			:	'='		;
-EQUAL			:	"=="	;
-LNOT			:	'!'		;
-BNOT			:	'~'		;
-NOT_EQUAL		:	"!="	;
-DIV				:	'/'		;
-DIV_ASSIGN		:	"/="	;
-PLUS			:	'+'		;
-PLUS_ASSIGN		:	"+="	;
-INC				:	"++"	;
-MINUS			:	'-'		;
-MINUS_ASSIGN	:	"-="	;
-DEC				:	"--"	;
-STAR			:	'*'		;
-STAR_ASSIGN		:	"*="	;
-MOD				:	'%'		;
-MOD_ASSIGN		:	"%="	;
-SR				:	">>"	;
-SR_ASSIGN		:	">>="	;
-BSR				:	">>>"	;
-BSR_ASSIGN		:	">>>="	;
-GE				:	">="	;
-GT				:	">"		;
-SL				:	"<<"	;
-SL_ASSIGN		:	"<<="	;
-LE				:	"<="	;
-LT				:	'<'		;
-BXOR			:	'^'		;
-BXOR_ASSIGN		:	"^="	;
-BOR				:	'|'		;
-BOR_ASSIGN		:	"|="	;
-LOR				:	"||"	;
-BAND			:	'&'		;
-BAND_ASSIGN		:	"&="	;
-LAND			:	"&&"	;
-SEMI			:	';'		;
+FOLLOWED_BY options {paraphrase = "an followed-by \"->\"";}		:	"->"	;
+EQUALS options {paraphrase = "an equals '='";}					:	'='		;
+SQL_NE options {paraphrase = "a sql-style not equals \"<>\"";}	: 	"<>"	;
+QUESTION options {paraphrase = "a questionmark '?'";}			:	'?'		;
+LPAREN options {paraphrase = "an opening parenthesis '('";}		:	'('		;
+RPAREN options {paraphrase = "a closing parenthesis ')'";}		:	')'		;
+LBRACK options {paraphrase = "a left angle bracket '['";}		:	'['		;
+RBRACK options {paraphrase = "a right angle bracket ']'";}		:	']'		;
+LCURLY options {paraphrase = "a left curly bracket '{'";}		:	'{'		;
+RCURLY options {paraphrase = "a right curly bracket '}'";}		:	'}'		;
+COLON options {paraphrase = "a colon ':'";}						:	':'		;
+COMMA options {paraphrase = "a comma ','";}						:	','		;
+EQUAL options {paraphrase = "an equals compare \"==\"";}		:	"=="	;
+LNOT options {paraphrase = "a not '!'";}						:	'!'		;
+BNOT options {paraphrase = "a binary not '~'";}					:	'~'		;
+NOT_EQUAL options {paraphrase = "a not equals \"!=\"";}			:	"!="	;
+DIV options {paraphrase = "a division operator '\'";}			:	'/'		;
+DIV_ASSIGN options {paraphrase = "a division assign \"/=\"";}	:	"/="	;
+PLUS options {paraphrase = "a plus operator '+'";}				:	'+'		;
+PLUS_ASSIGN	options {paraphrase = "a plus assign \"+=\"";}		:	"+="	;
+INC options {paraphrase = "an increment operator '++'";}		:	"++"	;
+MINUS options {paraphrase = "a minus '-'";}					:	'-'		;
+MINUS_ASSIGN options {paraphrase = "a minus assign \"-=\"";}	:	"-="	;
+DEC options {paraphrase = "a decrement operator '--'";}		:	"--"	;
+STAR options {paraphrase = "a star '*'";}						:	'*'		;
+STAR_ASSIGN options {paraphrase = "a star assign '*='";}		:	"*="	;
+MOD options {paraphrase = "a modulo '%'";}						:	'%'		;
+MOD_ASSIGN options {paraphrase = "a module assign \"%=\"";}		:	"%="	;
+SR options {paraphrase = "a shift right '>>'";}				:	">>"	;
+SR_ASSIGN options {paraphrase = "a shift right assign '>>='";}	:	">>="	;
+BSR options {paraphrase = "a binary shift right \">>>\"";}		:	">>>"	;
+BSR_ASSIGN options {paraphrase = "a binary shift right assign \">>>=\"";}		:	">>>="	;
+GE options {paraphrase = "a greater equals \">=\"";}			:	">="	;
+GT options {paraphrase = "a greater then '>'";}					:	">"		;
+SL options {paraphrase = "a shift left \"<<\"";}				:	"<<"	;
+SL_ASSIGN options {paraphrase = "a shift left assign \"<<=\"";}	:	"<<="	;
+LE options {paraphrase = "a less equals \"<=\"";}				:	"<="	;
+LT options {paraphrase = "a lesser then '<'";}					:	'<'		;
+BXOR options {paraphrase = "a binary xor '^'";}					:	'^'		;
+BXOR_ASSIGN options {paraphrase = "a binary xor assign \"^=\"";}:	"^="	;
+BOR	options {paraphrase = "a binary or '|'";}					:	'|'		;
+BOR_ASSIGN options {paraphrase = "a binary or assign \"|=\"";}	:	"|="	;
+LOR	options {paraphrase = "a logical or \"||\"";}				:	"||"	;
+BAND options {paraphrase = "a binary and '&'";}					:	'&'		;
+BAND_ASSIGN options {paraphrase = "a binary and assign \"&=\"";}:	"&="	;
+LAND options {paraphrase = "a logical and \"&&\"";}				:	"&&"	;
+SEMI options {paraphrase = "a semicolon ';'";}					:	';'		;
 
 // Whitespace -- ignored
 WS	:	(	' '
@@ -921,13 +881,14 @@ HEX_DIGIT
 // that after we match the rule, we look in the literals table to see
 // if it's a literal or really an identifer
 IDENT
-	options {testLiterals=true;}
+	options {testLiterals=true; paraphrase = "an identifier";}		   
 	:	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
 	;
 
 
 // a numeric literal
 NUM_INT
+	options {paraphrase = "a numeric literal";}		   
 	{boolean isDecimal=false; Token t=null;}
     :   '.' {_ttype = DOT;}
             (	('0'..'9')+ (EXPONENT)? (f1:FLOAT_SUFFIX {t=f1;})?

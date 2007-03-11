@@ -12,6 +12,8 @@ import net.esper.filter.FilterServiceProvider;
 import net.esper.schedule.SchedulingService;
 import net.esper.timer.TimerService;
 import net.esper.timer.TimerServiceProvider;
+import net.esper.util.ManagedReadWriteLock;
+import net.esper.view.ViewResolutionService;
 import net.esper.view.ViewService;
 import net.esper.view.ViewServiceProvider;
 import net.esper.view.stream.StreamFactoryService;
@@ -32,8 +34,13 @@ public final class EPServicesContext
     private final EventAdapterService eventAdapterService;
     private final AutoImportService autoImportService;
     private final DatabaseConfigService databaseConfigService;
+    private final ViewResolutionService viewResolutionService;
+    private final StatementLockFactory statementLockFactory;
+    private final ManagedReadWriteLock eventProcessingRWLock;
+    private final ExtensionServicesContext extensionServicesContext;
 
-    // Must be set
+    // Supplied after construction to avoid circular dependency
+    private StatementLifecycleSvc statementLifecycleSvc;
     private InternalEventRouter internalEventRouter;
 
     /**
@@ -42,23 +49,43 @@ public final class EPServicesContext
      * @param eventAdapterService service to resolve event types
      * @param autoImportService service to resolve partial class names
      * @param databaseConfigService service to resolve a database name to database connection factory and configs
+     * @param viewResolutionService resolves view namespace and name to view factory class
+     * @param statementLockFactory creates statement-level locks
+     * @param eventProcessingRWLock is the engine lock for statement management
+     * @param extensionServicesContext marker interface allows adding additional services 
      */
     public EPServicesContext(SchedulingService schedulingService,
                              EventAdapterService eventAdapterService,
                              AutoImportService autoImportService,
-                             DatabaseConfigService databaseConfigService)
+                             DatabaseConfigService databaseConfigService,
+                             ViewResolutionService viewResolutionService,
+                             StatementLockFactory statementLockFactory,
+                             ManagedReadWriteLock eventProcessingRWLock,
+                             ExtensionServicesContext extensionServicesContext)
     {
         this.schedulingService = schedulingService;
         this.eventAdapterService = eventAdapterService;
         this.autoImportService = autoImportService;
         this.databaseConfigService = databaseConfigService;
-
         this.filterService = FilterServiceProvider.newService();
         this.timerService = TimerServiceProvider.newService();
         this.emitService = EmitServiceProvider.newService();
         this.dispatchService = DispatchServiceProvider.newService();
         this.viewService = ViewServiceProvider.newService();
-        this.streamFactoryService = StreamFactoryServiceProvider.newService();
+        this.streamFactoryService = StreamFactoryServiceProvider.newService(eventAdapterService);
+        this.viewResolutionService = viewResolutionService;
+        this.statementLockFactory = statementLockFactory;
+        this.eventProcessingRWLock = eventProcessingRWLock;
+        this.extensionServicesContext = extensionServicesContext;
+    }
+
+    /**
+     * Sets the service dealing with starting and stopping statements.
+     * @param statementLifecycleSvc statement lifycycle svc
+     */
+    public void setStatementLifecycleSvc(StatementLifecycleSvc statementLifecycleSvc)
+    {
+        this.statementLifecycleSvc = statementLifecycleSvc;
     }
 
     /**
@@ -150,7 +177,7 @@ public final class EPServicesContext
     {
         return eventAdapterService;
     }
-    
+
     /**
      * Returns the import and class name resolution service.
      * @return import service
@@ -167,5 +194,61 @@ public final class EPServicesContext
     public DatabaseConfigService getDatabaseRefService()
     {
         return databaseConfigService;
+    }
+
+    /**
+     * Service for resolving view namespace and name.
+     * @return view resolution svc
+     */
+    public ViewResolutionService getViewResolutionService()
+    {
+        return viewResolutionService;
+    }
+
+    /**
+     * Factory for statement-level locks.
+     * @return factory
+     */
+    public StatementLockFactory getStatementLockFactory()
+    {
+        return statementLockFactory;
+    }
+
+    /**
+     * Returns the event processing lock for coordinating statement administration with event processing.
+     * @return lock
+     */
+    public ManagedReadWriteLock getEventProcessingRWLock()
+    {
+        return eventProcessingRWLock;
+    }
+
+    /**
+     * Returns statement lifecycle svc
+     * @return service for statement start and stop
+     */
+    public StatementLifecycleSvc getStatementLifecycleSvc()
+    {
+        return statementLifecycleSvc;
+    }
+
+    /**
+     * Returns extension service for adding custom the services.
+     * @return extension service context
+     */
+    public ExtensionServicesContext getExtensionServicesContext()
+    {
+        return extensionServicesContext;
+    }
+
+    /**
+     * Destroy services.
+     */
+    public void destroy()
+    {
+        if (extensionServicesContext != null)
+        {
+            extensionServicesContext.destroy();
+        }
     }
 }
