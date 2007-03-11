@@ -130,7 +130,7 @@ public class TestExprIdentNode extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
         log.info(".testEvaluate delta=" + delta);
-        assertTrue(delta < 200);
+        assertTrue(delta < 500);
     }
 
     public void testToExpressionString() throws Exception

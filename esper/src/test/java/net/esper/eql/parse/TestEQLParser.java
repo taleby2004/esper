@@ -266,6 +266,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select 1 from b.win:length(1) where a=b and b=d group by a having (max(3*b - 2, 5) > 1) or 'a'=b");
         assertIsValid("select 1 from b.win:length(1) group by a having a");   // a could be boolean
         assertIsValid("select 1 from b.win:length(1) having a>5");
+        assertIsValid("SELECT 1 FROM b.win:length(1) WHERE a=b AND b=d GROUP BY a HAVING (max(3*b - 2, 5) > 1) OR 'a'=b");
 
         // insert into
         assertIsValid("insert into MyEvent select 1 from b.win:length(1)");

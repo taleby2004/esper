@@ -31,9 +31,16 @@ public class TestPerRowFunc extends TestCase
 
     public void testCoalesceBeans()
     {
+        tryCoalesceBeans("select coalesce(a.string, b.string) as myString, coalesce(a, b) as myBean" +
+                          " from pattern [every (a=" + SupportBean.class.getName() + "(string='s0') or b=" + SupportBean.class.getName() + "(string='s1'))]");
+
+        tryCoalesceBeans("SELECT COALESCE(a.string, b.string) AS myString, COALESCE(a, b) AS myBean" +
+                          " FROM PATTERN [EVERY (a=" + SupportBean.class.getName() + "(string='s0') OR b=" + SupportBean.class.getName() + "(string='s1'))]");
+    }
+
+    private void tryCoalesceBeans(String viewExpr)
+    {
         epService.initialize();
-        String viewExpr = "select coalesce(a.string, b.string) as myString, coalesce(a, b) as myBean" +
-                          " from pattern [every (a=" + SupportBean.class.getName() + "(string='s0') or b=" + SupportBean.class.getName() + "(string='s1'))]";
         selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
         selectTestView.addListener(testListener);
 

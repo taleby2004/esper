@@ -720,6 +720,8 @@ options {
 	// I need to make ANTLR generate smaller bitsets; see
 	// bottom of JavaLexer.java
 	codeGenBitsetTestThreshold=20;
+	caseSensitive=false;
+	caseSensitiveLiterals=false;
 }
 
 // Operators
@@ -873,7 +875,7 @@ ESC
 // hexadecimal digit (again, note it's protected!)
 protected
 HEX_DIGIT
-	:	('0'..'9'|'A'..'F'|'a'..'f')
+	:	('0'..'9'|'a'..'f')
 	;
 
 
@@ -882,7 +884,7 @@ HEX_DIGIT
 // if it's a literal or really an identifer
 IDENT
 	options {testLiterals=true; paraphrase = "an identifier";}		   
-	:	('a'..'z'|'A'..'Z'|'_'|'$') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'$')*
+	:	('a'..'z'|'_'|'$') ('a'..'z'|'_'|'0'..'9'|'$')*
 	;
 
 
@@ -903,7 +905,7 @@ NUM_INT
             )?
 
 	|	(	'0' {isDecimal = true;} // special case for just '0'
-			(	('x'|'X')
+			(	('x')
 				(											// hex
 					// the 'e'|'E' and float suffix stuff look
 					// like hex digits, hence the (...)+ doesn't
@@ -923,7 +925,7 @@ NUM_INT
 			)?
 		|	('1'..'9') ('0'..'9')*  {isDecimal=true;}		// non-zero decimal
 		)
-		(	('l'|'L') { _ttype = NUM_LONG; }
+		(	('l') { _ttype = NUM_LONG; }
 
 		// only check to see if it's a float if looks like decimal so far
 		|	{isDecimal}?
@@ -946,11 +948,11 @@ NUM_INT
 // a couple protected methods to assist in matching floating point numbers
 protected
 EXPONENT
-	:	('e'|'E') ('+'|'-')? ('0'..'9')+
+	:	('e') ('+'|'-')? ('0'..'9')+
 	;
 
 
 protected
 FLOAT_SUFFIX
-	:	'f'|'F'|'d'|'D'
+	:	'f'|'d'
 	;
