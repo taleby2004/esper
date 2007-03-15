@@ -91,6 +91,11 @@ public class Configuration {
     protected List<ConfigurationPlugInView> plugInViews;
 
     /**
+     * List of adapter loaders.
+     */
+    protected List<ConfigurationAdapterLoader> adapterLoaders;
+
+    /**
      * Constructs an empty configuration. The auto import values
      * are set by default to java.lang, java.math, java.text and
      * java.util.
@@ -278,6 +283,20 @@ public class Configuration {
         return plugInViews;
     }
 
+    public List<ConfigurationAdapterLoader> getAdapterLoaders()
+    {
+        return adapterLoaders;
+    }
+
+    public void addAdapterLoader(String loaderName, String className, Properties configuration)
+    {
+        ConfigurationAdapterLoader adapterLoader = new ConfigurationAdapterLoader();
+        adapterLoader.setLoaderName(loaderName);
+        adapterLoader.setClassName(className);
+        adapterLoader.setConfigProperties(configuration);
+        adapterLoaders.add(adapterLoader);
+    }
+
     /**
      * Add a view for plug-in.
      * @param namespace is the namespace the view should be available under
@@ -449,7 +468,6 @@ public class Configuration {
     /**
      * Reset to an empty configuration.
      */
-    @SuppressWarnings({"CollectionWithoutInitialCapacity"})
     protected void reset()
     {
         eventClasses = new HashMap<String, String>();
@@ -461,6 +479,7 @@ public class Configuration {
         addDefaultImports();
         isUsingDefaultImports = true;
         plugInViews = new ArrayList<ConfigurationPlugInView>();
+        adapterLoaders = new ArrayList<ConfigurationAdapterLoader>();
     }
 
     /**

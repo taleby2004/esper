@@ -17,8 +17,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathConstants;
+import javax.swing.text.ElementIterator;
 import java.util.*;
 import java.io.*;
+
+import net.esper.collection.Pair;
 
 /**
  * Parser for configuration XML.
@@ -82,6 +85,7 @@ class ConfigurationParser {
         handleAutoImports(configuration, root);
         handleDatabaseRefs(configuration, root);
         handlePlugInView(configuration, root);
+        handleAdapterLoaders(configuration, root);
     }
 
     private static void handleEventTypes(Configuration configuration, Element parentElement)
@@ -320,6 +324,29 @@ class ConfigurationParser {
             String name = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
             String factoryClassName = nodes.item(i).getAttributes().getNamedItem("factory-class").getTextContent();
             configuration.addPlugInView(namespace, name, factoryClassName);
+        }
+    }
+
+    private static void handleAdapterLoaders(Configuration configuration, Element parentElement)
+    {
+        NodeList nodes = parentElement.getElementsByTagName("adapter-loader");
+        for (int i = 0; i < nodes.getLength(); i++)
+        {
+            String loaderName = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
+            String className = nodes.item(i).getAttributes().getNamedItem("class-name").getTextContent();
+            Properties properties = new Properties();
+            ElementIterator nodeIterator = new ElementIterator(nodes.item(i).getChildNodes());
+            while (nodeIterator.hasNext())
+            {
+                Element subElement = nodeIterator.next();
+                if (subElement.getNodeName().equals("init-arg"))
+                {
+                    String name = subElement.getAttributes().getNamedItem("name").getTextContent();
+                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                    properties.put(name, value);
+                }
+            }
+            configuration.addAdapterLoader(loaderName, className, properties);
         }
     }
 

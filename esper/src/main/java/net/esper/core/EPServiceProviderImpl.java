@@ -1,11 +1,12 @@
 package net.esper.core;
 
-import net.esper.client.Configuration;
-import net.esper.client.ConfigurationException;
-import net.esper.client.EPAdministrator;
-import net.esper.client.EPRuntime;
+import net.esper.adapter.AdapterLoader;
+import net.esper.client.*;
 import net.esper.event.EventAdapterService;
 import net.esper.schedule.SchedulingService;
+import net.esper.filter.FilterService;
+
+import java.util.List;
 
 /**
  * Service provider encapsulates the engine's services for runtime and administration interfaces.
@@ -13,7 +14,7 @@ import net.esper.schedule.SchedulingService;
 public class EPServiceProviderImpl implements EPServiceProviderSPI
 {
     private volatile EPServiceEngine engine;
-    private final ConfigurationSnapshot configSnapshot;
+    private ConfigurationSnapshot configSnapshot;
     private String engineURI;
 
     /**
@@ -27,6 +28,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         this.engineURI = engineURI;
         configSnapshot = new ConfigurationSnapshot(configuration);
         initialize();
+    }
+
+    public void setConfiguration(Configuration configuration)
+    {
+        configSnapshot = new ConfigurationSnapshot(configuration);
     }
 
     public String getURI()
@@ -52,6 +58,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     public SchedulingService getSchedulingService()
     {
         return engine.getServices().getSchedulingService();
+    }
+
+    public FilterService getFilterService()
+    {
+        return engine.getServices().getFilterService();
     }
 
     public void initialize()
@@ -140,6 +151,48 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
         // Save engine instance
         engine = new EPServiceEngine(services, runtime, admin);
+
+        // Load and initialize adapter loader classes
+        setEPServiceProviderAdapters(configSnapshot);
+    }
+
+    public void setEPServiceProviderAdapters(ConfigurationSnapshot configuration)
+    {
+        List<ConfigurationAdapterLoader> adapterLoaders = configuration.getAdapterLoaders();
+        if ((adapterLoaders == null) || (adapterLoaders.size() == 0))
+        {
+            return;
+        }
+        for (ConfigurationAdapterLoader config : adapterLoaders)
+        {
+            String className = config.getClassName();
+            Class adapterLoaderClass;
+            try
+            {
+                adapterLoaderClass = Class.forName(className);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                throw new ConfigurationException("Failed to load adapter loader class '" + className + "'", ex);
+            }
+
+            Object adapterLoaderObj = null;
+            try
+            {
+                adapterLoaderObj = adapterLoaderClass.newInstance();
+            }
+            catch (InstantiationException ex)
+            {
+                throw new ConfigurationException("Failed to instantiate adapter loader class '" + className + "' via default constructor", ex);
+            }
+            catch (IllegalAccessException ex)
+            {
+                throw new ConfigurationException("Illegal access to instantiate adapter loader class '" + className + "' via default constructor", ex);
+            }
+
+            AdapterLoader adapterLoader = (AdapterLoader) adapterLoaderObj;
+            adapterLoader.init(config.getLoaderName(), config.getConfigProperties(), this);
+        }
     }
 
     private static class EPServiceEngine
