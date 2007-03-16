@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.core;
 
 import net.esper.adapter.AdapterLoader;
@@ -6,6 +13,8 @@ import net.esper.event.EventAdapterService;
 import net.esper.schedule.SchedulingService;
 import net.esper.filter.FilterService;
 
+import javax.naming.Context;
+import javax.naming.NamingException;
 import java.util.List;
 
 /**
@@ -30,6 +39,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         initialize();
     }
 
+    /**
+     * Sets engine configuration information for use in the next initialize.
+     * @param configuration is the engine configs
+     */
     public void setConfiguration(Configuration configuration)
     {
         configSnapshot = new ConfigurationSnapshot(configuration);
@@ -65,6 +78,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         return engine.getServices().getFilterService();
     }
 
+    public Context getEnvContext()
+    {
+        return engine.getServices().getEngineEnvContext();
+    }
+    
     public void initialize()
     {
         if (engine != null)
@@ -134,7 +152,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         services.getTimerService().setCallback(runtime);
 
         // New admin
-        EPAdministratorImpl admin = new EPAdministratorImpl(services);
+        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService());
+        EPAdministratorImpl admin = new EPAdministratorImpl(services, configOps);
 
         // Start clocking
         services.getTimerService().startInternalClock();
@@ -153,10 +172,14 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         engine = new EPServiceEngine(services, runtime, admin);
 
         // Load and initialize adapter loader classes
-        setEPServiceProviderAdapters(configSnapshot);
+        loadAdapters(configSnapshot, services);
     }
 
-    public void setEPServiceProviderAdapters(ConfigurationSnapshot configuration)
+    /**
+     * Loads and initializes adapter loaders.
+     * @param configuration is the engine configs
+     */
+    private void loadAdapters(ConfigurationSnapshot configuration, EPServicesContext services)
     {
         List<ConfigurationAdapterLoader> adapterLoaders = configuration.getAdapterLoaders();
         if ((adapterLoaders == null) || (adapterLoaders.size() == 0))
@@ -192,6 +215,16 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
             AdapterLoader adapterLoader = (AdapterLoader) adapterLoaderObj;
             adapterLoader.init(config.getLoaderName(), config.getConfigProperties(), this);
+
+            // register adapter loader in JNDI context tree
+            try
+            {
+                services.getEngineEnvContext().bind("adapter-loader/" + config.getLoaderName(), adapterLoader);
+            }
+            catch (NamingException e)
+            {
+                throw new EPException("Failed to use context to bind adapter loader", e);
+            }
         }
     }
 

@@ -90,4 +90,10 @@ public interface EPAdministrator
      * @throws EPException when an error occured stopping or destroying statements
      */
     public void destroyAllStatements() throws EPException;
+
+    /**
+     * Returns configuration operations for runtime engine configuration.
+     * @return runtime engine configuration operations
+     */
+    public ConfigurationOperations getConfiguration();
 }

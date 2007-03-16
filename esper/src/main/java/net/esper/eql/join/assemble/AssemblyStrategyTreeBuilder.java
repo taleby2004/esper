@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.join.assemble;
 
 import org.apache.commons.logging.Log;
@@ -127,7 +134,7 @@ public class AssemblyStrategyTreeBuilder
             }
         }
 
-        // Make node for building a cartesian product 
+        // Make node for building a cartesian product
         if (isRoot)
         {
             return new RootCartProdAssemblyNode(streamNum, numStreams, allSubStreamsOptional);

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 import net.esper.eql.spec.OutputLimitSpec;
@@ -13,7 +20,7 @@ public class OutputConditionFirst implements OutputCondition
 	private final OutputCallback outputCallback;
 	private final OutputCondition innerCondition;
 	private boolean witnessedFirst;
-	
+
 	/**
 	 * Ctor.
      * @param outputLimitSpec specifies what kind of condition to create
@@ -32,7 +39,7 @@ public class OutputConditionFirst implements OutputCondition
 		this.innerCondition = OutputConditionFactory.createCondition(innerSpec, statementContext, localCallback);
 		this.witnessedFirst = false;
 	}
-	
+
 	public void updateOutputCondition(int newEventsCount, int oldEventsCount)
 	{
 		if(!witnessedFirst)
@@ -44,7 +51,7 @@ public class OutputConditionFirst implements OutputCondition
 		}
 		innerCondition.updateOutputCondition(newEventsCount, oldEventsCount);
 	}
-	
+
 	private static OutputLimitSpec createInnerSpec(OutputLimitSpec outputLimitSpec)
 	{
 		if(outputLimitSpec.isEventLimit())
@@ -56,7 +63,7 @@ public class OutputConditionFirst implements OutputCondition
 			return new OutputLimitSpec(outputLimitSpec.getTimeRate(), DisplayLimit.ALL);
 		}
 	}
-	
+
 	private OutputCallback createCallbackToLocal()
 	{
 		return new OutputCallback()
@@ -67,7 +74,7 @@ public class OutputConditionFirst implements OutputCondition
 			}
 		};
 	}
-	
+
 	private void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
 	{
 		doOutput = !witnessedFirst;

@@ -27,15 +27,17 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
     private final XPathFactory xPathFactory;
     private final String rootElementName;
     private XPathNamespaceContext namespaceContext;
+    private final ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM;
 
     /**
      * Ctor.
-     * @param rootElementName is the name of the root element
+     * @param configurationEventTypeXMLDOM is the XML DOM configuration such as root element and schema names
      */
-    public BaseXMLEventType(String rootElementName)
+    public BaseXMLEventType(ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
         super(Node.class);
-        this.rootElementName = rootElementName;
+        this.rootElementName = configurationEventTypeXMLDOM.getRootElementName();
+        this.configurationEventTypeXMLDOM = configurationEventTypeXMLDOM;
         xPathFactory = XPathFactory.newInstance();
     }
 
@@ -109,5 +111,20 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
 
     protected String[] doListPropertyNames() {
         return EMPTY_STRING_ARRAY;
+    }
+
+    public boolean equals(Object otherObj)
+    {
+        if (!(otherObj instanceof BaseXMLEventType))
+        {
+            return false;
+        }
+        BaseXMLEventType other = (BaseXMLEventType) otherObj;
+        return (configurationEventTypeXMLDOM.equals(other.configurationEventTypeXMLDOM));
+    }
+
+    public int hashCode()
+    {
+        return configurationEventTypeXMLDOM.hashCode();
     }
 }

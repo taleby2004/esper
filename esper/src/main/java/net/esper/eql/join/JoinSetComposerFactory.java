@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.join;
 
 import net.esper.eql.expression.ExprNode;
@@ -43,7 +50,7 @@ public class JoinSetComposerFactory
      * validation of view use in joins failed.
      */
     public static JoinSetComposer makeComposer(List<OuterJoinDesc> outerJoinDescList,
-                                                   ExprNode optionalFilterNode, 
+                                                   ExprNode optionalFilterNode,
                                                    EventType[] streamTypes,
                                                    String[] streamNames,
                                                    Viewable[] streamViews,
@@ -75,7 +82,7 @@ public class JoinSetComposerFactory
             // No tables for any streams
             indexes = new EventTable[streamTypes.length][];
             queryStrategies = new QueryStrategy[streamTypes.length];
-            
+
             for (int streamNo = 0; streamNo < streamTypes.length; streamNo++)
             {
                 indexes[streamNo] = new EventTable[0];

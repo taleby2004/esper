@@ -7,7 +7,6 @@ package net.esper.eql.core;
  */
 public interface AutoImportService 
 {
-
 	/**
 	 * Gets the Class object for the class name. If the class 
 	 * name is incomplete, uses the imported class and package 
@@ -18,5 +17,4 @@ public interface AutoImportService
 	 */
 	public abstract Class resolveClass(String className)
 			throws ClassNotFoundException;
-
 }

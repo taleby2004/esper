@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.parse;
 
 import antlr.collections.AST;
@@ -30,7 +37,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     // private holding areas for accumulated info
     private final Map<AST, ExprNode> astExprNodeMap = new HashMap<AST, ExprNode>();
     private final Map<AST, EvalNode> astPatternNodeMap = new HashMap<AST, EvalNode>();
-    
+
     private FilterSpecRaw filterSpec;
     private final List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
 
@@ -381,7 +388,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         // Add as selection element
         statementSpec.getSelectClauseSpec().add(new SelectExprElementRawSpec(exprNode, optionalName));
     }
-    
+
     private void leaveWildcardSelect()
     {
     	log.debug(".leaveWildcardSelect");
@@ -505,7 +512,7 @@ public class EQLTreeWalker extends EQLBaseWalker
         }
         else
         {
-            throw new IllegalStateException("Unknown method named '" + node.getFirstChild().getText() + "' could not be resolved"); 
+            throw new IllegalStateException("Unknown method named '" + node.getFirstChild().getText() + "' could not be resolved");
         }
     }
 

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.expression;
 
 import net.esper.eql.core.AutoImportService;
@@ -26,7 +33,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
     /**
      * Return true if a expression node semantically equals the current node, or false if not.
      * <p>Concrete implementations should compare the type and any additional information
-     * that impact the evaluation of a node.  
+     * that impact the evaluation of a node.
      * @param node to compare to
      * @return true if semantically equal, or false if not equals
      */
@@ -42,14 +49,14 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
 
     /**
      * Validates the expression node subtree that has this
-     * node as root. Some of the nodes of the tree, including the 
+     * node as root. Some of the nodes of the tree, including the
      * root, might be replaced in the process.
      * @param streamTypeService - serves stream type information
      * @param autoImportService - for resolving class names in library method invocations
      * @param viewResourceDelegate - delegates for view resources to expression nodes
      * @throws ExprValidationException when the validation fails
-     * @return the root node of the validated subtree, possibly 
-     *         different than the root node of the unvalidated subtree 
+     * @return the root node of the validated subtree, possibly
+     *         different than the root node of the unvalidated subtree
      */
     public ExprNode getValidatedSubtree(StreamTypeService streamTypeService, AutoImportService autoImportService,
                                         ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
@@ -215,7 +222,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
         if ((indexFirstSingleQuote == -1) && (indexFirstDoubleQuote == -1))
         {
             return null;
-        }        
+        }
         if ((indexFirstSingleQuote != -1) && (indexFirstDoubleQuote != -1))
         {
             if (indexFirstSingleQuote < indexFirstDoubleQuote)
@@ -224,7 +231,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             }
             else
             {
-                startArg = indexFirstDoubleQuote;    
+                startArg = indexFirstDoubleQuote;
             }
         }
         else if (indexFirstSingleQuote != -1)
@@ -286,40 +293,59 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             {
                 clazz.append('.');
             }
-            clazz.append(splitDots[i]);            
+            clazz.append(splitDots[i]);
         }
 
         return new MappedPropertyParseResult(clazz.toString(), method, argument);
     }
 
+    /**
+     * Encapsulates the parse result parsing a mapped property as a class and method name with args.
+     */
     protected static class MappedPropertyParseResult
     {
         private String className;
         private String methodName;
         private String argString;
 
+        /**
+         * Returns class name.
+         * @return name of class
+         */
         public String getClassName()
         {
             return className;
         }
 
+        /**
+         * Returns the method name.
+         * @return method name
+         */
         public String getMethodName()
         {
             return methodName;
         }
 
+        /**
+         * Returns the method argument.
+         * @return arg
+         */
         public String getArgString()
         {
             return argString;
         }
 
+        /**
+         * Returns the parse result of the mapped property.
+         * @param className is the class name
+         * @param methodName is the method name
+         * @param argString is the argument
+         */
         public MappedPropertyParseResult(String className, String methodName, String argString)
         {
             this.className = className;
             this.methodName = methodName;
             this.argString = argString;
-
-
         }
     }
 

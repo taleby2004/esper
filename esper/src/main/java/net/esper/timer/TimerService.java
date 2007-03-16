@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.timer;
 
 /**
@@ -25,7 +32,7 @@ public interface TimerService
     /**
      * Stop internal clock.
      * @param warnIfNotStarted use true to indicate whether to warn if the clock is not started, use false to not warn
-     * and expect the clock to be not started. 
+     * and expect the clock to be not started.
      */
     public void stopInternalClock(boolean warnIfNotStarted);
 }

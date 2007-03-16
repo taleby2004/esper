@@ -6,8 +6,8 @@
 	<!ENTITY api SYSTEM "modules/api.xml">
 	<!ENTITY event_representation SYSTEM "modules/event_representation.xml">
 	<!ENTITY examples SYSTEM "modules/examples.xml">
-	<!ENTITY event_pattern SYSTEM "modules/event_pattern.xml">
 	<!ENTITY EQL SYSTEM "modules/eql.xml">
+	<!ENTITY event_pattern SYSTEM "modules/event_pattern.xml">
 	<!ENTITY references SYSTEM "modules/references.xml">
 	<!ENTITY outputmodel SYSTEM "modules/outputmodel.xml">
 ]>
@@ -46,12 +46,12 @@
 			</listitem>
 			<listitem>
 				<para>
-                    Read <xref linkend="event-pattern-intro"/> for an overview over event patterns
+                    Read <xref linkend="eql-intro"/> for an introduction to event stream processing via EQL
                 </para>
 			</listitem>
 			<listitem>
 				<para>
-                    Read <xref linkend="eql-intro"/> for an introduction to event stream processing via EQL
+                    Read <xref linkend="event-pattern-intro"/> for an overview over event patterns
                 </para>
 			</listitem>
 			<listitem>
@@ -77,9 +77,9 @@
 
     &event_representation;
 
-    &event_pattern;
-
     &EQL;
+
+    &event_pattern;
 
     &examples;
     

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
@@ -98,7 +105,7 @@ public class ExprArrayNode extends ExprNode
                     if (boxed != null)
                     {
                         Object coercedResult = JavaClassHelper.coerceBoxed(boxed, coercionType);
-                        Array.set(constantResult, i, coercedResult);                        
+                        Array.set(constantResult, i, coercedResult);
                     }
                 }
                 else
@@ -120,9 +127,9 @@ public class ExprArrayNode extends ExprNode
         {
             return constantResult;
         }
-        
+
         Object array = Array.newInstance(coercionType, length);
-        
+
         if (length == 0)
         {
             return array;

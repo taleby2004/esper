@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.filter;
 
 import net.esper.collection.MultiKeyUntyped;
@@ -129,14 +136,14 @@ public final class FilterParamIndexNotIn extends FilterParamIndexPropBase
                 eval.matchEvent(eventBean, matches);
             }
             constantsMapRWLock.readLock().unlock();
-            return;            
+            return;
         }
 
         // if none are matching, we are done
         if (evalNotMatching.size() == evaluatorsSet.size())
         {
             constantsMapRWLock.readLock().unlock();
-            return;            
+            return;
         }
 
         // handle partial matches: loop through all evaluators and see which one should not be matching, match all else

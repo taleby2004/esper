@@ -3,6 +3,7 @@ package net.esper.event;
 import java.util.Map;
 
 import org.w3c.dom.Node;
+import net.esper.client.ConfigurationEventTypeXMLDOM;
 
 /**
  * Interface for a service to resolve event names to event type.
@@ -214,4 +215,12 @@ public interface EventAdapterService
      * @throws EventAdapterException if alias already exists and doesn't match this type's info
      */
     public EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException;
+
+    /**
+     * Adds an XML DOM event type.
+     * @param eventTypeAlias is the alias to add the type for
+     * @param configurationEventTypeXMLDOM is the XML DOM config info
+     * @return event type
+     */
+    public EventType addXMLDOMType(String eventTypeAlias, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM);
 }

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.filter;
 
 import net.esper.collection.Pair;
@@ -163,7 +170,7 @@ public final class FilterSpecCompiler
                 }
             }
         }
-        while(haveConsolidated);        
+        while(haveConsolidated);
     }
 
     private static FilterSpecCompiled makeFilterSpec(EventType eventType, List<ExprNode> constituents, LinkedHashMap<String, EventType> taggedEventTypes)
@@ -175,16 +182,16 @@ public final class FilterSpecCompiler
         for (ExprNode constituent : constituents)
         {
             FilterSpecParam param = makeFilterParam(constituent);
-            filterParamExprMap.put(constituent, param); // accepts null values as the expression may not be optimized            
+            filterParamExprMap.put(constituent, param); // accepts null values as the expression may not be optimized
         }
 
         // Consolidate entries as possible, i.e. (a != 5 and a != 6) is (a not in (5,6)
-        // Removes duplicates for same property and same filter operator for filter service index optimizations  
+        // Removes duplicates for same property and same filter operator for filter service index optimizations
         consolidate(filterParamExprMap);
 
         // Use all filter parameter and unassigned expressions
         List<FilterSpecParam> filterParams = new ArrayList<FilterSpecParam>();
-        filterParams.addAll(filterParamExprMap.getFilterParams());                
+        filterParams.addAll(filterParamExprMap.getFilterParams());
         List<ExprNode> remainingExprNodes = filterParamExprMap.getUnassignedExpressions();
 
         // any unoptimized expression nodes are put under one AND
@@ -522,7 +529,7 @@ public final class FilterSpecCompiler
         {
             return null;
         }
-        
+
         if (!JavaClassHelper.canCoerce(constant.getClass(), identNodeType))
         {
             throwConversionError(constant.getClass(), identNodeType, identNode.getResolvedPropertyName());

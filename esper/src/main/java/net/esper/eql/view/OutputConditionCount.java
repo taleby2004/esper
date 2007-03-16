@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 import org.apache.commons.logging.Log;
@@ -9,10 +16,10 @@ import org.apache.commons.logging.LogFactory;
  * of old events arrived is greater than a preset value.
  */
 public final class OutputConditionCount implements OutputCondition
-{    
+{
     private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = false;
-    
+
     private final int eventRate;
     private int newEventsCount;
     private int oldEventsCount;
@@ -63,25 +70,25 @@ public final class OutputConditionCount implements OutputCondition
     {
         return eventRate;
     }
-    
+
     public final void updateOutputCondition(int newDataCount, int oldDataCount)
     {
         this.newEventsCount += newDataCount;
         this.oldEventsCount += oldDataCount;
-        
+
         if (log.isDebugEnabled())
         {
             log.debug(".updateBatchCondition, " +
                     "  newEventsCount==" + newEventsCount +
                     "  oldEventsCount==" + oldEventsCount);
-        } 
+        }
 
         if (isSatisfied())
         {
         	log.debug(".updateOutputCondition() condition satisfied");
             this.newEventsCount = 0;
             this.oldEventsCount = 0;
-            outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);    
+            outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);
         }
     }
 
@@ -95,7 +102,7 @@ public final class OutputConditionCount implements OutputCondition
     {
     	return (newEventsCount >= eventRate) || (oldEventsCount >= eventRate);
     }
-    
+
     private static final Log log = LogFactory.getLog(OutputConditionCount.class);
 
 

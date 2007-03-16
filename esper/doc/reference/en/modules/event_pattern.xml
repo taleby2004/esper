@@ -157,211 +157,115 @@ else
     </sect1>
 
     <sect1 id="pattern-filter">
-        <title>Filter Expressions</title>
+        <title>Pattern Filter Expressions</title>
 
-        <para>
-            This chapter outines how to filter events based on their properties.
-        </para>
+		<para>
+			The simplest form of filter is a filter for events of a given type without any conditions on the event property values. This filter matches any event of that type regardless of the event's properties. The example below is such a filter. Note that this event pattern would stop firing as soon as the first RfidEvent is encountered.
+		 </para>
+		 <programlisting><![CDATA[com.mypackage.myevents.RfidEvent]]></programlisting>
 
-        <sect2 id="pattern-filter-overview" >
-            <title>Filtering Overview</title>
+		 <para>
+			 To make the event pattern fire for every RfidEvent and not just the first event, use the <literal>every</literal> keyword.
+		 </para>
+		 <programlisting><![CDATA[every com.mypackage.myevents.RfidEvent]]></programlisting>
+		 
+		 <para>
+			 The example above specifies the fully-qualified Java class name as the event type. Via configuration, the event pattern above can be simplified by using the alias
+			 that has been defined for the event type.
+		 </para>
+		 <programlisting><![CDATA[every RfidEvent]]></programlisting>
+		 
+		 <para>
+			 Interfaces and superclasses are also supported as event types. In the below example <literal>IRfidReadable</literal> is an interface class, and the statement matches any event that implements this interface:
+		 </para>
+		 <programlisting><![CDATA[every org.myorg.rfid.IRfidReadable]]></programlisting>
 
-			<para>
-				The simplest form of filter is a filter for events of a given type without any conditions on the event property values. This filter matches any event of that type regardless of the event's properties. The example below is such a filter. Note that this event pattern would stop firing as soon as the first RfidEvent is encountered.
-			 </para>
-			 <programlisting><![CDATA[com.mypackage.myevents.RfidEvent]]></programlisting>
-	
-			 <para>
-				 To make the event pattern fire for every RfidEvent and not just the first event, use the <literal>every</literal> keyword.
-			 </para>
-			 <programlisting><![CDATA[every com.mypackage.myevents.RfidEvent]]></programlisting>
-			 
-			 <para>
-				 The example above specifies the fully-qualified Java class name as the event type. Via configuration, the event pattern above can be simplified by using the alias
-				 that has been defined for the event type. Interfaces and abstract classes are also supported as event types.
-			 </para>
-			 <programlisting><![CDATA[every RfidEvent]]></programlisting>
-			 
-			 <para>
-				 Interfaces and superclasses are also supported as event types. In the below example <literal>IRfidReadable</literal> is an interface class.
-			 </para>
-			 <programlisting><![CDATA[every org.myorg.rfid.IRfidReadable]]></programlisting>
-	
-			<para>
-				The filtering criteria to filter for events with certain event property values are placed within parenthesis after the event type name.
-			 </para>
-			 <programlisting><![CDATA[mypackage.RfidEvent(category="Perishable")]]></programlisting>
-			 
-			<para>
-				The supported filter operators are
-			</para>
-	
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						equals <literal>=</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						not equals <literal>!=</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						comparison operators <literal>&lt; , &gt; , &gt;=, &lt;=</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						ranges 
-					</para>
-					<itemizedlist spacing="compact">
-						<listitem>
-							<para>
-								use the <literal>between</literal> keyword for a closed range where both endpoints are included
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								use the <literal>in </literal> keyword and round <literal>()</literal> or square brackets <literal>[]</literal> to control how endpoints are included
-							</para>
-						</listitem>
-						<listitem>
-							<para>
-								for inverted ranges use the <literal>not</literal> keyword and the <literal>between</literal> or <literal>in</literal> keywords
-							</para>
-						</listitem>
-					</itemizedlist>
-				</listitem>
-				<listitem>
-					<para>
-						list-of-values checks using the <literal>in</literal> keyword or the <literal>not in </literal> keywords followed by a comma-separated list of values
-					</para>
-				</listitem>
-			</itemizedlist>
-		</sect2>
-        
-        <sect2 id="pattern-filter-ranges" >
-            <title>Ranges</title>
-			<para>
-				Ranges come in the following 4 varieties. The use of round <literal>()</literal> 
-				or square <literal>[]</literal> bracket dictates whether an endpoint is included or excluded. The low point and the high-point of the range are separated by the colon <literal>:</literal> character.
-			 </para>
-
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						Open ranges that contain neither endpoint <literal>(low:high)</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Closed ranges that contain both endpoints <literal>[low:high]</literal>. The equivalent 'between' keyword also defines a closed range.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Half-open ranges that contain the low endpoint but not the high endpoint <literal>[low:high)</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Half-closed ranges that contain the high endpoint but not the low endpoint <literal>(low:high]</literal>
-					</para>
-				</listitem>
-			</itemizedlist>
+		<para>
+			The filtering criteria to filter for events with certain event property values are placed within parenthesis after the event type name:
+		 </para>
+		 <programlisting><![CDATA[RfidEvent(category="Perishable")]]></programlisting>
+		 
+		<para>
+			All expressions can be used in filters, including static method invocations that return a boolean value:
+		 </para>
+		 <programlisting><![CDATA[RfidEvent(MyRFIDLib.isInRange(x, y) or (x<0 and y < 0))]]></programlisting>
 			
-			<para>
-				The next statement shows a filter specifying a range for <literal>x</literal> and <literal>y</literal> values of RFID events. The range includes both endpoints therefore uses <literal>[]</literal> hard brackets.
-			</para>
-            <programlisting><![CDATA[mypackage.RfidEvent(x in [100:200], y in [0, 100])]]></programlisting>
+		<para>
+			Filter expressions can be separated via a single comma '<literal>,</literal>'. The comma represents a logical AND between expressions:
+		 </para>
+		 <programlisting><![CDATA[RfidEvent(zone=1, category=10)
+...is equivalent to...
+RfidEvent(zone=1 and category=10)]]></programlisting>
 
-			<para>
-				The <literal>between</literal> keyword is equivalent for closed ranges. The same filter using the <literal>between</literal> keyword is:
-			</para>
-            <programlisting><![CDATA[mypackage.RfidEvent(x between 100 and 200, y between 0 and 50)]]></programlisting>
+		<para>
+			The following set of operators are highly optimized through indexing and are the preferred means of filtering high-volume event streams:
+		</para>
 
-			<para>
-				The <literal>not</literal> keyword can be used to determine if a value falls outside a given range:
-			</para>
-            <programlisting><![CDATA[mypackage.RfidEvent(x not in [0:100])]]></programlisting>
+		<itemizedlist spacing="compact">
+			<listitem>
+				<para>
+					equals <literal>=</literal>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					not equals <literal>!=</literal>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					comparison operators <literal>&lt; , &gt; , &gt;=, &lt;=</literal>
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					ranges 
+				</para>
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							use the <literal>between</literal> keyword for a closed range where both endpoints are included
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							use the <literal>in </literal> keyword and round <literal>()</literal> or square brackets <literal>[]</literal> to control how endpoints are included
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							for inverted ranges use the <literal>not</literal> keyword and the <literal>between</literal> or <literal>in</literal> keywords
+						</para>
+					</listitem>
+				</itemizedlist>
+			</listitem>
+			<listitem>
+				<para>
+					list-of-values checks using the <literal>in</literal> keyword or the <literal>not in </literal> keywords followed by a comma-separated list of values
+				</para>
+			</listitem>
+		</itemizedlist>
 
-			<para>
-				The equivalent statement using the <literal>between</literal> keyword is:
-			</para>
-            <programlisting><![CDATA[mypackage.RfidEvent(x not between 0 and 100)]]></programlisting>
-		</sect2>
-        
-        <sect2 id="pattern-filter-in" >
-            <title>The 'in' Keyword</title>
-			<para>
-				The <literal>in</literal> keyword for filter criteria determines if a given value matches any value in a list of values.
-			 </para>
+		<para>
+			At compile time as well as at run time, the engine scans new filter expressions for sub-expressions that can be indexed. Indexing filter values to match event properties of incoming events enables the engine to match incoming events faster. The above list of operators represents the set of operators that the engine can best convert into indexes. The use of comma or logical <literal>and</literal> in filter expressions does not impact optimizations by the engine. 
+		</para>
+		
+		<para>
+			For more information on filters please see <xref linkend="eql-from-clause-filter"/>.
+		</para>
 
-			<para>
-				In this example we are interested in RFID events where the category matches any of the given values:
-			</para>
-            <programlisting><![CDATA[mypackage.RfidEvent(category in ('Perishable', 'Container'))]]></programlisting>
-
-			<para>
-				By using the <literal>not in </literal>keywords we can filter events with a property value that does not match any of the values in a list of values:
-			 </para>
-            <programlisting><![CDATA[mypackage.RfidEvent(category not in ('Household', 'Electrical'))]]></programlisting>
-		</sect2>
-
-        <sect2 id="pattern-filter-examples" >
-            <title>Filter Examples</title>
-			<para>
-				Filter criteria are listed in a comma-separated format. In the example below we look for <literal>RfidEvent</literal> events with
-				a <literal>grade</literal> property between 1 and 5 (endpoints included), a <literal>price</literal> less then 1, and a category of "Perishable".
-			 </para>
-			 <programlisting><![CDATA[mypackage.RfidEvent(category="Perishable", price<1.00, grade in [1:5])]]></programlisting>
-			 
-			<para>
-				Filter criteria can also refer to events matching prior named events in the same expression. Below pattern is an example in which the pattern
-				matches once for every RfidEvent that is preceded by an RfidEvent with the same item id.
-			 </para>
-			 <programlisting><![CDATA[every A=mypackage.RfidEvent -> B=mypackage.RfidEvent(itemId=A.itemId)]]></programlisting>
-			<para>
-				The syntax shown above allows filter criteria to reference prior results by specifying the event name and event property. This syntax can be used with all filter operators.
-			 </para>
-		</sect2>
-	
-        <sect2 id="pattern-filter-limitations" >
-            <title>Limitations</title>
-			<para>
-				Filters are designed for high-volume, switchboard-type operation. Therefore there are certain limitations to filters expressions that only apply to event stream filters, and not to where-clauses or other expression-based filtering and sorting.
-			</para>        
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						Range and comparison operators require the event property to be of a numeric type. 
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Null values in filter criteria are currently not allowed.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Filter criteria can list the same event property only once. That is, a filter such as <literal>(price &gt;= 10, price &lt;= 20)</literal> is not allowed but can be expressed as <literal>(price between 10 and 20)</literal>.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Events that have null values for event properties listed in the filter criteria do not match the criteria.
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						No type coercion - event property types and filter values must be of the same boxed type
-					</para>
-				</listitem>
-			</itemizedlist>
-		</sect2>
-   </sect1>
+		<para>
+			Filter criteria can also refer to events matching prior named events in the same expression. Below pattern is an example in which the pattern
+			matches once for every RfidEvent that is preceded by an RfidEvent with the same asset id.
+		 </para>
+		 <programlisting><![CDATA[every A=RfidEvent -> B=RfidEvent(assetId=A.assetId)]]></programlisting>
+		 
+		<para>
+			The syntax shown above allows filter criteria to reference prior results by specifying the event name tag of the prior event, and the event property name. This syntax can be used in all filter operators or expressions including ranges and the <literal>in</literal> set-of-values check:
+		 </para>
+		 <programlisting><![CDATA[every A=RfidEvent -> 
+  B=RfidEvent(MyLib.isInRadius(A.x, A.y, x, y) and zone in (1, A.zone))]]></programlisting>
+	</sect1>
 
     <sect1 id="pattern-operators">
         <title>Pattern Operators</title>

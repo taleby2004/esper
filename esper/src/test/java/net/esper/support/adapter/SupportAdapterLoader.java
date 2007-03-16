@@ -22,6 +22,11 @@ public class SupportAdapterLoader implements AdapterLoader
         return names;
     }
 
+    public void destroy()
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void init(String name, Properties properties, EPServiceProviderSPI epService)
     {
         names.add(name);

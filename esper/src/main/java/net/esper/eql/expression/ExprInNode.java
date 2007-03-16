@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
@@ -32,7 +39,7 @@ public class ExprInNode extends ExprNode
 
     /**
      * Returns true for not-in, false for regular in
-     * @return false for "val in (a,b,c)" or true for "val not in (a,b,c)" 
+     * @return false for "val in (a,b,c)" or true for "val not in (a,b,c)"
      */
     public boolean isNotIn()
     {

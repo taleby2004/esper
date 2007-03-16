@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 import net.esper.eql.spec.OutputLimitSpec;
@@ -27,11 +34,11 @@ public final class OutputConditionFactory {
 		{
 			throw new NullPointerException("Output condition by count requires a non-null callback");
 		}
-		
+
 		if(outputLimitSpec == null)
 		{
 			return new OutputConditionNull(outputCallback);
-		}		
+		}
 		else if(outputLimitSpec.isDisplayFirstOnly())
 		{
 			log.debug(".createCondition creating OutputConditionFirst");
@@ -42,7 +49,7 @@ public final class OutputConditionFactory {
 			log.debug(".createCondition creating OutputConditionCount with event rate " + outputLimitSpec.getEventRate());
 			return new OutputConditionCount(outputLimitSpec.getEventRate(), outputCallback);
 		}
-		else 
+		else
 		{
 			log.debug(".createCondition creating OutputConditionTime with interval length " + outputLimitSpec.getTimeRate());
 			return new OutputConditionTime(outputLimitSpec.getTimeRate(), statementContext, outputCallback);

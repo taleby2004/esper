@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.filter;
 
 import net.esper.eql.expression.ExprNode;
@@ -25,7 +32,7 @@ public class FilterParamExprMap
     /**
      * Add a node and filter param.
      * @param exprNode is the node to add
-     * @param param is null if the expression node has not optimized form 
+     * @param param is null if the expression node has not optimized form
      */
     public void put(ExprNode exprNode, FilterSpecParam param)
     {
@@ -33,7 +40,7 @@ public class FilterParamExprMap
         if (param != null)
         {
             specParams.put(param, exprNode);
-        }        
+        }
     }
 
     /**

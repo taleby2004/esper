@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.type;
 
 import net.esper.collection.MultiKey;
@@ -49,9 +56,9 @@ public enum BitWiseOpEnum
         computers.put(new MultiKey<Object>(new Object[] {Short.class, BXOR}), new BXorShort());
         computers.put(new MultiKey<Object>(new Object[] {Integer.class, BXOR}), new BXorInt());
         computers.put(new MultiKey<Object>(new Object[] {Long.class, BXOR}), new BXorLong());
-        computers.put(new MultiKey<Object>(new Object[] {Boolean.class, BXOR}), new BXorBoolean());        
-        
-        
+        computers.put(new MultiKey<Object>(new Object[] {Boolean.class, BXOR}), new BXorBoolean());
+
+
     }
 
     /**
@@ -63,7 +70,7 @@ public enum BitWiseOpEnum
     {
         if ( (coercedType != Byte.class) &&
              (coercedType != Short.class) &&
-             (coercedType != Integer.class) &&              
+             (coercedType != Integer.class) &&
              (coercedType != Long.class) &&
              (coercedType != Boolean.class))
         {
@@ -84,7 +91,7 @@ public enum BitWiseOpEnum
          * @param objTwo is the second number or boolean
          * @return result
          */
-    	
+
         public Object compute(Object objOne, Object objTwo);
     }
 
@@ -106,7 +113,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Or.
-     */    
+     */
     public static class BOrByte implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -119,7 +126,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Xor.
-     */        
+     */
     public static class BXorByte implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -129,14 +136,14 @@ public enum BitWiseOpEnum
             Byte result = (byte) (n1.byteValue() ^ n2.byteValue());
             return result;
         }
-    }    
-    
+    }
+
     /**
      * Computer for type-specific arith. operations.
      */
     /**
      * Bit Wise And.
-     */    
+     */
     public static class BAndShort implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -146,10 +153,10 @@ public enum BitWiseOpEnum
             Short result = (short) (n1.shortValue() & n2.shortValue());
             return result;
         }
-    }    
+    }
     /**
      * Bit Wise Or.
-     */    
+     */
     public static class BOrShort implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -159,10 +166,10 @@ public enum BitWiseOpEnum
             Short result = (short) (n1.shortValue() | n2.shortValue());
             return result;
         }
-    }    
+    }
     /**
      * Bit Wise Xor.
-     */        
+     */
     public static class BXorShort implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -172,14 +179,14 @@ public enum BitWiseOpEnum
             Short result = (short) (n1.shortValue() ^ n2.shortValue());
             return result;
         }
-    }    
+    }
 
     /**
      * Computer for type-specific arith. operations.
      */
     /**
      * Bit Wise And.
-     */            
+     */
     public static class BAndInt implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -192,7 +199,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Or.
-     */            
+     */
     public static class BOrInt implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -205,7 +212,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Xor.
-     */            
+     */
     public static class BXorInt implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -216,13 +223,13 @@ public enum BitWiseOpEnum
             return result;
         }
     }
-    
+
     /**
      * Computer for type-specific arith. operations.
      */
     /**
      * Bit Wise And.
-     */        
+     */
     public static class BAndLong implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -235,7 +242,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Or.
-     */    
+     */
     public static class BOrLong implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -248,7 +255,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Xor.
-     */    
+     */
     public static class BXorLong implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -265,7 +272,7 @@ public enum BitWiseOpEnum
      */
     /**
      * Bit Wise And.
-     */            
+     */
     public static class BAndBoolean implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -278,7 +285,7 @@ public enum BitWiseOpEnum
     }
     /**
      * Bit Wise Or.
-     */            
+     */
     public static class BOrBoolean implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -288,10 +295,10 @@ public enum BitWiseOpEnum
         	Boolean result = b1.booleanValue() | b2.booleanValue();
             return result;
         }
-    }                
+    }
     /**
      * Bit Wise Xor.
-     */            
+     */
     public static class BXorBoolean implements Computer
     {
         public Object compute(Object objOne, Object objTwo)
@@ -301,8 +308,8 @@ public enum BitWiseOpEnum
         	Boolean result = b1.booleanValue() ^ b2.booleanValue();
             return result;
         }
-    }                
-    
+    }
+
     /**
      * Returns string rendering of enum.
      * @return bitwise operator string

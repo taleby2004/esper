@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.core;
 
 import net.esper.dispatch.DispatchService;
@@ -38,6 +45,7 @@ public final class EPServicesContext
     private final StatementLockFactory statementLockFactory;
     private final ManagedReadWriteLock eventProcessingRWLock;
     private final ExtensionServicesContext extensionServicesContext;
+    private final EngineEnvContext engineEnvContext;
 
     // Supplied after construction to avoid circular dependency
     private StatementLifecycleSvc statementLifecycleSvc;
@@ -52,7 +60,7 @@ public final class EPServicesContext
      * @param viewResolutionService resolves view namespace and name to view factory class
      * @param statementLockFactory creates statement-level locks
      * @param eventProcessingRWLock is the engine lock for statement management
-     * @param extensionServicesContext marker interface allows adding additional services 
+     * @param extensionServicesContext marker interface allows adding additional services
      */
     public EPServicesContext(SchedulingService schedulingService,
                              EventAdapterService eventAdapterService,
@@ -61,7 +69,8 @@ public final class EPServicesContext
                              ViewResolutionService viewResolutionService,
                              StatementLockFactory statementLockFactory,
                              ManagedReadWriteLock eventProcessingRWLock,
-                             ExtensionServicesContext extensionServicesContext)
+                             ExtensionServicesContext extensionServicesContext,
+                             EngineEnvContext engineEnvContext)
     {
         this.schedulingService = schedulingService;
         this.eventAdapterService = eventAdapterService;
@@ -77,6 +86,7 @@ public final class EPServicesContext
         this.statementLockFactory = statementLockFactory;
         this.eventProcessingRWLock = eventProcessingRWLock;
         this.extensionServicesContext = extensionServicesContext;
+        this.engineEnvContext = engineEnvContext;
     }
 
     /**
@@ -239,6 +249,11 @@ public final class EPServicesContext
     public ExtensionServicesContext getExtensionServicesContext()
     {
         return extensionServicesContext;
+    }
+
+    public EngineEnvContext getEngineEnvContext()
+    {
+        return engineEnvContext;
     }
 
     /**

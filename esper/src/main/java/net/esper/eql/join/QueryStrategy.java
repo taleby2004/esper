@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.join;
 
 import net.esper.event.EventBean;
@@ -13,7 +20,7 @@ public interface QueryStrategy
     /**
      * Look up events returning tuples of joined events.
      * @param lookupEvents - events to use to perform the join
-     * @param joinSet - result join tuples of events 
+     * @param joinSet - result join tuples of events
      */
     public void lookup(EventBean[] lookupEvents, Set<MultiKey<EventBean>> joinSet);
 }

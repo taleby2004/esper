@@ -1,5 +1,5 @@
 /**************************************************************************************
- * Copyright (C) 2006 Thomas Bernhardt. All rights reserved.                          *
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
  * http://esper.codehaus.org                                                          *
  * ---------------------------------------------------------------------------------- *
  * The software in this package is published under the terms of the GPL license       *
@@ -33,7 +33,7 @@ import org.w3c.dom.*;
  * The format of an Esper XML configuration file is defined in
  * <tt>esper-configuration-1.0.xsd</tt>.
  */
-public class Configuration {
+public class Configuration implements ConfigurationOperations {
 
 	private static Log log = LogFactory.getLog( Configuration.class );
 
@@ -283,11 +283,21 @@ public class Configuration {
         return plugInViews;
     }
 
+    /**
+     * Returns a list of configured adapter loaders.
+     * @return adapter loaders
+     */
     public List<ConfigurationAdapterLoader> getAdapterLoaders()
     {
         return adapterLoaders;
     }
 
+    /**
+     * Add an input/output adapter loader.
+     * @param loaderName is the name of the loader
+     * @param className is the fully-qualified classname of the loader class
+     * @param configuration is loader cofiguration entries
+     */
     public void addAdapterLoader(String loaderName, String className, Properties configuration)
     {
         ConfigurationAdapterLoader adapterLoader = new ConfigurationAdapterLoader();

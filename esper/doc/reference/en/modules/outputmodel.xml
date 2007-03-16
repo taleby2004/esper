@@ -138,7 +138,7 @@
         <programlisting><![CDATA[select * from Withdrawal(amount>=200).win:length(5)]]></programlisting>
 
         <para>
-			With the filter, any Withdrawal events that have an amount of less then 200 do not enter the length window and are therefore not passed to update listeners. Filters are discussed in more details in <xref linkend="pattern-filter"/>.
+			With the filter, any Withdrawal events that have an amount of less then 200 do not enter the length window and are therefore not passed to update listeners. Filters are discussed in more detail in <xref linkend="eql-from-clause-filter"/> and <xref linkend="pattern-filter"/>.
         </para>
 
         <figure id="outputmodel_filter_flow">

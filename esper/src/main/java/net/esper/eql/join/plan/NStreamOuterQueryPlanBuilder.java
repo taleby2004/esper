@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.join.plan;
 
 import java.util.*;
@@ -23,7 +30,7 @@ public class NStreamOuterQueryPlanBuilder
      * @param outerJoinDescList - descriptors for all outer joins
      * @return query plan
      */
-    protected static QueryPlan build(QueryGraph queryGraph, 
+    protected static QueryPlan build(QueryGraph queryGraph,
                                      List<OuterJoinDesc> outerJoinDescList,
                                      String[] streamNames)
     {
@@ -112,7 +119,7 @@ public class NStreamOuterQueryPlanBuilder
             {
                 continue;
             }
-            
+
             TableLookupPlan plans[] = new TableLookupPlan[substreams.length];
 
             for (int i = 0; i < substreams.length; i++)
@@ -303,7 +310,7 @@ public class NStreamOuterQueryPlanBuilder
      * is correct, ie. all streams are included and none are listed twice.
      * @param rootStream is the stream supplying the incoming event
      * @param streamsJoinedPerStream is keyed by the from-stream number and contains as values all
-     * stream numbers of lookup into to-streams. 
+     * stream numbers of lookup into to-streams.
      */
     public static void verifyJoinedPerStream(int rootStream, Map<Integer, int[]> streamsJoinedPerStream)
     {

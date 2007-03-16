@@ -44,7 +44,7 @@ public class SchemaXMLEventType extends BaseXMLEventType {
      */
     public SchemaXMLEventType(ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
-        super(configurationEventTypeXMLDOM.getRootElementName());
+        super(configurationEventTypeXMLDOM);
         propertyGetterCache = new HashMap<String, TypedEventPropertyGetter>();
 
         // Load schema

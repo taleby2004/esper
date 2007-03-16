@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
@@ -23,7 +30,7 @@ public class ExprRegexpNode extends ExprNode
 
     /**
      * Ctor.
-     * @param not is true if the it's a "not regexp" expression, of false for regular regexp 
+     * @param not is true if the it's a "not regexp" expression, of false for regular regexp
      */
     public ExprRegexpNode(boolean not)
     {

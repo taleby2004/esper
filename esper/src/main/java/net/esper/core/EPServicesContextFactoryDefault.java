@@ -41,10 +41,13 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         // New read-write lock for concurrent event processing
         ManagedReadWriteLock eventProcessingRWLock = new ManagedReadWriteLock("EventProcLock");
 
+        // JNDI context for binding resources
+        EngineEnvContext jndiContext = new EngineEnvContext();
+
         // New services context
         EPServicesContext services = new EPServicesContext(schedulingService,
                 eventAdapterService, autoImportService, databaseConfigService, viewResolutionService,
-                new StatementLockFactoryImpl(), eventProcessingRWLock, null);
+                new StatementLockFactoryImpl(), eventProcessingRWLock, null, jndiContext);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(services);

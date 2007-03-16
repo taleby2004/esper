@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.spec;
 
 import net.esper.pattern.EvalNode;
@@ -16,7 +23,7 @@ import java.util.List;
  * A pattern statement contains tagged events (i.e. a=A -> b=B).
  * Thus the resulting event type is has properties "a" and "b" of the type of A and B.
  */
-public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamSpecCompiled 
+public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamSpecCompiled
 {
     private final EvalNode evalNode;
     private final Map<String, EventType> taggedEventTypes;       // Stores types for filters with tags

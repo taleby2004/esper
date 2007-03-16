@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 /**
@@ -7,9 +14,9 @@ public class OutputConditionNull implements OutputCondition {
 
 	private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = false;
-	
+
 	private final OutputCallback outputCallback;
-	
+
 	/**
 	 * Ctor.
 	 * @param outputCallback is the callback to make once the condition is satisfied
@@ -22,7 +29,7 @@ public class OutputConditionNull implements OutputCondition {
         }
 		this.outputCallback = outputCallback;
 	}
-	
+
 	public void updateOutputCondition(int newEventsCount, int oldEventsCount) {
 		outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);
 	}

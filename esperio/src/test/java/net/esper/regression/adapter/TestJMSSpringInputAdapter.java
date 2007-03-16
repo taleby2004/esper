@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import net.esper.adapter.SpringContext;
 import net.esper.adapter.SpringContextLoader;
 import net.esper.adapter.InputAdapter;
+import net.esper.adapter.AdapterLoader;
 import net.esper.client.Configuration;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
@@ -11,6 +12,7 @@ import net.esper.client.EPStatement;
 import net.esper.support.util.SupportSerializableBean;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.event.EventBean;
+import net.esper.core.EPServiceProviderSPI;
 
 import java.util.Properties;
 import java.util.Map;
@@ -52,7 +54,9 @@ public class TestJMSSpringInputAdapter extends TestCase
         Thread.sleep(200);
         assertEquals("x2", listener.assertOneGetNewAndReset().get("string"));
 
-        service.initialize();
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) service;
+        AdapterLoader loader = (AdapterLoader) spi.getEnvContext().lookup("adapter-loader/MyLoader");
+        loader.destroy();
     }
 
     public void testMap() throws Exception

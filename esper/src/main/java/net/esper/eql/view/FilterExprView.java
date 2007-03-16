@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 import net.esper.eql.expression.ExprEvaluator;
@@ -48,7 +55,7 @@ public class FilterExprView extends ViewSupport
      * @param exprEvaluator - evaluator to use
      * @param events - events to filter
      * @param isNewData - true to indicate filter new data (istream) and not old data (rstream)
-     * @return filtered events, or null if no events got through the filter 
+     * @return filtered events, or null if no events got through the filter
      */
     protected static EventBean[] filterEvents(ExprEvaluator exprEvaluator, EventBean[] events, boolean isNewData)
     {

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.spec;
 
 import net.esper.eql.core.AutoImportService;
@@ -52,7 +59,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
     {
         // Determine al the filter nodes used in the pattern
         List<EvalFilterNode> filterNodes = recusiveFilterChildNodes(evalNode);
-        
+
         // Resolve all event types; some filters are tagged and we keep the order in which they are specified
         LinkedHashMap<String, EventType> taggedEventTypes = new LinkedHashMap<String, EventType>();
         for (EvalFilterNode filterNode : filterNodes)
@@ -87,7 +94,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             filterTypes.put(selfStreamName, eventType);
             filterTypes.putAll(taggedEventTypes);
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, true);
-            
+
             List<ExprNode> exprNodes = filterNode.getRawFilterSpec().getFilterExpressions();
             FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, exprNodes, taggedEventTypes, streamTypeService, autoImportService);
             filterNode.setFilterSpec(spec);

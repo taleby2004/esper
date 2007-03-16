@@ -243,48 +243,205 @@ milliseconds-part : <emphasis>number</emphasis> ("milliseconds" | "millisecond" 
            <title>Filter-based event streams</title>
 
 			<para>
-				For filter-based event streams, the event stream definition <emphasis>stream_def</emphasis> as shown in the syntax above consists of an event type, an optional filter property list and an optional list of views that derive data from a stream. The syntax for a filter-based event stream is as below:
+				For filter-based event streams, the event stream definition <emphasis>stream_def</emphasis> as shown in the from-clause syntax consists of an event type, optional filter expressions and an optional list of views that derive data from a stream. The syntax for a filter-based event stream is as below:
 			</para>
 	
 			<synopsis><emphasis>event_type</emphasis> ( [<emphasis>filter_criteria</emphasis>] ) [.<emphasis>view_spec</emphasis>] [.<emphasis>view_spec</emphasis>] [...]</synopsis>
 	
 			<para>
-				The following EQL statement selects all event properties for the last 100 events of IBM stock ticks for volume. In the example, the event type is the fully qualified Java class name <literal>org.esper.example.StockTick</literal>. The expression filters for events where the property <literal>symbol</literal> has a value of "IBM". The optional view specifications for deriving data from the StockTick events are a length window and a view for computing statistics on volume. The name for the event stream is "volumeStats".
+				The following EQL statement shows event type, filter criteria and views combined in one statement. It selects all event properties for the last 100 events of IBM stock ticks for volume. In the example, the event type is the fully qualified Java class name <literal>org.esper.example.StockTick</literal>. The expression filters for events where the property <literal>symbol</literal> has a value of "IBM". The optional view specifications for deriving data from the StockTick events are a length window and a view for computing statistics on volume. The name for the event stream is "volumeStats".
 			</para>
 			<programlisting><![CDATA[select * from 
   org.esper.example.StockTick(symbol='IBM').win:length(100).stat:uni('volume') as volumeStats]]></programlisting>
 	
 			<para>
-				Instead of the fully-qualified Java class name any other event name can be mapped via Configuration to a Java class, making the resulting statement more readable.
+				Esper filters out events in an event stream as defined by filter criteria before it sends events to subsequent views. Thus, compared to search conditions in a where-clause, filter criteria remove unneeded events early. In the above example, events with a symbol other then IBM do not enter the time window.
 			</para>
-			<programlisting><![CDATA[select * from StockTick(symbol='IBM').win:length(100).stat:uni('volume') as volumeStats]]></programlisting>
 
-			<sect3 id="eql-from-clause-event-type" >
+			<sect3 id="eql-filter-event-type" >
 			   <title>Specifying an event type</title>
+
 				<para>
-					In the example above the event type was <literal>org.esper.example.StockTick</literal>. The event type is simply the fully qualified Java class name. Interfaces and abstract classes are also supported. Alternatively, via configuration an alias for an event type can be defined and used instead of the fully qualified class name. The below example shows one way to obtain the fully qualified class name of a given Java class <literal>StockTick</literal>.
+					The simplest form of filter is a filter for events of a given type without any conditions on the event property values. This filter matches any event of that type regardless of the event's properties. The example below is such a filter. 
+				 </para>
+				 <programlisting><![CDATA[select * from com.mypackage.myevents.RfidEvent]]></programlisting>
+
+				<para>
+					Instead of the fully-qualified Java class name any other event name can be mapped via Configuration to a Java class, making the resulting statement more readable:
 				</para>
-	
-				<programlisting><![CDATA[String eventName = StockTick.class.getName();]]>
-	String stmt = "from " + eventName + ".win:length(100)"
-	</programlisting>
+				<programlisting><![CDATA[select * from RfidEvent]]></programlisting>
+
+				 <para>
+					 Interfaces and superclasses are also supported as event types. In the below example <literal>IRfidReadable</literal> is an interface class.
+				 </para>
+				 <programlisting><![CDATA[select * from org.myorg.rfid.IRfidReadable]]></programlisting>
 			</sect3>
 		
-			<sect3 id="eql-from-clause-filter-criteria" >
-			   <title>Specifying event filter criteria</title>
+			<sect3 id="eql-filter-criteria" >
+			   <title>Specifying filter criteria</title>
 				<para>
-					Filter criteria follow the same syntax as outlined in the event pattern section on filters; see <xref linkend="pattern-filter"/>. Filter criteria operators are: <literal>=, &lt; , &gt; , &gt;=, &lt;=</literal>. Ranges use the <literal>in </literal> keyword and round <literal>(...)</literal> or square brackets <literal>[]</literal>.
-				</para>
-				
+					The filtering criteria to filter for events with certain event property values are placed within parenthesis after the event type name:
+				 </para>
+				 <programlisting><![CDATA[select * from RfidEvent(category="Perishable")]]></programlisting>
+				 
 				<para>
-					Esper filters out events in an event stream as defined by filter criteria before it sends events to subsequent views. Thus, compared to search conditions in a where-clause, filter criteria remove unneeded events early.
-				</para>
+					All expressions can be used in filters, including static methods that return a boolean value:
+				 </para>
+				 <programlisting><![CDATA[select * from RfidEvent(MyRFIDLib.isInRange(x, y) or (x < 0 and y < 0))]]></programlisting>
+					
+				<para>
+					Filter expressions can be separated via a single comma '<literal>,</literal>'. The comma represents a logical AND between filter expressions:
+				 </para>
+				 <programlisting><![CDATA[select * from RfidEvent(zone=1, category=10)
+...is equivalent to...
+select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 	
 				<para>
-					The below example is a filter criteria list that removes events based on category, price and grade.
+					The following set of operators are highly optimized through indexing and are the preferred means of filtering in high-volumne event streams:
 				</para>
-			 <programlisting><![CDATA[from mypackage.RfidEvent(category="Perishable", price<1.00, grade in [1:2])]]></programlisting>
+		
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							equals <literal>=</literal>
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							not equals <literal>!=</literal>
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							comparison operators <literal>&lt; , &gt; , &gt;=, &lt;=</literal>
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							ranges 
+						</para>
+						<itemizedlist spacing="compact">
+							<listitem>
+								<para>
+									use the <literal>between</literal> keyword for a closed range where both endpoints are included
+								</para>
+							</listitem>
+							<listitem>
+								<para>
+									use the <literal>in </literal> keyword and round <literal>()</literal> or square brackets <literal>[]</literal> to control how endpoints are included
+								</para>
+							</listitem>
+							<listitem>
+								<para>
+									for inverted ranges use the <literal>not</literal> keyword and the <literal>between</literal> or <literal>in</literal> keywords
+								</para>
+							</listitem>
+						</itemizedlist>
+					</listitem>
+					<listitem>
+						<para>
+							list-of-values checks using the <literal>in</literal> keyword or the <literal>not in </literal> keywords followed by a comma-separated list of values
+						</para>
+					</listitem>
+				</itemizedlist>
+	
+				<para>
+					At compile time as well as at run time, the engine scans new filter expressions for sub-expressions that can be indexed. Indexing filter values to match event properties of incoming events enables the engine to match incoming events faster. The above list of operators represents the set of operators that the engine can best convert into indexes. The use of comma or logical <literal>and</literal> in filter expressions does not impact optimizations by the engine. 
+				</para>
 			</sect3>
+			
+			<sect3 id="eql-filter-ranges" >
+				<title>Filtering Ranges</title>
+				<para>
+					Ranges come in the following 4 varieties. The use of round <literal>()</literal> 
+					or square <literal>[]</literal> bracket dictates whether an endpoint is included or excluded. The low point and the high-point of the range are separated by the colon <literal>:</literal> character.
+				 </para>
+	
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Open ranges that contain neither endpoint <literal>(low:high)</literal>
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Closed ranges that contain both endpoints <literal>[low:high]</literal>. The equivalent 'between' keyword also defines a closed range.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Half-open ranges that contain the low endpoint but not the high endpoint <literal>[low:high)</literal>
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Half-closed ranges that contain the high endpoint but not the low endpoint <literal>(low:high]</literal>
+						</para>
+					</listitem>
+				</itemizedlist>
+				
+				<para>
+					The next statement shows a filter specifying a range for <literal>x</literal> and <literal>y</literal> values of RFID events. The range includes both endpoints therefore uses <literal>[]</literal> hard brackets.
+				</para>
+				<programlisting><![CDATA[mypackage.RfidEvent(x in [100:200], y in [0:100])]]></programlisting>
+	
+				<para>
+					The <literal>between</literal> keyword is equivalent for closed ranges. The same filter using the <literal>between</literal> keyword is:
+				</para>
+				<programlisting><![CDATA[mypackage.RfidEvent(x between 100 and 200, y between 0 and 50)]]></programlisting>
+	
+				<para>
+					The <literal>not</literal> keyword can be used to determine if a value falls outside a given range:
+				</para>
+				<programlisting><![CDATA[mypackage.RfidEvent(x not in [0:100])]]></programlisting>
+	
+				<para>
+					The equivalent statement using the <literal>between</literal> keyword is:
+				</para>
+				<programlisting><![CDATA[mypackage.RfidEvent(x not between 0 and 100)]]></programlisting>
+			</sect3>
+			
+			<sect3 id="eql-filter-in" >
+				<title>Filtering Sets of Values</title>
+				<para>
+					The <literal>in</literal> keyword for filter criteria determines if a given value matches any value in a list of values.
+				 </para>
+	
+				<para>
+					In this example we are interested in RFID events where the category matches any of the given values:
+				</para>
+				<programlisting><![CDATA[mypackage.RfidEvent(category in ('Perishable', 'Container'))]]></programlisting>
+	
+				<para>
+					By using the <literal>not in </literal>keywords we can filter events with a property value that does not match any of the values in a list of values:
+				 </para>
+				<programlisting><![CDATA[mypackage.RfidEvent(category not in ('Household', 'Electrical'))]]></programlisting>
+			</sect3>
+			
+			<sect3 id="eql-filter-limitations" >
+				<title>Filter Limitations</title>
+				<para>
+					The following restrictions apply to filter criteria:
+				</para>        
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Range and comparison operators require the event property to be of a numeric type. 
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Aggregation functions are not allowed within filter expressions.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							The <literal>prev</literal> previous event function and the <literal>prior</literal> prior event function cannot be used in filter expressions.
+						</para>
+					</listitem>
+				</itemizedlist>
+			</sect3>
+
 		</sect2>
 		
         <sect2 id="eql-from-clause-patterns" >

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.join;
 
 import net.esper.event.EventBean;
@@ -37,7 +44,7 @@ public class JoinSetFilter implements JoinSetProcessor
      * Filter event by applying the filter nodes evaluation method.
      * @param filterExprNode - top node of the filter expression tree.
      * @param events - set of tuples of events
-     * @param isNewData - true to indicate filter new data (istream) and not old data (rstream) 
+     * @param isNewData - true to indicate filter new data (istream) and not old data (rstream)
      */
     protected static void filter(ExprNode filterExprNode, Set<MultiKey<EventBean>> events, boolean isNewData)
     {

@@ -1,12 +1,16 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.core;
 
 import antlr.RecognitionException;
 import antlr.TokenStreamException;
 import antlr.collections.AST;
-import net.esper.client.EPAdministrator;
-import net.esper.client.EPException;
-import net.esper.client.EPStatement;
-import net.esper.client.EPStatementException;
+import net.esper.client.*;
 import net.esper.eql.generated.EQLBaseWalker;
 import net.esper.eql.generated.EQLStatementParser;
 import net.esper.eql.parse.*;
@@ -27,6 +31,7 @@ public class EPAdministratorImpl implements EPAdministrator
     private static WalkRuleSelector eqlWalkRule;
 
     private final EPServicesContext services;
+    private final ConfigurationOperations configurationOperations;
 
     static
     {
@@ -64,10 +69,12 @@ public class EPAdministratorImpl implements EPAdministrator
     /**
      * Constructor - takes the services context as argument.
      * @param services - references to services
+     * @param configurationOperations - runtime configuration operations
      */
-    public EPAdministratorImpl(EPServicesContext services)
+    public EPAdministratorImpl(EPServicesContext services, ConfigurationOperations configurationOperations)
     {
         this.services = services;
+        this.configurationOperations = configurationOperations;
     }
 
     public EPStatement createPattern(String onExpression) throws EPException
@@ -197,6 +204,11 @@ public class EPAdministratorImpl implements EPAdministrator
     public void destroyAllStatements() throws EPException
     {
         services.getStatementLifecycleSvc().destroyAllStatements();
+    }
+
+    public ConfigurationOperations getConfiguration()
+    {
+        return configurationOperations;
     }
 
     private static Log log = LogFactory.getLog(EPAdministratorImpl.class);

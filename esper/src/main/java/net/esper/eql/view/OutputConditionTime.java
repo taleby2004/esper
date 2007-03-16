@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 import net.esper.schedule.ScheduleHandleCallback;
@@ -14,10 +21,10 @@ import org.apache.commons.logging.LogFactory;
  * of every time interval of a given length.
  */
 public final class OutputConditionTime implements OutputCondition
-{    
+{
     private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = true;
-	
+
     private final long msecIntervalSize;
     private final OutputCallback outputCallback;
     private final ScheduleSlot scheduleSlot;
@@ -29,10 +36,10 @@ public final class OutputConditionTime implements OutputCondition
     /**
      * Constructor.
      * @param secIntervalSize is the number of seconds to batch events for.
-     * @param context is the view context for time scheduling	
+     * @param context is the view context for time scheduling
      * @param outputCallback is the callback to make once the condition is satisfied
      */
-    public OutputConditionTime(double secIntervalSize, 
+    public OutputConditionTime(double secIntervalSize,
     						   StatementServiceContext context,
     						   OutputCallback outputCallback)
     {
@@ -49,13 +56,13 @@ public final class OutputConditionTime implements OutputCondition
             String message = "OutputConditionTime requires a non-null view context";
             throw new NullPointerException(message);
         }
-        
+
         this.msecIntervalSize = Math.round(1000 * secIntervalSize);
-        this.context = context;   
+        this.context = context;
         this.outputCallback = outputCallback;
         this.scheduleSlot = context.getScheduleBucket().allocateSlot();
     }
-    
+
     /**
      * Returns the interval size in milliseconds.
      * @return batch size
@@ -64,7 +71,7 @@ public final class OutputConditionTime implements OutputCondition
     {
         return msecIntervalSize;
     }
-    
+
     public final void updateOutputCondition(int newEventsCount, int oldEventsCount)
     {
         if (log.isDebugEnabled())
@@ -73,12 +80,12 @@ public final class OutputConditionTime implements OutputCondition
         			"  newEventsCount==" + newEventsCount +
         			"  oldEventsCount==" + oldEventsCount);
         }
-        
+
         if (currentReferencePoint == null)
         {
         	currentReferencePoint = context.getSchedulingService().getTime();
         }
-        
+
         // Schedule the next callback if there is none currently scheduled
         if (!isCallbackScheduled)
         {

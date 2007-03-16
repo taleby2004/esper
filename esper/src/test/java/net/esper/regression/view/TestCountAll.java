@@ -1,8 +1,6 @@
 package net.esper.regression.view;
 
-import net.esper.client.EPServiceProvider;
-import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPStatement;
+import net.esper.client.*;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.util.SupportUpdateListener;

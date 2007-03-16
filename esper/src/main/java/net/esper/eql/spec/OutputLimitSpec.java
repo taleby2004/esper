@@ -1,10 +1,17 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.spec;
 
 /**
  * Spec for building an EventBatch.
  *
  */
-public class OutputLimitSpec 
+public class OutputLimitSpec
 {
     /**
      * Enum controlling the type of output limiting.
@@ -25,10 +32,10 @@ public class OutputLimitSpec
          * Output all events.
          */
         ALL };
-	
+
 	private final boolean isEventLimit;
 	private final DisplayLimit displayLimit;
-	
+
 	private final int eventRate;
 	private final double timeRate;
 
@@ -45,7 +52,7 @@ public class OutputLimitSpec
 		this.timeRate = -1.0;
 		this.displayLimit = displayLimit;
 	}
-	
+
 	/**
 	 * Ctor.
 	 * Used for creating batching events by time.
@@ -64,7 +71,7 @@ public class OutputLimitSpec
      * Returns the event rate.
      * @return event rate
      */
-	public int getEventRate() 
+	public int getEventRate()
 	{
 		return eventRate;
 	}
@@ -73,7 +80,7 @@ public class OutputLimitSpec
      * Returns the number of events, or zero if no number of events was supplied.
      * @return event limit
      */
-	public boolean isEventLimit() 
+	public boolean isEventLimit()
 	{
 		return isEventLimit;
 	}
@@ -82,7 +89,7 @@ public class OutputLimitSpec
      * Returns the rate in seconds, if supplied, or zero if not supplied.
      * @return rate
      */
-	public double getTimeRate() 
+	public double getTimeRate()
 	{
 		return timeRate;
 	}
@@ -91,16 +98,16 @@ public class OutputLimitSpec
      * Returns true to output the last event only.
      * @return true if last only, false otherwise
      */
-	public boolean isDisplayLastOnly() 
+	public boolean isDisplayLastOnly()
 	{
 		return displayLimit == DisplayLimit.LAST;
 	}
-	
+
     /**
      * Returns true to output the first event only.
      * @return true if first only, false otherwise
      */
-	public boolean isDisplayFirstOnly() 
+	public boolean isDisplayFirstOnly()
 	{
 		return displayLimit == DisplayLimit.FIRST;
 	}

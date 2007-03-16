@@ -220,4 +220,29 @@ public class ConfigurationEventTypeXMLDOM
             return type;
         }
     }
+
+    public boolean equals(Object otherObj)
+    {
+        if (!(otherObj instanceof ConfigurationEventTypeXMLDOM))
+        {
+            return false;
+        }
+
+        ConfigurationEventTypeXMLDOM other = (ConfigurationEventTypeXMLDOM) otherObj;
+        if (!(other.rootElementName.equals(rootElementName)))
+        {
+            return false;
+        }
+
+        if (((other.rootElementNamespace == null) && (rootElementNamespace != null)) ||
+            ((other.rootElementNamespace != null) && (rootElementNamespace == null)))
+        {
+            return false;
+        }
+        if ((other.rootElementNamespace != null) && (rootElementNamespace != null))
+        {
+            return rootElementNamespace.equals(other.rootElementNamespace);
+        }
+        return true;
+    }
 }

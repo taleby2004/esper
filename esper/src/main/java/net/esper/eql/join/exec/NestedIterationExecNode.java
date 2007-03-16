@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.join.exec;
 
 import net.esper.event.EventBean;
@@ -12,7 +19,7 @@ import java.util.LinkedList;
  * Each child node under this node typically represents a table lookup. The implementation
  * 'hops' from the first child to the next recursively for each row returned by a child.
  * <p>
- * It passes a 'prototype' row (prefillPath) to each new child which contains the current partial event set. 
+ * It passes a 'prototype' row (prefillPath) to each new child which contains the current partial event set.
  */
 public class NestedIterationExecNode extends ExecNode
 {
@@ -51,7 +58,7 @@ public class NestedIterationExecNode extends ExecNode
      * @param lookupEvent - current event to use for lookup by child node
      * @param nestingOrderIndex - index within the child nodes indicating what nesting level we are at
      * @param currentPath - prototype result row to use by child nodes for generating result rows
-     * @param result - result tuple rows to be populated   
+     * @param result - result tuple rows to be populated
      */
     protected void recursiveNestedJoin(EventBean lookupEvent, int nestingOrderIndex, EventBean[] currentPath, List<EventBean[]> result)
     {

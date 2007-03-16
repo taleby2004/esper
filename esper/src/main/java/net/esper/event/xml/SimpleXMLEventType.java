@@ -36,7 +36,7 @@ public class SimpleXMLEventType extends BaseXMLEventType {
      */
     public SimpleXMLEventType(ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
-        super(configurationEventTypeXMLDOM.getRootElementName());
+        super(configurationEventTypeXMLDOM);
         super.setExplicitProperties(configurationEventTypeXMLDOM.getXPathProperties().values());
         propertyGetterCache = new HashMap<String, TypedEventPropertyGetter>();
     }

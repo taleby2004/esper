@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.expression;
 
 import java.lang.reflect.InvocationTargetException;
@@ -16,18 +23,18 @@ import net.sf.cglib.reflect.FastMethod;
 /**
  * Represents an invocation of a static library method in the expression tree.
  */
-public class ExprStaticMethodNode extends ExprNode 
+public class ExprStaticMethodNode extends ExprNode
 {
 	private final String className;
 	private final String methodName;
 	private Class[] paramTypes;
 	private FastMethod staticMethod;
-	
+
 	/**
 	 * Ctor.
 	 * @param className - the declaring class for the method that this node will invoke
 	 * @param methodName - the name of the method that this node will invoke
-	 */	
+	 */
 	public ExprStaticMethodNode(String className, String methodName)
 	{
 		if(className == null)
@@ -38,11 +45,11 @@ public class ExprStaticMethodNode extends ExprNode
 		{
 			throw new NullPointerException("Method name is null");
 		}
-	
+
 		this.className = className;
 		this.methodName = methodName;
 	}
-	
+
 	/**
      * Returns the static method.
 	 * @return the static method that this node invokes
@@ -51,7 +58,7 @@ public class ExprStaticMethodNode extends ExprNode
 	{
 		return staticMethod.getJavaMethod();
 	}
-	
+
 	/**
      * Returns the class name.
 	 * @return the class that declared the static method
@@ -76,7 +83,7 @@ public class ExprStaticMethodNode extends ExprNode
 		return paramTypes;
 	}
 
-	public String toExpressionString() 
+	public String toExpressionString()
 	{
         StringBuilder buffer = new StringBuilder();
 		buffer.append(className);
@@ -92,11 +99,11 @@ public class ExprStaticMethodNode extends ExprNode
 			appendString = ", ";
 		}
 		buffer.append(')');
-		
+
 		return buffer.toString();
 	}
 
-	public boolean equalsNode(ExprNode node) 
+	public boolean equalsNode(ExprNode node)
 	{
 		if(!(node instanceof ExprStaticMethodNode))
 		{
@@ -122,9 +129,9 @@ public class ExprStaticMethodNode extends ExprNode
 		int count = 0;
 		for(ExprNode childNode : childNodes)
 		{
-			paramTypes[count++] = childNode.getType();	
+			paramTypes[count++] = childNode.getType();
 		}
-		
+
 		// Try to resolve the method
 		try
 		{
@@ -138,7 +145,7 @@ public class ExprStaticMethodNode extends ExprNode
 		}
 	}
 
-	public Class getType() throws ExprValidationException 
+	public Class getType() throws ExprValidationException
 	{
 		if(staticMethod == null)
 		{
@@ -157,15 +164,15 @@ public class ExprStaticMethodNode extends ExprNode
 		{
 			args[count++] = childNode.evaluate(eventsPerStream, isNewData);
 		}
-		
+
 		// The method is static so the object it is invoked on
 		// can be null
 		Object obj = null;
-		try 
+		try
 		{
 			return staticMethod.invoke(obj, args);
-		} 
-		catch (InvocationTargetException e) 
+		}
+		catch (InvocationTargetException e)
 		{
 			throw new EPException(e);
 		}

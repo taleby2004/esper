@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.view;
 
 import java.util.Iterator;
@@ -19,9 +26,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * A view that prepares output events, batching incoming 
+ * A view that prepares output events, batching incoming
  * events and invoking the result set processor as necessary.
- * 
+ *
  */
 public class OutputProcessView extends ViewSupport implements JoinSetIndicator
 {
@@ -43,23 +50,23 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
      * @param statementContext is the services the output condition may depend on
      */
     public OutputProcessView(ResultSetProcessor resultSetProcessor,
-    					  int streamCount, 
-    					  OutputLimitSpec outputLimitSpec, 
+    					  int streamCount,
+    					  OutputLimitSpec outputLimitSpec,
     					  StatementServiceContext statementContext)
     {
     	log.debug("creating view");
- 
+
     	if(streamCount < 1)
     	{
     		throw new IllegalArgumentException("Output process view is part of at least 1 stream");
     	}
 
-    	OutputCallback outputCallback = getCallbackToLocal(streamCount);		
+    	OutputCallback outputCallback = getCallbackToLocal(streamCount);
     	this.outputCondition = OutputConditionFactory.createCondition(outputLimitSpec, statementContext, outputCallback);
         this.resultSetProcessor = resultSetProcessor;
         this.outputLastOnly = (outputLimitSpec != null) && (outputLimitSpec.isDisplayLastOnly());
     }
-    
+
     /**
      * The update method is called if the view does not participate in a join.
      * @param newData - new events
@@ -133,13 +140,13 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
 	 * */
 	protected void continueOutputProcessingView(boolean doOutput, boolean forceUpdate)
 	{
-		log.debug(".continueOutputProcessingView");			
+		log.debug(".continueOutputProcessingView");
 
 		// Get the arrays of new and old events, or null if none
 		EventBean[] newEvents = !newEventsList.isEmpty() ? newEventsList.toArray(new EventBean[0]) : null;
 		EventBean[] oldEvents = !oldEventsList.isEmpty() ? oldEventsList.toArray(new EventBean[0]) : null;
 
-		
+
 		if(resultSetProcessor != null)
 		{
 			// Process the events and get the result
@@ -180,27 +187,27 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
 		newEventsSet.clear();
 		oldEventsSet.clear();
 	}
-	
+
 	/**
 	 * Called once the output condition has been met.
 	 * Invokes the result set processor.
 	 * Used for join event data.
 	 * @param doOutput - true if the batched events should actually be output as well as processed, false if they should just be processed
-	 * @param forceUpdate - true if output should be made even when no updating events have arrived	
+	 * @param forceUpdate - true if output should be made even when no updating events have arrived
 	 */
 	protected void continueOutputProcessingJoin(boolean doOutput, boolean forceUpdate)
 	{
-		log.debug(".continueOutputProcessingJoin");			
+		log.debug(".continueOutputProcessingJoin");
 
 		EventBean[] newEvents = null;
 		EventBean[] oldEvents = null;
-		
+
 		Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEventsSet, oldEventsSet);
 		if (newOldEvents != null)
 		{
 			newEvents = newOldEvents.getFirst();
 			oldEvents = newOldEvents.getSecond();
-		} 		
+		}
 
 		if(doOutput)
 		{
@@ -220,7 +227,7 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
             }
             return parent.getEventType();
     	}
-    	else 
+    	else
     	{
     		return parent.getEventType();
     	}
@@ -232,7 +239,7 @@ public class OutputProcessView extends ViewSupport implements JoinSetIndicator
     	{
             return new TransformEventIterator(parent.iterator(), new OutputProcessTransform(resultSetProcessor));
     	}
-    	else 
+    	else
     	{
     		return parent.iterator();
     	}

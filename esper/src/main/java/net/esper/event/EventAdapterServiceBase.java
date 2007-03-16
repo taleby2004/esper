@@ -346,7 +346,7 @@ public abstract class EventAdapterServiceBase implements EventAdapterService
      * @param configurationEventTypeXMLDOM configures the event type schema and namespace and XPath
      * property information.
      */
-    public synchronized void addXMLDOMType(String eventTypeAlias, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
+    public synchronized EventType addXMLDOMType(String eventTypeAlias, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
         if (configurationEventTypeXMLDOM.getRootElementName() == null)
         {
@@ -362,6 +362,20 @@ public abstract class EventAdapterServiceBase implements EventAdapterService
             type = new SchemaXMLEventType(configurationEventTypeXMLDOM);
         }
 
+        EventType existingType = aliasToTypeMap.get(eventTypeAlias);
+        if (existingType != null)
+        {
+            // The existing type must be the same as the type createdStatement
+            if (!type.equals(existingType))
+            {
+                throw new EventAdapterException("Event type named '" + eventTypeAlias +
+                        "' has already been declared with differing column name or type information");
+            }
+
+            // Since it's the same, return the existing type
+            return existingType;
+        }
+
         aliasToTypeMap.put(eventTypeAlias, type);
         xmldomRootElementNames.put(configurationEventTypeXMLDOM.getRootElementName(), type);
 
@@ -369,6 +383,8 @@ public abstract class EventAdapterServiceBase implements EventAdapterService
         idToTypeMap.put(eventTypeID, type);
         idToAliasMap.put(eventTypeID, eventTypeAlias);
         typeToIdMap.put(type, eventTypeID);
+
+        return type;
     }
 
     public synchronized EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException

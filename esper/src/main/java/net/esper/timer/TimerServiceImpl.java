@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.timer;
 
 import org.apache.commons.logging.LogFactory;
@@ -43,7 +50,7 @@ public final class TimerServiceImpl implements TimerService
         {
             throw new IllegalStateException("Timer callback not set");
         }
-        
+
         timer = new Timer(true);        // Timer started as a deamon thread
         timerTask = new EQLTimerTask(timerCallback);
 

@@ -10,13 +10,13 @@ import org.apache.commons.logging.*;
  */
 public abstract class JMSInputAdapter implements InputAdapter, AdapterSPI
 {
+    private final Log log = LogFactory.getLog(this.getClass());
+
     protected final AdapterStateManager stateManager = new AdapterStateManager();
     protected EPServiceProviderSPI epServiceProviderSPI;
     protected long currentTime = 0;
     protected long startTime;
     protected JMSMessageUnmarshaler jmsMessageUnmarshaler;
-
-    private final Log log = LogFactory.getLog(this.getClass());
 
     public JMSMessageUnmarshaler getJmsMessageUnmarshaler()
     {

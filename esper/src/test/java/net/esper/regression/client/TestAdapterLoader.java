@@ -18,7 +18,7 @@ public class TestAdapterLoader extends TestCase
         props.put("name", "val");
         config.addAdapterLoader("MyLoader", SupportAdapterLoader.class.getName(), props);
 
-        EPServiceProvider service = EPServiceProviderManager.getDefaultProvider(config);
+        EPServiceProvider service = EPServiceProviderManager.getProvider("TestAdapterLoader", config);
         assertEquals("MyLoader", SupportAdapterLoader.getNames().get(0));
         assertEquals("val", SupportAdapterLoader.getProps().get(0).get("name"));
     }

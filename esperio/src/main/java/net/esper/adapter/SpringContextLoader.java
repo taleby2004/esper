@@ -28,6 +28,22 @@ public class SpringContextLoader implements AdapterLoader
     {
     }
 
+    public void destroy()
+    {
+        for (Adapter adapter : adapterMap.values())
+        {
+            adapterSpringContext.destroy();
+            if (adapter.getState() == AdapterState.STARTED)
+            {
+                adapter.stop();
+            }
+            if ((adapter.getState() == AdapterState.OPENED) || (adapter.getState() == AdapterState.PAUSED))
+            {
+                adapter.destroy();
+            }
+        }
+    }
+
     public void init(String name, Properties properties, EPServiceProviderSPI epService)
     {
         boolean fromClassPath = true;

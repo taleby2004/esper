@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
@@ -25,7 +32,7 @@ public class ExprBetweenNode extends ExprNode
      * @param lowEndpointIncluded is true for the regular 'between' or false for "val in (a:b)" (open range), or
      * false if the endpoint is not included
      * @param highEndpointIncluded indicates whether the high endpoint is included
-     * @param notBetween is true for 'not between' or 'not in (a:b), or false for a regular between 
+     * @param notBetween is true for 'not between' or 'not in (a:b), or false for a regular between
      */
     public ExprBetweenNode(boolean lowEndpointIncluded, boolean highEndpointIncluded, boolean notBetween)
     {
@@ -54,7 +61,7 @@ public class ExprBetweenNode extends ExprNode
 
     /**
      * Returns true for inverted range, or false for regular (openn/close/half-open/half-closed) ranges.
-     * @return true for not betwene, false for between 
+     * @return true for not betwene, false for between
      */
     public boolean isNotBetween()
     {
@@ -140,7 +147,7 @@ public class ExprBetweenNode extends ExprNode
         {
             return !result;
         }
-        
+
         return result;
     }
 
@@ -287,7 +294,7 @@ public class ExprBetweenNode extends ExprNode
                 upperD = lowerD;
                 lowerD = temp;
             }
-            
+
             if (valueD > lowerD)
             {
                 if (valueD < upperD)
