@@ -9,7 +9,7 @@
         </para>
 
         <para>
-			Use Esper's administrative interface to create event patterns and EQL statements as discussed in <xref linkend="event-pattern-intro"/> and <xref linkend="eql-intro"/>. 
+			Use Esper's administrative interface to create and manage EQL and pattern statements, and set runtime configurations, as discussed in <xref linkend="eql-intro"/> and <xref linkend="event-pattern-intro"/>. 
         </para>
         
         <para>
@@ -54,14 +54,16 @@
     <sect1 id="api-administrative">
         <title>The Administrative Interface</title>
 
-        <para>
-			Create event pattern expression and EQL statements via the administrative interface <literal>EPAdministrator</literal>.
-        </para>
-
-        <para>
-			This code snippet gets an Esper engine then creates an event pattern and an EQL statement.
-        </para>
-		<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+		<sect2 id="api-admin-creating">
+        <title>Creating Statements</title>
+			<para>
+				Create event pattern expression and EQL statements via the administrative interface <literal>EPAdministrator</literal>.
+			</para>
+	
+			<para>
+				This code snippet gets an Esper engine then creates an event pattern and an EQL statement.
+			</para>
+			<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
 EPAdministrator admin = epService.getEPAdministrator();
 
 EPStatement 10secRecurTrigger = admin.createPattern(
@@ -71,55 +73,121 @@ EPStatement countStmt = admin.createEQL(
   "select count(*) from MarketDataBean.win:time(60 sec)");
 ]]></programlisting>
 
-        <para>
-			Note that event pattern expressions can also occur within EQL statements. This is outlined in more detail in <xref linkend="eql-from-clause-patterns"/>.
-        </para>
+			<para>
+				Note that event pattern expressions can also occur within EQL statements. This is outlined in more detail in <xref linkend="eql-from-clause-patterns"/>.
+			</para>
+	
+			<para>
+				The <literal>create</literal> methods on <literal>EPAdministrator</literal> are overloaded and allow an optional statement name to be passed to the engine. A statement name can be useful for retrieving a statement
+				by name from the engine at a later time. The engine assigns a statement name if no statement name is supplied on statement creation.
+			</para>
 
-        <para>
-			The <literal>createPattern</literal> and <literal>createEQL</literal> methods return <literal>EPStatement</literal> instances. Statements are automatically started and active when created. A statement can also be stopped and started again via the <literal>stop</literal> and <literal>start</literal> methods shown in the code snippet below.
-        </para>
-		<programlisting><![CDATA[countStmt.stop();
-countStmt.start();
-]]></programlisting>
-		
-        <para>
-			We can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods the <literal>EPStatement</literal>  statement. We need to provide an implementation of the <literal>UpdateListener</literal> interface to the statement.
-        </para>
-		<programlisting><![CDATA[UpdateListener myListener = new MyUpdateListener();
-countStmt.addListener(myListener);
-]]></programlisting>
+			<para>
+				The <literal>createPattern</literal> and <literal>createEQL</literal> methods return <literal>EPStatement</literal> instances. Statements are automatically started and active when created. A statement can also be stopped and started again via the <literal>stop</literal> and <literal>start</literal> methods shown in the code snippet below.
+			</para>
+			<programlisting><![CDATA[countStmt.stop();
+countStmt.start();]]></programlisting>
+	
+	  </sect2>
 
-		<para>			
-			EQL statements and event patterns publish old data and new data to registered <literal>UpdateListener</literal> listeners. 
-			New data published by statements is the events representing the new values of derived data held by the statement.
-			Old data published by statements constists of the events representing the prior values of derived data held by the statement.
-		</para>
-		
-        <para>
-			Subscribing to events posted by a statement is following a push model. The engine pushes data to listeners when events are received that cause data to change or patterns to match. Alternatively, statements can also serve up data in a pull model via the <literal>iterator</literal> method. This can come in handy if we are not interested in all new updates, but only want to perform a frequent poll for the latest data. For example, an event pattern that fires every 5 seconds could be used to pull data from an EQL statement. The code snippet below demonstrates some pull code.			
-        </para>
-		<programlisting><![CDATA[Iterator<EventBean> eventIter = countStmt.iterator();
+	  <sect2 id="api-admin-listeners">		
+			<title>Adding Listeners</title>
+			<para>
+				We can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods on <literal>EPStatement</literal> . We need to provide an implementation of the <literal>UpdateListener</literal> interface to the statement:
+			</para>
+			<programlisting><![CDATA[UpdateListener myListener = new MyUpdateListener();
+countStmt.addListener(myListener);]]></programlisting>
+
+			<para>			
+				EQL statements and event patterns publish old data and new data to registered <literal>UpdateListener</literal> listeners. 
+				New data published by statements is the events representing the new values of derived data held by the statement.
+				Old data published by statements constists of the events representing the prior values of derived data held by the statement.
+			</para>		
+	  </sect2>
+
+	  <sect2 id="api-admin-iterators">		
+			<title>Using Iterators</title>
+			<para>
+				Subscribing to events posted by a statement is following a push model. The engine pushes data to listeners when events are received that cause data to change or patterns to match. Alternatively, statements can also serve up data in a pull model via the <literal>iterator</literal> method. This can come in handy if we are not interested in all new updates, but only want to perform a frequent poll for the latest data. For example, an event pattern that fires every 5 seconds could be used to pull data from an EQL statement. The code snippet below demonstrates some pull code.			
+			</para>
+			<programlisting><![CDATA[Iterator<EventBean> eventIter = countStmt.iterator();
 for (EventBean event : eventIter) {
    // .. do something ..
-}
-]]></programlisting>
+}]]></programlisting>
 
-        <para>
-			This is a second example:
-        </para>
-		<programlisting><![CDATA[double averagePrice = (Double) eqlStatement.iterator().next().get("average");]]></programlisting>
-		
-		<para>
-			Esper places the following restrictions on the pull API and usage of the <literal>iterator</literal> method:
-		</para>
+			<para>
+				This is a second example:
+			</para>
+			<programlisting><![CDATA[double averagePrice = (Double) eqlStatement.iterator().next().get("average");]]></programlisting>
+			
+			<para>
+				Esper places the following restrictions on the pull API and usage of the <literal>iterator</literal> method:
+			</para>
+	
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						EQL statements joining multiple event streams do not support the pull API 
+					</para>
+				</listitem>
+			</orderedlist>
+		</sect2>
 
-		<orderedlist spacing="compact">
-			<listitem>
-				<para>
-					EQL statements joining multiple event streams do not support the pull API 
-				</para>
-			</listitem>
-		</orderedlist>
+	    <sect2 id="api-admin-mgmt-stmt">		
+			<title>Managing Statements</title>
+
+			<para>
+				The <literal>EPAdministrator</literal> interface provides the facilities for managing statements:
+			</para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						Use the <literal>getStatement</literal> method to obtain an existing started or stopped statement by name
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Use the <literal>getStatementNames</literal> methods to obtain a list of started and stopped statement names
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Use the <literal>startAllStatements</literal>, <literal>stopAllStatements</literal> and <literal>destroyAllStatements</literal> methods to manage all statements in one operation
+					</para>
+				</listitem>
+			</itemizedlist>				
+	    </sect2>
+
+	    <sect2 id="api-admin-runtime-config">		
+			<title>Runtime Engine Configuration</title>
+			<para>
+				Certain configuration changes are available to perform on an engine instance while in operation. Such configuration operations are available via the <literal>getConfiguration</literal> method on <literal>EPAdministrator</literal>,
+				which returns an <literal>ConfigurationOperations</literal> object.
+			</para>
+
+			<para>
+				The  configuration operations available on a running engine instance are as follows. Please see <xref linkend="configuration"/> for more information. 
+			</para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						Add an new event type for a JavaBean class, legacy Java class or custom Java class
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Add an new DOM XML event type
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Add an new Map-based event type
+					</para>
+				</listitem>
+			</itemizedlist>				
+	    </sect2>
 
     </sect1>
 

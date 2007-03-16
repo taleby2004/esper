@@ -21,12 +21,26 @@ import java.util.LinkedList;
  */
 public abstract class BaseSubscription implements Subscription, FilterHandleCallback
 {
+    /**
+     * The output adapter to which the subscription applies.
+     */
     protected OutputAdapter adapter;
+
+    /**
+     * The event type of the events we are subscribing for.
+     */
     protected String eventTypeAlias;
+
+    /**
+     * The name of the subscription.
+     */
     protected String subscriptionName;
 
     public abstract void matchFound(EventBean event);
 
+    /**
+     * Ctor, assigns default name.
+     */
     public BaseSubscription()
     {
         subscriptionName = "default";
@@ -47,6 +61,10 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
         return eventTypeAlias;
     }
 
+    /**
+     * Set the event type name we are looking for.
+     * @param eventTypeAlias is a type name
+     */
     public void setEventTypeAlias(String eventTypeAlias)
     {
         this.eventTypeAlias = eventTypeAlias;

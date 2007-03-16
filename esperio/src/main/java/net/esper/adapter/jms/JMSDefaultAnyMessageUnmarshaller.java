@@ -20,9 +20,9 @@ import java.io.Serializable;
 /**
  * Created for ESPER.
  */
-public class JMSDefaultAnyMessageUnmarshaler implements JMSMessageUnmarshaler
+public class JMSDefaultAnyMessageUnmarshaller implements JMSMessageUnmarshaller
 {
-    private static final Log log = LogFactory.getLog(JMSDefaultAnyMessageUnmarshaler.class);
+    private static final Log log = LogFactory.getLog(JMSDefaultAnyMessageUnmarshaller.class);
 
     public EventBean unmarshal(EventAdapterService eventAdapterService,
                                Message message) throws EPException

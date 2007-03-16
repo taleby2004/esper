@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+/**
+ * Loader for Spring-configured input and output adapters.
+ */
 public class SpringContextLoader implements AdapterLoader
 {
     private final Log log = LogFactory.getLog(this.getClass());

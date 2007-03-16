@@ -37,8 +37,8 @@
   </bean>
 
   <!--  Marshaller marshalls events into map messages -->
-  <bean id="jmsMessageMarshaler" class="net.esper.adapter.jms.JMSDefaultMapMessageMarshaler"/>
-  <bean id="myCustomMarshaler" class="net.esper.adapter.jms.JMSDefaultMapMessageMarshaler"/>
+  <bean id="jmsMessageMarshaller" class="net.esper.adapter.jms.JMSDefaultMapMessageMarshaller"/>
+  <bean id="myCustomMarshaller" class="net.esper.adapter.jms.JMSDefaultMapMessageMarshaller"/>
 
   <!--  Output adapter puts it all together -->
   <bean id="jmsOutputAdapter" class="net.esper.adapter.jms.SpringJMSTemplateOutputAdapter">
@@ -57,8 +57,8 @@
         </entry>
       </map>
     </property>
-    <property name="jmsMessageMarshaler">
-      <ref bean="jmsMessageMarshaler"/>
+    <property name="jmsMessageMarshaller">
+      <ref bean="jmsMessageMarshaller"/>
     </property>
   </bean>
 
@@ -68,8 +68,8 @@
 
   <bean id="subscriptionTwo" class="net.esper.adapter.jms.JMSSubscription">
     <property name="eventTypeAlias" value="MyMapEventTwo"/>
-    <property name="jmsMessageMarshaler">
-      <ref bean="myCustomMarshaler"/>
+    <property name="jmsMessageMarshaller">
+      <ref bean="myCustomMarshaller"/>
     </property>
   </bean>
 

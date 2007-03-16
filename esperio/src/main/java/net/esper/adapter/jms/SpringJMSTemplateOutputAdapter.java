@@ -2,12 +2,14 @@ package net.esper.adapter.jms;
 
 import net.esper.client.*;
 import net.esper.event.*;
-import net.esper.adapter.AdapterSPI;
 import org.apache.commons.logging.*;
 import org.springframework.jms.core.*;
 
 import javax.jms.*;
 
+/**
+ * Output adapter for sending engine events out into the JMS world using Spring JMS templates.
+ */
 public class SpringJMSTemplateOutputAdapter extends JMSOutputAdapter
 {
     private JmsTemplate jmsTemplate;
@@ -15,19 +17,26 @@ public class SpringJMSTemplateOutputAdapter extends JMSOutputAdapter
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    // getters and setters called by Spring
+    /**
+     * Returns the jms template.
+     * @return Spring JMS template
+     */
     public JmsTemplate getJmsTemplate()
     {
         return jmsTemplate;
     }
 
+    /**
+     * Sets the Spring JMS template
+     * @param jmsTemplate to set
+     */
     public void setJmsTemplate(JmsTemplate jmsTemplate)
     {
         this.jmsTemplate = jmsTemplate;
     }
 
     public void send(final EventBean eventBean,
-                     JMSMessageMarshaler jmsMessageMarshaler) throws EPException
+                     JMSMessageMarshaller jmsMessageMarshaller) throws EPException
     {
         if (jmsTemplate != null)
         {
@@ -36,9 +45,9 @@ public class SpringJMSTemplateOutputAdapter extends JMSOutputAdapter
                 messageCreator = new SpringMessageCreator();
             }
             messageCreator.setMessageParameters(
-                    eventBean, ((jmsMessageMarshaler != null) ?
-                    jmsMessageMarshaler :
-                    this.jmsMessageMarshaler));
+                    eventBean, ((jmsMessageMarshaller != null) ?
+                    jmsMessageMarshaller :
+                    this.jmsMessageMarshaller));
             if (destination != null)
             {
                 jmsTemplate.send(destination, messageCreator);
@@ -53,23 +62,23 @@ public class SpringJMSTemplateOutputAdapter extends JMSOutputAdapter
     private class SpringMessageCreator implements MessageCreator
     {
         EventBean eventBean;
-        JMSMessageMarshaler jmsMessageMarshaler;
+        JMSMessageMarshaller jmsMessageMarshaller;
 
         public void setMessageParameters(EventBean eventBean,
-                                         JMSMessageMarshaler jmsMessageMarshaler)
+                                         JMSMessageMarshaller jmsMessageMarshaller)
         {
             this.eventBean = eventBean;
-            this.jmsMessageMarshaler = jmsMessageMarshaler;
+            this.jmsMessageMarshaller = jmsMessageMarshaller;
         }
 
         public Message createMessage(Session session)
         {
-            if ((eventBean == null) || (jmsMessageMarshaler == null))
+            if ((eventBean == null) || (jmsMessageMarshaller == null))
             {
                 return null;
             }
             Message msg =
-                    jmsMessageMarshaler.marshal(eventBean, session, getCurrentTime());
+                    jmsMessageMarshaller.marshal(eventBean, session, System.currentTimeMillis());
             log.debug("Creating jms message from event." + msg.toString());
             return msg;
         }

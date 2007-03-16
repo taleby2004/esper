@@ -97,7 +97,7 @@
 
 
         <para>
-				To use the CSVInputAdapter without any options, the event type <literal>PriceEvent</literal> and it's property names and value types must be known to the engine. The next section elaborates on adapter options.
+				To use the CSVInputAdapter without any options, the event type <literal>PriceEvent</literal> and its property names and value types must be known to the engine. The next section elaborates on adapter options.
         </para>
 
 		<itemizedlist spacing="compact">

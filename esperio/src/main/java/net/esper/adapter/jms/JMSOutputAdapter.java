@@ -15,25 +15,53 @@ import java.util.*;
  */
 public abstract class JMSOutputAdapter implements OutputAdapter, AdapterSPI
 {
-    protected EPServiceProviderSPI spi;
-    protected long startTime;
-    protected final AdapterStateManager stateManager = new AdapterStateManager();
-    protected Map<String, Subscription> subscriptionMap;
-    protected JMSMessageMarshaler jmsMessageMarshaler;
+    private EPServiceProviderSPI spi;
+    private long startTime;
+    private final AdapterStateManager stateManager = new AdapterStateManager();
+    private Map<String, Subscription> subscriptionMap;
+
+    /**
+     * Abstract send methods for marshalling and sending an event of to JMS care.
+     * @param eventBean is the event
+     * @param jmsAdapterMarshaller is the marshaller
+     * @throws EPException when the send failed
+     */
+    public abstract void send(final EventBean eventBean, JMSMessageMarshaller jmsAdapterMarshaller) throws EPException;
+
+    /**
+     * Marshaller to use.
+     */
+    protected JMSMessageMarshaller jmsMessageMarshaller;
+
+    /**
+     * JMS Destination.
+     */
     protected Destination destination;
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    public JMSMessageMarshaler getJmsMessageMarshaler()
+    /**
+     * Returns the JMS message marshaller.
+     * @return marshaller
+     */
+    public JMSMessageMarshaller getJmsMessageMarshaller()
     {
-        return jmsMessageMarshaler;
+        return jmsMessageMarshaller;
     }
 
-    public void setJmsMessageMarshaler(JMSMessageMarshaler jmsMessageMarshaler)
+    /**
+     * Sets the JMS message marshaller.
+     * @param jmsMessageMarshaller is the marshaller
+     */
+    public void setJmsMessageMarshaller(JMSMessageMarshaller jmsMessageMarshaller)
     {
-        this.jmsMessageMarshaler = jmsMessageMarshaler;
+        this.jmsMessageMarshaller = jmsMessageMarshaller;
     }
 
+    /**
+     * Sets the JMS destination.
+     * @param destination is the queue or topic
+     */
     public void setDestination(Destination destination)
     {
         this.destination = destination;
@@ -92,8 +120,11 @@ public abstract class JMSOutputAdapter implements OutputAdapter, AdapterSPI
             throw new EPException("Attempting to start an Adapter that hasn't had the epService provided");
         }
 
-        startTime = getCurrentTime();
-        log.debug(".start startTime==" + startTime);
+        startTime = System.currentTimeMillis();
+        if (log.isDebugEnabled())
+        {
+            log.debug(".start startTime==" + startTime);
+        }
         
         stateManager.start();
         Iterator<Map.Entry<String, Subscription>> it = subscriptionMap.entrySet().iterator();
@@ -131,13 +162,4 @@ public abstract class JMSOutputAdapter implements OutputAdapter, AdapterSPI
     {
         return stateManager.getState();
     }
-
-    public abstract void send(final EventBean eventBean,
-                              JMSMessageMarshaler jmsAdapterMarshaler) throws EPException;
-
-    protected long getCurrentTime()
-    {
-        return System.currentTimeMillis();
-    }
-
 }

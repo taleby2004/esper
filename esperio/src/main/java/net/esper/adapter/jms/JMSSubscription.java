@@ -1,25 +1,38 @@
 package net.esper.adapter.jms;
 
 import net.esper.adapter.subscription.*;
-import net.esper.adapter.*;
 import net.esper.event.*;
 
+/**
+ * Represents the JMS-aspects of a subscription.
+ */
 public class JMSSubscription extends BaseSubscription
 {
-    private JMSMessageMarshaler jmsMessageMarshaler;
+    private JMSMessageMarshaller jmsMessageMarshaller;
 
+    /**
+     * Empty Ctor required for use with Spring.
+     */
     public JMSSubscription()
     {
     }
 
-    public JMSMessageMarshaler getJmsMessageMarshaler()
+    /**
+     * Returns the marshaller to use for this subscription.
+     * @return marshaller
+     */
+    public JMSMessageMarshaller getJmsMessageMarshaller()
     {
-        return jmsMessageMarshaler;
+        return jmsMessageMarshaller;
     }
 
-    public void setJmsMessageMarshaler(JMSMessageMarshaler jmsMessageMarshaler)
+    /**
+     * Sets the marshaller to use for this subscription.
+     * @param jmsMessageMarshaller to use
+     */
+    public void setJmsMessageMarshaller(JMSMessageMarshaller jmsMessageMarshaller)
     {
-        this.jmsMessageMarshaler = jmsMessageMarshaler;
+        this.jmsMessageMarshaller = jmsMessageMarshaller;
     }
 
     public void matchFound(EventBean event)
@@ -28,6 +41,6 @@ public class JMSSubscription extends BaseSubscription
         {
             return;
         }
-        ((JMSOutputAdapter) (adapter)).send(event, jmsMessageMarshaler);
+        ((JMSOutputAdapter) (adapter)).send(event, jmsMessageMarshaller);
     }
 }

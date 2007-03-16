@@ -12,21 +12,43 @@ public abstract class JMSInputAdapter implements InputAdapter, AdapterSPI
 {
     private final Log log = LogFactory.getLog(this.getClass());
 
+    /**
+     * Manages adapter state.
+     */
     protected final AdapterStateManager stateManager = new AdapterStateManager();
-    protected EPServiceProviderSPI epServiceProviderSPI;
-    protected long currentTime = 0;
-    protected long startTime;
-    protected JMSMessageUnmarshaler jmsMessageUnmarshaler;
 
-    public JMSMessageUnmarshaler getJmsMessageUnmarshaler()
+    /**
+     * Engine services.
+     */
+    protected EPServiceProviderSPI epServiceProviderSPI;
+
+    /**
+     * Start time.
+     */
+    protected long startTime;
+
+    /**
+     * Unmarshaller for JMS messages.
+     */
+    protected JMSMessageUnmarshaller jmsMessageUnmarshaller;
+
+    /**
+     * Returns the unmarshaller.
+     * @return unmarshaller
+     */
+    public JMSMessageUnmarshaller getJmsMessageUnmarshaller()
     {
-        return jmsMessageUnmarshaler;
+        return jmsMessageUnmarshaller;
     }
 
-    public void setJmsMessageUnmarshaler(
-            JMSMessageUnmarshaler jmsMessageUnmarshaler)
+    /**
+     * Sets the unmarshaller to use.
+     * @param jmsMessageUnmarshaller is the unmarshaller to use
+     */
+    public void setJmsMessageUnmarshaller(
+            JMSMessageUnmarshaller jmsMessageUnmarshaller)
     {
-        this.jmsMessageUnmarshaler = jmsMessageUnmarshaler;
+        this.jmsMessageUnmarshaller = jmsMessageUnmarshaller;
     }
 
     public EPServiceProvider getEPServiceProvider()
@@ -55,8 +77,12 @@ public abstract class JMSInputAdapter implements InputAdapter, AdapterSPI
             throw new EPException(
                     "Attempting to start an Adapter that hasn't had the epService provided");
         }
-        startTime = getCurrentTime();
-        log.debug(".start startTime==" + startTime);
+
+        startTime = System.currentTimeMillis();
+        if (log.isDebugEnabled())
+        {
+            log.debug(".start startTime==" + startTime);
+        }
         stateManager.start();
     }
 
@@ -88,11 +114,4 @@ public abstract class JMSInputAdapter implements InputAdapter, AdapterSPI
     {
         return stateManager.getState();
     }
-
-    protected long getCurrentTime()
-    {
-        return System.currentTimeMillis();
-    }
-
-
 }

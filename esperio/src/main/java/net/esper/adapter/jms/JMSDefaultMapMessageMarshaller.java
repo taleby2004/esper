@@ -10,12 +10,10 @@ import javax.jms.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.*;
-
 /**
  * Marshals the response out of the event bean into a jms map message.
  */
-public class JMSDefaultMapMessageMarshaler implements JMSMessageMarshaler
+public class JMSDefaultMapMessageMarshaller implements JMSMessageMarshaller
 {
     private final Log log = LogFactory.getLog(this.getClass());
 

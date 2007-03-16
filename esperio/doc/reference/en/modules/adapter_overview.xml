@@ -6,13 +6,13 @@
     </para>
     
     <para>
-        The following input adapters exist. There are currently no output adapters available.
+        The following input and output adapters exist:
     </para>
 
 	<table frame="topbot" id="adapter-available" revision="2">
 		<title>Input and Output Adapters</title>
 		<tgroup cols="2">
-			<colspec colwidth="2.0*"/>
+			<colspec colwidth="1.0*"/>
 			<colspec colwidth="1.5*"/>
 			<thead>
 				<row>
@@ -29,6 +29,14 @@
 						</para>
 					</entry>
 				</row>
+				<row>
+					<entry>Spring JMS Input and Output Adapter</entry>
+					<entry>
+						<para>
+							JMS adapters based on the JmsTemplate offered by Spring 2. Provides unmarshalling of JMS <literal>javax.jms.Message</literal> messages for sending into an engine instance, and marshaling of <literal>net.esper.EventBean</literal> events into JMS messages.
+						</para>
+					</entry>
+				</row>
 			</tbody>
 		</tgroup>
 	</table>
@@ -36,86 +44,27 @@
     <sect1 id="adapter-shared">
         <title>Adapter Library Classes</title>
         
-		<sect2 id="adapter-inputsource">
-			<title>Using AdapterInputSource</title>
-	
-			<para>
-					The <literal>net.esper.adapter.AdapterInputSource</literal> encapsulates information about an input source. Input adapters use the <literal>AdapterInputSource</literal> to determine how to read input. The class provides constructors for use with different input sources:
-			</para>	
-
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						<literal>java.io.Reader</literal> to read character streams
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<literal>java.io.InputStream</literal> to read byte streams
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<literal>java.net.URL</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Classpath resource by name
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						<literal>java.io.File</literal>
-					</para>
-				</listitem>
-			</itemizedlist>
-
-			<para>
-					Adapters resolve Classpath resources in the following order:
-			</para>	
-
-			<orderedlist spacing="compact">
-				<listitem>
-					<para>
-						Current thread classloader via <literal>Thread.currentThread().getContextClassLoader().getResourceAsStream</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						If the resource is not found: <literal>AdapterInputSource.class.getResourceAsStream</literal>
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						If the resource is not found: <literal>AdapterInputSource.class.getClassLoader().getResourceAsStream</literal>
-					</para>
-				</listitem>
-			</orderedlist>
-
-		</sect2>
-		
 		<sect2 id="adapter-inputadapter">
-			<title>The InputAdapter Interface</title>
+			<title>The Adapter Interface</title>
 	
 			<para>
-					The <literal>InputAdapter</literal> interface allows client applications to control the state of an input adapter. It provides state transition methods that each
-					input adapter implements. 
+					The <literal>Adapter</literal> interface allows client applications to control the state of an input and output adapter. It provides state transition methods that each
+					input and output adapter implements. 
 			</para>
 			
 			<para>
-					An input adapter is always in one of the following states:
+					An input or output adapter is always in one of the following states:
 			</para>
 
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Opened - The begin state; The adapter is not generating events in this state
+						Opened - The begin state; The adapter is not generating or accepting events in this state
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						Started - When the adapter is active and generating events
+						Started - When the adapter is active, generating and accepting events
 					</para>
 				</listitem>
 				<listitem>
@@ -131,7 +80,7 @@
 			</itemizedlist>
 
 			<para>
-					The state transition table below outlines input adapter states and, for each state, the valid state transitions:
+					The state transition table below outlines adapter states and, for each state, the valid state transitions:
 			</para>
 
 			<table frame="topbot" id="adapter-states" revision="2">
@@ -193,7 +142,66 @@
 			</table>
 						
 		</sect2>
+
+		<sect2 id="adapter-inputsource">
+			<title>Using AdapterInputSource</title>
+	
+			<para>
+					The <literal>net.esper.adapter.AdapterInputSource</literal> encapsulates information about an input source. Input adapters use the <literal>AdapterInputSource</literal> to determine how to read input. The class provides constructors for use with different input sources:
+			</para>	
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						<literal>java.io.Reader</literal> to read character streams
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>java.io.InputStream</literal> to read byte streams
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>java.net.URL</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Classpath resource by name
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>java.io.File</literal>
+					</para>
+				</listitem>
+			</itemizedlist>
+
+			<para>
+					Adapters resolve Classpath resources in the following order:
+			</para>	
+
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						Current thread classloader via <literal>Thread.currentThread().getContextClassLoader().getResourceAsStream</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						If the resource is not found: <literal>AdapterInputSource.class.getResourceAsStream</literal>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						If the resource is not found: <literal>AdapterInputSource.class.getClassLoader().getResourceAsStream</literal>
+					</para>
+				</listitem>
+			</orderedlist>
+
+		</sect2>
+		
     </sect1>
 
 </chapter>
-

@@ -3,10 +3,11 @@
                       "../support/docbook-dtd/docbookx.dtd" [
 	<!ENTITY adapter_overview SYSTEM "modules/adapter_overview.xml">
 	<!ENTITY adapter_csv SYSTEM "modules/adapter_csv.xml">
+	<!ENTITY adapter_jms_spring SYSTEM "modules/adapter_jms_spring.xml">
 ]>
 <book lang="en">
 	<bookinfo>
-		<title>Esper Adapters - Java Event Stream Processor </title>
+		<title>Esper Adapters</title>
 		<subtitle>Esper Adapter Reference Documentation</subtitle>
 		<releaseinfo>1.6.0</releaseinfo>
 	</bookinfo>
@@ -14,11 +15,11 @@
 	<preface id="preface" revision="1">
 		<title>Preface</title>
 		<para>
-			Esper Adapters contains all input and output adapters for the Esper Java event stream processor.
+			This document describes input and output adapters for the Esper Java event stream and complex event processor.
         </para>
         
 		<para>
-			If you are new to Esper, the Esper reference manual should be your first stop. If you are looking for 
+			If you are new to Esper, the Esper reference manual should be your first stop.
 		</para>
 			
 		<para>
@@ -31,4 +32,5 @@
     
     &adapter_csv;
 
+    &adapter_jms_spring;
 </book>

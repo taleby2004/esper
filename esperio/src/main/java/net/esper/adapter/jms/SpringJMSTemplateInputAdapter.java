@@ -7,6 +7,9 @@ import org.springframework.jms.core.*;
 
 import javax.jms.*;
 
+/**
+ * Input adapter for receiving engine from the JMS world using Spring JMS templates and sending these to an engine.
+ */
 public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
         implements MessageListener
 {
@@ -14,12 +17,19 @@ public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
 
     private final Log log = LogFactory.getLog(getClass());
 
-    // getters and setters called by Spring
+    /**
+     * Returns the jms template.
+     * @return Spring JMS template
+     */
     public JmsTemplate getJmsTemplate()
     {
         return jmsTemplate;
     }
 
+    /**
+     * Sets the Spring JMS template
+     * @param jmsTemplate is the jms template
+     */
     public void setJmsTemplate(JmsTemplate jmsTemplate)
     {
         this.jmsTemplate = jmsTemplate;
@@ -44,7 +54,7 @@ public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
 
             synchronized (message)
             {
-                Object event = jmsMessageUnmarshaler.unmarshal(epServiceProviderSPI.getEventAdapterService(), message);
+                Object event = jmsMessageUnmarshaller.unmarshal(epServiceProviderSPI.getEventAdapterService(), message);
 
                 if (event != null)
                 {

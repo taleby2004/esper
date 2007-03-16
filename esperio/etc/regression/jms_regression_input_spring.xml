@@ -44,15 +44,15 @@
   </bean>
 
   <!-- Default unmarshaller -->
-  <bean id="jmsMessageUnmarshaler" class="net.esper.adapter.jms.JMSDefaultAnyMessageUnmarshaler"/>
+  <bean id="jmsMessageUnmarshaller" class="net.esper.adapter.jms.JMSDefaultAnyMessageUnmarshaller"/>
 
   <!-- Input adapter -->
   <bean id="jmsInputAdapter" class="net.esper.adapter.jms.SpringJMSTemplateInputAdapter">
     <property name="jmsTemplate">
       <ref bean="jmsActiveMQTemplate"/>
     </property>
-    <property name="jmsMessageUnmarshaler">
-      <ref bean="jmsMessageUnmarshaler"/>
+    <property name="jmsMessageUnmarshaller">
+      <ref bean="jmsMessageUnmarshaller"/>
     </property>
   </bean>
 
