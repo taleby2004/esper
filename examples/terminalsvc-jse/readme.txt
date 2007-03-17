@@ -21,7 +21,7 @@ GETTING Esper
 *************
 If you want to download Esper sources etc
 
-- download Esper x.y (f.e. 1.6)
+- download Esper
 http://esper.codehaus.org/evaluating/download/download.html
 
 Esper Documentation

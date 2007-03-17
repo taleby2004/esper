@@ -17,8 +17,6 @@ import java.util.List;
  * <p/>
  * It is also possible to place breakpoints and launch this in debug mode from your IDE to better understand
  * the execution flow (put breakpoints in the BaseTerminalEvent subclasses like CountPerTypeListener
- * <p/>
- * Refer to http://esper.codehaus.org/esper-1.6.0/doc/reference/en/html_single/index.html for Esper documentation
  */
 public class TerminalEventSimulator {
 
