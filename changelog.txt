@@ -13,6 +13,7 @@ Changes in version 1.7
 * Fixed issue ESPER-86 "selecting first element via prev and count(*)"
 * Fixed issue ESPER-92 "String with parantheses not parsing in static method arg"
 
+
 Changes in version 1.6
 ----------------------
 * Added support for group-by and previous (ESPER-80 Prev function to consider grouped windows)

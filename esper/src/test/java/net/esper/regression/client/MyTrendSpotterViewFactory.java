@@ -1,12 +1,11 @@
 package net.esper.regression.client;
 
-import net.esper.view.*;
 import net.esper.event.EventType;
-import net.esper.eql.core.ViewResourceCallback;
+import net.esper.view.*;
 
 import java.util.List;
 
-public class MyTrendSpotterViewFactory implements ViewFactory
+public class MyTrendSpotterViewFactory extends ViewFactorySupport
 {
     private String fieldName;
     private EventType eventType;
@@ -37,16 +36,6 @@ public class MyTrendSpotterViewFactory implements ViewFactory
         eventType = MyTrendSpotterView.createEventType(statementServiceContext);
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
-
     public View makeView(StatementServiceContext statementServiceContext)
     {
         return new MyTrendSpotterView(statementServiceContext, fieldName);
@@ -55,21 +44,5 @@ public class MyTrendSpotterViewFactory implements ViewFactory
     public EventType getEventType()
     {
         return eventType;
-    }
-
-    public boolean canReuse(View view)
-    {
-        if (!(view instanceof MyTrendSpotterView))
-        {
-            return false;
-        }
-
-        MyTrendSpotterView other = (MyTrendSpotterView) view;
-        if (!other.getFieldName().equals(fieldName))
-        {
-            return false;
-        }
-
-        return true;
     }
 }

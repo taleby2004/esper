@@ -10,6 +10,7 @@
 	<!ENTITY event_pattern SYSTEM "modules/event_pattern.xml">
 	<!ENTITY references SYSTEM "modules/references.xml">
 	<!ENTITY outputmodel SYSTEM "modules/outputmodel.xml">
+	<!ENTITY extension SYSTEM "modules/extension.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -80,6 +81,8 @@
     &EQL;
 
     &event_pattern;
+
+    &extension;
 
     &examples;
     

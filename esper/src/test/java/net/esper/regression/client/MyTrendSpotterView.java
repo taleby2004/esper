@@ -59,7 +59,6 @@ public class MyTrendSpotterView extends ViewSupport
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        // If we have child views, keep a reference to the old values, so we can fireStatementStopped them as old data event.
         EventBean oldDataPost = populateMap(trendcount);
 
         // add data points
@@ -85,7 +84,6 @@ public class MyTrendSpotterView extends ViewSupport
             }
         }
 
-        // If there are child view, fireStatementStopped update method
         if (this.hasViews())
         {
             EventBean newDataPost = populateMap(trendcount);
@@ -124,7 +122,7 @@ public class MyTrendSpotterView extends ViewSupport
     protected static EventType createEventType(StatementServiceContext statementServiceContext)
     {
         Map<String, Class> eventTypeMap = new HashMap<String, Class>();
-        eventTypeMap.put(PROPERTY_NAME, long.class);
+        eventTypeMap.put(PROPERTY_NAME, Long.class);
         return statementServiceContext.getEventAdapterService().createAnonymousMapType(eventTypeMap);
     }
 }

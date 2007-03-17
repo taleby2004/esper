@@ -68,6 +68,8 @@ Features
     * Input Adapters
     	
     	* CSV input adapter reads comma-separated value formats, and can simulate multiple event streams with timed playback
+    	
+    	* JMS input and output adapter based on Spring JMS templates
 
     * Relational database access via SQL-query joins with event streams; LRU and expiry-time query result caches
 	
@@ -87,7 +89,7 @@ Features
     	
     * Supports multiple independent Esper engines per JavaVM
     		  
-    * Pluggable architecture for event pattern and event stream analysis user-defined functions
+    * Pluggable architecture for event pattern and event stream analysis via user-defined functions and plug-in views
 	  
 	[]		
 
