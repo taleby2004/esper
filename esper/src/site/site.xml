@@ -18,8 +18,8 @@
 			<item name="Evaluating Esper" href="/evaluating/evaluating.html" collapse="false">
 				<item name="Tutorial" href="/evaluating/tutorial/tutorial.html"/>
 				<item name="Short Case Study" href="/evaluating/tutorial/feedmonitor_casestudy.html"/>
-				<!-- <item name="Case Study" href="/evaluating/tutorial/selfservterminal_casestudy.html"/> -->
 				<item name="Longer Case Study" href="/evaluating/tutorial/transaction_casestudy.html"/>
+				<item name="OnJava Article" href="http://www.onjava.com/pub/a/onjava/2007/03/07/esper-event-stream-processing-and-correlation.html"/>
 				<item name="Solution Patterns" href="/tutorial/faq/solution_patterns.html"/>
 				<item name="Download" href="/evaluating/download/download.html"/>
 			</item>
