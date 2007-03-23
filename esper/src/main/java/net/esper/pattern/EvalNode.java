@@ -11,6 +11,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.LinkedList;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Superclass of all nodes in an evaluation tree representing an event pattern expression.
@@ -69,6 +71,30 @@ public abstract class EvalNode
         for (EvalNode node : childNodes)
         {
             node.dumpDebug(prefix + "  ");
+        }
+    }
+
+    /**
+     * Searched recursivly for pattern evaluation filter nodes.
+     * @param currentNode is the root node
+     * @return list of filter nodes
+     */
+    public static List<EvalFilterNode> recusiveFilterChildNodes(EvalNode currentNode)
+    {
+        List<EvalFilterNode> nodeList = new ArrayList<EvalFilterNode>();
+        recusiveFilterChildNodes(nodeList, currentNode);
+        return nodeList;
+    }
+
+    private static void recusiveFilterChildNodes(List<EvalFilterNode> nodeList, EvalNode currentNode)
+    {
+        if (currentNode instanceof EvalFilterNode)
+        {
+            nodeList.add((EvalFilterNode) currentNode);
+        }
+        for (EvalNode node : currentNode.getChildNodes())
+        {
+            recusiveFilterChildNodes(nodeList, node);
         }
     }
 

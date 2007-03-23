@@ -7,6 +7,7 @@ import net.esper.eql.parse.EQLTreeWalker;
 import net.esper.eql.expression.ExprValidationException;
 import net.esper.filter.*;
 import net.esper.pattern.EvalFilterNode;
+import net.esper.pattern.EvalNode;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.event.SupportEventAdapterService;
@@ -70,7 +71,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getUnderlyingType());
 
-        List<EvalFilterNode> filters = PatternStreamSpecRaw.recusiveFilterChildNodes(spec.getEvalNode());
+        List<EvalFilterNode> filters = EvalNode.recusiveFilterChildNodes(spec.getEvalNode());
         assertEquals(1, filters.size());
 
         // node 0
@@ -92,7 +93,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getUnderlyingType());
 
-        List<EvalFilterNode> filters = PatternStreamSpecRaw.recusiveFilterChildNodes(spec.getEvalNode());
+        List<EvalFilterNode> filters = EvalNode.recusiveFilterChildNodes(spec.getEvalNode());
         assertEquals(2, filters.size());
 
         // node 0
@@ -131,7 +132,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getUnderlyingType());
 
-        List<EvalFilterNode> filters = PatternStreamSpecRaw.recusiveFilterChildNodes(spec.getEvalNode());
+        List<EvalFilterNode> filters = EvalNode.recusiveFilterChildNodes(spec.getEvalNode());
         assertEquals(2, filters.size());
 
         // node 0
@@ -165,7 +166,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getUnderlyingType());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("t").getUnderlyingType());
 
-        List<EvalFilterNode> filters = PatternStreamSpecRaw.recusiveFilterChildNodes(spec.getEvalNode());
+        List<EvalFilterNode> filters = EvalNode.recusiveFilterChildNodes(spec.getEvalNode());
         assertEquals(2, filters.size());
 
         // node 0

@@ -14,16 +14,20 @@ public class EPStatementHandle implements MetaDefItem
     private final ManagedLock statementLock;
     private final int hashCode;
     private EPStatementDispatch optionalDispatchable;
+    // handles self-join (ie. statement where from-clause lists the same event type or a super-type more then once)
+    // such that the internal dispatching must occur after both matches are processed
+    private boolean canSelfJoin;
 
     /**
      * Ctor.
      * @param statementLock is the statement resource lock
      * @param expressionText is the expression
      */
-    public EPStatementHandle(ManagedLock statementLock, String expressionText)
+    public EPStatementHandle(ManagedLock statementLock, String expressionText, boolean canSelfJoin)
     {
         this.statementLock = statementLock;
         hashCode = expressionText.hashCode() ^ statementLock.hashCode();
+        this.canSelfJoin = canSelfJoin;
     }
 
     /**
@@ -76,5 +80,10 @@ public class EPStatementHandle implements MetaDefItem
     public int hashCode()
     {
         return hashCode;
+    }
+
+    public boolean isCanSelfJoin()
+    {
+        return canSelfJoin;
     }
 }

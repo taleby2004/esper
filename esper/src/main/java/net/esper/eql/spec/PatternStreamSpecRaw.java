@@ -58,7 +58,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             throws ExprValidationException
     {
         // Determine al the filter nodes used in the pattern
-        List<EvalFilterNode> filterNodes = recusiveFilterChildNodes(evalNode);
+        List<EvalFilterNode> filterNodes = EvalNode.recusiveFilterChildNodes(evalNode);
 
         // Resolve all event types; some filters are tagged and we keep the order in which they are specified
         LinkedHashMap<String, EventType> taggedEventTypes = new LinkedHashMap<String, EventType>();
@@ -101,29 +101,5 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         }
 
         return new PatternStreamSpecCompiled(evalNode, taggedEventTypes, this.getViewSpecs(), this.getOptionalStreamName());
-    }
-
-    /**
-     * Searched recursivly for pattern evaluation filter nodes.
-     * @param currentNode is the root node
-     * @return list of filter nodes
-     */
-    protected static List<EvalFilterNode> recusiveFilterChildNodes(EvalNode currentNode)
-    {
-        List<EvalFilterNode> nodeList = new ArrayList<EvalFilterNode>();
-        recusiveFilterChildNodes(nodeList, currentNode);
-        return nodeList;
-    }
-
-    private static void recusiveFilterChildNodes(List<EvalFilterNode> nodeList, EvalNode currentNode)
-    {
-        if (currentNode instanceof EvalFilterNode)
-        {
-            nodeList.add((EvalFilterNode) currentNode);
-        }
-        for (EvalNode node : currentNode.getChildNodes())
-        {
-            recusiveFilterChildNodes(nodeList, node);
-        }
     }
 }

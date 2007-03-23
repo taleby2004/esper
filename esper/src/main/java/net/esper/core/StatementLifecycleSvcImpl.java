@@ -3,15 +3,16 @@ package net.esper.core;
 import net.esper.client.*;
 import net.esper.collection.Pair;
 import net.esper.eql.expression.ExprValidationException;
-import net.esper.eql.spec.StatementSpecRaw;
-import net.esper.eql.spec.StatementSpecCompiled;
-import net.esper.eql.spec.StreamSpecCompiled;
-import net.esper.eql.spec.StreamSpecRaw;
+import net.esper.eql.spec.*;
 import net.esper.util.ManagedLock;
 import net.esper.util.ManagedReadWriteLock;
 import net.esper.util.UuidGenerator;
 import net.esper.view.ViewProcessingException;
 import net.esper.view.Viewable;
+import net.esper.filter.FilterSpecCompiled;
+import net.esper.event.EventType;
+import net.esper.pattern.EvalFilterNode;
+import net.esper.pattern.EvalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -95,12 +96,15 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId)
     {
         ManagedLock statementResourceLock = services.getStatementLockFactory().getStatementLock(statementName, expression);
-        EPStatementHandle epStatementHandle = new EPStatementHandle(statementResourceLock, expression);
 
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
 
         StatementSpecCompiled compiledSpec = compile(statementSpec, expression);
+        // In a join statements if the same event type or it's deep super types are used in the join more then once,
+        // then this is a self-join and the statement handle must know to dispatch the results together
+        boolean canSelfJoin = isPotentialSelfJoin(compiledSpec.getStreamSpecs());
+        EPStatementHandle epStatementHandle = new EPStatementHandle(statementResourceLock, expression, canSelfJoin);
 
         eventProcessingRWLock.acquireWriteLock();
         try
@@ -129,6 +133,80 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
 
         return statementDesc;
+    }
+
+    private boolean isPotentialSelfJoin(List<StreamSpecCompiled> streamSpecs)
+    {
+        // not a join (pattern doesn't count)
+        if (streamSpecs.size() == 1)
+        {
+            return false;
+        }
+
+        // join - determine types joined
+        List<EventType> filteredTypes = new ArrayList<EventType>();
+        boolean hasFilterStream = false;
+        for (StreamSpecCompiled streamSpec : streamSpecs)
+        {
+            if (streamSpec instanceof FilterStreamSpecCompiled)
+            {
+                EventType type = ((FilterStreamSpecCompiled) streamSpec).getFilterSpec().getEventType();
+                filteredTypes.add(type);
+                hasFilterStream = true;
+            }
+            else if (streamSpec instanceof PatternStreamSpecCompiled)
+            {
+                List<EvalFilterNode> filterNodes = EvalNode.recusiveFilterChildNodes(((PatternStreamSpecCompiled)streamSpec).getEvalNode());
+                for (EvalFilterNode filterNode : filterNodes)
+                {
+                    filteredTypes.add(filterNode.getFilterSpec().getEventType());
+                }
+            }
+            else if (streamSpec instanceof DBStatementStreamSpec)
+            {
+                // no action for these
+            }            
+        }
+
+        if (filteredTypes.size() == 1)
+        {
+            return false;
+        }
+        // pattern-only streams are not self-joins
+        if (!hasFilterStream)
+        {
+            return false;
+        }
+
+        // is type overlap
+        for (int i = 0; i < filteredTypes.size(); i++)
+        {
+            for (int j = i + 1; j < filteredTypes.size(); j++)
+            {
+                EventType typeOne = filteredTypes.get(i);
+                EventType typeTwo = filteredTypes.get(j);
+                if (typeOne == typeTwo)
+                {
+                    return true;
+                }
+
+                for (EventType typeOneSuper : typeOne.getSuperTypes())
+                {
+                    if (typeOneSuper == typeTwo)
+                    {
+                        return true;
+                    }
+                }
+                for (EventType typeTwoSuper : typeTwo.getSuperTypes())
+                {
+                    if (typeOne == typeTwoSuper)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public synchronized void start(String statementId)

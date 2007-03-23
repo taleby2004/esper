@@ -29,7 +29,7 @@ public class TestStockTickerSimple extends TestCase
         epService = EPServiceProviderManager.getProvider("TestStockTickerSimple", configuration);
         epService.getEPRuntime().addEmittedListener(listener, null);
 
-        // TODO: remove this
+        // To reduce logging noise and get max performance
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));        
     }
 
