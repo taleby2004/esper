@@ -312,6 +312,32 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         assertEquals(event, listener.assertOneGetNewAndReset().get("b"));
     }
 
+    public void testFollowedNotEvery()
+    {
+        String expression = "select * from pattern [every A=" + SupportBean.class.getName() +
+                " -> (timer:interval(1 seconds) and not " + SupportBean_A.class.getName() + ")]";
+
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+        epService.initialize();
+        // TODO: document send of TimerControlEvent.ClockType.CLOCK_EXTERNAL 
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+
+        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        Object eventOne = new SupportBean();
+        epService.getEPRuntime().sendEvent(eventOne);
+        
+        Object eventTwo = new SupportBean();
+        epService.getEPRuntime().sendEvent(eventTwo);
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+        assertEquals(1, listener.getNewDataList().size());
+        assertEquals(2, listener.getNewDataList().get(0).length);
+    }
+
     private long dateToLong(String dateText) throws ParseException
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
