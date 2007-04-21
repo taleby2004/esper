@@ -26,6 +26,8 @@ public class ConfigurationSnapshot
     private String epServicesContextFactoryClassName;
     private List<ConfigurationPlugInView> plugInViews = new LinkedList<ConfigurationPlugInView>();
     private List<ConfigurationAdapterLoader> adapterLoaders = new LinkedList<ConfigurationAdapterLoader>();
+    private List<ConfigurationPlugInAggregationFunction> plugInAggregation = new LinkedList<ConfigurationPlugInAggregationFunction>();
+    private List<ConfigurationPlugInPatternObject> plugInPatternObjects = new LinkedList<ConfigurationPlugInPatternObject>();
 
     /**
      * Ctor.
@@ -45,6 +47,8 @@ public class ConfigurationSnapshot
         epServicesContextFactoryClassName = configuration.getEPServicesContextFactoryClassName();
         plugInViews.addAll(configuration.getPlugInViews());
         adapterLoaders.addAll(configuration.getAdapterLoaders());
+        plugInAggregation.addAll(configuration.getPlugInAggregationFunctions());
+        plugInPatternObjects.addAll(configuration.getPlugInPatternObjects());
     }
 
     /**
@@ -126,6 +130,24 @@ public class ConfigurationSnapshot
     public List<ConfigurationAdapterLoader> getAdapterLoaders()
     {
         return adapterLoaders;
+    }
+
+    /**
+     * Returns a list of configured aggregation functions.
+     * @return aggregation function configs 
+     */
+    public List<ConfigurationPlugInAggregationFunction> getPlugInAggregation()
+    {
+        return plugInAggregation;
+    }
+
+    /**
+     * Returns the list of configured pattern objects plugged-in.
+     * @return list of pattern objects
+     */
+    public List<ConfigurationPlugInPatternObject> getPlugInPatternObjects()
+    {
+        return plugInPatternObjects;
     }
 }
 

@@ -98,7 +98,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals("mypassword1", dmDef.getOptionalPassword());
         assertEquals("{user=myuser2, password=mypassword2, somearg=someargvalue}", dmDef.getOptionalProperties().toString());
         assertEquals(ConfigurationDBRef.ConnectionLifecycleEnum.RETAIN, configDBRef.getConnectionLifecycleEnum());
-        assertEquals(false, configDBRef.getConnectionSettings().getAutoCommit().booleanValue());
+        assertEquals((Boolean) false, configDBRef.getConnectionSettings().getAutoCommit());
         assertEquals("test", configDBRef.getConnectionSettings().getCatalog());
         assertEquals(Boolean.TRUE, configDBRef.getConnectionSettings().getReadOnly());
         assertEquals(new Integer(3), configDBRef.getConnectionSettings().getTransactionIsolation());
@@ -131,5 +131,37 @@ public class TestConfigurationParser extends TestCase
         assertEquals("Loader2", adapterTwo.getLoaderName());
         assertEquals("net.esper.support.adapter.SupportLoaderTwo", adapterTwo.getClassName());
         assertEquals(0, adapterTwo.getConfigProperties().size());
+
+        // assert plug-in aggregation function loaded
+        assertEquals(2, config.getPlugInAggregationFunctions().size());
+        ConfigurationPlugInAggregationFunction pluginAgg = config.getPlugInAggregationFunctions().get(0);
+        assertEquals("com.mycompany.MyMatrixAggregationMethod0", pluginAgg.getFunctionClassName());
+        assertEquals("func1", pluginAgg.getName());
+        pluginAgg = config.getPlugInAggregationFunctions().get(1);
+        assertEquals("com.mycompany.MyMatrixAggregationMethod1", pluginAgg.getFunctionClassName());
+        assertEquals("func2", pluginAgg.getName());
+
+        // assert plug-in guard objects loaded
+        assertEquals(4, config.getPlugInPatternObjects().size());
+        ConfigurationPlugInPatternObject pluginPattern = config.getPlugInPatternObjects().get(0);
+        assertEquals("com.mycompany.MyGuardFactory0", pluginPattern.getFactoryClassName());
+        assertEquals("ext0", pluginPattern.getNamespace());
+        assertEquals("guard1", pluginPattern.getName());
+        assertEquals(ConfigurationPlugInPatternObject.PatternObjectType.GUARD, pluginPattern.getPatternObjectType());
+        pluginPattern = config.getPlugInPatternObjects().get(1);
+        assertEquals("com.mycompany.MyGuardFactory1", pluginPattern.getFactoryClassName());
+        assertEquals("ext1", pluginPattern.getNamespace());
+        assertEquals("guard2", pluginPattern.getName());
+        assertEquals(ConfigurationPlugInPatternObject.PatternObjectType.GUARD, pluginPattern.getPatternObjectType());
+        pluginPattern = config.getPlugInPatternObjects().get(2);
+        assertEquals("com.mycompany.MyObserverFactory0", pluginPattern.getFactoryClassName());
+        assertEquals("ext0", pluginPattern.getNamespace());
+        assertEquals("observer1", pluginPattern.getName());
+        assertEquals(ConfigurationPlugInPatternObject.PatternObjectType.OBSERVER, pluginPattern.getPatternObjectType());
+        pluginPattern = config.getPlugInPatternObjects().get(3);
+        assertEquals("com.mycompany.MyObserverFactory1", pluginPattern.getFactoryClassName());
+        assertEquals("ext1", pluginPattern.getNamespace());
+        assertEquals("observer2", pluginPattern.getName());
+        assertEquals(ConfigurationPlugInPatternObject.PatternObjectType.OBSERVER, pluginPattern.getPatternObjectType());
     }
 }

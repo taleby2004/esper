@@ -72,6 +72,7 @@ tokens
 	SQL="sql";
 	PREVIOUS="prev";
 	PRIOR="prior";
+	EXISTS="exists";
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -142,6 +143,11 @@ tokens
 	INSERTINTO_STREAM_NAME;
 	IN_RANGE;
 	NOT_IN_RANGE;
+	SUBSELECT_EXPR;
+	EXISTS_SUBSELECT_EXPR;
+	IN_SUBSELECT_EXPR;
+	NOT_IN_SUBSELECT_EXPR;
+	IN_SUBSELECT_QUERY_EXPR;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -252,11 +258,11 @@ selectionList
 
 selectionListElement
 	:   STAR 
-		{ #selectionListElement = #[WILDCARD_SELECT]; }
+		{ #selectionListElement = #[WILDCARD_SELECT, "wildcard-select"]; }
 	|	expression (AS! IDENT)?
 		{ #selectionListElement = #([SELECTION_ELEMENT_EXPR,"selectionListElement"], #selectionListElement); }
 	;
-		
+	
 streamExpression
 	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression)
 		(DOT! viewExpression (DOT! viewExpression)*)? (AS! IDENT | IDENT)?
@@ -379,15 +385,15 @@ evalRelationalExpression
 			(
 				// Represent the optional NOT prefix using the token type by
 				// testing 'n' and setting the token type accordingly.
-				(i:IN_SET^ 				
-					(LPAREN | LBRACK) expression	// brackets are for inclusive/exclusive
+				(i:IN_SET^
+					  (LPAREN | LBRACK) expression	// brackets are for inclusive/exclusive
 						(
 							( col:COLON! (expression) )		// range
 							|
 							( (COMMA! expression)* )		// list of values
 						)
-					(RPAREN | RBRACK)	
-					{
+					  (RPAREN | RBRACK)	
+					  {
 						if (col == null)
 						{
 							#i.setType( (n == null) ? IN_SET : NOT_IN_SET);
@@ -398,8 +404,12 @@ evalRelationalExpression
 							#i.setType( (n == null) ? IN_RANGE : NOT_IN_RANGE);
 							#i.setText( (n == null) ? "in range" : "not in range");
 						}
+					  }
+					)
+				| IN_SET! s:inSubSelectQuery
+					{	if (n == null) #evalRelationalExpression = #([IN_SUBSELECT_EXPR,"inSubselectExpr"], #evalRelationalExpression); 
+					    else #evalRelationalExpression = #([NOT_IN_SUBSELECT_EXPR,"notInSubselectExpr"], #evalRelationalExpression); 
 					}
-				)
 				| (b:BETWEEN^ {
 						#b.setType( (n == null) ? BETWEEN : NOT_BETWEEN);
 						#b.setText( (n == null) ? "between" : "not between");
@@ -417,6 +427,11 @@ evalRelationalExpression
 					concatenationExpr)
 			)	
 		)
+	;
+	
+inSubSelectQuery
+	: subQueryExpr
+		{ #inSubSelectQuery = #([IN_SUBSELECT_QUERY_EXPR,"inSubSelectQuery"], #inSubSelectQuery); }
 	;
 			
 concatenationExpr
@@ -441,8 +456,34 @@ unaryExpression
 	| eventPropertyOrLibFunction
 	| builtinFunc
 	| arrayExpression
+	| subSelectExpression
+	| existsSubSelectExpression
 	;
 	
+subSelectExpression 
+	:	subQueryExpr
+		{ #subSelectExpression = #([SUBSELECT_EXPR,"subSelectExpression"], #subSelectExpression); }	
+	;
+
+existsSubSelectExpression 
+	:	EXISTS! subQueryExpr
+		{ #existsSubSelectExpression = #([EXISTS_SUBSELECT_EXPR,"existsSubSelectExpression"], #existsSubSelectExpression); }
+	;
+
+subQueryExpr 
+	:	LPAREN! 
+		SELECT! selectionListElement
+	    FROM! subSelectFilterExpr
+	    (WHERE! whereClause)?
+	    RPAREN!
+	;
+	
+subSelectFilterExpr
+	:	eventFilterExpression
+		(DOT! viewExpression (DOT! viewExpression)*)? (AS! IDENT | IDENT)?
+		{ #subSelectFilterExpr = #([STREAM_EXPR,"subSelectFilterExpr"], #subSelectFilterExpr); }
+	;
+		
 arrayExpression
 	: LCURLY! (expression (COMMA! expression)* )? RCURLY!
 	{ #arrayExpression = #([ARRAY_EXPR,"arrayExpression"], #arrayExpression); }	

@@ -83,7 +83,7 @@ public class ExprIdentNode extends ExprNode
         return streamOrPropertyName;
     }
 
-    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         Pair<PropertyResolutionDescriptor, String> propertyInfoPair = getTypeFromStream(streamTypeService, unresolvedPropertyName, streamOrPropertyName);
         resolvedStreamName = propertyInfoPair.getSecond();
@@ -100,6 +100,11 @@ public class ExprIdentNode extends ExprNode
             throw new IllegalStateException("Identifier node has not been validated");
         }
         return propertyType;
+    }
+
+    public boolean isConstantResult()
+    {
+        return false;
     }
 
     /**

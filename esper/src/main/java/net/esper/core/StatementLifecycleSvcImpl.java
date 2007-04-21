@@ -5,11 +5,12 @@ import net.esper.collection.Pair;
 import net.esper.eql.expression.ExprValidationException;
 import net.esper.eql.spec.*;
 import net.esper.util.ManagedLock;
+import net.esper.eql.expression.ExprNodeSubselectVisitor;
+import net.esper.eql.expression.ExprSubselectNode;
 import net.esper.util.ManagedReadWriteLock;
 import net.esper.util.UuidGenerator;
 import net.esper.view.ViewProcessingException;
 import net.esper.view.Viewable;
-import net.esper.filter.FilterSpecCompiled;
 import net.esper.event.EventType;
 import net.esper.pattern.EvalFilterNode;
 import net.esper.pattern.EvalNode;
@@ -95,16 +96,16 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      */
     protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId)
     {
-        ManagedLock statementResourceLock = services.getStatementLockFactory().getStatementLock(statementName, expression);
-
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
 
-        StatementSpecCompiled compiledSpec = compile(statementSpec, expression);
+        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, services);
+        StatementSpecCompiled compiledSpec = compile(statementSpec, expression, statementContext);
+
         // In a join statements if the same event type or it's deep super types are used in the join more then once,
         // then this is a self-join and the statement handle must know to dispatch the results together
         boolean canSelfJoin = isPotentialSelfJoin(compiledSpec.getStreamSpecs());
-        EPStatementHandle epStatementHandle = new EPStatementHandle(statementResourceLock, expression, canSelfJoin);
+        statementContext.getEpStatementHandle().setCanSelfJoin(canSelfJoin);
 
         eventProcessingRWLock.acquireWriteLock();
         try
@@ -113,7 +114,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, isPattern, services.getDispatchService(), this);
 
             // create start method
-            startMethod = new EPStatementStartMethod(statementId, statementName, compiledSpec, expression, services, epStatementHandle);
+            startMethod = new EPStatementStartMethod(compiledSpec, services, statementContext);
 
             statementDesc = new EPStatementDesc(statement, startMethod, null);
             stmtIdToDescMap.put(statementId, statementDesc);
@@ -243,7 +244,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param statementId is the statement id
      * @param desc is the cached statement info
      */
-    public synchronized void start(String statementId, EPStatementDesc desc)
+    public void start(String statementId, EPStatementDesc desc)
     {
         if (log.isDebugEnabled())
         {
@@ -402,7 +403,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param id is the statement id
      * @return statement
      */
-    public synchronized EPStatementSPI getStatementById(String id)
+    public EPStatementSPI getStatementById(String id)
     {
         return this.stmtIdToDescMap.get(id).getEpStatement();
     }
@@ -558,7 +559,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
     }
 
-    private StatementSpecCompiled compile(StatementSpecRaw spec, String eqlStatement) throws EPStatementException
+    private static StatementSpecCompiled compile(StatementSpecRaw spec, String eqlStatement, StatementContext statementContext) throws EPStatementException
     {
         List<StreamSpecCompiled> compiledStreams;
 
@@ -567,7 +568,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(services.getEventAdapterService(), services.getAutoImportService());
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService());
                 compiledStreams.add(compiled);
             }
         }
@@ -582,6 +583,24 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             throw new EPStatementException(text + ":" + ex.getClass().getName() + ":" + ex.getMessage(), eqlStatement);
         }
 
+        // Look for expressions with sub-selects in select expression list and filter expression
+        // Recursively compile the statement within the statement.
+        ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+        for (SelectExprElementRawSpec raw : spec.getSelectClauseSpec().getSelectList())
+        {
+            raw.getSelectExpression().accept(visitor);
+        }
+        if (spec.getFilterRootNode() != null)
+        {
+            spec.getFilterRootNode().accept(visitor);
+        }
+        for (ExprSubselectNode subselect : visitor.getSubselects())
+        {
+            StatementSpecRaw raw = subselect.getStatementSpecRaw();
+            StatementSpecCompiled compiled = compile(raw, eqlStatement, statementContext);
+            subselect.setStatementSpecCompiled(compiled);
+        }
+
         return new StatementSpecCompiled(
                 spec.getInsertIntoDesc(),
                 spec.getSelectStreamSelectorEnum(),
@@ -592,6 +611,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 spec.getGroupByExpressions(),
                 spec.getHavingExprRootNode(),
                 spec.getOutputLimitSpec(),
-                spec.getOrderByList());
+                spec.getOrderByList(),
+                visitor.getSubselects()
+                );
     }    
 }

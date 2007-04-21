@@ -8,7 +8,7 @@
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.ViewResourceDelegate;
 import net.esper.util.JavaClassHelper;
 import net.esper.util.LikeUtil;
@@ -34,7 +34,7 @@ public class ExprLikeNode extends ExprNode
         this.isNot = not;
     }
 
-    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         if ((this.getChildNodes().size() != 2) && (this.getChildNodes().size() != 3))
         {
@@ -56,7 +56,7 @@ public class ExprLikeNode extends ExprNode
         {
             throw new ExprValidationException("The 'like' operator requires a String-type pattern expression");
         }
-        if (this.getChildNodes().get(1) instanceof ExprConstantNode)
+        if (getChildNodes().get(1).isConstantResult())
         {
             isConstantPattern = true;
         }
@@ -75,6 +75,11 @@ public class ExprLikeNode extends ExprNode
     public Class getType()
     {
         return Boolean.class;
+    }
+
+    public boolean isConstantResult()
+    {
+        return false;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)

@@ -8,25 +8,25 @@
 package net.esper.eql.parse;
 
 import antlr.collections.AST;
+import antlr.SemanticException;
 import net.esper.collection.Pair;
+import net.esper.eql.agg.AggregationSupport;
+import net.esper.eql.core.EngineImportException;
+import net.esper.eql.core.EngineImportService;
+import net.esper.eql.core.EngineImportUndefinedException;
 import net.esper.eql.expression.*;
 import net.esper.eql.generated.EQLBaseWalker;
 import net.esper.eql.spec.*;
 import net.esper.pattern.*;
-import net.esper.pattern.guard.GuardEnum;
-import net.esper.pattern.guard.GuardFactory;
-import net.esper.pattern.observer.ObserverEnum;
 import net.esper.pattern.observer.ObserverFactory;
+import net.esper.pattern.observer.ObserverParameterException;
+import net.esper.pattern.guard.GuardFactory;
+import net.esper.pattern.guard.GuardParameterException;
 import net.esper.type.*;
-import net.esper.util.ConstructorHelper;
-import net.esper.view.ViewSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Called during the walks of a EQL expression AST tree as specified in the grammar file.
@@ -35,7 +35,9 @@ import java.util.Map;
 public class EQLTreeWalker extends EQLBaseWalker
 {
     // private holding areas for accumulated info
-    private final Map<AST, ExprNode> astExprNodeMap = new HashMap<AST, ExprNode>();
+    private Map<AST, ExprNode> astExprNodeMap = new HashMap<AST, ExprNode>();
+    private final Stack<Map<AST, ExprNode>> astExprNodeMapStack;
+
     private final Map<AST, EvalNode> astPatternNodeMap = new HashMap<AST, EvalNode>();
 
     private FilterSpecRaw filterSpec;
@@ -45,14 +47,42 @@ public class EQLTreeWalker extends EQLBaseWalker
     private boolean isProcessingPattern;
 
     // AST Walk result
-    private final StatementSpecRaw statementSpec;
+    private StatementSpecRaw statementSpec;
+    private final Stack<StatementSpecRaw> statementSpecStack;
+
+    private final EngineImportService engineImportService;
+    private final PatternObjectResolutionService patternObjectResolutionService;
 
     /**
      * Ctor.
+     * @param engineImportService is required to resolve lib-calls into static methods or configured aggregation functions
+     * @param  patternObjectResolutionService resolves plug-in pattern object names (guards and observers)
      */
-    public EQLTreeWalker()
+    public EQLTreeWalker(EngineImportService engineImportService,
+                         PatternObjectResolutionService patternObjectResolutionService)
     {
+        this.engineImportService = engineImportService;
+        this.patternObjectResolutionService = patternObjectResolutionService;
         statementSpec = new StatementSpecRaw();
+        statementSpecStack = new Stack<StatementSpecRaw>();
+        astExprNodeMapStack = new Stack<Map<AST, ExprNode>>();
+    }
+
+    /**
+     * Pushes a statement into the stack, creating a new empty statement to fill in.
+     * The leave node method for subquery statements pops from the stack.
+     * @throws SemanticException is a standard parser exception
+     */
+    protected void pushStmtContext() throws SemanticException {
+        if (log.isDebugEnabled())
+        {
+            log.debug(".pushStmtContext");
+        }
+        statementSpecStack.push(statementSpec);
+        astExprNodeMapStack.push(astExprNodeMap);
+
+        statementSpec = new StatementSpecRaw();
+        astExprNodeMap = new HashMap<AST, ExprNode>();
     }
 
     /**
@@ -80,7 +110,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     /**
      * Leave AST node and process it's type and child nodes.
      * @param node is the node to complete
-     * @throws ASTWalkException
+     * @throws ASTWalkException if the node tree walk operation failed
      */
     protected void leaveNode(AST node) throws ASTWalkException
     {
@@ -252,6 +282,19 @@ public class EQLTreeWalker extends EQLBaseWalker
             case ARRAY_EXPR:
                 leaveArray(node);
                 break;
+            case SUBSELECT_EXPR:
+                leaveSubselectRow(node);
+                break;
+            case EXISTS_SUBSELECT_EXPR:
+                leaveSubselectExists(node);
+                break;
+            case IN_SUBSELECT_EXPR:
+            case NOT_IN_SUBSELECT_EXPR:
+                leaveSubselectIn(node);
+                break;
+            case IN_SUBSELECT_QUERY_EXPR:
+                leaveSubselectQueryIn(node);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + '\'');
@@ -324,9 +367,66 @@ public class EQLTreeWalker extends EQLBaseWalker
         astExprNodeMap.put(node, arrayNode);
     }
 
+    private void leaveSubselectRow(AST node)
+    {
+        log.debug(".leaveSubselectRow");
+       
+        StatementSpecRaw currentSpec = popStacks();
+        ExprSubselectRowNode subselectNode = new ExprSubselectRowNode(currentSpec);
+        astExprNodeMap.put(node, subselectNode);
+    }
+
+    private void leaveSubselectExists(AST node)
+    {
+        log.debug(".leaveSubselectExists");
+
+        StatementSpecRaw currentSpec = popStacks();
+        ExprSubselectNode subselectNode = new ExprSubselectExistsNode(currentSpec);
+        astExprNodeMap.put(node, subselectNode);
+    }
+
+    private void leaveSubselectIn(AST node)
+    {
+        log.debug(".leaveSubselectIn");
+
+        AST nodeEvalExpr = node.getFirstChild();
+        AST nodeSubquery = nodeEvalExpr.getNextSibling();
+
+        boolean isNot = false;
+        if (node.getType() == NOT_IN_SUBSELECT_EXPR)
+        {
+            isNot = true;
+        }
+        
+        ExprSubselectInNode subqueryNode = (ExprSubselectInNode) astExprNodeMap.remove(nodeSubquery);
+        subqueryNode.setNotIn(isNot);
+
+        astExprNodeMap.put(node, subqueryNode);
+    }
+
+    private void leaveSubselectQueryIn(AST node)
+    {
+        log.debug(".leaveSubselectQueryIn");
+
+        StatementSpecRaw currentSpec = popStacks();
+        ExprSubselectNode subselectNode = new ExprSubselectInNode(currentSpec);
+        astExprNodeMap.put(node, subselectNode);
+    }
+
+    private StatementSpecRaw popStacks()
+    {
+        log.debug(".popStacks");
+
+        StatementSpecRaw currentSpec = statementSpec;
+        statementSpec = statementSpecStack.pop();
+        astExprNodeMap = astExprNodeMapStack.pop();
+
+        return currentSpec;
+    }
+
     /**
      * End processing of the AST tree for stand-alone pattern expressions.
-     * @throws ASTWalkException
+     * @throws ASTWalkException is the walk failed
      */
     protected void endPattern() throws ASTWalkException
     {
@@ -348,7 +448,7 @@ public class EQLTreeWalker extends EQLBaseWalker
 
     /**
      * End processing of the AST tree, check that expression nodes found their homes.
-     * @throws ASTWalkException
+     * @throws ASTWalkException is the walk failed
      */
     protected void end() throws ASTWalkException
     {
@@ -369,6 +469,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     private void leaveSelectionElement(AST node) throws ASTWalkException
     {
         log.debug(".leaveSelectionElement");
+
         if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.isEmpty())))
         {
             throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
@@ -492,11 +593,6 @@ public class EQLTreeWalker extends EQLBaseWalker
     {
     	log.debug(".leaveLibFunction");
 
-    	if(node.getNumberOfChildren() < 1)
-    	{
-    		throw new IllegalArgumentException("Illegal number of child nodes for lib function");
-    	}
-
         String childNodeText = node.getFirstChild().getText();
         if ((childNodeText.equals("max")) || (childNodeText.equals("min")))
         {
@@ -509,11 +605,32 @@ public class EQLTreeWalker extends EQLBaseWalker
             String className = node.getFirstChild().getText();
             String methodName = node.getFirstChild().getNextSibling().getText();
             astExprNodeMap.put(node, new ExprStaticMethodNode(className, methodName));
+            return;
         }
-        else
+
+        try
         {
-            throw new IllegalStateException("Unknown method named '" + node.getFirstChild().getText() + "' could not be resolved");
+            AggregationSupport aggregation = engineImportService.resolveAggregation(childNodeText);
+
+            boolean isDistinct = false;
+            if ((node.getFirstChild().getNextSibling() != null) && (node.getFirstChild().getNextSibling().getType() == DISTINCT))
+            {
+                isDistinct = true;
+            }
+
+            astExprNodeMap.put(node, new ExprPlugInAggFunctionNode(isDistinct, aggregation, childNodeText));
+            return;
         }
+        catch (EngineImportUndefinedException e)
+        {
+            // Not an aggretaion function
+        }
+        catch (EngineImportException e)
+        {
+            throw new IllegalStateException("Error resolving aggregation: " + e.getMessage(), e);            
+        }
+
+        throw new IllegalStateException("Unknown method named '" + childNodeText + "' could not be resolved");
     }
 
     private void leaveEqualsExpr(AST node)
@@ -1054,7 +1171,6 @@ public class EQLTreeWalker extends EQLBaseWalker
         String objectName = startGuard.getNextSibling().getText();
 
         List<Object> objectParams = new LinkedList<Object>();
-
         AST child = startGuard.getNextSibling().getNextSibling();
         while (child != null)
         {
@@ -1063,34 +1179,25 @@ public class EQLTreeWalker extends EQLBaseWalker
             child = child.getNextSibling();
         }
 
-        // From object name construct guard factory
-        GuardEnum guardEnum = GuardEnum.forName(objectNamespace, objectName);
-        if (guardEnum == null)
-        {
-            throw new ASTWalkException("Guard in namespace " + objectNamespace + " and name " + objectName +
-                    " is not a known guard");
-        }
+        PatternGuardSpec guardSpec = new PatternGuardSpec(objectNamespace, objectName, objectParams);
 
-        GuardFactory guardFactory;
+        // try out the specification at compile time since the node may not get used till later
+        GuardFactory factory;
         try
         {
-            guardFactory = (GuardFactory) ConstructorHelper.invokeConstructor(guardEnum.getClazz(), objectParams.toArray());
-
-            if (log.isDebugEnabled())
-            {
-                log.debug(".leaveGuard Successfully instantiated guard");
-            }
+            factory = patternObjectResolutionService.create(guardSpec);
+            factory.setGuardParameters(objectParams);
         }
-        catch (Exception e)
+        catch (PatternObjectException e)
         {
-            StringBuilder message = new StringBuilder("Error invoking constructor for guard '");
-            message.append(objectName);
-            message.append("', invalid parameter list for the object");
-            log.fatal(".leaveGuard " + message, e);
-            throw new ASTWalkException(message.toString());
+            throw new ASTWalkException(e.getMessage(), e);
+        }
+        catch (GuardParameterException e)
+        {
+            throw new ASTWalkException(e.getMessage(), e);
         }
 
-        EvalGuardNode guardNode = new EvalGuardNode(guardFactory);
+        EvalGuardNode guardNode = new EvalGuardNode(factory);
         astPatternNodeMap.put(node, guardNode);
     }
 
@@ -1120,49 +1227,34 @@ public class EQLTreeWalker extends EQLBaseWalker
         String objectNamespace = node.getFirstChild().getText();
         String objectName = node.getFirstChild().getNextSibling().getText();
 
-        int numNodes = node.getNumberOfChildren();
-        Object[] observerParameters = new Object[numNodes - 2];
-
+        List<Object> objectParams = new LinkedList<Object>();
         AST child = node.getFirstChild().getNextSibling().getNextSibling();
-        int index = 0;
         while (child != null)
         {
             Object object = ASTParameterHelper.makeParameter(child);
-            observerParameters[index++] = object;
+            objectParams.add(object);
             child = child.getNextSibling();
         }
 
-        // From object name construct observer factory
-        ObserverEnum observerEnum = ObserverEnum.forName(objectNamespace, objectName);
-        if (observerEnum == null)
-        {
-            throw new ASTWalkException("EventObserver in namespace " + objectNamespace + " and name " + objectName +
-                    " is not a known observer");
-        }
+        PatternObserverSpec observerSpec = new PatternObserverSpec(objectNamespace, objectName, objectParams);
 
-        ObserverFactory observerFactory;
+        // try out the specification at compile time since the node may not get used till later
+        ObserverFactory factory;
         try
         {
-            Object obsFactory = ConstructorHelper.invokeConstructor(observerEnum.getClazz(), observerParameters);
-            observerFactory = (ObserverFactory) obsFactory;
-
-            if (log.isDebugEnabled())
-            {
-                log.debug(".create Successfully instantiated observer");
-            }
+            factory = patternObjectResolutionService.create(observerSpec);
+            factory.setObserverParameters(objectParams);
         }
-        catch (Exception e)
+        catch (PatternObjectException e)
         {
-            StringBuilder message = new StringBuilder("Error invoking constructor for observer '");
-            message.append(objectNamespace);
-            message.append(':');
-            message.append(objectName);
-            message.append("', invalid parameter list for the object");
-            log.fatal(".leaveObserver " + message, e);
-            throw new ASTWalkException(message.toString());
+            throw new ASTWalkException(e.getMessage(), e);
+        }
+        catch (ObserverParameterException e)
+        {
+            throw new ASTWalkException(e.getMessage(), e);
         }
 
-        EvalObserverNode observerNode = new EvalObserverNode(observerFactory);
+        EvalObserverNode observerNode = new EvalObserverNode(factory);
         astPatternNodeMap.put(node, observerNode);
     }
 

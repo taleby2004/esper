@@ -7,10 +7,12 @@
  **************************************************************************************/
 package net.esper.pattern;
 
+import net.esper.util.MetaDefItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -19,9 +21,10 @@ import java.util.ArrayList;
  * Follows the Composite pattern. Child nodes do not carry references to parent nodes, the tree
  * is unidirectional.
  */
-public abstract class EvalNode
+public abstract class EvalNode implements MetaDefItem
 {
-    private final LinkedList<EvalNode> childNodes;
+    private final List<EvalNode> childNodes;
+    private EvalNodeNumber nodeNumber;
 
     /**
      * Create the evaluation state node containing the truth value state for each operator in an
@@ -29,18 +32,38 @@ public abstract class EvalNode
      * @param parentNode is the parent evaluator node that this node indicates a change in truth value to
      * @param beginState is the container for events that makes up the start state
      * @param context is the handle to services required for evaluation
+     * @param stateNodeId is the new state object's identifier
      * @return state node containing the truth value state for the operator
      */
     public abstract EvalStateNode newState(Evaluator parentNode,
                                            MatchedEventMap beginState,
-                                           PatternContext context);
+                                           PatternContext context,
+                                           Object stateNodeId);
 
     /**
      * Constructor creates a list of child nodes.
      */
     EvalNode()
     {
-        childNodes = new LinkedList<EvalNode>();
+        childNodes = new ArrayList<EvalNode>();
+    }
+
+    /**
+     * Returns the evaluation node's relative node number in the evaluation node tree.
+     * @return node number
+     */
+    public EvalNodeNumber getNodeNumber()
+    {
+        return nodeNumber;
+    }
+
+    /**
+     * Sets the evaluation node's relative node number.
+     * @param nodeNumber is the node number to set
+     */
+    public void setNodeNumber(EvalNodeNumber nodeNumber)
+    {
+        this.nodeNumber = nodeNumber;
     }
 
     /**
@@ -56,7 +79,7 @@ public abstract class EvalNode
      * Returns list of child nodes.
      * @return list of child nodes
      */
-    public final LinkedList<EvalNode> getChildNodes()
+    public final List<EvalNode> getChildNodes()
     {
         return childNodes;
     }

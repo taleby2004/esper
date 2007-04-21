@@ -11,7 +11,7 @@ import net.esper.dispatch.DispatchService;
 import net.esper.dispatch.DispatchServiceProvider;
 import net.esper.emit.EmitService;
 import net.esper.emit.EmitServiceProvider;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.EngineImportService;
 import net.esper.eql.db.DatabaseConfigService;
 import net.esper.event.EventAdapterService;
 import net.esper.filter.FilterService;
@@ -25,12 +25,15 @@ import net.esper.view.ViewService;
 import net.esper.view.ViewServiceProvider;
 import net.esper.view.stream.StreamFactoryService;
 import net.esper.view.stream.StreamFactoryServiceProvider;
+import net.esper.pattern.PatternObjectResolutionService;
 
 /**
- * Convenience class to instantiate implementations for all services.
+ * Convenience class to hold implementations for all services.
  */
 public final class EPServicesContext
 {
+    private final String engineURI;
+    private final String engineInstanceId;
     private final FilterService filterService;
     private final TimerService timerService;
     private final SchedulingService schedulingService;
@@ -39,13 +42,15 @@ public final class EPServicesContext
     private final ViewService viewService;
     private final StreamFactoryService streamFactoryService;
     private final EventAdapterService eventAdapterService;
-    private final AutoImportService autoImportService;
+    private final EngineImportService engineImportService;
     private final DatabaseConfigService databaseConfigService;
     private final ViewResolutionService viewResolutionService;
     private final StatementLockFactory statementLockFactory;
     private final ManagedReadWriteLock eventProcessingRWLock;
     private final ExtensionServicesContext extensionServicesContext;
     private final EngineEnvContext engineEnvContext;
+    private final StatementContextFactory statementContextFactory;
+    private final PatternObjectResolutionService patternObjectResolutionService;
 
     // Supplied after construction to avoid circular dependency
     private StatementLifecycleSvc statementLifecycleSvc;
@@ -53,28 +58,39 @@ public final class EPServicesContext
 
     /**
      * Constructor - sets up new set of services.
+     * @param engineURI is the engine URI
+     * @param engineInstanceId is the name of the engine instance
      * @param schedulingService service to get time and schedule callbacks
      * @param eventAdapterService service to resolve event types
-     * @param autoImportService service to resolve partial class names
      * @param databaseConfigService service to resolve a database name to database connection factory and configs
      * @param viewResolutionService resolves view namespace and name to view factory class
      * @param statementLockFactory creates statement-level locks
      * @param eventProcessingRWLock is the engine lock for statement management
      * @param extensionServicesContext marker interface allows adding additional services
+     * @param engineImportService is engine imported static func packages and aggregation functions
+     * @param statementContextFactory is the factory to use to create statement context objects
+     * @param engineEnvContext is engine environment/directory information for use with adapters and external env
+     * @param patternObjectResolutionService resolves plug-in pattern objects 
      */
-    public EPServicesContext(SchedulingService schedulingService,
+    public EPServicesContext(String engineURI,
+                             String engineInstanceId,
+                             SchedulingService schedulingService,
                              EventAdapterService eventAdapterService,
-                             AutoImportService autoImportService,
+                             EngineImportService engineImportService,
                              DatabaseConfigService databaseConfigService,
                              ViewResolutionService viewResolutionService,
                              StatementLockFactory statementLockFactory,
                              ManagedReadWriteLock eventProcessingRWLock,
                              ExtensionServicesContext extensionServicesContext,
-                             EngineEnvContext engineEnvContext)
+                             EngineEnvContext engineEnvContext,
+                             StatementContextFactory statementContextFactory,
+                             PatternObjectResolutionService patternObjectResolutionService)
     {
+        this.engineURI = engineURI;
+        this.engineInstanceId = engineInstanceId;
         this.schedulingService = schedulingService;
         this.eventAdapterService = eventAdapterService;
-        this.autoImportService = autoImportService;
+        this.engineImportService = engineImportService;
         this.databaseConfigService = databaseConfigService;
         this.filterService = FilterServiceProvider.newService();
         this.timerService = TimerServiceProvider.newService();
@@ -87,6 +103,8 @@ public final class EPServicesContext
         this.eventProcessingRWLock = eventProcessingRWLock;
         this.extensionServicesContext = extensionServicesContext;
         this.engineEnvContext = engineEnvContext;
+        this.statementContextFactory = statementContextFactory;
+        this.patternObjectResolutionService = patternObjectResolutionService;
     }
 
     /**
@@ -192,9 +210,9 @@ public final class EPServicesContext
      * Returns the import and class name resolution service.
      * @return import service
      */
-    public AutoImportService getAutoImportService()
+    public EngineImportService getEngineImportService()
     {
-    	return autoImportService;
+    	return engineImportService;
     }
 
     /**
@@ -251,6 +269,10 @@ public final class EPServicesContext
         return extensionServicesContext;
     }
 
+    /**
+     * Returns the engine environment context for getting access to engine-external resources, such as adapters
+     * @return engine environment context
+     */
     public EngineEnvContext getEngineEnvContext()
     {
         return engineEnvContext;
@@ -265,5 +287,41 @@ public final class EPServicesContext
         {
             extensionServicesContext.destroy();
         }
+    }
+
+    /**
+     * Returns the factory to use for creating a statement context.
+     * @return statement context factory
+     */
+    public StatementContextFactory getStatementContextFactory()
+    {
+        return statementContextFactory;
+    }
+
+    /**
+     * Returns the engine URI.
+     * @return engine URI
+     */
+    public String getEngineURI()
+    {
+        return engineURI;
+    }
+
+    /**
+     * Returns the engine instance ID.
+     * @return instance id
+     */
+    public String getEngineInstanceId()
+    {
+        return engineInstanceId;
+    }
+
+    /**
+     * Returns the pattern object resolver.
+     * @return resolver for plug-in pattern objects.
+     */
+    public PatternObjectResolutionService getPatternObjectResolutionService()
+    {
+        return patternObjectResolutionService;
     }
 }

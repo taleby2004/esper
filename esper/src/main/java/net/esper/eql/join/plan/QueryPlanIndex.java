@@ -15,19 +15,22 @@ import java.util.Arrays;
 public class QueryPlanIndex
 {
     private String[][] indexProps;
+    private Class[][] optCoercionTypes;
 
     /**
      * Ctor.
      * @param indexProps - array of property names with the first dimension suplying the number of
      * distinct indexes. The second dimension can be empty and indicates a full table scan.
+     * @param optCoercionTypes - array of coercion types for each index, or null entry for no coercion required
      */
-    public QueryPlanIndex(String[][] indexProps)
+    public QueryPlanIndex(String[][] indexProps, Class[][] optCoercionTypes)
     {
-        if ((indexProps == null) || (indexProps.length == 0))
+        if ((indexProps == null) || (indexProps.length == 0) || (optCoercionTypes == null))
         {
-            throw new IllegalArgumentException("Null or empty index properites parameter is supplied, expecting at least one entry");
+            throw new IllegalArgumentException("Null or empty index properites or coercion types-per-index parameter is supplied, expecting at least one entry");
         }
         this.indexProps = indexProps;
+        this.optCoercionTypes = optCoercionTypes;
     }
 
     /**
@@ -37,6 +40,15 @@ public class QueryPlanIndex
     public String[][] getIndexProps()
     {
         return indexProps;
+    }
+
+    /**
+     * Returns property names of all indexes.
+     * @return property names array
+     */
+    public Class[][] getCoercionTypesPerIndex()
+    {
+        return optCoercionTypes;
     }
 
     /**
@@ -59,18 +71,62 @@ public class QueryPlanIndex
     /**
      * Add an index specification element.
      * @param indexProperties - list of property names to index
+     * @param coercionTypes - list of coercion types if required, or null if no coercion required
      * @return number indicating position of index that was added
      */
-    public int addIndex(String[] indexProperties)
+    public int addIndex(String[] indexProperties, Class[] coercionTypes)
     {
         int numElements = indexProps.length;
         String[][] newProps = new String[numElements + 1][];
         System.arraycopy(indexProps, 0, newProps, 0, numElements);
         newProps[numElements] = indexProperties;
-
         indexProps = newProps;
 
+        Class[][] newCoercionTypes = new Class[numElements + 1][];
+        System.arraycopy(optCoercionTypes, 0, newCoercionTypes, 0, numElements);
+        newCoercionTypes[numElements] = coercionTypes;
+        optCoercionTypes = newCoercionTypes;
+
         return numElements;
+    }
+
+    /**
+     * Returns a list of coercion types for a given index.
+     * @param indexProperties is the index field names
+     * @return coercion types, or null if no coercion is required
+     */
+    public Class[] getCoercionTypes(String[] indexProperties)
+    {
+        for (int i = 0; i < indexProps.length; i++)
+        {
+            if (Arrays.deepEquals(indexProps[i], indexProperties))
+            {
+                return this.optCoercionTypes[i];
+            }
+        }
+        throw new IllegalArgumentException("Index properties not found");
+    }
+
+    /**
+     * Sets the coercion types for a given index.
+     * @param indexProperties is the index property names
+     * @param coercionTypes is the coercion types
+     */
+    public void setCoercionTypes(String[] indexProperties, Class[] coercionTypes)
+    {
+        boolean found = false;
+        for (int i = 0; i < indexProps.length; i++)
+        {
+            if (Arrays.deepEquals(indexProps[i], indexProperties))
+            {
+                this.optCoercionTypes[i] = coercionTypes;
+                found = true;
+            }
+        }
+        if (!found)
+        {
+            throw new IllegalArgumentException("Index properties not found");
+        }
     }
 
     public String toString()

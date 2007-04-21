@@ -4,10 +4,9 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.support.eql.parse.SupportParserHelper;
+import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
 import net.esper.support.bean.SupportBean;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.eql.generated.EqlTokenTypes;
-import net.esper.eql.core.AutoImportServiceImpl;
 import antlr.collections.AST;
 
 public class TestEQLParser extends TestCase implements EqlTokenTypes
@@ -15,14 +14,14 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select 1 from " + className + "(intPrimitive < 5 and intPrimitive > 4)";
+        String expression = "select b in (select * from A) from " + className;
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
         SupportParserHelper.displayAST(ast);
 
         log.debug(".testDisplayAST walking...");
-        EQLTreeWalker walker = new EQLTreeWalker();
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker();        
         walker.startEQLExpressionRule(ast);
     }
 
@@ -151,6 +150,18 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("select prev(price, a*b) from x");
         assertIsInvalid("select prior(10) from x");
         assertIsInvalid("select prior(price, a*b) from x");
+
+        // subqueries
+        assertIsInvalid("select (select a) from x");
+        assertIsInvalid("select (select a from X group by b) from x");
+        assertIsInvalid("select (select a from X, Y) from x");
+        assertIsInvalid("select (select a,b from X) from x");
+        assertIsInvalid("select (select a from ) from x");
+        assertIsInvalid("select (select from X) from x");
+        assertIsInvalid("select * from x where (select q from pattern [A->B])");
+        assertIsInvalid("select c from A where q*9 in in (select g*5 from C.win:length(100)) and r=6");
+        assertIsInvalid("select c from A in (select g*5 from C.win:length(100)) and r=6");
+        assertIsInvalid("select c from A where a in (select g*5 from C.win:length(100)) 9");
     }
 
     public void testValidCases() throws Exception
@@ -381,6 +392,30 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select {1.1,'2',3E5, 7L} from x");
         assertIsValid("select * from x where oo = {1,2,3}");
         assertIsValid("select {a, b}, {c, d} from x");
+
+        // subqueries
+        assertIsValid("select (select a from B) from x");
+        assertIsValid("select (select a||b||c from B) from x");
+        assertIsValid("select (select 3*222 from B) from x");
+        assertIsValid("select (select 3*222 from B.win:length(100)) from x");
+        assertIsValid("select (select x from B.win:length(100) where a=b) from x");
+        assertIsValid("select (select x from B.win:length(100) where a=b), (select y from C.w:g().e:o(11)) from x");
+        assertIsValid("select 3 + (select a from B) from x");
+        assertIsValid("select (select x from B) / 100, 9 * (select y from C.w:g().e:o(11))/2 from x");
+        assertIsValid("select * from x where id = (select a from B)");
+        assertIsValid("select * from x where id = -1 * (select a from B)");
+        assertIsValid("select * from x where id = (5-(select a from B))");
+        assertIsValid("select * from X where (select a from B where X.f = B.a) or (select a from B where X.f = B.c)");
+        assertIsValid("select * from X where exists (select * from B where X.f = B.a)");
+        assertIsValid("select * from X where exists (select * from B)");
+        assertIsValid("select * from X where not exists (select * from B where X.f = B.a)");
+        assertIsValid("select * from X where not exists (select * from B)");
+        assertIsValid("select exists (select * from B where X.f = B.a) from A");
+        assertIsValid("select B or exists (select * from B) from A");
+        assertIsValid("select c in (select * from C) from A");
+        assertIsValid("select c from A where b in (select * from C)");
+        assertIsValid("select c from A where b not in (select b from C)");
+        assertIsValid("select c from A where q*9 not in (select g*5 from C.win:length(100)) and r=6");
     }
 
     public void testBitWiseCases() throws Exception

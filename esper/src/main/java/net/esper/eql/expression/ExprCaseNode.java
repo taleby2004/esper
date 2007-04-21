@@ -11,7 +11,7 @@ import net.esper.util.JavaClassHelper;
 import net.esper.util.CoercionException;
 import net.esper.event.EventBean;
 import net.esper.collection.UniformPair;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.core.ViewResourceDelegate;
 
@@ -46,7 +46,7 @@ public class ExprCaseNode extends ExprNode
         this.isCase2 = isCase2;
     }
 
-    public void validate(StreamTypeService streamTypeService_, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService_, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         if (isCase2)
         {
@@ -80,6 +80,11 @@ public class ExprCaseNode extends ExprNode
         {
             throw new ExprValidationException("Implicit conversion not allowed: " + ex.getMessage());
         }
+    }
+
+    public boolean isConstantResult()
+    {
+        return false;
     }
 
     public Class getType()

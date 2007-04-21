@@ -2,18 +2,20 @@ package net.esper.eql.spec;
 
 import antlr.collections.AST;
 import junit.framework.TestCase;
-import net.esper.eql.core.AutoImportServiceImpl;
-import net.esper.eql.parse.EQLTreeWalker;
-import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.core.EngineImportServiceImpl;
+import net.esper.eql.core.MethodResolutionServiceImpl;
 import net.esper.eql.expression.ExprAndNode;
+import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.parse.EQLTreeWalker;
 import net.esper.filter.*;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
 import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.event.SupportEventAdapterService;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 public class TestFilterStreamSpecRaw extends TestCase
 {
@@ -246,7 +248,7 @@ public class TestFilterStreamSpecRaw extends TestCase
 
     private FilterSpecCompiled compile(FilterStreamSpecRaw raw) throws Exception
     {
-        FilterStreamSpecCompiled compiled = (FilterStreamSpecCompiled) raw.compile(SupportEventAdapterService.getService(), new AutoImportServiceImpl());
+        FilterStreamSpecCompiled compiled = (FilterStreamSpecCompiled) raw.compile(SupportEventAdapterService.getService(), new MethodResolutionServiceImpl(new EngineImportServiceImpl()));
         return compiled.getFilterSpec();
     }
     
@@ -255,7 +257,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         AST ast = SupportParserHelper.parseEQL(expression);
         SupportParserHelper.displayAST(ast);
 
-        EQLTreeWalker walker = new EQLTreeWalker();
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker();
         walker.startEQLExpressionRule(ast);
 
         FilterStreamSpecRaw spec = (FilterStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);

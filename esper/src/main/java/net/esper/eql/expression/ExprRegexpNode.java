@@ -8,7 +8,7 @@
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.ViewResourceDelegate;
 import net.esper.event.EventBean;
 import net.esper.util.JavaClassHelper;
@@ -37,7 +37,7 @@ public class ExprRegexpNode extends ExprNode
         this.isNot = not;
     }
 
-    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 2)
         {
@@ -51,7 +51,7 @@ public class ExprRegexpNode extends ExprNode
         {
             throw new ExprValidationException("The regexp operator requires a String-type pattern expression");
         }
-        if (this.getChildNodes().get(1) instanceof ExprConstantNode)
+        if (this.getChildNodes().get(1).isConstantResult())
         {
             isConstantPattern = true;
         }
@@ -68,6 +68,11 @@ public class ExprRegexpNode extends ExprNode
     public Class getType()
     {
         return Boolean.class;
+    }
+
+    public boolean isConstantResult()
+    {
+        return false;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)

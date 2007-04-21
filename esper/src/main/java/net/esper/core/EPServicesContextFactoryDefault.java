@@ -3,13 +3,15 @@ package net.esper.core;
 import net.esper.client.ConfigurationEventTypeLegacy;
 import net.esper.client.ConfigurationEventTypeXMLDOM;
 import net.esper.client.ConfigurationException;
-import net.esper.eql.core.AutoImportService;
-import net.esper.eql.core.AutoImportServiceImpl;
+import net.esper.client.ConfigurationPlugInAggregationFunction;
+import net.esper.eql.core.EngineImportService;
+import net.esper.eql.core.EngineImportServiceImpl;
+import net.esper.eql.core.EngineImportException;
 import net.esper.eql.db.DatabaseConfigService;
 import net.esper.eql.db.DatabaseConfigServiceImpl;
 import net.esper.event.EventAdapterException;
-import net.esper.event.EventAdapterServiceImpl;
 import net.esper.event.EventAdapterServiceBase;
+import net.esper.event.EventAdapterServiceImpl;
 import net.esper.schedule.ScheduleBucket;
 import net.esper.schedule.SchedulingService;
 import net.esper.schedule.SchedulingServiceProvider;
@@ -17,6 +19,8 @@ import net.esper.util.JavaClassHelper;
 import net.esper.util.ManagedReadWriteLock;
 import net.esper.view.ViewResolutionService;
 import net.esper.view.ViewResolutionServiceImpl;
+import net.esper.pattern.PatternObjectResolutionService;
+import net.esper.pattern.PatternObjectResolutionServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,21 +37,26 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         EventAdapterServiceImpl eventAdapterService = new EventAdapterServiceImpl();
         init(eventAdapterService, configSnapshot);
 
-        SchedulingService schedulingService = SchedulingServiceProvider.newService();
-        AutoImportService autoImportService = makeAutoImportService(configSnapshot);
-        DatabaseConfigService databaseConfigService = makeDatabaseRefService(configSnapshot, schedulingService);
-        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(configSnapshot.getPlugInViews());
-
         // New read-write lock for concurrent event processing
         ManagedReadWriteLock eventProcessingRWLock = new ManagedReadWriteLock("EventProcLock");
+
+        SchedulingService schedulingService = SchedulingServiceProvider.newService();
+        EngineImportService engineImportService = makeEngineImportService(configSnapshot);
+        DatabaseConfigService databaseConfigService = makeDatabaseRefService(configSnapshot, schedulingService);
+        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(configSnapshot.getPlugInViews());
+        PatternObjectResolutionService patternObjectResolutionService = new PatternObjectResolutionServiceImpl(configSnapshot.getPlugInPatternObjects());
 
         // JNDI context for binding resources
         EngineEnvContext jndiContext = new EngineEnvContext();
 
+        // Statement context factory
+        StatementContextFactory statementContextFactory = new StatementContextFactoryDefault();
+
         // New services context
-        EPServicesContext services = new EPServicesContext(schedulingService,
-                eventAdapterService, autoImportService, databaseConfigService, viewResolutionService,
-                new StatementLockFactoryImpl(), eventProcessingRWLock, null, jndiContext);
+        EPServicesContext services = new EPServicesContext(engineURI, engineURI, schedulingService,
+                eventAdapterService, engineImportService, databaseConfigService, viewResolutionService,
+                new StatementLockFactoryImpl(), eventProcessingRWLock, null, jndiContext, statementContextFactory,
+                patternObjectResolutionService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(services);
@@ -133,21 +142,29 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
      * @param configSnapshot config info
      * @return service
      */
-    protected static AutoImportService makeAutoImportService(ConfigurationSnapshot configSnapshot)
+    protected static EngineImportService makeEngineImportService(ConfigurationSnapshot configSnapshot)
     {
-        AutoImportService autoImportService = null;
+        EngineImportService engineImportService = new EngineImportServiceImpl();
 
         // Add auto-imports
         try
         {
-            autoImportService = new AutoImportServiceImpl(configSnapshot.getAutoImports());
+            for (String importName : configSnapshot.getAutoImports())
+            {
+                engineImportService.addImport(importName);
+            }
+
+            for (ConfigurationPlugInAggregationFunction config : configSnapshot.getPlugInAggregation())
+            {
+                engineImportService.addAggregation(config.getName(), config.getFunctionClassName());
+            }
         }
-        catch (IllegalArgumentException ex)
+        catch (EngineImportException ex)
         {
             throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
         }
 
-        return autoImportService;
+        return engineImportService;
     }
 
     /**

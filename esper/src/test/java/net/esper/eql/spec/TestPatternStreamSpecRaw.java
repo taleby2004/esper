@@ -2,7 +2,9 @@ package net.esper.eql.spec;
 
 import antlr.collections.AST;
 import junit.framework.TestCase;
-import net.esper.eql.core.AutoImportServiceImpl;
+import net.esper.eql.core.MethodResolutionServiceImpl;
+import net.esper.eql.core.EngineImportServiceImpl;
+import net.esper.eql.core.EngineImportService;
 import net.esper.eql.parse.EQLTreeWalker;
 import net.esper.eql.expression.ExprValidationException;
 import net.esper.filter.*;
@@ -10,6 +12,7 @@ import net.esper.pattern.EvalFilterNode;
 import net.esper.pattern.EvalNode;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.parse.SupportParserHelper;
+import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
 import net.esper.support.event.SupportEventAdapterService;
 
 import java.util.List;
@@ -193,7 +196,7 @@ public class TestPatternStreamSpecRaw extends TestCase
 
     private PatternStreamSpecCompiled compile(PatternStreamSpecRaw raw) throws Exception
     {
-        PatternStreamSpecCompiled compiled = (PatternStreamSpecCompiled) raw.compile(SupportEventAdapterService.getService(), new AutoImportServiceImpl());
+        PatternStreamSpecCompiled compiled = (PatternStreamSpecCompiled) raw.compile(SupportEventAdapterService.getService(), new MethodResolutionServiceImpl(new EngineImportServiceImpl()));
         return compiled;
     }
 
@@ -202,7 +205,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         AST ast = SupportParserHelper.parseEQL(expression);
         SupportParserHelper.displayAST(ast);
 
-        EQLTreeWalker walker = new EQLTreeWalker();
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker();        
         walker.startEQLExpressionRule(ast);
 
         PatternStreamSpecRaw spec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);

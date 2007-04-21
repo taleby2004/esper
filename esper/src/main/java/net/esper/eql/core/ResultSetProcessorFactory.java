@@ -16,15 +16,14 @@ import java.util.ListIterator;
 import java.util.Set;
 
 import net.esper.collection.Pair;
-import net.esper.eql.expression.ExprAggregateNode;
-import net.esper.eql.expression.ExprNode;
-import net.esper.eql.expression.ExprNodeIdentifierVisitor;
-import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.expression.*;
 import net.esper.eql.spec.InsertIntoDesc;
 import net.esper.eql.spec.OutputLimitSpec;
 import net.esper.eql.spec.SelectClauseSpec;
 import net.esper.eql.spec.SelectExprElementCompiledSpec;
 import net.esper.eql.spec.SelectExprElementRawSpec;
+import net.esper.eql.agg.AggregationServiceFactory;
+import net.esper.eql.agg.AggregationService;
 import net.esper.event.EventAdapterService;
 
 import org.apache.commons.logging.Log;
@@ -69,7 +68,7 @@ public class ResultSetProcessorFactory
      * @param typeService - for information about the streams in the from clause
      * @param insertIntoDesc - descriptor for insert-into clause information
      * @param eventAdapterService - wrapping service for events
-     * @param autoImportService - for resolving class names
+     * @param methodResolutionService - for resolving class names
      * @param viewResourceDelegate - delegates views resource factory to expression resources requirements
      * @return result set processor instance
      * @throws ExprValidationException when any of the expressions is invalid
@@ -82,7 +81,7 @@ public class ResultSetProcessorFactory
                                                	  List<Pair<ExprNode, Boolean>> orderByList,
                                                   StreamTypeService typeService,
                                                   EventAdapterService eventAdapterService,
-                                                  AutoImportService autoImportService,
+                                                  MethodResolutionService methodResolutionService,
                                                   ViewResourceDelegate viewResourceDelegate)
             throws ExprValidationException
     {
@@ -105,7 +104,7 @@ public class ResultSetProcessorFactory
         {
             // validate element
             SelectExprElementRawSpec element = selectClauseSpec.getSelectList().get(i);
-            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, autoImportService, viewResourceDelegate);
+            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate);
 
             // determine an element name if none assigned
             String asName = element.getOptionalAsName();
@@ -123,21 +122,46 @@ public class ResultSetProcessorFactory
         // Validate group-by expressions, if any (could be empty list for no group-by)
         for (int i = 0; i < groupByNodes.size(); i++)
         {
-            groupByNodes.set(i, groupByNodes.get(i).getValidatedSubtree(typeService, autoImportService, viewResourceDelegate));
+            // Ensure there is no subselects
+            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            groupByNodes.get(i).accept(visitor);
+            if (visitor.getSubselects().size() > 0)
+            {
+                throw new ExprValidationException("Subselects not allowed within group-by");
+            }
+
+            groupByNodes.set(i, groupByNodes.get(i).getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate));
         }
 
         // Validate having clause, if present
         if (optionalHavingNode != null)
         {
-            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, autoImportService, viewResourceDelegate);
+            // Ensure there is no subselects
+            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            optionalHavingNode.accept(visitor);
+            if (visitor.getSubselects().size() > 0)
+            {
+                throw new ExprValidationException("Subselects not allowed within having-clause");
+            }
+
+            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate);
         }
 
         // Validate order-by expressions, if any (could be empty list for no order-by)
         for (int i = 0; i < orderByList.size(); i++)
         {
         	ExprNode orderByNode = orderByList.get(i).getFirst();
-        	Boolean isDescending = orderByList.get(i).getSecond();
-        	Pair<ExprNode, Boolean> validatedPair = new Pair<ExprNode, Boolean>(orderByNode.getValidatedSubtree(typeService, autoImportService, viewResourceDelegate), isDescending);
+
+            // Ensure there is no subselects
+            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            orderByNode.accept(visitor);
+            if (visitor.getSubselects().size() > 0)
+            {
+                throw new ExprValidationException("Subselects not allowed within order-by clause");
+            }
+
+            Boolean isDescending = orderByList.get(i).getSecond();
+        	Pair<ExprNode, Boolean> validatedPair = new Pair<ExprNode, Boolean>(orderByNode.getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate), isDescending);
         	orderByList.set(i, validatedPair);
         }
 
@@ -162,9 +186,28 @@ public class ResultSetProcessorFactory
             ExprAggregateNode.getAggregatesBottomUp(element.getSelectExpression(), selectAggregateExprNodes);
         }
 
+        // Determine if we have a having clause with aggregation
+        List<ExprAggregateNode> havingAggregateExprNodes = new LinkedList<ExprAggregateNode>();
+        Set<Pair<Integer, String>> propertiesAggregatedHaving = new HashSet<Pair<Integer, String>>();
+        if (optionalHavingNode != null)
+        {
+            ExprAggregateNode.getAggregatesBottomUp(optionalHavingNode, havingAggregateExprNodes);
+            propertiesAggregatedHaving = getAggregatedProperties(havingAggregateExprNodes);
+        }
+
+        // Determine if we have a order-by clause with aggregation
+        List<ExprAggregateNode> orderByAggregateExprNodes = new LinkedList<ExprAggregateNode>();
+        if (orderByNodes != null)
+        {
+            for (ExprNode orderByNode : orderByNodes)
+            {
+                ExprAggregateNode.getAggregatesBottomUp(orderByNode, orderByAggregateExprNodes);
+            }
+        }
+
         // Construct the appropriate aggregation service
         boolean hasGroupBy = !groupByNodes.isEmpty();
-        AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, hasGroupBy, optionalHavingNode, orderByNodes);
+        AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, methodResolutionService);
 
         // Construct the processor for sorting output events
         OrderByProcessor orderByProcessor = OrderByProcessorFactory.getProcessor(namedSelectionList,
@@ -178,15 +221,6 @@ public class ResultSetProcessorFactory
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);
         // Figure out all non-aggregated event properties in the select clause (props not under a sum/avg/max aggregation node)
         Set<Pair<Integer, String>> nonAggregatedProps = getNonAggregatedProps(selectNodes);
-
-        // Determine if we have a having clause with aggregation
-        List<ExprAggregateNode> havingAggregateExprNodes = new LinkedList<ExprAggregateNode>();
-        Set<Pair<Integer, String>> propertiesAggregatedHaving = new HashSet<Pair<Integer, String>>();
-        if (optionalHavingNode != null)
-        {
-            ExprAggregateNode.getAggregatesBottomUp(optionalHavingNode, havingAggregateExprNodes);
-            propertiesAggregatedHaving = getAggregatedProperties(havingAggregateExprNodes);
-        }
 
         // Validate that group-by is filled with sensible nodes (identifiers, and not part of aggregates selected, no aggregates)
         validateGroupBy(groupByNodes, propertiesAggregatedSelect, propertiesGroupBy);
@@ -230,11 +264,12 @@ public class ResultSetProcessorFactory
             return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
 
-        if ((groupByNodes.isEmpty()) && (!selectAggregateExprNodes.isEmpty()))
+        boolean hasAggregation = (!selectAggregateExprNodes.isEmpty()) || (!propertiesAggregatedHaving.isEmpty());
+        if ((groupByNodes.isEmpty()) && hasAggregation)
         {
             // (3)
             // There is no group-by clause and there are aggregate functions with event properties in the select clause (aggregation case)
-            // and all event properties are aggregated (all properties are under aggregation functions).
+            // or having class, and all event properties are aggregated (all properties are under aggregation functions).
             if (nonAggregatedProps.isEmpty())
             {
                 log.debug(".getProcessor Using ResultSetProcessorRowForAll");
@@ -243,7 +278,7 @@ public class ResultSetProcessorFactory
 
             // (4)
             // There is no group-by clause but there are aggregate functions with event properties in the select clause (aggregation case)
-            // and not all event properties are aggregated (some properties are not under aggregation functions).
+            // or having clause and not all event properties are aggregated (some properties are not under aggregation functions).
             log.debug(".getProcessor Using ResultSetProcessorAggregateAll");
             return new ResultSetProcessorAggregateAll(selectExprProcessor, orderByProcessor, aggregationService, optionalHavingNode, isOutputLimiting, isOutputLimitLastOnly);
         }
@@ -311,29 +346,10 @@ public class ResultSetProcessorFactory
                                        ExprNode havingNode)
         throws ExprValidationException
     {
-        // All aggregation functions in the having node must match with an aggregation function in the select
         List<ExprAggregateNode> aggregateNodesHaving = new LinkedList<ExprAggregateNode>();
         if (aggregateNodesHaving != null)
         {
             ExprAggregateNode.getAggregatesBottomUp(havingNode, aggregateNodesHaving);
-        }
-
-        for (ExprAggregateNode aggregateNodeHaving : aggregateNodesHaving)
-        {
-            boolean foundMatch = false;
-            for (ExprAggregateNode aggregateNodeSelect : selectAggregateExprNodes)
-            {
-                if (ExprNode.deepEquals(aggregateNodeSelect, aggregateNodeHaving))
-                {
-                    foundMatch = true;
-                    break;
-                }
-            }
-
-            if (!foundMatch)
-            {
-                throw new ExprValidationException("Aggregate functions in the HAVING clause must match aggregate functions in the select clause");
-            }
         }
 
         // Any non-aggregated properties must occur in the group-by clause (if there is one)

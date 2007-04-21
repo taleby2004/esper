@@ -152,7 +152,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         services.getTimerService().setCallback(runtime);
 
         // New admin
-        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService());
+        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService(), services.getEngineImportService());
         EPAdministratorImpl admin = new EPAdministratorImpl(services, configOps);
 
         // Start clocking
@@ -178,6 +178,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     /**
      * Loads and initializes adapter loaders.
      * @param configuration is the engine configs
+     * @param services is the engine instance services
      */
     private void loadAdapters(ConfigurationSnapshot configuration, EPServicesContext services)
     {

@@ -42,7 +42,7 @@ public class TestInvalidView extends TestCase
 
         // invalid view
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".dummy:dummy(10)");
-        assertEquals("Error starting view: View name 'dummy' is not a known view name [select * from net.esper.support.bean.SupportBean_N.dummy:dummy(10)]", exceptionText);
+        assertEquals("Error starting view: View name 'dummy:dummy' is not a known view name [select * from net.esper.support.bean.SupportBean_N.dummy:dummy(10)]", exceptionText);
 
         // invalid view parameter
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".win:length('s')");
@@ -74,11 +74,11 @@ public class TestInvalidView extends TestCase
 
         // class in method invocation not found
         exceptionText = getStatementExceptionView("select unknownClass.method() from " + EVENT_NUM + ".win:length(10)");
-        assertEquals("Error starting view: Unknown class unknownClass [select unknownClass.method() from net.esper.support.bean.SupportBean_N.win:length(10)]", exceptionText);
+        assertEquals("Error starting view: Could not load class by name 'unknownClass'  [select unknownClass.method() from net.esper.support.bean.SupportBean_N.win:length(10)]", exceptionText);
         
         // method not found
         exceptionText = getStatementExceptionView("select Math.unknownMethod() from " + EVENT_NUM + ".win:length(10)");
-        assertEquals("Error starting view: Unknown method Math.unknownMethod() [select Math.unknownMethod() from net.esper.support.bean.SupportBean_N.win:length(10)]", exceptionText);
+        assertEquals("Error starting view: Could not find method named 'unknownMethod' in class 'Math'  [select Math.unknownMethod() from net.esper.support.bean.SupportBean_N.win:length(10)]", exceptionText);
         
         // invalid property in group-by
         exceptionText = getStatementExceptionView("select intPrimitive from " + EVENT_ALLTYPES + ".win:length(1) group by xxx");
@@ -99,10 +99,6 @@ public class TestInvalidView extends TestCase
         // invalid property in having clause
         exceptionText = getStatementExceptionView("select 2 * 's' from " + EVENT_ALLTYPES + ".win:length(1) group by intPrimitive having xxx > 5");
         assertEquals("Error starting view: Implicit conversion from datatype 'String' to numeric is not allowed [select 2 * 's' from net.esper.support.bean.SupportBean.win:length(1) group by intPrimitive having xxx > 5]", exceptionText);
-
-        // invalid having clause - not the same aggregate as used in select
-        exceptionText = getStatementExceptionView("select sum(intPrimitive) from " + EVENT_ALLTYPES + ".win:length(1) group by intBoxed having sum(doubleBoxed) > 5");
-        assertEquals("Error starting view: Aggregate functions in the HAVING clause must match aggregate functions in the select clause [select sum(intPrimitive) from net.esper.support.bean.SupportBean.win:length(1) group by intBoxed having sum(doubleBoxed) > 5]", exceptionText);
 
         // invalid having clause - not a symbol in the group-by (non-aggregate)
         exceptionText = getStatementExceptionView("select sum(intPrimitive) from " + EVENT_ALLTYPES + ".win:length(1) group by intBoxed having doubleBoxed > 5");

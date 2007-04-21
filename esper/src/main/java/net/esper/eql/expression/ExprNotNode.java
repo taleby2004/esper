@@ -9,7 +9,7 @@ package net.esper.eql.expression;
 
 import net.esper.util.JavaClassHelper;
 import net.esper.event.EventBean;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.core.ViewResourceDelegate;
 
@@ -18,7 +18,7 @@ import net.esper.eql.core.ViewResourceDelegate;
  */
 public class ExprNotNode extends ExprNode
 {
-    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         // Must have a single child node
         if (this.getChildNodes().size() != 1)
@@ -36,6 +36,11 @@ public class ExprNotNode extends ExprNode
     public Class getType()
     {
         return Boolean.class;
+    }
+
+    public boolean isConstantResult()
+    {
+        return false;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)

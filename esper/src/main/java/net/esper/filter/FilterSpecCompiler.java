@@ -8,17 +8,16 @@
 package net.esper.filter;
 
 import net.esper.collection.Pair;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.expression.*;
 import net.esper.event.EventType;
 import net.esper.type.RelationalOpEnum;
 import net.esper.util.JavaClassHelper;
-
-import java.util.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
 
 /**
  * Helper to compile (validate and optimize) filter expressions as used in pattern and filter-based streams.
@@ -43,7 +42,7 @@ public final class FilterSpecCompiler
      * @param filterExpessions is a list of filter expressions
      * @param taggedEventTypes is a map of stream names (tags) and event types available
      * @param streamTypeService is used to set rules for resolving properties
-     * @param autoImportService resolved imports for static methods and such
+     * @param methodResolutionService resolved imports for static methods and such
      * @return compiled filter specification
      * @throws ExprValidationException if the expression or type validations failed
      */
@@ -51,12 +50,12 @@ public final class FilterSpecCompiler
                                                     List<ExprNode> filterExpessions,
                                                     LinkedHashMap<String, EventType> taggedEventTypes,
                                                     StreamTypeService streamTypeService,
-                                                    AutoImportService autoImportService)
+                                                    MethodResolutionService methodResolutionService)
             throws ExprValidationException
     {
         // Validate all nodes, make sure each returns a boolean and types are good;
         // Also decompose all AND super nodes into individual expressions
-        List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, autoImportService);
+        List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService);
 
         // From the constituents make a filter specification
         FilterSpecCompiled spec = makeFilterSpec(eventType, constituents, taggedEventTypes);
@@ -88,13 +87,21 @@ public final class FilterSpecCompiler
         }
     }
 
-    private static List<ExprNode> validateAndDecompose(List<ExprNode> exprNodes, StreamTypeService streamTypeService, AutoImportService autoImportService)
+    private static List<ExprNode> validateAndDecompose(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService)
             throws ExprValidationException
     {
         List<ExprNode> validatedNodes = new ArrayList<ExprNode>();
         for (ExprNode node : exprNodes)
         {
-            ExprNode validated = node.getValidatedSubtree(streamTypeService, autoImportService, null);
+            // Ensure there is no subselects
+            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            node.accept(visitor);
+            if (visitor.getSubselects().size() > 0)
+            {
+                throw new ExprValidationException("Subselects not allowed within filters");
+            }
+
+            ExprNode validated = node.getValidatedSubtree(streamTypeService, methodResolutionService, null);
             validatedNodes.add(validated);
 
             if ((validated.getType() != Boolean.class) && ((validated.getType() != boolean.class)))

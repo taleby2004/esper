@@ -11,6 +11,7 @@ import net.esper.util.ManagedLock;
  */
 public class EPStatementHandle implements MetaDefItem
 {
+    private final String statementId;
     private final ManagedLock statementLock;
     private final int hashCode;
     private EPStatementDispatch optionalDispatchable;
@@ -20,13 +21,19 @@ public class EPStatementHandle implements MetaDefItem
 
     /**
      * Ctor.
+     * @param statementId is the statement id uniquely indentifying the handle
      * @param statementLock is the statement resource lock
      * @param expressionText is the expression
      */
-    public EPStatementHandle(ManagedLock statementLock, String expressionText, boolean canSelfJoin)
+    public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText)
     {
+        this.statementId = statementId;
         this.statementLock = statementLock;
         hashCode = expressionText.hashCode() ^ statementLock.hashCode();
+    }
+
+    public void setCanSelfJoin(boolean canSelfJoin)
+    {
         this.canSelfJoin = canSelfJoin;
     }
 
@@ -70,7 +77,7 @@ public class EPStatementHandle implements MetaDefItem
         }
 
         EPStatementHandle other = (EPStatementHandle) otherObj;
-        if (other.statementLock == this.statementLock)
+        if (other.statementId.equals(this.statementId))
         {
             return true;
         }

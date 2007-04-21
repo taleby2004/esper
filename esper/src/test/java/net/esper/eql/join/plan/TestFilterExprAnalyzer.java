@@ -5,8 +5,6 @@ import net.esper.support.eql.SupportExprNodeFactory;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.eql.expression.ExprEqualsNode;
 import net.esper.eql.expression.ExprAndNode;
-import net.esper.eql.join.plan.FilterExprAnalyzer;
-import net.esper.eql.join.plan.QueryGraph;
 
 public class TestFilterExprAnalyzer extends TestCase
 {

@@ -7,10 +7,8 @@
  **************************************************************************************/
 package net.esper.eql.join.plan;
 
-import net.esper.eql.expression.ExprAndNode;
-import net.esper.eql.expression.ExprEqualsNode;
-import net.esper.eql.expression.ExprIdentNode;
-import net.esper.eql.expression.ExprNode;
+import net.esper.eql.expression.*;
+import net.esper.util.JavaClassHelper;
 
 /**
  * Analyzes a filter expression and builds a query graph model.

@@ -4,9 +4,7 @@ import junit.framework.TestCase;
 import net.esper.support.eql.SupportExprNode;
 import net.esper.support.eql.SupportExprNodeFactory;
 import net.esper.support.eql.SupportStreamTypeSvc1Stream;
-import net.esper.eql.core.AutoImportService;
-import net.esper.eql.core.AutoImportServiceImpl;
-import net.esper.eql.core.StreamTypeService;
+import net.esper.eql.core.*;
 
 public class TestExprNode extends TestCase
 {
@@ -45,25 +43,27 @@ public class TestExprNode extends TestCase
         assertEquals(7, topNode.getValidateCountSnapshot());
     }
 
-    public void testIdentToStaticMethod() throws ExprValidationException
+    public void testIdentToStaticMethod() throws ExprValidationException, EngineImportException
     {
         StreamTypeService typeService = new SupportStreamTypeSvc1Stream();
-        AutoImportService autoImportService = new AutoImportServiceImpl(new String[] {"java.lang.*" });
+        EngineImportService engineImportService = new EngineImportServiceImpl();
+        engineImportService.addImport("java.lang.*");
+        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineImportService);
 
         ExprNode identNode = new ExprIdentNode("Integer.valueOf(\"3\")");
-        ExprNode result = identNode.getValidatedSubtree(typeService, autoImportService, null);
+        ExprNode result = identNode.getValidatedSubtree(typeService, methodResolutionService, null);
         assertTrue(result instanceof ExprStaticMethodNode);
         assertEquals(Integer.valueOf("3"), result.evaluate(null, false));
 
         identNode = new ExprIdentNode("Integer.valueOf(\'3\')");
-        result = identNode.getValidatedSubtree(typeService, autoImportService, null);
+        result = identNode.getValidatedSubtree(typeService, methodResolutionService, null);
         assertTrue(result instanceof ExprStaticMethodNode);
         assertEquals(Integer.valueOf("3"), result.evaluate(null, false));
 
         identNode = new ExprIdentNode("UknownClass.nonexistentMethod(\"3\")");
         try
         {
-            result = identNode.getValidatedSubtree(typeService, autoImportService, null);
+            result = identNode.getValidatedSubtree(typeService, methodResolutionService, null);
             fail();
         }
         catch(ExprValidationException e)
@@ -74,7 +74,7 @@ public class TestExprNode extends TestCase
         identNode = new ExprIdentNode("unknownMap(\"key\")");
         try
         {
-            result = identNode.getValidatedSubtree(typeService, autoImportService, null);
+            result = identNode.getValidatedSubtree(typeService, methodResolutionService, null);
             fail();
         }
         catch(ExprValidationException e)
@@ -113,5 +113,13 @@ public class TestExprNode extends TestCase
         assertEquals("c.d", result.getClassName());
         assertEquals("doit", result.getMethodName());
         assertEquals("kf\"kf'kf\"", result.getArgString());
+
+        result = ExprNode.parseMappedProperty("f('a')");
+        assertEquals(null, result.getClassName());
+        assertEquals("f", result.getMethodName());
+        assertEquals("a", result.getArgString());
+
+        assertNull(ExprNode.parseMappedProperty("('a')"));
+        assertNull(ExprNode.parseMappedProperty(""));
     }
 }

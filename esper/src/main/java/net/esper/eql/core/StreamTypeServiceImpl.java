@@ -19,6 +19,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
     private final EventType[] eventTypes;
     private final String[] streamNames;
     private boolean isStreamZeroUnambigous;
+    private boolean requireStreamNames;
 
     /**
      * Ctor.
@@ -41,10 +42,12 @@ public class StreamTypeServiceImpl implements StreamTypeService
      * @param namesAndTypes is the ordered list of stream names and event types available (stream zero to N)
      * @param isStreamZeroUnambigous indicates whether when a property is found in stream zero and another stream an exception should be
      * thrown or the stream zero should be assumed
+     * @param requireStreamNames is true to indicate that stream names are required for any non-zero streams (for subqueries)
      */
-    public StreamTypeServiceImpl (LinkedHashMap<String, EventType> namesAndTypes, boolean isStreamZeroUnambigous)
+    public StreamTypeServiceImpl (LinkedHashMap<String, EventType> namesAndTypes, boolean isStreamZeroUnambigous, boolean requireStreamNames)
     {
         this.isStreamZeroUnambigous = isStreamZeroUnambigous;
+        this.requireStreamNames = requireStreamNames;
         eventTypes = new EventType[namesAndTypes.size()] ;
         streamNames = new String[namesAndTypes.size()] ;
         int count = 0;
@@ -73,7 +76,19 @@ public class StreamTypeServiceImpl implements StreamTypeService
         {
             throw new IllegalArgumentException("Null property name");
         }
-        return findByPropertyName(propertyName);
+        PropertyResolutionDescriptor desc = findByPropertyName(propertyName);
+        if ((requireStreamNames) && (desc.getStreamNum() != 0))
+        {
+            if (desc.getStreamName() != null)
+            {
+                throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by stream name '" + desc.getStreamName() + "'");
+            }
+            else
+            {
+                throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by a stream name, use the as-clause to name the stream");
+            }
+        }
+        return desc;
     }
 
     public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName)

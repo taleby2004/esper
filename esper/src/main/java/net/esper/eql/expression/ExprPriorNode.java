@@ -9,7 +9,7 @@ package net.esper.eql.expression;
 
 import net.esper.eql.core.ViewResourceCallback;
 import net.esper.eql.core.StreamTypeService;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.ViewResourceDelegate;
 import net.esper.view.window.RandomAccessByIndex;
 import net.esper.view.window.RelativeAccessByEventNIndex;
@@ -27,17 +27,17 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback
     private RelativeAccessByEventNIndex relativeAccess;
     private RandomAccessByIndex randomAccess;
 
-    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 2)
         {
             throw new ExprValidationException("Prior node must have 2 child nodes");
         }
-        if (!(this.getChildNodes().get(0) instanceof ExprConstantNode))
+        if (!(this.getChildNodes().get(0).isConstantResult()))
         {
             throw new ExprValidationException("Prior function requires an integer index parameter");
         }
-        ExprConstantNode constantNode = (ExprConstantNode) this.getChildNodes().get(0);
+        ExprNode constantNode = this.getChildNodes().get(0);
         if (constantNode.getType() != Integer.class)
         {
             throw new ExprValidationException("Prior function requires an integer index parameter");
@@ -65,6 +65,11 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback
     public Class getType()
     {
         return resultType;
+    }
+
+    public boolean isConstantResult()
+    {
+        return false;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)

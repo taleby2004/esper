@@ -7,7 +7,7 @@
  **************************************************************************************/
 package net.esper.eql.spec;
 
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.core.StreamTypeServiceImpl;
 import net.esper.eql.expression.ExprNode;
@@ -19,7 +19,7 @@ import net.esper.filter.FilterSpecCompiler;
 import net.esper.pattern.EvalFilterNode;
 import net.esper.pattern.EvalNode;
 import net.esper.util.UuidGenerator;
-import net.esper.view.ViewSpec;
+import net.esper.eql.spec.ViewSpec;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -54,7 +54,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
     }
 
     public StreamSpecCompiled compile(EventAdapterService eventAdapterService,
-                                      AutoImportService autoImportService)
+                                      MethodResolutionService methodResolutionService)
             throws ExprValidationException
     {
         // Determine al the filter nodes used in the pattern
@@ -93,10 +93,10 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             LinkedHashMap<String, EventType> filterTypes = new LinkedHashMap<String, EventType>();
             filterTypes.put(selfStreamName, eventType);
             filterTypes.putAll(taggedEventTypes);
-            StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, true);
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, true, false);
 
             List<ExprNode> exprNodes = filterNode.getRawFilterSpec().getFilterExpressions();
-            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, exprNodes, taggedEventTypes, streamTypeService, autoImportService);
+            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, exprNodes, taggedEventTypes, streamTypeService, methodResolutionService);
             filterNode.setFilterSpec(spec);
         }
 

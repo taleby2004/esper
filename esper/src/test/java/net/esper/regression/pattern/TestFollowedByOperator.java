@@ -319,7 +319,6 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
-        // TODO: document send of TimerControlEvent.ClockType.CLOCK_EXTERNAL 
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 

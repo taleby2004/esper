@@ -1,7 +1,7 @@
 package net.esper.eql.expression;
 
 import net.esper.eql.core.StreamTypeService;
-import net.esper.eql.core.AutoImportService;
+import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.ViewResourceDelegate;
 import net.esper.eql.core.ViewResourceCallback;
 import net.esper.event.EventBean;
@@ -25,7 +25,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
     private RandomAccessByIndexGetter randomAccessGetter;
     private RelativeAccessByEventNIndexGetter relativeAccessGetter;
 
-    public void validate(StreamTypeService streamTypeService, AutoImportService autoImportService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 2)
         {
@@ -33,9 +33,9 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         }
 
         // Determine if the index is a constant value or an expression to evaluate
-        if (this.getChildNodes().get(0) instanceof ExprConstantNode)
+        if (this.getChildNodes().get(0).isConstantResult())
         {
-            ExprConstantNode constantNode = (ExprConstantNode) this.getChildNodes().get(0);
+            ExprNode constantNode = (ExprNode) this.getChildNodes().get(0);
             Object value = constantNode.evaluate(null, false);
             if (!(value instanceof Number))
             {
@@ -73,6 +73,11 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
     {
         return resultType;
     }
+
+    public boolean isConstantResult()
+    {
+        return false;
+    }        
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
     {

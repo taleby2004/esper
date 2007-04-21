@@ -9,6 +9,7 @@ package net.esper.eql.spec;
 
 import net.esper.collection.Pair;
 import net.esper.eql.expression.ExprNode;
+import net.esper.eql.expression.ExprSubselectNode;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class StatementSpecCompiled
     private final ExprNode havingExprRootNode;
     private final OutputLimitSpec outputLimitSpec;
     private final List<Pair<ExprNode, Boolean>> orderByList;
+    private final List<ExprSubselectNode> subSelectExpressions;
 
     /**
      * Ctor.
@@ -40,8 +42,10 @@ public class StatementSpecCompiled
      * @param havingExprRootNode having expression
      * @param outputLimitSpec output limit
      * @param orderByList order by
+     * @param subSelectExpressions list of subqueries
      */
-    public StatementSpecCompiled(InsertIntoDesc insertIntoDesc, SelectClauseStreamSelectorEnum selectClauseStreamSelectorEnum, SelectClauseSpec selectClauseSpec, List<StreamSpecCompiled> streamSpecs, List<OuterJoinDesc> outerJoinDescList, ExprNode filterExprRootNode, List<ExprNode> groupByExpressions, ExprNode havingExprRootNode, OutputLimitSpec outputLimitSpec, List<Pair<ExprNode, Boolean>> orderByList)
+    public StatementSpecCompiled(InsertIntoDesc insertIntoDesc, SelectClauseStreamSelectorEnum selectClauseStreamSelectorEnum, SelectClauseSpec selectClauseSpec, List<StreamSpecCompiled> streamSpecs, List<OuterJoinDesc> outerJoinDescList, ExprNode filterExprRootNode, List<ExprNode> groupByExpressions, ExprNode havingExprRootNode, OutputLimitSpec outputLimitSpec, List<Pair<ExprNode, Boolean>> orderByList,
+                                 List<ExprSubselectNode> subSelectExpressions)
     {
         this.insertIntoDesc = insertIntoDesc;
         this.selectStreamDirEnum = selectClauseStreamSelectorEnum;
@@ -53,6 +57,7 @@ public class StatementSpecCompiled
         this.havingExprRootNode = havingExprRootNode;
         this.outputLimitSpec = outputLimitSpec;
         this.orderByList = orderByList;
+        this.subSelectExpressions = subSelectExpressions;
     }
 
     /**
@@ -151,5 +156,14 @@ public class StatementSpecCompiled
     public void setFilterExprRootNode(ExprNode optionalFilterNode)
     {
         filterExprRootNode = optionalFilterNode;
+    }
+
+    /**
+     * Returns the list of subquery expression nodes.
+     * @return subquery nodes
+     */
+    public List<ExprSubselectNode> getSubSelectExpressions()
+    {
+        return subSelectExpressions;
     }
 }

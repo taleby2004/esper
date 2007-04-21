@@ -4,13 +4,17 @@ import antlr.collections.AST;
 import junit.framework.TestCase;
 import net.esper.eql.expression.*;
 import net.esper.eql.spec.*;
+import net.esper.eql.core.EngineImportServiceImpl;
+import net.esper.eql.core.EngineImportService;
 import net.esper.event.EventAdapterService;
 import net.esper.pattern.*;
 import net.esper.support.bean.*;
 import net.esper.support.eql.parse.SupportParserHelper;
+import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
+import net.esper.support.eql.SupportPluginAggregationMethodOne;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.type.OuterJoinType;
-import net.esper.view.ViewSpec;
+import net.esper.eql.spec.ViewSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -589,6 +593,24 @@ public class TestEQLTreeWalker extends TestCase
         parseAndWalkPattern(text);
     }
 
+    public void testWalkPluginAggregationFunction() throws Exception
+    {
+        EngineImportService engineImportService = new EngineImportServiceImpl();
+        engineImportService.addAggregation("concat", SupportPluginAggregationMethodOne.class.getName());
+
+        String text = "select * from " + SupportBean.class.getName() + " group by concat(1)";
+        EQLTreeWalker walker = parseAndWalkEQL(text, engineImportService);
+        ExprPlugInAggFunctionNode node = (ExprPlugInAggFunctionNode) walker.getStatementSpec().getGroupByExpressions().get(0);
+        assertEquals("concat", node.getAggregationFunctionName());
+        assertFalse(node.isDistinct());
+
+        text = "select * from " + SupportBean.class.getName() + " group by concat(distinct 1)";
+        walker = parseAndWalkEQL(text, engineImportService);
+        node = (ExprPlugInAggFunctionNode) walker.getStatementSpec().getGroupByExpressions().get(0);
+        assertEquals("concat", node.getAggregationFunctionName());
+        assertTrue(node.isDistinct());
+    }
+
     public void testWalkPatternTypesValid() throws Exception
     {
         String text = SupportBean.class.getName();
@@ -695,6 +717,39 @@ public class TestEQLTreeWalker extends TestCase
         parseAndWalkEQL(expression);
     }
 
+    public void testSubselect() throws Exception
+    {
+        String expression = "select (select a from B(id=1) where cox=mox) from C";
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        SelectExprElementRawSpec element = walker.getStatementSpec().getSelectClauseSpec().getSelectList().get(0);
+        ExprSubselectNode exprNode = (ExprSubselectNode) element.getSelectExpression();
+
+        // check select expressions
+        StatementSpecRaw spec = exprNode.getStatementSpecRaw();
+        assertEquals(1, spec.getSelectClauseSpec().getSelectList().size());
+
+        // check filter
+        assertEquals(1, spec.getStreamSpecs().size());
+        FilterStreamSpecRaw filter = (FilterStreamSpecRaw) spec.getStreamSpecs().get(0);
+        assertEquals("B", filter.getRawFilterSpec().getEventTypeAlias());
+        assertEquals(1, filter.getRawFilterSpec().getFilterExpressions().size());
+
+        // check where clause
+        assertTrue(spec.getFilterRootNode() instanceof ExprEqualsNode);
+    }
+
+    public void testWalkPatternObject() throws Exception
+    {
+        String expression = "select * from pattern [" + SupportBean.class.getName() + " -> timer:interval(100)]";
+        parseAndWalkEQL(expression);
+
+        expression = "select * from pattern [" + SupportBean.class.getName() + " where timer:within(100)]";
+        parseAndWalkEQL(expression);
+
+        expression = "select * from pattern [" + SupportBean.class.getName() + " -> timer:at(2,3,4,4,4)]";
+        parseAndWalkEQL(expression);
+    }
+
     private double tryInterval(String interval) throws Exception
     {
         String text = "select * from " + SupportBean.class.getName() + ".win:time(" + interval + ")";
@@ -729,12 +784,17 @@ public class TestEQLTreeWalker extends TestCase
         log.debug(".parseAndWalk success, tree walking...");
         SupportParserHelper.displayAST(ast);
 
-        EQLTreeWalker walker = new EQLTreeWalker();
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker();        
         walker.startPatternExpressionRule(ast);
         return walker;
     }
 
     private static EQLTreeWalker parseAndWalkEQL(String expression) throws Exception
+    {
+        return parseAndWalkEQL(expression, new EngineImportServiceImpl());
+    }
+
+    private static EQLTreeWalker parseAndWalkEQL(String expression, EngineImportService engineImportService) throws Exception
     {
         log.debug(".parseAndWalk Trying text=" + expression);
         AST ast = SupportParserHelper.parseEQL(expression);
@@ -744,7 +804,7 @@ public class TestEQLTreeWalker extends TestCase
         EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
         eventAdapterService.addBeanType("SupportBean_N", SupportBean_N.class);
 
-        EQLTreeWalker walker = new EQLTreeWalker();
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(engineImportService);        
         walker.startEQLExpressionRule(ast);
         return walker;
     }
