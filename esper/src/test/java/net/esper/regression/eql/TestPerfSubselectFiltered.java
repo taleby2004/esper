@@ -107,7 +107,7 @@ public class TestPerfSubselectFiltered extends TestCase
         }
 
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < 5000; i++)
         {
             int index = i;
             epService.getEPRuntime().sendEvent(new SupportBean_S1(i, Integer.toString(index)));
@@ -118,6 +118,6 @@ public class TestPerfSubselectFiltered extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
+        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
     }
 }

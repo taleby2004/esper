@@ -11,7 +11,7 @@ import net.esper.support.eql.SupportResultSetProcessor;
 import net.esper.support.view.SupportSchemaNeutralView;
 import net.esper.support.event.SupportEventBeanFactory;
 
-public class TestOutputProcessView extends TestCase
+public class TestOutputProcessViewPolicy extends TestCase
 {
     private OutputProcessView outputProcessViewUpdate;
     private OutputProcessView outputProcessViewProcess;
@@ -22,8 +22,8 @@ public class TestOutputProcessView extends TestCase
     public void setUp() throws Exception
     {
         resultSetProcessor = new SupportResultSetProcessor();
-        outputProcessViewUpdate = new OutputProcessView(resultSetProcessor, 1, null, null);
-        outputProcessViewProcess = new OutputProcessView(resultSetProcessor, 2, null, null);        
+        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, 1, null, null);
+        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, 2, null, null);        
         
         childViewNoJoin = new SupportSchemaNeutralView();
         outputProcessViewUpdate.addView(childViewNoJoin);

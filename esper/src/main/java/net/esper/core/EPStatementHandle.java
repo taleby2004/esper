@@ -32,6 +32,13 @@ public class EPStatementHandle implements MetaDefItem
         hashCode = expressionText.hashCode() ^ statementLock.hashCode();
     }
 
+    /**
+     * Set the statement's self-join flag to indicate the the statement may join to itself,
+     * that is a single event may dispatch into multiple streams or patterns for the same statement,
+     * requiring internal dispatch logic to not shortcut evaluation of all filters for the statement
+     * within one lock, requiring the callback handle to be sorted.
+     * @param canSelfJoin is true if the statement potentially self-joins, false if not
+     */
     public void setCanSelfJoin(boolean canSelfJoin)
     {
         this.canSelfJoin = canSelfJoin;
@@ -89,6 +96,10 @@ public class EPStatementHandle implements MetaDefItem
         return hashCode;
     }
 
+    /**
+     * Returns true if the statement potentially self-joins amojng the events it processes.
+     * @return true for self-joins possible, false for not possible (most statements)
+     */
     public boolean isCanSelfJoin()
     {
         return canSelfJoin;

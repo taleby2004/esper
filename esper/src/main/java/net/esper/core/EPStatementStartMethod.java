@@ -14,10 +14,7 @@ import net.esper.eql.join.table.PropertyIndTableCoerceAdd;
 import net.esper.eql.join.plan.QueryGraph;
 import net.esper.eql.join.plan.FilterExprAnalyzer;
 import net.esper.eql.spec.*;
-import net.esper.eql.view.FilterExprView;
-import net.esper.eql.view.IStreamRStreamSelectorView;
-import net.esper.eql.view.InternalRouteView;
-import net.esper.eql.view.OutputProcessView;
+import net.esper.eql.view.*;
 import net.esper.eql.subquery.*;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
@@ -259,7 +256,7 @@ public class EPStatementStartMethod
         // Handle joins
         JoinSetComposer composer = JoinSetComposerFactory.makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), streamTypes, streamNames, streamViews, selectStreamSelectorEnum);
         JoinSetFilter filter = new JoinSetFilter(statementSpec.getFilterRootNode());
-        OutputProcessView indicatorView = new OutputProcessView(optionalResultSetProcessor, statementSpec.getStreamSpecs().size(), statementSpec.getOutputLimitSpec(), statementContext);
+        OutputProcessView indicatorView = OutputProcessViewFactory.makeView(optionalResultSetProcessor, statementSpec.getStreamSpecs().size(), statementSpec.getOutputLimitSpec(), statementContext);
 
         // Create strategy for join execution
         JoinExecutionStrategy execution = new JoinExecutionStrategyImpl(composer, filter, indicatorView);
@@ -402,7 +399,7 @@ public class EPStatementStartMethod
         // Add select expression view if there is any
        if (optionalResultSetProcessor != null || statementSpec.getOutputLimitSpec() != null)
         {
-            OutputProcessView selectView = new OutputProcessView(optionalResultSetProcessor, statementSpec.getStreamSpecs().size(), statementSpec.getOutputLimitSpec(), statementContext);
+            OutputProcessView selectView = OutputProcessViewFactory.makeView(optionalResultSetProcessor, statementSpec.getStreamSpecs().size(), statementSpec.getOutputLimitSpec(), statementContext);
             finalView.addView(selectView);
             finalView = selectView;
         }

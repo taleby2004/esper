@@ -50,8 +50,10 @@ public class TestPerfTimeWindowMinFilter extends TestCase
         }
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 30000; i++)
+        int count = 0;
+        for (int i = 0; i < 10000; i++)
         {
+            count++;
             /*
             if (i % 10000 == 0)
             {
@@ -72,5 +74,6 @@ public class TestPerfTimeWindowMinFilter extends TestCase
         long end = System.currentTimeMillis();
         long delta = end - start;
         assertTrue("Delta=" + delta, delta < 2000);
+        //System.out.println("total=" + count + " delta=" + delta + " per sec:" + 10000.0 / (delta / 1000.0));
     }
 }
