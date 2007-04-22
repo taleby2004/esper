@@ -1176,6 +1176,10 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 			</listitem>
 		</orderedlist>
 
+		<para>
+			Performance of your statement containing one or more subqueries principally depends on two parameters. First, if your subquery correlates one or more columns in the subquery stream with the enclosing statement's streams via equals '=', the engine automatically builds the appropriate indexes for fast row retrieval based on the key values correlated (joined). The second parameter is the number of rows found in the subquery stream and the complexity of the filter criteria (where-clause), as each row in the subquery stream must evaluate against the where-clause filter.
+		</para>
+
 		<sect2 id="eql-subqueries-exists">
 			<title>The '<literal>exists</literal>' keyword</title>
 

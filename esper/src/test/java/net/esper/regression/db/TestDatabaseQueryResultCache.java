@@ -22,7 +22,7 @@ public class TestDatabaseQueryResultCache extends TestCase
     {
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setExpiryTimeCache(1.0d, Double.MAX_VALUE);
-        tryCache(configDB, 3000, 1000, false);
+        tryCache(configDB, 5000, 1000, false);
     }
 
     public void testLRUCache()
