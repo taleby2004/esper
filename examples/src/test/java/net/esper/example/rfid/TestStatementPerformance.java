@@ -14,6 +14,49 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Performance test for the following problem and statements:
+ *
+ * <quote>If a given set of assets are not moving together from zone to zone, alert</quote>
+ * <p>
+ * Statements:
+ * <pre>
+    insert into CountZone_[Nx] select [Nx] as groupId, zone, count(*) as cnt
+    from LocationReport(assetId in ([aNx1], [aNx2], [aNx3])).std:unique('assetId')
+    group by zone
+
+    select * from pattern [every a=CountZone_[Nx](cnt in [1:2]) ->
+        (timer:interval(10 sec) and not CountZone_[Nx](cnt in (0, 3)))]
+ * </pre>
+ *
+ * This performance test works as follows:
+ * <OL>
+ * <LI> Assume N is the number of asset groups (numAssetGroups), each group consisting of 3 assets
+ * <LI> Generate unique assets ids for N*3 assets, assign a random start zone for each asset group
+ * <LI> Create 2 times N statements: the first N statements count the assets per zones for the statement's asset group,
+ * and generates stream CountZone_[Nx] where Nx=0..N
+ * The second statement detects a pattern among each asset group's event stream CountZone_[Nx] where assets are split
+ * between zones for more then 10 seconds.
+ * <LI> Send one event for each asset to start of each asset in the assigned zone
+ * <LI> Create M number of callables and an executor services, assigning each callable a range of asset groups.
+ * For example, with 1000 asset groups and 3 callables (threads) then each callable gets 333 asset groups assigned to it. The callable only
+ * sends events for the assigned asset group. The main thread starts the executor service.
+ * <LI> Each callable enters a processing loop until a shutdown flag is set
+ * <LI> If a random number integer number modulo the ratio of zone moves is 1, then the callable moves one asset group from zone to zone.
+ * For this, it determines a random asset group and new zone and sends 3 events moving the 3 assets to the new zone.
+ * <LI> If a random number integer number modulo the ratio of zone splits is 1, then the callable moves 2 of the 3 assets in
+ * a random asset group to a new zone, and leaves one asset in the group in the old zone. It saves the asset group number
+ * in a collection since this information is needed to reconciled later.
+ * <LI> If neither random number matches, then the callable picks a random asset group and resends all 3 asset location
+ * report events for the current zone for that asset.
+ * <LI> The main thread runs for the given number of seconds, sleeps 1 seconds and compiles statistics for reporting
+ * by asking each callable for events generated
+ * <LI> At 15 seconds before the end of the test the main thread invokes a setter method on all callables to stop
+ * generating split asset groups.
+ * <LI> The main thread stops the executor service
+ * <LI> The main thread reconciles the events received by listeners with the asset groups that were split by any callables.
+ * </OL>
+ */
 public class TestStatementPerformance extends TestCase
 {
     private static final Log log = LogFactory.getLog(TestStatementPerformance.class);
