@@ -1,5 +1,12 @@
 News
 
+* April 27, 2007  -  New! NEsper for .NET
+
+	* The .NET version is feature-equivalent to Esper version 1.3
+	
+	* Database joins not yet supported
+
+
 * April 22, 2007  -  Esper 1.8.0
 
     * Support for subqueries including the exists and subquery-in syntax (ESPER-22 support for subqueries)

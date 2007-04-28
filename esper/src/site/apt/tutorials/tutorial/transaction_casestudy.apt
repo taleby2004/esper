@@ -72,21 +72,21 @@ Transaction Case Study
 	
 ----------------------------------------
 public class TxnEventBase {
-  private String transactionId;
-  private long timestamp;
+    private String transactionId;
+    private long timestamp;
 
-  public TxnEventBase(String transactionId, long timestamp) {
-    this.transactionId = transactionId;
-	this.timestamp = timestamp;
-  }
+    public TxnEventBase(String transactionId, long timestamp) {
+  	    this.transactionId = transactionId;
+	    this.timestamp = timestamp;
+    }
 
-  public String getTransactionId() {
-    return transactionId;
-  }
+    public String getTransactionId() {
+	    return transactionId;
+    }
 
-  public long getTimestamp() {
-    return timestamp;
-  }
+    public long getTimestamp() {
+	    return timestamp;
+    }
 }
 ----------------------------------------	
 
@@ -94,16 +94,16 @@ public class TxnEventBase {
 	
 ----------------------------------------
 public class TxnEventA extends TxnEventBase {
-  private String customerId;
+    private String customerId;
 
-  public TxnEventA(String transactionId, long timestamp, String customerId) {
-    super(transactionId, timestamp);
-    this.customerId = customerId;
-  }
+    public TxnEventA(String transactionId, long timestamp, String customerId) {
+        super(transactionId, timestamp);
+        this.customerId = customerId;
+    }
 
-  public String getCustomerId() {
-    return customerId;
-  }
+    public String getCustomerId() {
+        return customerId;
+    }
 }
 ----------------------------------------	
 
@@ -115,18 +115,13 @@ public class TxnEventA extends TxnEventBase {
 	the last 30 minutes.
 	
 ----------------------------------------
-insert into CombinedEvent(
-  transactionId, customerId, supplierId,
-  latencyAC, latencyBC, latencyAB
-)
+insert into CombinedEvent(transactionId, customerId, supplierId, latencyAC, latencyBC, latencyAB)
 select C.transactionId, customerId, supplierId, 
-  C.timestamp - A.timestamp, C.timestamp - B.timestamp,
-  B.timestamp - A.timestamp
-from TxnEventA.win:time(30 minutes) A,
-  TxnEventB.win:time(30 minutes) B,
-  TxnEventC.win:time(30 minutes) C
-where A.transactionId = B.transactionId
-  and B.transactionId = C.transactionId
+       C.timestamp - A.timestamp, C.timestamp - B.timestamp, B.timestamp - A.timestamp 
+  from TxnEventA.win:time(30 minutes) A,
+       TxnEventB.win:time(30 minutes) B,
+       TxnEventC.win:time(30 minutes) C 
+ where A.transactionId = B.transactionId and B.transactionId = C.transactionId
 ----------------------------------------
 	
 	This statement uses the <insert into> syntax to generate a CombinedEvent event stream. The next section uses
@@ -140,20 +135,16 @@ where A.transactionId = B.transactionId
 	(difference in time between A and C) over the past 30 minutes we can use the EQL below.
 	
 ----------------------------------------
-select min(latencyAC) as minLatencyAC,
-  max(latencyAC) as maxLatencyAC,
-  avg(latencyAC) as avgLatencyAC
-from CombinedEvent.win:time(30 minutes)
+select min(latencyAC) as minLatencyAC, max(latencyAC) as maxLatencyAC, avg(latencyAC) as avgLatencyAC
+  from CombinedEvent.win:time(30 minutes)
 ----------------------------------------
 	
 	We can derive this data per customer and supplier id by specifying a <group by> clause.
 	
 ----------------------------------------
-select customerId, min(latencyAC) as minLatencyAC,
-  max(latencyAC) as maxLatencyAC,
-  avg(latencyAC) as avgLatencyAC
-from CombinedEvent.win:time(30 minutes)
-group by customerId
+select customerId, min(latencyAC) as minLatencyAC, max(latencyAC) as maxLatencyAC, avg(latencyAC) as avgLatencyAC
+  from CombinedEvent.win:time(30 minutes)
+ group by customerId
 ----------------------------------------
 	
 	
@@ -163,10 +154,10 @@ group by customerId
 	
 ----------------------------------------
 select * 
-from TxnEventA.win:time(30 minutes) A
-full outer join TxnEventC.win:time(60 minutes) C on A.transactionId = C.transactionId
-full outer join TxnEventB.win:time(30 minutes) B on B.transactionId = C.transactionId
-where C.transactionId is null
+  from TxnEventA.win:time(30 minutes) A 
+       full outer join TxnEventC.win:time(60 minutes) C on A.transactionId = C.transactionId
+       full outer join TxnEventB.win:time(30 minutes) B on B.transactionId = C.transactionId
+ where C.transactionId is null
 ----------------------------------------
 
 	When TxnEventA or TxnEventB events leave their respective time windows consisting of the last 30 minutes of events, Esper
@@ -213,12 +204,13 @@ bySupplierStatement.addListener(myListener);
 ----------------------------------------
 public class RealtimeSummaryTotalsListener implements UpdateListener {
 
-  public void update(EventBean[] newEvents, EventBean[] oldEvents) {
-    EventBean event = newEvents[0];
-    log.debug(" Totals minAC=" + event.get("minLatencyAC") +
-      " maxAC=" + event.get("maxLatencyAC") +
-      " avgAC=" + event.get("avgLatencyAC"));
-  }
+    public void update(EventBean[] newEvents, EventBean[] oldEvents) {
+
+        EventBean event = newEvents[0];
+        log.debug(" Totals minAC=" + event.get("minLatencyAC") +
+                  " maxAC=" + event.get("maxLatencyAC") +
+                  " avgAC=" + event.get("avgLatencyAC"));
+    }
 }
 ----------------------------------------
 	
