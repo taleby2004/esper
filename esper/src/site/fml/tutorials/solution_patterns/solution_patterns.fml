@@ -152,6 +152,69 @@ select feed, max(cnt) as maxCount, min(cnt) as minCount from TicksPerSecond.win:
 </pre></div>    
       </answer>
     </faq>    
+
+    <faq id="triple-bottom-pattern">
+      <question>How do I detect something really complex, like a triple-bottom pattern?</question>
+      <answer>
+      	<p>
+      		The triple-bottom pattern is out of the world of stock trading and is described in <a href="http://www.thestockbandit.com/Triple-bottom.htm">Triple-Bottom Pattern</a> in detail.
+      	</p>
+        <p>
+			The problem can be broken down: First, how does one identify bottom price points among a stream of market data events?
+			Second, once the individual bottom price points are identified, how does one detect an occurance of 3 bottom price points, whose value is within approximation of each other, and that are spaced out over time in a pattern?
+		</p>
+        <p>
+			The first problem is an event streaming processing problem, I believe. The stream of events is market data that contains price points for the NIFTY index over time. I'll attempt to define a bottom price point as follows: If the average price for the last 5 days is 15% lower then the average price over a period of say 60 days, then the minimum price during that 5 days is a single bottom price point. Of course the number of days and percentages are parameters to figure out and get right.
+		</p>
+			
+<div class="source"><pre>-- The query to determine the average price for the last 60 days:
+insert into AvgPriceLast60Days
+select avg(price) as avgPrice
+from MarketData.win:time(60 days)
+output every 10 minutes
+</pre></div>    
+
+<div class="source"><pre>-- The query to determine the average price for the last 5 days:
+insert into AvgPriceLast5Days
+select avg(price) as avgPrice, min(price) as minPrice
+from MarketData.win:time(5 days)
+output every 10 minutes
+</pre></div>    
+
+<div class="source"><pre>-- Compare the last average prices for each:
+insert into BottomPriceEvent
+select minPrice as bottomPrice 
+from AvgPriceLast60Days.std:last() as LastAvg60Days
+     AvgPriceLast5Days.std:last() as LastAvg5Days
+where LastAvg5Days.avgPrice &lt; LastAvg60Days.avgPrice * 0.85
+output first every 1 day
+</pre></div>    
+
+		<p>
+			The last statement populates the "BottomPriceEvent" event stream as a stream of higher-level events in which each event represents a bottom price point.
+		</p>
+		<p>
+			The second part of the problem requires detecting 3 bottom price points whose values are within a given range of each other, and that have a certain temporal relationship with each other. Lets assume that the bottom price points should be within 5% each other. Lets also assume we are looking for bottom price points spaced at least 10 days apart from each other, but within 30 days of the prior bottom price point.
+		</p>
+
+<div class="source"><pre>-- The pattern to detect the triple-bottom:
+insert into TripeBottomPattern
+select * from pattern [every a=ButtomPriceEvent 
+  -> timer:interval(10 days) 
+  -> ButtomPriceEvent(minPrice between 0.95*a.minPrice and 1.05*a.minPrice) where timer:within(30 days)
+  -> timer:interval(10 days) 
+  -> ButtomPriceEvent(minPrice between 0.95*a.minPrice and 1.05*a.minPrice) where timer:within(30 days)]
+</pre></div>    
+
+		<p>
+			Finally, the resulting TripeBottomPattern event stream created by the last statement is the higher-level complex events represening that a triple-bottom pattern has been detected. 
+        </p>
+
+		<p>
+			An additional interesting problem is that the stream and pattern queries are rather long-running continuous queries, since they need to run over days and month. That may requires persisting events, and/or using simulated time by playing back past events into the engine.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
 </faqs>

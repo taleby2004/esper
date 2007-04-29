@@ -12,9 +12,9 @@ NEsper Change History
 	[]
 
 
-Version 1.3.0 BETA - Release Candidate 
+NEsper 1.3.0 Beta 1 - Release Candidate 
 
-	Released XXX, 2007
+	Released April 28, 2007
 		
 * API changes
 
@@ -22,7 +22,7 @@ Version 1.3.0 BETA - Release Candidate
     
 * Major changes
 
-	  * Conversion of Esper to the CLR.
+	* Conversion of Esper to the CLR.
 
     * Most of the method names have had their canonization changed to reflect .NET coding conventions.
     
