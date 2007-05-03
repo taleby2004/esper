@@ -153,6 +153,22 @@ select feed, max(cnt) as maxCount, min(cnt) as minCount from TicksPerSecond.win:
       </answer>
     </faq>    
 
+   <faq id="absence-3">
+      <question>How do I report at a regular interval without any incoming events?</question>
+      <answer>
+        <p>
+          Let's say we want to have our listener get invoked every 5 seconds, and select the last value, if any, from a stream.          
+        </p>
+	    <div class="source"><pre>select (select price from MarketData.std:lastevent()) as price 
+from pattern [every timer:interval(5 sec)]
+</pre></div>    
+        <p>
+          The pattern fires every 5 seconds causing the sub-select to take place, returning null if no MarketData events have come in,
+          or returning the price column of the last MarketData event.
+        </p>
+      </answer>
+    </faq>    
+ 
     <faq id="triple-bottom-pattern">
       <question>How do I detect something really complex, like a triple-bottom pattern?</question>
       <answer>
