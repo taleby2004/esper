@@ -907,7 +907,7 @@ having stddev(price) &gt; 0.8</programlisting>
 					Using the <literal>first</literal> keyword you can be notified at the start of the interval. The allows to watch for situations such as a rate falling below a threshold
 					and only be informed every now and again after the specified output interval, but be informed the moment it first happens. 
 				</para>
-			    <programlisting>select * from TickRate.win:time(30 seconds) output first every 60 seconds where rate&lt;100</programlisting>
+			    <programlisting>select * from TickRate.win:time(30 seconds) where rate&lt;100 output first every 60 seconds</programlisting>
 
 		</sect2>
 
