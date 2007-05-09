@@ -15,8 +15,8 @@ import javax.swing.JFrame;
 
 public class RFIDMouseDragExample extends JFrame
 {
-    private final static int WIDTH = 750;
-    private final static int HEIGHT = 500;
+    private final static int WIDTH = 1050;
+    private final static int HEIGHT = 700;
 
     private DisplayCanvas canvas;
 
@@ -36,7 +36,7 @@ public class RFIDMouseDragExample extends JFrame
             {
                 for (int i = 0; i < newEvents.length; i++)
                 {
-                    System.out.println("New event for zone " + newEvents[i].get("Part.zone"));
+                    System.out.println("ALERT: Asset group not moving together, zone " + newEvents[i].get("Part.zone"));
                 }
             }
         });

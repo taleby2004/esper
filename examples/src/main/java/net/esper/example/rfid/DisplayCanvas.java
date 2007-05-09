@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.net.URL;
 
 import javax.swing.*;
 
@@ -32,7 +33,8 @@ public class DisplayCanvas extends JPanel
         addMouseMotionListener(new MouseMotionHandler());
         this.addMouseListener(new MouseListenerHandler(this));
 
-        Image image = getToolkit().getImage("etc/rfid_tag_image.gif");
+        URL imageURL = this.getClass().getClassLoader().getResource("rfid_tag_image.gif");
+        Image image = getToolkit().getImage(imageURL);
 
         // Load image
         MediaTracker mt = new MediaTracker(this);
@@ -57,6 +59,7 @@ public class DisplayCanvas extends JPanel
         for (int i = 0; i < NUM_IMAGES; i++)
         {
             x[i] = i * (imageWidth + 10);
+            y[i] = 0;
             assetIds[i] = "A" + Integer.toString(i + 1);
         }
 
@@ -76,6 +79,29 @@ public class DisplayCanvas extends JPanel
         {
             g2D.drawImage(bi, x[i], y[i], this);
         }
+
+        int lineLen = 50;
+
+        // draw zones
+        int middleX = (int) this.getSize().getWidth() / 2;
+        int middleY = (int) this.getSize().getHeight() / 2;
+        int width = (int)this.getSize().getWidth();
+        int height = (int)this.getSize().getHeight();
+        g2D.drawLine(0, middleY, lineLen, middleY);
+        g2D.drawLine(width, middleY, width - lineLen, middleY);
+        g2D.drawLine(middleX, 0, middleX, lineLen);
+        g2D.drawLine(middleX, height, middleX, height - lineLen);
+
+        g2D.drawLine(middleX - 20, middleY, middleX + 20, middleY);
+        g2D.drawLine(middleX, middleY - 20, middleX, middleY + 20);
+
+        int offsetXText = middleX / 2 - 20;
+
+        g2D.setFont(new Font("arial", Font.PLAIN, 30));
+        g2D.drawString("Zone1", offsetXText, middleY / 2);    // middle of zone
+        g2D.drawString("Zone2", middleX + offsetXText, middleY / 2);
+        g2D.drawString("Zone3", offsetXText, middleY + middleY / 2);
+        g2D.drawString("Zone4", middleX + offsetXText, middleY + middleY / 2);
     }
 
     class MouseMotionHandler extends MouseMotionAdapter {
@@ -156,9 +182,9 @@ public class DisplayCanvas extends JPanel
                 {
                     yzone = 1;
                 }
-                int zone = xzone + 2 * yzone;
+                int zone = xzone + 2 * yzone + 1;
 
-                System.out.println("Moved asset " + assetIds[currentImage] + " to " + xpos + " " + ypos + " in zone " + zone);
+                System.out.println("Moved asset " + assetIds[currentImage] + " to coordinates (" + xpos + "," + ypos + ") to zone " + zone);
 
                 // Send event
                 LocationReport report = new LocationReport(assetIds[currentImage], zone);

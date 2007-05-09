@@ -21,7 +21,7 @@ public class LRMovingZoneStmt
             {
                 for (int i = 0; i < newEvents.length; i++)
                 {
-                    System.out.println("Summary: zone " + newEvents[i].get("zone") + " count " + newEvents[i].get("cnt"));
+                    System.out.println("Summary: zone " + newEvents[i].get("zone") + " now has count " + newEvents[i].get("cnt"));
                 }
             }
         });
