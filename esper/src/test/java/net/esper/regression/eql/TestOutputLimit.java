@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.EPRuntime;
 import net.esper.client.time.CurrentTimeEvent;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
@@ -26,7 +27,124 @@ public class TestOutputLimit extends TestCase
         epService.initialize();
     }
     
-    public void testLimitTime(){  	
+    public void testTimeBatchOutputEvents()
+    {
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+
+        String stmtText = "select * from " + SupportBean.class.getName() + ".win:time_batch(10 seconds) output every 10 seconds";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        sendTimer(0);
+        sendTimer(10000);
+        assertFalse(listener.isInvoked());
+        sendTimer(20000);
+        assertFalse(listener.isInvoked());
+
+        sendEvent("e1");
+        sendTimer(30000);
+        assertFalse(listener.isInvoked());
+        sendTimer(40000);
+        EventBean[] newEvents = listener.getAndResetLastNewData();
+        assertEquals(1, newEvents.length);
+        assertEquals("e1", newEvents[0].get("string"));
+        listener.reset();
+
+        sendTimer(50000);
+        assertTrue(listener.isInvoked());
+        listener.reset();
+
+        sendTimer(60000);
+        assertTrue(listener.isInvoked());
+        listener.reset();
+
+        sendTimer(70000);
+        assertTrue(listener.isInvoked());
+        listener.reset();
+
+        sendEvent("e2");
+        sendEvent("e3");
+        sendTimer(80000);
+        newEvents = listener.getAndResetLastNewData();
+        assertEquals(2, newEvents.length);
+        assertEquals("e2", newEvents[0].get("string"));
+        assertEquals("e3", newEvents[1].get("string"));
+
+        sendTimer(90000);
+        assertTrue(listener.isInvoked());
+        listener.reset();
+    }
+
+    public void testTimeWindowOutputCount()
+    {
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+
+        String stmtText = "select count(*) as cnt from " + SupportBean.class.getName() + ".win:time(10 seconds) output every 10 seconds";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        sendTimer(0);
+        sendTimer(10000);
+        assertFalse(listener.isInvoked());
+        sendTimer(20000);
+        assertFalse(listener.isInvoked());
+
+        sendEvent("e1");
+        sendTimer(30000);
+        EventBean[] newEvents = listener.getAndResetLastNewData();
+        assertEquals(1, newEvents.length);
+        assertEquals(0L, newEvents[0].get("cnt"));
+
+        sendTimer(31000);
+
+        sendEvent("e2");
+        sendEvent("e3");
+        sendTimer(40000);
+        newEvents = listener.getAndResetLastNewData();
+        assertEquals(1, newEvents.length);
+        assertEquals(2L, newEvents[0].get("cnt"));
+    }
+
+    public void testTimeBatchOutputCount()
+    {
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+
+        String stmtText = "select count(*) as cnt from " + SupportBean.class.getName() + ".win:time_batch(10 seconds) output every 10 seconds";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        sendTimer(0);
+        sendTimer(10000);
+        assertFalse(listener.isInvoked());
+        sendTimer(20000);
+        assertFalse(listener.isInvoked());
+
+        sendEvent("e1");
+        sendTimer(30000);
+        assertFalse(listener.isInvoked());
+        sendTimer(40000);
+        EventBean[] newEvents = listener.getAndResetLastNewData();
+        assertEquals(1, newEvents.length);
+        // output limiting starts 10 seconds after, therefore the old batch was posted already and the cnt is zero
+        assertEquals(0L, newEvents[0].get("cnt"));
+
+        sendTimer(50000);
+        EventBean[] newData = listener.getLastNewData();
+        assertEquals(0L, newData[0].get("cnt"));
+        listener.reset();
+
+        sendEvent("e2");
+        sendEvent("e3");
+        sendTimer(60000);
+        newEvents = listener.getAndResetLastNewData();
+        assertEquals(1, newEvents.length);
+        assertEquals(2L, newEvents[0].get("cnt"));
+    }
+
+    public void testLimitTime(){
     	String eventName = SupportBean.class.getName();  
     	String selectStatement = "select * from " + eventName + ".win:length(5)";
 
@@ -334,6 +452,13 @@ public class TestOutputLimit extends TestCase
 	    SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, null);
 	    epService.getEPRuntime().sendEvent(bean);
 	}
+
+    private void sendTimer(long time)
+    {
+        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        EPRuntime runtime = epService.getEPRuntime();
+        runtime.sendEvent(event);
+    }
 
 	private static Log log = LogFactory.getLog(TestOutputLimit.class);
 }

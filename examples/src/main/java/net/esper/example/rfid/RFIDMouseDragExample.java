@@ -28,7 +28,6 @@ public class RFIDMouseDragExample extends JFrame
         config.addEventTypeAlias("LocationReport", LocationReport.class);
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
-        epService.initialize();
 
         LRMovingZoneStmt.createStmt(epService, 10, new UpdateListener()
         {

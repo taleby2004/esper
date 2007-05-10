@@ -8,6 +8,7 @@ import net.esper.client.Configuration;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
+import net.esper.event.EventBean;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ public class TestJoinMapType extends TestCase
         listener = new SupportUpdateListener();
     }
 
-    public void testJoinCoercion()
+    public void testJoinMapEvent()
     {
         String joinStatement = "select S0.id, S1.id, S0.p00, S1.p00 from MapS0 as S0, MapS1 as S1" +
                 " where S0.id = S1.id";
@@ -40,7 +41,19 @@ public class TestJoinMapType extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEQL(joinStatement);
         stmt.addListener(listener);
 
-        sendMapEvent("MapS0", "a", 1000);
+        sendMapEvent("MapS0", "a", 1);
+        assertFalse(listener.isInvoked());
+        
+        sendMapEvent("MapS1", "a", 2);
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals("a", event.get("S0.id"));
+        assertEquals("a", event.get("S1.id"));
+        assertEquals(1, event.get("S0.p00"));
+        assertEquals(2, event.get("S1.p00"));
+
+        sendMapEvent("MapS1", "b", 3);
+        sendMapEvent("MapS0", "c", 4);
+        assertFalse(listener.isInvoked());
     }
 
     private void sendMapEvent(String alias, String id, int p00)

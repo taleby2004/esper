@@ -27,8 +27,8 @@ public class LRMovingZoneStmt
         });
 
         String textTwo = "select Part.zone from pattern [" +
-                "  every Part=CountZone(cnt in [1:2]) ->" +
-                "  (timer:interval(" + secTimeout + " sec) and not CountZone(cnt in (0, 3)))]";
+                "  every Part=CountZone(cnt in (1,2)) ->" +
+                "  (timer:interval(" + secTimeout + " sec) and not CountZone(cnt in (0,3)))]";
         EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
         stmtTwo.addListener(listener);        
     }
