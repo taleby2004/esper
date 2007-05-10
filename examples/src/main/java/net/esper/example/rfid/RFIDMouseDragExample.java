@@ -4,7 +4,6 @@ import net.esper.client.Configuration;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.UpdateListener;
-import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
 
 import java.awt.Container;
