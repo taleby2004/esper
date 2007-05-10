@@ -191,18 +191,24 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     return true;
                 }
 
-                for (EventType typeOneSuper : typeOne.getSuperTypes())
+                if (typeOne.getSuperTypes() != null)
                 {
-                    if (typeOneSuper == typeTwo)
+                    for (EventType typeOneSuper : typeOne.getSuperTypes())
                     {
-                        return true;
+                        if (typeOneSuper == typeTwo)
+                        {
+                            return true;
+                        }
                     }
                 }
-                for (EventType typeTwoSuper : typeTwo.getSuperTypes())
+                if (typeTwo.getSuperTypes() != null)
                 {
-                    if (typeOne == typeTwoSuper)
+                    for (EventType typeTwoSuper : typeTwo.getSuperTypes())
                     {
-                        return true;
+                        if (typeOne == typeTwoSuper)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
