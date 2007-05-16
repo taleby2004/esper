@@ -61,7 +61,11 @@ public class DisplayCanvas extends JPanel
             x[i] = i * (imageWidth + 10);
             y[i] = 0;
             assetIds[i] = "A" + Integer.toString(i + 1);
+
+            // boostrap initial positions in zone 1
+            engine.getEPRuntime().sendEvent(new LocationReport(assetIds[i], 1));
         }
+        System.out.println("-- END OF STARTUP SEQUENCE with initial positions --");
 
         bi = new BufferedImage(image.getWidth(this), image.getHeight(this), BufferedImage.TYPE_INT_ARGB);
         Graphics2D big = bi.createGraphics();
