@@ -264,4 +264,12 @@ public class TestStatementPerformance extends TestCase
         }
         return result;
     }
+
+    public static void main(String[] args) throws Throwable {
+        TestStatementPerformance me = new TestStatementPerformance();
+        me.setUp();
+        me.testPerformance();
+        me.tearDown();
+    }
+
 }
