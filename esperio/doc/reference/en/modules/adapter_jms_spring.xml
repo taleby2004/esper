@@ -324,10 +324,14 @@ mapMessage.setObject(InputAdapter.ESPERIO_MAP_EVENT_TYPE, "MyInputEvent");]]></p
 			<title>JMS Message Marshalling</title>
 			<para>
 				EsperIO provides a marshal implementation in the class <literal>JMSDefaultMapMessageMarshaller</literal>. This marshaller constructs a JMS <literal>MapMessage</literal> from any event received by copying 
-				event properties into the properties of the message. The configuration file makes it easy to configure a custom marshaller that adheres to the <literal>net.esper.adapter.jms.JMSMessageMarshaller</literal> interface.
+				event properties into the name-value pairs of the message. The configuration file makes it easy to configure a custom marshaller that adheres to the <literal>net.esper.adapter.jms.JMSMessageMarshaller</literal> interface.
 			</para>
-			
-			<para>
+            <para>
+                Note that this marshaller uses <literal>javax.jms.MapMessage</literal> name-value pairs and not general <literal>javax.jms.Message</literal> properties.
+                This means when you'll read the event properties back from the JMS MapMessage, you will have to use the <literal>javax.jms.MapMessage.getObject(...)</literal> method.
+            </para>
+
+            <para>
 				The <literal>SpringJMSTemplateOutputAdapter</literal> is configured with a list of subscription instances of type <literal>JMSSubscription</literal> as the sample configuration shows. Each subscription defines 
 				an event type alias that must be configured and used in the <literal>insert-into</literal> syntax of a statement.
 			</para>

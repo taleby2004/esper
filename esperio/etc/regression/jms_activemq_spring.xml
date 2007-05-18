@@ -12,7 +12,8 @@
   <bean id="jmsActiveMQFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
     <property name="connectionFactory">
       <bean class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="tcp://localhost:61616"/>
+        <!-- <property name="brokerURL" value="tcp://localhost:61616"/> -->
+        <property name="brokerURL" value="vm://localhost?broker.persistent=false"/>          
       </bean>
     </property>
   </bean>
