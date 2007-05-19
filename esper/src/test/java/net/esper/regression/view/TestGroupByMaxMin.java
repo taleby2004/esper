@@ -3,6 +3,9 @@ package net.esper.regression.view;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPStatement;
 import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPRuntime;
+import net.esper.client.time.TimerControlEvent;
+import net.esper.client.time.CurrentTimeEvent;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBeanString;
@@ -26,6 +29,38 @@ public class TestGroupByMaxMin extends TestCase
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
+    }
+
+    // TODO
+    // A. OutputProcessViewPolicy must collect events posted by views in the same order they arrive
+    // B. OutputProcessViewPolicy must replay events  replay 
+    public void testMinMaxTimeWindow()
+    {
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+        sendTimer(0);
+
+        String viewExpr = "select symbol, " +
+                                  "volume, max(volume) as maxVol" +
+                          " from " + SupportMarketDataBean.class.getName() + ".win:time(1 sec) " +
+                          "group by symbol output every 1 seconds";
+
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        long timer = 0;
+        for (int i = 0; i < 10000000; i++)
+        {
+            long volume = i % 10;
+            SupportMarketDataBean event = new SupportMarketDataBean("SYM", -1, volume, "");
+            epService.getEPRuntime().sendEvent(event);
+
+            if (i % 20 == 0)
+            {
+                timer += 500;
+                log.info(".testMinMax Sending timer=" + timer);
+                sendTimer(timer);
+            }
+        }
     }
 
     public void testMinMaxView()
@@ -211,6 +246,13 @@ public class TestGroupByMaxMin extends TestCase
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, 0, volume, null);
         epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendTimer(long timeInMSec)
+    {
+        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        EPRuntime runtime = epService.getEPRuntime();
+        runtime.sendEvent(event);
     }
 
     private static final Log log = LogFactory.getLog(TestGroupByMaxMin.class);

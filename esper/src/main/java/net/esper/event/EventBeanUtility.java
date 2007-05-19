@@ -1,6 +1,8 @@
 package net.esper.event;
 
 import net.esper.collection.MultiKeyUntyped;
+import net.esper.collection.UniformPair;
+import net.esper.collection.MultiKey;
 
 import java.util.*;
 import java.io.PrintWriter;
@@ -17,7 +19,7 @@ public class EventBeanUtility
      * @param eventVector vector
      * @return array with all events
      */
-    public static EventBean[] flatten(LinkedList<EventBean[]> eventVector)
+    public static EventBean[] flatten(List<EventBean[]> eventVector)
     {
         if (eventVector.isEmpty())
         {
@@ -32,18 +34,101 @@ public class EventBeanUtility
         int totalElements = 0;
         for (EventBean[] arr : eventVector)
         {
-            totalElements += arr.length;
+            if (arr != null)
+            {
+                totalElements += arr.length;
+            }
+        }
+
+        if (totalElements == 0)
+        {
+            return null;
         }
 
         EventBean[] result = new EventBean[totalElements];
         int destPos = 0;
         for (EventBean[] arr : eventVector)
         {
-            System.arraycopy(arr, 0, result, destPos, arr.length);
-            destPos += arr.length;
+            if (arr != null)
+            {
+                System.arraycopy(arr, 0, result, destPos, arr.length);
+                destPos += arr.length;
+            }
         }
 
         return result;
+    }
+
+    /**
+     * Flatten the vector of arrays to an array. Return null if an empty vector was passed, else
+     * return an array containing all the events.
+     * @param updateVector is a list of updates of old and new events
+     * @return array with all events
+     */
+    public static UniformPair<EventBean[]> flattenBatchStream(List<UniformPair<EventBean[]>> updateVector)
+    {
+        if (updateVector.isEmpty())
+        {
+            return new UniformPair<EventBean[]>(null, null);
+        }
+
+        if (updateVector.size() == 1)
+        {
+            return new UniformPair<EventBean[]>(updateVector.get(0).getFirst(), updateVector.get(0).getSecond());
+        }
+
+        int totalNewEvents = 0;
+        int totalOldEvents = 0;
+        for (UniformPair<EventBean[]> pair : updateVector)
+        {
+            if (pair.getFirst() != null)
+            {
+                totalNewEvents += pair.getFirst().length;
+            }
+            if (pair.getSecond() != null)
+            {
+                totalOldEvents += pair.getSecond().length;
+            }
+        }
+
+        if ((totalNewEvents == 0) && (totalOldEvents == 0))
+        {
+            return new UniformPair<EventBean[]>(null, null);
+        }
+
+        EventBean[] newEvents = null;
+        EventBean[] oldEvents = null;
+        if (totalNewEvents != 0)
+        {
+            newEvents = new EventBean[totalNewEvents];
+        }
+        if (totalOldEvents != 0)
+        {
+            oldEvents = new EventBean[totalOldEvents];
+        }
+
+        int destPosNew = 0;
+        int destPosOld = 0;
+        for (UniformPair<EventBean[]> pair : updateVector)
+        {
+            EventBean[] newData = pair.getFirst();
+            EventBean[] oldData = pair.getSecond();
+
+            if (newData != null)
+            {
+                int newDataLen = newData.length;
+                System.arraycopy(newData, 0, newEvents, destPosNew, newDataLen);
+                destPosNew += newDataLen;
+            }
+            if (oldData != null)
+            {
+                int oldDataLen = oldData.length;
+                System.arraycopy(oldData, 0, oldEvents, destPosOld, oldDataLen);
+                destPosOld += oldDataLen;
+            }
+        }
+
+        return new UniformPair<EventBean[]>(newEvents, oldEvents);
     }
 
      /**
@@ -123,5 +208,38 @@ public class EventBeanUtility
         {
             writer.println( "#" + i + "  " + properties[i] + " = " + event.get(properties[i]));
         }
+    }
+
+    public static UniformPair<Set<MultiKey<EventBean>>> flattenBatchJoin(List<UniformPair<Set<MultiKey<EventBean>>>> joinPostings)
+    {
+        if (joinPostings.isEmpty())
+        {
+            return new UniformPair<Set<MultiKey<EventBean>>>(null, null);
+        }
+
+        if (joinPostings.size() == 1)
+        {
+            return new UniformPair<Set<MultiKey<EventBean>>>(joinPostings.get(0).getFirst(), joinPostings.get(0).getSecond());
+        }
+
+        Set<MultiKey<EventBean>> newEvents = new LinkedHashSet<MultiKey<EventBean>>();
+        Set<MultiKey<EventBean>> oldEvents = new LinkedHashSet<MultiKey<EventBean>>();
+
+        for (UniformPair<Set<MultiKey<EventBean>>> pair : joinPostings)
+        {
+            Set<MultiKey<EventBean>> newData = pair.getFirst();
+            Set<MultiKey<EventBean>> oldData = pair.getSecond();
+
+            if (newData != null)
+            {
+                newEvents.addAll(newData);
+            }
+            if (oldData != null)
+            {
+                oldEvents.addAll(oldData);
+            }
+        }
+
+        return new UniformPair<Set<MultiKey<EventBean>>>(newEvents, oldEvents);        
     }
 }

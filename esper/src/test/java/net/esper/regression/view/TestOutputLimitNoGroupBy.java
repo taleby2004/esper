@@ -177,7 +177,7 @@ public class TestOutputLimitNoGroupBy extends TestCase
 	    assertTrue(updateListener.getAndClearIsInvoked());
 	    assertEquals(2, updateListener.getLastNewData().length);
 	    assertEquals(1L, updateListener.getLastNewData()[0].get("longBoxed"));
-	    assertEquals(3L, updateListener.getLastNewData()[0].get("result"));
+	    assertEquals(1L, updateListener.getLastNewData()[0].get("result"));
 	    assertEquals(2L, updateListener.getLastNewData()[1].get("longBoxed"));
 	    assertEquals(3L, updateListener.getLastNewData()[1].get("result"));
 	    assertNull(updateListener.getLastOldData());

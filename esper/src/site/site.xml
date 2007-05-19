@@ -31,6 +31,7 @@
 				<item name="Longer Case Study" href="/tutorials/tutorial/transaction_casestudy.html"/>
 				<item name="Solution Patterns" href="/tutorials/solution_patterns/solution_patterns.html"/>
 				<item name="OnJava Article" href="http://www.onjava.com/pub/a/onjava/2007/03/07/esper-event-stream-processing-and-correlation.html"/>
+				<item name="JavaOne Presentation" href="http://dist.codehaus.org/esper/index.php?key=JavaOne_TS-1911_May_11_2007.pdf"/>
 				<item name="FAQ for Java" href="/tutorials/faq_esper/faq.html"/>
 				<item name="FAQ for .NET" href="/tutorials/faq_nesper/faq.html"/>
 				<item name="Technology Links" href="/tutorials/links/links.html"/>
