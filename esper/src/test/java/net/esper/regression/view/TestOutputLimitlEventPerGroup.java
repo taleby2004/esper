@@ -4,6 +4,9 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.EPRuntime;
+import net.esper.client.time.TimerControlEvent;
+import net.esper.client.time.CurrentTimeEvent;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBeanString;
 import net.esper.support.bean.SupportMarketDataBean;
@@ -26,6 +29,37 @@ public class TestOutputLimitlEventPerGroup extends TestCase
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
+    }
+
+    public void testTimeBatchLast()
+	{
+        sendTimer(0);
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+	    String viewExpr = "select symbol," +
+	                             "sum(price) as mySum," +
+	                             "avg(price) as myAvg " +
+	                      "from " + SupportMarketDataBean.class.getName() + ".win:time_batch(.1 seconds) " +
+	                      "group by symbol " +
+	                      "output last every .1 seconds";
+
+	    selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+	    selectTestView.addListener(testListener);
+
+        sendTimer(1000);
+        sendEvent("Dell", 20);
+        sendTimer(2000);
+        EventBean newEvents[] = testListener.getLastNewData();
+        assertEquals(2, newEvents.length);
+        assertEquals("DELL", newEvents[0].get("symbol"));
+        assertEquals("IBM", newEvents[1].get("symbol"));
+        assertEquals(20, newEvents[0].get("mySum"));
+        assertEquals(3, newEvents[1].get("mySum"));
+        sendTimer(3000);
+        sendTimer(3500);
+        sendEvent("Dell", 20);
+        sendTimer(3510);
+        sendTimer(4000);
+        sendTimer(5000);
     }
 
     public void testNoJoinLast()
@@ -278,4 +312,11 @@ public class TestOutputLimitlEventPerGroup extends TestCase
 	    SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, null);
 	    epService.getEPRuntime().sendEvent(bean);
 	}
+
+    private void sendTimer(long timeInMSec)
+    {
+        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        EPRuntime runtime = epService.getEPRuntime();
+        runtime.sendEvent(event);
+    }
 }
