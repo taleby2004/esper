@@ -2,6 +2,7 @@ package net.esper.support.util;
 
 import net.esper.client.UpdateListener;
 import net.esper.event.EventBean;
+import net.esper.collection.UniformPair;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -226,4 +227,9 @@ public class SupportUpdateListener implements UpdateListener
 
         reset();
     }
+
+    public UniformPair<EventBean[]> getDataListsFlattened()
+    {
+        return new UniformPair<EventBean[]>(flatten(newDataList), flatten(oldDataList));
+    }    
 }

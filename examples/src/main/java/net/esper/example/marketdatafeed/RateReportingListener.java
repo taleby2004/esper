@@ -9,8 +9,14 @@ public class RateReportingListener implements UpdateListener
 {
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        logRate(newEvents[0]);
-        logRate(newEvents[1]);
+        if (newEvents.length > 0)
+        {
+            logRate(newEvents[0]);
+        }
+        if (newEvents.length > 1)
+        {
+            logRate(newEvents[1]);
+        }
     }
 
     private void logRate(EventBean event)

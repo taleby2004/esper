@@ -3,28 +3,39 @@ package net.esper.example.marketdatafeed;
 import net.esper.client.Configuration;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPRuntime;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class FeedSimMain {
 
+    private static final Log log = LogFactory.getLog(FeedSimMain.class);
+
     public static void main(String[] args) throws IOException, InterruptedException {
-        if (args.length < 2) {
-            System.out.println("Arguments are: <target targetRate> <targetRate drop probability percent>");
+        if (args.length < 3) {
+            System.out.println("Arguments are: <number of threads> <drop probability percent> <number of seconds to run>");
+            System.out.println("  number of threads: the number of threads sending feed events into the engine");
+            System.out.println("  drop probability percent: a number between zero and 100 that dictates the ");
+            System.out.println("                            probability that per second one of the feeds drops off");
+            System.out.println("  number of seconds: the number of seconds the simulation runs");
             System.exit(-1);
         }
 
-        int rate = 0;
+        int numberOfThreads;
         try {
-            rate = Integer.parseInt(args[0]);
+            numberOfThreads = Integer.parseInt(args[0]);
         } catch (NullPointerException e) {
-            System.out.println("Invalid targetRate:" + args[0]);
+            System.out.println("Invalid number of threads:" + args[0]);
             System.exit(-2);
             return;
         }
 
-        double dropProbability = 0;
+        double dropProbability;
         try {
             dropProbability = Double.parseDouble(args[1]);
         } catch (NumberFormatException e) {
@@ -33,23 +44,30 @@ public class FeedSimMain {
             return;
         }
 
+        int numberOfSeconds;
+        try {
+            numberOfSeconds = Integer.parseInt(args[2]);
+        } catch (NullPointerException e) {
+            System.out.println("Invalid number of seconds to run:" + args[2]);
+            System.exit(-2);
+            return;
+        }
+
         // Run the sample
-        System.out.println("Using a target targetRate of " + rate + " with drop probability " + dropProbability + "%, for 60 seconds");
-        FeedSimMain feedSimMain = new FeedSimMain(rate, dropProbability, 60 );
+        System.out.println("Using " + numberOfThreads + " threads with a drop probability of " + dropProbability + "%, for " + numberOfSeconds + " seconds");
+        FeedSimMain feedSimMain = new FeedSimMain(numberOfThreads, dropProbability, numberOfSeconds);
         feedSimMain.run();
     }
 
-    private Random random;
-    private int targetRate;
+    private int numberOfThreads;
     private double dropProbability;
     private int numSeconds;
 
-    public FeedSimMain(int targetRate, double dropProbability, int numSeconds)
+    public FeedSimMain(int numberOfThreads, double dropProbability, int numSeconds)
     {
-        this.targetRate = targetRate;
+        this.numberOfThreads = numberOfThreads;
         this.dropProbability = dropProbability;
         this.numSeconds = numSeconds;
-        this.random = new Random();
     }
 
     public void run() throws IOException, InterruptedException
@@ -70,48 +88,47 @@ public class FeedSimMain {
         falloffStmt.addListener(new RateFalloffAlertListener());
 
         // Send events
+        ExecutorService threadPool = Executors.newFixedThreadPool(numberOfThreads);
+        MarketDataSendRunnable runnables[] = new MarketDataSendRunnable[numberOfThreads];
+        for (int i = 0; i < numberOfThreads; i++)
+        {
+            runnables[i] = new MarketDataSendRunnable(epService);
+            threadPool.submit(runnables[i]);
+        }
+
         int seconds = 0;
+        Random random = new Random();
         while(seconds < numSeconds) {
             seconds++;
-            sendEvents(epService.getEPRuntime());
-        }
-    }
+            Thread.sleep(1000);
 
-    private void sendEvents(EPRuntime epRuntime) throws InterruptedException
-    {
-        // Determine number of events to send
-        int eventsFeedA = (int) (targetRate * 0.9 + targetRate * 0.2 * random.nextDouble());
-        int eventsFeedB = (int) (targetRate * 0.9 + targetRate * 0.2 * random.nextDouble());
-
-        if (random.nextDouble() * 100 < dropProbability)
-        {
-            if (random.nextBoolean())
+            FeedEnum feedToDropOff;
+            if (random.nextDouble() * 100 < dropProbability)
             {
-                eventsFeedA = (int) (targetRate * 0.6);
+                feedToDropOff = FeedEnum.FEED_A;
+                if (random.nextBoolean())
+                {
+                    feedToDropOff = FeedEnum.FEED_B;
+                }
+                log.info("Setting drop-off for feed " + feedToDropOff);
+                
             }
             else
             {
-                eventsFeedB = (int) (targetRate * 0.6);
+                feedToDropOff = null;
+            }
+            for (int i = 0; i < runnables.length; i++)
+            {
+                runnables[i].setRateDropOffFeed(feedToDropOff);
             }
         }
 
-        // send events
-        long startTime = System.currentTimeMillis();
-        for (int i = 0; i < eventsFeedA; i++)
+        log.info("Shutting down threadpool");
+        for (int i = 0; i < runnables.length; i++)
         {
-            epRuntime.sendEvent(new MarketDataEvent("SYM", FeedEnum.FEED_A));
+            runnables[i].setShutdown();
         }
-        for (int i = 0; i < eventsFeedB; i++)
-        {
-            epRuntime.sendEvent(new MarketDataEvent("SYM", FeedEnum.FEED_B));
-        }
-        long endTime = System.currentTimeMillis();
-
-        // sleep remainder of 1 second
-        long delta = startTime - endTime;
-        if (delta < 950)
-        {
-            Thread.sleep(1000 - delta);
-        }
+        threadPool.shutdown();
+        threadPool.awaitTermination(10, TimeUnit.SECONDS);
     }
 }
