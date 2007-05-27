@@ -37,18 +37,27 @@ public class NStreamOuterQueryPlanBuilder
                                      String[] streamNames,
                                      EventType[] typesPerStream)
     {
-        log.debug(".build queryGraph=" + queryGraph);
+        if (log.isDebugEnabled())
+        {
+            log.debug(".build queryGraph=" + queryGraph);
+        }
 
         int numStreams = queryGraph.getNumStreams();
         QueryPlanNode[] planNodeSpecs = new QueryPlanNode[numStreams];
 
         // Build index specifications
         QueryPlanIndex[] indexSpecs = QueryPlanIndexBuilder.buildIndexSpec(queryGraph);
-        log.debug(".build Index build completed, indexes=" + QueryPlanIndex.print(indexSpecs));
+        if (log.isDebugEnabled())
+        {
+            log.debug(".build Index build completed, indexes=" + QueryPlanIndex.print(indexSpecs));
+        }
 
         // Build graph of the outer and inner joins
         OuterInnerDirectionalGraph outerInnerGraph = graphOuterJoins(numStreams, outerJoinDescList);
-        log.debug(".build directional graph=" + outerInnerGraph.print());
+        if (log.isDebugEnabled())
+        {
+           log.debug(".build directional graph=" + outerInnerGraph.print());
+        }
 
         // For each stream determine the query plan
         for (int streamNo = 0; streamNo < numStreams; streamNo++)
@@ -65,7 +74,10 @@ public class NStreamOuterQueryPlanBuilder
         }
 
         QueryPlan queryPlan = new QueryPlan(indexSpecs, planNodeSpecs);
-        log.debug(".build query plan=" + queryPlan.toString());
+        if (log.isDebugEnabled())
+        {
+            log.debug(".build query plan=" + queryPlan.toString());
+        }
 
         return queryPlan;
     }

@@ -1,6 +1,17 @@
 Esper Changelog
 ===================
 
+Changes in version 1.9.0
+------------------------
+* Determinism: events delivered to listeners deterministic and insert-into chaining deterministic
+* Performance optimization for filter-only statement
+* New RFID example and performance test case
+* StockTicker sample now multithreaded
+* Support for last-functions (TODO) (ESPER-84 Timer:at to have last day of month function)
+* Fixed issue ESPER-101 "ArrayIndexOutOfBounds with 'output last' and group by"
+* Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"
+* Fixed issue ESPER-98 "NullPointerException for Joins involving Map event types"
+
 Changes in version 1.8.0
 ------------------------
 * Support for subqueries including the exists and subquery-in syntax (ESPER-22 support for subqueries)

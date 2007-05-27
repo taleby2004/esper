@@ -152,7 +152,7 @@ public class JoinSetComposerFactory
                 QueryPlanNode planNode = queryExecSpecs[i];
                 ExecNode executionNode = planNode.makeExec(indexes, streamTypes);
 
-                if (log.isInfoEnabled())
+                if (log.isDebugEnabled())
                 {
                     log.debug(".makeComposer Execution nodes for stream " + i + " '" + streamNames[i] +
                         "' : \n" + ExecNode.print(executionNode));

@@ -134,13 +134,19 @@ public class ConstructorHelper
 
     private static void logConstructors(Class clazz)
     {
-        log.debug(".invokeConstructor Constructors for class " + clazz);
+        if (log.isDebugEnabled())
+        {
+            log.debug(".invokeConstructor Constructors for class " + clazz);
+        }
 
         Constructor[] ctors = clazz.getConstructors();
         for (int i = 0, size = ctors.length; i < size; i++)
         {
             Class[] ctorParams = ctors[i].getParameterTypes();
-            log.debug(".invokeConstructor Constructor " + i + ' ' + Arrays.toString(ctorParams));
+            if (log.isDebugEnabled())
+            {
+                log.debug(".invokeConstructor Constructor " + i + ' ' + Arrays.toString(ctorParams));
+            }
         }
     }
 

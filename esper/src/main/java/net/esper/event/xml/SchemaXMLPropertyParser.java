@@ -118,7 +118,10 @@ public class SchemaXMLPropertyParser implements EqlTokenTypes
         }
 
         String xPath = xPathBuf.toString();
-        log.debug(".parse XPath for property '" + propertyName + "' is expression=" + xPath);
+        if (log.isDebugEnabled())
+        {
+            log.debug(".parse XPath for property '" + propertyName + "' is expression=" + xPath);
+        }
 
         // Compile assembled XPath expression
         XPath path = xPathFactory.newXPath();

@@ -1203,7 +1203,10 @@ public class EQLTreeWalker extends EQLBaseWalker
 
     private void leaveCaseNode(AST node, boolean inCase2)
     {
-        log.debug(".leaveCase2Node inCase2=" + inCase2);
+        if (log.isDebugEnabled())
+        {
+            log.debug(".leaveCase2Node inCase2=" + inCase2);
+        }
 
         if (astExprNodeMap.isEmpty())
         {

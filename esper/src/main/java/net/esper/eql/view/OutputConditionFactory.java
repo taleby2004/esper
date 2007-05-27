@@ -46,13 +46,19 @@ public final class OutputConditionFactory {
 		}
 		if(outputLimitSpec.isEventLimit())
 		{
-			log.debug(".createCondition creating OutputConditionCount with event rate " + outputLimitSpec.getEventRate());
-			return new OutputConditionCount(outputLimitSpec.getEventRate(), outputCallback);
+            if (log.isDebugEnabled())
+            {
+			    log.debug(".createCondition creating OutputConditionCount with event rate " + outputLimitSpec.getEventRate());
+            }
+            return new OutputConditionCount(outputLimitSpec.getEventRate(), outputCallback);
 		}
 		else
 		{
-			log.debug(".createCondition creating OutputConditionTime with interval length " + outputLimitSpec.getTimeRate());
-			return new OutputConditionTime(outputLimitSpec.getTimeRate(), statementContext, outputCallback);
+            if (log.isDebugEnabled())
+            {
+                log.debug(".createCondition creating OutputConditionTime with interval length " + outputLimitSpec.getTimeRate());
+            }
+            return new OutputConditionTime(outputLimitSpec.getTimeRate(), statementContext, outputCallback);
 		}
 	}
 }

@@ -144,7 +144,10 @@ public class PropertyIndexedEventTable implements EventTable
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
         {
-            log.debug(".remove Event could not be located in index, event " + event);
+            if (log.isDebugEnabled())
+            {
+                log.debug(".remove Event could not be located in index, event " + event);
+            }
             return;
         }
 
@@ -152,7 +155,10 @@ public class PropertyIndexedEventTable implements EventTable
         {
             // Not an error, its possible that an old-data event is artificial (such as for statistics) and
             // thus did not correspond to a new-data event raised earlier.
-            log.debug(".remove Event could not be located in index, event " + event);
+            if (log.isDebugEnabled())
+            {
+                log.debug(".remove Event could not be located in index, event " + event);
+            }
             return;
         }
 

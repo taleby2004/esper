@@ -154,7 +154,10 @@ public abstract class ViewSupport implements View
             printObjectArray(prefix, writer, oldData);
         }
 
-        log.debug(".dumpUpdateParams Dumping update parameters..." + buffer.toString());
+        if (log.isDebugEnabled())
+        {
+            log.debug(".dumpUpdateParams Dumping update parameters..." + buffer.toString());
+        }
     }
 
     private static void printObjectArray(String prefix, PrintWriter writer, Object[] objects)

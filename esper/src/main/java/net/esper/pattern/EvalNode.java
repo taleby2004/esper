@@ -90,7 +90,10 @@ public abstract class EvalNode implements MetaDefItem
      */
     public final void dumpDebug(String prefix)
     {
-        log.debug(".dumpDebug " + prefix + this.toString());
+        if (log.isDebugEnabled())
+        {
+            log.debug(".dumpDebug " + prefix + this.toString());
+        }
         for (EvalNode node : childNodes)
         {
             node.dumpDebug(prefix + "  ");

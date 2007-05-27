@@ -105,21 +105,33 @@ public class NStreamQueryPlanBuilder
      */
     protected static QueryPlan build(QueryGraph queryGraph, EventType[] typesPerStream)
     {
-        log.debug(".build queryGraph=" + queryGraph);
+        if (log.isDebugEnabled())
+        {
+            log.debug(".build queryGraph=" + queryGraph);
+        }
 
         int numStreams = queryGraph.getNumStreams();
         QueryPlanIndex[] indexSpecs = QueryPlanIndexBuilder.buildIndexSpec(queryGraph);
-        log.debug(".build Index build completed, indexes=" + QueryPlanIndex.print(indexSpecs));
+        if (log.isDebugEnabled())
+        {
+            log.debug(".build Index build completed, indexes=" + QueryPlanIndex.print(indexSpecs));
+        }
 
         QueryPlanNode[] planNodeSpecs = new QueryPlanNode[numStreams];
         for (int streamNo = 0; streamNo < numStreams; streamNo++)
         {
             BestChainResult bestChainResult = computeBestPath(streamNo, queryGraph);
             int[] bestChain = bestChainResult.getChain();
-            log.debug(".build For stream " + streamNo + " bestChain=" + Arrays.toString(bestChain));
+            if (log.isDebugEnabled())
+            {
+                log.debug(".build For stream " + streamNo + " bestChain=" + Arrays.toString(bestChain));
+            }
 
             planNodeSpecs[streamNo] = createStreamPlan(streamNo, bestChain, queryGraph, indexSpecs, typesPerStream);
-            log.debug(".build spec=" + planNodeSpecs[streamNo]);
+            if (log.isDebugEnabled())
+            {
+                log.debug(".build spec=" + planNodeSpecs[streamNo]);
+            }
         }
 
         return new QueryPlan(indexSpecs, planNodeSpecs);

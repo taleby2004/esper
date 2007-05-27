@@ -60,9 +60,12 @@ public class PollingViewableFactory
         // Assemble a PreparedStatement and parameter list
         String preparedStatementText = createPreparedStatement(sqlFragments);
         String[] parameters = getParameters(sqlFragments);
-        log.debug(".createDBEventStream preparedStatementText=" + preparedStatementText +
+        if (log.isDebugEnabled())
+        {
+            log.debug(".createDBEventStream preparedStatementText=" + preparedStatementText +
                 " parameters=" + Arrays.toString(parameters));
-
+        }
+        
         // Get a database connection
         String databaseName = databaseStreamSpec.getDatabaseName();
         DatabaseConnectionFactory databaseConnectionFactory = null;
@@ -179,9 +182,12 @@ public class PollingViewableFactory
             throw new ExprValidationException(text + ", please check the statement, reason: " + ex.getMessage());
         }
 
-        log.debug(".createDBEventStream in=" + inputParameters.toString() +
+        if (log.isDebugEnabled())
+        {
+            log.debug(".createDBEventStream in=" + inputParameters.toString() +
                 " out=" + outputProperties.toString());
-
+        }
+        
         // Close statement
         try
         {

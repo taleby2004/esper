@@ -76,9 +76,9 @@ public final class FilterParamIndexNotEquals extends FilterParamIndexPropBase
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
-        if (FilterParamIndexNotEquals.log.isDebugEnabled())
+        if (log.isDebugEnabled())
         {
-            FilterParamIndexNotEquals.log.debug(".match (" + Thread.currentThread().getId() + ") attributeValue=" + attributeValue);
+            log.debug(".match (" + Thread.currentThread().getId() + ") attributeValue=" + attributeValue);
         }
 
         // Look up in hashtable

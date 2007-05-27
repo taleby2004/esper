@@ -20,7 +20,10 @@ public final class EvalStateNodePrinterVisitor implements EvalStateNodeVisitor
 
     public final Object visit(EvalStateNode node, Object data)
     {
-        log.debug("visit " + indent(level++) + node.toString());
+        if (log.isDebugEnabled())
+        {
+            log.debug("visit " + indent(level++) + node.toString());
+        }
         node.childrenAccept(this, data);
         level--;
         return data;

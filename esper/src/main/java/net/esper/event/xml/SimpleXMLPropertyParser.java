@@ -58,7 +58,10 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
         }
 
         String xPath = xPathBuf.toString();
-        log.debug(".parse For property '" + propertyName + "' the xpath is '" + xPath + '\'');
+        if (log.isDebugEnabled())
+        {
+            log.debug(".parse For property '" + propertyName + "' the xpath is '" + xPath + '\'');
+        }
 
         return xPathFactory.newXPath().compile(xPath);
     }

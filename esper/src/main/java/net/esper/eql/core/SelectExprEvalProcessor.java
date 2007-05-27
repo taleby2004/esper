@@ -93,9 +93,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         			singleStreamWrapper = true;
         		}
         	}
-        	log.debug(".ctor underlyingType==" + underlyingType);
         }
-        log.debug(".ctor singleStreamWrapper=" + singleStreamWrapper);
         
         // This function may modify
         init(selectionList, insertIntoDesc, underlyingType, eventAdapterService);
@@ -166,7 +164,11 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                 resultEventType = eventAdapterService.createAnonymousMapType(selPropertyTypes);
             }
         }
-        log.debug(".init resultEventType=" + resultEventType);
+
+        if (log.isDebugEnabled())
+        {
+            log.debug(".init resultEventType=" + resultEventType);
+        }
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData)
@@ -189,8 +191,11 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         		if(wrapper != null)
         		{
         			Map<String, Object> map = (Map<String, Object>)wrapper.getUnderlyingMap();
-        			log.debug(".process additional properties=" + map);
-        			props.putAll(map);
+                    if (log.isDebugEnabled())
+                    {
+        			    log.debug(".process additional properties=" + map);
+                    }
+                    props.putAll(map);
         		}
         	}
         	return eventAdapterService.createWrapper(getEvent(eventsPerStream, isNewData), props, resultEventType);

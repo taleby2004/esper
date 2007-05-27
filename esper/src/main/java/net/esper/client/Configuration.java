@@ -413,7 +413,10 @@ public class Configuration implements ConfigurationOperations {
      */
     public Configuration configure(String resource) throws EPException
     {
-        log.debug( "configuring from resource: " + resource );
+        if (log.isDebugEnabled())
+        {
+            log.debug( "configuring from resource: " + resource );
+        }
         InputStream stream = getConfigurationInputStream( resource );
         ConfigurationParser.doConfigure(this, stream, resource );
         return this;
@@ -431,7 +434,10 @@ public class Configuration implements ConfigurationOperations {
      */
     protected static InputStream getConfigurationInputStream(String resource) throws EPException
     {
-        log.debug( "Configuration resource: " + resource );
+        if (log.isDebugEnabled())
+        {
+            log.debug( "Configuration resource: " + resource );
+        }
         return getResourceAsStream(resource);
     }
 
@@ -447,8 +453,11 @@ public class Configuration implements ConfigurationOperations {
 	 */
 	public Configuration configure(URL url) throws EPException
     {
-		log.debug( "configuring from url: " + url.toString() );
-		try {
+        if (log.isDebugEnabled())
+        {
+            log.debug( "configuring from url: " + url.toString() );
+        }
+        try {
             ConfigurationParser.doConfigure(this, url.openStream(), url.toString());
             return this;
 		}
@@ -468,8 +477,11 @@ public class Configuration implements ConfigurationOperations {
 	 */
 	public Configuration configure(File configFile) throws EPException
     {
-		log.debug( "configuring from file: " + configFile.getName() );
-		try {
+        if (log.isDebugEnabled())
+        {
+            log.debug( "configuring from file: " + configFile.getName() );
+        }
+        try {
             ConfigurationParser.doConfigure(this, new FileInputStream(configFile), configFile.toString());
 		}
 		catch (FileNotFoundException fnfe) {
@@ -490,8 +502,11 @@ public class Configuration implements ConfigurationOperations {
 	 */
 	public Configuration configure(Document document) throws EPException
     {
-		log.debug( "configuring from XML document" );
-		ConfigurationParser.doConfigure(this, document);
+        if (log.isDebugEnabled())
+        {
+		    log.debug( "configuring from XML document" );
+        }
+        ConfigurationParser.doConfigure(this, document);
         return this;
     }
 

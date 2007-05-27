@@ -137,7 +137,10 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
     @SuppressWarnings({"StringContatenationInLoop"})
     public final void dumpDebug(String prefix)
     {
-        log.debug(".dumpDebug " + prefix + this.toString());
+        if (log.isDebugEnabled())
+        {
+            log.debug(".dumpDebug " + prefix + this.toString());
+        }
         for (ExprNode node : childNodes)
         {
             node.dumpDebug(prefix + "  ");

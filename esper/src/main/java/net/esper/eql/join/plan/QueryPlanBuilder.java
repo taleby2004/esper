@@ -52,7 +52,10 @@ public class QueryPlanBuilder
         if (!outerJoinDescList.isEmpty())
         {
             OuterJoinAnalyzer.analyze(outerJoinDescList, queryGraph);
-            log.debug(methodName + " After outer join queryGraph=\n" + queryGraph);
+            if (log.isDebugEnabled())
+            {
+                log.debug(methodName + " After outer join queryGraph=\n" + queryGraph);
+            }
         }
         else
         {
@@ -62,11 +65,17 @@ public class QueryPlanBuilder
                 // Analyze relationships between streams using the optional filter expression.
                 // Relationships are properties in AND and EQUALS nodes of joins.
                 FilterExprAnalyzer.analyze(optionalFilterNode, queryGraph);
-                log.debug(methodName + "After filter expression queryGraph=\n" + queryGraph);
+                if (log.isDebugEnabled())
+                {
+                    log.debug(methodName + "After filter expression queryGraph=\n" + queryGraph);
+                }
 
                 // Add navigation entries based on key and index property equivalency (a=b, b=c follows a=c)
                 QueryGraph.fillEquivalentNav(queryGraph);
-                log.debug(methodName + "After fill equiv. nav. queryGraph=\n" + queryGraph);
+                if (log.isDebugEnabled())
+                {
+                    log.debug(methodName + "After fill equiv. nav. queryGraph=\n" + queryGraph);
+                }
             }
         }
 
@@ -80,7 +89,7 @@ public class QueryPlanBuilder
 
             QueryPlan queryPlan = TwoStreamQueryPlanBuilder.build(typesPerStream, queryGraph, outerJoinType);
 
-            if (log.isInfoEnabled())
+            if (log.isDebugEnabled())
             {
                 log.debug(methodName + "2-Stream queryPlan=" + queryPlan);
             }
@@ -91,7 +100,7 @@ public class QueryPlanBuilder
         {
             QueryPlan queryPlan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream);
 
-            if (log.isInfoEnabled())
+            if (log.isDebugEnabled())
             {
                 log.debug(methodName + "N-Stream no-outer-join queryPlan=" + queryPlan);
             }
