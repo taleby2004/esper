@@ -104,7 +104,7 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         // If there are child views, fireStatementStopped update method
         if (viewUpdatedCollection != null)
         {
-            viewUpdatedCollection.update(newData, oldData);
+            viewUpdatedCollection.update(newData, expiredArr);
         }
         if (this.hasViews())
         {
