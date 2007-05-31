@@ -211,6 +211,14 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
 ]]></programlisting>
 
         <para>
+			Events, in theoretical terms, are observations of a state change that occured in the past. Since one cannot change an event that happened in the past, events are best modelled as immutable objects. 
+        </para>
+
+        <para>
+			Note that the Esper engine relies on events that are sent into an engine to not change their state. Typically, applications create a new event object for every new event, to represent that new event. Application should not modify an existing event that was sent into the engine.
+        </para>
+
+        <para>
 			Another important method in the runtime interface is the <literal>route</literal> method. This method is designed for use by <literal>UpdateListener</literal> implementations that
 			need to send events into an engine instance.
         </para>
