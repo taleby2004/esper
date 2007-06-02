@@ -331,6 +331,24 @@ public class TestInsertInto extends TestCase
         assertNull(listener.assertOneGetNewAndReset().get("dummy"));
     }
 
+    public void testIterator()
+    {
+        String stmtText = "insert into Cutoff " +
+                          "select symbol, (String.valueOf(count(*)) || 'x1000.0') as msg " +
+                          "from " + SupportMarketDataBean.class.getName() + ".std:groupby('symbol').win:length(1) " +
+                          "where price - volume >= 1000.0 group by symbol having count(*) = 1";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        assertFalse(stmt.iterator().hasNext());
+
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("SYM", -1, -1L, null));
+        assertFalse(stmt.iterator().hasNext());
+        EventBean event = stmt.iterator().next();
+
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("SYM", 100000d, 0L, null));
+        assertTrue(stmt.iterator().hasNext());
+        event = stmt.iterator().next();
+    }
+
     private void assertSimple(SupportUpdateListener listener, String myString, int myInt, String additionalString, int additionalInt)
     {
     	assertTrue(listener.getAndClearIsInvoked());

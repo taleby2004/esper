@@ -3,14 +3,20 @@ Esper Changelog
 
 Changes in version 1.9.0
 ------------------------
+* Allow subquery to return the event object http://jira.codehaus.org/browse/ESPER-105
+* Allow output rate limiting to start eager ESPER-106
+
+doc: More detailed explanation/examples of dereferences between std:groupby and "group by", as well as their interaction with windows and output limits, would be extremely useful. That was the main area I found I didn't understand from docs, and had to experiment to really see what it does. I need to look back at exactly what I did to give you concrete suggestions. Part of it was also that I didn't appreciate at first the effect of presence of non-aggregating/always changing field in a select, with relation to time window, and was getting confused by difference in # of events generated in such a case.
+
 * Determinism: events delivered to listeners deterministic and insert-into chaining deterministic
-* Performance optimization for filter-only statement
+* Performance optimization for filter-only statements
 * New RFID example and performance test case
 * StockTicker sample now multithreaded
 * Support for last-functions (TODO) (ESPER-84 Timer:at to have last day of month function)
 * Fixed issue ESPER-101 "ArrayIndexOutOfBounds with 'output last' and group by"
 * Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"
 * Fixed issue ESPER-98 "NullPointerException for Joins involving Map event types"
+* Fixed issue ESPER-107 "TODO"
 
 Changes in version 1.8.0
 ------------------------

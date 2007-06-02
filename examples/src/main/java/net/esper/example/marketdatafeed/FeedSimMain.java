@@ -72,6 +72,9 @@ public class FeedSimMain {
 
     public void run() throws IOException, InterruptedException
     {
+        System.out.println("...press enter to start simulation...");
+        System.in.read();
+
         // Configure engine with event names to make the statements more readable.
         // This could also be done in a configuration file.
         Configuration configuration = new Configuration();
