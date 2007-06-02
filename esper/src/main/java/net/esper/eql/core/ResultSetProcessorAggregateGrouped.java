@@ -7,11 +7,7 @@
  **************************************************************************************/
 package net.esper.eql.core;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
@@ -20,6 +16,7 @@ import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.eql.expression.ExprNode;
 import net.esper.eql.agg.AggregationService;
+import net.esper.view.Viewable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -442,5 +439,100 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         }
 
         return applyOutputLimitAndOrderBy(events, currentGenerators, keys, groupReps, generators, isNewData);
+    }
+
+    public Iterator<EventBean> getIterator(Viewable parent)
+    {
+        return new ResultSetAggregateGroupedIterator(parent.iterator(), this, aggregationService);
+    }
+
+    /**
+     * Method to transform an event based on the select expression.
+     */
+    public static class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
+    {
+        private final Iterator<EventBean> sourceIterator;
+        private final ResultSetProcessorAggregateGrouped resultSetProcessor;
+        private final AggregationService aggregationService;
+        private EventBean nextResult;
+        private final EventBean[] eventsPerStream;
+
+        public ResultSetAggregateGroupedIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorAggregateGrouped resultSetProcessor, AggregationService aggregationService)
+        {
+            this.sourceIterator = sourceIterator;
+            this.resultSetProcessor = resultSetProcessor;
+            this.aggregationService = aggregationService;
+            eventsPerStream = new EventBean[1];
+        }
+
+        public boolean hasNext()
+        {
+            if (nextResult != null)
+            {
+                return true;
+            }
+            findNext();
+            if (nextResult != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public EventBean next()
+        {
+            if (nextResult != null)
+            {
+                EventBean result = nextResult;
+                nextResult = null;
+                return result;
+            }
+            findNext();
+            if (nextResult != null)
+            {
+                EventBean result = nextResult;
+                nextResult = null;
+                return result;
+            }
+            throw new NoSuchElementException();
+        }
+
+        private void findNext()
+        {
+            while(sourceIterator.hasNext())
+            {
+                EventBean candidate = sourceIterator.next();
+                eventsPerStream[0] = candidate;
+
+                MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
+                aggregationService.setCurrentRow(groupKey);
+
+                Boolean pass = true;
+                if (resultSetProcessor.optionalHavingNode != null)
+                {
+                    pass = (Boolean) resultSetProcessor.optionalHavingNode.evaluate(eventsPerStream, true);
+                }
+                if (!pass)
+                {
+                    continue;
+                }
+
+                if(resultSetProcessor.selectExprProcessor == null)
+                {
+                    nextResult = candidate;
+                }
+                else
+                {
+                    nextResult = resultSetProcessor.selectExprProcessor.process(eventsPerStream, true);
+                }
+
+                break;
+            }
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 }

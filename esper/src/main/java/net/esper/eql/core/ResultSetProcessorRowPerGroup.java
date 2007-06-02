@@ -7,11 +7,7 @@
  **************************************************************************************/
 package net.esper.eql.core;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
@@ -20,6 +16,7 @@ import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.eql.expression.ExprNode;
 import net.esper.eql.agg.AggregationService;
+import net.esper.view.Viewable;
 
 /**
  * Result set processor for the fully-grouped case:
@@ -36,7 +33,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
     private final OrderByProcessor orderByProcessor;
     private final AggregationService aggregationService;
     private final List<ExprNode> groupKeyNodes;
-    private final ExprNode optionalHavingExpr;
+    private final ExprNode optionalHavingNode;
     private final boolean isOutputLimiting;
     private final boolean isOutputLimitLastOnly;
     private final boolean isSorting;
@@ -73,7 +70,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         this.orderByProcessor = orderByProcessor;
         this.aggregationService = aggregationService;
         this.groupKeyNodes = groupKeyNodes;
-        this.optionalHavingExpr = optionalHavingNode;
+        this.optionalHavingNode = optionalHavingNode;
         this.isOutputLimiting = isOutputLimiting;
         this.isOutputLimitLastOnly = isOutputLimitLastOnly;
         this.isSorting = orderByProcessor != null;
@@ -92,7 +89,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         MultiKeyUntyped[] oldDataMultiKey = generateGroupKeys(oldEvents, keysAndEvents, false);
 
         // generate old events
-        EventBean[] selectOldEvents = generateOutputEventsJoin(keysAndEvents, optionalHavingExpr, oldEventGroupReps, oldGenerators, false);
+        EventBean[] selectOldEvents = generateOutputEventsJoin(keysAndEvents, optionalHavingNode, oldEventGroupReps, oldGenerators, false);
 
         // update aggregates
         if (!newEvents.isEmpty())
@@ -117,7 +114,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         }
 
         // generate new events using select expressions
-        EventBean[] selectNewEvents = generateOutputEventsJoin(keysAndEvents, optionalHavingExpr, newEventGroupReps, newGenerators, true);
+        EventBean[] selectNewEvents = generateOutputEventsJoin(keysAndEvents, optionalHavingNode, newEventGroupReps, newGenerators, true);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))
         {
@@ -134,7 +131,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         MultiKeyUntyped[] oldDataMultiKey = generateGroupKeys(oldData, keysAndEvents, false);
 
         // generate old events
-        EventBean[] selectOldEvents = generateOutputEventsView(keysAndEvents, optionalHavingExpr, oldEventGroupReps, oldGenerators, false);
+        EventBean[] selectOldEvents = generateOutputEventsView(keysAndEvents, optionalHavingNode, oldEventGroupReps, oldGenerators, false);
 
         // update aggregates
         EventBean[] eventsPerStream = new EventBean[1];
@@ -158,7 +155,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         }
 
         // generate new events using select expressions
-        EventBean[] selectNewEvents = generateOutputEventsView(keysAndEvents, optionalHavingExpr, newEventGroupReps, newGenerators, true);
+        EventBean[] selectNewEvents = generateOutputEventsView(keysAndEvents, optionalHavingNode, newEventGroupReps, newGenerators, true);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))
         {
@@ -395,5 +392,107 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         }
 
         return new MultiKeyUntyped(keys);
+    }
+
+    public Iterator<EventBean> getIterator(Viewable parent)
+    {
+        return new ResultSetRowPerGroupIterator(parent.iterator(), this, aggregationService);
+    }
+
+    /**
+     * Method to transform an event based on the select expression.
+     */
+    public static class ResultSetRowPerGroupIterator implements Iterator<EventBean>
+    {
+        private final Iterator<EventBean> sourceIterator;
+        private final ResultSetProcessorRowPerGroup resultSetProcessor;
+        private final AggregationService aggregationService;
+        private EventBean nextResult;
+        private final EventBean[] eventsPerStream;
+        private final Set<MultiKeyUntyped> priorSeenGroups;
+
+        public ResultSetRowPerGroupIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorRowPerGroup resultSetProcessor, AggregationService aggregationService)
+        {
+            this.sourceIterator = sourceIterator;
+            this.resultSetProcessor = resultSetProcessor;
+            this.aggregationService = aggregationService;
+            eventsPerStream = new EventBean[1];
+            priorSeenGroups = new HashSet<MultiKeyUntyped>();
+        }
+
+        public boolean hasNext()
+        {
+            if (nextResult != null)
+            {
+                return true;
+            }
+            findNext();
+            if (nextResult != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public EventBean next()
+        {
+            if (nextResult != null)
+            {
+                EventBean result = nextResult;
+                nextResult = null;
+                return result;
+            }
+            findNext();
+            if (nextResult != null)
+            {
+                EventBean result = nextResult;
+                nextResult = null;
+                return result;
+            }
+            throw new NoSuchElementException();
+        }
+
+        private void findNext()
+        {
+            while(sourceIterator.hasNext())
+            {
+                EventBean candidate = sourceIterator.next();
+                eventsPerStream[0] = candidate;
+
+                MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
+                aggregationService.setCurrentRow(groupKey);
+
+                Boolean pass = true;
+                if (resultSetProcessor.optionalHavingNode != null)
+                {
+                    pass = (Boolean) resultSetProcessor.optionalHavingNode.evaluate(eventsPerStream, true);
+                }
+                if (!pass)
+                {
+                    continue;
+                }
+                if (priorSeenGroups.contains(groupKey))
+                {
+                    continue;
+                }
+                priorSeenGroups.add(groupKey);
+
+                if(resultSetProcessor.selectExprProcessor == null)
+                {
+                    nextResult = candidate;
+                }
+                else
+                {
+                    nextResult = resultSetProcessor.selectExprProcessor.process(eventsPerStream, true);
+                }
+
+                break;
+            }
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 }

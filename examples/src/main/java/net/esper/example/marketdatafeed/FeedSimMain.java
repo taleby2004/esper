@@ -55,25 +55,30 @@ public class FeedSimMain {
 
         // Run the sample
         System.out.println("Using " + numberOfThreads + " threads with a drop probability of " + dropProbability + "%, for " + numberOfSeconds + " seconds");
-        FeedSimMain feedSimMain = new FeedSimMain(numberOfThreads, dropProbability, numberOfSeconds);
+        FeedSimMain feedSimMain = new FeedSimMain(numberOfThreads, dropProbability, numberOfSeconds, true);
         feedSimMain.run();
     }
 
     private int numberOfThreads;
     private double dropProbability;
     private int numSeconds;
+    private boolean isWaitKeypress;
 
-    public FeedSimMain(int numberOfThreads, double dropProbability, int numSeconds)
+    public FeedSimMain(int numberOfThreads, double dropProbability, int numSeconds, boolean isWaitKeypress)
     {
         this.numberOfThreads = numberOfThreads;
         this.dropProbability = dropProbability;
         this.numSeconds = numSeconds;
+        this.isWaitKeypress = isWaitKeypress;
     }
 
     public void run() throws IOException, InterruptedException
     {
-        System.out.println("...press enter to start simulation...");
-        System.in.read();
+        if (isWaitKeypress)
+        {
+            System.out.println("...press enter to start simulation...");
+            System.in.read();
+        }
 
         // Configure engine with event names to make the statements more readable.
         // This could also be done in a configuration file.

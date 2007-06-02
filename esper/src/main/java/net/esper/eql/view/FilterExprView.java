@@ -36,7 +36,7 @@ public class FilterExprView extends ViewSupport
 
     public Iterator<EventBean> iterator()
     {
-        return parent.iterator();
+        return new FilterExprViewIterator(parent.iterator(), exprEvaluator);
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)

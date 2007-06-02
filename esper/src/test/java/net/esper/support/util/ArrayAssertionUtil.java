@@ -485,5 +485,48 @@ public class ArrayAssertionUtil
         return result;
     }
 
+    /**
+     * Compare the event properties returned by the events of the iterator with the supplied values.
+     * @param iterator supplies events
+     * @param expectedValues is the expected values
+     */
+    public static void assertEqualsExactOrder(Iterator<EventBean> iterator, String[] fields, Object[][] expectedValues)
+    {
+        ArrayList<Object[]> rows = new ArrayList<Object[]>();
+        while (iterator.hasNext())
+        {
+            EventBean event = iterator.next();
+            Object[] eventProps = new Object[fields.length];
+            for (int i = 0; i < fields.length; i++)
+            {
+                eventProps[i] = event.get(fields[i]);
+            }
+            rows.add(eventProps);
+        }
+
+        try
+        {
+            iterator.next();
+            TestCase.fail();
+        }
+        catch (NoSuchElementException ex)
+        {
+            // Expected exception - next called after hasNext returned false, for testing
+        }
+
+        if (rows.size() == 0)
+        {
+            Assert.assertNull(expectedValues);
+            return;
+        }
+
+        Object[][] data = rows.toArray(new Object[0][]);
+        Assert.assertEquals(expectedValues.length, data.length);
+        for (int i = 0; i < data.length; i++)
+        {
+            assertEqualsExactOrder(data[i], expectedValues[i]);
+        }
+    }
+
     private static final Log log = LogFactory.getLog(ArrayAssertionUtil.class);
 }

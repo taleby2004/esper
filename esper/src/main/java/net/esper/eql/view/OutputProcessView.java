@@ -59,7 +59,7 @@ public abstract class OutputProcessView extends ViewSupport implements JoinSetIn
     {
     	if(resultSetProcessor != null)
     	{
-            return new TransformEventIterator(parent.iterator(), new OutputProcessViewPolicy.OutputProcessTransform(resultSetProcessor));
+            return resultSetProcessor.getIterator(parent); 
     	}
     	else
     	{

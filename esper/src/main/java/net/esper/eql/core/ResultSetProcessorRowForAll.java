@@ -7,14 +7,15 @@
  **************************************************************************************/
 package net.esper.eql.core;
 
-import net.esper.collection.MultiKey;
-import net.esper.collection.Pair;
+import net.esper.collection.*;
 import net.esper.eql.agg.AggregationService;
 import net.esper.eql.expression.ExprNode;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
+import net.esper.view.Viewable;
 
 import java.util.Set;
+import java.util.Iterator;
 
 /**
  * Result set processor for the case: aggregation functions used in the select clause, and no group-by,
@@ -110,7 +111,6 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
             }
         }
 
-
         // generate new events using select expressions
         selectNewEvents = getSelectListEvents(selectExprProcessor, optionalHavingNode, true);
 
@@ -138,5 +138,16 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
 
         // The result is always a single row
         return new EventBean[] {event};
+    }
+
+    public Iterator<EventBean> getIterator(Viewable parent)
+    {
+        EventBean[] selectNewEvents = getSelectListEvents(selectExprProcessor, optionalHavingNode, true);
+        if (selectNewEvents == null)
+        {
+            return new NullIterator();
+        }
+        SingleEventIterator iterator = new SingleEventIterator(selectNewEvents[0]);
+        return iterator;
     }
 }

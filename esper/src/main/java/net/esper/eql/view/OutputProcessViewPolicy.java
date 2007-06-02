@@ -2,7 +2,6 @@ package net.esper.eql.view;
 
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
-import net.esper.collection.TransformEventMethod;
 import net.esper.core.StatementContext;
 import net.esper.eql.core.ResultSetProcessor;
 import net.esper.eql.spec.OutputLimitSpec;
@@ -230,31 +229,6 @@ public class OutputProcessViewPolicy extends OutputProcessView
                     OutputProcessViewPolicy.this.continueOutputProcessingJoin(doOutput, forceUpdate);
                 }
             };
-        }
-    }
-
-    /**
-     * Method to transform an event based on the select expression.
-     */
-    public static class OutputProcessTransform implements TransformEventMethod
-    {
-        private final ResultSetProcessor resultSetProcessor;
-        private final EventBean[] newData;
-
-        /**
-         * Ctor.
-         * @param resultSetProcessor is applying the select expressions to the events for the transformation
-         */
-        public OutputProcessTransform(ResultSetProcessor resultSetProcessor) {
-            this.resultSetProcessor = resultSetProcessor;
-            newData = new EventBean[1];
-        }
-
-        public EventBean transform(EventBean event)
-        {
-            newData[0] = event;
-            Pair<EventBean[], EventBean[]> pair = resultSetProcessor.processViewResult(newData, null);
-            return pair.getFirst()[0];
         }
     }
 }

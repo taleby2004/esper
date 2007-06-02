@@ -1,15 +1,17 @@
 package net.esper.eql.core;
 
-import java.util.*;
-
+import net.esper.collection.MultiKey;
+import net.esper.collection.Pair;
+import net.esper.collection.TransformEventIterator;
+import net.esper.collection.TransformEventMethod;
+import net.esper.eql.expression.ExprNode;
+import net.esper.event.EventBean;
+import net.esper.event.EventType;
+import net.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import net.esper.collection.MultiKey;
-import net.esper.collection.Pair;
-import net.esper.event.EventBean;
-import net.esper.event.EventType;
-import net.esper.eql.expression.ExprNode;
+import java.util.*;
 
 /**
  * Result set processor for the simplest case: no aggregation functions used in the select clause, and no group-by.
@@ -366,6 +368,37 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         else
         {
             return null;
+        }
+    }
+
+    public Iterator<EventBean> getIterator(Viewable parent)
+    {
+        // Return an iterator that gives row-by-row a result
+        return new TransformEventIterator(parent.iterator(), new ResultSetSimpleTransform(this));
+    }
+    
+    /**
+     * Method to transform an event based on the select expression.
+     */
+    public static class ResultSetSimpleTransform implements TransformEventMethod
+    {
+        private final ResultSetProcessorSimple resultSetProcessor;
+        private final EventBean[] newData;
+
+        /**
+         * Ctor.
+         * @param resultSetProcessor is applying the select expressions to the events for the transformation
+         */
+        public ResultSetSimpleTransform(ResultSetProcessorSimple resultSetProcessor) {
+            this.resultSetProcessor = resultSetProcessor;
+            newData = new EventBean[1];
+        }
+
+        public EventBean transform(EventBean event)
+        {
+            newData[0] = event;
+            Pair<EventBean[], EventBean[]> pair = resultSetProcessor.processViewResult(newData, null);
+            return pair.getFirst()[0];
         }
     }
 }

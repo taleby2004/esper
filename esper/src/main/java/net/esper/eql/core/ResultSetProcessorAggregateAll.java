@@ -7,14 +7,17 @@
  **************************************************************************************/
 package net.esper.eql.core;
 
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.collection.Pair;
 import net.esper.collection.MultiKey;
-import net.esper.eql.expression.ExprNode;
+import net.esper.collection.Pair;
 import net.esper.eql.agg.AggregationService;
+import net.esper.eql.expression.ExprNode;
+import net.esper.event.EventBean;
+import net.esper.event.EventType;
+import net.esper.view.Viewable;
 
+import java.util.Iterator;
 import java.util.Set;
+import java.util.NoSuchElementException;
 
 /**
  * Result set processor for the case: aggregation functions used in the select clause, and no group-by,
@@ -162,5 +165,95 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         }
 
         return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
+    }
+
+    public Iterator<EventBean> getIterator(Viewable parent)
+    {
+        return new ResultSetAggregateAllIterator(parent.iterator(), this);
+    }
+
+    /**
+     * Method to transform an event based on the select expression.
+     */
+    public static class ResultSetAggregateAllIterator implements Iterator<EventBean>
+    {
+        private final Iterator<EventBean> sourceIterator;
+        private final ResultSetProcessorAggregateAll resultSetProcessor;
+        private EventBean nextResult;
+        private final EventBean[] eventsPerStream;
+
+        public ResultSetAggregateAllIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorAggregateAll resultSetProcessor)
+        {
+            this.sourceIterator = sourceIterator;
+            this.resultSetProcessor = resultSetProcessor;
+            eventsPerStream = new EventBean[1];
+        }
+
+        public boolean hasNext()
+        {
+            if (nextResult != null)
+            {
+                return true;
+            }
+            findNext();
+            if (nextResult != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public EventBean next()
+        {
+            if (nextResult != null)
+            {
+                EventBean result = nextResult;
+                nextResult = null;
+                return result;
+            }
+            findNext();
+            if (nextResult != null)
+            {
+                EventBean result = nextResult;
+                nextResult = null;
+                return result;
+            }
+            throw new NoSuchElementException();
+        }
+
+        private void findNext()
+        {
+            while(sourceIterator.hasNext())
+            {
+                EventBean candidate = sourceIterator.next();
+                eventsPerStream[0] = candidate;
+
+                Boolean pass = true;
+                if (resultSetProcessor.optionalHavingNode != null)
+                {
+                    pass = (Boolean) resultSetProcessor.optionalHavingNode.evaluate(eventsPerStream, true);
+                }
+                if (!pass)
+                {
+                    continue;
+                }
+
+                if(resultSetProcessor.selectExprProcessor == null)
+                {
+                    nextResult = candidate;
+                }
+                else
+                {
+                    nextResult = resultSetProcessor.selectExprProcessor.process(eventsPerStream, true);
+                }
+
+                break;
+            }
+        }
+
+        public void remove()
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 }

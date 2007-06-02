@@ -4,10 +4,10 @@ import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.collection.Pair;
 import net.esper.collection.MultiKey;
-import net.esper.collection.UniformPair;
+import net.esper.view.Viewable;
 
 import java.util.Set;
-import java.util.List;
+import java.util.Iterator;
 
 /**
  * Processor for result sets coming from 2 sources. First, out of a simple view (no join).
@@ -41,4 +41,6 @@ public interface ResultSetProcessor
      * @return pair of new events and old events
      */
     public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents);
+
+    public Iterator<EventBean> getIterator(Viewable parent);
 }
