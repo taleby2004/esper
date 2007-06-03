@@ -12,6 +12,7 @@ import java.util.*;
 import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
 import net.esper.collection.MultiKeyUntyped;
+import net.esper.collection.ArrayEventIterator;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.eql.expression.ExprNode;
@@ -355,7 +356,7 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         return keys;
     }
 
-    private MultiKeyUntyped generateGroupKey(EventBean[] eventsPerStream, boolean isNewData)
+    protected MultiKeyUntyped generateGroupKey(EventBean[] eventsPerStream, boolean isNewData)
     {
         Object[] keys = new Object[groupKeyNodes.size()];
 
@@ -443,96 +444,62 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
 
     public Iterator<EventBean> getIterator(Viewable parent)
     {
-        return new ResultSetAggregateGroupedIterator(parent.iterator(), this, aggregationService);
+        if (orderByProcessor == null)
+        {
+            return new ResultSetAggregateGroupedIterator(parent.iterator(), this, aggregationService);
+        }
+
+        // Pull all parent events, generate order keys
+        EventBean[] eventsPerStream = new EventBean[1];
+        List<EventBean> outgoingEvents = new ArrayList<EventBean>();
+        List<MultiKeyUntyped> orderKeys = new ArrayList<MultiKeyUntyped>();
+
+        for (Iterator<EventBean> it = parent.iterator(); it.hasNext();)
+        {
+            EventBean candidate = it.next();
+            eventsPerStream[0] = candidate;
+
+            MultiKeyUntyped groupKey = generateGroupKey(eventsPerStream, true);
+            aggregationService.setCurrentRow(groupKey);
+
+            Boolean pass = true;
+            if (optionalHavingNode != null)
+            {
+                pass = (Boolean) optionalHavingNode.evaluate(eventsPerStream, true);
+            }
+            if (!pass)
+            {
+                continue;
+            }
+
+            if (selectExprProcessor == null)
+            {
+                outgoingEvents.add(candidate);
+            }
+            else
+            {
+                outgoingEvents.add(selectExprProcessor.process(eventsPerStream, true));
+            }
+
+            MultiKeyUntyped orderKey = orderByProcessor.getSortKey(eventsPerStream, true);
+            orderKeys.add(orderKey);
+        }
+
+        // sort
+        EventBean[] outgoingEventsArr = outgoingEvents.toArray(new EventBean[0]);
+        MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[0]);
+        EventBean[] orderedEvents = orderByProcessor.sort(outgoingEventsArr, orderKeysArr);
+
+        return new ArrayEventIterator(orderedEvents);
     }
 
-    /**
-     * Method to transform an event based on the select expression.
-     */
-    public static class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
+    public SelectExprProcessor getSelectExprProcessor()
     {
-        private final Iterator<EventBean> sourceIterator;
-        private final ResultSetProcessorAggregateGrouped resultSetProcessor;
-        private final AggregationService aggregationService;
-        private EventBean nextResult;
-        private final EventBean[] eventsPerStream;
+        return selectExprProcessor;
+    }
 
-        public ResultSetAggregateGroupedIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorAggregateGrouped resultSetProcessor, AggregationService aggregationService)
-        {
-            this.sourceIterator = sourceIterator;
-            this.resultSetProcessor = resultSetProcessor;
-            this.aggregationService = aggregationService;
-            eventsPerStream = new EventBean[1];
-        }
-
-        public boolean hasNext()
-        {
-            if (nextResult != null)
-            {
-                return true;
-            }
-            findNext();
-            if (nextResult != null)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public EventBean next()
-        {
-            if (nextResult != null)
-            {
-                EventBean result = nextResult;
-                nextResult = null;
-                return result;
-            }
-            findNext();
-            if (nextResult != null)
-            {
-                EventBean result = nextResult;
-                nextResult = null;
-                return result;
-            }
-            throw new NoSuchElementException();
-        }
-
-        private void findNext()
-        {
-            while(sourceIterator.hasNext())
-            {
-                EventBean candidate = sourceIterator.next();
-                eventsPerStream[0] = candidate;
-
-                MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
-                aggregationService.setCurrentRow(groupKey);
-
-                Boolean pass = true;
-                if (resultSetProcessor.optionalHavingNode != null)
-                {
-                    pass = (Boolean) resultSetProcessor.optionalHavingNode.evaluate(eventsPerStream, true);
-                }
-                if (!pass)
-                {
-                    continue;
-                }
-
-                if(resultSetProcessor.selectExprProcessor == null)
-                {
-                    nextResult = candidate;
-                }
-                else
-                {
-                    nextResult = resultSetProcessor.selectExprProcessor.process(eventsPerStream, true);
-                }
-
-                break;
-            }
-        }
-
-        public void remove()
-        {
-            throw new UnsupportedOperationException();
-        }
+    public ExprNode getOptionalHavingNode()
+    {
+        return optionalHavingNode;
     }
 }

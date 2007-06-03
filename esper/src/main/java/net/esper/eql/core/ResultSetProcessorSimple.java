@@ -1,9 +1,6 @@
 package net.esper.eql.core;
 
-import net.esper.collection.MultiKey;
-import net.esper.collection.Pair;
-import net.esper.collection.TransformEventIterator;
-import net.esper.collection.TransformEventMethod;
+import net.esper.collection.*;
 import net.esper.eql.expression.ExprNode;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
@@ -373,6 +370,28 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
 
     public Iterator<EventBean> getIterator(Viewable parent)
     {
+        if (orderByProcessor != null)
+        {
+            // Pull all events, generate order keys
+            EventBean[] eventsPerStream = new EventBean[1];
+            List<EventBean> events = new ArrayList<EventBean>();
+            List<MultiKeyUntyped> orderKeys = new ArrayList<MultiKeyUntyped>();
+            for (Iterator<EventBean> it = parent.iterator(); it.hasNext();)
+            {
+                eventsPerStream[0] = it.next();
+                MultiKeyUntyped orderKey = orderByProcessor.getSortKey(eventsPerStream, true);
+                Pair<EventBean[], EventBean[]> pair = processViewResult(eventsPerStream, null);
+                events.add(pair.getFirst()[0]);
+                orderKeys.add(orderKey);
+            }
+
+            // sort
+            EventBean[] outgoingEvents = events.toArray(new EventBean[0]);
+            MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[0]);
+            EventBean[] orderedEvents = orderByProcessor.sort(outgoingEvents, orderKeysArr);
+            
+            return new ArrayEventIterator(orderedEvents);
+        }
         // Return an iterator that gives row-by-row a result
         return new TransformEventIterator(parent.iterator(), new ResultSetSimpleTransform(this));
     }

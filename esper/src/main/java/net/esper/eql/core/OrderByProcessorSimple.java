@@ -1,15 +1,6 @@
 package net.esper.eql.core;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import net.esper.collection.Pair;
 import net.esper.collection.MultiKeyUntyped;
@@ -61,6 +52,48 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 		this.aggregationService = aggregationService;
 
         this.comparator = new MultiKeyComparator(getIsDescendingValues());
+    }
+
+    public MultiKeyUntyped getSortKey(EventBean[] eventsPerStream, boolean isNewData)
+    {
+        Object[] values = new Object[orderByList.size()];
+        int count = 0;
+        for (Pair<ExprNode, Boolean> sortPair : orderByList)
+        {
+            ExprNode sortNode = sortPair.getFirst();
+            values[count++] = sortNode.evaluate(eventsPerStream, isNewData);
+        }
+
+        return new MultiKeyUntyped(values);
+    }
+
+    public MultiKeyUntyped[] getSortKeyPerRow(EventBean[] generatingEvents, boolean isNewData)
+    {
+        if (generatingEvents == null)
+        {
+            return null;
+        }
+
+        MultiKeyUntyped[] sortProperties = new MultiKeyUntyped[generatingEvents.length];
+
+        int count = 0;
+        EventBean[] evalEventsPerStream = new EventBean[1];
+        for (EventBean event : generatingEvents)
+        {
+            Object[] values = new Object[orderByList.size()];
+            int countTwo = 0;
+            evalEventsPerStream[0] = event;
+            for (Pair<ExprNode, Boolean> sortPair : orderByList)
+            {
+                ExprNode sortNode = sortPair.getFirst();
+                values[countTwo++] = sortNode.evaluate(evalEventsPerStream, isNewData);
+            }
+
+            sortProperties[count] = new MultiKeyUntyped(values);
+            count++;
+        }
+
+        return sortProperties;
     }
 
 	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, boolean isNewData)
@@ -209,7 +242,57 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 		return new MultiKeyUntyped(keys);
 	}
 
-	private MultiKeyUntyped[] generateGroupKeys(EventBean[][] generatingEvents, boolean isNewData)
+    public EventBean[] sort(EventBean[] outgoingEvents, MultiKeyUntyped[] orderKeys)
+    {
+        TreeMap<MultiKeyUntyped, Object> sort = new TreeMap<MultiKeyUntyped, Object>(comparator);
+
+        if (outgoingEvents == null || outgoingEvents.length < 2)
+        {
+            return outgoingEvents;
+        }
+
+        for (int i = 0; i < outgoingEvents.length; i++)
+        {
+            Object entry = sort.get(orderKeys[i]);
+            if (entry == null)
+            {
+                sort.put(orderKeys[i], outgoingEvents[i]);
+            }
+            else if (entry instanceof EventBean)
+            {
+                List<EventBean> list = new ArrayList<EventBean>();
+                list.add((EventBean)entry);
+                list.add(outgoingEvents[i]);
+                sort.put(orderKeys[i], list);
+            }
+            else
+            {
+                List<EventBean> list = (List<EventBean>) entry;
+                list.add(outgoingEvents[i]);
+            }
+        }
+
+        EventBean[] result = new EventBean[outgoingEvents.length];
+        int count = 0;
+        for (Object entry : sort.values())
+        {
+            if (entry instanceof List)
+            {
+                List<EventBean> output = (List<EventBean>) entry;
+                for(EventBean event : output)
+                {
+                    result[count++] = event;
+                }
+            }
+            else
+            {
+                result[count++] = (EventBean) entry;
+            }
+        }
+        return result;
+    }
+
+    private MultiKeyUntyped[] generateGroupKeys(EventBean[][] generatingEvents, boolean isNewData)
 	{
 		MultiKeyUntyped keys[] = new MultiKeyUntyped[generatingEvents.length];
 

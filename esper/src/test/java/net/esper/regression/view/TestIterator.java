@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
-import net.esper.event.EventBean;
+import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.ArrayAssertionUtil;
 
@@ -16,6 +16,67 @@ public class TestIterator extends TestCase
     {
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
+    }
+
+    public void testOrderByWildcard()
+    {
+        String stmtText = "select * from " + SupportMarketDataBean.class.getName() + ".win:length(5) order by symbol, volume";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        assertFalse(stmt.iterator().hasNext());
+
+        Object eventOne = sendEvent("SYM", 1);
+        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventOne});
+
+        Object eventTwo = sendEvent("OCC", 2);
+        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventOne});
+
+        Object eventThree = sendEvent("TOC", 3);
+        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventOne, eventThree});
+
+        Object eventFour = sendEvent("SYM", 0);
+        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventFour, eventOne, eventThree});
+
+        Object eventFive = sendEvent("SYM", 10);
+        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventFour, eventOne, eventFive, eventThree});
+
+        Object eventSix = sendEvent("SYM", 4);
+        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventFour, eventSix, eventFive, eventThree});
+    }
+
+    public void testOrderByProps()
+    {
+        String[] fields = new String[] {"symbol", "volume"};
+        String stmtText = "select symbol, volume from " + SupportMarketDataBean.class.getName() + ".win:length(3) order by symbol, volume";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        assertFalse(stmt.iterator().hasNext());
+
+        sendEvent("SYM", 1);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"SYM", 1L}});
+
+        sendEvent("OCC", 2);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"OCC", 2L}, {"SYM", 1L}});
+
+        sendEvent("SYM", 0);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"OCC", 2L}, {"SYM", 0L}, {"SYM", 1L}});
+
+        sendEvent("OCC", 3);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"OCC", 2L}, {"OCC", 3L}, {"SYM", 0L}});
+    }
+
+    public void testJoin()
+    {
+        String stmtText = "select * from " + SupportMarketDataBean.class.getName() + ".win:length(5)," +
+                           SupportBean.class.getName();
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        try
+        {
+            stmt.iterator();
+            fail();
+        }
+        catch (UnsupportedOperationException ex)
+        {
+            // expected
+        }
     }
 
     public void testFilter()
@@ -54,6 +115,36 @@ public class TestIterator extends TestCase
         ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -90L}});
         sendEvent("SYM", 6);
         assertFalse(stmt.iterator().hasNext());
+    }
+
+    public void testGroupByRowPerGroupOrdered()
+    {
+        String[] fields = new String[] {"symbol", "sumVol"};
+        String stmtText = "select symbol, sum(volume) as sumVol " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
+                          "group by symbol " +
+                          "order by symbol";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        assertFalse(stmt.iterator().hasNext());
+
+        sendEvent("SYM", 100);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+
+        sendEvent("OCC", 5);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"OCC", 5L}, {"SYM", 100L}});
+
+        sendEvent("SYM", 10);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"OCC", 5L}, {"SYM", 110L}});
+
+        sendEvent("OCC", 6);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"OCC", 11L}, {"SYM", 110L}});
+
+        sendEvent("ATB", 8);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"ATB", 8L}, {"OCC", 11L}, {"SYM", 110L}});
+
+        sendEvent("ATB", 7);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"ATB", 15L}, {"OCC", 11L}, {"SYM", 10L}});
     }
 
     public void testGroupByRowPerGroup()
@@ -146,6 +237,41 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
     }
 
+    public void testGroupByRowPerEventOrdered()
+    {
+        String[] fields = new String[] {"symbol", "price", "sumVol"};
+        String stmtText = "select symbol, price, sum(volume) as sumVol " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
+                          "group by symbol " +
+                          "order by symbol";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        assertFalse(stmt.iterator().hasNext());
+
+        sendEvent("SYM", -1, 100);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -1d, 100L}});
+
+        sendEvent("TAC", -2, 12);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 12L}});
+
+        sendEvent("TAC", -3, 13);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+
+        sendEvent("SYM", -4, 1);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] { {"SYM", -1d, 101L}, {"SYM", -4d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+
+        sendEvent("OCC", -5, 99);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] { {"OCC", -5d, 99L}, {"SYM", -1d, 101L}, {"SYM", -4d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+
+        sendEvent("TAC", -6, 2);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] { {"OCC", -5d, 99L}, {"SYM", -4d, 1L}, {"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"TAC", -6d, 27L}});
+    }
+
     public void testGroupByRowPerEvent()
     {
         String[] fields = new String[] {"symbol", "price", "sumVol"};
@@ -236,6 +362,29 @@ public class TestIterator extends TestCase
         ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"TAC", 14L}, {"MOV", 14L}, {"SYM", 14L}});
     }
 
+    public void testAggregateAllOrdered()
+    {
+        String[] fields = new String[] {"symbol", "sumVol"};
+        String stmtText = "select symbol, sum(volume) as sumVol " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
+                          " order by symbol asc";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        assertFalse(stmt.iterator().hasNext());
+
+        sendEvent("SYM", 100);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+
+        sendEvent("TAC", 1);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 101L}, {"TAC", 101L}});
+
+        sendEvent("MOV", 3);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"MOV", 104L}, {"SYM", 104L}, {"TAC", 104L}});
+
+        sendEvent("SYM", 10);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"MOV", 14L}, {"SYM", 14L}, {"TAC", 14L}});
+    }
+
     public void testAggregateAllHaving()
     {
         String[] fields = new String[] {"symbol", "sumVol"};
@@ -307,9 +456,11 @@ public class TestIterator extends TestCase
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean(symbol, price, volume, null));
     }
 
-    private void sendEvent(String symbol, long volume)
+    private SupportMarketDataBean sendEvent(String symbol, long volume)
     {
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean(symbol, 0, volume, null));
+        SupportMarketDataBean event = new SupportMarketDataBean(symbol, 0, volume, null);
+        epService.getEPRuntime().sendEvent(event);
+        return event;
     }
 
     private void sendEvent(long volume)

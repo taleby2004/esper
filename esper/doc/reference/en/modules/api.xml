@@ -121,13 +121,31 @@ for (EventBean event : eventIter) {
 			<programlisting><![CDATA[double averagePrice = (Double) eqlStatement.iterator().next().get("average");]]></programlisting>
 			
 			<para>
+				The <literal>iterator</literal> method can be used to pull results out of most statements, including statements that contain aggregation functions, pattern statements, and statements that contain a <literal>where</literal> clause, <literal>group by</literal> clause, <literal>having</literal> clause or <literal>order by</literal> clause.
+			</para>
+
+			<para>
+				For statements without an <literal>order by</literal> clause, the <literal>iterator</literal> method returns events in the order maintained by the data window. For statements that contain an <literal>order by</literal> clause, the <literal>iterator</literal> method returns events in the order indicated by the <literal>order by</literal> clause.
+			</para>
+
+			<para>
 				Esper places the following restrictions on the pull API and usage of the <literal>iterator</literal> method:
 			</para>
 	
 			<orderedlist spacing="compact">
 				<listitem>
 					<para>
-						EQL statements joining multiple event streams do not support the pull API 
+						EQL statements joining multiple event streams do not support the pull API.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Since the <literal>iterator</literal> method returns events to the application immediately, the iterator does not honor an output rate limiting clause, if present.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						In multithreaded applications, the <literal>iterator</literal> method does not hold any locks and modifications to the underlying data window may throw runtime exceptions in the face of concurrent modifications.
 					</para>
 				</listitem>
 			</orderedlist>

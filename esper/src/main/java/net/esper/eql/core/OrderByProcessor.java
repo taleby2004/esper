@@ -38,4 +38,8 @@ public interface OrderByProcessor {
 	 * @return an array containing the output events in sorted order
 	 */
 	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, MultiKeyUntyped[] groupByKeys, boolean isNewData);
-}	
+
+    public MultiKeyUntyped getSortKey(EventBean[] eventsPerStream, boolean isNewData);
+    public MultiKeyUntyped[] getSortKeyPerRow(EventBean[] generatingEvents, boolean isNewData);
+    public EventBean[] sort(EventBean[] outgoingEvents, MultiKeyUntyped[] orderKeys);
+}

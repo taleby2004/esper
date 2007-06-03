@@ -9,6 +9,7 @@ package net.esper.eql.view;
 
 import net.esper.collection.TransformEventIterator;
 import net.esper.eql.core.ResultSetProcessor;
+import net.esper.eql.core.OrderByProcessor;
 import net.esper.eql.join.JoinSetIndicator;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
@@ -28,14 +29,16 @@ public abstract class OutputProcessView extends ViewSupport implements JoinSetIn
      * Processes the parent views result set generating events for pushing out to child view.
      */
     protected final ResultSetProcessor resultSetProcessor;
+    private boolean isJoin;
 
     /**
      * Ctor.
      * @param resultSetProcessor processes the results posted by parent view or joins
      */
-    protected OutputProcessView(ResultSetProcessor resultSetProcessor)
+    protected OutputProcessView(ResultSetProcessor resultSetProcessor, boolean isJoin)
     {
         this.resultSetProcessor = resultSetProcessor;
+        this.isJoin = isJoin;
     }
 
     public EventType getEventType()
@@ -57,7 +60,11 @@ public abstract class OutputProcessView extends ViewSupport implements JoinSetIn
 
     public Iterator<EventBean> iterator()
     {
-    	if(resultSetProcessor != null)
+        if (isJoin)
+        {
+            throw new UnsupportedOperationException("Joins statements do not allow iteration");
+        }
+        if(resultSetProcessor != null)
     	{
             return resultSetProcessor.getIterator(parent); 
     	}

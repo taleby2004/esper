@@ -21,9 +21,9 @@ public class OutputProcessViewDirect extends OutputProcessView
      * Ctor.
      * @param resultSetProcessor is processing the result set for publishing it out
      */
-    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor)
+    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, boolean isJoin)
     {
-        super(resultSetProcessor);
+        super(resultSetProcessor, isJoin);
 
         log.debug(".ctor");
         if (resultSetProcessor == null)
