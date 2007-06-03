@@ -708,11 +708,88 @@ timer:within(125)</programlisting>
 			<programlisting><![CDATA[every timer:at(5, *, *, *, *)]]></programlisting>
 
             <para>
-				The below at operator pattern matches every 15 minutes from 8am to 5pm on even numbered days of the month as well as on the 
+				The below <literal>timer:at</literal> pattern matches every 15 minutes from 8am to 5pm on even numbered days of the month as well as on the 
 				first day of the month.
             </para>
 			<programlisting><![CDATA[timer:at (*/15, 8:17, [*/2, 1], *, *)]]></programlisting>
            
+            <para>
+				The below table outlines the fields, valid values and keywords available for each field:
+            </para>
+
+		   <table frame="topbot">
+				<title>Properties offered by sample statement aggregating price</title>
+				<tgroup cols="4">
+					<colspec colwidth="0.7*"/>
+					<colspec colwidth="0.7*"/>
+					<colspec colwidth="0.7*"/>
+					<colspec colwidth="1.3*"/>
+					<thead>
+						<row>
+							<entry>Field Name</entry>
+							<entry>Mandatory?</entry>
+							<entry>Allowed Values</entry>
+							<entry>Additional Keywords</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>Minutes</entry>
+							<entry>yes</entry>
+							<entry>0 - 59</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>Hours</entry>
+							<entry>yes</entry>
+							<entry>0 - 23</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>Days Of Month</entry>
+							<entry>yes</entry>
+							<entry>1 - 31</entry>
+							<entry>last, weekday, lastweekday</entry>
+						</row>
+						<row>
+							<entry>Months</entry>
+							<entry>yes</entry>
+							<entry>1 - 12</entry>
+							<entry></entry>
+						</row>
+						<row>
+							<entry>Days Of Week</entry>
+							<entry>yes</entry>
+							<entry>0 (Sunday) - 6 (Saturday)</entry>
+							<entry>last</entry>
+						</row>
+						<row>
+							<entry>Seconds</entry>
+							<entry>no</entry>
+							<entry>0 - 59</entry>
+							<entry></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table> 
+
+            <para>
+				The keyword <literal>last</literal> used in the days-of-month field means the last day of the month (current month). To specify the last day of another month, a value for the month field has to be provided. For example: <literal>timer:at(*, *, last,2,*)</literal> is the last day of February. 
+            </para>
+				
+            <para>
+				The <literal>last</literal> keyword in the day-of-week field by itself simply means Saturday. If used in the day-of-week field after another value, it means "the last xxx day of the month" - for example "5 last" means "the last friday of the month". 
+				So the last Friday of the current month will be: <literal>timer:at(*, *, *, *, 5 last)</literal>. And the last Friday of June: <literal>timer:at(*, *, *, 6, 5 last)</literal>.
+            </para>
+
+            <para>
+				The keyword <literal>weekday</literal> is used to specify the weekday (Monday-Friday) nearest the given day. Variant could include month like in: <literal>timer:at(*, *, 30 weekday, 9, *)</literal> which is Friday September 28th (no jump over month).
+            </para>
+
+            <para>
+				The keyword <literal>lastweekday</literal> is a combination of two parameters, the <literal>last</literal> and the <literal>weekday</literal> keywords. A typical example could be: <literal>timer:at(*, *, *, lastweekday, 9, *)</literal> which will define Friday September 28th (example year is 2007).
+            </para>
+
         </sect2>
    </sect1>
    
