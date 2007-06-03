@@ -73,6 +73,8 @@ tokens
 	PREVIOUS="prev";
 	PRIOR="prior";
 	EXISTS="exists";
+	WEEKDAY="weekday";
+	LW="lastweekday";
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -148,6 +150,8 @@ tokens
 	IN_SUBSELECT_EXPR;
 	NOT_IN_SUBSELECT_EXPR;
 	IN_SUBSELECT_QUERY_EXPR;
+	LAST_OPERATOR;
+	WEEKDAY_OPERATOR;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -608,8 +612,12 @@ parameter
 	;
 
 singleParameter
-	:	rangeOperand
+	:	rangeOperand	
 	| 	frequencyOperand
+	|	lastOperator
+	|	weekDayOperator
+	|	LAST^
+	|	LW^
 	|	STAR^
 	|	constant
 	|	time_period
@@ -623,6 +631,14 @@ frequencyOperand
 rangeOperand
 	:	NUM_INT COLON! NUM_INT
 		{ #rangeOperand = #([NUMERIC_PARAM_RANGE, "rangeOperand"], #rangeOperand); }
+	;
+
+lastOperator
+	:	NUM_INT LAST! {#lastOperator = #([LAST_OPERATOR,"lastOperator"], #lastOperator);}
+	;
+
+weekDayOperator:
+	NUM_INT WEEKDAY! {#weekDayOperator = #([WEEKDAY_OPERATOR,"weekDayOperator"], #weekDayOperator);}
 	;
 
 numericParameterList

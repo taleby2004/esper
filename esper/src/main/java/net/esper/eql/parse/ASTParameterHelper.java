@@ -52,6 +52,10 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
             case STRING_TYPE:               return ASTConstantHelper.parse(node);
             case NUMERIC_PARAM_FREQUENCY:   return makeFrequency(node);
             case NUMERIC_PARAM_RANGE:       return makeRange(node);
+            case LAST:
+            case LW:
+            case WEEKDAY_OPERATOR:
+            case LAST_OPERATOR:             return makeCronParameter(node);
             case STAR:                      return new WildcardParameter();
             case NUMERIC_PARAM_LIST:        return makeList(node);
             case ARRAY_PARAM_LIST:          return makeArray(node);
@@ -132,6 +136,15 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
         int low = IntValue.parseString(node.getFirstChild().getText());
         int high = IntValue.parseString(node.getFirstChild().getNextSibling().getText());
         return new RangeParameter(low, high);
+    }
+
+    private static Object makeCronParameter(AST node)
+    {
+       if (node.getFirstChild() == null) {
+           return new CronParameter(node.getText(), null);
+       } else {
+        return new CronParameter(node.getText(), node.getFirstChild().getText());
+       }
     }
 
     private static Object makeArray(AST node) throws ASTWalkException

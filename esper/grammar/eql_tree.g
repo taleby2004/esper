@@ -328,6 +328,10 @@ parameter
 
 singleParameter
 	: 	STAR
+	|	LAST
+	|	LW
+	|	lastOperator
+	|	weekDayOperator
 	| 	constant
 	| 	#( NUMERIC_PARAM_RANGE NUM_INT NUM_INT)
 	| 	#( NUMERIC_PARAM_FREQUENCY NUM_INT)
@@ -338,6 +342,14 @@ numericParameterList
 	: 	NUM_INT
 	| 	#( NUMERIC_PARAM_RANGE NUM_INT NUM_INT)
 	| 	#( NUMERIC_PARAM_FREQUENCE NUM_INT)
+	;
+
+lastOperator
+	:	#( LAST_OPERATOR NUM_INT )
+	;
+
+weekDayOperator
+	:	#( WEEKDAY_OPERATOR NUM_INT )
 	;
 
 time_period
