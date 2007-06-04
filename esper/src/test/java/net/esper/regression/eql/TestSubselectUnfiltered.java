@@ -164,9 +164,6 @@ public class TestSubselectUnfiltered extends TestCase {
         tryInvalid("select (select id, id from S1) as idS1 from S0",
                    "expecting \"from\", found ',' near line 1, column 18 [select (select id, id from S1) as idS1 from S0]");
 
-        tryInvalid("select (select * from S1.std:lastevent()) as idS1 from S0",
-                   "Error starting view: Invalid use of wildcard in subquery [select (select * from S1.std:lastevent()) as idS1 from S0]");
-
         tryInvalid("select (select id from S1.std:lastevent() group by id) as idS1 from S0",
                    "unexpected token: group near line 1, column 43 [select (select id from S1.std:lastevent() group by id) as idS1 from S0]");
         
@@ -196,6 +193,9 @@ public class TestSubselectUnfiltered extends TestCase {
 
         tryInvalid("select (select id from S1.std:lastevent() where id = p00) from S0",
                    "Error starting view: Property named 'p00' must be prefixed by a stream name, use the as-clause to name the stream [select (select id from S1.std:lastevent() where id = p00) from S0]");
+
+        tryInvalid("select id in (select * from S1.win:length(1000)) as value from S0",
+                   "Error starting view: Implicit conversion from datatype 'SupportBean_S1' to 'Integer' is not allowed [select id in (select * from S1.win:length(1000)) as value from S0]");
     }
 
     public void testUnfilteredStreamPrior()

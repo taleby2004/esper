@@ -420,12 +420,6 @@ public class EPStatementStartMethod
             SelectClauseSpec selectClauseSpec = statementSpec.getSelectClauseSpec();
             FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) statementSpec.getStreamSpecs().get(0);
 
-            // Validate select clause wildcard use
-            if ((!subselect.isAllowWildcardSelect()) && (selectClauseSpec.isUsingWildcard()))
-            {
-                throw new ExprValidationException("Invalid use of wildcard in subquery");
-            }
-
             // no aggregation functions allowed in select
             if (selectClauseSpec.getSelectList().size() > 0)
             {
@@ -461,6 +455,7 @@ public class EPStatementStartMethod
             Viewable viewable = services.getStreamService().createStream(filterStreamSpec.getFilterSpec(),
                     services.getFilterService(), statementContext.getEpStatementHandle(), isJoin);
             ViewFactoryChain viewFactoryChain = services.getViewService().createFactories(subselectStreamNumber, viewable.getEventType(), filterStreamSpec.getViewSpecs(), statementContext);
+            subselect.setRawEventType(viewFactoryChain.getEventType());
 
             // Add subquery to list, for later starts
             subSelectStreamDesc.add(subselect, subselectStreamNumber, viewable, viewFactoryChain);

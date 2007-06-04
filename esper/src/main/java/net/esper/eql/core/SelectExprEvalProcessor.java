@@ -95,7 +95,6 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         	}
         }
         
-        // This function may modify
         init(selectionList, insertIntoDesc, underlyingType, eventAdapterService);
     }
 

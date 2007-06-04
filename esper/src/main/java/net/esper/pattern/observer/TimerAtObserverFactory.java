@@ -46,7 +46,7 @@ public class TimerAtObserverFactory implements ObserverFactory
         if (unitParameter instanceof Integer)
         {
             SortedSet<Integer> result = new TreeSet<Integer>();
-            result.add((Integer)unitParameter);
+            result.add((Integer) unitParameter);
             return result;
         }
 
@@ -63,7 +63,7 @@ public class TimerAtObserverFactory implements ObserverFactory
         return resultSorted;
     }
 
-    private static ScheduleSpec  computeValues(Object[] args)
+    private static ScheduleSpec computeValues(Object[] args)
     {
         EnumMap<ScheduleUnit, SortedSet<Integer>> unitMap = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         Object minutes = args[0];
@@ -74,42 +74,53 @@ public class TimerAtObserverFactory implements ObserverFactory
         unitMap.put(ScheduleUnit.MINUTES, computeValues(minutes, ScheduleUnit.MINUTES));
         unitMap.put(ScheduleUnit.HOURS, computeValues(hours, ScheduleUnit.HOURS));
         SortedSet<Integer> resultMonths = computeValues(months, ScheduleUnit.MONTHS);
-        if (daysOfWeek instanceof CronParameter && daysOfMonth instanceof CronParameter) {
+        if (daysOfWeek instanceof CronParameter && daysOfMonth instanceof CronParameter)
+        {
             throw
-            new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
+                    new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
         }
-        if (resultMonths != null && resultMonths.size() == 1 && (resultMonths.first() instanceof Integer)) {
+        if (resultMonths != null && resultMonths.size() == 1 && (resultMonths.first() instanceof Integer))
+        {
             // If other arguments are cronParameters, use it for later computations
             CronParameter parameter = null;
-            if (daysOfMonth instanceof CronParameter) {
+            if (daysOfMonth instanceof CronParameter)
+            {
                 parameter = ((CronParameter) daysOfMonth);
-            } else if (daysOfWeek instanceof CronParameter) {
+            }
+            else if (daysOfWeek instanceof CronParameter)
+            {
                 parameter = ((CronParameter) daysOfWeek);
             }
-            if (parameter != null) {
+            if (parameter != null)
+            {
                 parameter.setMonth(resultMonths.first());
             }
         }
         SortedSet<Integer> resultDaysOfWeek = computeValues(daysOfWeek, ScheduleUnit.DAYS_OF_WEEK);
         SortedSet<Integer> resultDaysOfMonth = computeValues(daysOfMonth, ScheduleUnit.DAYS_OF_MONTH);
-        if (resultDaysOfWeek != null && resultDaysOfWeek.size() == 1 && (resultDaysOfWeek.first() instanceof Integer)) {
-          // The result is in the form "last xx of the month
-          // Days of week is replaced by a wildcard and days of month is updated with
-          // the computation of "last xx day of month".
-           // In this case "days of month" parameter has to be a wildcard.
-            if (resultDaysOfWeek.first() > 6) {
-              if (resultDaysOfMonth != null) {
-                throw
-                new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
-              }
-              resultDaysOfMonth = resultDaysOfWeek;
-              resultDaysOfWeek = null;
+        if (resultDaysOfWeek != null && resultDaysOfWeek.size() == 1 && (resultDaysOfWeek.first() instanceof Integer))
+        {
+            // The result is in the form "last xx of the month
+            // Days of week is replaced by a wildcard and days of month is updated with
+            // the computation of "last xx day of month".
+            // In this case "days of month" parameter has to be a wildcard.
+            if (resultDaysOfWeek.first() > 6)
+            {
+                if (resultDaysOfMonth != null)
+                {
+                    throw
+                            new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
+                }
+                resultDaysOfMonth = resultDaysOfWeek;
+                resultDaysOfWeek = null;
             }
         }
-        if (resultDaysOfMonth != null && resultDaysOfMonth.size() == 1 && (resultDaysOfMonth.first() instanceof Integer)) {
-            if (resultDaysOfWeek != null) {
-              throw
-              new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
+        if (resultDaysOfMonth != null && resultDaysOfMonth.size() == 1 && (resultDaysOfMonth.first() instanceof Integer))
+        {
+            if (resultDaysOfWeek != null)
+            {
+                throw
+                        new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
             }
         }
         unitMap.put(ScheduleUnit.DAYS_OF_WEEK, resultDaysOfWeek);

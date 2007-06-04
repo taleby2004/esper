@@ -7,6 +7,7 @@ import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
+import net.esper.event.EventType;
 import net.esper.support.bean.*;
 import net.esper.support.util.SupportUpdateListener;
 
@@ -31,6 +32,40 @@ public class TestSubselectFiltered extends TestCase
 
         // Use external clocking for the test, reduces logging
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+    }
+
+    public void testSelectWildcard()
+    {
+        String stmtText = "select (select * from S1.win:length(1000)) as events1 from S0";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        stmt.addListener(listener);
+
+        EventType type = stmt.getEventType();
+        assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
+
+        Object event = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
+        EventBean result = listener.assertOneGetNewAndReset();
+        assertSame(event, result.get("events1"));
+    }
+
+    public void testSelectWildcardNoName()
+    {
+        String stmtText = "select (select * from S1.win:length(1000)) from S0";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        stmt.addListener(listener);
+
+        EventType type = stmt.getEventType();
+        assertEquals(SupportBean_S1.class, type.getPropertyType("*"));
+
+        Object event = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
+        EventBean result = listener.assertOneGetNewAndReset();
+        assertSame(event, result.get("*"));
     }
 
     public void testWhereConstant()

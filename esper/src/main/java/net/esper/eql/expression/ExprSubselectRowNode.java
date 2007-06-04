@@ -33,6 +33,10 @@ public class ExprSubselectRowNode extends ExprSubselectNode
 
     public Class getType() throws ExprValidationException
     {
+        if (selectClause == null)   // wildcards allowed
+        {
+            return rawEventType.getUnderlyingType();
+        }
         return selectClause.getType();
     }
 
@@ -91,7 +95,17 @@ public class ExprSubselectRowNode extends ExprSubselectNode
         }
 
         events[0] = subSelectResult;
-        Object result = selectClause.evaluate(events, true);
+        Object result;
+
+        if (selectClause != null)
+        {
+            result = selectClause.evaluate(events, true);
+        }
+        else
+        {
+            result = events[0].getUnderlying();
+        }
+
         return result;
     }
 }

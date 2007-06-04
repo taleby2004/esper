@@ -59,7 +59,15 @@ public class ExprSubselectInNode extends ExprSubselectNode
 
         // Must be the same boxed type returned by expressions under this
         Class typeOne = JavaClassHelper.getBoxedType(this.getChildNodes().get(0).getType());
-        Class typeTwo = selectClause.getType();
+        Class typeTwo;
+        if (selectClause != null)
+        {
+            typeTwo = selectClause.getType();
+        }
+        else
+        {
+            typeTwo = this.rawEventType.getUnderlyingType();
+        }         
 
         // Null constants can be compared for any type
         if ((typeOne == null) || (typeTwo == null))

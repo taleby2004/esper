@@ -1146,7 +1146,18 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
   where zoneId = RFID.zoneId) as name from RFIDEvent]]></programlisting>
 
 		<para>
-			Note that when a simple or correlated subquery returns multiple rows, the engine returns a <literal>NULL</literal> value as the subquery result. To limit the number of events returned by a subquery consider using one of the views <literal>std:lastevent</literal>, <literal>std:unique</literal> and <literal>std:groupby</literal>.
+			Note that when a simple or correlated subquery returns multiple rows, the engine returns a <literal>null</literal> value as the subquery result. To limit the number of events returned by a subquery consider using one of the views <literal>std:lastevent</literal>, <literal>std:unique</literal> and <literal>std:groupby</literal>.
+		</para>
+
+		<para>
+			The select clause of a subquery also allows wildcard selects, which return as an event property the underlying event object of the event type as defined in the from-clause. An example:
+		</para>
+
+		<programlisting><![CDATA[select (select * from MarketData.std:last()) as md 
+  from pattern [every timer:interval(10 sec)]]]></programlisting>
+
+		<para>
+			The output events to the statement above contain the underlying MarketData event in a property named "md". The statement populates the last MarketData event into a property named "md" every 10 seconds following the pattern definition, or populates a <literal>null</literal> value if no MarketData event has been encountered so far.
 		</para>
 
 		<para>
@@ -1154,11 +1165,6 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 		</para>
 
 		<orderedlist spacing="compact">
-			<listitem>
-				<para>
-					Wildcard selection criteria can only be used in subqueries using the <literal>exists</literal> keyword
-				</para>
-			</listitem>
 			<listitem>
 				<para>
 					The subquery stream definition must define a data window or other view to limit subquery results, reducing the number of events held for subquery execution

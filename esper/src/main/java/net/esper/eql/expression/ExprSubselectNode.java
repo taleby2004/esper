@@ -4,6 +4,7 @@ import net.esper.eql.spec.StatementSpecCompiled;
 import net.esper.eql.spec.StatementSpecRaw;
 import net.esper.eql.subquery.SubqueryTableLookupStrategy;
 import net.esper.event.EventBean;
+import net.esper.event.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,6 +31,7 @@ public abstract class ExprSubselectNode extends ExprNode
     private StatementSpecCompiled statementSpecCompiled;
     private SubqueryTableLookupStrategy strategy;
     private String selectAsName;
+    protected EventType rawEventType;
 
     /**
      * Evaluate the subquery expression returning an evaluation result object.
@@ -39,12 +41,6 @@ public abstract class ExprSubselectNode extends ExprNode
      * @return evaluation result
      */
     public abstract Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents);
-
-    /**
-     * Return true to indicate that wildcard selects are acceptable, or false to indicate wildcard is not acceptable 
-     * @return true for yes-wildcards, false for no-wildcards
-     */
-    public abstract boolean isAllowWildcardSelect();
 
     /**
      * Ctor.
@@ -130,6 +126,10 @@ public abstract class ExprSubselectNode extends ExprNode
         {
             return selectAsName;
         }
+        if (selectClause == null)
+        {
+            return "*";
+        }
         return selectClause.toExpressionString();
     }
 
@@ -145,5 +145,10 @@ public abstract class ExprSubselectNode extends ExprNode
     public void setStrategy(SubqueryTableLookupStrategy strategy)
     {
         this.strategy = strategy;
+    }
+
+    public void setRawEventType(EventType rawEventType)
+    {
+        this.rawEventType = rawEventType;
     }
 }

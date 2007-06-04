@@ -3,20 +3,26 @@ Esper Changelog
 
 Changes in version 1.9.0
 ------------------------
-* Allow subquery to return the event object http://jira.codehaus.org/browse/ESPER-105
 * Allow output rate limiting to start eager ESPER-106
-
-doc: More detailed explanation/examples of dereferences between std:groupby and "group by", as well as their interaction with windows and output limits, would be extremely useful. That was the main area I found I didn't understand from docs, and had to experiment to really see what it does. I need to look back at exactly what I did to give you concrete suggestions. Part of it was also that I didn't appreciate at first the effect of presence of non-aggregating/always changing field in a select, with relation to time window, and was getting confused by difference in # of events generated in such a case.
-
-* Determinism: events delivered to listeners deterministic and insert-into chaining deterministic
 * Performance optimization for filter-only statements
+* Determinism: events delivered to listeners deterministic and insert-into chaining deterministic
+* Added doc: More detailed explanation/examples of dereferences between std:groupby and "group by", 
+             as well as their interaction with windows and output limits, would be extremely useful. 
+             That was the main area I found I didn't understand from docs, and had to experiment to really see what it does. 
+             I need to look back at exactly what I did to give you concrete suggestions. 
+             Part of it was also that I didn't appreciate at first the effect of presence of non-aggregating/always changing field in a select, 
+             with relation to time window, and was getting confused by difference in # of events generated in such a case.
 * New RFID example and performance test case
-* StockTicker sample now multithreaded
-* Support for last-functions (TODO) (ESPER-84 Timer:at to have last day of month function)
-* Fixed issue ESPER-101 "ArrayIndexOutOfBounds with 'output last' and group by"
-* Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"
+
+* Support for last-day-of-month and weekday for timer:at crontab functions (ESPER-84 Timer:at to have last day of month function)
+* Fixed issue ESPER-105 "Allow subquery to return the event object"
 * Fixed issue ESPER-98 "NullPointerException for Joins involving Map event types"
-* Fixed issue ESPER-107 "TODO"
+* Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"
+* Fixed issue ESPER-101 "ArrayIndexOutOfBounds with 'output last' and group by"
+* Fixed issue ESPER-107 "Memory leak using previous function and length window under a group"
+* Fixed issue ESPER-109 "NPE while fetching events from statements"
+* Fixed issue ESPER-110 "Iterator not honoring filter, aggregation, group-by and having clause"
+
 
 Changes in version 1.8.0
 ------------------------
@@ -26,6 +32,7 @@ Changes in version 1.8.0
 * Fixed issue ESPER-96 "Cache result of user-defined functions when parameter set is constants"
 * Fixed issue ESPER-94 "Performance degradation for certain statement between 1.4 and 1.5 of 25%"
 * Significant performance improvements in statement event output and lock management
+
 
 Changes in version 1.7.0
 ------------------------

@@ -11,6 +11,8 @@ import net.esper.support.bean.SupportBean_S0;
 import net.esper.support.bean.SupportBean_S1;
 import net.esper.support.bean.SupportBean_S2;
 import net.esper.support.bean.SupportBean;
+import net.esper.event.EventType;
+import net.esper.event.EventBean;
 
 public class TestSubselectIn extends TestCase
 {
