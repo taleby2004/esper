@@ -1,15 +1,16 @@
 package net.esper.example.rfid;
 
-import net.esper.client.EPServiceProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.Set;
 import java.util.HashSet;
-import java.util.concurrent.Callable;
+import java.util.Random;
 
-public class AssetEventGenCallable implements Callable
+import net.esper.client.EPServiceProvider;
+
+public class AssetEventGenCallable implements Callable<Boolean>
 {
     public static final int NUM_ZONES = 20;
 
@@ -62,7 +63,7 @@ public class AssetEventGenCallable implements Callable
         return numEventsSend;
     }
 
-    public Object call() throws Exception
+    public Boolean call() throws Exception
     {
         try
         {

@@ -25,4 +25,9 @@ public class AssetZoneSplitListener implements UpdateListener
     {
         return callbacks;
     }
+
+    public void reset()
+    {
+        callbacks.clear();
+    }
 }

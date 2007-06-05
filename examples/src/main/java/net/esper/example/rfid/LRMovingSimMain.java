@@ -1,6 +1,5 @@
 package net.esper.example.rfid;
 
-import junit.framework.TestCase;
 import net.esper.client.Configuration;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
@@ -9,10 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Performance test for the following problem and statements:
@@ -57,38 +53,92 @@ import java.util.concurrent.TimeUnit;
  * <LI> The main thread reconciles the events received by listeners with the asset groups that were split by any callables.
  * </OL>
  */
-public class TestStatementPerformance extends TestCase
+public class LRMovingSimMain
 {
-    private static final Log log = LogFactory.getLog(TestStatementPerformance.class);
+    private static final Log log = LogFactory.getLog(LRMovingSimMain.class);
+
+    private final int numberOfThreads;
+    private final int numberOfAssetGroups;
+    private final int numberOfSeconds;
+    private boolean isAssert;
+
     private EPServiceProvider epService;
     private Random random = new Random();
 
-    public void setUp()
+    public static void main(String[] args) throws Exception
+    {
+        if (args.length < 3) {
+            System.out.println("Arguments are: <number of threads> <number of asset groups> <number of seconds to run>");
+            System.out.println("  number of threads: the number of threads sending events into the engine (e.g. 4)");
+            System.out.println("  number of asset groups: number of groups tracked (e.g. 1000)");
+            System.out.println("  number of seconds: the number of seconds the simulation runs (e.g. 60)");
+            System.exit(-1);
+        }
+
+        int numberOfThreads;
+        try {
+            numberOfThreads = Integer.parseInt(args[0]);
+        } catch (NullPointerException e) {
+            System.out.println("Invalid number of threads:" + args[0]);
+            System.exit(-2);
+            return;
+        }
+
+        int numberOfAssetGroups;
+        try {
+            numberOfAssetGroups = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number of asset groups:" + args[1]);
+            System.exit(-2);
+            return;
+        }
+
+        int numberOfSeconds;
+        try {
+            numberOfSeconds = Integer.parseInt(args[2]);
+        } catch (NullPointerException e) {
+            System.out.println("Invalid number of seconds to run:" + args[2]);
+            System.exit(-2);
+            return;
+        }
+
+        // Run the sample
+        System.out.println("Using " + numberOfThreads + " threads and " + numberOfAssetGroups + " asset groups, for " + numberOfSeconds + " seconds");
+        LRMovingSimMain simMain = new LRMovingSimMain(numberOfThreads, numberOfAssetGroups, numberOfSeconds, false);
+        simMain.run();
+    }
+
+    public LRMovingSimMain(int numberOfThreads, int numberOfAssetGroups, int numberOfSeconds, boolean isAssert)
+    {
+        this.numberOfThreads = numberOfThreads;
+        this.numberOfAssetGroups = numberOfAssetGroups;
+        this.numberOfSeconds = numberOfSeconds;
+        this.isAssert = isAssert;
+    }
+
+    public void run() throws Exception
     {
         Configuration config = new Configuration();
         config.addEventTypeAlias("LocationReport", LocationReport.class);
 
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
-    }
 
-    public void testPerformance() throws Exception
-    {
         // Number of seconds the total test runs
-        int numSeconds = 5;    // usually 60
+        int numSeconds = numberOfSeconds;    // usually 60
 
         // Number of asset groups
-        int numAssetGroups = 100;      // usually 1000
+        int numAssetGroups = numberOfAssetGroups;      // usually 1000
 
         // Number of threads
-        int numThreads = 2;
+        int numThreads = numberOfThreads;
 
         // Ratio of events indicating that all assets moved to a new zone
         int ratioZoneMove= 3;
 
         // Ratio of events indicating that the asset group split between zones, i.e. only some assets in a group move to a new zone
         int ratioZoneSplit = 1000000;       // usually 1000000;
-        
+
         tryPerf(numSeconds, numAssetGroups, numThreads, ratioZoneMove, ratioZoneSplit);
     }
 
@@ -150,7 +200,7 @@ public class TestStatementPerformance extends TestCase
         // Reset listeners
         for (int i = 0; i < listeners.length; i++)
         {
-            //listeners[i].reset();
+            listeners[i].reset();
         }
 
         // Create threadpool
@@ -163,7 +213,8 @@ public class TestStatementPerformance extends TestCase
         for (int i = 0; i < numThreads; i++)
         {
             callables[i] = new AssetEventGenCallable(epService, assetIds, zoneIds, assetGroupsForThread[i], ratioZoneMove, ratioZoneSplit);
-            future[i] = threadPool.submit(callables[i]);
+            Future<Boolean> f = threadPool.submit(callables[i]);
+            future[i] = f;
         }
 
         // Create threadpool
@@ -223,11 +274,19 @@ public class TestStatementPerformance extends TestCase
         threadPool.shutdown();
         threadPool.awaitTermination(10, TimeUnit.SECONDS);
 
-        for (int i = 0; i < numThreads; i++)
+        if (!isAssert)
         {
-            assertTrue((Boolean) future[i].get());
+            return;
         }
 
+        for (int i = 0; i < numThreads; i++)
+        {
+            if (!(Boolean) future[i].get())
+            {
+                throw new RuntimeException("Invalid result of callable");
+            }
+        }
+        
         // Get groups split
         Set<Integer> splitGroups = new HashSet<Integer>();
         for (int i = 0; i < callables.length; i++)
@@ -239,7 +298,10 @@ public class TestStatementPerformance extends TestCase
         // Compare to listeners
         for (Integer groupId : splitGroups)
         {
-            assertTrue(listeners[groupId].getCallbacks().size() > 0);
+            if (listeners[groupId].getCallbacks().size() == 0)
+            {
+                throw new RuntimeException("Invalid result for listener, expected split group");
+            }
         }
     }
 
@@ -264,12 +326,4 @@ public class TestStatementPerformance extends TestCase
         }
         return result;
     }
-
-    public static void main(String[] args) throws Throwable {
-        TestStatementPerformance me = new TestStatementPerformance();
-        me.setUp();
-        me.testPerformance();
-        me.tearDown();
-    }
-
 }
