@@ -130,22 +130,18 @@ having cnt < avg(cnt) * 0.75
         <sect2 id="examples-marketdata-monitor-sim">
 			<title>Event generator</title>
 			<para>
-				The simulator generates market data events for 2 feeds, feed A and feed B. A target rate parameter
-				defines how many events for each feed the simulator sends to the engine in each second. Depending on your system,
-				a large target rate may result in more events to be sent to the engine then your system can handle in one second.
-				In that case, the target rate will not be achieved. After reaching the target number of events for a given second, 
-				the simulator sleeps the thread for an approximate remainder of the current second.
+				The simulator generates market data events for 2 feeds, feed A and feed B. 
+				The first parameter to the simulator is a number of threads. Each thread sends events for each feed in an endless loop.
+				Note that as the Java VM garbage collection kicks in, the example generates rate drop-offs during such pauses.
 			</para>
 
 			<para>
-				The simulator generates a number of events per second following the formula 
-				<literal>target rate * 0.9 + target rate * 0.2 * random.nextDouble()</literal>.
-				This generates a random rate for each feed in a +-10% range within the target rate.
-			</para>
-
-			<para>
-				The rate drop probability parameter specifies the probability in percent that the engine drops the rate 
+				The second parameter is a rate drop probability parameter specifies the probability in percent that the simulator drops the rate 
 				for a randomly chosen feed to 60% of the target rate for that second. Thus rate fall-off alerts can be generated.
+			</para>
+
+			<para>
+				The third parameter defines the number of seconds to run the example.
 			</para>
 		</sect2>
     </sect1>
@@ -489,8 +485,51 @@ output all every 1 minutes]]></programlisting>
 		</sect2>
     </sect1>
 
+    <sect1 id="examples-assets-moving">
+        <title>Assets Moving Across Zones - An RFID Example</title>
+
+		<para>
+			This example out of the RFID domain processes location report events. Each location report event indicates an asset id and the current zone of the asset. 
+			The example solves the problem that when a given set of assets is not moving together from zone to zone, then an alert must be fired.
+		</para>
+    	
+		<para>
+			Each asset group is tracked by 2 statements. The two statements to track a single asset group consisting of assets identified by asset ids {1, 2, 3} are as follows:
+		</para>
+
+<programlisting><![CDATA[insert into CountZone_G1
+select 1 as groupId, zone, count(*) as cnt
+from LocationReport(assetId in 1, 2, 3).std:unique('assetId')
+group by zone
+
+select Part.zone from pattern [
+  every Part=CountZone_G1(cnt in (1,2)) ->
+    (timer:interval(10 sec)  and not CountZone_G1(zone=Part.zone, cnt in (0,3)))]]]></programlisting>
+
+		<para>
+			The classes for this example can be found in package <literal>net.esper.example.rfid</literal>.
+		</para>
+
+		<para>
+			This example provides a Swing-based GUI that can be run from the command line.
+			The GUI allows drag-and-drop of three RFID tags that form one asset group from zone to zone. Each time you move an asset across the screen the example sends an
+			event into the engine indicating the asset id and current zone. The example detects if within 10 seconds the three assets do not join each other
+			within the same zone, but stay split across zones.
+			Run "run_rfid_swing.bat" (Windows) or "run_rfid_swing.sh" (Unix) to start the example's Swing GUI. 
+		</para>
+
+		<para>
+			The example also provides a simulator that can be run from the command line.
+			The simulator generates a number of asset groups as specified by a command line argument and starts a number of threads as specified by a command line argument
+			to send location report events into the engine.
+			Run "run_rfid_sim.bat" (Windows) or "run_rfid_sim.sh" (Unix) to start the RFID location report event simulator. 
+			Please see the readme file in the same folder for build instructions and command line parameters.
+		</para>
+
+    </sect1>
+
     <sect1 id="examples-autoid">
-        <title>AutoID RFID Reader</title>
+        <title>AutoID RFID Reader generating XML documents</title>
 
 		<para>
 			In this example an array of RFID readers sense RFID tags as pallets are coming within the range of one of the readers. 

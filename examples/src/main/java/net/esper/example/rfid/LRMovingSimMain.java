@@ -164,7 +164,7 @@ public class LRMovingSimMain
         }
 
         // Create statements
-        log.info(".tryPerf Creating " + numAssetGroups + " statements for " + numAssetGroups + " asset groups");
+        log.info(".tryPerf Creating " + numAssetGroups*2 + " statements for " + numAssetGroups + " asset groups");
         AssetZoneSplitListener listeners[] = new AssetZoneSplitListener[numAssetGroups];
         for (int i = 0; i < numAssetGroups; i++)
         {
