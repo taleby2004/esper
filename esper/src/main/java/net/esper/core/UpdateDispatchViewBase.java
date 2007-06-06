@@ -23,20 +23,37 @@ import org.apache.commons.logging.LogFactory;
 public abstract class UpdateDispatchViewBase extends ViewSupport implements Dispatchable
 {
     private Set<UpdateListener> updateListeners;
+
+    /**
+     * Dispatches events to listeners.
+     */
     protected final DispatchService dispatchService;
+
+    /**
+     * For iteration with patterns.
+     */
     protected EventBean lastIterableEvent;
 
+    /**
+     * Flag to indicate we have registered a dispatch.
+     */
     protected ThreadLocal<Boolean> isDispatchWaiting = new ThreadLocal<Boolean>() {
         protected synchronized Boolean initialValue() {
             return new Boolean(false);
         }
     };
 
+    /**
+     * Buffer for holding dispatchable events.
+     */
     protected ThreadLocal<LinkedList<EventBean[]>> lastNewEvents = new ThreadLocal<LinkedList<EventBean[]>>() {
         protected synchronized LinkedList<EventBean[]> initialValue() {
             return new LinkedList<EventBean[]>();
         }
     };
+    /**
+     * Buffer for holding dispatchable events.
+     */
     protected ThreadLocal<LinkedList<EventBean[]>> lastOldEvents = new ThreadLocal<LinkedList<EventBean[]>>() {
         protected synchronized LinkedList<EventBean[]> initialValue() {
             return new LinkedList<EventBean[]>();

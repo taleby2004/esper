@@ -5,9 +5,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * DF3   <-->   DF2  <-->  DF1
- *
- * DF1 completes: set DF2.earlier = null, notify DF2
+ * DispatchFuture can be added to a dispatch queue that is thread-local. It represents
+ * is a stand-in for a future dispatching of a statement result to statement listeners.
+ * <p>
+ * DispatchFuture is aware of future and past dispatches:
+ * (newest) DF3   <-->   DF2  <-->  DF1  (oldest)
  */
 public class DispatchFuture implements Dispatchable
 {
@@ -18,6 +20,12 @@ public class DispatchFuture implements Dispatchable
     private transient boolean isCompleted;
     private long msecTimeout;
 
+    /**
+     * Ctor.
+     * @param view is the blocking dispatch view through which to execute a dispatch 
+     * @param earlier is the older future
+     * @param msecTimeout is the timeout period to wait for listeners to complete a prior dispatch
+     */
     public DispatchFuture(UpdateDispatchViewBlocking view, DispatchFuture earlier, long msecTimeout)
     {
         this.view = view;
@@ -25,16 +33,27 @@ public class DispatchFuture implements Dispatchable
         this.msecTimeout = msecTimeout;
     }
 
+    /**
+     * Ctor - use for the first future to indicate completion.
+     */
     public DispatchFuture()
     {
         isCompleted = true;
     }
 
+    /**
+     * Returns true if the dispatch completed for this future.
+     * @return true for completed, false if not
+     */
     public boolean isCompleted()
     {
         return isCompleted;
     }
 
+    /**
+     * Hand a later future to the dispatch to use for indicating completion via notify.
+     * @param later is the later dispatch
+     */
     public void setLater(DispatchFuture later)
     {
         this.later = later;

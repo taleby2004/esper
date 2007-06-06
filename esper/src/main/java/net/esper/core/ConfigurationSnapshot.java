@@ -152,6 +152,10 @@ public class ConfigurationSnapshot
         return plugInPatternObjects;
     }
 
+    /**
+     * Returns engine default settings.
+     * @return defaults for engine
+     */
     public ConfigurationEngineDefaults getEngineDefaults()
     {
         return engineDefaults;

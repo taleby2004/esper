@@ -215,11 +215,19 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         return new ArrayEventIterator(orderedEvents);        
     }
 
+    /**
+     * Returns the select expression processor
+     * @return select processor.
+     */
     public SelectExprProcessor getSelectExprProcessor()
     {
         return selectExprProcessor;
     }
 
+    /**
+     * Returns the optional having expression.
+     * @return having expression node
+     */
     public ExprNode getOptionalHavingNode()
     {
         return optionalHavingNode;

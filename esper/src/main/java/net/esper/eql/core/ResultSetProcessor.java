@@ -42,5 +42,11 @@ public interface ResultSetProcessor
      */
     public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents);
 
+    /**
+     * Returns the iterator implementing the group-by and aggregation and order-by logic
+     * specific to each case of use of these construct.
+     * @param parent is the parent view iterator
+     * @return event iterator
+     */
     public Iterator<EventBean> getIterator(Viewable parent);
 }

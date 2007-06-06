@@ -45,11 +45,19 @@ public class EPStatementHandle implements MetaDefItem
         this.canSelfJoin = canSelfJoin;
     }
 
+    /**
+     * Set a insert-into stream lock to use for reserving order in generated streams.
+     * @param routedInsertStreamLock is a lock to use to lock the stream when routing events into it
+     */
     public void setRoutedInsertStreamLock(ManagedLock routedInsertStreamLock)
     {
         this.routedInsertStreamLock = routedInsertStreamLock;
     }
 
+    /**
+     * Returns the insert-into stream lock to use for reserving order in generated streams.
+     * @return lock
+     */
     public ManagedLock getRoutedInsertStreamLock()
     {
         return routedInsertStreamLock;

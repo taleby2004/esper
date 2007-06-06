@@ -31,11 +31,6 @@ public class ExprSubselectInNode extends ExprSubselectNode
         super(statementSpec);
     }
 
-    public boolean isAllowWildcardSelect()
-    {
-        return false;
-    }
-
     public Class getType() throws ExprValidationException
     {
         return Boolean.class;

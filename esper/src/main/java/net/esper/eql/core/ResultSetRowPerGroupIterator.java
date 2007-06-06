@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 /**
- * Method to transform an event based on the select expression.
+ * Iterator for the group-by case with a row per group.
  */
 public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
 {
@@ -21,6 +21,12 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
     private final EventBean[] eventsPerStream;
     private final Set<MultiKeyUntyped> priorSeenGroups;
 
+    /**
+     * Ctor.
+     * @param sourceIterator is the parent view iterator
+     * @param resultSetProcessor for providing results
+     * @param aggregationService for pointing to the right aggregation row
+     */
     public ResultSetRowPerGroupIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorRowPerGroup resultSetProcessor, AggregationService aggregationService)
     {
         this.sourceIterator = sourceIterator;

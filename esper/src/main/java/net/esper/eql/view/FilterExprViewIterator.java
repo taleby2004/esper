@@ -23,6 +23,11 @@ public class FilterExprViewIterator implements Iterator<EventBean>
 
     private EventBean nextResult;
 
+    /**
+     * Ctor.
+     * @param sourceIterator is the iterator supplying events to filter out.
+     * @param filter is the filter expression
+     */
     public FilterExprViewIterator(Iterator<EventBean> sourceIterator, ExprEvaluator filter)
     {
         this.sourceIterator = sourceIterator;

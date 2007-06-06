@@ -31,6 +31,7 @@ public class InternalRouteView extends ViewSupport
      * Ctor.
      * @param isIStream true for insert stream, false for remove stream
      * @param internalEventRouter routes the events internally
+     * @param epStatementHandle is the statement handle
      */
     public InternalRouteView(boolean isIStream, InternalEventRouter internalEventRouter, EPStatementHandle epStatementHandle)
     {

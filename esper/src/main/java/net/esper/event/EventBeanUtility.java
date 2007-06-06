@@ -210,6 +210,11 @@ public class EventBeanUtility
         }
     }
 
+    /**
+     * Flattens a list of pairs of join result sets.
+     * @param joinPostings is the list
+     * @return is the consolidate sets
+     */
     public static UniformPair<Set<MultiKey<EventBean>>> flattenBatchJoin(List<UniformPair<Set<MultiKey<EventBean>>>> joinPostings)
     {
         if (joinPostings.isEmpty())

@@ -26,5 +26,9 @@ public interface ManagedLock
      */
     public void releaseLock(StatementLockFactory statementLockFactory);
 
+    /**
+     * Returns true if the current thread holds the lock, or false if not.
+     * @return thread owner indication
+     */
     public boolean isHeldByCurrentThread();
 }

@@ -356,6 +356,12 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         return keys;
     }
 
+    /**
+     * Generates the group-by key for the row
+     * @param eventsPerStream is the row of events
+     * @param isNewData is true for new data
+     * @return grouping keys
+     */
     protected MultiKeyUntyped generateGroupKey(EventBean[] eventsPerStream, boolean isNewData)
     {
         Object[] keys = new Object[groupKeyNodes.size()];
@@ -493,11 +499,19 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         return new ArrayEventIterator(orderedEvents);
     }
 
+    /**
+     * Returns the select expression processor
+     * @return select processor.
+     */
     public SelectExprProcessor getSelectExprProcessor()
     {
         return selectExprProcessor;
     }
 
+    /**
+     * Returns the having node.
+     * @return having expression
+     */
     public ExprNode getOptionalHavingNode()
     {
         return optionalHavingNode;

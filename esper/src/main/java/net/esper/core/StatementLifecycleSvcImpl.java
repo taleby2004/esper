@@ -564,6 +564,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
          * @param epStatement the statement
          * @param startMethod the start method
          * @param stopMethod the stop method
+         * @param optInsertIntoStream is the insert-into stream name, or null if not using insert-into
          */
         public EPStatementDesc(EPStatementSPI epStatement, EPStatementStartMethod startMethod, EPStatementStopMethod stopMethod, String optInsertIntoStream)
         {
@@ -600,6 +601,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             return stopMethod;
         }
 
+        /**
+         * Return the insert-into stream name, or null if no insert-into
+         * @return stream name
+         */
         public String getOptInsertIntoStream()
         {
             return optInsertIntoStream;

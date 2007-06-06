@@ -12,6 +12,47 @@ Change History
 	[]
 
 
+Version 1.9.0 Update
+
+	Released June 6, 2007
+
+* API changes
+
+    * None
+    
+* Major changes
+    
+	* Improvements to multi-threaded processing:
+	
+   		* Deliver events to listeners in a predictable order
+   		
+   		* Deterministic in processing events between statements that consume other statement's events via insert-into
+
+* Minor changes	
+    
+	* Support for last-day-of-month and weekday for timer:at crontab functions (ESPER-84)
+
+	* Support for subqueries to the return event object (ESPER-105)
+
+	* Additional documentation on grouping and aggregation (output model chapter)
+	
+	* Additional documentation on threading and concurrency (API chapter)
+
+	* New example out of the RFID domain featuring a Swing GUI and a simulator
+
+	* Fixed issue ESPER-98 "NullPointerException for Joins involving Map event types"
+
+	* Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"
+
+	* Fixed issue ESPER-101 "ArrayIndexOutOfBounds with 'output last' and group by"
+
+	* Fixed issue ESPER-107 "Memory leak using previous function and length window under a group"
+
+	* Fixed issue ESPER-109 "NPE while fetching events from statements"
+
+	* Fixed issue ESPER-110 "Iterator not honoring filter, aggregation, group-by and having clause"
+
+
 Version 1.8.0 Update
 
 	Released April 22, 2007

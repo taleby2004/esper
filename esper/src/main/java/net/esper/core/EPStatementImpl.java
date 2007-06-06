@@ -43,6 +43,8 @@ public class EPStatementImpl implements EPStatementSPI
      * @param isPattern is true to indicate this is a pure pattern expression
      * @param dispatchService for dispatching events to listeners to the statement
      * @param statementLifecycleSvc handles lifecycle transitions for the statement
+     * @param isBlockingDispatch is true if the dispatch to listeners should block to preserve event generation order
+     * @param msecBlockingTimeout is the max number of milliseconds of block time 
      */
     public EPStatementImpl(String statementId,
                               String statementName,

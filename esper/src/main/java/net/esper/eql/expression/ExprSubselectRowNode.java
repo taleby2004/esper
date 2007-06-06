@@ -26,11 +26,6 @@ public class ExprSubselectRowNode extends ExprSubselectNode
         super(statementSpec);
     }
 
-    public boolean isAllowWildcardSelect()
-    {
-        return false;
-    }
-
     public Class getType() throws ExprValidationException
     {
         if (selectClause == null)   // wildcards allowed

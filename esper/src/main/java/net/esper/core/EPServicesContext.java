@@ -70,6 +70,7 @@ public final class EPServicesContext
      * @param eventProcessingRWLock is the engine lock for statement management
      * @param extensionServicesContext marker interface allows adding additional services
      * @param engineImportService is engine imported static func packages and aggregation functions
+     * @param engineSettingsService provides engine settings
      * @param statementContextFactory is the factory to use to create statement context objects
      * @param engineEnvContext is engine environment/directory information for use with adapters and external env
      * @param patternObjectResolutionService resolves plug-in pattern objects 
@@ -329,6 +330,10 @@ public final class EPServicesContext
         return patternObjectResolutionService;
     }
 
+    /**
+     * Returns engine settings.
+     * @return settings
+     */
     public EngineSettingsService getEngineSettingsService()
     {
         return engineSettingsService;

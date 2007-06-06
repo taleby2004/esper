@@ -39,7 +39,27 @@ public interface OrderByProcessor {
 	 */
 	public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, MultiKeyUntyped[] groupByKeys, boolean isNewData);
 
+    /**
+     * Returns the sort key for a given row.
+     * @param eventsPerStream is the row consisting of one event per stream
+     * @param isNewData is true for new data
+     * @return sort key
+     */
     public MultiKeyUntyped getSortKey(EventBean[] eventsPerStream, boolean isNewData);
+
+    /**
+     * Returns the sort key for a each row where a row is a single event (no join, single stream).
+     * @param generatingEvents is the rows consisting of one event per row
+     * @param isNewData is true for new data
+     * @return sort key for each row
+     */
     public MultiKeyUntyped[] getSortKeyPerRow(EventBean[] generatingEvents, boolean isNewData);
+
+    /**
+     * Sort a given array of outgoing events using the sort keys returning a sorted outgoing event array.
+     * @param outgoingEvents is the events to sort
+     * @param orderKeys is the keys to sort by
+     * @return sorted events
+     */
     public EventBean[] sort(EventBean[] outgoingEvents, MultiKeyUntyped[] orderKeys);
 }

@@ -378,6 +378,10 @@ having amount > 1000]]></programlisting>
 				Following SQL (Standard Query Language) standards for queries against relational databases, the presence or absence of aggregation functions and the presence or absence of the <literal>group by</literal> clause dictates the number of rows posted by the engine to listeners at the end of a batch. The next sections outline the output model for batched events under aggregation and grouping.
 			</para>
 
+			<para>
+				Note that output rate limiting also generates batches of events following the output model as discussed here.
+			</para>
+
 			<sect3 id="outputmodel_aggregation_batch_unagg" revision="1">
 				<title>Un-aggregated and Un-grouped</title>
 
@@ -399,7 +403,7 @@ having amount > 1000]]></programlisting>
 				<programlisting><![CDATA[select sum(amount) 
 from Withdrawal.win:time_batch(1 sec)]]></programlisting>
 				<para>
-					At the end of a time interval, the engine posts to listeners a single row indicating the aggregation result. The aggregation result is aggregating all events collected during the time interval.
+					At the end of a time interval, the engine posts to listeners a single row indicating the aggregation result. The aggregation result aggregates all events collected during the time interval.
 				</para>
 			</sect3>
 

@@ -34,6 +34,7 @@ public abstract class OutputProcessView extends ViewSupport implements JoinSetIn
     /**
      * Ctor.
      * @param resultSetProcessor processes the results posted by parent view or joins
+     * @param isJoin is true for join statements
      */
     protected OutputProcessView(ResultSetProcessor resultSetProcessor, boolean isJoin)
     {

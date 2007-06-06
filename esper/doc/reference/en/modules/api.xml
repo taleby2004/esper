@@ -323,4 +323,54 @@ public class MyUpdateListener implements UpdateListener
 
     </sect1>
 
+    <sect1 id="api-threading">
+        <title>Engine Threading and Concurrency</title>
+
+        <para>
+			Esper is designed from the ground up to operate as a component to multi-threaded, highly-concurrent applications that require efficient use of Java VM resources. In addition, multi-threaded execution requires guarantees in predictability of results and deterministic processing. This section discusses these concerns in detail. 
+        </para>
+
+		<para>
+In Esper, an engine instance is a unit of separation. Applications can obtain and discard (initialize) one or more engine instances within the same Java VM and can provide the same or different engine configurations to each instance. An engine instance efficiently shares resources between statements. For example, consider two statements that declare the same data window. The engine matches up view declarations provided by each statements and can thus provide a single data window representation shared between the two statements.
+        </para>
+
+        <para>
+			Applications can use Esper APIs to concurrently, by multiple threads of execution, perform such functions as creating and 
+managing statements, or sending events into an engine instance for processing. Applications can use one or more thread pools or any set of same or different threads of execution with any of the public Esper APIs. There are no restrictions towards threading other then those noted in specific sections of this document. 
+        </para>
+        
+        <para>
+Applications using Esper retain full control over threading, allowing an engine to be easily embedded and used as a component or library in your favorite Java container or process. It is up to the application code to use multiple threads for processing events by the engine, if so desired. All event processing takes places within your application thread call stack. The exception is timer-based processing if your engine instance relies on the internal timer (default).
+        </para>
+
+        <para>
+The fact that event processing takes places within an application thread call stack makes developing applications with Esper easier: Any common Java integrated development environment (IDE) can host an Esper engine instance. This allows developers to easily set up test cases, debug through listener code and inspect input or output events, or trace their call stack.
+        </para>
+        
+		<para>
+To send events into an engine concurrently by multiple execution threads, typically applications use the Java <literal>java.lang.Thread</literal> or <literal>java.lang.Runnable</literal> classes or Java 5 concurrent utilities that include abstractions for thread pools and blocking in-memory queues.
+        </para>
+
+		<para>
+Each engine instance maintains a single timer thread (internal timer) providing for time or schedule-based processing within the engine. The default resolution at which the timer operates is 100 milliseconds. The internal timer thread can be disabled and applications can instead send external time events to an engine instance to perform timer or scheduled processing at the resolution required by an application.
+        </para>
+        
+		<para>
+Each engine instance performs minimal locking to enable high levels of concurrency. An engine instance locks on a statement level to protect statement resources.
+        </para>
+
+		<para>
+For an engine instance to produce predictable results from the viewpoint of listeners to statements, an engine instance by default ensures that 
+it dispatches statement result events to listeners in the order in which a statement produced result events. Applications that require the highest possible concurrency and do not require predictable order of delivery of events to listeners, this feature can be turned off via configuration.
+        </para>
+
+		<para>
+In multithreaded environments, when one or more statements make result events available via the <literal>insert into</literal> clause to further statements, the engine preserves the order of events inserted into the generated insert-into stream, allowing statements that consume other statement's events to behave deterministic. This feature can also be turned off via configuration.
+        </para>
+
+		<para>
+We generally recommended that listener implementations do not block. By implementing listener code as non-blocking code execution threads can often achieve higher levels of concurrency. 
+        </para>
+    </sect1>
+
 </chapter>

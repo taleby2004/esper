@@ -381,6 +381,12 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         return keys;
     }
 
+    /**
+     * Generates the group-by key for the row
+     * @param eventsPerStream is the row of events
+     * @param isNewData is true for new data
+     * @return grouping keys
+     */
     protected MultiKeyUntyped generateGroupKey(EventBean[] eventsPerStream, boolean isNewData)
     {
         Object[] keys = new Object[groupKeyNodes.size()];
@@ -395,11 +401,19 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         return new MultiKeyUntyped(keys);
     }
 
+    /**
+     * Returns the optional having expression.
+     * @return having expression node
+     */
     public ExprNode getOptionalHavingNode()
     {
         return optionalHavingNode;
     }
 
+    /**
+     * Returns the select expression processor
+     * @return select processor.
+     */
     public SelectExprProcessor getSelectExprProcessor()
     {
         return selectExprProcessor;

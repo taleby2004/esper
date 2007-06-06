@@ -13,6 +13,9 @@ import java.util.Set;
  */
 public interface StatementLifecycleSvc
 {
+    /**
+     * Initialized the service before use.
+     */
     public void init();
 
     /**

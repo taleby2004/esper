@@ -22,6 +22,7 @@ public class UpdateDispatchViewBlocking extends UpdateDispatchViewBase
      * Ctor.
      * @param updateListeners - listeners to update
      * @param dispatchService - for performing the dispatch
+     * @param msecTimeout - timeout for preserving dispatch order through blocking
      */
     public UpdateDispatchViewBlocking(Set<UpdateListener> updateListeners, DispatchService dispatchService, long msecTimeout)
     {

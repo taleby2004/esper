@@ -3,12 +3,13 @@ Esper Changelog
 
 Changes in version 1.9.0
 ------------------------
-* Support for last-day-of-month and weekday for timer:at crontab functions (ESPER-84)
-* Support for subqueries to the return event object (ESPER-105)
-* Additional documentation providing greater detail on grouping and aggregation
 * Improvements to multi-threaded processing:
    - Deliver events to listeners in a predictable order
    - Deterministic in processing events between statements that consume other statement's events via insert-into
+* Support for last-day-of-month and weekday for timer:at crontab functions (ESPER-84)
+* Support for subqueries to return the event object itself (ESPER-105)
+* Additional documentation on grouping and aggregation (output model chapter)
+* Additional documentation on threading and concurrency (API chapter)
 * New example out of the RFID domain featuring a Swing GUI and a simulator
 * Fixed issue ESPER-98 "NullPointerException for Joins involving Map event types"
 * Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"

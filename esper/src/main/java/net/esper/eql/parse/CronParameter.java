@@ -6,13 +6,30 @@ import java.util.*;
 import java.text.SimpleDateFormat;
 
 /**
- * Created for ESPER.
+ * Hold parameters for timer:at.
  */
 public class CronParameter implements NumberSetParameter {
     private cronOperator operator;
     private static Calendar calendar;
     private Integer day, month;
-    public enum cronOperator { last, w, lw };
+
+    /**
+     * Enumeration for special keywords in crontab timer.
+     */
+    public enum cronOperator {
+        /**
+         * Last day of week or month.
+         */
+        last,
+        /**
+         * Weekday (nearest to a date)
+         */
+        w,
+        /**
+         * Last weekday in a month
+         */
+        lw };
+    
     private static int FIRST_DAY_OF_WEEK = Calendar.SUNDAY;
 
     CronParameter(String cronOperator, String day) {
@@ -24,6 +41,10 @@ public class CronParameter implements NumberSetParameter {
         calendar.setFirstDayOfWeek(FIRST_DAY_OF_WEEK);
     }
 
+    /**
+     * Sets the month value.
+     * @param month to set
+     */
     public void setMonth(int month) {
         this.month = month - 1;
     }

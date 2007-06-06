@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Method to transform an event based on the select expression.
+ * Iterator for aggregation results that aggregate all rows.
  */
 public class ResultSetAggregateAllIterator implements Iterator<EventBean>
 {
@@ -15,6 +15,11 @@ public class ResultSetAggregateAllIterator implements Iterator<EventBean>
     private EventBean nextResult;
     private final EventBean[] eventsPerStream;
 
+    /**
+     * Ctor.
+     * @param sourceIterator is the parent iterator
+     * @param resultSetProcessor for getting outgoing rows
+     */
     public ResultSetAggregateAllIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorAggregateAll resultSetProcessor)
     {
         this.sourceIterator = sourceIterator;

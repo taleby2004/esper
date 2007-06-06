@@ -27,11 +27,15 @@ public abstract class ExprSubselectNode extends ExprNode
      */
     protected ExprNode filterExpr;
 
+    /**
+     * The event type generated for wildcard selects.
+     */
+    protected EventType rawEventType;
+
     private StatementSpecRaw statementSpecRaw;
     private StatementSpecCompiled statementSpecCompiled;
     private SubqueryTableLookupStrategy strategy;
     private String selectAsName;
-    protected EventType rawEventType;
 
     /**
      * Evaluate the subquery expression returning an evaluation result object.
@@ -147,6 +151,10 @@ public abstract class ExprSubselectNode extends ExprNode
         this.strategy = strategy;
     }
 
+    /**
+     * Sets the event type generated for wildcard selects.
+     * @param rawEventType is the wildcard type (parent view)
+     */
     public void setRawEventType(EventType rawEventType)
     {
         this.rawEventType = rawEventType;

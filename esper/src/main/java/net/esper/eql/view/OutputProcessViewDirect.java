@@ -20,6 +20,7 @@ public class OutputProcessViewDirect extends OutputProcessView
     /**
      * Ctor.
      * @param resultSetProcessor is processing the result set for publishing it out
+     * @param isJoin is true for join statements
      */
     public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, boolean isJoin)
     {

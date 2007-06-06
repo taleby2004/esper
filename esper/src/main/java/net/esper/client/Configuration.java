@@ -105,6 +105,9 @@ public class Configuration implements ConfigurationOperations {
      */
     protected List<ConfigurationAdapterLoader> adapterLoaders;
 
+    /**
+     * Saves engine default configs such as threading settings
+     */
     protected ConfigurationEngineDefaults engineDefaults;
 
     /**
@@ -388,18 +391,13 @@ public class Configuration implements ConfigurationOperations {
         plugInPatternObjects.add(entry);
     }
 
+    /**
+     * Returns engine default settings.
+     * @return engine defaults
+     */
     public ConfigurationEngineDefaults getEngineDefaults()
     {
         return engineDefaults;
-    }
-
-    public void setEngineDefaults(ConfigurationEngineDefaults engineDefaults)
-    {
-        if (engineDefaults == null)
-        {
-            engineDefaults = new ConfigurationEngineDefaults();
-        }
-        this.engineDefaults = engineDefaults;
     }
 
     /**

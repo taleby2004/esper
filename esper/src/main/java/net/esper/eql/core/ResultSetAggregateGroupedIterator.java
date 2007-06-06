@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Method to transform an event based on the select expression.
+ * Iterator for group-by with aggregation.
  */
 public class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
 {
@@ -18,6 +18,12 @@ public class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
     private EventBean nextResult;
     private final EventBean[] eventsPerStream;
 
+    /**
+     * Ctor.
+     * @param sourceIterator is the parent iterator
+     * @param resultSetProcessor for constructing result rows
+     * @param aggregationService for pointing to the right aggregation row
+     */
     public ResultSetAggregateGroupedIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorAggregateGrouped resultSetProcessor, AggregationService aggregationService)
     {
         this.sourceIterator = sourceIterator;

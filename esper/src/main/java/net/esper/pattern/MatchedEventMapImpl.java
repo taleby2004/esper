@@ -22,6 +22,10 @@ public final class MatchedEventMapImpl implements MatchedEventMap
     {
     }
 
+    /**
+     * Ctor.
+     * @param events is the name-value pairs of tag and event
+     */
     public MatchedEventMapImpl(Map<String, EventBean> events)
     {
         this.events = events;
