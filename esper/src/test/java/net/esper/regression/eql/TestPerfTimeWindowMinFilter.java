@@ -54,7 +54,6 @@ public class TestPerfTimeWindowMinFilter extends TestCase
         for (int i = 0; i < 10000; i++)
         {
             count++;
-            /*
             if (i % 10000 == 0)
             {
                 long now = System.currentTimeMillis();
@@ -67,7 +66,7 @@ public class TestPerfTimeWindowMinFilter extends TestCase
                 }
                 start = now;
             }
-            */
+
             SupportMarketDataIDBean bean = new SupportMarketDataIDBean("IBM", Integer.toString(i % 5), 1);
             epService.getEPRuntime().sendEvent(bean);
         }

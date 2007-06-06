@@ -20,14 +20,14 @@ public class TestConfiguration extends TestCase
     public void testString() throws Exception
     {
         config.configure(ESPER_TEST_CONFIG);
-        TestConfigurationParser.assertFileConfig(config);
+        TestConfigurationParser.assertFileConfig(config, true);
     }
 
     public void testURL() throws Exception
     {
         URL url = this.getClass().getClassLoader().getResource(ESPER_TEST_CONFIG);
         config.configure(url);
-        TestConfigurationParser.assertFileConfig(config);
+        TestConfigurationParser.assertFileConfig(config, true);
     }
 
     public void testFile() throws Exception
@@ -35,7 +35,7 @@ public class TestConfiguration extends TestCase
         URL url = this.getClass().getClassLoader().getResource(ESPER_TEST_CONFIG);
         File file = new File(url.toURI());
         config.configure(file);
-        TestConfigurationParser.assertFileConfig(config);
+        TestConfigurationParser.assertFileConfig(config, true);
     }
 
     public void testAddEventTypeAlias()

@@ -34,6 +34,9 @@ public class TestInvalidPattern extends TestCase
     {
         String exceptionText = null;
 
+        exceptionText = getStatementExceptionPattern(SupportBean.class.getName() + " -> timer:at(2,3,4,4,4)");
+        assertEquals("Invalid combination between days of week and days of month fields for timer:at [net.esper.support.bean.SupportBean -> timer:at(2,3,4,4,4)]", exceptionText);
+
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " -> timer:within()");
         assertEquals("Invalid use for pattern guard named 'within' outside of where-clause [net.esper.support.bean.SupportBean -> timer:within()]", exceptionText);
 

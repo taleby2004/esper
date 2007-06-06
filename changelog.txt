@@ -9,7 +9,7 @@ Changes in version 1.9.0
 * Improvements to multi-threaded processing:
    - Deliver events to listeners in a predictable order
    - Deterministic in processing events between statements that consume other statement's events via insert-into
-* New example out of the RFID domain and a performance test for this use case
+* New example out of the RFID domain featuring a Swing GUI and a simulator
 * Fixed issue ESPER-98 "NullPointerException for Joins involving Map event types"
 * Fixed issue ESPER-99 "IllegalStateException combining a time window with min/max and group-by and output every"
 * Fixed issue ESPER-101 "ArrayIndexOutOfBounds with 'output last' and group by"

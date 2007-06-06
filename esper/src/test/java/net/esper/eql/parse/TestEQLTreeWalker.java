@@ -745,9 +745,6 @@ public class TestEQLTreeWalker extends TestCase
 
         expression = "select * from pattern [" + SupportBean.class.getName() + " where timer:within(100)]";
         parseAndWalkEQL(expression);
-
-        expression = "select * from pattern [" + SupportBean.class.getName() + " -> timer:at(2,3,4,4,4)]";
-        parseAndWalkEQL(expression);
     }
 
     private double tryInterval(String interval) throws Exception
