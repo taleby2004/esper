@@ -21,10 +21,10 @@ public class TestConfigurationParser extends TestCase
     {
         URL url = this.getClass().getClassLoader().getResource(TestConfiguration.ESPER_TEST_CONFIG);
         ConfigurationParser.doConfigure(config, url.openStream(), url.toString());
-        assertFileConfig(config, true);
+        assertFileConfig(config);
     }
 
-    protected static void assertFileConfig(Configuration config, boolean isDefaults)
+    protected static void assertFileConfig(Configuration config)
     {
         // assert alias for class
         assertEquals(3, config.getEventTypeAliases().size());
@@ -165,17 +165,8 @@ public class TestConfigurationParser extends TestCase
         assertEquals(ConfigurationPlugInPatternObject.PatternObjectType.OBSERVER, pluginPattern.getPatternObjectType());
 
         // assert engine defaults
-        if (isDefaults)
-        {
-            assertTrue(config.getEngineDefaults().getThreading().isInsertIntoDispatchPreserveOrder());
-            assertTrue(config.getEngineDefaults().getThreading().isListenerDispatchPreserveOrder());
-            assertEquals(1000, config.getEngineDefaults().getThreading().getListenerDispatchTimeout());
-        }
-        else
-        {
-            assertFalse(config.getEngineDefaults().getThreading().isInsertIntoDispatchPreserveOrder());
-            assertFalse(config.getEngineDefaults().getThreading().isListenerDispatchPreserveOrder());
-            assertEquals(2000, config.getEngineDefaults().getThreading().getListenerDispatchTimeout());
-        }
+        assertFalse(config.getEngineDefaults().getThreading().isInsertIntoDispatchPreserveOrder());
+        assertFalse(config.getEngineDefaults().getThreading().isListenerDispatchPreserveOrder());
+        assertEquals(2000, config.getEngineDefaults().getThreading().getListenerDispatchTimeout());
     }
 }

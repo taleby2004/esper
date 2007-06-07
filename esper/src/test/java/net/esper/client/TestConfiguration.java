@@ -2,7 +2,6 @@ package net.esper.client;
 
 import junit.framework.TestCase;
 
-import javax.xml.xpath.XPathConstants;
 import java.net.URL;
 import java.io.File;
 
@@ -20,14 +19,14 @@ public class TestConfiguration extends TestCase
     public void testString() throws Exception
     {
         config.configure(ESPER_TEST_CONFIG);
-        TestConfigurationParser.assertFileConfig(config, true);
+        TestConfigurationParser.assertFileConfig(config);
     }
 
     public void testURL() throws Exception
     {
         URL url = this.getClass().getClassLoader().getResource(ESPER_TEST_CONFIG);
         config.configure(url);
-        TestConfigurationParser.assertFileConfig(config, true);
+        TestConfigurationParser.assertFileConfig(config);
     }
 
     public void testFile() throws Exception
@@ -35,7 +34,7 @@ public class TestConfiguration extends TestCase
         URL url = this.getClass().getClassLoader().getResource(ESPER_TEST_CONFIG);
         File file = new File(url.toURI());
         config.configure(file);
-        TestConfigurationParser.assertFileConfig(config, true);
+        TestConfigurationParser.assertFileConfig(config);
     }
 
     public void testAddEventTypeAlias()
