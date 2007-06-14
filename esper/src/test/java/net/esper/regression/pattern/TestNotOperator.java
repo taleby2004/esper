@@ -44,6 +44,7 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
 
         testCase = new EventExpressionCase("every (every b=" + EVENT_B_CLASS + " and not " + EVENT_B_CLASS + "(id='B2'))");
         testCase.add("B1", "b", events.getEvent("B1"));
+        testCase.add("B3", "b", events.getEvent("B3"));
         testCaseList.addTest(testCase);
 
         testCase = new EventExpressionCase("(b=" + EVENT_B_CLASS + " -> d=" + EVENT_D_CLASS + ") and " +
