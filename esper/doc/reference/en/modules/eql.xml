@@ -1299,6 +1299,11 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 					Your database software must support JDBC prepared statements that provide statement meta data at compilation time. Most major databases provide this function.
 				</para>
 			</listitem>
+			<listitem>
+				<para>
+					JDBC drivers must support the getMetadata feature
+				</para>
+			</listitem>
 		</itemizedlist>
 		
 		<para>
