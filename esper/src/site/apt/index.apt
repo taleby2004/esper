@@ -69,7 +69,13 @@ Features
         
     * Input Adapters
     	
-    	* CSV input adapter reads comma-separated value formats, and can simulate multiple event streams with timed playback
+    	* CSV input adapter reads comma-separated value formats
+    	
+    		* simulate multiple event streams with timed, coordinated playback via timestamp column
+    		
+    		* load generator
+    		
+    		* preloading of reference data
     	
     	* JMS input and output adapter based on Spring JMS templates
 
@@ -122,6 +128,8 @@ Java - Known Limitations
 	* An Esper engine instance is multithread-safe, i.e. 2 or more threads sending events to the
 	  same engine instance is supported as of release 1.5. Multiple engine instances in the same Java JVM 
 	  has also been tested and is a supported configuration.
+	  
+	* JDBC drivers must support the getMetadata feature to work correctly with the Esper embedded-SQL feature	  
 	
 
 .NET - Known Limitations
@@ -136,3 +144,8 @@ Summary
 
 	Esper and NEsper were designed to make it easier to build CEP and ESP applications. Esper and NEsper are open-source software available
 	under the GNU General Public License (GPL) license.
+
+=====================
+=====================
+	We are happy to use licenses of {{{http://www.jetbrains.com/idea/?java_esper}IntelliJ IDEA}}, {{{http://www.jetbrains.com/resharper/?java_esper}ReSharper}}, and {{{http://www.jetbrains.com/profiler/?java_esper}dotTrace}} through the {{{http://www.jetbrains.com/devnet/index.html?java_esper}JetBrains Open Source Program}}
+	
