@@ -22,6 +22,18 @@
 		<echo message="Please use Maven 2 to build Esper and related components. Maven build instructions are available on the website." />
 	</target>
 
+	<target name="grammar_html" description="Generate HTML page from ANTLR grammar">
+       <java classname="antlr.Tool">
+         <arg value="-html"/>
+         <arg value="-o"/>
+         <arg value="esper/doc/grammar"/>
+         <arg value="esper/grammar/eql.g"/>
+         <classpath>
+           <pathelement location="esper/lib/antlr-2.7.5.jar"/>
+         </classpath>
+       </java>
+    </target>
+
 	<target name="touch_all" description="Update timestamp all artifacts">
 		<touch>
 			<fileset dir=".">
