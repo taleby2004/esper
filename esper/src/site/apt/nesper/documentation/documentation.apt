@@ -4,9 +4,9 @@ NEsper Documentation
  	Since NEsper is feature-equivalent to a given Esper version, the download links below point you to the appropriate Java Esper documentation.
  	
 
-* NEsper 1.3.0 Beta 1  (feature-equivalent to Esper 1.3)
+* NEsper 1.3.0 Final (feature-equivalent to Esper 1.3)
 	
-	<<NEsper API Doc>> : {{{http://esper.codehaus.org/nesper-1.3.0-beta-1/doc/NEsper.chm}NEsper.chm}}
+	<<NEsper API Doc>> : {{{http://esper.codehaus.org/nesper-1.3.0/doc/NEsper.chm}NEsper.chm}}
 	
 	<<Reference documentation>>
 	

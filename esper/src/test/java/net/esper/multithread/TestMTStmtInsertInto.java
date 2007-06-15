@@ -27,6 +27,7 @@ public class TestMTStmtInsertInto extends TestCase
     public void setUp()
     {
         engine = EPServiceProviderManager.getDefaultProvider();
+        engine.initialize();
         // Less much debug output can be obtained by using external times
         //engine.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
