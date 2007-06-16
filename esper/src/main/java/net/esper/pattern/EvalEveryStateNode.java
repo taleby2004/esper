@@ -117,7 +117,8 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
     {
         log.debug(".evaluateFalse");
 
-        quit();
+        fromNode.quit();
+        spawnedNodes.remove(fromNode);
 
         // Spawn all nodes below this EVERY node
         // During the start of a child we need to use the temporary evaluator to catch any event created during a start
