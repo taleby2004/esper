@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import net.esper.client.*;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.SupportBeanComplexProps;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.eql.SupportStaticMethodLib;
 
@@ -17,6 +18,15 @@ public class TestFilterExpressions extends TestCase
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
+    }
+
+    public void testCoercion()
+    {
+        // TODO: Esper-114
+        String text = "select * from " + SupportBeanComplexProps.class.getName() + "(simpleProperty='1') as s0" +
+                ", " + SupportBeanComplexProps.class.getName() + "(simpleProperty='2') as s1" +
+                " where s0.nested = s1.nested";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
     }
 
     public void testPatternFunc3Stream()

@@ -7,6 +7,9 @@ import net.esper.client.EPStatement;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.ArrayAssertionUtil;
+import net.esper.event.EventBean;
+
+import java.util.Iterator;
 
 public class TestIterator extends TestCase
 {
@@ -16,6 +19,55 @@ public class TestIterator extends TestCase
     {
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
+    }
+
+    public void testPatternNoWindow()
+    {
+        // TODO: fix for Esper-114
+        String cepStatementString =	"select * from pattern " +
+									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
+									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ] " +
+									"where addressInfo.intBoxed = txnWD.intBoxed";
+		EPStatement epStatement = epService.getEPAdministrator().createEQL(cepStatementString);
+
+		SupportBean myEventBean1 = new SupportBean();
+		myEventBean1.setString("address");
+		myEventBean1.setIntBoxed(9001);
+		epService.getEPRuntime().sendEvent(myEventBean1);
+
+        SupportBean myEventBean2 = new SupportBean();
+        myEventBean2.setString("txn");
+        myEventBean2.setIntBoxed(9001);
+        epService.getEPRuntime().sendEvent(myEventBean2);
+
+        Iterator<EventBean> itr = epStatement.iterator();
+        EventBean event = itr.next();
+        assertEquals(myEventBean1, event.get("addressInfo"));
+        assertEquals(myEventBean2, event.get("txnWD"));
+    }
+
+    public void testPatternWithWindow()
+    {
+		String cepStatementString =	"select * from pattern " +
+									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
+									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ].std:lastevent() " +
+									"where addressInfo.intBoxed = txnWD.intBoxed";
+		EPStatement epStatement = epService.getEPAdministrator().createEQL(cepStatementString);
+
+		SupportBean myEventBean1 = new SupportBean();
+		myEventBean1.setString("address");
+		myEventBean1.setIntBoxed(9001);
+		epService.getEPRuntime().sendEvent(myEventBean1);
+
+        SupportBean myEventBean2 = new SupportBean();
+        myEventBean2.setString("txn");
+        myEventBean2.setIntBoxed(9001);
+        epService.getEPRuntime().sendEvent(myEventBean2);
+
+        Iterator<EventBean> itr = epStatement.iterator();
+        EventBean event = itr.next();
+        assertEquals(myEventBean1, event.get("addressInfo"));
+        assertEquals(myEventBean2, event.get("txnWD"));
     }
 
     public void testOrderByWildcard()
