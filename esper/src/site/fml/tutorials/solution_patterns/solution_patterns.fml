@@ -67,6 +67,78 @@ where login.accountNumber = null</pre></div>
       </answer>
     </faq>    
 
+    <faq id="correlate-2">
+      <question>How do I correlate events arriving out-of-order?</question>
+      <answer>
+		<p>
+			Let's assume we have three different types of events, all having a common attribute
+			'exchangeId'. Let's call the events start, finished and aborted.
+		</p>						
+		<p>
+			Let's expect exactly one start event and multiple finished or aborted
+			events for every exchange_id. The start event may happen after the
+			finished or aborted events, but they all happen within lets say 30
+			seconds per exchangeId.
+		</p>			
+		<p>
+			There are multiple possible answers to this problem. One solution can be an outer join using time windows, and looking at the remove stream since we care about the composite events when a start event leaves the time window after 30 sec, when the other events for the same exchange id have accumulated. 
+		</p>
+
+<div class="source"><pre>select rstream * from
+  StartEvent.win:time(30 sec) start
+    left outer join
+  AbortedEvent.win:time(30 sec) abort
+    on about.exchangeId = start.exchangeId
+    left outer join
+  FinishedEvent.win:time(30 sec) finished
+    on finished.exchangeId = start.exchangeId</pre></div>
+
+		<p>
+			In the example above, every time a StartEvent leaves the time window it takes with it all aborted and finished events. The abort property will be null if no abort occured.
+		</p>
+
+		<p>
+			Another solution is shown next using patterns to detect out-of-order events.
+		</p>
+
+      </answer>
+    </faq>    
+
+    <faq id="correlate-3">
+      <question>How do I use patterns to correlate events arriving in-order or out-of-order?</question>
+      <answer>
+        <p>
+          The prior discussion focussed on 3 kinds of events: start, finished and aborted.
+        </p>
+
+		<p>
+			A second possible solution can be found in using patterns. If one doesn't really care about processing the multiple aborted events and simply wants to get a failed or finished indication when the first aborted event or finished event is encountered, then a simpler approach can be specifying a pattern for each interesting combinations, some of which are shown below.
+		</p>
+			
+<div class="source"><pre>select * from pattern [every s=StartEvent -> 
+  a=AbortedEvent(exchangeId = s.echangeId) where timer:within(30 sec)]
+</pre></div>
+
+		<p>
+			The above pattern simply looks for aborted transactions and reacts to the first aborted event coming in after a start event.
+			The pattern to detect finished transactions, i.e. where no abort occured, should look about like this:
+		</p>
+  
+<div class="source"><pre>select * from pattern [every s=StartEvent -> 
+  (f=FinishedEvent(exchangeId = s.echangeId) where timer:within(30 sec)
+    and not AbortedEvent(exchangeId = s.echangeId) where timer:within(30 sec)]
+</pre></div>
+  
+		<p>
+			To detect out-of-order events, the pattern can certainly be reversed:
+		</p>
+<div class="source"><pre>select * from pattern [every a=AbortedEvent -> 
+  s=StartEvent(exchangeId = s.echangeId) where timer:within(30 sec)]
+</pre></div>
+  
+      </answer>
+    </faq>    
+
     <faq id="window-per-category">
       <question>How do I keep a separate window of events per category and compute aggregates for each category's window?</question>
       <answer>
@@ -231,6 +303,54 @@ select * from pattern [every a=ButtomPriceEvent
         </p>
       </answer>
     </faq>    
+
+    <faq id="pull-push-api">
+      <question>Can I use an UpdateListener to listen to events and the iterator-based pull-API together?</question>
+      <answer>
+		<p>
+			UpdateListener and iterator can be used together. An update listener implementation can also itself query the same statement or 
+			another statement's iterator, as the engine guarantees the iterators are up-to-date before calling update listeners even across statements.
+		</p>			
+		<p>
+			The iterator can also be used to query for no matches. You should find the iterator to have minimal overhead 
+			depending on the type of statement iterated on, the overhead for patterns statements specifically is neglible.
+		</p>
+      </answer>
+    </faq>    
+
+    <faq id="stop-insert">
+      <question>How do I stop an insert after a period of time?</question>
+      <answer>
+		<p>
+			Assume we only want to receive the first 10 minutes of an incoming event stream and then stop receiving data from that stream.
+		</p>
+
+		<p>
+			The timer:within pattern guard function can serve here to stop the stream after a given amount of time,
+			as the next statement shows:
+		</p>
+		
+<div class="source"><pre>insert into PackageNotifyEvent
+select myevent.uid as uid, 'HOME' as loc, 'ARRIVED' as status 
+from pattern[every myevent=TrackingEvent where timer:within(10 min)]
+</pre></div>    
+      </answer>
+    </faq>    
+
+    <faq id="regexp-filter">
+      <question>Can I use a regular expression (regexp) within a filter?</question>
+      <answer>
+		<p>
+			Yes a regular expression can be used as part of a filter expressions. Pretty much any expression is allowed within event filter expressions other then
+			aggregation functions and the previous or prior function.
+		</p>
+
+<div class="source"><pre>select * from pattern[every myevent=TrackingEvent(event.uid regexp '^a-b-.*' 
+  and event.lat in [40.1:40.2] and event.lon in [-74.1:-74.0])]
+</pre></div>    
+      </answer>
+    </faq>    
+
   </part>
 
 </faqs>

@@ -29,7 +29,7 @@
       <answer>
         <p>
           Esper uses the JUnit testing framework to automate testing of the system.
-          Esper's build process runs the currently around 1350 unit test methods in 450 JUnit test classes when a build occurs.
+          Esper's build process runs the currently around 1550 unit test methods, many running multiple test scenarios, in 490 JUnit test classes when a build occurs.
           The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
           individual classes and components. Tests are very detailed in asserting the expected results allowing us
           to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
@@ -40,6 +40,10 @@
         <p>          
           The Esper team follows the practice of test-driven development (TDD) rigorously, ensuring that each feature added has automated test coverage.
           We develop and evolve the tests for each feature along with the feature that is currently being developed.
+        </p>
+        <p>          
+		  We have received a recent test coverage result that we quote here:         
+			"I used Cobertura for this, the line coverage is 85% and the branch coverage is 93%. This gives me a good feeling, but one concern is that the tests takes long time to run, but I can live with that."
         </p>
       </answer>
     </faq>
@@ -133,17 +137,6 @@
           into a separate possibly remote engine process. Esper is an entirely free open-source component available under the 
           GNU GPL license. The open-source nature of Esper helps in tailoring the event processing language and other 
           community driven features.
-        </p>
-      </answer>
-    </faq>
-     <faq id="users">
-      <question>Who's using Esper?</question>
-      <answer>
-        <p>
-          With the Esper 1.0 release and given it's shorter history most users are at the evaluation stage. 
-          A major financial institution is looking at Esper for real-time monitoring of proprietary options trading. 
-          A network monitoring application had success with Esper, and Esper is also playing a role in RFID research. 
-          Our user community is growing rapidly.
         </p>
       </answer>
     </faq>
