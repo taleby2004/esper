@@ -1,6 +1,90 @@
 <?xml version="1.0"?>
 <faqs id="General FAQ">
 
+  <part id="general">
+  	<title>How does it work?</title>
+     <faq id="how-does-it-work-overview">
+      <question>How does Esper work? How does Esper allow you to search and match patterns on temporal events?</question>
+      <answer>
+        <p>
+          Esper is an event stream processing (ESP) and event correlation engine (CEP) written in Java.
+		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, Esper works as 
+		  real time engine that triggers actions when event conditions occur among event streams.
+		  A tailored Event Query Language (EQL) allows registering queries in the engine, using javabeans to represent events. 
+		  A listener class - which is basically a POJO - will then be called by the engine when the EQL condition is matched as 
+		  events come in. The EQL allows expressing complex matching conditions that include temporal windows, 
+		  and join different event streams, as well as filter and sort them.
+        </p>
+        <p>
+		  A simple example could be to compute the average stock price of the BEA tick on a sliding window of 30 seconds. 
+		  Given a StockTick event bean with a price and symbol property and the EQL 
+		  "select avg(price) from StockTick.win:time(30 sec) where symbol='BEA'", 
+		  a POJO would get notified as tick come in - and in real world millions of ticks can come in - 
+		  so there's no way to store them all to later query them using a classical database architecture.
+		  Statements can be much more complex, and also be combined together with "followed by" conditions.
+        </p>
+        <p>
+		  The internals of Esper are made up of fairly complex algorithms primarily relying on state machines and delta networks in which only changes to data are communicated across object boundaries when required.
+        </p>
+      </answer>
+    </faq>
+     <faq id="retain-data">
+      <question>How does the engine discern which data to retain? Is it based solely on the queries registered with the engine at the time the event comes in?</question>
+      <answer>
+        <p>
+        	Yes, the data that the engine retains is based solely on the queries registered with the engine. 
+        	The engine retains the minimum needed events and/or derived data to satisfy any started statements. Thus, if one has an engine running and 
+        	consuming events, but has no queries registered with the engine, the engine does not retain any data.
+        </p>
+      </answer>
+    </faq>
+     <faq id="insert-remove-stream">
+      <question>How many events are held in the system? If we get say 5 events within 30 seconds, how long are the events kept around? What are the eviction policies?</question>
+      <answer>
+        <p>
+        	Esper offers built-in data windows as part of the event query language that instruct the engine how many or how long events must be considered. For example, a time window with an interval length of 10 seconds instructs the engine to retain the last 10 seconds of events as a moving data window. 
+        </p>
+        <p>
+        	Eviction policies are usually row-count based or time-based. A sort-based eviction policy is also possible, as is combining different data windows. And the engine can process events without any data windows as well.
+        </p>
+      </answer>
+    </faq>            
+     <faq id="engine-start-state">
+      <question>What happens on engine start? I assume that if I have a time based query, since there's no history within the engine, there's no way to get any events to fire until the time and events have been consumed?</question>
+      <answer>
+        <p>
+        	That is correct. An application can replay events into the engine but that is currently a process the application or middleware must do.
+        	Currently the engine does not provide state persistance, fail-over or recovery, or an event replay mechanism.
+        </p>
+      </answer>
+    </faq>
+     <faq id="engine-start-state">
+	  <question>Can queries be added to the system only on engine start, or can they be added dynamically? Will those queries work with any internally stored historical data when they're started?</question>
+	  <answer>
+		<p>
+			Queries can be added, stopped, started, or destroyed while the engine is running in a multithread-safe fashion. There is no facility to explicitly attach or initialize a new query from a prior query or data window. The engine does not have the concept of internally stored historical data in that sense.
+		</p>
+	  </answer>
+	</faq>
+     <faq id="engine-configuration">
+	  <question>The engine can be configured to work with DOM objects and many other event representations. Is that configuration static, or can those configurations be changed or added to on a running system?</question>
+	  <answer>
+		<p>
+			The runtime configuration API allows most configuration actions to be performed at runtime. This API is available via the administrative 
+			interface of the engine.
+		</p>
+	  </answer>
+	</faq>
+     <faq id="insert-into">
+	  <question>When working with composite streams, i.e. when using the 'insert into' mechanism, does the entity being inserted in to have to be a registered object in the system or are those created simply by registering the query?</question>
+	  <answer>
+		<p>
+			No, there is no registration required. The creation of the query that contains the insert-into clause creates the new stream and makes it available to use in further statements.		
+		</p>
+	  </answer>
+	</faq>
+  </part>
+
   <part id="technical">
   	<title>Technical</title>
     <faq id="deployment-dependencies">
@@ -100,34 +184,8 @@
     </faq>
   </part>
 
-
   <part id="general">
   	<title>General</title>
-     <faq id="how-does-it-work">
-      <question>How does Esper work? How does Esper allow you to search and match patterns on temporal events?</question>
-      <answer>
-        <p>
-          Esper is an event stream processing (ESP) and event correlation engine (CEP) written in Java.
-		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, Esper works as 
-		  real time engine that triggers actions when event conditions occur among event streams.
-		  A tailored Event Query Language (EQL) allows registering queries in the engine, using javabeans to represent events. 
-		  A listener class - which is basically a POJO - will then be called by the engine when the EQL condition is matched as 
-		  events come in. The EQL allows expressing complex matching conditions that include temporal windows, 
-		  and join different event streams, as well as filter and sort them.
-        </p>
-        <p>
-		  A simple example could be to compute the average stock price of the BEA tick on a sliding window of 30 seconds. 
-		  Given a StockTick event bean with a price and symbol property and the EQL 
-		  "select avg(price) from StockTick.win:time(30 sec) where symbol='BEA'", 
-		  a POJO would get notified as tick come in - and in real world millions of ticks can come in - 
-		  so there's no way to store them all to later query them using a classical database architecture.
-		  Statements can be much more complex, and also be combined together with "followed by" conditions.
-        </p>
-        <p>
-		  The internals of Esper are made up of fairly complex algorithms primarily relying on state machines and delta networks in which only changes to data are communicated across object boundaries when required.
-        </p>
-      </answer>
-    </faq>
      <faq id="advantage">
       <question>What's the advantage of using Esper over other products?</question>
       <answer>
@@ -241,6 +299,7 @@
       </answer>
     </faq>
   </part>
+
 </faqs>
 
 
