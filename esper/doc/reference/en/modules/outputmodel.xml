@@ -408,7 +408,7 @@ from Withdrawal.win:time_batch(1 sec)]]></programlisting>
 			</sect3>
 
 			<sect3 id="outputmodel_aggregation_batch_event_agg" revision="1">
-				<title>Aggregated an Un-Grouped</title>
+				<title>Aggregated and Un-Grouped</title>
 
 				<para>
 					If your statement selects non-aggregated properties and aggregation values, and does not group, your statement may be similar to this statement:

@@ -33,6 +33,29 @@ public class TestCountAll extends TestCase
         assertSize(2, 1);
     }
     
+    public void testCountPlusStar()
+    {
+        // TODO: http://jira.codehaus.org/browse/ESPER-118 NullPointerException when select * and additional fields
+        String statementText = "select *, count(*) as cnt from " + SupportMarketDataBean.class.getName();
+        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView.addListener(listener);
+
+        sendEvent("DELL", 1L);
+        assertTrue(listener.getAndClearIsInvoked());
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals(1L, listener.getLastNewData()[0].get("cnt"));
+        
+        sendEvent("DELL", 1L);
+        assertTrue(listener.getAndClearIsInvoked());
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals(2L, listener.getLastNewData()[0].get("cnt"));
+
+        sendEvent("DELL", 1L);
+        assertTrue(listener.getAndClearIsInvoked());
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals(3L, listener.getLastNewData()[0].get("cnt"));
+    }
+
     public void testCount()
     {
     	String statementText = "select count(*) as cnt from " + SupportMarketDataBean.class.getName() + ".win:time(1)";
