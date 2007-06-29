@@ -5,6 +5,9 @@ NEsper for .NET
 	NEsper is based upon the Esper baseline, but includes customizations
 	that are specific to the .NET CLR.
 
+	NEsper is open-source software available under the {{{http://www.opensource.org/licenses/gpl-license.php}GNU General Public License (GPL)}}.
+	The GPL licenses you the right to redistribute NEsper under specific terms. Please {{{http://www.espertech.com/partners/embedded.php}contact us}} for any inquiry.
+
 Guiding Philosophy
 
 	NEsper is derived from Esper and to that end we want to ensure that
