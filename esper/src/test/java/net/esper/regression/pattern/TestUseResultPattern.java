@@ -1,10 +1,16 @@
 package net.esper.regression.pattern;
 
-import junit.framework.*;
+import junit.framework.TestCase;
+import net.esper.client.*;
+import net.esper.client.time.TimerControlEvent;
+import net.esper.event.EventBean;
 import net.esper.regression.support.*;
 import net.esper.support.bean.SupportBeanConstants;
 import net.esper.support.bean.SupportBean_N;
 import net.esper.support.bean.SupportBean_S0;
+import net.esper.support.bean.SupportTradeEvent;
+
+import java.util.Random;
 
 public class TestUseResultPattern extends TestCase implements SupportBeanConstants
 {
@@ -153,5 +159,94 @@ public class TestUseResultPattern extends TestCase implements SupportBeanConstan
 
         PatternTestHarness util = new PatternTestHarness(events, testCaseList);
         util.runTest();
+    }
+
+    public void testFollowedByFilter()
+    {
+        Configuration config = new Configuration();
+        config.addEventTypeAlias("FxTradeEvent", SupportTradeEvent.class
+                .getName());
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(
+                "testRFIDZoneEnter", config);
+        epService.initialize();
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+
+        String expression = "every tradeevent1=FxTradeEvent(userId in ('U1000','U1001','U1002') ) -> " +
+                "(tradeevent2=FxTradeEvent(userId in ('U1000','U1001','U1002') and " +
+                "  userId != tradeevent1.userId and " +
+                "  ccypair = tradeevent1.ccypair and " +
+                "  direction = tradeevent1.direction) -> " +
+                " tradeevent3=FxTradeEvent(userId in ('U1000','U1001','U1002') and " +
+                "  userId != tradeevent1.userId and " +
+                "  userId != tradeevent2.userId and " +
+                "  ccypair = tradeevent1.ccypair and " +
+                "  direction = tradeevent1.direction)" +
+                ") where timer:within(600 sec)";
+
+        EPStatement statement = epService
+                .getEPAdministrator().createPattern(expression);
+        MyUpdateListener listener = new MyUpdateListener();
+        statement.addListener(listener);
+
+        Random random = new Random();
+        String users[] = {"U1000", "U1001", "U1002"};
+        String ccy[] = {"USD", "JPY", "EUR"};
+        String direction[] = {"B", "S"};
+
+        for (int i = 0; i < 100; i++)
+        {
+            SupportTradeEvent event = new
+                    SupportTradeEvent(i, users[random.nextInt(users.length)],
+                    ccy[random.nextInt(ccy.length)], direction[random.nextInt(direction.length
+            )]);
+            epService.getEPRuntime().sendEvent(event);
+        }
+
+        assertEquals(0, listener.badMatchCount);
+    }
+
+    private class MyUpdateListener implements UpdateListener
+    {
+        private int badMatchCount;
+        private int goodMatchCount;
+
+        public void update(EventBean[] newEvents, EventBean[]
+                oldEvents)
+        {
+            if (newEvents != null)
+            {
+                for (EventBean eventBean : newEvents)
+                {
+                    handleEvent(eventBean);
+                }
+            }
+        }
+
+        private void handleEvent(EventBean eventBean)
+        {
+            SupportTradeEvent tradeevent1 = (SupportTradeEvent)
+                    eventBean.get("tradeevent1");
+            SupportTradeEvent tradeevent2 = (SupportTradeEvent)
+                    eventBean.get("tradeevent2");
+            SupportTradeEvent tradeevent3 = (SupportTradeEvent)
+                    eventBean.get("tradeevent3");
+
+            if ((
+                    tradeevent1.getUserId().equals(tradeevent2.getUserId()) ||
+                            tradeevent1.getUserId().equals(tradeevent3.getUserId()) ||
+                            tradeevent2.getUserId().equals(tradeevent3.getUserId())))
+            {
+                System.out.println("Bad Match : ");
+                System.out.println(tradeevent1);
+                System.out.println(tradeevent2);
+                System.out.println(tradeevent3 +
+                        "\n");
+                badMatchCount++;
+            }
+            else
+            {
+                goodMatchCount++;
+            }
+        }
     }
 }

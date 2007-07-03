@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 public final class FilterSpecParamExprNode extends FilterSpecParam
 {
     private final ExprNode exprNode;
-    private final ExprNodeAdapter adapter;
     private final LinkedHashMap<String, EventType> taggedEventTypes;
 
     /**
@@ -44,8 +43,6 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         }
         this.exprNode = exprNode;
         this.taggedEventTypes = taggedEventTypes;
-
-        adapter = new ExprNodeAdapter(exprNode);
     }
 
     /**
@@ -68,6 +65,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
 
     public final Object getFilterValue(MatchedEventMap matchedEvents)
     {
+        ExprNodeAdapter adapter = new ExprNodeAdapter(exprNode);
         if (taggedEventTypes != null)
         {
             EventBean[] events = new EventBean[taggedEventTypes.size() + 1];

@@ -19,6 +19,7 @@ public class TestSubselectFiltered extends TestCase
     public void setUp()
     {
         Configuration config = new Configuration();
+        config.addEventTypeAlias("Sensor", SupportSensorEvent.class);
         config.addEventTypeAlias("MyEvent", SupportBean.class);
         config.addEventTypeAlias("S0", SupportBean_S0.class);
         config.addEventTypeAlias("S1", SupportBean_S1.class);
@@ -421,7 +422,49 @@ public class TestSubselectFiltered extends TestCase
         tryJoinFiltered(stmtText);
     }
 
-    public void tryJoinFiltered(String stmtText)
+    public void testSubselectPrior()
+    {
+        String stmtTextOne = "insert into Pair " +
+                "select * from Sensor(device='A').std:lastevent() as a, Sensor(device='B').std:lastevent() as b " +
+                "where a.type = b.type";
+        epService.getEPAdministrator().createEQL(stmtTextOne);
+
+        epService.getEPAdministrator().createEQL("insert into PairDuplicatesRemoved select * from Pair(1=2)");
+        
+        String stmtTextTwo = "insert into PairDuplicatesRemoved " +
+                "select * from Pair " +
+                "where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())" +
+                "  and b.id != (select b.id from PairDuplicatesRemoved.std:lastevent())";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(stmtTextTwo);
+        stmtTwo.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(1,"Temperature","A",51,94.5));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(2,"Temperature","A",57,95.5));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(3,"Humidity","B",29,67.5));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(4,"Temperature","B",55,88.0));
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals(2, event.get("a.id"));
+        assertEquals(4, event.get("b.id"));
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(5,"Temperature","B",65,85.0));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(6,"Temperature","B",49,87.0));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(7,"Temperature","A",51,99.5));
+        event = listener.assertOneGetNewAndReset();
+        assertEquals(7, event.get("a.id"));
+        assertEquals(6, event.get("b.id"));
+    }
+
+    private void tryJoinFiltered(String stmtText)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);

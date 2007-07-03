@@ -49,7 +49,7 @@ where fraud.accountNumber = withdraw.accountNumber</pre></div>
         <p>
           As in SQL we can use outer joins to generate a result even if one or more of the correlated events are not 
           found in a stream. Usually we want to generate the result after a certain time or after a
-          certain number of events have been received, indicating that a correlated event is truely missing.          
+          certain number of events have been received, indicating that a correlated event is truly missing.          
         </p>
         <p>
 	  In this example we are looking for a withdrawal event without a login event for the same account number after 60 seconds.
@@ -77,7 +77,7 @@ where login.accountNumber = null</pre></div>
 		<p>
 			Let's expect exactly one start event and multiple finished or aborted
 			events for every exchange_id. The start event may happen after the
-			finished or aborted events, but they all happen within lets say 30
+			finished or aborted events, but they all happen within say 30
 			seconds per exchangeId.
 		</p>			
 		<p>
@@ -94,7 +94,7 @@ where login.accountNumber = null</pre></div>
     on finished.exchangeId = start.exchangeId</pre></div>
 
 		<p>
-			In the example above, every time a StartEvent leaves the time window it takes with it all aborted and finished events. The abort property will be null if no abort occured.
+			In the example above, every time a StartEvent leaves the time window it takes with it all aborted and finished events. The abort property will be null if no abort occurred.
 		</p>
 
 		<p>
@@ -108,7 +108,7 @@ where login.accountNumber = null</pre></div>
       <question>How do I use patterns to correlate events arriving in-order or out-of-order?</question>
       <answer>
         <p>
-          The prior discussion focussed on 3 kinds of events: start, finished and aborted.
+          The prior discussion focused on 3 kinds of events: start, finished and aborted.
         </p>
 
 		<p>
@@ -121,7 +121,7 @@ where login.accountNumber = null</pre></div>
 
 		<p>
 			The above pattern simply looks for aborted transactions and reacts to the first aborted event coming in after a start event.
-			The pattern to detect finished transactions, i.e. where no abort occured, should look about like this:
+			The pattern to detect finished transactions, i.e. where no abort occurred, should look about like this:
 		</p>
   
 <div class="source"><pre>select * from pattern [every s=StartEvent -> 
@@ -136,6 +136,31 @@ where login.accountNumber = null</pre></div>
   s=StartEvent(exchangeId = s.echangeId) where timer:within(30 sec)]
 </pre></div>
   
+      </answer>
+    </faq>    
+
+    <faq id="correlate_pattern_similar_properties">
+      <question>How do I correlate 3 events in a time window in which events have similar properties?</question>
+      <answer>
+		<p>
+			My application needs to match 3 events which occur within a time window where 3 different users submit trades with
+similar properties. The properties that must have the same value for each of the 3 events matched is currency and direction.
+The pattern is to match only if all 3 events have a different user. The time window should be 10 minutes long.
+		</p>
+
+		<p>
+			The pattern that solves this problem is shown below. It uses the timer:within pattern guard to limit
+			the lifetime of each active sub-expression to 10 minutes.
+		</p>
+		
+<div class="source"><pre>every trade1=Trade(userId in ('U1000','U1001','U1002') ) ->
+  (trade2=Trade(userId in ('U1000','U1001','U1002') and
+     userId != trade1.userId and ccypair = trade1.ccypair and direction = trade1.direction) ->
+   trade3=Trade(userId in ('U1000','U1001','U1002') and 
+     userId not in (trade1.userId, trade2.userId) and
+     ccypair = trade1.ccypair and direction = trade1.direction))
+  ) where timer:within(10 min)
+</pre></div>    
       </answer>
     </faq>    
 
@@ -249,7 +274,7 @@ from pattern [every timer:interval(5 sec)]
       	</p>
         <p>
 			The problem can be broken down: First, how does one identify bottom price points among a stream of market data events?
-			Second, once the individual bottom price points are identified, how does one detect an occurance of 3 bottom price points, whose value is within approximation of each other, and that are spaced out over time in a pattern?
+			Second, once the individual bottom price points are identified, how does one detect an occurrence of 3 bottom price points, whose value is within approximation of each other, and that are spaced out over time in a pattern?
 		</p>
         <p>
 			The first problem is an event streaming processing problem, I believe. The stream of events is market data that contains price points for the NIFTY index over time. I'll attempt to define a bottom price point as follows: If the average price for the last 5 days is 15% lower then the average price over a period of say 60 days, then the minimum price during that 5 days is a single bottom price point. Of course the number of days and percentages are parameters to figure out and get right.
@@ -282,7 +307,7 @@ output first every 1 day
 			The last statement populates the "BottomPriceEvent" event stream as a stream of higher-level events in which each event represents a bottom price point.
 		</p>
 		<p>
-			The second part of the problem requires detecting 3 bottom price points whose values are within a given range of each other, and that have a certain temporal relationship with each other. Lets assume that the bottom price points should be within 5% each other. Lets also assume we are looking for bottom price points spaced at least 10 days apart from each other, but within 30 days of the prior bottom price point.
+			The second part of the problem requires detecting 3 bottom price points whose values are within a given range of each other, and that have a certain temporal relationship with each other. Let's assume that the bottom price points should be within 5% each other. Let's also assume we are looking for bottom price points spaced at least 10 days apart from each other, but within 30 days of the prior bottom price point.
 		</p>
 
 <div class="source"><pre>-- The pattern to detect the triple-bottom:
@@ -295,7 +320,7 @@ select * from pattern [every a=ButtomPriceEvent
 </pre></div>    
 
 		<p>
-			Finally, the resulting TripeBottomPattern event stream created by the last statement is the higher-level complex events represening that a triple-bottom pattern has been detected. 
+			Finally, the resulting TripeBottomPattern event stream created by the last statement is the higher-level complex events representing that a triple-bottom pattern has been detected. 
         </p>
 
 		<p>
@@ -313,7 +338,7 @@ select * from pattern [every a=ButtomPriceEvent
 		</p>			
 		<p>
 			The iterator can also be used to query for no matches. You should find the iterator to have minimal overhead 
-			depending on the type of statement iterated on, the overhead for patterns statements specifically is neglible.
+			depending on the type of statement iterated on, the overhead for patterns statements specifically is negligible.
 		</p>
       </answer>
     </faq>    
@@ -341,13 +366,94 @@ from pattern[every myevent=TrackingEvent where timer:within(10 min)]
       <question>Can I use a regular expression (regexp) within a filter?</question>
       <answer>
 		<p>
-			Yes a regular expression can be used as part of a filter expressions. Pretty much any expression is allowed within event filter expressions other then
+			Yes a regular expression can be used as part of a filter expression. Pretty much any expression is allowed within event filter expressions other then
 			aggregation functions and the previous or prior function.
 		</p>
 
 <div class="source"><pre>select * from pattern[every myevent=TrackingEvent(event.uid regexp '^a-b-.*' 
   and event.lat in [40.1:40.2] and event.lon in [-74.1:-74.0])]
 </pre></div>    
+      </answer>
+    </faq>    
+
+    <faq id="remove_duplicates">
+      <question>How can I remove duplicates? What if I want to form pairs of events where each pair is a unique combination of the latest event of two streams?</question>
+      <answer>
+		<p>
+			I'm trying to detect pairs of events correlated by a "type" value and a unique "device" value.  
+			Then based on this pair of events, I'd like to find the maximum "measurement" value and the corresponding "confidence" 
+			for the one with the max "measurement" value.  Here's my event object:
+		</p>
+			
+		<div class="source"><pre>class Sensor {
+	long id;
+	String type;
+	String device;
+	Double measurement;
+	Double confidence;
+}</pre></div>    
+		<p>
+			I'll know in advance the set of possible device values, but the Sensor events can happen in any order, and two or more Sensor event 
+			for the same device might occur before a Sensor event for the other device occurs. Thus if a Sensor event for the same device occurs 
+			before a Sensor event for the other device, then the second Sensor event would replace the first Sensor event for that device of the 
+			same type.  In other words, the last event for a particular device of a given type is the one that should be used in the calculation of the maximum.
+		</p>
+		<p>
+			The computation would be the maximum value of the 'measurement' property between A and B.  
+			Also, the 'confidence' value would correspond to the value from the event with the maximum 'measurement' property.
+		</p>
+		<p>
+			A sample input and output:
+		</p>
+
+		<div class="source"><pre>Sensor[id=1,type='Temperature',device='A',measurement=51,confidence=94.5]
+Sensor[id=2,type='Temperature',device='A',measurement=57,confidence=95.5]
+Sensor[id=3,type='Humidity',device='B',measurement=29,confidence=67.5]
+Sensor[id=4,type='Temperature',device='B',measurement=55,confidence=88.0]
+Sensor[id=5,type='Temperature',device='B',measurement=65,confidence=85.0]
+Sensor[id=6,type='Temperature',device='B',measurement=49,confidence=87.0]
+Sensor[id=7,type='Temperature',device='A',measurement=51,confidence=99.5]</pre></div>    
+		<p>
+			For output, one would expect the following:
+		</p>
+
+<div class="source"><pre>// First output event pairs events with id=2 and id=4 and chooses the values from id=2
+MaxReading[type='Temperature',device='A',measurement=57,confidence=95.5]
+// Second output event pairs events with id=6 and id=7, since the event with id=6
+// replaces the one with id=5, the event with id=5 is never compared against the
+// event with id=7
+MaxReading[type='Temperature',device='A',measurement=51,confidence=99.5]</pre></div>
+
+		<p>
+			One possible solution builds pairs of events using a join:
+		</p>
+<div class="source"><pre>// Create pairs of device A and B events
+  insert into Pair
+  select * from Sensor(device='A').std:lastevent() as a, Sensor(device='B').std:lastevent() as b
+  where a.type = b.type
+</pre></div>
+
+		<p>
+			From the resulting stream we remove those pairs in which either event was seen before, leaving unique pairs:
+		</p>
+<div class="source"><pre>  // Fast way of declaring the stream type, could also be done via config API or XML
+  insert into PairDuplicatesRemoved select * from Pair(1=2)
+       
+  // Remove duplicate pairs where either sensor event is from the prior pair
+  insert into PairDuplicatesRemoved
+  select * from Pair
+  where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
+    and b.id != (select b.id from PairDuplicatesRemoved.std:lastevent())</pre></div>
+
+		<p>
+			Last, select the maximum measurement value between the pair of sensor events and the corresponding confidence and device:
+		</p>
+<div class="source"><pre>select a.type,
+       max(a.measurement, b.measurement) as measurement,
+       case when a.measurement > b.measurement then a.confidence else b.confidence end as confidence,
+       case when a.measurement > b.measurement then a.device else b.device end as device
+       from PairDuplicatesRemoved</pre></div>
+
       </answer>
     </faq>    
 
