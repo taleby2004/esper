@@ -11,22 +11,51 @@ import net.esper.support.eql.SupportStaticMethodLib;
 public class TestFilterExpressions extends TestCase
 {
     private EPServiceProvider epService;
-    private SupportUpdateListener testListener;
+    private SupportUpdateListener listener;
 
     public void setUp()
     {
-        testListener = new SupportUpdateListener();
+        listener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
     }
 
-    public void testCoercion()
+    public void testEqualsSemanticFilter()
+    {
+        // TODO: Esper-114
+        String text = "select * from " + SupportBeanComplexProps.class.getName() + "(nested=nested)";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        stmt.addListener(listener);
+
+        SupportBeanComplexProps eventOne = SupportBeanComplexProps.makeDefaultBean();
+        eventOne.setSimpleProperty("1");
+
+        epService.getEPRuntime().sendEvent(eventOne);
+        assertTrue(listener.isInvoked());
+    }
+
+    public void testEqualsSemanticExpr()
     {
         // TODO: Esper-114
         String text = "select * from " + SupportBeanComplexProps.class.getName() + "(simpleProperty='1') as s0" +
                 ", " + SupportBeanComplexProps.class.getName() + "(simpleProperty='2') as s1" +
                 " where s0.nested = s1.nested";
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        stmt.addListener(listener);
+
+        SupportBeanComplexProps eventOne = SupportBeanComplexProps.makeDefaultBean();
+        eventOne.setSimpleProperty("1");
+
+        SupportBeanComplexProps eventTwo = SupportBeanComplexProps.makeDefaultBean();
+        eventTwo.setSimpleProperty("2");
+
+        assertEquals(eventOne.getNested(), eventTwo.getNested());
+
+        epService.getEPRuntime().sendEvent(eventOne);
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(eventTwo);
+        assertTrue(listener.isInvoked());
     }
 
     public void testPatternFunc3Stream()
@@ -250,11 +279,11 @@ public class TestFilterExpressions extends TestCase
         for (int i = 0; i < intBoxedA.length; i++)
         {
             EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-            stmt.addListener(testListener);
+            stmt.addListener(listener);
 
             sendBeanIntDouble(intBoxedA[i], doubleBoxedA[i]);
             sendBeanIntDouble(intBoxedB[i], doubleBoxedB[i]);
-            assertEquals("failed at index " + i, expected[i], testListener.getAndClearIsInvoked());
+            assertEquals("failed at index " + i, expected[i], listener.getAndClearIsInvoked());
             stmt.stop();
         }
     }
@@ -278,12 +307,12 @@ public class TestFilterExpressions extends TestCase
         for (int i = 0; i < intBoxedA.length; i++)
         {
             EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-            stmt.addListener(testListener);
+            stmt.addListener(listener);
 
             sendBeanIntDouble(intBoxedA[i], doubleBoxedA[i]);
             sendBeanIntDouble(intBoxedB[i], doubleBoxedB[i]);
             sendBeanIntDouble(intBoxedC[i], doubleBoxedC[i]);
-            assertEquals("failed at index " + i, expected[i], testListener.getAndClearIsInvoked());
+            assertEquals("failed at index " + i, expected[i], listener.getAndClearIsInvoked());
             stmt.stop();
         }
     }
@@ -413,30 +442,30 @@ public class TestFilterExpressions extends TestCase
     public void tryFilterRelationalOpRange(String text, int[] testData, boolean[] isReceived)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         assertEquals(testData.length,  isReceived.length);
         for (int i = 0; i < testData.length; i++)
         {
             sendBeanIntDouble(testData[i], 0D);
-            assertEquals("failed testing index " + i, isReceived[i], testListener.getAndClearIsInvoked());
+            assertEquals("failed testing index " + i, isReceived[i], listener.getAndClearIsInvoked());
         }
-        stmt.removeListener(testListener);
+        stmt.removeListener(listener);
     }
     
     private void tryFilter(String text, boolean isReceived)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         sendBeanString("a");
-        assertFalse(testListener.getAndClearIsInvoked());
+        assertFalse(listener.getAndClearIsInvoked());
         sendBeanString("b");
-        assertEquals(isReceived, testListener.getAndClearIsInvoked());
+        assertEquals(isReceived, listener.getAndClearIsInvoked());
         sendBeanString("c");
-        assertFalse(testListener.getAndClearIsInvoked());
+        assertFalse(listener.getAndClearIsInvoked());
 
-        stmt.removeListener(testListener);
+        stmt.removeListener(listener);
     }
 
     private void try3Fields(String text,
@@ -446,7 +475,7 @@ public class TestFilterExpressions extends TestCase
                             boolean[] expected)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         assertEquals(intPrimitive.length, doubleBoxed.length);
         assertEquals(intBoxed.length, doubleBoxed.length);
@@ -454,7 +483,7 @@ public class TestFilterExpressions extends TestCase
         for (int i = 0; i < intBoxed.length; i++)
         {
             sendBeanIntIntDouble(intPrimitive[i], intBoxed[i], doubleBoxed[i]);
-            assertEquals("failed at index " + i, expected[i], testListener.getAndClearIsInvoked());
+            assertEquals("failed at index " + i, expected[i], listener.getAndClearIsInvoked());
         }
 
         stmt.stop();
@@ -464,12 +493,12 @@ public class TestFilterExpressions extends TestCase
     {
         String text = "select * from " + SupportBean.class.getName() + "(2*intBoxed=doubleBoxed)";
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         sendBeanIntDouble(20, 50d);
-        assertFalse(testListener.getAndClearIsInvoked());
+        assertFalse(listener.getAndClearIsInvoked());
         sendBeanIntDouble(25, 50d);
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
 
         text = "select * from " + SupportBean.class.getName() + "(2*intBoxed=doubleBoxed, string='s')";
         stmt = epService.getEPAdministrator().createEQL(text);
@@ -511,14 +540,14 @@ public class TestFilterExpressions extends TestCase
     private void tryFilterWithEqualsSameCompare(String text, int[] intBoxed, double[] doubleBoxed, boolean[] expected)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         assertEquals(intBoxed.length, doubleBoxed.length);
         assertEquals(expected.length, doubleBoxed.length);
         for (int i = 0; i < intBoxed.length; i++)
         {
             sendBeanIntDouble(intBoxed[i], doubleBoxed[i]);
-            assertEquals("failed at index " + i, expected[i], testListener.getAndClearIsInvoked());
+            assertEquals("failed at index " + i, expected[i], listener.getAndClearIsInvoked());
         }
 
         stmt.stop();
@@ -577,24 +606,24 @@ public class TestFilterExpressions extends TestCase
     private void tryPatternWithExpr(String text)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         sendBeanLong(10L);
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 0, 0L, ""));
-        assertFalse(testListener.getAndClearIsInvoked());
+        assertFalse(listener.getAndClearIsInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 0, 5L, ""));
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
 
         sendBeanLong(0L);
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 0, 0L, ""));
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 0, 1L, ""));
-        assertFalse(testListener.getAndClearIsInvoked());
+        assertFalse(listener.getAndClearIsInvoked());
 
         sendBeanLong(20L);
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 0, 10L, ""));
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
 
         stmt.removeAllListeners();
     }
@@ -619,16 +648,16 @@ public class TestFilterExpressions extends TestCase
     private void tryArithmatic(String text)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         sendBeanIntDouble(5, 5d);
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
 
         sendBeanIntDouble(5, 4d);
-        assertFalse(testListener.getAndClearIsInvoked());
+        assertFalse(listener.getAndClearIsInvoked());
 
         sendBeanIntDouble(5, 4.001d);
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
 
         stmt.destroy();
     }
@@ -637,10 +666,10 @@ public class TestFilterExpressions extends TestCase
     {
         String expr = "select * from " + SupportBean.class.getName() + "(5 = intBoxed)";
         EPStatement stmt = epService.getEPAdministrator().createEQL(expr);
-        stmt.addListener(testListener);
+        stmt.addListener(listener);
 
         sendBean("intBoxed", 5);
-        assertTrue(testListener.getAndClearIsInvoked());
+        assertTrue(listener.getAndClearIsInvoked());
     }
 
     private void sendBeanIntDouble(Integer intBoxed, Double doubleBoxed)

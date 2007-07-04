@@ -59,6 +59,12 @@ public class ExprEqualsNode extends ExprNode
             return;
         }
 
+        if (typeOne.equals(typeTwo))
+        {
+            mustCoerce = false;
+            return;
+        }
+
         // Get the common type such as Bool, String or Double and Long
         try
         {

@@ -51,7 +51,12 @@ public class SupportBeanComplexProps
         return simpleProperty;
     }
 
-	public Map<String, String> getMapProperty()
+    public void setSimpleProperty(String simpleProperty)
+    {
+        this.simpleProperty = simpleProperty;
+    }
+
+    public Map<String, String> getMapProperty()
 	{
 		return mapProperty;
 	}
@@ -101,7 +106,33 @@ public class SupportBeanComplexProps
         {
             return nestedNested;
         }
-	}
+
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass())
+            {
+                return false;
+            }
+
+            SupportBeanSpecialGetterNested that = (SupportBeanSpecialGetterNested) o;
+
+            if (!nestedValue.equals(that.nestedValue))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public int hashCode()
+        {
+            return nestedValue.hashCode();
+        }
+    }
 
     public static class SupportBeanSpecialGetterNestedNested
     {
