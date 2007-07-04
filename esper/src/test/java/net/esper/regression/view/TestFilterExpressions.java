@@ -22,7 +22,7 @@ public class TestFilterExpressions extends TestCase
 
     public void testEqualsSemanticFilter()
     {
-        // TODO: Esper-114
+        // Test for Esper-114
         String text = "select * from " + SupportBeanComplexProps.class.getName() + "(nested=nested)";
         EPStatement stmt = epService.getEPAdministrator().createEQL(text);
         stmt.addListener(listener);
@@ -36,7 +36,7 @@ public class TestFilterExpressions extends TestCase
 
     public void testEqualsSemanticExpr()
     {
-        // TODO: Esper-114
+        // Test for Esper-114
         String text = "select * from " + SupportBeanComplexProps.class.getName() + "(simpleProperty='1') as s0" +
                 ", " + SupportBeanComplexProps.class.getName() + "(simpleProperty='2') as s1" +
                 " where s0.nested = s1.nested";

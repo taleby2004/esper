@@ -13,6 +13,8 @@ import java.util.LinkedList;
 
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
+import net.esper.collection.NullIterator;
+import net.esper.collection.SingleEventIterator;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -23,6 +25,7 @@ public final class ZeroDepthStream implements EventStream
 {
     private final LinkedList<View> children = new LinkedList<View>();
     private final EventType eventType;
+    private EventBean lastInsertedEvent;
 
     /**
      * Ctor.
@@ -47,6 +50,8 @@ public final class ZeroDepthStream implements EventStream
         {
             childView.update(row, null);
         }
+
+        lastInsertedEvent = event;
     }
 
     public final EventType getEventType()
@@ -56,7 +61,7 @@ public final class ZeroDepthStream implements EventStream
 
     public final Iterator<EventBean> iterator()
     {
-        return null;
+        return new SingleEventIterator(lastInsertedEvent);
     }
 
     public final View addView(View view)

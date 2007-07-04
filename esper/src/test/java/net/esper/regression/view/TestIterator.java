@@ -23,7 +23,7 @@ public class TestIterator extends TestCase
 
     public void testPatternNoWindow()
     {
-        // TODO: fix for Esper-114
+        // Test for Esper-115
         String cepStatementString =	"select * from pattern " +
 									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
 									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ] " +
@@ -34,11 +34,13 @@ public class TestIterator extends TestCase
 		myEventBean1.setString("address");
 		myEventBean1.setIntBoxed(9001);
 		epService.getEPRuntime().sendEvent(myEventBean1);
+        assertFalse(epStatement.iterator().hasNext());
 
         SupportBean myEventBean2 = new SupportBean();
         myEventBean2.setString("txn");
         myEventBean2.setIntBoxed(9001);
         epService.getEPRuntime().sendEvent(myEventBean2);
+        assertTrue(epStatement.iterator().hasNext());
 
         Iterator<EventBean> itr = epStatement.iterator();
         EventBean event = itr.next();
