@@ -163,6 +163,7 @@ public class TestUseResultPattern extends TestCase implements SupportBeanConstan
 
     public void testFollowedByFilter()
     {
+        // Test for ESPER-121
         Configuration config = new Configuration();
         config.addEventTypeAlias("FxTradeEvent", SupportTradeEvent.class
                 .getName());

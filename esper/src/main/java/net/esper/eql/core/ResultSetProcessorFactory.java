@@ -270,7 +270,7 @@ public class ResultSetProcessorFactory
             // (3)
             // There is no group-by clause and there are aggregate functions with event properties in the select clause (aggregation case)
             // or having class, and all event properties are aggregated (all properties are under aggregation functions).
-            if (nonAggregatedProps.isEmpty())
+            if ((nonAggregatedProps.isEmpty()) && (!isUsingWildcard))
             {
                 log.debug(".getProcessor Using ResultSetProcessorRowForAll");
                 return new ResultSetProcessorRowForAll(selectExprProcessor, aggregationService, optionalHavingNode);

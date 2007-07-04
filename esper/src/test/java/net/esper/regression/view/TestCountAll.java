@@ -32,28 +32,31 @@ public class TestCountAll extends TestCase
         sendEvent("DELL", 1L);
         assertSize(2, 1);
     }
-    
+
     public void testCountPlusStar()
     {
-        // TODO: http://jira.codehaus.org/browse/ESPER-118 NullPointerException when select * and additional fields
+        // Test for ESPER-118
         String statementText = "select *, count(*) as cnt from " + SupportMarketDataBean.class.getName();
         selectTestView = epService.getEPAdministrator().createEQL(statementText);
         selectTestView.addListener(listener);
 
-        sendEvent("DELL", 1L);
+        sendEvent("S0", 1L);
         assertTrue(listener.getAndClearIsInvoked());
         assertEquals(1, listener.getLastNewData().length);
         assertEquals(1L, listener.getLastNewData()[0].get("cnt"));
-        
-        sendEvent("DELL", 1L);
+        assertEquals("S0", listener.getLastNewData()[0].get("symbol"));
+
+        sendEvent("S1", 1L);
         assertTrue(listener.getAndClearIsInvoked());
         assertEquals(1, listener.getLastNewData().length);
         assertEquals(2L, listener.getLastNewData()[0].get("cnt"));
+        assertEquals("S1", listener.getLastNewData()[0].get("symbol"));
 
-        sendEvent("DELL", 1L);
+        sendEvent("S2", 1L);
         assertTrue(listener.getAndClearIsInvoked());
         assertEquals(1, listener.getLastNewData().length);
         assertEquals(3L, listener.getLastNewData()[0].get("cnt"));
+        assertEquals("S2", listener.getLastNewData()[0].get("symbol"));
     }
 
     public void testCount()
