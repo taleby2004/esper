@@ -28,6 +28,8 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
     private double sumW = Double.NaN;
     private double currentValue = Double.NaN;
 
+    private EventBean lastNewEvent;
+
     /**
      * Constructor requires the name of the field to use in the parent view to compute the weighted average on,
      * as well as the name of the field in the parent view to get the weight from.
@@ -131,11 +133,19 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
             newDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), currentValue);
             EventBean newDataEvent = statementContext.getEventAdapterService().createMapFromValues(newDataMap, eventType);
 
-            Map<String, Object> oldDataMap = new HashMap<String, Object>();
-            oldDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), oldValue);
-            EventBean oldDataEvent = statementContext.getEventAdapterService().createMapFromValues(oldDataMap, eventType);
+            if (lastNewEvent == null)
+            {
+                Map<String, Object> oldDataMap = new HashMap<String, Object>();
+                oldDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), oldValue);
+                EventBean oldDataEvent = statementContext.getEventAdapterService().createMapFromValues(oldDataMap, eventType);
 
-            updateChildren(new EventBean[] {newDataEvent}, new EventBean[] {oldDataEvent});
+                updateChildren(new EventBean[] {newDataEvent}, new EventBean[] {oldDataEvent});
+            }
+            else
+            {
+                updateChildren(new EventBean[] {newDataEvent}, new EventBean[] {lastNewEvent});
+                lastNewEvent = newDataEvent;
+            }
         }
     }
 

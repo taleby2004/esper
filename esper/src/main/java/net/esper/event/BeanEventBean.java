@@ -41,28 +41,6 @@ public class BeanEventBean implements EventBeanSPI
         return eventType;
     }
 
-    public final boolean equals(Object other)
-    {
-        if (!(other instanceof BeanEventBean))
-        {
-            return false;
-        }
-        BeanEventBean o = (BeanEventBean) other;
-        if (other == this)
-        {
-            return true;
-        }
-        if (o.eventType != eventType)
-        {
-            return false;
-        }
-        if (!(o.event.equals(event)))
-        {
-            return false;
-        }
-        return true;
-    }
-
     public Object get(String property) throws IllegalArgumentException, PropertyAccessException
     {
         EventPropertyGetter getter = eventType.getGetter(property);

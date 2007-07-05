@@ -7,15 +7,14 @@
  **************************************************************************************/
 package net.esper.eql.join;
 
-import net.esper.event.EventBean;
 import net.esper.collection.MultiKey;
 import net.esper.collection.UniformPair;
 import net.esper.eql.join.table.EventTable;
 import net.esper.eql.spec.SelectClauseStreamSelectorEnum;
+import net.esper.event.EventBean;
 
-import java.util.Set;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Implements the function to determine a join result set using tables/indexes and query strategy

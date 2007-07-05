@@ -17,7 +17,6 @@ public class WrapperEventBean implements EventBean {
 	private final EventBean event;
 	private final Map<String, Object> map;
 	private final EventType eventType;
-    private Integer hashCode;
 
     /**
      * Ctor.
@@ -84,79 +83,4 @@ public class WrapperEventBean implements EventBean {
         "[event=" + event + "] " + 
         "[properties=" + map + "]";
 	}
-
-    public boolean equals(final Object otherObject)
-    {
-        if (otherObject == this)
-        {
-            return true;
-        }
-
-        if (otherObject == null)
-        {
-            return false;
-        }
-
-        if (getClass() != otherObject.getClass())
-        {
-            return false;
-        }
-
-        final WrapperEventBean other = (WrapperEventBean) otherObject;
-
-        if (other.eventType != eventType)
-        {
-            return false;
-        }
-
-        if (map.size() != other.map.size())
-        {
-            return false;
-        }
-
-        // Compare entry by entry
-        for (Map.Entry<String, Object> entry : map.entrySet())
-        {
-            final String name = entry.getKey();
-            final Object value = entry.getValue();
-            final Object otherValue = other.get(name);
-
-            if ((otherValue == null) && (value == null))
-            {
-                continue;
-            }
-
-            if ((otherValue == null) && (value != null))
-            {
-                return false;
-            }
-
-            if (!otherValue.equals(value))
-            {
-                return false;
-            }
-        }
-
-        return other.event.equals(this.event);
-    }
-
-    public int hashCode()
-    {
-        if (hashCode == null)
-        {
-            int hashCodeVal = 0;
-            for (Map.Entry<String, Object> entry : map.entrySet())
-            {
-                final String name = entry.getKey();
-                final Object value = entry.getValue();
-
-                if (value != null)
-                {
-                    hashCodeVal = hashCodeVal ^ name.hashCode() ^ value.hashCode();
-                }
-            }
-            hashCode = hashCodeVal ^ event.hashCode();
-        }
-        return hashCode;
-    }    
 }

@@ -29,6 +29,8 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
      */
     protected StatementContext statementContext;
 
+    private EventBean lastNewEvent;
+
     /**
      * Constructor requires the name of the two fields to use in the parent view to compute the statistics.
      * @param statisticsBean is the base class prodiving sum of X and Y and squares for use by subclasses
@@ -61,9 +63,12 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     {
         // If we have child views, keep a reference to the old values, so we can fireStatementStopped them as old data event.
         BaseStatisticsBean oldValues = null;
-        if (this.hasViews())
+        if (lastNewEvent == null)
         {
-            oldValues = (BaseStatisticsBean) statisticsBean.clone();
+            if (this.hasViews())
+            {
+                oldValues = (BaseStatisticsBean) statisticsBean.clone();
+            }
         }
 
         // add data points to the bean
@@ -91,12 +96,25 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
         // If there are child view, fireStatementStopped update method
         if (this.hasViews())
         {
-            // Make a copy of the current values since if we change the values subsequently, the handed-down
-            // values should not change
-            BaseStatisticsBean newValues = (BaseStatisticsBean) statisticsBean.clone();
-            EventBean newValuesEvent = statementContext.getEventAdapterService().adapterForBean(newValues);
-            EventBean oldValuesEvent = statementContext.getEventAdapterService().adapterForBean(oldValues);
-            updateChildren(new EventBean[] {newValuesEvent}, new EventBean[] {oldValuesEvent});
+            if (lastNewEvent == null)
+            {
+                // Make a copy of the current values since if we change the values subsequently, the handed-down
+                // values should not change
+                BaseStatisticsBean newValues = (BaseStatisticsBean) statisticsBean.clone();
+                EventBean newValuesEvent = statementContext.getEventAdapterService().adapterForBean(newValues);
+                EventBean oldValuesEvent = statementContext.getEventAdapterService().adapterForBean(oldValues);
+                updateChildren(new EventBean[] {newValuesEvent}, new EventBean[] {oldValuesEvent});
+                lastNewEvent = newValuesEvent;
+            }
+            else
+            {
+                // Make a copy of the current values since if we change the values subsequently, the handed-down
+                // values should not change
+                BaseStatisticsBean newValues = (BaseStatisticsBean) statisticsBean.clone();
+                EventBean newValuesEvent = statementContext.getEventAdapterService().adapterForBean(newValues);
+                updateChildren(new EventBean[] {newValuesEvent}, new EventBean[] {lastNewEvent});
+                lastNewEvent = newValuesEvent;
+            }
         }
     }
 

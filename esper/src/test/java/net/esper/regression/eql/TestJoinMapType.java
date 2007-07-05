@@ -56,6 +56,44 @@ public class TestJoinMapType extends TestCase
         assertFalse(listener.isInvoked());
     }
 
+    public void testJoinMapEventNotUnique()
+    {
+        // Test for Esper-122 
+        String joinStatement = "select S0.id, S1.id, S0.p00, S1.p00 from MapS0 as S0, MapS1 as S1" +
+                " where S0.id = S1.id";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(joinStatement);
+        stmt.addListener(listener);
+
+        for (int i = 0; i < 100; i++)
+        {
+            if (i % 2 == 1)
+            {
+                sendMapEvent("MapS0", "a", 1);
+            }
+            else
+            {
+                sendMapEvent("MapS1", "a", 1);
+            }
+        }
+    }
+
+    public void testJoinWrapperEventNotUnique()
+    {
+        // Test for Esper-122
+        epService.getEPAdministrator().createEQL("insert into S0 select 's0' as stream, * from " + SupportBean.class.getName());
+        epService.getEPAdministrator().createEQL("insert into S1 select 's1' as stream, * from " + SupportBean.class.getName());
+        String joinStatement = "select * from S0 as a, S1 as b where a.intBoxed = b.intBoxed";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(joinStatement);
+        stmt.addListener(listener);
+
+        for (int i = 0; i < 100; i++)
+        {
+            epService.getEPRuntime().sendEvent(new SupportBean());
+        }
+    }
+
     private void sendMapEvent(String alias, String id, int p00)
     {
         Map<String, Object> event = new HashMap<String, Object>();

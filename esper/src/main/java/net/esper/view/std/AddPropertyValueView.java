@@ -1,18 +1,20 @@
 package net.esper.view.std;
 
+import net.esper.core.StatementContext;
+import net.esper.event.EventAdapterService;
+import net.esper.event.EventBean;
+import net.esper.event.EventType;
+import net.esper.view.CloneableView;
+import net.esper.view.View;
+import net.esper.view.ViewSupport;
+import net.esper.view.Viewable;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import net.esper.event.EventBean;
-import net.esper.event.EventType;
-import net.esper.event.EventAdapterService;
-import net.esper.view.*;
-import net.esper.core.StatementContext;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This view simply adds a property to the events posted to it. This is useful for the group-merge views.
@@ -24,6 +26,10 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
     private final Object[] propertyValues;
     private final EventType eventType;
     private boolean mustAddProperty;
+
+    // Keep a history of posted old events to avoid reconstructing the event
+    // and adhere to the contract of posting the same reference to child views
+    private Map<EventBean, EventBean> newToOldEventMap;
 
     /**
      * Constructor.
@@ -38,6 +44,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
         this.propertyValues = mergeValues;
         this.eventType = mergedResultEventType;
         this.statementContext = statementContext;
+        newToOldEventMap = new HashMap<EventBean, EventBean>();
     }
 
     public View cloneView(StatementContext statementContext)
@@ -101,6 +108,8 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
             {
                 EventBean event = addProperty(newEvent, propertyNames, propertyValues, eventType, statementContext.getEventAdapterService());
                 newEvents[index++] = event;
+
+                newToOldEventMap.put(newEvent, event);
             }
         }
 
@@ -111,8 +120,16 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
             int index = 0;
             for (EventBean oldEvent : oldData)
             {
-                EventBean event = addProperty(oldEvent, propertyNames, propertyValues, eventType, statementContext.getEventAdapterService());
-                oldEvents[index++] = event;
+                EventBean outgoing = newToOldEventMap.remove(oldEvent);
+                if (outgoing != null)
+                {
+                    oldEvents[index++] = outgoing;
+                }
+                else
+                {
+                    EventBean event = addProperty(oldEvent, propertyNames, propertyValues, eventType, statementContext.getEventAdapterService());
+                    oldEvents[index++] = event;
+                }
             }
         }
 

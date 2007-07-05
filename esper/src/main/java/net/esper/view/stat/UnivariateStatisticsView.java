@@ -22,6 +22,7 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
     private final String fieldName;
     private EventPropertyGetter fieldGetter;
     private final BaseStatisticsBean baseStatisticsBean = new BaseStatisticsBean();
+    private EventBean lastNewEvent;
 
     /**
      * Constructor requires the name of the field to use in the parent view to compute the statistics.
@@ -61,11 +62,14 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        // If we have child views, keep a reference to the old values, so we can fireStatementStopped them as old data event.
+        // If we have child views, keep a reference to the old values, so we can update them as old data event.
         EventBean oldDataMap = null;
-        if (this.hasViews())
+        if (lastNewEvent == null)
         {
-            oldDataMap = populateMap(baseStatisticsBean, statementContext.getEventAdapterService(), eventType);
+            if (this.hasViews())
+            {
+                oldDataMap = populateMap(baseStatisticsBean, statementContext.getEventAdapterService(), eventType);
+            }
         }
 
         // add data points to the bean
@@ -88,11 +92,21 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
             }
         }
 
-        // If there are child view, fireStatementStopped update method
+        // If there are child view, call update method
         if (this.hasViews())
         {
             EventBean newDataMap = populateMap(baseStatisticsBean, statementContext.getEventAdapterService(), eventType);
-            updateChildren(new EventBean[] {newDataMap}, new EventBean[] {oldDataMap});
+
+            if (lastNewEvent == null)
+            {
+                updateChildren(new EventBean[] {newDataMap}, new EventBean[] {oldDataMap});
+            }
+            else
+            {
+                updateChildren(new EventBean[] {newDataMap}, new EventBean[] {lastNewEvent});
+            }
+
+            lastNewEvent = newDataMap;
         }
     }
 
