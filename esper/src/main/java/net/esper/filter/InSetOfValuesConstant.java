@@ -57,4 +57,9 @@ public class InSetOfValuesConstant implements FilterSpecParamInValue
         InSetOfValuesConstant other = (InSetOfValuesConstant) obj;
         return other.constant.equals(this.constant);
     }
+
+    public int hashCode()
+    {
+        return (constant != null ? constant.hashCode() : 0);
+    }
 }

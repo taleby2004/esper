@@ -43,4 +43,10 @@ public class TimePeriodParameter implements MetaDefItem
         TimePeriodParameter other = (TimePeriodParameter) object;
         return other.numSeconds == this.numSeconds;
     }
+
+    public int hashCode()
+    {
+        long temp = numSeconds != +0.0d ? Double.doubleToLongBits(numSeconds) : 0L;
+        return (int) (temp ^ (temp >>> 32));
+    }
 }

@@ -16,7 +16,7 @@ import net.esper.util.MetaDefItem;
  */
 public abstract class FilterSpecParam implements MetaDefItem
 {
-    private final String propertyName;
+    protected final String propertyName;
     private final FilterOperator filterOperator;
 
     FilterSpecParam(String propertyName, FilterOperator filterOperator)
@@ -83,4 +83,11 @@ public abstract class FilterSpecParam implements MetaDefItem
         return true;
     }
 
+    public int hashCode()
+    {
+        int result;
+        result = propertyName.hashCode();
+        result = 31 * result + filterOperator.hashCode();
+        return result;
+    }
 }

@@ -8,6 +8,7 @@
 package net.esper.util;
 
 import java.util.Comparator;
+import java.io.Serializable;
 
 import net.esper.collection.MultiKeyUntyped;
 
@@ -15,7 +16,7 @@ import net.esper.collection.MultiKeyUntyped;
  * A comparator on multikeys. The multikeys must contain the same
  * number of values.
  */
-public final class MultiKeyComparator implements Comparator<MultiKeyUntyped>
+public final class MultiKeyComparator implements Comparator<MultiKeyUntyped>, Serializable
 {
     private final Boolean[] isDescendingValues;
 

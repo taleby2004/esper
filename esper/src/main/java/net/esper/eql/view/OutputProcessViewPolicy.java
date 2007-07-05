@@ -109,17 +109,28 @@ public class OutputProcessViewPolicy extends OutputProcessView
                     "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
         }
 
-		// add the incoming events to the event batches
-		for(MultiKey<EventBean> event : newEvents)
-		{
-			newEventsSet.add(event);
-		}
-		for(MultiKey<EventBean> event : oldEvents)
-		{
-			oldEventsSet.add(event);
-		}
+        int newEventsSize = 0;
+        if (newEvents != null)
+        {
+            // add the incoming events to the event batches
+            newEventsSize = newEvents.size();
+            for(MultiKey<EventBean> event : newEvents)
+            {
+                newEventsSet.add(event);
+            }
+        }
 
-		outputCondition.updateOutputCondition(newEvents.size(), oldEvents.size());
+        int oldEventsSize = 0;
+        if (oldEvents != null)
+        {
+            oldEventsSize = oldEvents.size();
+            for(MultiKey<EventBean> event : oldEvents)
+            {
+                oldEventsSet.add(event);
+            }
+        }
+
+        outputCondition.updateOutputCondition(newEventsSize, oldEventsSize);
     }
 
 	/**

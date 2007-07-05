@@ -54,4 +54,37 @@ public class ScheduleSlot implements Comparable<ScheduleSlot>, MetaDefItem
     {
         return "bucket/slot=" + bucketNum + "/" + slotNum;
     }
+
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+
+        ScheduleSlot that = (ScheduleSlot) o;
+
+        if (bucketNum != that.bucketNum)
+        {
+            return false;
+        }
+        if (slotNum != that.slotNum)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public int hashCode()
+    {
+        int result;
+        result = bucketNum;
+        result = 31 * result + slotNum;
+        return result;
+    }
 }

@@ -214,8 +214,8 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
     public final String toString()
     {
         return this.getClass().getName() +
-                " sortFieldName=" + sortFieldNames +
-                " isDescending=" + isDescendingValues +
+                " sortFieldName=" + Arrays.toString(sortFieldNames) +
+                " isDescending=" + Arrays.toString(isDescendingValues) +
                 " sortWindowSize=" + sortWindowSize;
     }
 

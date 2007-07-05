@@ -102,6 +102,14 @@ public abstract class ObjectSpec implements MetaDefItem
         return true;
     }
 
+    public int hashCode()
+    {
+        int result;
+        result = objectNamespace.hashCode();
+        result = 31 * result + objectName.hashCode();
+        return result;
+    }
+
     public final String toString()
     {
         StringBuilder buffer = new StringBuilder();

@@ -198,10 +198,6 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     filteredTypes.add(filterNode.getFilterSpec().getEventType());
                 }
             }
-            else if (streamSpec instanceof DBStatementStreamSpec)
-            {
-                // no action for these
-            }            
         }
 
         if (filteredTypes.size() == 1)

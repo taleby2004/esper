@@ -245,4 +245,9 @@ public class ConfigurationEventTypeXMLDOM
         }
         return true;
     }
+
+    public int hashCode()
+    {
+        return rootElementName.hashCode();
+    }
 }

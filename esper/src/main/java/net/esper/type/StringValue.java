@@ -81,8 +81,8 @@ public final class StringValue extends PrimitiveValueBase
      */
     public static String parseString(String value)
     {
-        if ( (value.startsWith("\"")) & (value.endsWith("\"")) ||
-             (value.startsWith("'")) & (value.endsWith("'")) )
+        if ( (value.startsWith("\"")) && (value.endsWith("\"")) ||
+             (value.startsWith("'")) && (value.endsWith("'")) )
         {
             if (value.length() > 1)
             {

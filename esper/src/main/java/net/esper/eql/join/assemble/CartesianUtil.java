@@ -77,7 +77,6 @@ public class CartesianUtil
 
             streamOne = streamTwo;
             streamOneSize = streamTwoSize;
-            subStreamNumsOne = subStreamNumsTwo;
 
             streamTwo = holdRows;
             streamTwoSize = holdSize;

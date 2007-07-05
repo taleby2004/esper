@@ -160,4 +160,9 @@ public class EventPropertyDescriptor
         }
         return true;
     }
+
+    public int hashCode()
+    {
+        return propertyName.hashCode();
+    }
 }

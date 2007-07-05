@@ -70,14 +70,14 @@ public class OutputConditionFirst implements OutputCondition
 		{
 			public void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
 			{
-				OutputConditionFirst.this.continueOutputProcessing(doOutput, forceUpdate);
+				OutputConditionFirst.this.continueOutputProcessing(forceUpdate);
 			}
 		};
 	}
 
-	private void continueOutputProcessing(boolean doOutput, boolean forceUpdate)
+	private void continueOutputProcessing(boolean forceUpdate)
 	{
-		doOutput = !witnessedFirst;
+		boolean doOutput = !witnessedFirst;
 		outputCallback.continueOutputProcessing(doOutput, forceUpdate);
 		witnessedFirst = false;
 	}

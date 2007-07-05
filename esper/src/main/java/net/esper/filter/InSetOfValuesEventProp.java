@@ -99,4 +99,9 @@ public class InSetOfValuesEventProp implements FilterSpecParamInValue
 
         return false;
     }
+
+    public int hashCode()
+    {
+        return resultEventProperty.hashCode();
+    }
 }

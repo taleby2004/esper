@@ -62,4 +62,10 @@ public class RangeValueDouble implements FilterSpecParamRangeValue
         RangeValueDouble other = (RangeValueDouble) obj;
         return other.doubleValue == this.doubleValue;
     }
+
+    public int hashCode()
+    {
+        long temp = doubleValue != +0.0d ? Double.doubleToLongBits(doubleValue) : 0L;
+        return (int) (temp ^ (temp >>> 32));
+    }
 }

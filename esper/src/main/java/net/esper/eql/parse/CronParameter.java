@@ -9,14 +9,15 @@ import java.text.SimpleDateFormat;
  * Hold parameters for timer:at.
  */
 public class CronParameter implements NumberSetParameter {
-    private cronOperator operator;
+    private CronOperator operator;
     private static Calendar calendar;
     private Integer day, month;
 
     /**
      * Enumeration for special keywords in crontab timer.
      */
-    public enum cronOperator {
+    public enum CronOperator
+    {
         /**
          * Last day of week or month.
          */
@@ -178,17 +179,16 @@ public class CronParameter implements NumberSetParameter {
         return true;
     }
 
-
-    private static cronOperator assignOperator(String name)
+    private static CronOperator assignOperator(String name)
     {
         if (name.equalsIgnoreCase("last") || (name.equalsIgnoreCase("lastoperator"))) {
-            return cronOperator.last;
+            return CronOperator.last;
         }
         if (name.equalsIgnoreCase("weekdayoperator")) {
-            return cronOperator.w;
+            return CronOperator.w;
         }
         if (name.equalsIgnoreCase("lastweekday")) {
-            return cronOperator.lw;
+            return CronOperator.lw;
         }
         return null;
     }

@@ -7,12 +7,8 @@
  **************************************************************************************/
 package net.esper.filter;
 
-import net.esper.event.EventType;
 import net.esper.event.EventBean;
-import net.esper.util.JavaClassHelper;
 import net.esper.pattern.MatchedEventMap;
-
-import java.util.Map;
 
 /**
  * An event property as a filter parameter representing a range.
@@ -93,5 +89,10 @@ public class RangeValueEventProp implements FilterSpecParamRangeValue
         }
 
         return false;
+    }
+
+    public int hashCode()
+    {
+        return resultEventProperty.hashCode();
     }
 }

@@ -138,6 +138,11 @@ public class PlaceholderParser
          * @return true if parameter fragement, false if text fragment.
          */
         public abstract boolean isParameter();
+
+        public int hashCode()
+        {
+            return (value != null ? value.hashCode() : 0);
+        }
     }
 
     /**

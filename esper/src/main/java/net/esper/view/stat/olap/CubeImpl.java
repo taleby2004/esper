@@ -54,7 +54,7 @@ public final class CubeImpl implements Cube
 
     public final DimensionMember[] getMembers(int ordinal)
     {
-        if ((ordinal < 0) || (ordinal >= measures.length))
+        if ((ordinal < 0) || ((measures != null) && (ordinal >= measures.length)))
         {
             throw new IllegalArgumentException("Invalid ordinal value");
         }

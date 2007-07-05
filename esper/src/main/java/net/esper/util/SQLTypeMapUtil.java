@@ -119,7 +119,7 @@ public class SQLTypeMapUtil
             }
             catch (ClassNotFoundException e)
             {
-                new IllegalArgumentException("Cannot load class for sql type " + sqlType + " and class " + className);
+                throw new IllegalArgumentException("Cannot load class for sql type " + sqlType + " and class " + className);
             }
         }
         throw new IllegalArgumentException("Cannot map java.sql.Types type " + sqlType);

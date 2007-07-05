@@ -14,7 +14,7 @@ public final class RegressionBean extends BaseStatisticsBean
     {
         double slope = getSlope();
 
-        if (slope == Double.NaN)
+        if (Double.isNaN(slope))
         {
             return Double.NaN;
         }
