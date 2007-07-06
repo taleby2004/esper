@@ -20,6 +20,45 @@ public class TestFilterExpressions extends TestCase
         epService.initialize();
     }
 
+    public void testNotEqualsNotIn()
+    {
+        tryNotEqualsConsolidate("intPrimitive not in (1, 2)");
+    }
+
+    public void testNotEqualsComma()
+    {
+        tryNotEqualsConsolidate("intPrimitive != 1, intPrimitive != 2");
+    }
+
+    public void testNotEqualsAnd()
+    {
+        tryNotEqualsConsolidate("intPrimitive != 1 and intPrimitive != 2");
+    }
+
+    // TODO: remove
+    public void tryNotEqualsConsolidate(String filter)
+    {
+        String text = "select * from " + SupportBean.class.getName() + "(" + filter + ")";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        stmt.addListener(listener);
+
+        for (int i = 0; i < 5; i++)
+        {
+            epService.getEPRuntime().sendEvent(new SupportBean("", i));
+
+            if ((i == 1) || (i == 2))
+            {
+                assertFalse("incorrect:" + i, listener.isInvoked());
+            }
+            else
+            {
+                assertTrue("incorrect:" + i, listener.isInvoked());
+            }
+            listener.reset();
+        }
+
+    }
+
     public void testEqualsSemanticFilter()
     {
         // Test for Esper-114
@@ -96,7 +135,7 @@ public class TestFilterExpressions extends TestCase
         tryPattern3Stream(text, new Integer[] {null, 2, 1, null,   8,  1,  2}, new Double[] {0d, 0d, 0d, 0d, 0d, 0d, 0d},
                                 new Integer[] {null, 3, 1,    8, null, 4, -2}, new Double[] {0d, 0d, 0d, 0d, 0d, 0d, 0d},
                                 new Integer[] {null, 3, 1,    8, null, 5, null}, new Double[] {0d, 0d, 0d, 0d, 0d, 0d, 0d},
-                    new boolean[] {false, false, false, false, false, true, true});
+                    new boolean[] {false, false, false, false, false, true, false});
 
         text = "select * from pattern [" +
                 "a=" + SupportBean.class.getName() + " -> " +

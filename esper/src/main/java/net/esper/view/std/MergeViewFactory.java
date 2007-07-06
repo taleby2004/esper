@@ -14,7 +14,6 @@ import java.util.Arrays;
 public class MergeViewFactory implements ViewFactory
 {
     private String[] fieldNames;
-    private Class[] fieldTypes;
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
@@ -45,7 +44,7 @@ public class MergeViewFactory implements ViewFactory
         }
 
         // determine types of fields
-        fieldTypes = new Class[fieldNames.length];
+        Class[] fieldTypes = new Class[fieldNames.length];
         for (int i = 0; i < fieldTypes.length; i++)
         {
             fieldTypes[i] = groupByViewFactory.getEventType().getPropertyType(fieldNames[i]);

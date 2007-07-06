@@ -27,7 +27,7 @@ public class ConfigurationEngineDefaults
     /**
      * Holds threading settings.
      */
-    public class Threading
+    public static class Threading
     {
         private boolean isListenerDispatchPreserveOrder;
         private long listenerDispatchTimeout;

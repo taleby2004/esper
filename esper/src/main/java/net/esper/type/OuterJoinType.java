@@ -25,5 +25,5 @@ public enum OuterJoinType
     /**
      * Full outer join.
      */
-    FULL;
+    FULL
 }

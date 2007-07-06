@@ -82,7 +82,7 @@ public class TestMTStmtMgmt extends TestCase
     public void testStatementsAll() throws Exception
     {
         int numThreads = 3;
-        tryStatementCreateSendAndStop(numThreads, STMT, 250);
+        tryStatementCreateSendAndStop(numThreads, STMT, 100);
     }
 
     private void tryStatementCreateSendAndStop(int numThreads, Object[][] statements, int numRepeats) throws Exception

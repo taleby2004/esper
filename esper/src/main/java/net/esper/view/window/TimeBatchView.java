@@ -1,23 +1,22 @@
 package net.esper.view.window;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.*;
-import java.text.SimpleDateFormat;
-
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.view.ViewSupport;
-import net.esper.core.StatementContext;
-import net.esper.view.View;
-import net.esper.view.CloneableView;
-import net.esper.schedule.ScheduleHandleCallback;
-import net.esper.schedule.ScheduleSlot;
 import net.esper.client.EPException;
 import net.esper.collection.ViewUpdatedCollection;
 import net.esper.core.EPStatementHandleCallback;
 import net.esper.core.ExtensionServicesContext;
+import net.esper.core.StatementContext;
+import net.esper.event.EventBean;
+import net.esper.event.EventType;
+import net.esper.schedule.ScheduleHandleCallback;
+import net.esper.schedule.ScheduleSlot;
+import net.esper.view.CloneableView;
+import net.esper.view.View;
+import net.esper.view.ViewSupport;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -36,8 +35,6 @@ import net.esper.core.ExtensionServicesContext;
  */
 public final class TimeBatchView extends ViewSupport implements CloneableView, DataWindowView
 {
-    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;
     private final StatementContext statementContext;
@@ -166,7 +163,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, D
         if (log.isDebugEnabled())
         {
             log.debug(".sendBatch Update child views, " +
-                    "  time=" + dateFormat.format(statementContext.getSchedulingService().getTime()));
+                    "  time=" + statementContext.getSchedulingService().getTime());
         }
 
         // If there are child views and the batch was filled, fireStatementStopped update method

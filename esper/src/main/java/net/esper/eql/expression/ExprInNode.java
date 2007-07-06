@@ -175,7 +175,7 @@ public class ExprInNode extends ExprNode
         }
         if (rightResult == null)
         {
-            return (leftResult == null);
+            return false;
         }
 
         if (!mustCoerce)

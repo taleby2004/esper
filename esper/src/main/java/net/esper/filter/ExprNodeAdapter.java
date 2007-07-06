@@ -7,8 +7,8 @@
  **************************************************************************************/
 package net.esper.filter;
 
-import net.esper.event.EventBean;
 import net.esper.eql.expression.ExprNode;
+import net.esper.event.EventBean;
 
 /**
  * Adapter for use by {@link FilterParamIndexBooleanExpr} to evaluate boolean expressions, providing
@@ -18,25 +18,33 @@ import net.esper.eql.expression.ExprNode;
 public class ExprNodeAdapter
 {
     private final ExprNode exprNode;
-    private EventBean[] prototype;
+    private final EventBean[] prototype;
+
+    private ThreadLocal<EventBean[]> arrayPerThread = new ThreadLocal<EventBean[]>()
+    {
+        protected synchronized EventBean[] initialValue()
+        {
+            EventBean[] eventsPerStream = new EventBean[prototype.length];
+            System.arraycopy(prototype, 0, eventsPerStream, 0, prototype.length);
+            return eventsPerStream;
+        }
+    };
 
     /**
      * Ctor.
      * @param exprNode is the boolean expression
      */
-    public ExprNodeAdapter(ExprNode exprNode)
+    public ExprNodeAdapter(ExprNode exprNode, EventBean[] prototype)
     {
         this.exprNode = exprNode;
-    }
-
-    /**
-     * Provides the prototype events-per-stream where stream zero is the current stream
-     * and is filled when the expression is evaluated.
-     * @param prototype is the row of events for which stream zero is missing as the current event is filled in later
-     */
-    public void setPrototype(EventBean[] prototype)
-    {
-        this.prototype = prototype;
+        if (prototype == null)
+        {
+            this.prototype = new EventBean[1];
+        }
+        else
+        {
+            this.prototype = prototype;
+        }
     }
 
     /**
@@ -46,21 +54,7 @@ public class ExprNodeAdapter
      */
     public boolean evaluate(EventBean event)
     {
-        EventBean[] eventsPerStream;
-
-        if (prototype == null)
-        {
-            eventsPerStream = new EventBean[1];
-        }
-        else
-        {
-            eventsPerStream = new EventBean[prototype.length];
-            for (int i = 1; i < prototype.length; i++)
-            {
-                eventsPerStream[i] = prototype[i];
-            }
-        }
-
+        EventBean[] eventsPerStream = arrayPerThread.get();
         eventsPerStream[0] = event;
         return (Boolean) exprNode.evaluate(eventsPerStream, true);
     }

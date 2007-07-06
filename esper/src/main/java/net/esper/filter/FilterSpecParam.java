@@ -72,7 +72,7 @@ public abstract class FilterSpecParam implements MetaDefItem
 
         FilterSpecParam other = (FilterSpecParam) obj;
 
-        if (this.propertyName != other.propertyName)
+        if (!(this.propertyName.equals(other.propertyName)))
         {
             return false;
         }

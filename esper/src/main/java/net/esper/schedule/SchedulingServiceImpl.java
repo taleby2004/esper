@@ -128,9 +128,10 @@ public final class SchedulingServiceImpl implements SchedulingService
 
         // First determine all triggers to shoot
         List<Long> removeKeys = new LinkedList<Long>();
-        for (Long key : headMap.keySet())
+        for (Map.Entry<Long, SortedMap<ScheduleSlot, ScheduleHandle>> entry : headMap.entrySet())
         {
-            SortedMap<ScheduleSlot, ScheduleHandle> value = headMap.get(key);
+            Long key = entry.getKey();
+            SortedMap<ScheduleSlot, ScheduleHandle> value = entry.getValue();
             removeKeys.add(key);
             for (ScheduleHandle handle : value.values())
             {

@@ -55,31 +55,48 @@ public class EventTypeIndexBuilder
         if (rootNode == null)
         {
             callbacksLock.lock();
-            rootNode = eventTypeIndex.get(eventType);
-            if (rootNode == null)
+            try
             {
-                rootNode = new FilterHandleSetNode();
-                eventTypeIndex.add(eventType, rootNode);
+                rootNode = eventTypeIndex.get(eventType);
+                if (rootNode == null)
+                {
+                    rootNode = new FilterHandleSetNode();
+                    eventTypeIndex.add(eventType, rootNode);
+                }
             }
-            callbacksLock.unlock();
+            finally
+            {
+                callbacksLock.unlock();
+            }
         }
 
         // Make sure the filter callback doesn't already exist
         callbacksLock.lock();
-        if (callbacks.containsKey(filterCallback))
+        try
+        {
+            if (callbacks.containsKey(filterCallback))
+            {
+                throw new IllegalStateException("Callback for filter specification already exists in collection");
+            }
+        }
+        finally
         {
             callbacksLock.unlock();
-            throw new IllegalStateException("Callback for filter specification already exists in collection");
         }
-        callbacksLock.unlock();
 
         // Now add to tree
         IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
         IndexTreePath path = treeBuilder.add(filterValueSet, filterCallback, rootNode);
 
         callbacksLock.lock();
-        callbacks.put(filterCallback, new Pair<EventType, IndexTreePath>(eventType, path));
-        callbacksLock.unlock();
+        try
+        {
+            callbacks.put(filterCallback, new Pair<EventType, IndexTreePath>(eventType, path));
+        }
+        finally
+        {
+            callbacksLock.unlock();
+        }
     }
 
     /**
@@ -88,9 +105,16 @@ public class EventTypeIndexBuilder
      */
     public final void remove(FilterHandle filterCallback)
     {
+        Pair<EventType, IndexTreePath> pair = null;
         callbacksLock.lock();
-        Pair<EventType, IndexTreePath> pair = callbacks.get(filterCallback);
-        callbacksLock.unlock();
+        try
+        {
+            pair = callbacks.get(filterCallback);
+        }
+        finally
+        {
+            callbacksLock.unlock();
+        }
 
         if (pair == null)
         {
@@ -105,7 +129,13 @@ public class EventTypeIndexBuilder
 
         // Remove from callbacks list
         callbacksLock.lock();
-        callbacks.remove(filterCallback);
-        callbacksLock.unlock();
+        try
+        {
+            callbacks.remove(filterCallback);
+        }
+        finally
+        {
+            callbacksLock.unlock();
+        }
     }
 }

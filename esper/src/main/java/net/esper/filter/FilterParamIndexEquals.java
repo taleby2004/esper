@@ -79,9 +79,16 @@ public final class FilterParamIndexEquals extends FilterParamIndexPropBase
         }
 
         // Look up in hashtable
+        EventEvaluator evaluator = null;
         constantsMapRWLock.readLock().lock();
-        EventEvaluator evaluator = constantsMap.get(attributeValue);
-        constantsMapRWLock.readLock().unlock();
+        try
+        {
+            evaluator = constantsMap.get(attributeValue);
+        }
+        finally
+        {
+            constantsMapRWLock.readLock().unlock();
+        }
 
         // No listener found for the value, return
         if (evaluator == null)

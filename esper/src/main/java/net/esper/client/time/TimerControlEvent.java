@@ -24,7 +24,7 @@ public final class TimerControlEvent extends TimerEvent
         /**
          * For internal clocking.
          */
-        CLOCK_INTERNAL;
+        CLOCK_INTERNAL
     }
 
     private final ClockType clockType;

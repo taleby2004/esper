@@ -116,7 +116,7 @@ public class ExprEqualsNode extends ExprNode
         }
         if (rightResult == null)
         {
-            return (leftResult == null) ^ isNotEquals;
+            return isNotEquals;
         }
 
         if (!mustCoerce)

@@ -18,5 +18,5 @@ public enum EPStatementState
     /**
      * Destroyed state.
      */
-    DESTROYED;
+    DESTROYED
 }

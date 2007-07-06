@@ -102,6 +102,6 @@ public class ConfigurationPlugInPatternObject
         /**
          * Guard allows or disallows events from child expressions to pass.
          */
-        GUARD;
+        GUARD
     }
 }

@@ -60,7 +60,7 @@ public class TestConfigurationOperations extends TestCase
 
         Document eventTwo = makeDOMEvent("RootAddedDOMOne");
         epService.getEPRuntime().sendEvent(eventTwo);
-        assertFalse(testListener.isInvoked());
+        assertTrue(testListener.isInvoked());
         assertEquals(eventTwo, testListenerTwo.assertOneGetNewAndReset().getUnderlying());
 
         // Add the same alias and type again

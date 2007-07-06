@@ -403,9 +403,10 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         }
         handles.clear();
 
-        for (EPStatementHandle handle : stmtCallbacks.keySet())
+        for (Map.Entry<EPStatementHandle, Object> entry : stmtCallbacks.entrySet())
         {
-            Object callbackObject = stmtCallbacks.get(handle);
+            EPStatementHandle handle = entry.getKey();
+            Object callbackObject = entry.getValue();
 
             handle.getStatementLock().acquireLock(services.getStatementLockFactory());
             try
@@ -552,12 +553,13 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             return;
         }
 
-        for (EPStatementHandle handle : stmtCallbacks.keySet())
+        for (Map.Entry<EPStatementHandle, Object> entry : stmtCallbacks.entrySet())
         {
+            EPStatementHandle handle = entry.getKey();
             handle.getStatementLock().acquireLock(services.getStatementLockFactory());
             try
             {
-                List<FilterHandleCallback> callbackList = (List<FilterHandleCallback>) stmtCallbacks.get(handle);
+                List<FilterHandleCallback> callbackList = (List<FilterHandleCallback>) entry.getValue();
                 for (FilterHandleCallback callback : callbackList)
                 {
                     callback.matchFound(event);

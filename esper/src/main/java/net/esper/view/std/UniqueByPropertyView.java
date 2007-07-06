@@ -34,7 +34,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
 {
     private final String uniqueFieldName;
     private EventPropertyGetter uniqueFieldGetter;
-    private final Map<Object, EventBean> mostRecentEvents = new LinkedHashMap<Object, EventBean>();;
+    private final Map<Object, EventBean> mostRecentEvents = new LinkedHashMap<Object, EventBean>();
 
     /**
      * Constructor.

@@ -90,7 +90,7 @@ public final class FilterParamIndexNotEquals extends FilterParamIndexPropBase
             {
                 if (attributeValue != null)
                 {
-                    EventEvaluator evaluator = constantsMap.get(key);
+                    EventEvaluator evaluator = constantsMap.get(null);
                     evaluator.matchEvent(eventBean, matches);
                 }
             }

@@ -9,11 +9,10 @@ public final class StreamFactoryServiceProvider
 {
     /**
      * Creates an implementation of the StreamFactoryService interface.
-     * @param eventAdapterService is the event adapter service
      * @return implementation
      */
-    public static StreamFactoryService newService(EventAdapterService eventAdapterService)
+    public static StreamFactoryService newService()
     {
-        return new StreamFactorySvcImpl(eventAdapterService);
+        return new StreamFactorySvcImpl();
     }
 }

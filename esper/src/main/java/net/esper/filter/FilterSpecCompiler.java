@@ -74,7 +74,6 @@ public final class FilterSpecCompiler
         if (op == FilterOperator.NOT_EQUAL)
         {
             handleConsolidateNotEqual(items, filterParamExprMap);
-            return;
         }
         else
         {
@@ -167,13 +166,12 @@ public final class FilterSpecCompiler
                 existingParam.add(currentParam);
             }
 
-            for (Pair<String, FilterOperator> key : mapOfParams.keySet())
+            for (List<FilterSpecParam> entry : mapOfParams.values())
             {
-                List<FilterSpecParam> existingParams = mapOfParams.get(key);
-                if (existingParams.size() > 1)
+                if (entry.size() > 1)
                 {
                     haveConsolidated = true;
-                    consolidate(existingParams, filterParamExprMap);
+                    consolidate(entry, filterParamExprMap);
                 }
             }
         }
@@ -192,7 +190,7 @@ public final class FilterSpecCompiler
             filterParamExprMap.put(constituent, param); // accepts null values as the expression may not be optimized
         }
 
-        // Consolidate entries as possible, i.e. (a != 5 and a != 6) is (a not in (5,6)
+        // Consolidate entries as possible, i.e. (a != 5 and a != 6) is (a not in (5,6))
         // Removes duplicates for same property and same filter operator for filter service index optimizations
         consolidate(filterParamExprMap);
 
@@ -236,11 +234,13 @@ public final class FilterSpecCompiler
     {
         List<FilterSpecParamInValue> values = new ArrayList<FilterSpecParamInValue>();
 
+        ExprNode lastNotEqualsExprNode = null;
         for (FilterSpecParam param : params)
         {
             if (param instanceof FilterSpecParamConstant)
             {
-                FilterSpecParamConstant constant = (FilterSpecParamConstant) param;
+                FilterSpecParamConstant constantParam = (FilterSpecParamConstant) param;
+                Object constant = constantParam.getFilterConstant();
                 values.add(new InSetOfValuesConstant(constant));
             }
             else if (param instanceof FilterSpecParamEventProp)
@@ -254,8 +254,12 @@ public final class FilterSpecCompiler
                 throw new IllegalArgumentException("Unknown filter parameter:" + param.toString());
             }
 
-            filterParamExprMap.removeValue(param);
+            lastNotEqualsExprNode = filterParamExprMap.removeEntry(param);
         }
+
+        FilterSpecParamIn param = new FilterSpecParamIn(params.get(0).getPropertyName(),
+                FilterOperator.NOT_IN_LIST_OF_VALUES, values);
+        filterParamExprMap.put(lastNotEqualsExprNode, param);
     }
 
     /**
@@ -560,7 +564,4 @@ public final class FilterSpecCompiler
             }
         }
     }
-
-
-
 }

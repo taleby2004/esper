@@ -63,7 +63,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         }
 
         // Request a callback that provides the required access
-        if (!viewResourceDelegate.requestCapability(streamNumber, new ViewCapDataWindowAccess(constantIndexNumber), this))
+        if (!viewResourceDelegate.requestCapability(streamNumber, new ViewCapDataWindowAccess(), this))
         {
             throw new ExprValidationException("Previous function requires a single data window view onto the stream");
         }

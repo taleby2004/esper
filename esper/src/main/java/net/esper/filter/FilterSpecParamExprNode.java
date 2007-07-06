@@ -65,19 +65,19 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
 
     public final Object getFilterValue(MatchedEventMap matchedEvents)
     {
-        ExprNodeAdapter adapter = new ExprNodeAdapter(exprNode);
+        EventBean[] events = null;
+
         if (taggedEventTypes != null)
         {
-            EventBean[] events = new EventBean[taggedEventTypes.size() + 1];
+            events = new EventBean[taggedEventTypes.size() + 1];
             int count = 1;
             for (String tag : taggedEventTypes.keySet())
             {
                 events[count] = matchedEvents.getMatchingEvent(tag);
                 count++;
             }
-            adapter.setPrototype(events);
         }
-        return adapter;
+        return new ExprNodeAdapter(exprNode, events);
     }
 
     public final String toString()
@@ -109,5 +109,12 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         }
 
         return true;
+    }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + exprNode.hashCode();
+        return result;
     }
 }

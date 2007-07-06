@@ -16,6 +16,9 @@
 	<property name="doc.api.dir" value="${doc.dir}/api"/>
 	<property name="dist.api.dir" value="doc/javadoc/api"/>
 	<property name="javadoc_link" value="http://java.sun.com/j2se/1.5.0/docs/api"/>
+	<property name="checkstyle_home" value="../../../../../software/checkstyle-4.3"/>
+
+	<taskdef resource="checkstyletask.properties" classpath="${checkstyle_home}/checkstyle-all-4.3.jar"/>
 
 	<target name="info" description="The master build is done my Maven">
 		<echo message="Please use Maven 2 to build Esper and related components. Maven build instructions are available on the website." />
@@ -54,6 +57,18 @@
 						
 		</javadoc>
 		<copy file="${doc.api.dir}/package.html" todir="${dist.api.dir}"/>
+	</target>
+	
+	
+	<target name="checkstyle" description="Generates a report of code convention violations.">
+	  <checkstyle config="${checkstyle_home}/sun_checks.xml"
+				  failureProperty="checkstyle.failure"
+				  failOnViolation="false">
+		<formatter type="xml" tofile="target/checkstyle_report.xml"/>
+		<fileset dir="src/main/java" includes="**/*.java"/>
+	  </checkstyle>
+
+	  <style in="target/checkstyle_report.xml" out="target/checkstyle_report.html" style="${checkstyle_home}/contrib/checkstyle-simple.xsl"/>
 	</target>
 	
 </project>

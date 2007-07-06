@@ -37,57 +37,80 @@ public final class EmitServiceImpl implements EmitService
     {
         channelEmitListenersRWLock.writeLock().lock();
 
-        // Check if the listener already exists, to make sure the same listener
-        // doesn't subscribe twice to the same or the default channel
-        for (Map.Entry<String, List<EmittedListener>> entry : channelEmitListeners.entrySet())
+        try
         {
-            if (entry.getValue().contains(listener))
+            // Check if the listener already exists, to make sure the same listener
+            // doesn't subscribe twice to the same or the default channel
+            for (Map.Entry<String, List<EmittedListener>> entry : channelEmitListeners.entrySet())
             {
-                // If already subscribed to the default channel, do not add
-                // If already subscribed to the same channel, do not add
-                if ((entry.getKey() == null) ||
-                    ((channel != null) && (channel.equals(entry.getKey()))))
+                if (entry.getValue().contains(listener))
                 {
-                    channelEmitListenersRWLock.writeLock().unlock();
-                    return;
-                }
+                    // If already subscribed to the default channel, do not add
+                    // If already subscribed to the same channel, do not add
+                    if ((entry.getKey() == null) ||
+                        ((channel != null) && (channel.equals(entry.getKey()))))
+                    {
+                        return;
+                    }
 
-                // If subscribing to default channel, remove from existing channel
-                if (channel == null)
-                {
-                    entry.getValue().remove(listener);
+                    // If subscribing to default channel, remove from existing channel
+                    if (channel == null)
+                    {
+                        entry.getValue().remove(listener);
+                    }
                 }
             }
-        }
 
-        // Add listener, its a new listener or new channel for an existing listener
-        List<EmittedListener> listeners = channelEmitListeners.get(channel);
-        if (listeners == null)
+            // Add listener, its a new listener or new channel for an existing listener
+            List<EmittedListener> listeners = channelEmitListeners.get(channel);
+            if (listeners == null)
+            {
+                listeners = new LinkedList<EmittedListener>();
+                channelEmitListeners.put(channel, listeners);
+            }
+
+            listeners.add(listener);
+        }
+        finally
         {
-            listeners = new LinkedList<EmittedListener>();
-            channelEmitListeners.put(channel, listeners);
+            channelEmitListenersRWLock.writeLock().unlock();
         }
-
-        listeners.add(listener);
-
-        channelEmitListenersRWLock.writeLock().unlock();
     }
 
     public final void clearListeners()
     {
         channelEmitListenersRWLock.writeLock().lock();
-        channelEmitListeners.clear();
-        channelEmitListenersRWLock.writeLock().unlock();
+        try
+        {
+            channelEmitListeners.clear();
+        }
+        finally
+        {
+            channelEmitListenersRWLock.writeLock().unlock();
+        }
     }
 
     public final void emitEvent(Object object, String channel)
     {
         channelEmitListenersRWLock.readLock().lock();
 
-        // Emit to specific channel first
-        if (channel != null)
+        try
         {
-            List<EmittedListener> listeners = channelEmitListeners.get(channel);
+            // Emit to specific channel first
+            if (channel != null)
+            {
+                List<EmittedListener> listeners = channelEmitListeners.get(channel);
+                if (listeners != null)
+                {
+                    for (EmittedListener listener : listeners)
+                    {
+                        listener.emitted(object);
+                    }
+                }
+            }
+
+            // Emit to default channel if there are any listeners
+            List<EmittedListener> listeners = channelEmitListeners.get(null);
             if (listeners != null)
             {
                 for (EmittedListener listener : listeners)
@@ -96,18 +119,10 @@ public final class EmitServiceImpl implements EmitService
                 }
             }
         }
-
-        // Emit to default channel if there are any listeners
-        List<EmittedListener> listeners = channelEmitListeners.get(null);
-        if (listeners != null)
+        finally
         {
-            for (EmittedListener listener : listeners)
-            {
-                listener.emitted(object);
-            }
+            channelEmitListenersRWLock.readLock().unlock();
         }
-
-        channelEmitListenersRWLock.readLock().unlock();
 
         numEventsEmitted.incrementAndGet();
     }

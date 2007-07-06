@@ -318,7 +318,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
         String argument = property.substring(startArg + 1, endArg);
 
         // get method
-        String splitDots[] = property.toString().split("[\\.]");
+        String splitDots[] = property.split("[\\.]");
         if (splitDots.length == 0)
         {
             return null;

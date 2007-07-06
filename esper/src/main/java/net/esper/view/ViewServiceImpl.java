@@ -71,7 +71,6 @@ public final class ViewServiceImpl implements ViewService
         Pair<Viewable, List<View>> resultPair = ViewServiceHelper.matchExistingViews(eventStreamViewable, viewFactories);
 
         Viewable parentViewable = resultPair.getFirst();
-        List<View> existingParentViews = resultPair.getSecond();
 
         if (viewFactories.isEmpty())
         {

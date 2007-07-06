@@ -127,4 +127,11 @@ public final class FilterSpecParamIn extends FilterSpecParam
         }
         return true;
     }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + (listOfValues != null ? listOfValues.hashCode() : 0);
+        return result;
+    }
 }

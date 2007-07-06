@@ -52,17 +52,13 @@ public class StreamFactorySvcImpl implements StreamFactoryService
     // Using a reference-counted map for non-join statements
     private final RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>> eventStreamsRefCounted;
 
-    private final EventAdapterService eventAdapterService;
-
     /**
      * Ctor.
-     * @param eventAdapterService is the service to resolve event types
      */
-    public StreamFactorySvcImpl(EventAdapterService eventAdapterService)
+    public StreamFactorySvcImpl()
     {
         this.eventStreamsRefCounted = new RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
         this.eventStreamsIdentity = new IdentityHashMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
-        this.eventAdapterService = eventAdapterService;
     }
 
     /**

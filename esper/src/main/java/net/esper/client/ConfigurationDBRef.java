@@ -270,7 +270,7 @@ public class ConfigurationDBRef
         /**
          * Obtain a new connection each lookup closing the connection when done.
          */
-        POOLED;
+        POOLED
     }
 
     /**

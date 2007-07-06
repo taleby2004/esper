@@ -18,5 +18,5 @@ public enum EventPropertyType
     /**
      * Mapped property.
      */
-	MAPPED;
+	MAPPED
 }

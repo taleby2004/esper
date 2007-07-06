@@ -98,7 +98,7 @@ public class ParseHelper
                 if (mme.foundChar == 65535)
                 {
                     char expected = (char) mme.expecting;
-                    String wrapped = "'" + new String(Character.toString(expected)) + "'";
+                    String wrapped = "'" + Character.toString(expected) + "'";
                     if (expected == '\'')
                     {
                         wrapped = "a singe quote \"'\"";

@@ -75,7 +75,7 @@ public class TestMTDeterminismListener extends TestCase
         {
             result[i] = (Long) events[i].get("cnt");
         }
-        log.info(".trySend result=" + Arrays.toString(result));
+        //log.info(".trySend result=" + Arrays.toString(result));
 
         // assert result
         assertEquals(numEvents * numThreads, events.length);

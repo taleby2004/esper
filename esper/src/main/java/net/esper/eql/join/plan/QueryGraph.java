@@ -7,8 +7,6 @@
  **************************************************************************************/
 package net.esper.eql.join.plan;
 
-import net.esper.collection.UniformPair;
-
 import java.util.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,7 +18,7 @@ import java.io.StringWriter;
 public class QueryGraph
 {
     private final int numStreams;
-    private final Map<GraphKey, GraphValue> streamJoinMap;
+    private final Map<QueryGraphKey, QueryGraphValue> streamJoinMap;
 
     /**
      * Ctor.
@@ -29,7 +27,7 @@ public class QueryGraph
     public QueryGraph(int numStreams)
     {
         this.numStreams = numStreams;
-        streamJoinMap = new HashMap<GraphKey, GraphValue>();
+        streamJoinMap = new HashMap<QueryGraphKey, QueryGraphValue>();
     }
 
     /**
@@ -61,12 +59,12 @@ public class QueryGraph
             throw new IllegalArgumentException("Streams supplied are the same");
         }
 
-        GraphKey key = new GraphKey(streamLeft, streamRight);
-        GraphValue value = streamJoinMap.get(key);
+        QueryGraphKey key = new QueryGraphKey(streamLeft, streamRight);
+        QueryGraphValue value = streamJoinMap.get(key);
 
         if (value == null)
         {
-            value = new GraphValue();
+            value = new QueryGraphValue();
             streamJoinMap.put(key, value);
         }
 
@@ -88,7 +86,7 @@ public class QueryGraph
      */
     public boolean isNavigable(int streamFrom, int streamTo)
     {
-        GraphKey key = new GraphKey(streamFrom, streamTo);
+        QueryGraphKey key = new QueryGraphKey(streamFrom, streamTo);
         return streamJoinMap.containsKey(key);
     }
 
@@ -118,8 +116,8 @@ public class QueryGraph
      */
     public String[] getIndexProperties(int streamLookup, int streamIndexed)
     {
-        GraphKey key = new GraphKey(streamLookup, streamIndexed);
-        GraphValue value = streamJoinMap.get(key);
+        QueryGraphKey key = new QueryGraphKey(streamLookup, streamIndexed);
+        QueryGraphValue value = streamJoinMap.get(key);
 
         if (value == null)
         {
@@ -141,8 +139,8 @@ public class QueryGraph
      */
     public String[] getKeyProperties(int streamLookup, int streamIndexed)
     {
-        GraphKey key = new GraphKey(streamLookup, streamIndexed);
-        GraphValue value = streamJoinMap.get(key);
+        QueryGraphKey key = new QueryGraphKey(streamLookup, streamIndexed);
+        QueryGraphValue value = streamJoinMap.get(key);
 
         if (value == null)
         {
@@ -274,127 +272,13 @@ public class QueryGraph
         return addedEquivalency;
     }
 
-    /**
-     * Property lists stored as a value for each stream-to-stream relationship.
-     */
-    public static class GraphValue
-    {
-        private List<String> propertiesLeft;
-        private List<String> propertiesRight;
-
-        /**
-         * Ctor.
-         */
-        public GraphValue()
-        {
-            propertiesLeft = new LinkedList<String>();
-            propertiesRight = new LinkedList<String>();
-        }
-
-        /**
-         * Add key and index property.
-         * @param keyProperty - key property
-         * @param indexProperty - index property
-         * @return true if added and either property did not exist, false if either already existed
-         */
-        public boolean add(String keyProperty, String indexProperty)
-        {
-            if (propertiesLeft.contains(keyProperty))
-            {
-                return false;
-            }
-            if (propertiesRight.contains(indexProperty))
-            {
-                return false;
-            }
-            propertiesLeft.add(keyProperty);
-            propertiesRight.add(indexProperty);
-            return true;
-        }
-
-        /**
-         * Returns property names for left stream.
-         * @return property names
-         */
-        public List<String> getPropertiesLeft()
-        {
-            return propertiesLeft;
-        }
-
-        /**
-         * Returns property names for right stream.
-         * @return property names
-         */
-        public List<String> getPropertiesRight()
-        {
-            return propertiesRight;
-        }
-
-        public String toString()
-        {
-            return "GraphValue " +
-                    " propertiesLeft=" + Arrays.toString(propertiesLeft.toArray()) +
-                    " propertiesRight=" + Arrays.toString(propertiesRight.toArray());
-        }
-    }
-
-    /**
-     * Key consisting of 2 integer stream numbers.
-     */
-    public class GraphKey
-    {
-        private UniformPair<Integer> streams;
-
-        /**
-         * Ctor.
-         * @param streamOne - from stream
-         * @param streamTwo - to stream
-         */
-        public GraphKey(int streamOne, int streamTwo)
-        {
-            if (streamOne > streamTwo)
-            {
-                int temp = streamTwo;
-                streamTwo = streamOne;
-                streamOne = temp;
-            }
-            streams = new UniformPair<Integer>(streamOne, streamTwo);
-        }
-
-        public boolean equals(Object obj)
-        {
-            if (this == obj)
-            {
-                return true;
-            }
-
-            if (!(obj instanceof GraphKey))
-            {
-                return false;
-            }
-
-            GraphKey other = (GraphKey) obj;
-            return other.streams.equals(this.streams);
-        }
-
-        public int hashCode()
-        {
-            return streams.hashCode();
-        }
-
-        public String toString()
-        {
-            return "GraphKey " + streams.getFirst() + " and " + streams.getSecond();
-        }
-    }
-
     public String toString()
     {
         StringWriter buf = new StringWriter();
         PrintWriter writer = new PrintWriter(buf);
 
         int count = 0;
-        for (Map.Entry<GraphKey, GraphValue> entry : streamJoinMap.entrySet())
+        for (Map.Entry<QueryGraphKey, QueryGraphValue> entry : streamJoinMap.entrySet())
         {
             count++;
             writer.println("Entry " + count + ": key=" + entry.getKey());

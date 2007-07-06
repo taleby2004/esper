@@ -43,7 +43,7 @@ final class EvalEveryStateSpawnEvaluator implements Evaluator
     }
 
     private static final Log log = LogFactory.getLog(EvalEveryStateSpawnEvaluator.class);
-};
+}
 
 /**
  * Contains the state collected by an "every" operator. The state includes handles to any sub-listeners

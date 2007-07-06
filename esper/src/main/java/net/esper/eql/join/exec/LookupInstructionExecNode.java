@@ -122,8 +122,8 @@ public class LookupInstructionExecNode extends ExecNode
         if (results == null)
         {
             BaseAssemblyNode lastAssemblyNode = assemblyInstructions[assemblyInstructions.length - 1];
-            lastAssemblyNode.init(results);
-            lastAssemblyNode.process(results);
+            lastAssemblyNode.init(null);
+            lastAssemblyNode.process(null);
             return;
         }
 

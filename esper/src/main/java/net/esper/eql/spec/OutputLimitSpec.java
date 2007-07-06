@@ -31,7 +31,7 @@ public class OutputLimitSpec
         /**
          * Output all events.
          */
-        ALL };
+        ALL }
 
 	private final boolean isEventLimit;
 	private final DisplayLimit displayLimit;

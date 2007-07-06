@@ -49,13 +49,18 @@ public class EventTypeIndex implements EventEvaluator
     public void add(EventType eventType, FilterHandleSetNode rootNode)
     {
         eventTypesRWLock.writeLock().lock();
-        if (eventTypes.containsKey(eventType))
+        try
+        {
+            if (eventTypes.containsKey(eventType))
+            {
+                throw new IllegalStateException("Event type already in index, add not performed, type=" + eventType);
+            }
+            eventTypes.put(eventType, rootNode);
+        }
+        finally
         {
             eventTypesRWLock.writeLock().unlock();
-            throw new IllegalStateException("Event type already in index, add not performed, type=" + eventType);
         }
-        eventTypes.put(eventType, rootNode);
-        eventTypesRWLock.writeLock().unlock();
     }
 
     /**
@@ -109,8 +114,15 @@ public class EventTypeIndex implements EventEvaluator
     private void matchType(EventType eventType, EventBean eventBean, Collection<FilterHandle> matches)
     {
         eventTypesRWLock.readLock().lock();
-        FilterHandleSetNode rootNode = eventTypes.get(eventType);
-        eventTypesRWLock.readLock().unlock();
+        FilterHandleSetNode rootNode = null;
+        try
+        {
+            rootNode = eventTypes.get(eventType);
+        }
+        finally
+        {
+            eventTypesRWLock.readLock().unlock();
+        }
 
         // If the top class node is null, no filters have yet been registered for this event type.
         // In this case, log a message and done.

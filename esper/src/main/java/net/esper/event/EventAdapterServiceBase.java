@@ -74,7 +74,7 @@ public abstract class EventAdapterServiceBase implements EventAdapterService
         String id = typeToIdMap.get(type);
         if (id == null)
         {
-            throw new IllegalStateException("Event type id " + id + " not in collection");
+            throw new IllegalStateException("Event type id not in collection");
         }
         return id;
     }

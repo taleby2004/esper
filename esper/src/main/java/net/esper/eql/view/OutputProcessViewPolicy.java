@@ -158,8 +158,8 @@ public class OutputProcessViewPolicy extends OutputProcessView
 		else if(outputLastOnly)
 		{
 			// Keep only the last event, if there is one
-			newEvents = newEvents != null ? new EventBean[] { newEvents[newEvents.length - 1] } : newEvents;
-			oldEvents = oldEvents != null ? new EventBean[] { oldEvents[oldEvents.length - 1] } : oldEvents;
+			newEvents = newEvents != null ? new EventBean[] { newEvents[newEvents.length - 1] } : null;
+			oldEvents = oldEvents != null ? new EventBean[] { oldEvents[oldEvents.length - 1] } : null;
 		}
 
 		if(doOutput)

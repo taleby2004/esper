@@ -10,6 +10,7 @@ package net.esper.eql.core;
 import net.esper.event.EventType;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Implementation that provides stream number and property type information. 
@@ -51,10 +52,10 @@ public class StreamTypeServiceImpl implements StreamTypeService
         eventTypes = new EventType[namesAndTypes.size()] ;
         streamNames = new String[namesAndTypes.size()] ;
         int count = 0;
-        for (String streamName : namesAndTypes.keySet())
+        for (Map.Entry<String, EventType> entry : namesAndTypes.entrySet())
         {
-            streamNames[count] = streamName;
-            eventTypes[count] = namesAndTypes.get(streamName);
+            streamNames[count] = entry.getKey();
+            eventTypes[count] = entry.getValue();
             count++;
         }
     }

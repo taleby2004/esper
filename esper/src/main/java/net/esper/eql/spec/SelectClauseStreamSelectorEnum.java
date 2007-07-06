@@ -25,5 +25,5 @@ public enum SelectClauseStreamSelectorEnum
     /**
      * Indicates selection of both the insert and the remove stream.
      */
-    RSTREAM_ISTREAM_BOTH;
+    RSTREAM_ISTREAM_BOTH
 }

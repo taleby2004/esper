@@ -41,8 +41,8 @@ public class TestViewFactoryDelegateImpl extends TestCase
             }
         };
         assertFalse(delegate.requestCapability(1, new SupportViewCapability(), callback));
-        assertFalse(delegate.requestCapability(0, new ViewCapDataWindowAccess(1), callback));
-        assertTrue(delegate.requestCapability(1, new ViewCapDataWindowAccess(1), callback));
+        assertFalse(delegate.requestCapability(0, new ViewCapDataWindowAccess(), callback));
+        assertTrue(delegate.requestCapability(1, new ViewCapDataWindowAccess(), callback));
     }
 
     private class SupportViewCapability implements ViewCapability

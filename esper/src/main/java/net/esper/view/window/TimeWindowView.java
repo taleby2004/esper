@@ -1,24 +1,23 @@
 package net.esper.view.window;
 
+import net.esper.client.EPException;
+import net.esper.collection.TimeWindow;
+import net.esper.collection.ViewUpdatedCollection;
+import net.esper.core.EPStatementHandleCallback;
+import net.esper.core.ExtensionServicesContext;
+import net.esper.core.StatementContext;
+import net.esper.event.EventBean;
+import net.esper.event.EventType;
+import net.esper.schedule.ScheduleHandleCallback;
+import net.esper.schedule.ScheduleSlot;
+import net.esper.view.CloneableView;
+import net.esper.view.View;
+import net.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-import java.text.SimpleDateFormat;
-
-import net.esper.view.ViewSupport;
-import net.esper.core.StatementContext;
-import net.esper.view.View;
-import net.esper.view.CloneableView;
-import net.esper.event.EventType;
-import net.esper.event.EventBean;
-import net.esper.schedule.ScheduleHandleCallback;
-import net.esper.schedule.ScheduleSlot;
-import net.esper.collection.TimeWindow;
-import net.esper.collection.ViewUpdatedCollection;
-import net.esper.client.EPException;
-import net.esper.core.EPStatementHandleCallback;
-import net.esper.core.ExtensionServicesContext;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This view is a moving timeWindow extending the specified amount of milliseconds into the past.
@@ -33,8 +32,6 @@ import net.esper.core.ExtensionServicesContext;
  */
 public final class TimeWindowView extends ViewSupport implements CloneableView, DataWindowView
 {
-    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-
     private final TimeWindowViewFactory timeWindowViewFactory;
     private final long millisecondsBeforeExpiry;
     private final TimeWindow timeWindow = new TimeWindow();
@@ -142,7 +139,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         {
             log.debug(".expire Expiring messages before " +
                     "msec=" + expireBeforeTimestamp +
-                    "  date=" + dateFormat.format(expireBeforeTimestamp));
+                    "  date=" + statementContext.getSchedulingService().getTime());
         }
 
         // Remove from the timeWindow any events that have an older or timestamp then the given timestamp

@@ -10,7 +10,7 @@ import java.text.SimpleDateFormat;
  */
 public class CronParameter implements NumberSetParameter {
     private CronOperator operator;
-    private static Calendar calendar;
+    private Calendar calendar;
     private Integer day, month;
 
     /**
@@ -29,11 +29,11 @@ public class CronParameter implements NumberSetParameter {
         /**
          * Last weekday in a month
          */
-        lw };
+        lw }
     
     private static int FIRST_DAY_OF_WEEK = Calendar.SUNDAY;
 
-    CronParameter(String cronOperator, String day) {
+    public CronParameter(String cronOperator, String day) {
         this.operator = assignOperator(cronOperator);
         if (day != null) {
             this.day = IntValue.parseString(day);

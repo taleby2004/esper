@@ -102,7 +102,7 @@ public final class EPServicesContext
         this.emitService = EmitServiceProvider.newService();
         this.dispatchService = DispatchServiceProvider.newService();
         this.viewService = ViewServiceProvider.newService();
-        this.streamFactoryService = StreamFactoryServiceProvider.newService(eventAdapterService);
+        this.streamFactoryService = StreamFactoryServiceProvider.newService();
         this.viewResolutionService = viewResolutionService;
         this.statementLockFactory = statementLockFactory;
         this.eventProcessingRWLock = eventProcessingRWLock;

@@ -9,15 +9,11 @@ import java.util.List;
  */
 public class ViewCapDataWindowAccess implements ViewCapability
 {
-    private Integer optionalIndexConstant;
-
     /**
      * Ctor.
-     * @param optionalIndexConstant is the index, or null if expression-supplied index and not constant
      */
-    public ViewCapDataWindowAccess(Integer optionalIndexConstant)
+    public ViewCapDataWindowAccess()
     {
-        this.optionalIndexConstant = optionalIndexConstant;
     }
 
     public boolean inspect(List<ViewFactory> viewFactories)

@@ -22,7 +22,7 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void setUp()
     {
         supportFilterService = new SupportFilterServiceImpl();
-        streamFactoryService = new StreamFactorySvcImpl(SupportEventAdapterService.getService());
+        streamFactoryService = new StreamFactorySvcImpl();
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
         filterSpecs = new FilterSpecCompiled[3];

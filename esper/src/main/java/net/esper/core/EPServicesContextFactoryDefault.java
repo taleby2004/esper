@@ -197,9 +197,10 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
     private static Map<String, Class> createPropertyTypes(Properties properties)
     {
         Map<String, Class> propertyTypes = new HashMap<String, Class>();
-        for(Object property : properties.keySet())
+        for(Map.Entry<Object, Object> entry : properties.entrySet())
         {
-            String className = (String) properties.get(property);
+            String property = (String) entry.getKey();
+            String className = (String) entry.getValue();
 
             if ("string".equals(className))
             {
@@ -219,7 +220,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 throw new EventAdapterException("Unable to load class '" + boxedClassName + "', class not found", ex);
             }
 
-            propertyTypes.put((String) property, clazz);
+            propertyTypes.put(property, clazz);
         }
         return propertyTypes;
     }

@@ -128,11 +128,12 @@ public class AggregationServiceFactory
     {
         // Check any same aggregation nodes among all aggregation clauses
         boolean foundEquivalent = false;
-        for (ExprAggregateNode aggNode : equivalencyList.keySet())
+        for (Map.Entry<ExprAggregateNode, List<ExprAggregateNode>> entry : equivalencyList.entrySet())
         {
+            ExprAggregateNode aggNode = entry.getKey();
             if (ExprNode.deepEquals(aggNode, aggNodeToAdd))
             {
-                List<ExprAggregateNode> equivalentAggregators = equivalencyList.get(aggNode);
+                List<ExprAggregateNode> equivalentAggregators = entry.getValue();
                 if (equivalentAggregators == null)
                 {
                     equivalentAggregators = new ArrayList<ExprAggregateNode>();

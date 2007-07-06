@@ -128,9 +128,9 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     private static Map<String, Class> createPropertyTypes(Properties properties)
     {
         Map<String, Class> propertyTypes = new HashMap<String, Class>();
-        for(Object property : properties.keySet())
+        for(Map.Entry<Object, Object> entry : properties.entrySet())
         {
-            String className = (String) properties.get(property);
+            String className = (String) entry.getValue();
 
             if ("string".equals(className))
             {
@@ -140,7 +140,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
             // use the boxed type for primitives
             String boxedClassName = JavaClassHelper.getBoxedClassName(className);
 
-            Class clazz = null;
+            Class clazz;
             try
             {
                 clazz = Class.forName(boxedClassName);
@@ -150,7 +150,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
                 throw new ConfigurationException("Unable to load class '" + boxedClassName + "', class not found", ex);
             }
 
-            propertyTypes.put((String) property, clazz);
+            propertyTypes.put((String) entry.getKey(), clazz);
         }
         return propertyTypes;
     }

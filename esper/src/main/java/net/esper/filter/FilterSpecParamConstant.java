@@ -79,4 +79,11 @@ public final class FilterSpecParamConstant extends FilterSpecParam
         }
         return true;
     }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + (filterConstant != null ? filterConstant.hashCode() : 0);
+        return result;
+    }
 }

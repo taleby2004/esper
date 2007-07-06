@@ -136,4 +136,11 @@ public final class FilterSpecParamEventProp extends FilterSpecParam
         }
         return true;
     }
+
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + resultEventProperty.hashCode();
+        return result;
+    }
 }

@@ -12,7 +12,6 @@ public class MapEventBean implements EventBean
 {
     private EventType eventType;
     private Map<String, Object> properties;
-    private Integer hashCode = null;
 
     /**
      * Constructor for initialization with existing values.

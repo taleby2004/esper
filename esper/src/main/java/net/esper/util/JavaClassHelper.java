@@ -557,7 +557,7 @@ public class JavaClassHelper
         }
 
         // Use arithmatic coercion type as the final authority, considering all types
-        Class result = getArithmaticCoercionType(types[0], types[1]);;
+        Class result = getArithmaticCoercionType(types[0], types[1]);
         int count = 2;
         while(count < types.length)
         {

@@ -39,7 +39,7 @@ public abstract class UpdateDispatchViewBase extends ViewSupport implements Disp
      */
     protected ThreadLocal<Boolean> isDispatchWaiting = new ThreadLocal<Boolean>() {
         protected synchronized Boolean initialValue() {
-            return new Boolean(false);
+            return Boolean.valueOf(false);
         }
     };
 

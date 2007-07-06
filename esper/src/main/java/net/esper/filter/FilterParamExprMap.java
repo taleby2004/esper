@@ -73,7 +73,7 @@ public class FilterParamExprMap
      * Removes a filter parameter and it's associated expression node
      * @param param is the parameter to remove
      */
-    public void removeEntry(FilterSpecParam param)
+    public ExprNode removeEntry(FilterSpecParam param)
     {
         ExprNode exprNode = specParams.get(param);
         if (exprNode == null)
@@ -83,6 +83,8 @@ public class FilterParamExprMap
 
         specParams.remove(param);
         exprNodes.remove(exprNode);
+
+        return exprNode;
     }
 
     /**
