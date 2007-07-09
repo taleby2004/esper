@@ -305,7 +305,7 @@ public class MyUpdateListener implements UpdateListener
 			Composite events are events that aggregate one or more other events. Composite events are typically created by the engine for statements that join two event streams, and for event patterns in which the causal events are retained and reported in a composite event. The example below shows such an event pattern.
         </para>
 
-		<programlisting><![CDATA[// Look for a pattern where AEvent follows BEvent
+		<programlisting><![CDATA[// Look for a pattern where BEvent follows AEvent
 String pattern = "a=AEvent -> b=BEvent";
 EPStatement stmt = epService.getEPAdministrator().createPattern(pattern);
 stmt.addListener(testListener);
