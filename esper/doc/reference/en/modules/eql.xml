@@ -1961,7 +1961,7 @@ from Trade.std:groupby('symbol').ext:sort('price', false, 1)</programlisting>
 			<para>
 				The statement is equivalent to:
 			</para>
-			<programlisting><![CDATA[select * from RFIDEvent where command = 'OBSERVATION' or symbol = 'SIGNAL']]></programlisting>
+			<programlisting><![CDATA[select * from RFIDEvent where command = 'OBSERVATION' or command = 'SIGNAL']]></programlisting>
 		</sect2>		
 
 		<sect2 id="eql-operator-ref-keyword-between">
