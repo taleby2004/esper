@@ -529,8 +529,8 @@ public class EPStatementStartMethod
             bufferView.setObserver(new BufferObserver() {
                 public void newData(int streamId, FlushedEventBuffer newEventBuffer, FlushedEventBuffer oldEventBuffer)
                 {
-                    eventIndex.remove(oldEventBuffer.getAndFlush());
                     eventIndex.add(newEventBuffer.getAndFlush());
+                    eventIndex.remove(oldEventBuffer.getAndFlush());
                 }
 
             });
