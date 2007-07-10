@@ -35,6 +35,22 @@ public class TestSubselectFiltered extends TestCase
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
+    public void testSameEvent()
+    {
+        String stmtText = "select (select * from S1.win:length(1000)) as events1 from S1";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        stmt.addListener(listener);
+
+        EventType type = stmt.getEventType();
+        assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
+
+        Object event = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(event);
+        EventBean result = listener.assertOneGetNewAndReset();
+        assertSame(event, result.get("events1"));
+    }
+
     public void testSelectWildcard()
     {
         String stmtText = "select (select * from S1.win:length(1000)) as events1 from S0";
@@ -464,6 +480,32 @@ public class TestSubselectFiltered extends TestCase
         assertEquals(6, event.get("b.id"));
     }
 
+    public void testSubselectMixMax()
+    {
+        String stmtTextOne =
+                     "select " +
+                     " (select * from Sensor.ext:sort('measurement',true,1)) as high, " +
+                     " (select * from Sensor.ext:sort('measurement',false,1)) as low " +
+                     " from Sensor";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtTextOne);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(1, "Temp", "Dev1", 68.0, 96.5));
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals(68.0, ((SupportSensorEvent) event.get("high")).getMeasurement());
+        assertEquals(68.0, ((SupportSensorEvent) event.get("low")).getMeasurement());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(2, "Temp", "Dev2", 70.0, 98.5));
+        event = listener.assertOneGetNewAndReset();
+        assertEquals(70.0, ((SupportSensorEvent) event.get("high")).getMeasurement());
+        assertEquals(68.0, ((SupportSensorEvent) event.get("low")).getMeasurement());
+
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(3, "Temp", "Dev2", 65.0, 99.5));
+        event = listener.assertOneGetNewAndReset();
+        assertEquals(70.0, ((SupportSensorEvent) event.get("high")).getMeasurement());
+        assertEquals(65.0, ((SupportSensorEvent) event.get("low")).getMeasurement());
+    }
+    
     private void tryJoinFiltered(String stmtText)
     {
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);

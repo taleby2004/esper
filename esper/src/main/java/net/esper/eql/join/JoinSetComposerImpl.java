@@ -60,18 +60,6 @@ public class JoinSetComposerImpl implements JoinSetComposer
             }
         }
 
-        // remove old data from indexes
-        for (int i = 0; i < oldDataPerStream.length; i++)
-        {
-            if (oldDataPerStream[i] != null)
-            {
-                for (int j = 0; j < repositories[i].length; j++)
-                {
-                    repositories[i][j].remove(oldDataPerStream[i]);
-                }
-            }
-        }
-
         // add new data to indexes
         for (int i = 0; i < newDataPerStream.length; i++)
         {
@@ -80,6 +68,19 @@ public class JoinSetComposerImpl implements JoinSetComposer
                 for (int j = 0; j < repositories[i].length; j++)
                 {
                     repositories[i][j].add((newDataPerStream[i]));
+                }
+            }
+        }
+
+        // remove old data from indexes
+        // adding first and then removing as the events added may be remove right away
+        for (int i = 0; i < oldDataPerStream.length; i++)
+        {
+            if (oldDataPerStream[i] != null)
+            {
+                for (int j = 0; j < repositories[i].length; j++)
+                {
+                    repositories[i][j].remove(oldDataPerStream[i]);
                 }
             }
         }
