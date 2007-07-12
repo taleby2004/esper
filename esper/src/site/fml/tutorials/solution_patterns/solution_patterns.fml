@@ -299,7 +299,7 @@ insert into BottomPriceEvent
 select minPrice as bottomPrice 
 from AvgPriceLast60Days.std:last() as LastAvg60Days
      AvgPriceLast5Days.std:last() as LastAvg5Days
-where LastAvg5Days.avgPrice &lt; LastAvg60Days.avgPrice * 0.85
+where LastAvg60Days.avgPrice * 0.85 > LastAvg5Days.avgPrice
 output first every 1 day
 </pre></div>    
 
