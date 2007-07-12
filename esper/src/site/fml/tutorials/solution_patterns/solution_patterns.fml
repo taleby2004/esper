@@ -297,7 +297,7 @@ output every 10 minutes
 <div class="source"><pre>-- Compare the last average prices for each:
 insert into BottomPriceEvent
 select minPrice as bottomPrice 
-from AvgPriceLast60Days.std:last() as LastAvg60Days
+from AvgPriceLast60Days.std:last() as LastAvg60Days,
      AvgPriceLast5Days.std:last() as LastAvg5Days
 where LastAvg60Days.avgPrice * 0.85 > LastAvg5Days.avgPrice
 output first every 1 day
