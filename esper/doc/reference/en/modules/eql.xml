@@ -1195,7 +1195,7 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 			The select clause of a subquery also allows wildcard selects, which return as an event property the underlying event object of the event type as defined in the from-clause. An example:
 		</para>
 
-		<programlisting><![CDATA[select (select * from MarketData.std:last()) as md 
+		<programlisting><![CDATA[select (select * from MarketData.std:lastevent()) as md 
   from pattern [every timer:interval(10 sec)]]]></programlisting>
 
 		<para>
