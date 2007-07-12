@@ -2,9 +2,7 @@ package net.esper.regression.view;
 
 import junit.framework.TestCase;
 import net.esper.client.*;
-import net.esper.support.bean.SupportBean;
-import net.esper.support.bean.SupportMarketDataBean;
-import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.bean.*;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.eql.SupportStaticMethodLib;
 
@@ -18,6 +16,18 @@ public class TestFilterExpressions extends TestCase
         listener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
+    }
+
+    public void testEnumSyntaxOne()
+    {
+        String text = "select * from pattern [" +
+            SupportBeanWithEnum.class.getName() + "(supportEnum=" + SupportEnum.class.getName() + ".valueOf('ENUM_VALUE_1'))]";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        stmt.addListener(listener);
+
+        SupportBeanWithEnum event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_1);
+        epService.getEPRuntime().sendEvent(event);
+        assertTrue(listener.isInvoked());
     }
 
     public void testNotEqualsNotIn()

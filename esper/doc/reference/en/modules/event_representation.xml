@@ -95,6 +95,7 @@
 		<para>
 			Combinations are also possible. For example, a valid combination could be <literal>person.address('home').street[0]</literal>.
 		</para>
+
 	</sect1>
 		
 	<sect1 id="eventrep-javabean">
@@ -194,6 +195,11 @@ where address('work').streetName = 'Park Ave'
 ]]></programlisting>
 		</sect2>
 		
+		<para>
+			Event properties that are enumeration values can be compared by means of the Enumeration <literal>valueOf</literal> method on the <literal>java.lang.Enum</literal> class. An example could look as follows:
+		</para>
+		<programlisting><![CDATA[every MyEvent(enumProp=EnumClass.valueOf('ENUM_VALUE_1'))]]></programlisting>
+
     </sect1>
     
 	<sect1 id="eventrep-java-util-map">
