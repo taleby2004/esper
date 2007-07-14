@@ -1,17 +1,14 @@
 package net.esper.regression.view;
 
 import junit.framework.TestCase;
-import net.esper.client.EPServiceProvider;
-import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPStatement;
+import net.esper.client.*;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.SupportSensorEvent;
 import net.esper.event.EventBean;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This test uses unique and sort views to obtain from a set of market data events the 3 currently most expensive stocks
@@ -85,6 +82,62 @@ public class TestViewUniqueSorted extends TestCase
 
         result = toObjectArray(top3Prices.iterator());
         ArrayAssertionUtil.assertEqualsExactOrder(result, new Object[] { beans[3], beans[8], beans[7] });
+    }
+
+    public void testSensorMaxQuery() throws Exception {
+        String stmtString =
+              "SELECT max(high.type) as type, \n" +
+              " max(high.measurement) as highMeasurement, max(high.confidence) as confidenceOfHigh, max(high.device) as deviceOfHigh\n" +
+              "FROM\n " +
+              SupportSensorEvent.class.getName() + ".std:groupby('type').win:time(1 hour).std:unique('device').ext:sort('measurement',true,1) as high ";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtString);
+        stmt.addListener(testListener);
+
+        EPRuntime runtime = epService.getEPRuntime();
+        runtime.sendEvent(new SupportSensorEvent(1, "Temperature", "Device1", 5.0, 96.5));
+        runtime.sendEvent(new SupportSensorEvent(2, "Temperature", "Device2", 7.0, 98.5));
+        runtime.sendEvent(new SupportSensorEvent(3, "Temperature", "Device2", 4.0, 99.5));
+
+        Map lastEvent = (Map) testListener.getLastNewData()[0].getUnderlying();
+        assertTrue (lastEvent != null);
+        assertEquals (4.0,lastEvent.get("highMeasurement"));
+        assertEquals ("Device2",lastEvent.get("deviceOfHigh"));
+        assertEquals (99.5,lastEvent.get("confidenceOfHigh"));
+
+        Iterator<EventBean> it = stmt.iterator();
+        Map event = (Map) it.next().getUnderlying();
+        assertEquals (5.0,event.get("highMeasurement"));
+        assertEquals ("Device1",event.get("deviceOfHigh"));
+        assertEquals (96.5,event.get("confidenceOfHigh"));
+    }
+
+    public void testSensorPerEvent() throws Exception {
+        String stmtString =
+              "SELECT * " +
+              "FROM\n " +
+              SupportSensorEvent.class.getName() + ".std:groupby('type').win:time(1 hour).std:unique('device').ext:sort('measurement',true,1) as high ";
+
+        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtString);
+        stmt.addListener(testListener);
+
+        EPRuntime runtime = epService.getEPRuntime();
+
+        SupportSensorEvent eventOne = new SupportSensorEvent(1, "Temperature", "Device1", 5.0, 96.5);
+        runtime.sendEvent(eventOne);
+        testListener.assertUnderlyingAndReset(new Object[] {eventOne}, null);
+
+        SupportSensorEvent eventTwo = new SupportSensorEvent(2, "Temperature", "Device2", 7.0, 98.5);
+        runtime.sendEvent(eventTwo);
+        testListener.assertUnderlyingAndReset(new Object[] {eventTwo}, new Object[] {eventOne});
+
+        SupportSensorEvent eventThree = new SupportSensorEvent(3, "Temperature", "Device2", 4.0, 99.5);
+        runtime.sendEvent(eventThree);
+        testListener.assertUnderlyingAndReset(new Object[] {eventThree}, new Object[] {eventTwo});
+
+        Iterator<EventBean> it = stmt.iterator();
+        SupportSensorEvent event = (SupportSensorEvent) it.next().getUnderlying();
+        assertEquals (3,event.getId());
     }
 
     private Object makeEvent(String symbol, double price)

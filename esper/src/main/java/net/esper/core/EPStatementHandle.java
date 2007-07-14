@@ -12,7 +12,7 @@ import net.esper.util.ManagedLock;
 public class EPStatementHandle implements MetaDefItem
 {
     private final String statementId;
-    private final ManagedLock statementLock;
+    private ManagedLock statementLock;
     private final int hashCode;
     private EPStatementDispatch optionalDispatchable;
     // handles self-join (ie. statement where from-clause lists the same event type or a super-type more then once)
@@ -70,6 +70,11 @@ public class EPStatementHandle implements MetaDefItem
     public ManagedLock getStatementLock()
     {
         return statementLock;
+    }
+
+    public void setStatementLock(ManagedLock statementLock)
+    {
+        this.statementLock = statementLock;
     }
 
     /**

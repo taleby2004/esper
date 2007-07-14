@@ -11,8 +11,8 @@ public final class StreamFactoryServiceProvider
      * Creates an implementation of the StreamFactoryService interface.
      * @return implementation
      */
-    public static StreamFactoryService newService()
+    public static StreamFactoryService newService(boolean isReuseViews)
     {
-        return new StreamFactorySvcImpl();
+        return new StreamFactorySvcImpl(isReuseViews);
     }
 }

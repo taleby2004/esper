@@ -6,7 +6,6 @@ import net.esper.filter.FilterOperator;
 import net.esper.filter.FilterSpecCompiled;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.event.SupportEventTypeFactory;
-import net.esper.support.event.SupportEventAdapterService;
 import net.esper.support.filter.SupportFilterServiceImpl;
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.view.EventStream;
@@ -22,7 +21,7 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void setUp()
     {
         supportFilterService = new SupportFilterServiceImpl();
-        streamFactoryService = new StreamFactorySvcImpl();
+        streamFactoryService = new StreamFactorySvcImpl(true);
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
         filterSpecs = new FilterSpecCompiled[3];
@@ -34,7 +33,7 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void testInvalidJoin()
     {
         streams = new EventStream[3];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, true);
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, true).getFirst();
 
         try
         {
@@ -51,9 +50,9 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void testCreateJoin()
     {
         streams = new EventStream[3];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, true);
-        streams[1] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, true);
-        streams[2] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, true);
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, true).getFirst();
+        streams[1] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, true).getFirst();
+        streams[2] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, true).getFirst();
 
         // Streams are reused
         assertNotSame(streams[0], streams[1]);
@@ -70,9 +69,9 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void testDropJoin()
     {
         streams = new EventStream[3];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, true);
-        streams[1] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, true);
-        streams[2] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, true);
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, true).getFirst();
+        streams[1] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, true).getFirst();
+        streams[2] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, true).getFirst();
 
         streamFactoryService.dropStream(filterSpecs[0], supportFilterService, true);
         streamFactoryService.dropStream(filterSpecs[1], supportFilterService, true);
@@ -97,10 +96,10 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void testCreateNoJoin()
     {
         streams = new EventStream[4];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false);
-        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false);
-        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, false);
-        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, false);
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
+        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
+        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, false).getFirst();
+        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, false).getFirst();
 
         // Streams are reused
         assertSame(streams[0], streams[1]);
@@ -117,10 +116,10 @@ public class TestStreamFactorySvcImpl extends TestCase
     public void testDropNoJoin()
     {
         streams = new EventStream[4];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false);
-        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false);
-        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, false);
-        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, false);
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
+        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
+        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, false).getFirst();
+        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, false).getFirst();
 
         streamFactoryService.dropStream(filterSpecs[0], supportFilterService, false);
         streamFactoryService.dropStream(filterSpecs[1], supportFilterService, false);

@@ -54,11 +54,13 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         // Statement context factory
         StatementContextFactory statementContextFactory = new StatementContextFactoryDefault();
 
+        boolean isReuseViews = configSnapshot.getEngineDefaults().getViewResources().isReuseViews();
+
         // New services context
         EPServicesContext services = new EPServicesContext(engineURI, engineURI, schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, viewResolutionService,
                 new StatementLockFactoryImpl(), eventProcessingRWLock, null, jndiContext, statementContextFactory,
-                patternObjectResolutionService);
+                patternObjectResolutionService, isReuseViews);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(services);

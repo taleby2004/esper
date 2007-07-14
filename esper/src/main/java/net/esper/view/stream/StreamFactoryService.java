@@ -4,6 +4,8 @@ import net.esper.view.EventStream;
 import net.esper.filter.FilterSpecCompiled;
 import net.esper.filter.FilterService;
 import net.esper.core.EPStatementHandle;
+import net.esper.util.ManagedLock;
+import net.esper.collection.Pair;
 
 /**
  * Service on top of the filter service for reuseing filter callbacks and their associated EventStream instances.
@@ -24,7 +26,7 @@ public interface StreamFactoryService
      * necessary for stream reuse and multithreading concerns
      * @return event stream representing active filter
      */
-    public EventStream createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
+    public Pair<EventStream, ManagedLock> createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
                                     boolean isJoin);
 
     /**

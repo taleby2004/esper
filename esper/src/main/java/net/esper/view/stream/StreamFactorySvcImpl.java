@@ -6,13 +6,13 @@ import net.esper.core.EPStatementHandle;
 import net.esper.core.EPStatementHandleCallback;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
-import net.esper.event.EventAdapterService;
 import net.esper.filter.FilterHandleCallback;
 import net.esper.filter.FilterService;
 import net.esper.filter.FilterSpecCompiled;
 import net.esper.filter.FilterValueSet;
 import net.esper.view.EventStream;
 import net.esper.view.ZeroDepthStream;
+import net.esper.util.ManagedLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -52,13 +52,16 @@ public class StreamFactorySvcImpl implements StreamFactoryService
     // Using a reference-counted map for non-join statements
     private final RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>> eventStreamsRefCounted;
 
+    private boolean isReuseViews;
+
     /**
      * Ctor.
      */
-    public StreamFactorySvcImpl()
+    public StreamFactorySvcImpl(boolean isReuseViews)
     {
         this.eventStreamsRefCounted = new RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
         this.eventStreamsIdentity = new IdentityHashMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
+        this.isReuseViews = isReuseViews;
     }
 
     /**
@@ -68,7 +71,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      * @param epStatementHandle is the statement resource lock
      * @return newly createdStatement event stream, not reusing existing instances
      */
-    public EventStream createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin)
+    public Pair<EventStream, ManagedLock> createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin)
     {
         if (log.isDebugEnabled())
         {
@@ -77,7 +80,8 @@ public class StreamFactorySvcImpl implements StreamFactoryService
 
         // Check if a stream for this filter already exists
         Pair<EventStream, EPStatementHandleCallback> pair = null;
-        if (isJoin)
+        boolean forceNewStream = (isJoin) || (!isReuseViews);
+        if (forceNewStream)
         {
             pair = eventStreamsIdentity.get(filterSpec);
         }
@@ -89,7 +93,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         // If pair exists, either reference count or illegal state
         if (pair != null)
         {
-            if (isJoin)
+            if (forceNewStream)
             {
                 throw new IllegalStateException("Filter spec object already found in collection");
             }
@@ -97,7 +101,8 @@ public class StreamFactorySvcImpl implements StreamFactoryService
             {
                 log.debug(".createStream filter already found");
                 eventStreamsRefCounted.reference(filterSpec);
-                return pair.getFirst();                
+                // We return the lock of the statement first establishing the stream to use that as the new statement's lock
+                return new Pair<EventStream, ManagedLock>(pair.getFirst(), pair.getSecond().getEpStatementHandle().getStatementLock());
             }
         }
 
@@ -116,7 +121,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
 
         // Store stream for reuse
         pair = new Pair<EventStream, EPStatementHandleCallback>(eventStream, handle);
-        if (isJoin)
+        if (forceNewStream)
         {
             eventStreamsIdentity.put(filterSpec, pair);
         }
@@ -129,7 +134,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         FilterValueSet filterValues = filterSpec.getValueSet(null);
         filterService.add(filterValues, handle);
 
-        return eventStream;
+        return new Pair<EventStream, ManagedLock>(eventStream, null);
     }
 
     /**
@@ -139,8 +144,9 @@ public class StreamFactorySvcImpl implements StreamFactoryService
     public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin)
     {
         Pair<EventStream, EPStatementHandleCallback> pair = null;
+        boolean forceNewStream = (isJoin) || (!isReuseViews);
 
-        if (isJoin)
+        if (forceNewStream)
         {
             pair = eventStreamsIdentity.get(filterSpec);
             if (pair == null)

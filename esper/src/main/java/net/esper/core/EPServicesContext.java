@@ -88,7 +88,8 @@ public final class EPServicesContext
                              ExtensionServicesContext extensionServicesContext,
                              EngineEnvContext engineEnvContext,
                              StatementContextFactory statementContextFactory,
-                             PatternObjectResolutionService patternObjectResolutionService)
+                             PatternObjectResolutionService patternObjectResolutionService,
+                             boolean isReuseViews)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -102,7 +103,7 @@ public final class EPServicesContext
         this.emitService = EmitServiceProvider.newService();
         this.dispatchService = DispatchServiceProvider.newService();
         this.viewService = ViewServiceProvider.newService();
-        this.streamFactoryService = StreamFactoryServiceProvider.newService();
+        this.streamFactoryService = StreamFactoryServiceProvider.newService(isReuseViews);
         this.viewResolutionService = viewResolutionService;
         this.statementLockFactory = statementLockFactory;
         this.eventProcessingRWLock = eventProcessingRWLock;

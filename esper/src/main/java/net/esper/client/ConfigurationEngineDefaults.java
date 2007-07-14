@@ -6,6 +6,7 @@ package net.esper.client;
 public class ConfigurationEngineDefaults
 {
     private Threading threading;
+    private ViewResources viewResources;
 
     /**
      * Ctor.
@@ -13,6 +14,7 @@ public class ConfigurationEngineDefaults
     protected ConfigurationEngineDefaults()
     {
         threading = new Threading();
+        viewResources = new ViewResources();
     }
 
     /**
@@ -22,6 +24,11 @@ public class ConfigurationEngineDefaults
     public Threading getThreading()
     {
         return threading;
+    }
+
+    public ViewResources getViewResources()
+    {
+        return viewResources;
     }
 
     /**
@@ -104,6 +111,32 @@ public class ConfigurationEngineDefaults
         public boolean isInsertIntoDispatchPreserveOrder()
         {
             return isInsertIntoDispatchPreserveOrder;
+        }
+    }
+
+    /**
+     * Holds view resources settings.
+     */
+    public static class ViewResources
+    {
+        private boolean isReuseViews;
+
+        /**
+         * Ctor - sets up defaults.
+         */
+        protected ViewResources()
+        {
+            isReuseViews = true;
+        }
+
+        public boolean isReuseViews()
+        {
+            return isReuseViews;
+        }
+
+        public void setReuseViews(boolean reuseViews)
+        {
+            isReuseViews = reuseViews;
         }
     }
 }
