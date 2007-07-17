@@ -8,6 +8,7 @@ import net.esper.client.EPStatement;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.support.util.SupportUpdateListener;
+import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.client.SupportConfigFactory;
 import net.esper.event.EventBean;
@@ -39,7 +40,7 @@ public class TestViewSelectExprClause extends TestCase
     {
         EventType type = selectTestView.getEventType();
         log.debug(".testGetEventType properties=" + Arrays.toString(type.getPropertyNames()));
-        assertTrue(Arrays.equals(type.getPropertyNames(), new String[] {"(3*intPrimitive)", "string", "result", "aBool"}));
+        ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"(3*intPrimitive)", "string", "result", "aBool"});
         assertEquals(String.class, type.getPropertyType("string"));
         assertEquals(Boolean.class, type.getPropertyType("aBool"));
         assertEquals(Float.class, type.getPropertyType("result"));

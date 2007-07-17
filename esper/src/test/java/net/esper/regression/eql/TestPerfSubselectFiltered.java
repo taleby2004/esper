@@ -118,6 +118,6 @@ public class TestPerfSubselectFiltered extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 }

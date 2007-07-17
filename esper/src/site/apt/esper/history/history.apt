@@ -12,6 +12,45 @@ Change History
 	[]
 
 
+Version 1.10.0 Update
+
+	Released July 18, 2007
+
+* API changes
+
+	* Support for a new statement-aware listener interface (ESPER-113)
+    
+* Major changes
+    
+    * None
+
+* Minor changes	    
+	
+	* Support for case-insensitive Java-class event property names (ESPER-103)
+	
+	* Additional engine configuration options
+	
+	* Fixed issue ESPER-112 "Pattern problem in 'every' operator not restarting a permanently false sub-expression"
+	
+	* Fixed issue ESPER-114 "Allow equals operator on object types in expressions"
+	
+	* Fixed issue ESPER-115 "NullPointerException using iterator on pattern without window"
+	
+	* Fixed issue ESPER-118 "NullPointerException when select * and additional fields"
+	
+	* Fixed issue ESPER-121 "Filter expression not evaluating correctly after optimization and using multiple pattern subexpression results"
+	
+	* Fixed issue ESPER-122 "IllegalArgumentException in a join statement between same-typed map-underlying events"
+	
+	* Fixed issue ESPER-124 "IllegalStateException in a grouped time window using the prior function"
+	
+	* Fixed issue ESPER-126 "Allow null statement name for createPattern"
+
+	* Documentation improvements
+	
+	* Performance improvement when running engine without log4j configuration
+
+
 Version 1.9.0 Update
 
 	Released June 6, 2007

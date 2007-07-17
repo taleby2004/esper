@@ -36,7 +36,7 @@ public class TestMTStmtSharedView extends TestCase
 
     public void testSharedViews() throws Exception
     {
-        trySend(4, 1000, 100);
+        trySend(4, 500, 100);
         //trySend(2, 1000, 100);
         //trySend(3, 2000, 20);
     }

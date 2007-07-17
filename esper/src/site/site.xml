@@ -18,7 +18,7 @@
 			</script>
 		</head>
 		<links/>
-		<menu name="Esper 1.9.0">
+		<menu name="Esper 1.10.0">
 			<item name="About Esper and NEsper" href="/index.html" collapse="false">
 				<item name="News" href="/about/news/news.html"/>
 				<item name="About Esper for Java" href="/about/esper/esper.html"/>

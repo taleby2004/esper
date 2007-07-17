@@ -12,6 +12,7 @@ import net.esper.support.eql.SupportSelectExprFactory;
 import net.esper.support.eql.SupportStreamTypeSvc1Stream;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.event.SupportEventAdapterService;
+import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.eql.spec.InsertIntoDesc;
 import net.esper.eql.spec.SelectExprElementCompiledSpec;
 
@@ -37,12 +38,12 @@ public class TestSelectExprEvalProcessor extends TestCase
     public void testGetResultEventType()
     {
         EventType type = methodOne.getResultEventType();
-        assertTrue(Arrays.equals(type.getPropertyNames(), new String[] {"resultOne", "resultTwo"}));
+        ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"resultOne", "resultTwo"});
         assertEquals(Double.class, type.getPropertyType("resultOne"));
         assertEquals(Integer.class, type.getPropertyType("resultTwo"));
 
         type = methodTwo.getResultEventType();
-        assertTrue(Arrays.equals(type.getPropertyNames(), new String[] {"a", "b"}));
+        ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"a", "b"});
         assertEquals(Double.class, type.getPropertyType("a"));
         assertEquals(Integer.class, type.getPropertyType("b"));
     }
