@@ -93,7 +93,7 @@ countStmt.start();]]></programlisting>
 	  <sect2 id="api-admin-listeners">		
 			<title>Adding Listeners</title>
 			<para>
-				We can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods on <literal>EPStatement</literal> . We need to provide an implementation of the <literal>UpdateListener</literal> interface to the statement:
+				We can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods on <literal>EPStatement</literal> . We need to provide an implementation of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement:
 			</para>
 			<programlisting><![CDATA[UpdateListener myListener = new MyUpdateListener();
 countStmt.addListener(myListener);]]></programlisting>
@@ -103,6 +103,18 @@ countStmt.addListener(myListener);]]></programlisting>
 				New data published by statements is the events representing the new values of derived data held by the statement.
 				Old data published by statements constists of the events representing the prior values of derived data held by the statement.
 			</para>		
+
+			<para>			
+				A second listener interface is the <literal>StatementAwareUpdateListener</literal> interface. A <literal>StatementAwareUpdateListener</literal> is especially useful for registering the same listener object with multiple statements, 
+				as the listener receives the statement instance and engine instance in addition to new and old data when the engine indicates new results to a listener.
+			</para>		
+			<programlisting><![CDATA[StatementAwareUpdateListener myListener = new MyStmtAwareUpdateListener();
+statement.addListener(myListener);]]></programlisting>
+
+			<para>			
+				To indicate results the engine invokes this method on <literal>StatementAwareUpdateListener</literal> listeners: <literal>update(EventBean[] newEvents, EventBean[] oldEvents, EPStatement statement, EPServiceProvider epServiceProvider)</literal>
+			</para>		
+
 	  </sect2>
 
 	  <sect2 id="api-admin-iterators">		

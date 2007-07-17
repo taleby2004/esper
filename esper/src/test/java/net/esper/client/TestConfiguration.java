@@ -14,6 +14,7 @@ public class TestConfiguration extends TestCase
     public void setUp()
     {
         config = new Configuration();
+        config.getEngineDefaults().getLogging().setEnableExecutionDebug(true);
     }
 
     public void testString() throws Exception

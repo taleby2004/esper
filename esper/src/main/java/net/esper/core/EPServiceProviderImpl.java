@@ -12,6 +12,7 @@ import net.esper.client.*;
 import net.esper.event.EventAdapterService;
 import net.esper.schedule.SchedulingService;
 import net.esper.filter.FilterService;
+import net.esper.util.ExecutionPathDebugLog;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -117,6 +118,9 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
     public void initialize()
     {
+        // This setting applies to all engines in a given VM
+        ExecutionPathDebugLog.setDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableExecutionDebug());
+
         if (engine != null)
         {
             engine.getServices().getTimerService().stopInternalClock(false);

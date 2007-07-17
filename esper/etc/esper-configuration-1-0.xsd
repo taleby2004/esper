@@ -254,6 +254,7 @@
 				<xs:element ref="threading" minOccurs="0"/>
 				<xs:element ref="event-meta" minOccurs="0"/>
 				<xs:element ref="view-resources" minOccurs="0"/>
+				<xs:element ref="logging" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -310,7 +311,21 @@
 	</xs:element>
 	<xs:element name="share-views">
 		<xs:complexType>
-			<xs:attribute name="value" type="xs:boolean" use="required"/>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="logging">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="execution-path" minOccurs="0"/>
+				</xs:sequence>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="execution-path">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

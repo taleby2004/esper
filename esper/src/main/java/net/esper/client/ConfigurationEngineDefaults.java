@@ -8,6 +8,7 @@ public class ConfigurationEngineDefaults
     private Threading threading;
     private ViewResources viewResources;
     private EventMeta eventMeta;
+    private Logging logging;
 
     /**
      * Ctor.
@@ -17,6 +18,7 @@ public class ConfigurationEngineDefaults
         threading = new Threading();
         viewResources = new ViewResources();
         eventMeta = new EventMeta();
+        logging = new Logging();
     }
 
     /**
@@ -44,6 +46,15 @@ public class ConfigurationEngineDefaults
     public EventMeta getEventMeta()
     {
         return eventMeta;
+    }
+
+    /**
+     * Returns logging settings applicable to the engine, other then Log4J settings.
+     * @return logging settings
+     */
+    public Logging getLogging()
+    {
+        return logging;
     }
 
     /**
@@ -246,6 +257,44 @@ public class ConfigurationEngineDefaults
         public void setClassPropertyResolutionStyle(Configuration.PropertyResolutionStyle classPropertyResolutionStyle)
         {
             this.classPropertyResolutionStyle = classPropertyResolutionStyle;
+        }
+    }
+
+    /**
+     * Holds view logging settings other then the Apache commons or Log4J settings.
+     */
+    public static class Logging
+    {
+        private boolean enableExecutionDebug;
+
+        /**
+         * Ctor - sets up defaults.
+         */
+        protected Logging()
+        {
+            enableExecutionDebug = false;
+        }
+
+        /**
+         * Returns true if execution path debug logging is enabled.
+         * <p>
+         * Only if this flag is set to true, in addition to LOG4J settings set to DEBUG, does an engine instance,
+         * produce debug out. 
+         * @return true if debug logging through Log4j is enabled for any event processing execution paths
+         */
+        public boolean isEnableExecutionDebug()
+        {
+            return enableExecutionDebug;
+        }
+
+        /**
+         * Set the debug flag for debugging the execution path, in which case the engine logs
+         * to Log4j in debug-level during execution.
+         * @param enableExecutionDebug false to disable debug logging in the execution path, true to enable
+         */
+        public void setEnableExecutionDebug(boolean enableExecutionDebug)
+        {
+            this.enableExecutionDebug = enableExecutionDebug;
         }
     }
 }

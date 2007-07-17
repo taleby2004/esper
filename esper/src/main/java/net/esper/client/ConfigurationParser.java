@@ -433,6 +433,10 @@ class ConfigurationParser {
             {
                 handleDefaultsViewResources(configuration, subElement);
             }
+            if (subElement.getNodeName().equals("logging"))
+            {
+                handleDefaultsLogging(configuration, subElement);
+            }
         }
     }
 
@@ -477,9 +481,24 @@ class ConfigurationParser {
             Element subElement = nodeIterator.next();
             if (subElement.getNodeName().equals("share-views"))
             {
-                String valueText = subElement.getAttributes().getNamedItem("value").getTextContent();
+                String valueText = subElement.getAttributes().getNamedItem("enabled").getTextContent();
                 Boolean value = Boolean.parseBoolean(valueText);
                 configuration.getEngineDefaults().getViewResources().setShareViews(value);
+            }
+        }
+    }
+
+    private static void handleDefaultsLogging(Configuration configuration, Element parentElement)
+    {
+        ElementIterator nodeIterator = new ElementIterator(parentElement.getChildNodes());
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("execution-path"))
+            {
+                String valueText = subElement.getAttributes().getNamedItem("enabled").getTextContent();
+                Boolean value = Boolean.parseBoolean(valueText);
+                configuration.getEngineDefaults().getLogging().setEnableExecutionDebug(value);
             }
         }
     }

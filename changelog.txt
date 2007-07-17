@@ -14,6 +14,7 @@ Changes in version 1.10.0
 * Fixed issue ESPER-124 "IllegalStateException in a grouped time window using the prior function"
 * Fixed issue ESPER-126 "Allow null statement name for createPattern"
 * Documentation improvements
+* Performance improvement when running engine without log4j configuration
 
 
 Changes in version 1.9.0

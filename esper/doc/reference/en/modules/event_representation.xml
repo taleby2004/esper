@@ -26,7 +26,7 @@
 				<tbody>
 					<row>
 						<entry><literal>java.lang.Object</literal></entry>
-						<entry>Any Java POJO (plain-old java object) with getter methods following JavaBean conventions</entry>
+						<entry>Any Java POJO (plain-old java object) with getter methods following JavaBean conventions;  Also legacy Java classes not following JavaBean conventions</entry>
 					</row>
 					<row>
 						<entry><literal>java.util.Map</literal></entry>
@@ -204,6 +204,9 @@ where address('work').streetName = 'Park Ave'
 		</para>
 		<programlisting><![CDATA[every MyEvent(enumProp=EnumClass.valueOf('ENUM_VALUE_1'))]]></programlisting>
 
+		<para>
+			Java classes that do not follow JavaBean conventions, such as legacy Java classes that expose public fields, or methods not following naming conventions, require additional configuration. Via configuration it is also possible to control case sensitivity in property name resolution. The relevant section in the chapter on configuration is <xref linkend="config-java-legacy"/>.
+		</para>
     </sect1>
     
 	<sect1 id="eventrep-java-util-map">
