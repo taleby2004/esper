@@ -15,6 +15,7 @@ import java.util.concurrent.locks.*;
 
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * Index for filter parameter constants to match using the equals (=) operator.
@@ -73,7 +74,7 @@ public final class FilterParamIndexEquals extends FilterParamIndexPropBase
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".match (" + Thread.currentThread().getId() + ") attributeValue=" + attributeValue);
         }

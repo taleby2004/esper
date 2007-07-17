@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import net.esper.pattern.observer.EventObserver;
 import net.esper.pattern.observer.ObserverEventEvaluator;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,7 +35,7 @@ public final class EvalObserverStateNode extends EvalStateNode implements Observ
     {
         super(evalObserverNode, parentNode, null);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".constructor");
         }

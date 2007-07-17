@@ -72,6 +72,10 @@ public class EPStatementHandle implements MetaDefItem
         return statementLock;
     }
 
+    /**
+     * Sets the lock to use for the statement.
+     * @param statementLock statement lock
+     */
     public void setStatementLock(ManagedLock statementLock)
     {
         this.statementLock = statementLock;

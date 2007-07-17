@@ -13,9 +13,17 @@ import java.util.List;
  */
 public class LengthBatchViewFactory implements ViewFactory
 {
-    private int size;
+    /**
+     * The length window size.
+     */
+    protected int size;
+
+    /**
+     * The access into the window.
+     */
+    protected RelativeAccessByEventNIndexGetter relativeAccessGetterImpl;
+    
     private EventType eventType;
-    private RelativeAccessByEventNIndexGetter relativeAccessGetterImpl;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {

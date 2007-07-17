@@ -8,6 +8,8 @@
 package net.esper.pattern;
 
 import net.esper.pattern.guard.GuardFactory;
+import net.esper.eql.spec.PatternGuardSpec;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -16,13 +18,32 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class EvalGuardNode extends EvalNode
 {
+    private PatternGuardSpec patternGuardSpec;
     private GuardFactory guardFactory;
 
     /**
      * Constructor.
-     * @param guardFactory - fcatory for guard construction
+     * @param patternGuardSpec - factory for guard construction
      */
-    public EvalGuardNode(GuardFactory guardFactory)
+    public EvalGuardNode(PatternGuardSpec patternGuardSpec)
+    {
+        this.patternGuardSpec = patternGuardSpec;
+    }
+
+    /**
+     * Returns the guard object specification to use for instantiating the guard factory and guard.
+     * @return guard specification
+     */
+    public PatternGuardSpec getPatternGuardSpec()
+    {
+        return patternGuardSpec;
+    }
+
+    /**
+     * Supplies the guard factory to the node.
+     * @param guardFactory is the guard factory
+     */
+    public void setGuardFactory(GuardFactory guardFactory)
     {
         this.guardFactory = guardFactory;
     }
@@ -31,7 +52,7 @@ public final class EvalGuardNode extends EvalNode
                                         MatchedEventMap beginState,
                                         PatternContext context, Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

@@ -9,6 +9,7 @@ import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.client.SupportConfigFactory;
 
 public class TestEPAdministrator extends TestCase
 {
@@ -18,7 +19,7 @@ public class TestEPAdministrator extends TestCase
     public void setUp()
     {
         testListener = new SupportUpdateListener();
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
     }
 
@@ -127,15 +128,8 @@ public class TestEPAdministrator extends TestCase
         assertEquals("s1--2", stmtFive.getName());
         assertEquals(stmt, stmtFive.getText());
 
-        try
-        {
-            epService.getEPAdministrator().createPattern(stmt, null);
-            fail();
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // expected
-        }
+        // should allow null statement name
+        epService.getEPAdministrator().createPattern(stmt, null);
     }
 
     public void testCreatePatternByName()
@@ -180,15 +174,8 @@ public class TestEPAdministrator extends TestCase
         assertEquals("s1--3", stmtFive.getName());
         assertEquals(stmt, stmtFive.getText());
 
-        try
-        {
-            epService.getEPAdministrator().createPattern(stmt, null);
-            fail();
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // expected
-        }
+        // Null statement names should be allowed
+        epService.getEPAdministrator().createPattern("every " + SupportBean.class.getName(), null);
     }
 
     public void testDestroyAll()
@@ -293,12 +280,6 @@ public class TestEPAdministrator extends TestCase
             statements[i] = epService.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName(), statementNames[i]);
         }
         return statements;
-    }
-
-    private EPStatement createStmt(String statementName)
-    {
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName(), statementName);
-        return stmt;
     }
 
     private void sendEvent()

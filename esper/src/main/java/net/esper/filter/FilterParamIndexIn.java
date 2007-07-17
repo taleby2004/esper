@@ -10,6 +10,7 @@ package net.esper.filter;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.collection.MultiKeyUntyped;
+import net.esper.util.ExecutionPathDebugLog;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -111,7 +112,7 @@ public final class FilterParamIndexIn extends FilterParamIndexPropBase
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".match (" + Thread.currentThread().getId() + ") attributeValue=" + attributeValue);
         }

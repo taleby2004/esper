@@ -1,13 +1,11 @@
 package net.esper.regression.pattern;
 
 import junit.framework.TestCase;
-import net.esper.client.EPException;
-import net.esper.client.EPServiceProvider;
-import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPStatementException;
+import net.esper.client.*;
 import net.esper.support.bean.SupportBean_N;
 import net.esper.support.bean.SupportBeanComplexProps;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.client.SupportConfigFactory;
 import net.esper.eql.parse.EPStatementSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +19,12 @@ public class TestInvalidPattern extends TestCase
 
     public void setUp()
     {
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+    }
+
+    public void testNullStatementName()
+    {
+        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName(), null);
     }
 
     public void testSyntaxException()
@@ -35,19 +38,19 @@ public class TestInvalidPattern extends TestCase
         String exceptionText = null;
 
         exceptionText = getStatementExceptionPattern(SupportBean.class.getName() + " -> timer:at(2,3,4,4,4)");
-        assertEquals("Invalid combination between days of week and days of month fields for timer:at [net.esper.support.bean.SupportBean -> timer:at(2,3,4,4,4)]", exceptionText);
+        assertEquals("Invalid parameter for pattern observer: Invalid combination between days of week and days of month fields for timer:at [net.esper.support.bean.SupportBean -> timer:at(2,3,4,4,4)]", exceptionText);
 
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " -> timer:within()");
-        assertEquals("Invalid use for pattern guard named 'within' outside of where-clause [net.esper.support.bean.SupportBean -> timer:within()]", exceptionText);
+        assertEquals("Failed to resolve pattern object: Pattern guard function 'within' cannot be used as a pattern observer [net.esper.support.bean.SupportBean -> timer:within()]", exceptionText);
 
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " where timer:interval(100)");
-        assertEquals("Invalid use for pattern observer named 'interval' [net.esper.support.bean.SupportBean where timer:interval(100)]", exceptionText);
+        assertEquals("Failed to resolve pattern object: Pattern observer function 'interval' cannot be used as a pattern guard [net.esper.support.bean.SupportBean where timer:interval(100)]", exceptionText);
 
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " -> timer:interval()");
-        assertEquals("Timer-interval observer requires a single numeric or time period parameter [net.esper.support.bean.SupportBean -> timer:interval()]", exceptionText);
+        assertEquals("Invalid parameter for pattern observer: Timer-interval observer requires a single numeric or time period parameter [net.esper.support.bean.SupportBean -> timer:interval()]", exceptionText);
 
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " where timer:within()");
-        assertEquals("Timer-within guard requires a single numeric or time period parameter [net.esper.support.bean.SupportBean where timer:within()]", exceptionText);
+        assertEquals("Invalid parameter for pattern guard: Timer-within guard requires a single numeric or time period parameter [net.esper.support.bean.SupportBean where timer:within()]", exceptionText);
 
         // class not found
         exceptionText = getStatementExceptionPattern("dummypkg.dummy()");
@@ -83,11 +86,11 @@ public class TestInvalidPattern extends TestCase
 
         // invalid observer arg
         exceptionText = getStatementExceptionPattern("timer:at(9l)");
-        assertEquals("Invalid number of parameters for timer:at [timer:at(9l)]", exceptionText);
+        assertEquals("Invalid parameter for pattern observer: Invalid number of parameters for timer:at [timer:at(9l)]", exceptionText);
 
         // invalid guard arg
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + " where timer:within('s')");
-        assertEquals("Timer-within guard requires a single numeric or time period parameter [net.esper.support.bean.SupportBean where timer:within('s')]", exceptionText);
+        assertEquals("Invalid parameter for pattern guard: Timer-within guard requires a single numeric or time period parameter [net.esper.support.bean.SupportBean where timer:within('s')]", exceptionText);
 
         // use-result property is wrong type
         exceptionText = getStatementExceptionPattern("x=" + EVENT_ALLTYPES + " -> " + EVENT_ALLTYPES + "(doublePrimitive=x.boolBoxed)");

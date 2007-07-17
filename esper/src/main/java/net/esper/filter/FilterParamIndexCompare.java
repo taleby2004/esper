@@ -8,6 +8,7 @@
 package net.esper.filter;
 
 import net.esper.util.JavaClassHelper;
+import net.esper.util.ExecutionPathDebugLog;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 
@@ -124,7 +125,7 @@ public final class FilterParamIndexCompare extends FilterParamIndexPropBase
         FilterOperator filterOperator = this.getFilterOperator();
         Double propertyValueDouble = ((Number) propertyValue).doubleValue();
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".match (" + Thread.currentThread().getId() + ") propertyValue=" + propertyValue +
                       "  filterOperator=" + filterOperator);

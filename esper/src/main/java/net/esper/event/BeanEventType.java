@@ -1,6 +1,8 @@
 package net.esper.event;
 
+import net.esper.client.Configuration;
 import net.esper.client.ConfigurationEventTypeLegacy;
+import net.esper.client.EPException;
 import net.esper.event.property.*;
 import net.sf.cglib.reflect.FastClass;
 import org.apache.commons.logging.Log;
@@ -11,57 +13,63 @@ import java.util.*;
 /**
  * Implementation of the EventType interface for handling JavaBean-type classes.
  */
-public class BeanEventType implements EventTypeSPI
+public class BeanEventType implements EventType
 {
     private final Class clazz;
-    private final BeanEventAdapter beanEventAdapter;
+    private final BeanEventTypeFactory beanEventTypeFactory;
     private final ConfigurationEventTypeLegacy optionalLegacyDef;
-    private final String eventTypeId;
+    private final String alias;
 
     private String[] propertyNames;
-    private Map<String, Class> simplePropertyTypes;
-    private Map<String, EventPropertyGetter> simplePropertyGetters;
-    private Map<String, EventPropertyDescriptor> simplePropertyDescriptors;
+    private Map<String, SimplePropertyInfo> simpleProperties;
     private Map<String, EventPropertyDescriptor> mappedPropertyDescriptors;
     private Map<String, EventPropertyDescriptor> indexedPropertyDescriptors;
     private EventType[] superTypes;
     private FastClass fastClass;
     private Set<EventType> deepSuperTypes;
+    private Configuration.PropertyResolutionStyle propertyResolutionStyle;
+
+    private Map<String, List<SimplePropertyInfo>> simpleSmartPropertyTable;
+    private Map<String, List<SimplePropertyInfo>> indexedSmartPropertyTable;
+    private Map<String, List<SimplePropertyInfo>> mappedSmartPropertyTable;
 
     /**
      * Constructor takes a java bean class as an argument.
      * @param clazz is the class of a java bean or other POJO
-     * @param beanEventAdapter is the chache and factory for event bean types and event wrappers
+     * @param beanEventTypeFactory is the chache and factory for event bean types and event wrappers
      * @param optionalLegacyDef optional configuration supplying legacy event type information
-     * @param eventTypeId is the event type id
+     * @param alias is the event type alias for the class
      */
     public BeanEventType(Class clazz,
-                         BeanEventAdapter beanEventAdapter,
+                         BeanEventTypeFactory beanEventTypeFactory,
                          ConfigurationEventTypeLegacy optionalLegacyDef,
-                         String eventTypeId)
+                         String alias)
     {
         this.clazz = clazz;
-        this.beanEventAdapter = beanEventAdapter;
+        this.beanEventTypeFactory = beanEventTypeFactory;
         this.optionalLegacyDef = optionalLegacyDef;
-        this.eventTypeId = eventTypeId;
+        this.alias = alias;
+        if (optionalLegacyDef != null)
+        {
+            this.propertyResolutionStyle = optionalLegacyDef.getPropertyResolutionStyle();
+        }
+        else
+        {
+            this.propertyResolutionStyle = beanEventTypeFactory.getDefaultPropertyResolutionStyle();
+        }
 
         initialize();
     }
 
-    public String getEventTypeId()
-    {
-        return eventTypeId;
-    }
-
     public final Class getPropertyType(String propertyName)
     {
-        Class propertyType = simplePropertyTypes.get(propertyName);
-        if (propertyType != null)
+        SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyName);
+        if ((simpleProp != null) && (simpleProp.getClazz() != null ))
         {
-            return propertyType;
+            return simpleProp.getClazz();
         }
 
-        Property prop = PropertyParser.parse(propertyName, beanEventAdapter);
+        Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory);
         if (prop instanceof SimpleProperty)
         {
             // there is no such property since it wasn't in simplePropertyTypes
@@ -84,15 +92,24 @@ public class BeanEventType implements EventTypeSPI
         return clazz;
     }
 
+    /**
+     * Returns the property resolution style.
+     * @return property resolution style
+     */
+    public Configuration.PropertyResolutionStyle getPropertyResolutionStyle()
+    {
+        return propertyResolutionStyle;
+    }
+
     public EventPropertyGetter getGetter(String propertyName)
     {
-        EventPropertyGetter getter = simplePropertyGetters.get(propertyName);
-        if (getter != null)
+        SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyName);
+        if ((simpleProp != null) && ( simpleProp.getter != null ))
         {
-            return getter;
+            return simpleProp.getGetter();
         }
 
-        Property prop = PropertyParser.parse(propertyName, beanEventAdapter);
+        Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory);
         if (prop instanceof SimpleProperty)
         {
             // there is no such property since it wasn't in simplePropertyGetters
@@ -108,7 +125,12 @@ public class BeanEventType implements EventTypeSPI
      */
     public final EventPropertyDescriptor getSimpleProperty(String propertyName)
     {
-        return simplePropertyDescriptors.get(propertyName);
+        SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyName);
+        if (simpleProp != null)
+        {
+            return simpleProp.getDescriptor();
+        }
+        return null;
     }
 
     /**
@@ -118,7 +140,31 @@ public class BeanEventType implements EventTypeSPI
      */
     public final EventPropertyDescriptor getMappedProperty(String propertyName)
     {
-        return mappedPropertyDescriptors.get(propertyName);
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.CASE_SENSITIVE)
+        {
+            return mappedPropertyDescriptors.get(propertyName);
+        }
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.CASE_INSENSITIVE)
+        {
+            List<SimplePropertyInfo> propertyInfos = mappedSmartPropertyTable.get(propertyName.toLowerCase());
+            return propertyInfos != null
+                    ? propertyInfos.get(0).getDescriptor()
+                    : null;
+        }
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE)
+        {
+            List<SimplePropertyInfo> propertyInfos = mappedSmartPropertyTable.get(propertyName.toLowerCase());
+            if (propertyInfos != null)
+            {
+                if (propertyInfos.size() != 1 )
+                {
+                    throw new EPException( "Unable to determine which property to use for \"" + propertyName + "\" because more than one property matched");
+                }
+
+                return propertyInfos.get(0).getDescriptor();
+            }
+        }
+        return null;
     }
 
     /**
@@ -128,7 +174,31 @@ public class BeanEventType implements EventTypeSPI
      */
     public final EventPropertyDescriptor getIndexedProperty(String propertyName)
     {
-        return indexedPropertyDescriptors.get(propertyName);
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.CASE_SENSITIVE)
+        {
+            return indexedPropertyDescriptors.get(propertyName);
+        }
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.CASE_INSENSITIVE)
+        {
+            List<SimplePropertyInfo> propertyInfos = indexedSmartPropertyTable.get(propertyName.toLowerCase());
+            return propertyInfos != null
+                    ? propertyInfos.get(0).getDescriptor()
+                    : null;
+        }
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE)
+        {
+            List<SimplePropertyInfo> propertyInfos = indexedSmartPropertyTable.get(propertyName.toLowerCase());
+            if (propertyInfos != null)
+            {
+                if (propertyInfos.size() != 1 )
+                {
+                    throw new EPException( "Unable to determine which property to use for \"" + propertyName + "\" because more than one property matched");
+                }
+
+                return propertyInfos.get(0).getDescriptor();
+            }
+        }
+        return null;
     }
 
     public String[] getPropertyNames()
@@ -144,6 +214,17 @@ public class BeanEventType implements EventTypeSPI
     public Iterator<EventType> getDeepSuperTypes()
     {
         return deepSuperTypes.iterator();
+    }
+
+    /**
+     * Returns the event type alias.
+     * <p>
+     * For classes for which no alias has been defined, the alias is the fully-qualified class name.
+     * @return event type alias 
+     */
+    public String getAlias()
+    {
+        return alias;
     }
 
     /**
@@ -167,11 +248,16 @@ public class BeanEventType implements EventTypeSPI
         List<EventPropertyDescriptor> properties = propertyListBuilder.assessProperties(clazz);
 
         this.propertyNames = new String[properties.size()];
-        this.simplePropertyTypes = new HashMap<String, Class>();
-        this.simplePropertyGetters = new HashMap<String, EventPropertyGetter>();
-        this.simplePropertyDescriptors = new HashMap<String, EventPropertyDescriptor>();
+        this.simpleProperties = new HashMap<String, SimplePropertyInfo>();
         this.mappedPropertyDescriptors = new HashMap<String, EventPropertyDescriptor>();
         this.indexedPropertyDescriptors = new HashMap<String, EventPropertyDescriptor>();
+
+        if (usesSmartResolutionStyle())
+        {
+            simpleSmartPropertyTable = new HashMap<String, List<SimplePropertyInfo>>();
+            mappedSmartPropertyTable = new HashMap<String, List<SimplePropertyInfo>>();
+            indexedSmartPropertyTable = new HashMap<String, List<SimplePropertyInfo>>();
+        }
 
         if ((optionalLegacyDef == null) ||
             (optionalLegacyDef.getCodeGeneration() != ConfigurationEventTypeLegacy.CodeGeneration.DISABLED))
@@ -198,33 +284,83 @@ public class BeanEventType implements EventTypeSPI
 
             if (desc.getPropertyType().equals(EventPropertyType.SIMPLE))
             {
-                EventPropertyGetter getter = null;
+                EventPropertyGetter getter;
+                Class type;
                 if (desc.getReadMethod() != null)
                 {
                     getter = PropertyHelper.getGetter(desc.getReadMethod(), fastClass);
-                    simplePropertyTypes.put(propertyName, desc.getReadMethod().getReturnType());
+                    type = desc.getReadMethod().getReturnType();
                 }
                 else
                 {
                     getter = new ReflectionPropFieldGetter(desc.getAccessorField());
-                    simplePropertyTypes.put(propertyName, desc.getAccessorField().getType());
+                    type = desc.getAccessorField().getType();
                 }
 
-                simplePropertyGetters.put(propertyName, getter);
-                simplePropertyDescriptors.put(propertyName, desc);
+                simpleProperties.put(propertyName, new SimplePropertyInfo(type, getter, desc));
+
+                // Recognize that there may be properties with overlapping case-insentitive names 
+                if (usesSmartResolutionStyle())
+                {
+                    // Find the property in the smart property table
+                    String smartPropertyName = propertyName.toLowerCase();
+                    List<SimplePropertyInfo> propertyInfoList = simpleSmartPropertyTable.get(smartPropertyName);
+                    if (propertyInfoList == null)
+                    {
+                        propertyInfoList = new ArrayList<SimplePropertyInfo>();
+                        simpleSmartPropertyTable.put(smartPropertyName, propertyInfoList);
+                    }
+                    
+                    // Enter the property into the smart property list
+                    SimplePropertyInfo propertyInfo = new SimplePropertyInfo(type, getter, desc);
+                    propertyInfoList.add(propertyInfo);
+                }
             }
             else if (desc.getPropertyType().equals(EventPropertyType.MAPPED))
             {
                 mappedPropertyDescriptors.put(propertyName, desc);
+
+                // Recognize that there may be properties with overlapping case-insentitive names
+                if (usesSmartResolutionStyle())
+                {
+                    // Find the property in the smart property table
+                    String smartPropertyName = propertyName.toLowerCase();
+                    List<SimplePropertyInfo> propertyInfoList = mappedSmartPropertyTable.get(smartPropertyName);
+                    if (propertyInfoList == null)
+                    {
+                        propertyInfoList = new ArrayList<SimplePropertyInfo>();
+                        mappedSmartPropertyTable.put(smartPropertyName, propertyInfoList);
+                    }
+
+                    // Enter the property into the smart property list
+                    SimplePropertyInfo propertyInfo = new SimplePropertyInfo(desc.getReturnType(), null, desc);
+                    propertyInfoList.add(propertyInfo);
+                }
             }
             else if (desc.getPropertyType().equals(EventPropertyType.INDEXED))
             {
                 indexedPropertyDescriptors.put(propertyName, desc);
+
+                if (usesSmartResolutionStyle())
+                {
+                    // Find the property in the smart property table
+                    String smartPropertyName = propertyName.toLowerCase();
+                    List<SimplePropertyInfo> propertyInfoList = indexedSmartPropertyTable.get(smartPropertyName);
+                    if (propertyInfoList == null)
+                    {
+                        propertyInfoList = new ArrayList<SimplePropertyInfo>();
+                        indexedSmartPropertyTable.put(smartPropertyName, propertyInfoList);
+                    }
+
+                    // Enter the property into the smart property list
+                    SimplePropertyInfo propertyInfo = new SimplePropertyInfo(desc.getReturnType(), null, desc);
+                    propertyInfoList.add(propertyInfo);
+                }
             }
         }
 
         // Determine event type super types
-        superTypes = getSuperTypes(clazz, beanEventAdapter);
+        superTypes = getSuperTypes(clazz, beanEventTypeFactory);
 
         // Determine deep supertypes
         // Get Java super types (superclasses and interfaces), deep get of all in the tree
@@ -236,12 +372,12 @@ public class BeanEventType implements EventTypeSPI
         deepSuperTypes = new HashSet<EventType>();
         for (Class superClass : supers)
         {
-            EventType superType = beanEventAdapter.createOrGetBeanType(superClass);
+            EventType superType = beanEventTypeFactory.createBeanType(superClass.getName(), superClass);
             deepSuperTypes.add(superType);
         }
     }
 
-    private static EventType[] getSuperTypes(Class clazz, BeanEventAdapter beanEventAdapter)
+    private static EventType[] getSuperTypes(Class clazz, BeanEventTypeFactory beanEventTypeFactory)
     {
         List<Class> superclasses = new LinkedList<Class>();
 
@@ -265,7 +401,7 @@ public class BeanEventType implements EventTypeSPI
         {
             if (!superclass.getName().startsWith("java"))
             {
-                EventType superType = beanEventAdapter.createOrGetBeanType(superclass);
+                EventType superType = beanEventTypeFactory.createBeanType(superclass.getName(), superclass);
                 superTypes.add(superType);
             }
         }
@@ -315,6 +451,115 @@ public class BeanEventType implements EventTypeSPI
             {
                 classes.remove(clazz);
             }
+        }
+    }
+
+    private boolean usesSmartResolutionStyle()
+    {
+        if ((propertyResolutionStyle == Configuration.PropertyResolutionStyle.CASE_INSENSITIVE) ||
+            (propertyResolutionStyle == Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private SimplePropertyInfo getSimplePropertyInfo(String propertyName)
+    {
+        SimplePropertyInfo propertyInfo;
+        List<SimplePropertyInfo> simplePropertyInfoList;
+
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.CASE_SENSITIVE)
+        {
+            return simpleProperties.get(propertyName);
+        }
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.CASE_INSENSITIVE)
+        {
+            propertyInfo = simpleProperties.get(propertyName);
+            if (propertyInfo != null)
+            {
+                return propertyInfo;
+            }
+
+            simplePropertyInfoList = simpleSmartPropertyTable.get(propertyName.toLowerCase());
+            return
+                simplePropertyInfoList != null
+                    ? simplePropertyInfoList.get(0)
+                    : null;
+        }
+        if (this.getPropertyResolutionStyle() == Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE)
+        {
+            propertyInfo = simpleProperties.get(propertyName);
+            if (propertyInfo != null)
+            {
+                return propertyInfo;
+            }
+
+            simplePropertyInfoList = simpleSmartPropertyTable.get(propertyName.toLowerCase());
+            if ( simplePropertyInfoList != null )
+            {
+                if (simplePropertyInfoList.size() != 1 )
+                {
+                    throw new EPException( "Unable to determine which property to use for \"" + propertyName + "\" because more than one property matched");
+                }
+
+                return simplePropertyInfoList.get(0);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Descriptor caching the getter, class and property info.
+     */
+    public class SimplePropertyInfo
+    {
+        private Class clazz;
+        private EventPropertyGetter getter;
+        private EventPropertyDescriptor descriptor;
+
+        /**
+         * Ctor.
+         * @param clazz is the class
+         * @param getter is the getter
+         * @param descriptor is the property info
+         */
+        public SimplePropertyInfo(Class clazz, EventPropertyGetter getter, EventPropertyDescriptor descriptor)
+        {
+            this.clazz = clazz;
+            this.getter = getter;
+            this.descriptor = descriptor;
+        }
+
+        /**
+         * Returns the return type.
+         * @return return type
+         */
+        public Class getClazz()
+        {
+            return clazz;
+        }
+
+        /**
+         * Returns the getter.
+         * @return getter
+         */
+        public EventPropertyGetter getGetter()
+        {
+            return getter;
+        }
+
+        /**
+         * Returns the property info.
+         * @return property info
+         */
+        public EventPropertyDescriptor getDescriptor()
+        {
+            return descriptor;
         }
     }
 

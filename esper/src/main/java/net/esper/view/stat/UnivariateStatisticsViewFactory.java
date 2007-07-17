@@ -15,7 +15,10 @@ import java.util.List;
  */
 public class UnivariateStatisticsViewFactory implements ViewFactory
 {
-    private String fieldName;
+    /**
+     * Property name of data field.
+     */
+    protected String fieldName;
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException

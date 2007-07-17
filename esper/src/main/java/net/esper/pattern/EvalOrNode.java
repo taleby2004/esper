@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class represents an 'or' operator in the evaluation tree representing any event expressions.
@@ -19,7 +20,7 @@ public final class EvalOrNode extends EvalNode
                                         MatchedEventMap beginState,
                                         PatternContext context, Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

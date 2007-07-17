@@ -27,6 +27,7 @@ public class WrapperEventType implements EventType
 	private final String[] propertyNames;
     private final int hashCode;
     private final boolean isNoMapProperties;
+    private final String typeName;
 
     /**
      * Ctor.
@@ -54,14 +55,24 @@ public class WrapperEventType implements EventType
 			propertyNames.add(mapProperty);
 		}
 		this.propertyNames = propertyNames.toArray(new String[0]);
-	}
+        this.typeName = typeName;
+    }
 	
 	public Iterator<EventType> getDeepSuperTypes() 
 	{
 		return null;
 	}
 
-	public EventPropertyGetter getGetter(final String property) 
+    /**
+     * Returns the event type alias.
+     * @return event type alias
+     */
+    public String getAlias()
+    {
+        return typeName;
+    }
+
+    public EventPropertyGetter getGetter(final String property)
 	{
 		if(underlyingEventType.isProperty(property))
 		{

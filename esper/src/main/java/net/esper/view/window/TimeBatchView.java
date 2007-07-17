@@ -12,6 +12,7 @@ import net.esper.schedule.ScheduleSlot;
 import net.esper.view.CloneableView;
 import net.esper.view.View;
 import net.esper.view.ViewSupport;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -103,7 +104,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, D
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Received update, " +
                     "  newData.length==" + ((newData == null) ? 0 : newData.length) +
@@ -160,7 +161,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, D
     {
         isCallbackScheduled = false;
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".sendBatch Update child views, " +
                     "  time=" + statementContext.getSchedulingService().getTime());
@@ -192,7 +193,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, D
             }
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".sendBatch Published updated data, ....newData size=" + currentBatch.size());
             for (Object object : currentBatch)
@@ -246,7 +247,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, D
         long current = statementContext.getSchedulingService().getTime();
         long afterMSec = computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".scheduleCallback Scheduled new callback for " +
                     " afterMsec=" + afterMSec +

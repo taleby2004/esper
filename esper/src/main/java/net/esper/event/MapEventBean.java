@@ -32,7 +32,7 @@ public class MapEventBean implements EventBean
      * @param eventType is the type of the event, i.e. describes the map entries
      * @param events are the event property constisting of events
      */
-    protected MapEventBean(EventType eventType, Map<String, EventBean> events)
+    public MapEventBean(EventType eventType, Map<String, EventBean> events)
     {
         this.properties = new HashMap<String, Object>();
         for (Map.Entry<String, EventBean> entry : events.entrySet())

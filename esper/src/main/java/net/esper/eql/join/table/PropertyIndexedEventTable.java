@@ -14,6 +14,7 @@ import net.esper.event.EventBean;
 import net.esper.event.EventBeanUtility;
 import net.esper.event.EventPropertyGetter;
 import net.esper.event.EventType;
+import net.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -144,7 +145,7 @@ public class PropertyIndexedEventTable implements EventTable
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
         {
-            if (log.isDebugEnabled())
+            if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
             {
                 log.debug(".remove Event could not be located in index, event " + event);
             }
@@ -155,7 +156,7 @@ public class PropertyIndexedEventTable implements EventTable
         {
             // Not an error, its possible that an old-data event is artificial (such as for statistics) and
             // thus did not correspond to a new-data event raised earlier.
-            if (log.isDebugEnabled())
+            if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
             {
                 log.debug(".remove Event could not be located in index, event " + event);
             }

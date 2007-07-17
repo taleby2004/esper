@@ -11,6 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 import java.util.LinkedList;
 
+import net.esper.util.ExecutionPathDebugLog;
+
 /**
  * Implements dispatch service using a thread-local linked list of Dispatchable instances.
  */
@@ -42,7 +44,7 @@ public class DispatchServiceImpl implements DispatchService
 
     private static void dispatchFromQueue(LinkedList<Dispatchable> dispatchQueue)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".dispatchFromQueue Dispatch queue is " + dispatchQueue.size() + " elements");
         }

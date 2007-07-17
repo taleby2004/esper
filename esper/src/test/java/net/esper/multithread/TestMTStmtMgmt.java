@@ -33,10 +33,11 @@ public class TestMTStmtMgmt extends TestCase
             {false, "every a=" + EVENT_NAME + "(feed='RT', price < 1000)"},
             {false, "every a=" + EVENT_NAME + "(symbol='IBM', feed='RT')"},
     };
-    
+
     public void setUp()
     {
         engine = EPServiceProviderManager.getDefaultProvider();
+        engine.initialize();
         // Less much debug output can be obtained by using external times
         //engine.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }

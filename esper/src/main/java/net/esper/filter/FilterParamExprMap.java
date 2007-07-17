@@ -72,6 +72,7 @@ public class FilterParamExprMap
     /**
      * Removes a filter parameter and it's associated expression node
      * @param param is the parameter to remove
+     * @return expression node removed
      */
     public ExprNode removeEntry(FilterSpecParam param)
     {

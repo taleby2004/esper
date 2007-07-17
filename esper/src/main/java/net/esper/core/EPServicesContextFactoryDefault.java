@@ -1,27 +1,24 @@
 package net.esper.core;
 
-import net.esper.client.ConfigurationEventTypeLegacy;
-import net.esper.client.ConfigurationEventTypeXMLDOM;
-import net.esper.client.ConfigurationException;
-import net.esper.client.ConfigurationPlugInAggregationFunction;
+import net.esper.client.*;
+import net.esper.eql.core.EngineImportException;
 import net.esper.eql.core.EngineImportService;
 import net.esper.eql.core.EngineImportServiceImpl;
-import net.esper.eql.core.EngineImportException;
 import net.esper.eql.core.EngineSettingsService;
 import net.esper.eql.db.DatabaseConfigService;
 import net.esper.eql.db.DatabaseConfigServiceImpl;
+import net.esper.eql.spec.PluggableObjectCollection;
+import net.esper.eql.view.OutputConditionFactory;
+import net.esper.eql.view.OutputConditionFactoryDefault;
 import net.esper.event.EventAdapterException;
-import net.esper.event.EventAdapterServiceBase;
 import net.esper.event.EventAdapterServiceImpl;
 import net.esper.schedule.ScheduleBucket;
 import net.esper.schedule.SchedulingService;
 import net.esper.schedule.SchedulingServiceProvider;
 import net.esper.util.JavaClassHelper;
 import net.esper.util.ManagedReadWriteLock;
-import net.esper.view.ViewResolutionService;
-import net.esper.view.ViewResolutionServiceImpl;
-import net.esper.pattern.PatternObjectResolutionService;
-import net.esper.pattern.PatternObjectResolutionServiceImpl;
+import net.esper.timer.TimerService;
+import net.esper.timer.TimerServiceImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +29,7 @@ import java.util.Properties;
  */
 public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 {
-    public EPServicesContext createServicesContext(String engineURI, ConfigurationSnapshot configSnapshot)
+    public EPServicesContext createServicesContext(EPServiceProvider epServiceProvider, ConfigurationSnapshot configSnapshot)
     {
         // Make services that depend on snapshot config entries
         EventAdapterServiceImpl eventAdapterService = new EventAdapterServiceImpl();
@@ -45,25 +42,35 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         EngineImportService engineImportService = makeEngineImportService(configSnapshot);
         EngineSettingsService engineSettingsService = new EngineSettingsService(configSnapshot.getEngineDefaults());
         DatabaseConfigService databaseConfigService = makeDatabaseRefService(configSnapshot, schedulingService);
-        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(configSnapshot.getPlugInViews());
-        PatternObjectResolutionService patternObjectResolutionService = new PatternObjectResolutionServiceImpl(configSnapshot.getPlugInPatternObjects());
+
+        PluggableObjectCollection plugInViews = new PluggableObjectCollection();
+        plugInViews.addViews(configSnapshot.getPlugInViews());
+        PluggableObjectCollection plugInPatternObj = new PluggableObjectCollection();
+        plugInPatternObj.addPatternObjects(configSnapshot.getPlugInPatternObjects());
 
         // JNDI context for binding resources
         EngineEnvContext jndiContext = new EngineEnvContext();
 
         // Statement context factory
-        StatementContextFactory statementContextFactory = new StatementContextFactoryDefault();
+        StatementContextFactory statementContextFactory = new StatementContextFactoryDefault(plugInViews, plugInPatternObj);
 
-        boolean isReuseViews = configSnapshot.getEngineDefaults().getViewResources().isReuseViews();
+        OutputConditionFactory outputConditionFactory = new OutputConditionFactoryDefault();
+
+        long msecTimerResolution = configSnapshot.getEngineDefaults().getThreading().getInternalTimerMsecResolution();
+        if (msecTimerResolution <= 0)
+        {
+            throw new ConfigurationException("Timer resolution configuration not set to a valid value, expecting a non-zero value");
+        }
+        TimerService timerService = new TimerServiceImpl(msecTimerResolution);
 
         // New services context
-        EPServicesContext services = new EPServicesContext(engineURI, engineURI, schedulingService,
-                eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, viewResolutionService,
+        EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
+                eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 new StatementLockFactoryImpl(), eventProcessingRWLock, null, jndiContext, statementContextFactory,
-                patternObjectResolutionService, isReuseViews);
+                plugInPatternObj, outputConditionFactory, timerService, configSnapshot.getEngineDefaults().getViewResources().isShareViews());
 
         // Circular dependency
-        StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(services);
+        StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
         services.setStatementLifecycleSvc(statementLifecycleSvc);
 
         return services;
@@ -74,7 +81,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
      * @param eventAdapterService is events adapter
      * @param configSnapshot is the config snapshot
      */
-    protected static void init(EventAdapterServiceBase eventAdapterService, ConfigurationSnapshot configSnapshot)
+    protected static void init(EventAdapterServiceImpl eventAdapterService, ConfigurationSnapshot configSnapshot)
     {
         // Extract legacy event type definitions for each event type alias, if supplied.
         //
@@ -93,6 +100,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             }
         }
         eventAdapterService.setClassLegacyConfigs(classLegacyInfo);
+        eventAdapterService.setDefaultPropertyResolutionStyle(configSnapshot.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
 
         // Add from the configuration the Java event class aliases
         Map<String, String> javaClassAliases = configSnapshot.getJavaClassAliases();
@@ -199,10 +207,9 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
     private static Map<String, Class> createPropertyTypes(Properties properties)
     {
         Map<String, Class> propertyTypes = new HashMap<String, Class>();
-        for(Map.Entry<Object, Object> entry : properties.entrySet())
+        for(Object property : properties.keySet())
         {
-            String property = (String) entry.getKey();
-            String className = (String) entry.getValue();
+            String className = (String) properties.get(property);
 
             if ("string".equals(className))
             {
@@ -222,7 +229,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 throw new EventAdapterException("Unable to load class '" + boxedClassName + "', class not found", ex);
             }
 
-            propertyTypes.put(property, clazz);
+            propertyTypes.put((String) property, clazz);
         }
         return propertyTypes;
     }

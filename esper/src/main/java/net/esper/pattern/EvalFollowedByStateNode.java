@@ -13,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 
+import net.esper.util.ExecutionPathDebugLog;
+
 /**
  * This class represents the state of a followed-by operator in the evaluation state tree.
  */
@@ -35,7 +37,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
     {
         super(evalFollowedByNode, parentNode, null);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".constructor");
         }
@@ -50,7 +52,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
 
     public final void start()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".start Starting followed-by expression for the first child");
         }
@@ -70,7 +72,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
     {
         Integer index = nodes.get(fromNode);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".evaluateTrue index=" + index + "  fromNode=" + fromNode.hashCode() + "  isQuitted=" + isQuitted);
         }
@@ -104,14 +106,18 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        log.debug(".evaluateFalse Child node has indicated permanently false");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".evaluateFalse Child node has indicated permanently false");
+        }
+
         fromNode.quit();
         nodes.remove(fromNode);
     }
 
     public final void quit()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".quit Stopping followed-by all children");
         }

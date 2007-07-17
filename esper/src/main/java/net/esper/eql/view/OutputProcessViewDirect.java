@@ -4,6 +4,7 @@ import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
 import net.esper.eql.core.ResultSetProcessor;
 import net.esper.event.EventBean;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -40,7 +41,7 @@ public class OutputProcessViewDirect extends OutputProcessView
      */
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Received update, " +
                     "  newData.length==" + ((newData == null) ? 0 : newData.length) +
@@ -65,14 +66,17 @@ public class OutputProcessViewDirect extends OutputProcessView
      */
     public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".process Received update, " +
                     "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
                     "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
         }
 
-        log.debug(".continueOutputProcessingJoin");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".continueOutputProcessingJoin");
+        }
 
         Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEvents, oldEvents);
 

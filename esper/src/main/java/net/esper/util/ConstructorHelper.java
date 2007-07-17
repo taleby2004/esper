@@ -134,7 +134,7 @@ public class ConstructorHelper
 
     private static void logConstructors(Class clazz)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".invokeConstructor Constructors for class " + clazz);
         }
@@ -143,7 +143,7 @@ public class ConstructorHelper
         for (int i = 0, size = ctors.length; i < size; i++)
         {
             Class[] ctorParams = ctors[i].getParameterTypes();
-            if (log.isDebugEnabled())
+            if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
             {
                 log.debug(".invokeConstructor Constructor " + i + ' ' + Arrays.toString(ctorParams));
             }

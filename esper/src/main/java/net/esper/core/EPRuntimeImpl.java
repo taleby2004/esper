@@ -23,6 +23,7 @@ import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.timer.TimerCallback;
 import net.esper.util.ManagedLock;
 import net.esper.util.ThreadLogUtil;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -93,7 +94,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
 
     public void timerCallback()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".timerCallback Evaluating scheduled callbacks");
         }
@@ -111,7 +112,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             return;
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".sendEvent Processing event " + event);
         }
@@ -128,7 +129,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             return;
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".sendEvent Processing DOM node event " + document);
         }
@@ -145,7 +146,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             throw new IllegalArgumentException("Invalid null event object");
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".sendMap Processing event " + map);
         }
@@ -272,7 +273,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         }
 
         // Evaluation of all time events is protected from statement management
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".processTimeEvent Setting time and evaluating schedules");
         }
@@ -297,7 +298,6 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         // Evaluation of schedules is protected by an optional scheduling service lock and then the engine lock
         // We want to stay in this order for allowing the engine lock as a second-order lock to the
         // services own lock, if it has one.
-        services.getSchedulingService().evaluateLock();
         services.getEventProcessingRWLock().acquireReadLock();
         try
         {
@@ -310,7 +310,6 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         finally
         {
             services.getEventProcessingRWLock().releaseReadLock();
-            services.getSchedulingService().evaluateUnLock();
         }
 
         services.getEventProcessingRWLock().acquireReadLock();

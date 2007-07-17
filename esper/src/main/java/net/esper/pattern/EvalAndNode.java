@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import net.esper.util.ExecutionPathDebugLog;
 
 
 /**
@@ -21,7 +22,7 @@ public final class EvalAndNode extends EvalNode
                                         PatternContext context,
                                         Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

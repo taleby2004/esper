@@ -12,6 +12,7 @@ import net.esper.schedule.ScheduleSlot;
 import net.esper.core.StatementContext;
 import net.esper.core.EPStatementHandleCallback;
 import net.esper.core.ExtensionServicesContext;
+import net.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,7 +75,7 @@ public final class OutputConditionTime implements OutputCondition
 
     public final void updateOutputCondition(int newEventsCount, int oldEventsCount)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
         	log.debug(".updateOutputCondition, " +
         			"  newEventsCount==" + newEventsCount +
@@ -105,7 +106,7 @@ public final class OutputConditionTime implements OutputCondition
         long current = context.getSchedulingService().getTime();
         long afterMSec = computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".scheduleCallback Scheduled new callback for " +
                     " afterMsec=" + afterMSec +

@@ -1,34 +1,37 @@
 package net.esper.event;
 
 import net.esper.client.ConfigurationEventTypeLegacy;
-import net.esper.util.UuidGenerator;
+import net.esper.client.Configuration;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Random;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * A cache and factory class for obtaining {@link EventType} instances and {@link EventBean} instances
- * for Java Bean events. The class caches {@link EventType} instances already known for performance reasons.
- * <p>
- * This class is multithread-safe. 
+ * A fcatory for {@link BeanEventType} instances based on Java class information and using configured
+ * settings for 
  */
-public class BeanEventAdapter
+public class BeanEventAdapter implements BeanEventTypeFactory
 {
-    private final Map<Class, BeanEventType> typesPerJavaBean;
+    private final ConcurrentHashMap<Class, BeanEventType> typesPerJavaBean;
+    private final Lock typesPerJavaBeanLock;
+
     private Map<String, ConfigurationEventTypeLegacy> classToLegacyConfigs;
-    private final ReadWriteLock typesPerJavaBeanLock;
+    private Configuration.PropertyResolutionStyle defaultPropertyResolutionStyle;
 
     /**
      * Ctor.
+     * @param typesPerJavaBean shareable collection that this adapter writes to
+     * for caching bean types per class
      */
-    public BeanEventAdapter()
+    public BeanEventAdapter(ConcurrentHashMap<Class, BeanEventType> typesPerJavaBean)
     {
-        typesPerJavaBean = new HashMap<Class, BeanEventType>();
-        typesPerJavaBeanLock = new ReentrantReadWriteLock();
+        this.typesPerJavaBean = typesPerJavaBean;
+        typesPerJavaBeanLock = new ReentrantLock();
         classToLegacyConfigs = new HashMap<String, ConfigurationEventTypeLegacy>();
+        this.defaultPropertyResolutionStyle = Configuration.PropertyResolutionStyle.getDefault();
     }
 
     /**
@@ -41,16 +44,21 @@ public class BeanEventAdapter
     }
 
     /**
-     * Returns an adapter for the given Java Bean.
-     * @param event is the bean to wrap
-     * @param eventId is an optional id to assigned to the event
-     * @return EventBean wrapping Java Bean
+     * Sets the default property resolution style for Java class properties.
+     * @param defaultPropertyResolutionStyle resolution style
      */
-    public EventBean adapterForBean(Object event, Object eventId)
+    public void setDefaultPropertyResolutionStyle(Configuration.PropertyResolutionStyle defaultPropertyResolutionStyle)
     {
-        Class eventClass = event.getClass();
-        EventType eventType = createOrGetBeanType(eventClass);
-        return new BeanEventBean(event, eventType, eventId);
+        this.defaultPropertyResolutionStyle = defaultPropertyResolutionStyle;
+    }
+
+    /**
+     * Gets the default property resolution style for Java class properties. 
+     * @return resolution style
+     */
+    public Configuration.PropertyResolutionStyle getDefaultPropertyResolutionStyle()
+    {
+        return defaultPropertyResolutionStyle;
     }
 
     /**
@@ -59,24 +67,17 @@ public class BeanEventAdapter
      * @param clazz is the class of the Java bean.
      * @return EventType implementation for bean class
      */
-    public final BeanEventType createOrGetBeanType(Class clazz)
+    public final BeanEventType createBeanType(String alias, Class clazz)
     {
         if (clazz == null)
         {
             throw new IllegalArgumentException("Null value passed as class");
         }
 
-        // Check if its already there
-        typesPerJavaBeanLock.readLock().lock();
-        BeanEventType eventType = typesPerJavaBean.get(clazz);
-        typesPerJavaBeanLock.readLock().unlock();
-        if (eventType != null)
-        {
-            return eventType;
-        }
+        BeanEventType eventType = null;
 
         // not created yet, thread-safe create
-        typesPerJavaBeanLock.writeLock().lock();
+        typesPerJavaBeanLock.lock();
         try
         {
             eventType = typesPerJavaBean.get(clazz);
@@ -88,8 +89,7 @@ public class BeanEventAdapter
             // Check if we have a legacy type definition for this class
             ConfigurationEventTypeLegacy legacyDef = classToLegacyConfigs.get(clazz.getName());
 
-            String eventTypeId = "CLASS_" + clazz.getName();
-            eventType = new BeanEventType(clazz, this, legacyDef, eventTypeId);
+            eventType = new BeanEventType(clazz, this, legacyDef, alias);
             typesPerJavaBean.put(clazz, eventType);
         }
         catch (RuntimeException ex)
@@ -98,7 +98,7 @@ public class BeanEventAdapter
         }
         finally
         {
-            typesPerJavaBeanLock.writeLock().unlock();
+            typesPerJavaBeanLock.unlock();
         }
 
         return eventType;

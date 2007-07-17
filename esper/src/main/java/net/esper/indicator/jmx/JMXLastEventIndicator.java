@@ -16,6 +16,7 @@ import net.esper.client.UpdateListener;
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.view.ViewFieldEnum;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -68,7 +69,7 @@ public final class JMXLastEventIndicator implements UpdateListener
             objectName += ":indexProperty=" + indexProperty;
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".setParent Registering mbean with name " + objectName);
         }

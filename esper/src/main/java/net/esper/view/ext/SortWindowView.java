@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.*;
 
 import net.esper.util.MultiKeyComparator;
+import net.esper.util.ExecutionPathDebugLog;
 import net.esper.view.*;
 import net.esper.view.window.DataWindowView;
 import net.esper.collection.MultiKeyUntyped;
@@ -128,7 +129,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Updating view");
             dumpUpdateParams("SortWindowView", newData, oldData);
@@ -182,7 +183,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
 
                 removedEvents.add(event);
 
-                if (log.isDebugEnabled())
+                if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
                 {
                     log.debug(".update Pushing out event event=" + event);
                 }

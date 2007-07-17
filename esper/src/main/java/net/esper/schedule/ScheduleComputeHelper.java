@@ -11,6 +11,7 @@ import java.util.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * For a crontab-like schedule, this class computes the next occurance given a start time and a specification of
@@ -39,7 +40,7 @@ public final class ScheduleComputeHelper
      */
     public static long computeNextOccurance(ScheduleSpec spec, long afterTimeInMillis)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".computeNextOccurance Computing next occurance, afterTimeInMillis=" + (new Date(afterTimeInMillis)) +
                       "  as long=" + afterTimeInMillis +
@@ -59,7 +60,7 @@ public final class ScheduleComputeHelper
 
         Date result = compute(spec, afterTimeInMillis);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".computeNextOccurance Completed, result=" + result + "  long=" + result.getTime());
         }

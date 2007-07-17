@@ -9,6 +9,7 @@ public final class StreamFactoryServiceProvider
 {
     /**
      * Creates an implementation of the StreamFactoryService interface.
+     * @param isReuseViews indicator on whether stream and view resources are to be reused between statements
      * @return implementation
      */
     public static StreamFactoryService newService(boolean isReuseViews)

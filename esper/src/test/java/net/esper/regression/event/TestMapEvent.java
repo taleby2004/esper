@@ -10,14 +10,15 @@ import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
+import net.esper.support.client.SupportConfigFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class TestMapEvent extends TestCase
 {
-    Properties properties;
-    Map<String, Object> map;
-    EPServiceProvider epService;
+    private Properties properties;
+    private Map<String, Object> map;
+    private EPServiceProvider epService;
 
     protected void setUp()
     {
@@ -31,7 +32,7 @@ public class TestMapEvent extends TestCase
         map.put("myString", "some string");
         map.put("beanA", SupportBeanComplexProps.makeDefaultBean());
 
-        Configuration configuration = new Configuration();
+        Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addEventTypeAlias("myMapEvent", properties);
 
         epService = EPServiceProviderManager.getProvider("myProvider", configuration);

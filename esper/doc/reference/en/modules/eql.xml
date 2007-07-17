@@ -36,7 +36,7 @@
 			<listitem>
 				<para>
 					Views that derive statistics: <literal>std:size</literal>, <literal>stat:uni</literal>, <literal>stat:linest</literal>, <literal>stat:correl</literal>, <literal>stat:weighted_avg</literal>, 
-					<literal>stat:multidim_stat</literal>
+					<literal>stat:cube</literal>
 				</para>
 			</listitem>
 		</orderedlist>
@@ -2382,7 +2382,7 @@ win:time(125)</programlisting>
 								<entry>Slope</entry>
 							</row>
 							<row>
-								<entry><literal>yintercept</literal></entry>
+								<entry><literal>YIntercept</literal></entry>
 								<entry>Y Intercept</entry>
 							</row>
 						</tbody>
@@ -2393,7 +2393,7 @@ win:time(125)</programlisting>
 					Calculate slope and y-intercept on price and offer for all events in the last 10 seconds.
 				</para>
 	
-				<programlisting><![CDATA[select slope, yintercept from StockTickEvent.win:time(10 seconds).stat:linest('price', 'offer')]]></programlisting>	
+				<programlisting><![CDATA[select slope, YIntercept from StockTickEvent.win:time(10 seconds).stat:linest('price', 'offer')]]></programlisting>	
 			</sect3>
 				
 			<sect3 id="view-stat-correl" >
@@ -2418,7 +2418,7 @@ win:time(125)</programlisting>
 						</thead>
 						<tbody>
 							<row>
-								<entry><literal>correl</literal></entry>
+								<entry><literal>correlation</literal></entry>
 								<entry>Correlation between two event properties</entry>
 							</row>
 						</tbody>
@@ -2429,7 +2429,7 @@ win:time(125)</programlisting>
 					Calculate correlation on price and offer over all stock tick events for IBM.
 				</para>
 	
-				<programlisting><![CDATA[select * from StockTickEvent(symbol='IBM').stat:correl('price', 'offer')]]></programlisting>            
+				<programlisting><![CDATA[select correlation from StockTickEvent(symbol='IBM').stat:correl('price', 'offer')]]></programlisting>            
 			</sect3>
 						
 			<sect3 id="view-stat-weightedavg" >
@@ -2469,7 +2469,7 @@ from StockTickEvent(symbol='IBM').win:time(3 seconds).stat:weighted_avg('price',
 			</sect3> 
 			
 			<sect3 id="view-stat-multidim" >
-			   <title>Multi-dimensional statistics (<literal>stat:multidim_stats</literal>)</title>
+			   <title>Multi-dimensional statistics (<literal>stat:cube</literal>)</title>
 		
 				<para>
 					This view works similar to the <literal>std:groupby</literal> views in that it groups information by one or more event properties. 
@@ -2477,10 +2477,10 @@ from StockTickEvent(symbol='IBM').win:time(3 seconds).stat:weighted_avg('price',
 					The second parameter is the property name to derive data from.
 					The remaining parameters supply the event property names to use to derive dimensions.
 				</para>
-				<synopsis>stat:multidim_stats(<emphasis>values_to_derive</emphasis>, <emphasis>property_name_datapoint</emphasis>, <emphasis>property_name_column</emphasis>)</synopsis>
-				<synopsis>stat:multidim_stats(<emphasis>values_to_derive</emphasis>, <emphasis>property_name_datapoint</emphasis>, <emphasis>property_name_column</emphasis>, 
+				<synopsis>stat:cube(<emphasis>values_to_derive</emphasis>, <emphasis>property_name_datapoint</emphasis>, <emphasis>property_name_column</emphasis>)</synopsis>
+				<synopsis>stat:cube(<emphasis>values_to_derive</emphasis>, <emphasis>property_name_datapoint</emphasis>, <emphasis>property_name_column</emphasis>, 
     <emphasis>property_name_row</emphasis>)</synopsis>
-				<synopsis>stat:multidim_stats(<emphasis>values_to_derive</emphasis>, <emphasis>property_name_datapoint</emphasis>, <emphasis>property_name_column</emphasis>, 
+				<synopsis>stat:cube(<emphasis>values_to_derive</emphasis>, <emphasis>property_name_datapoint</emphasis>, <emphasis>property_name_column</emphasis>, 
     <emphasis>property_name_row</emphasis>, <emphasis>property_name_page</emphasis>)</synopsis>
 				
 				<table frame="topbot" id="view-stat-multidim-table" revision="2">
@@ -2506,14 +2506,14 @@ from StockTickEvent(symbol='IBM').win:time(3 seconds).stat:weighted_avg('price',
 				<para>
 					The example below derives the count, average and standard deviation latency of service measurement events per customer.
 				</para>	
-				<programlisting><![CDATA[select cube from ServiceMeasurement.stat:multidim_stats({‘count’, ‘average’, ‘stdev’}, 
+				<programlisting><![CDATA[select cube from ServiceMeasurement.stat:cube({‘count’, ‘average’, ‘stdev’}, 
     'latency', 'customer')]]></programlisting>            
 
 				<para>
 					This example derives the average latency of service measurement events per customer, service and error status for events in
 					the last 30 seconds.
 				</para>	
-				<programlisting><![CDATA[select * from ServiceMeasurement.win:length(30000).stat:multidim_stats({‘average’}, 
+				<programlisting><![CDATA[select * from ServiceMeasurement.win:length(30000).stat:cube({‘average’}, 
 	'latency', 'customer', 'service', 'status')]]></programlisting>            
 			</sect3> 
 

@@ -9,6 +9,7 @@ package net.esper.filter;
 
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
+import net.esper.util.ExecutionPathDebugLog;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -108,7 +109,7 @@ public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
     {
         Object objAttributeValue = this.getGetter().get(eventBean);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".match Finding range matches, attribute=" + this.getPropertyName() +
                       "  attrValue=" + objAttributeValue);

@@ -29,7 +29,7 @@ public class WrapperEventBean implements EventBean {
 		this.event = event;
 		this.map = properties;		
 		this.eventType = eventType;
-	}
+    }
 	
 	public Object get(String property) throws PropertyAccessException 
 	{

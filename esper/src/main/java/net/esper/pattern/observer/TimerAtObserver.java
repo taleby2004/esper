@@ -14,6 +14,7 @@ import net.esper.schedule.ScheduleSpec;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.core.EPStatementHandleCallback;
 import net.esper.core.ExtensionServicesContext;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,7 +50,7 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
 
     public final void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".scheduledTrigger");
         }
@@ -60,7 +61,7 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
 
     public void startObserve()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".startObserve Starting at, spec=" + scheduleSpec);
         }
@@ -77,7 +78,7 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
 
     public void stopObserve()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".stopObserve");
         }

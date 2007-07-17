@@ -30,6 +30,7 @@ import net.esper.indicator.pretty.CubeCellStringRenderer;
 import net.esper.indicator.pretty.CubeTabularDataRenderer;
 import net.esper.view.ViewFieldEnum;
 import net.esper.view.stat.olap.Cube;
+import net.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,7 +72,7 @@ public final class JMXLastCubeElementDynamicMBean implements JMXLastElementObser
     {
         cells = CubeCellStringRenderer.renderCube(cube);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug (".setCube Cells...");
             for (String attribute : cells.keySet())
@@ -82,7 +83,7 @@ public final class JMXLastCubeElementDynamicMBean implements JMXLastElementObser
 
         tables = CubeTabularDataRenderer.renderCube(cube);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug (".setCube Tables...");
             for (String attribute : tables.keySet())
@@ -93,7 +94,7 @@ public final class JMXLastCubeElementDynamicMBean implements JMXLastElementObser
 
         setupMBeanInfo();
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug (".setCube mBeanInfo.getAttributes().length=" + mBeanInfo.getAttributes().length);
         }

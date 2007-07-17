@@ -16,7 +16,11 @@ import net.esper.util.MetaDefItem;
  */
 public abstract class FilterSpecParam implements MetaDefItem
 {
+    /**
+     * The property name of the filter parameter.
+     */
     protected final String propertyName;
+    
     private final FilterOperator filterOperator;
 
     FilterSpecParam(String propertyName, FilterOperator filterOperator)

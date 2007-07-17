@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import net.esper.collection.Pair;
 import net.esper.event.EventType;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * Builder manipulates a tree structure consisting of {@link FilterHandleSetNode} and {@link FilterParamIndexBase} instances.
@@ -54,7 +55,7 @@ public final class IndexTreeBuilder
         this.filterCallback = filterCallback;
         this.currentThreadId = Thread.currentThread().getId();
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".add (" + currentThreadId + ") Adding filter callback, " +
                       "  topNode=" + topNode +
@@ -87,7 +88,7 @@ public final class IndexTreeBuilder
         this.filterCallback = filterCallback;
         this.currentThreadId = Thread.currentThread().getId();
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".remove (" + currentThreadId + ") Removing filterCallback " +
                       " from treepath=" + treePathInfo.toString() +
@@ -107,7 +108,7 @@ public final class IndexTreeBuilder
      */
     private void addToNode(FilterHandleSetNode currentNode, IndexTreePath treePathInfo)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".addToNode (" + currentThreadId + ") Adding filterCallback, node=" + currentNode +
                       "  remainingParameters=" + printRemainingParameters());
@@ -309,7 +310,7 @@ public final class IndexTreeBuilder
                             Object filterForValue,
                             IndexTreePath treePathInfo)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".addToIndex (" + currentThreadId + ") Adding to index " +
                       index.toString() +

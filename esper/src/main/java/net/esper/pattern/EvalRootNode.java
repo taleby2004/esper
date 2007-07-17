@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class is always the root node in the evaluation tree representing an event expression.
@@ -31,7 +32,7 @@ public final class EvalRootNode extends EvalNode implements PatternStarter
                                         MatchedEventMap beginState,
                                         PatternContext context, Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

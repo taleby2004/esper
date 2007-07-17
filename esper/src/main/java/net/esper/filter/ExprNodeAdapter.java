@@ -33,6 +33,7 @@ public class ExprNodeAdapter
     /**
      * Ctor.
      * @param exprNode is the boolean expression
+     * @param prototype is the row of events the we are matching on
      */
     public ExprNodeAdapter(ExprNode exprNode, EventBean[] prototype)
     {

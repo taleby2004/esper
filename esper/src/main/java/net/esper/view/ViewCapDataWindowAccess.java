@@ -1,6 +1,7 @@
 package net.esper.view;
 
 import net.esper.view.std.GroupByViewFactory;
+import net.esper.core.StatementContext;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class ViewCapDataWindowAccess implements ViewCapability
     {
     }
 
-    public boolean inspect(List<ViewFactory> viewFactories)
+    public boolean inspect(int streamNumber, List<ViewFactory> viewFactories, StatementContext statementContext)
     {
         // We allow the capability only if
         //  - 1 view

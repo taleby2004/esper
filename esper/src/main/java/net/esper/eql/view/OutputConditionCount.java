@@ -9,6 +9,7 @@ package net.esper.eql.view;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * Output limit condition that is satisfied when either
@@ -76,7 +77,7 @@ public final class OutputConditionCount implements OutputCondition
         this.newEventsCount += newDataCount;
         this.oldEventsCount += oldDataCount;
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".updateBatchCondition, " +
                     "  newEventsCount==" + newEventsCount +

@@ -10,6 +10,7 @@ import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.collection.IterablesListIterator;
 import net.esper.core.StatementContext;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * The merge view works together with a group view that splits the data in a stream to multiple subviews, based on
@@ -70,7 +71,7 @@ public final class MergeView extends ViewSupport implements CloneableView
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Updating view");
             dumpUpdateParams("MergeView", newData, oldData);

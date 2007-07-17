@@ -4,6 +4,7 @@ import net.esper.client.ConfigurationPlugInPatternObject;
 import net.esper.client.ConfigurationException;
 import net.esper.eql.spec.PatternGuardSpec;
 import net.esper.eql.spec.PatternObserverSpec;
+import net.esper.eql.spec.PluggableObjectCollection;
 import net.esper.support.pattern.SupportObserverFactory;
 import net.esper.support.pattern.SupportGuardFactory;
 import net.esper.pattern.guard.TimerWithinGuardFactory;
@@ -24,7 +25,10 @@ public class TestPatternObjectResolutionServiceImpl extends TestCase
         List<ConfigurationPlugInPatternObject> init = new ArrayList<ConfigurationPlugInPatternObject>();
         init.add(makeGuardSpec("g", "h", SupportGuardFactory.class.getName()));
         init.add(makeObserverSpec("a", "b", SupportObserverFactory.class.getName()));
-        service = new PatternObjectResolutionServiceImpl(init);
+        PluggableObjectCollection desc = new PluggableObjectCollection();
+        desc.addPatternObjects(init);
+        desc.addObjects(PatternObjectHelper.getBuiltinPatternObjects());
+        service = new PatternObjectResolutionServiceImpl(desc);
     }
 
     public void testMake() throws Exception
@@ -50,7 +54,9 @@ public class TestPatternObjectResolutionServiceImpl extends TestCase
     {
         try
         {
-            service = new PatternObjectResolutionServiceImpl(config);
+            PluggableObjectCollection desc = new PluggableObjectCollection();
+            desc.addPatternObjects(config);
+            service = new PatternObjectResolutionServiceImpl(desc);
             fail();
         }
         catch (ConfigurationException ex)

@@ -15,6 +15,7 @@ import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.collection.NullIterator;
 import net.esper.collection.SingleEventIterator;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -38,7 +39,7 @@ public final class ZeroDepthStream implements EventStream
 
     public final void insert(EventBean event)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".insert Received event, updating child views, event=" + event);
         }

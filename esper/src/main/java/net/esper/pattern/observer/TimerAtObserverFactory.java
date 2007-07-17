@@ -18,13 +18,17 @@ import net.esper.schedule.ScheduleUnit;
 import net.esper.schedule.ScheduleSpec;
 import net.esper.eql.parse.NumberSetParameter;
 import net.esper.eql.parse.CronParameter;
+import net.esper.util.MetaDefItem;
 
 /**
  * Factory for 'crontab' observers that indicate truth when a time point was reached.
  */
-public class TimerAtObserverFactory implements ObserverFactory
+public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem
 {
-    private ScheduleSpec spec = null;
+    /**
+     * The schedule specification for the timer-at.
+     */
+    protected ScheduleSpec spec = null;
 
     public void setObserverParameters(List<Object> observerParameters) throws ObserverParameterException
     {
@@ -41,7 +45,7 @@ public class TimerAtObserverFactory implements ObserverFactory
         spec = computeValues(observerParameters.toArray());
     }
 
-    private static SortedSet<Integer> computeValues(Object unitParameter, ScheduleUnit unit)
+    private static SortedSet<Integer> computeValues(Object unitParameter, ScheduleUnit unit) throws ObserverParameterException
     {
         if (unitParameter instanceof Integer)
         {
@@ -63,7 +67,7 @@ public class TimerAtObserverFactory implements ObserverFactory
         return resultSorted;
     }
 
-    private static ScheduleSpec computeValues(Object[] args)
+    private static ScheduleSpec computeValues(Object[] args) throws ObserverParameterException
     {
         EnumMap<ScheduleUnit, SortedSet<Integer>> unitMap = new EnumMap<ScheduleUnit, SortedSet<Integer>>(ScheduleUnit.class);
         Object minutes = args[0];
@@ -77,7 +81,7 @@ public class TimerAtObserverFactory implements ObserverFactory
         if (daysOfWeek instanceof CronParameter && daysOfMonth instanceof CronParameter)
         {
             throw
-                    new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
+                    new ObserverParameterException("Invalid combination between days of week and days of month fields for timer:at");
         }
         if (resultMonths != null && resultMonths.size() == 1 && (resultMonths.first() instanceof Integer))
         {
@@ -109,7 +113,7 @@ public class TimerAtObserverFactory implements ObserverFactory
                 if (resultDaysOfMonth != null)
                 {
                     throw
-                            new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
+                            new ObserverParameterException("Invalid combination between days of week and days of month fields for timer:at");
                 }
                 resultDaysOfMonth = resultDaysOfWeek;
                 resultDaysOfWeek = null;
@@ -120,7 +124,7 @@ public class TimerAtObserverFactory implements ObserverFactory
             if (resultDaysOfWeek != null)
             {
                 throw
-                        new IllegalArgumentException("Invalid combination between days of week and days of month fields for timer:at");
+                        new ObserverParameterException("Invalid combination between days of week and days of month fields for timer:at");
             }
         }
         unitMap.put(ScheduleUnit.DAYS_OF_WEEK, resultDaysOfWeek);

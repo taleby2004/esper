@@ -13,6 +13,7 @@ import net.esper.schedule.ScheduleSlot;
 import net.esper.view.CloneableView;
 import net.esper.view.View;
 import net.esper.view.ViewSupport;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -135,7 +136,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
     {
         long expireBeforeTimestamp = statementContext.getSchedulingService().getTime() - millisecondsBeforeExpiry + 1;
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".expire Expiring messages before " +
                     "msec=" + expireBeforeTimestamp +
@@ -160,7 +161,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
             }
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".expire Expired messages....size=" + expired.size());
             for (Object object : expired)
@@ -179,7 +180,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         long scheduleMillisec = millisecondsBeforeExpiry - (currentTimestamp - oldestTimestamp);
         scheduleCallback(scheduleMillisec);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".expire Scheduled new callback for now plus msec=" + scheduleMillisec);
         }

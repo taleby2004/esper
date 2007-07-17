@@ -5,6 +5,7 @@ import net.esper.client.*;
 import net.esper.support.bean.*;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.eql.SupportStaticMethodLib;
+import net.esper.support.client.SupportConfigFactory;
 
 public class TestFilterExpressions extends TestCase
 {
@@ -14,7 +15,7 @@ public class TestFilterExpressions extends TestCase
     public void setUp()
     {
         listener = new SupportUpdateListener();
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
     }
 
@@ -45,7 +46,6 @@ public class TestFilterExpressions extends TestCase
         tryNotEqualsConsolidate("intPrimitive != 1 and intPrimitive != 2");
     }
 
-    // TODO: remove
     public void tryNotEqualsConsolidate(String filter)
     {
         String text = "select * from " + SupportBean.class.getName() + "(" + filter + ")";

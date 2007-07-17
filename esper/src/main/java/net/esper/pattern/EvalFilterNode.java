@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import net.esper.filter.FilterSpecCompiled;
 import net.esper.eql.spec.FilterSpecRaw;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -25,7 +26,7 @@ public final class EvalFilterNode extends EvalNode
                                         MatchedEventMap beginState,
                                         PatternContext context, Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

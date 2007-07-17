@@ -106,6 +106,11 @@ public class Configuration implements ConfigurationOperations {
     protected List<ConfigurationAdapterLoader> adapterLoaders;
 
     /**
+     * Map of extension configuration objects.
+     */
+    protected Map<String, Object> extensionConfigurations;
+
+    /**
      * Saves engine default configs such as threading settings
      */
     protected ConfigurationEngineDefaults engineDefaults;
@@ -327,6 +332,26 @@ public class Configuration implements ConfigurationOperations {
     public List<ConfigurationPlugInPatternObject> getPlugInPatternObjects()
     {
         return plugInPatternObjects;
+    }
+
+    /**
+     * Adds a configuration object for a named extension.
+     * @param extensionName is the name of the extension module.
+     * @param configurationObject is the extension configuration.
+     */
+    public void addExtensionConfig(String extensionName, Object configurationObject)
+    {
+        extensionConfigurations.put(extensionName, configurationObject);
+    }
+
+    /**
+     * Returns extension configuration objects as a map of extension module name and
+     * configuration object.
+     * @return extension configuration objects
+     */
+    public Map<String, Object> getExtensionConfigs()
+    {
+        return extensionConfigurations;
     }
 
     /**
@@ -585,7 +610,8 @@ public class Configuration implements ConfigurationOperations {
         adapterLoaders = new ArrayList<ConfigurationAdapterLoader>();
         plugInAggregationFunctions = new ArrayList<ConfigurationPlugInAggregationFunction>();
         plugInPatternObjects = new ArrayList<ConfigurationPlugInPatternObject>();
-        engineDefaults = new ConfigurationEngineDefaults(); 
+        engineDefaults = new ConfigurationEngineDefaults();
+        extensionConfigurations = new HashMap<String, Object>();
     }
 
     /**
@@ -597,6 +623,43 @@ public class Configuration implements ConfigurationOperations {
     	imports.add("java.math.*");
     	imports.add("java.text.*");
     	imports.add("java.util.*");
+    }
+
+    /**
+     * Enumeration of different resolution styles for resolving property names.
+     */
+    public static enum PropertyResolutionStyle
+    {
+        /**
+         * Properties are only matched if the names are identical in name
+         * and case to the original property name.
+         */
+        CASE_SENSITIVE,
+
+        /**
+         * Properties are matched if the names are identical.  A case insensitive
+         * search is used and will choose the first property that matches
+         * the name exactly or the first property that matches case insensitively
+         * should no match be found.
+         */
+        CASE_INSENSITIVE,
+
+        /**
+         * Properties are matched if the names are identical.  A case insensitive
+         * search is used and will choose the first property that matches
+         * the name exactly case insensitively.  If more than one 'name' can be
+         * mapped to the property an exception is thrown.
+         */
+        DISTINCT_CASE_INSENSITIVE;
+
+        /**
+         * Returns the default property resolution style.
+         * @return is the case-sensitive resolution
+         */
+        public static PropertyResolutionStyle getDefault()
+        {
+            return CASE_SENSITIVE; 
+        }
     }
 }
 

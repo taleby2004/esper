@@ -8,6 +8,8 @@
 package net.esper.pattern;
 
 import net.esper.pattern.observer.ObserverFactory;
+import net.esper.eql.spec.PatternObserverSpec;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,13 +19,32 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class EvalObserverNode extends EvalNode
 {
+    private final PatternObserverSpec patternObserverSpec;
     private ObserverFactory observerFactory;
 
     /**
      * Constructor.
-     * @param observerFactory is the factory to use to get an observer instance
+     * @param patternObserverSpec is the factory to use to get an observer instance
      */
-    public EvalObserverNode(ObserverFactory observerFactory)
+    public EvalObserverNode(PatternObserverSpec patternObserverSpec)
+    {
+        this.patternObserverSpec = patternObserverSpec;
+    }
+
+    /**
+     * Returns the observer object specification to use for instantiating the observer factory and observer.
+     * @return observer specification
+     */
+    public PatternObserverSpec getPatternObserverSpec()
+    {
+        return patternObserverSpec;
+    }
+
+    /**
+     * Supplies the observer factory to the node.
+     * @param observerFactory is the observer factory
+     */
+    public void setObserverFactory(ObserverFactory observerFactory)
     {
         this.observerFactory = observerFactory;
     }
@@ -42,7 +63,7 @@ public final class EvalObserverNode extends EvalNode
                                         PatternContext context,
                                         Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

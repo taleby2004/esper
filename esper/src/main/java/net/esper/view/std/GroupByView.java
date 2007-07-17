@@ -16,6 +16,7 @@ import net.esper.collection.Pair;
 import net.esper.collection.MultiKey;
 import net.esper.client.EPException;
 import net.esper.core.StatementContext;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * The group view splits the data in a stream to multiple subviews, based on a key index.
@@ -91,7 +92,7 @@ public final class GroupByView extends ViewSupport implements CloneableView
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Updating view");
             dumpUpdateParams("GroupByView", newData, oldData);

@@ -246,8 +246,16 @@
 }]]></programlisting>
 
 			<para>
-				This <literal>update</literal> method adheres to the view convention and posts prior data as an old event. This is a required behavior that views must implement to prevent memory leaks.
+				This <literal>update</literal> method must adhere to the following view conventions, to prevent memory leaks and to enable correct behavior within the engine:
 			</para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						Views must post a remove stream in the form of old data to child views. The remove stream must consist of the same event reference(s) posted as insert stream (new data).
+					</para>
+				</listitem>
+			</itemizedlist>
 
 			<para>
 				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods.

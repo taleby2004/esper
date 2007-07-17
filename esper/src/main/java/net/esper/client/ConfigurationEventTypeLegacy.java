@@ -19,6 +19,7 @@ public class ConfigurationEventTypeLegacy
     private CodeGeneration codeGeneration;
     private List<LegacyMethodPropDesc> methodProperties;
     private List<LegacyFieldPropDesc> fieldProperties;
+    private Configuration.PropertyResolutionStyle propertyResolutionStyle;
 
     /**
      * Ctor.
@@ -29,6 +30,7 @@ public class ConfigurationEventTypeLegacy
         codeGeneration = CodeGeneration.ENABLED;
         methodProperties = new LinkedList<LegacyMethodPropDesc>();
         fieldProperties = new LinkedList<LegacyFieldPropDesc>();
+        propertyResolutionStyle = Configuration.PropertyResolutionStyle.CASE_SENSITIVE;
     }
 
     /**
@@ -146,6 +148,24 @@ public class ConfigurationEventTypeLegacy
     public void addFieldProperty(String name, String accessorField)
     {
         fieldProperties.add(new LegacyFieldPropDesc(name, accessorField));
+    }
+
+    /**
+     * Returns the type's property resolution style to use.
+     * @return property resolution style
+     */
+    public Configuration.PropertyResolutionStyle getPropertyResolutionStyle()
+    {
+        return propertyResolutionStyle;
+    }
+
+    /**
+     * Sets the type's property resolution style to use.
+     * @param propertyResolutionStyle is the property resolution style to use for the type
+     */
+    public void setPropertyResolutionStyle(Configuration.PropertyResolutionStyle propertyResolutionStyle)
+    {
+        this.propertyResolutionStyle = propertyResolutionStyle;
     }
 
     /**

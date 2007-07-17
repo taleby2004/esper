@@ -8,6 +8,7 @@
 package net.esper.view;
 
 import net.esper.event.EventBean;
+import net.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -154,7 +155,7 @@ public abstract class ViewSupport implements View
             printObjectArray(prefix, writer, oldData);
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".dumpUpdateParams Dumping update parameters..." + buffer.toString());
         }
@@ -181,7 +182,10 @@ public abstract class ViewSupport implements View
         {
             for (View child : parentViewable.getViews())
             {
-                log.debug(".dumpChildViews " + prefix + ' ' + child.toString());
+                if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+                {
+                    log.debug(".dumpChildViews " + prefix + ' ' + child.toString());
+                }
                 dumpChildViews(prefix + "  ", child);
             }
         }

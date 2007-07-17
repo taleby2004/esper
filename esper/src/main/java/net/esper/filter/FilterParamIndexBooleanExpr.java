@@ -9,6 +9,7 @@ package net.esper.filter;
 
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
+import net.esper.util.ExecutionPathDebugLog;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -67,7 +68,7 @@ public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".match (" + Thread.currentThread().getId() + ")");
         }

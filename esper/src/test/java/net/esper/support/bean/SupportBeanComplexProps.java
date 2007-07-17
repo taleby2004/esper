@@ -3,8 +3,9 @@ package net.esper.support.bean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.io.Serializable;
 
-public class SupportBeanComplexProps
+public class SupportBeanComplexProps implements Serializable
 {
     private String simpleProperty;
 	private Properties mappedProps;
@@ -86,7 +87,7 @@ public class SupportBeanComplexProps
         indexedProps[index] = value;
     }
 
-	public static class SupportBeanSpecialGetterNested
+	public static class SupportBeanSpecialGetterNested implements Serializable
 	{
 		private String nestedValue;
         private SupportBeanSpecialGetterNestedNested nestedNested;
@@ -134,7 +135,7 @@ public class SupportBeanComplexProps
         }
     }
 
-    public static class SupportBeanSpecialGetterNestedNested
+    public static class SupportBeanSpecialGetterNestedNested implements Serializable
     {
         private String nestedNestedValue;
 

@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class contains the state of an 'not' operator in the evaluation state tree.
@@ -36,7 +37,7 @@ public final class EvalNotStateNode extends EvalStateNode implements Evaluator
     {
         super(evalNotNode, parentNode, null);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".constructor");
         }
@@ -47,7 +48,7 @@ public final class EvalNotStateNode extends EvalStateNode implements Evaluator
 
     public final void start()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".start Starting single child node");
         }
@@ -67,12 +68,15 @@ public final class EvalNotStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        log.debug(".evaluateFalse");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".evaluateFalse");
+        }
     }
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".evaluateTrue fromNode=" + fromNode.hashCode()  + "  isQuitted=" + isQuitted);
         }
@@ -92,7 +96,7 @@ public final class EvalNotStateNode extends EvalStateNode implements Evaluator
 
     public final void quit()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".quit Quitting not-node single child, childNode=" + childNode);
         }

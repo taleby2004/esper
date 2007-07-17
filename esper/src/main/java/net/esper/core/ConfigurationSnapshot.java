@@ -29,6 +29,7 @@ public class ConfigurationSnapshot
     private List<ConfigurationPlugInAggregationFunction> plugInAggregation = new LinkedList<ConfigurationPlugInAggregationFunction>();
     private List<ConfigurationPlugInPatternObject> plugInPatternObjects = new LinkedList<ConfigurationPlugInPatternObject>();
     private ConfigurationEngineDefaults engineDefaults;
+    private Map<String, Object> extensionConfigurations = new HashMap<String, Object>(); 
 
     /**
      * Ctor.
@@ -51,6 +52,7 @@ public class ConfigurationSnapshot
         plugInAggregation.addAll(configuration.getPlugInAggregationFunctions());
         plugInPatternObjects.addAll(configuration.getPlugInPatternObjects());
         engineDefaults = configuration.getEngineDefaults();
+        extensionConfigurations.putAll(configuration.getExtensionConfigs());
     }
 
     /**
@@ -159,6 +161,15 @@ public class ConfigurationSnapshot
     public ConfigurationEngineDefaults getEngineDefaults()
     {
         return engineDefaults;
+    }
+
+    /**
+     * Returns the extension module configuration objects per extension.
+     * @return map of module name and config object
+     */
+    public Map<String, Object> getExtensionConfigurations()
+    {
+        return extensionConfigurations;
     }
 }
 

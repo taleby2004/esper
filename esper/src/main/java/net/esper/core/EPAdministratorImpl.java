@@ -89,10 +89,6 @@ public class EPAdministratorImpl implements EPAdministrator
 
     public EPStatement createPattern(String expression, String statementName) throws EPException
     {
-        if (statementName == null)
-        {
-            throw new IllegalArgumentException("Invalid parameter, statement name cannot be null");
-        }
         return createPatternStmt(expression, statementName);
     }
 
@@ -105,7 +101,7 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         // Parse and walk
         AST ast = ParseHelper.parse(expression, patternParseRule);
-        EQLTreeWalker walker = new EQLTreeWalker(services.getEngineImportService(), services.getPatternObjectResolutionService());
+        EQLTreeWalker walker = new EQLTreeWalker(services.getEngineImportService());
 
         try
         {
@@ -150,7 +146,7 @@ public class EPAdministratorImpl implements EPAdministrator
         }
 
         AST ast = ParseHelper.parse(eqlStatement, eqlParseRule);
-        EQLTreeWalker walker = new EQLTreeWalker(services.getEngineImportService(), services.getPatternObjectResolutionService());
+        EQLTreeWalker walker = new EQLTreeWalker(services.getEngineImportService());
 
         try
         {

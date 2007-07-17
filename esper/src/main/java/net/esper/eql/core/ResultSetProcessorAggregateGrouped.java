@@ -18,6 +18,7 @@ import net.esper.event.EventType;
 import net.esper.eql.expression.ExprNode;
 import net.esper.eql.agg.AggregationService;
 import net.esper.view.Viewable;
+import net.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,7 +96,10 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         MultiKeyUntyped[] oldDataGroupByKeys = generateGroupKeys(oldEvents, false);
 
         // generate old events
-        log.debug(".processJoinResults creating old output events");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".processJoinResults creating old output events");
+        }
         EventBean[] selectOldEvents = generateOutputEventsJoin(oldEvents, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps, oldGenerators, false);
 
         // update aggregates
@@ -121,7 +125,10 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         }
 
         // generate new events using select expressions
-        log.debug(".processJoinResults creating new output events");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".processJoinResults creating new output events");
+        }
         EventBean[] selectNewEvents = generateOutputEventsJoin(newEvents, newDataGroupByKeys, optionalHavingNode, newEventGroupReps, newGenerators, true);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))
@@ -138,7 +145,10 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         MultiKeyUntyped[] oldDataGroupByKeys = generateGroupKeys(oldData, false);
 
         // generate old events
-        log.debug(".processViewResults creating old output events");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".processViewResults creating old output events");
+        }
         EventBean[] selectOldEvents = generateOutputEventsView(oldData, oldDataGroupByKeys, optionalHavingNode, oldEventGroupReps, oldGenerators, false);
 
         // update aggregates
@@ -163,7 +173,10 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor
         }
 
         // generate new events using select expressions
-        log.debug(".processViewResults creating new output events");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".processViewResults creating new output events");
+        }
         EventBean[] selectNewEvents = generateOutputEventsView(newData, newDataGroupByKeys, optionalHavingNode, newEventGroupReps, newGenerators, true);
 
         if ((selectNewEvents != null) || (selectOldEvents != null))

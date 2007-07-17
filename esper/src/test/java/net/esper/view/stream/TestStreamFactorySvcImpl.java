@@ -9,6 +9,8 @@ import net.esper.support.event.SupportEventTypeFactory;
 import net.esper.support.filter.SupportFilterServiceImpl;
 import net.esper.support.filter.SupportFilterSpecBuilder;
 import net.esper.view.EventStream;
+import net.esper.core.EPStatementHandle;
+import net.esper.util.ManagedLockImpl;
 
 public class TestStreamFactorySvcImpl extends TestCase
 {
@@ -95,11 +97,12 @@ public class TestStreamFactorySvcImpl extends TestCase
 
     public void testCreateNoJoin()
     {
+        EPStatementHandle stmtHande = new EPStatementHandle("id", new ManagedLockImpl("id"), "text");
         streams = new EventStream[4];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
-        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
-        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, false).getFirst();
-        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, false).getFirst();
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, stmtHande, false).getFirst();
+        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, stmtHande, false).getFirst();
+        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, stmtHande, false).getFirst();
+        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, stmtHande, false).getFirst();
 
         // Streams are reused
         assertSame(streams[0], streams[1]);
@@ -115,11 +118,12 @@ public class TestStreamFactorySvcImpl extends TestCase
 
     public void testDropNoJoin()
     {
+        EPStatementHandle stmtHande = new EPStatementHandle("id", new ManagedLockImpl("id"), "text");
         streams = new EventStream[4];
-        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
-        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, null, false).getFirst();
-        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, null, false).getFirst();
-        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, null, false).getFirst();
+        streams[0] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, stmtHande, false).getFirst();
+        streams[1] = streamFactoryService.createStream(filterSpecs[0], supportFilterService, stmtHande, false).getFirst();
+        streams[2] = streamFactoryService.createStream(filterSpecs[1], supportFilterService, stmtHande, false).getFirst();
+        streams[3] = streamFactoryService.createStream(filterSpecs[2], supportFilterService, stmtHande, false).getFirst();
 
         streamFactoryService.dropStream(filterSpecs[0], supportFilterService, false);
         streamFactoryService.dropStream(filterSpecs[1], supportFilterService, false);

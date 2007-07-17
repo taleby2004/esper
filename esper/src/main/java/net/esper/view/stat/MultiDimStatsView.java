@@ -12,6 +12,7 @@ import net.esper.view.*;
 import net.esper.collection.SingleEventIterator;
 import net.esper.collection.MultiKeyUntyped;
 import net.esper.core.StatementContext;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * This view compiles OLAP cubes for the specified fields. New data from the parent view is entered into
@@ -189,7 +190,7 @@ public final class MultiDimStatsView extends ViewSupport implements CloneableVie
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Received update, " +
                     "  newData.length==" + ((newData == null) ? 0 : newData.length) +

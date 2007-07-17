@@ -14,8 +14,15 @@ import java.util.List;
  */
 public class CorrelationViewFactory implements ViewFactory
 {
-    private String fieldNameX;
-    private String fieldNameY;
+    /**
+     * Property name of X field.
+     */
+    protected String fieldNameX;
+
+    /**
+     * Property name of Y field.
+     */
+    protected String fieldNameY;
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException

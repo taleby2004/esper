@@ -33,6 +33,11 @@ public class CronParameter implements NumberSetParameter {
     
     private static int FIRST_DAY_OF_WEEK = Calendar.SUNDAY;
 
+    /**
+     * Ctor.
+     * @param cronOperator is the operator as text
+     * @param day is the day text
+     */
     public CronParameter(String cronOperator, String day) {
         this.operator = assignOperator(cronOperator);
         if (day != null) {

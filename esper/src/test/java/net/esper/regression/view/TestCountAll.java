@@ -1,10 +1,13 @@
 package net.esper.regression.view;
 
-import net.esper.client.*;
-import net.esper.support.bean.SupportMarketDataBean;
-import net.esper.support.bean.SupportBean;
-import net.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
+import net.esper.client.EPServiceProvider;
+import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPStatement;
+import net.esper.support.bean.SupportBean;
+import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.client.SupportConfigFactory;
+import net.esper.support.util.SupportUpdateListener;
 
 public class TestCountAll extends TestCase
 {
@@ -15,7 +18,7 @@ public class TestCountAll extends TestCase
     public void setUp()
     {
         listener = new SupportUpdateListener();
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
     }
 

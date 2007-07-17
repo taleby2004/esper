@@ -9,6 +9,7 @@ import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.eql.SupportResultSetProcessor;
 import net.esper.support.view.SupportSchemaNeutralView;
+import net.esper.support.view.SupportStatementContextFactory;
 import net.esper.support.event.SupportEventBeanFactory;
 
 public class TestOutputProcessViewPolicy extends TestCase
@@ -22,8 +23,8 @@ public class TestOutputProcessViewPolicy extends TestCase
     public void setUp() throws Exception
     {
         resultSetProcessor = new SupportResultSetProcessor();
-        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, 1, null, null);
-        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, 2, null, null);        
+        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, 1, null, SupportStatementContextFactory.makeContext());
+        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, 2, null, SupportStatementContextFactory.makeContext());
         
         childViewNoJoin = new SupportSchemaNeutralView();
         outputProcessViewUpdate.addView(childViewNoJoin);

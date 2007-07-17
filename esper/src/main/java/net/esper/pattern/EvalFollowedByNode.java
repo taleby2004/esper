@@ -9,6 +9,7 @@ package net.esper.pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class represents a followed-by operator in the evaluation tree representing any event expressions.
@@ -20,7 +21,7 @@ public final class EvalFollowedByNode extends EvalNode
                                                  PatternContext context,
                                                  Object stateNodeId)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".newState");
         }

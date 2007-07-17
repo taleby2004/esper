@@ -9,6 +9,7 @@ package net.esper.filter;
 
 import net.esper.event.EventType;
 import net.esper.event.EventBean;
+import net.esper.util.ExecutionPathDebugLog;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -76,7 +77,7 @@ public final class FilterParamIndexNotEquals extends FilterParamIndexPropBase
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".match (" + Thread.currentThread().getId() + ") attributeValue=" + attributeValue);
         }

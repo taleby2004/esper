@@ -3,23 +3,27 @@ package net.esper.core;
 import net.esper.client.*;
 import net.esper.collection.Pair;
 import net.esper.collection.RefCountedMap;
-import net.esper.eql.expression.ExprValidationException;
-import net.esper.eql.spec.*;
-import net.esper.util.ManagedLock;
 import net.esper.eql.expression.ExprNodeSubselectVisitor;
 import net.esper.eql.expression.ExprSubselectNode;
-import net.esper.util.ManagedReadWriteLock;
-import net.esper.util.UuidGenerator;
-import net.esper.util.ManagedLockImpl;
-import net.esper.view.ViewProcessingException;
-import net.esper.view.Viewable;
+import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.spec.*;
 import net.esper.event.EventType;
 import net.esper.pattern.EvalFilterNode;
 import net.esper.pattern.EvalNode;
+import net.esper.pattern.EvalNodeAnalysisResult;
+import net.esper.util.ManagedLock;
+import net.esper.util.ManagedLockImpl;
+import net.esper.util.ManagedReadWriteLock;
+import net.esper.util.UuidGenerator;
+import net.esper.view.ViewProcessingException;
+import net.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides statement lifecycle services.
@@ -27,6 +31,8 @@ import java.util.*;
 public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 {
     private static Log log = LogFactory.getLog(StatementLifecycleSvcImpl.class);
+
+    private final EPServiceProvider epServiceProvider;
     private final EPServicesContext services;
     private final ManagedReadWriteLock eventProcessingRWLock;
 
@@ -35,15 +41,19 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     private final Map<String, EPStatement> stmtNameToStmtMap;
     private final RefCountedMap<String, ManagedLock> insertIntoStreams;
 
-    public void init() {}
+    public void init()
+    {
+    }
 
     /**
      * Ctor.
+     * @param epServiceProvider is the engine instance to hand to statement-aware listeners
      * @param services is engine services
      */
-    public StatementLifecycleSvcImpl(EPServicesContext services)
+    public StatementLifecycleSvcImpl(EPServiceProvider epServiceProvider, EPServicesContext services)
     {
         this.services = services;
+        this.epServiceProvider = epServiceProvider;
 
         // lock for starting and stopping statements
         this.eventProcessingRWLock = services.getEventProcessingRWLock();
@@ -137,7 +147,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             // create statement - may fail for parser and simple validation errors
             boolean preserveDispatchOrder = services.getEngineSettingsService().getEngineSettings().getThreading().isListenerDispatchPreserveOrder();
             long blockingTimeout = services.getEngineSettingsService().getEngineSettings().getThreading().getListenerDispatchTimeout();
-            EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, isPattern,
+            EPStatementSPI statement = new EPStatementImpl(epServiceProvider, statementId, statementName, expression, isPattern,
                     services.getDispatchService(), this, preserveDispatchOrder, blockingTimeout);
 
             // create start method
@@ -151,7 +161,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeAlias();
             }
 
-            statementDesc = new EPStatementDesc(statement, startMethod, null, insertIntoStreamName);
+            statementDesc = new EPStatementDesc(statement, startMethod, null, insertIntoStreamName, statementContext.getEpStatementHandle());
             stmtIdToDescMap.put(statementId, statementDesc);
             stmtNameToStmtMap.put(statementName, statement);
             stmtNameToIdMap.put(statementName, statementId);
@@ -192,7 +202,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
             else if (streamSpec instanceof PatternStreamSpecCompiled)
             {
-                List<EvalFilterNode> filterNodes = EvalNode.recusiveFilterChildNodes(((PatternStreamSpecCompiled)streamSpec).getEvalNode());
+                EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(((PatternStreamSpecCompiled)streamSpec).getEvalNode());
+                List<EvalFilterNode> filterNodes = evalNodeAnalysisResult.getFilterNodes();
                 for (EvalFilterNode filterNode : filterNodes)
                 {
                     filteredTypes.add(filterNode.getFilterSpec().getEventType());
@@ -540,9 +551,92 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return finalStatementName;
     }
 
-    public void updatedListeners(String statementId, Set<UpdateListener> listeners)
+    public void updatedListeners(String statementId, EPStatementListenerSet listeners)
     {
         log.debug(".updatedListeners No action for base implementation");
+    }
+
+    /**
+     * Statement information.
+     */
+    public class EPStatementDesc
+    {
+        private EPStatementSPI epStatement;
+        private EPStatementStartMethod startMethod;
+        private EPStatementStopMethod stopMethod;
+        private String optInsertIntoStream;
+        private EPStatementHandle statementHandle;
+
+        /**
+         * Ctor.
+         * @param epStatement the statement
+         * @param startMethod the start method
+         * @param stopMethod the stop method
+         * @param optInsertIntoStream is the insert-into stream name, or null if not using insert-into
+         * @param statementHandle is the locking handle for the statement
+         */
+        public EPStatementDesc(EPStatementSPI epStatement, EPStatementStartMethod startMethod, EPStatementStopMethod stopMethod, String optInsertIntoStream, EPStatementHandle statementHandle)
+        {
+            this.epStatement = epStatement;
+            this.startMethod = startMethod;
+            this.stopMethod = stopMethod;
+            this.optInsertIntoStream = optInsertIntoStream;
+            this.statementHandle = statementHandle;
+        }
+
+        /**
+         * Returns the statement.
+         * @return statement.
+         */
+        public EPStatementSPI getEpStatement()
+        {
+            return epStatement;
+        }
+
+        /**
+         * Returns the start method.
+         * @return start method
+         */
+        public EPStatementStartMethod getStartMethod()
+        {
+            return startMethod;
+        }
+
+        /**
+         * Returns the stop method.
+         * @return stop method
+         */
+        public EPStatementStopMethod getStopMethod()
+        {
+            return stopMethod;
+        }
+
+        /**
+         * Return the insert-into stream name, or null if no insert-into
+         * @return stream name
+         */
+        public String getOptInsertIntoStream()
+        {
+            return optInsertIntoStream;
+        }
+
+        /**
+         * Sets the stop method.
+         * @param stopMethod to set
+         */
+        public void setStopMethod(EPStatementStopMethod stopMethod)
+        {
+            this.stopMethod = stopMethod;
+        }
+
+        /**
+         * Returns the statements handle.
+         * @return statement handle
+         */
+        public EPStatementHandle getStatementHandle()
+        {
+            return statementHandle;
+        }
     }
 
     private static StatementSpecCompiled compile(StatementSpecRaw spec, String eqlStatement, StatementContext statementContext) throws EPStatementException
@@ -554,7 +648,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService());
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService());
                 compiledStreams.add(compiled);
             }
         }

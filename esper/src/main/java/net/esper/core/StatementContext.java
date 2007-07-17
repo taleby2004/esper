@@ -1,9 +1,12 @@
 package net.esper.core;
 
 import net.esper.eql.core.MethodResolutionService;
+import net.esper.eql.join.JoinSetComposerFactory;
+import net.esper.eql.view.OutputConditionFactory;
 import net.esper.event.EventAdapterService;
 import net.esper.filter.FilterService;
 import net.esper.pattern.PatternContextFactory;
+import net.esper.pattern.PatternObjectResolutionService;
 import net.esper.schedule.ScheduleBucket;
 import net.esper.schedule.SchedulingService;
 import net.esper.view.StatementStopService;
@@ -23,12 +26,15 @@ public final class StatementContext
     private final ScheduleBucket scheduleBucket;
     private final EventAdapterService eventAdapterService;
     private final EPStatementHandle epStatementHandle;
-    private final ViewResolutionService viewResultionService;
+    private final ViewResolutionService viewResolutionService;
+    private final PatternObjectResolutionService patternResolutionService;
     private final ExtensionServicesContext extensionServicesContext;
     private final StatementStopService statementStopService;
     private final MethodResolutionService methodResolutionService;
     private final PatternContextFactory patternContextFactory;
     private final FilterService filterService;
+    private final JoinSetComposerFactory joinSetComposerFactory;
+    private final OutputConditionFactory outputConditionFactory;
 
     /**
      * Constructor.
@@ -47,6 +53,9 @@ public final class StatementContext
      * @param methodResolutionService is a service for resolving static methods and aggregation functions
      * @param patternContextFactory is the pattern-level services and context information factory
      * @param filterService is the filtering service
+     * @param patternResolutionService is the service that resolves pattern objects for the statement
+     * @param joinSetComposerFactory is the factory for creating service objects that compose join results
+     * @param outputConditionFactory is the factory for output condition objects
      */
     public StatementContext(String engineURI,
                             String engineInstanceId,
@@ -58,11 +67,14 @@ public final class StatementContext
                               EventAdapterService eventAdapterService,
                               EPStatementHandle epStatementHandle,
                               ViewResolutionService viewResultionService,
+                              PatternObjectResolutionService patternResolutionService,
                               ExtensionServicesContext extensionServicesContext,
                               StatementStopService statementStopService,
                               MethodResolutionService methodResolutionService,
                               PatternContextFactory patternContextFactory,
-                              FilterService filterService)
+                              FilterService filterService,
+                              JoinSetComposerFactory joinSetComposerFactory,
+                              OutputConditionFactory outputConditionFactory)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -73,12 +85,15 @@ public final class StatementContext
         this.eventAdapterService = eventAdapterService;
         this.scheduleBucket = scheduleBucket;
         this.epStatementHandle = epStatementHandle;
-        this.viewResultionService = viewResultionService;
+        this.viewResolutionService = viewResultionService;
+        this.patternResolutionService = patternResolutionService;
         this.extensionServicesContext = extensionServicesContext;
         this.statementStopService = statementStopService;
         this.methodResolutionService = methodResolutionService;
         this.patternContextFactory = patternContextFactory;
         this.filterService = filterService;
+        this.joinSetComposerFactory = joinSetComposerFactory;
+        this.outputConditionFactory = outputConditionFactory;
     }
 
     /**
@@ -139,9 +154,9 @@ public final class StatementContext
      * Returns view resolution svc.
      * @return view resolution
      */
-    public ViewResolutionService getViewResultionService()
+    public ViewResolutionService getViewResolutionService()
     {
-        return viewResultionService;
+        return viewResolutionService;
     }
 
     /**
@@ -216,9 +231,36 @@ public final class StatementContext
         return filterService;
     }
 
+    /**
+     * Returns the statement's factory for join set processors.
+     * @return factory for processing join sets
+     */
+    public JoinSetComposerFactory getJoinSetComposerFactory()
+    {
+        return joinSetComposerFactory;
+    }
+
+    /**
+     * Returns the statement's factory for output conditions.
+     * @return factory for output conditions
+     */
+    public OutputConditionFactory getOutputConditionFactory()
+    {
+        return outputConditionFactory;
+    }
+
+    /**
+     * Returns the statement's resolution service for pattern objects.
+     * @return service for resolving pattern objects
+     */
+    public PatternObjectResolutionService getPatternResolutionService()
+    {
+        return patternResolutionService;
+    }
+
     public String toString()
     {
-        return  " statementId=" + statementId +
-                " statementName=" + statementName;
+        return  " stmtId=" + statementId +
+                " stmtName=" + statementName;
     }
 }

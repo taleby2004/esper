@@ -114,6 +114,10 @@
 		</para>
 
 		<para>
+			The <literal>hashCode</literal> and <literal>equals</literal> methods do not need to be implemented. The implementation of these methods by a Java event class does not affect the behavior of the engine in any way.
+		</para>
+
+		<para>
 			Please see <xref linkend="configuration"/> on options for naming event types represented by Java object event classes.
 		</para>
 

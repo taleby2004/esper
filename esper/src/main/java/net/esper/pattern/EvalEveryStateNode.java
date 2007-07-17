@@ -13,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 import java.util.List;
 import java.util.LinkedList;
 
+import net.esper.util.ExecutionPathDebugLog;
+
 /**
  * This class contains the state of an 'every' operator in the evaluation state tree.
  * EVERY nodes work as a factory for new state subnodes. When a child node of an EVERY
@@ -69,7 +71,7 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
     {
         super(everyNode, parentNode, null);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".constructor");
         }
@@ -84,7 +86,7 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
 
     public final void start()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".start Starting single child");
         }
@@ -115,7 +117,10 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        log.debug(".evaluateFalse");
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        {
+            log.debug(".evaluateFalse");
+        }
 
         fromNode.quit();
         spawnedNodes.remove(fromNode);
@@ -142,7 +147,7 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".evaluateTrue fromNode=" + fromNode  + "  isQuitted=" + isQuitted);
         }
@@ -185,7 +190,7 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
 
     public final void quit()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".quit Quitting EVERY-node all children");
         }

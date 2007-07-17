@@ -13,6 +13,7 @@ import java.util.LinkedList;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import net.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class represents the state of a "or" operator in the evaluation state tree.
@@ -35,7 +36,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
     {
         super(evalOrNode, parentNode, null);
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".constructor");
         }
@@ -53,7 +54,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
 
     public final void start()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".start Starting or-expression all children, size=" + getFactoryNode().getChildNodes().size());
         }
@@ -72,7 +73,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".evaluateTrue fromNode=" + fromNode.hashCode());
         }
@@ -89,7 +90,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".evaluateFalse fromNode=" + fromNode.hashCode());
         }
@@ -97,7 +98,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
 
     public final void quit()
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".quit Stopping all children");
         }

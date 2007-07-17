@@ -12,6 +12,7 @@ import net.esper.eql.spec.InsertIntoDesc;
 import net.esper.eql.spec.SelectExprElementCompiledSpec;
 import net.esper.eql.expression.ExprNode;
 import net.esper.eql.expression.ExprValidationException;
+import net.esper.util.ExecutionPathDebugLog;
 
 import java.util.*;
 
@@ -190,7 +191,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         		if(wrapper != null)
         		{
         			Map<String, Object> map = (Map<String, Object>)wrapper.getUnderlyingMap();
-                    if (log.isDebugEnabled())
+                    if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
                     {
         			    log.debug(".process additional properties=" + map);
                     }

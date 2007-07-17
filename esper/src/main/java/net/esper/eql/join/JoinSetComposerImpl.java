@@ -43,6 +43,20 @@ public class JoinSetComposerImpl implements JoinSetComposer
         this.selectStreamSelectorEnum = selectStreamSelectorEnum;
     }
 
+    public void init(EventBean[][] eventsPerStream)
+    {
+        for (int i = 0; i < eventsPerStream.length; i++)
+        {
+            if (eventsPerStream[i] != null)
+            {
+                for (int j = 0; j < repositories[i].length; j++)
+                {
+                    repositories[i][j].add((eventsPerStream[i]));
+                }
+            }
+        }
+    }
+
     public UniformPair<Set<MultiKey<EventBean>>> join(EventBean[][] newDataPerStream, EventBean[][] oldDataPerStream)
     {
         oldResults.clear();

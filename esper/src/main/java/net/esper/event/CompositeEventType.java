@@ -13,14 +13,26 @@ import java.util.Map;
 public class CompositeEventType implements EventType
 {
     private final Map<String, EventType> taggedEventTypes;
+    private String alias;
 
     /**
      * Ctor.
+     * @param alias is the event type alias
      * @param taggedEventTypes is a map of name tags and event type per tag 
      */
-    public CompositeEventType(Map<String, EventType> taggedEventTypes)
+    public CompositeEventType(String alias, Map<String, EventType> taggedEventTypes)
     {
         this.taggedEventTypes = taggedEventTypes;
+        this.alias = alias;
+    }
+
+    /**
+     * Returns the event type alias.
+     * @return event type alias 
+     */
+    public String getAlias()
+    {
+        return alias;
     }
 
     public Class getPropertyType(String propertyName)

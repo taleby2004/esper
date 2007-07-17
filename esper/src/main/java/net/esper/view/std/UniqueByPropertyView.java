@@ -10,6 +10,7 @@ import net.esper.event.EventPropertyGetter;
 import net.esper.event.EventType;
 import net.esper.view.*;
 import net.esper.core.StatementContext;
+import net.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,7 +77,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
         {
             log.debug(".update Updating view");
             dumpUpdateParams("UniqueByPropertyView", newData, oldData);
