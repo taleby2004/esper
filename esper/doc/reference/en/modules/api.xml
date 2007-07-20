@@ -333,6 +333,15 @@ public class MyUpdateListener implements UpdateListener
 }
 ]]></programlisting>
 
+        <para>
+			Note that the <literal>update</literal> method can receive multiple events at once as it accepts an array of <literal>EventBean</literal> instances. For example, a time batch window may post multiple events to listeners representing a batch of events received during a given time period. 
+        </para>
+			
+        <para>
+			Pattern statements can also produce multiple events delivered to update listeners in one invocation. The pattern statement below, for instance, delivers an event for each A event that was not followed by a B event with the same <literal>id</literal> property within 60 seconds of the A event. The engine may deliver all matching A events as an array of events in a single invocation of the <literal>update</literal> method of each listener to the statement:
+        </para>
+		<programlisting><![CDATA[every a=A -> (timer:interval(60 sec) and not B(id=a.id))]]></programlisting>
+        
     </sect1>
 
     <sect1 id="api-threading">
