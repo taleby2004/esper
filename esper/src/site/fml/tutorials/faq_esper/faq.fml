@@ -10,8 +10,8 @@
           Esper is an event stream processing (ESP) and event correlation engine (CEP) written in Java.
 		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, Esper works as 
 		  real time engine that triggers actions when event conditions occur among event streams.
-		  A tailored Event Query Language (EQL) allows registering queries in the engine, using javabeans to represent events. 
-		  A listener class - which is basically a POJO - will then be called by the engine when the EQL condition is matched as 
+		  A tailored Event Query Language (EQL) allows registering queries in the engine, using Java objects (POJO, JavaBean) to represent events. 
+		  A listener class - which is basically also a POJO - will then be called by the engine when the EQL condition is matched as 
 		  events come in. The EQL allows expressing complex matching conditions that include temporal windows, 
 		  and join different event streams, as well as filter and sort them.
         </p>
@@ -54,7 +54,7 @@
       <answer>
         <p>
         	That is correct. An application can replay events into the engine but that is currently a process the application or middleware must do.
-        	Currently the engine does not provide state persistance, fail-over or recovery, or an event replay mechanism.
+        	Currently the engine does not provide state persistence, fail-over or recovery, or an event replay mechanism.
         </p>
       </answer>
     </faq>
@@ -108,6 +108,25 @@
         </p>
       </answer>
     </faq>    
+    <faq id="benchmarks">
+      <question>Do you have any benchmarks available for Esper?  Such as results from Linear Road?</question>
+      <answer>
+        <p>
+			We don't currently have an official benchmark available and there is no such benchmark industry-wide 
+			that would allow easy comparison. We have an RIFD demo example that is designed to do performance 
+			testing (we can for example run about 100 000 event per second against 2000 statements on a single dual core CPU 
+			of a commodity hardware - but one would argue this does not mean a lot if we don't look at event, statement complexity, 
+			underlying resiliency etc.). 
+        </p>
+        <p>
+			Compared to other software in the CEP space, (N)Esper can run on a very large number of platforms - 
+			basically any platforms that has a Java or .Net runtime, either 32bit or 64bit, with no lock-in with any operating system 
+			(slightly more true for Esper than NEsper of course). 
+			It is also possible to run Esper on modern compute appliances such as from Azul(R) technologies in the field of high performance 
+			computing (hundreds of core, real time capabilities, etc). This is strictly not possible for other CEP engines.
+        </p>
+      </answer>
+    </faq>    
     <faq id="testing">
       <question>How has this been tested? What guarantees do I have that the next release works just as well?</question>
       <answer>
@@ -157,7 +176,7 @@
       <question>What operating systems has it been tested on?</question>
       <answer>
         <p>
-          The engine has been tested on Windows XP using JDK 1.5 update 10, and on SUSE Linux.
+          The engine has been tested on Windows XP using JDK 1.5 update 12, and on SUSE Linux.
         </p>
       </answer>
     </faq>    
@@ -196,6 +215,18 @@
           GNU GPL license. The open-source nature of Esper helps in tailoring the event processing language and other 
           community driven features.
         </p>
+        <p>
+        	Esper and NEsper are embeddable components written in Java and C# and are therefore suitable for integration into any Java process 
+        	or .NET-based process. Esper and NEsper are not a server by itself but are designed to hook into any sort of server, 
+        	ranging from market standard JEE server (weblogic, websphere, jboss etc), service bus, or lightweight solutions (OSGi based, grid etc) 
+        	and also Microsoft based .Net technologies. NEsper is suitable for use in desktop end-user stations.
+        </p>
+        <p>
+            The other advantages this model offers is that the components can run standalone in your development environment making development 
+            and testing much easier, while for the target production environment this makes it much more tailored to what you really need, 
+            or possibly have already in place. End to end performance and latency is also enhanced as your application may then not need to 
+            transport events to a dedicated remote server process, but can process events at the event source saving marshalling/unmarshalling/network.
+        </p>
       </answer>
     </faq>
     <faq id="problems-suited">
@@ -215,7 +246,7 @@
       </answer>
     </faq>
     <faq id="problems-misuses">
-      <question>What might be some mis-uses for it?</question>
+      <question>What might be some misuses for it?</question>
       <answer>
         <p>		
 			Esper is not designed for storing and retrieval of fairly static data - that is better left to conventional databases. 
@@ -238,14 +269,14 @@
       <question>How does Esper hook into an existing event-based system?</question>
       <answer>
         <p>
-		  Today, event based system are often confused with message based system such as JMS and alike backends or 
+		  Today, event based system are often confused with message based system such as JMS and alike back-ends or 
 		  Enterprise Service Bus (ESB). Messaging system are event based but usually do not correlate events or 
 		  process event streams at all. They simply process unitary events - and it becomes quickly complex if you 
 		  need to correlate messages.
 		</p>
         <p>
 		  Esper can hook into any Java based system as a message consumer - whose main purpose would be to listen 
-		  efficiently to everything whilst sending back other events when a matching condition has occured. On the 
+		  efficiently to everything whilst sending back other events when a matching condition has occurred. On the 
 		  other hand, hooking Esper in a classic messaging system allows having it correlate events even if those 
 		  come from non-Java based systems. This is just an example. Esper is completely container agnostic, can run 
 		  as a standalone component, and the 1.0 release simply assumes events to be POJO. We are currently working on 
@@ -279,9 +310,9 @@
       <answer>
         <p>
           Esper was developed using test-driven development and excellent automated test coverage.
-          Esper's design evolved by refactoring with courage towards higher design quality. 
-          Favorite patterns are dependency injection/inversion of control, 
-          GOF patterns, Immutable, Specification.
+          Esper's design evolved by re-factoring with courage towards higher design quality. 
+          Favorite patterns are dependency injection/inversion of control by context injection, 
+          Immutable, Specification, GOF patterns (except Singleton :).
         </p>
       </answer>
     </faq>
@@ -298,6 +329,39 @@
         </p>
       </answer>
     </faq>
+    <faq id="advantages_eql">
+      <question>What are the advantages of Esper's Query Language?</question>
+      <answer>
+        <p>
+		  The Esper event processing language (EQL) converges event stream processing (filtering, joins, aggregation) 
+		  and complex event processing (causality) into one single language. 
+		  The core language is SQL-like ensuring rapid learning, but is also highly oriented toward support of modern technologies 
+		  so it is for example object oriented (more than table oriented), enabling for simple extension. The language, of course, 
+		  includes event windows and causality patterns as first citizens. 
+		  We natively support several types of event formats, from Java/.Net object, maps, to XML documents.
+        </p>
+      </answer>
+    </faq>
+    <faq id="background">
+      <question>How difficult is modification to the Esper Query Language? For example adding aggregate functions, or modifying the language all together?</question>
+      <answer>
+        <p>
+			Esper allows plug-in of aggregation functions, views, pattern objects and user functions as described in the documentation.
+			Extending the language is thus easy and custom extensions directly surface in the EQL.
+        </p>
+        <p>
+			For even more flexibility, it is also possible to contribute your own extensions to the project in other areas if you comply 
+			with our open source GPL terms and if you don't feel it is giving away a valuable part of your own IP / competitive advantage. 
+			The grammar is specified in ANTLR and the well-componentized code constructs an internal representation of statements that 
+			allows for easy extension.
+        </p>
+      </answer>
+    </faq>
+    
+
+
+	
+
   </part>
 
 </faqs>
