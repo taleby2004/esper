@@ -3,6 +3,7 @@ package net.esper.event;
 import net.esper.client.ConfigurationEventTypeLegacy;
 import net.esper.client.ConfigurationEventTypeXMLDOM;
 import net.esper.client.Configuration;
+import net.esper.client.EPException;
 import net.esper.event.xml.SchemaXMLEventType;
 import net.esper.event.xml.SimpleXMLEventType;
 import net.esper.event.xml.XMLEventBean;
@@ -11,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.Element;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -215,6 +217,15 @@ public class EventAdapterServiceImpl implements EventAdapterService
         {
             namedNode = ((Document) node).getDocumentElement();
         }
+        else if (node instanceof Element)
+        {
+            namedNode = node;
+        }
+        else
+        {
+            throw new EPException("Unexpected DOM node of type '" + node.getClass() + "' encountered, please supply a Document or Element node");
+        }
+
         rootElementName = namedNode.getLocalName();
         if (rootElementName == null)
         {

@@ -3,16 +3,16 @@ package net.esper.regression.event;
 import junit.framework.TestCase;
 import net.esper.client.*;
 import net.esper.client.time.TimerControlEvent;
-import net.esper.support.util.SupportUpdateListener;
 import net.esper.event.EventBean;
+import net.esper.support.util.SupportUpdateListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xml.sax.InputSource;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.namespace.QName;
 import java.io.StringReader;
 
 public class TestNoSchemaXMLEvent extends TestCase
@@ -127,6 +127,40 @@ public class TestNoSchemaXMLEvent extends TestCase
         assertEquals("terminal.55", event.get("uid"));
     }
     
+    public void testElementNode() throws Exception
+    {
+        // test for Esper-129
+        Configuration configuration = new Configuration();
+        ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
+        desc.addXPathProperty("event.type", "//event/@type", XPathConstants.STRING);
+        desc.addXPathProperty("event.uid", "//event/@uid", XPathConstants.STRING);
+        desc.setRootElementName("batch-event");
+        configuration.addEventTypeAlias("MyEvent", desc);
+
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+        updateListener = new SupportUpdateListener();
+
+        String stmt = "select event.type as type, event.uid as uid from MyEvent";
+        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        joinView.addListener(updateListener);
+
+        String xml = "<batch-event>" +
+                     "<event type=\"a-f-G\" uid=\"terminal.55\" time=\"2007-04-19T13:05:20.22Z\" version=\"2.0\"/>" +
+                        "</batch-event>";
+        StringReader reader = new StringReader(xml);
+        InputSource source = new InputSource(reader);
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        builderFactory.setNamespaceAware(true);
+        Document doc = builderFactory.newDocumentBuilder().parse(source);
+        Element topElement = doc.getDocumentElement();
+
+        epService.getEPRuntime().sendEvent(topElement);
+        EventBean event = updateListener.assertOneGetNewAndReset();
+        assertEquals("a-f-G", event.get("type"));
+        assertEquals("terminal.55", event.get("uid"));
+    }
+
     private void assertData(String element1)
     {
         assertNotNull(updateListener.getLastNewData());
