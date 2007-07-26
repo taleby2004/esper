@@ -29,29 +29,35 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
      * The propertyName String may be simple, nested, indexed or mapped.
      *
      * @param propertyName is the property name to parse
-     * @param xPathFactory for compiling an XPath expression
      * @param rootElementName is the name of the root element for generating the XPath expression
      * @return xpath expression
-     * @throws XPathExpressionException when the XPath expression is invalid
      */
-    public static XPathExpression parse(String propertyName, XPathFactory xPathFactory, String rootElementName) throws XPathExpressionException
+    public static String parse(String propertyName, String rootElementName, String defaultNamespacePrefix, boolean isResolvePropertiesAbsolute)
     {
         AST ast = parse(propertyName);
 
         StringBuilder xPathBuf = new StringBuilder();
         xPathBuf.append('/');
-        xPathBuf.append(rootElementName);
+        if (isResolvePropertiesAbsolute)
+        {
+            if (defaultNamespacePrefix != null)
+            {
+                xPathBuf.append(defaultNamespacePrefix);
+                xPathBuf.append(':');
+            }
+            xPathBuf.append(rootElementName);
+        }
 
         if (ast.getNumberOfChildren() == 1)
         {
-            xPathBuf.append(makeProperty(ast.getFirstChild()));
+            xPathBuf.append(makeProperty(ast.getFirstChild(), defaultNamespacePrefix));
         }
         else
         {
             AST child = ast.getFirstChild();
             do
             {
-                xPathBuf.append(makeProperty(child));
+                xPathBuf.append(makeProperty(child, defaultNamespacePrefix));
                 child = child.getNextSibling();
             }
             while (child != null);
@@ -63,21 +69,27 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
             log.debug(".parse For property '" + propertyName + "' the xpath is '" + xPath + '\'');
         }
 
-        return xPathFactory.newXPath().compile(xPath);
+        return xPath;
     }
 
-    private static String makeProperty(AST child)
+    private static String makeProperty(AST child, String defaultNamespacePrefix)
     {
+        String prefix = "";
+        if (defaultNamespacePrefix != null)
+        {
+            prefix = defaultNamespacePrefix + ":";
+        }
+
         switch (child.getType())
         {
             case EVENT_PROP_SIMPLE:
-                return '/' + child.getFirstChild().getText();
+                return '/' + prefix + child.getFirstChild().getText();
             case EVENT_PROP_MAPPED:
                 String key = StringValue.parseString(child.getFirstChild().getNextSibling().getText());
-                return '/' + child.getFirstChild().getText() + "[@id='" + key + "']";
+                return '/' + prefix + child.getFirstChild().getText() + "[@id='" + key + "']";
             case EVENT_PROP_INDEXED:
                 int index = IntValue.parseString(child.getFirstChild().getNextSibling().getText());
-                return '/' + child.getFirstChild().getText() + "[position() = " + index + ']';
+                return '/' + prefix + child.getFirstChild().getText() + "[position() = " + index + ']';
             default:
                 throw new IllegalStateException("Event property AST node not recognized, type=" + child.getType());
         }

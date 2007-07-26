@@ -26,9 +26,9 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
 
     private final XPathFactory xPathFactory;
     private final String rootElementName;
-    private XPathNamespaceContext namespaceContext;
     private final ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM;
 
+    protected XPathNamespaceContext namespaceContext;
     /**
      * Ctor.
      * @param configurationEventTypeXMLDOM is the XML DOM configuration such as root element and schema names

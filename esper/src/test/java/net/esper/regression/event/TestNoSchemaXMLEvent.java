@@ -4,8 +4,6 @@ import junit.framework.TestCase;
 import net.esper.client.*;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
-import net.esper.event.xml.XPathPropertyGetter;
-import net.esper.event.xml.XPathNamespaceContext;
 import net.esper.support.util.SupportUpdateListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,9 +13,6 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpression;
 import java.io.StringReader;
 
 public class TestNoSchemaXMLEvent extends TestCase
@@ -166,24 +161,59 @@ public class TestNoSchemaXMLEvent extends TestCase
         assertEquals("terminal.55", event.get("uid"));
     }
 
-    public void testNamespaceXPath() throws Exception
+    public void testNamespaceXPathRelative() throws Exception
     {
         // TODO: test for Esper-131
         Configuration configuration = new Configuration();
         ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
-        desc.addXPathProperty("symbol_a", "//m0:symbol", XPathConstants.STRING);
-        desc.addXPathProperty("symbol_b", "//*[local-name(.) = 'getQuote' and namespace-uri(.) = 'http://services.samples/xsd']", XPathConstants.STRING);
         desc.setRootElementName("getQuote");
         desc.setDefaultNamespace("http://services.samples/xsd");
         desc.setRootElementNamespace("http://services.samples/xsd");
         desc.addNamespacePrefix("m0", "http://services.samples/xsd");
+        desc.setResolvePropertiesAbsolute(false);
         configuration.addEventTypeAlias("StockQuote", desc);
 
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
         updateListener = new SupportUpdateListener();
 
-        String stmt = "select symbol_a, symbol_b from StockQuote";
+        String stmt = "select request.symbol as symbol_a, symbol as symbol_b from StockQuote";
+        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        joinView.addListener(updateListener);
+
+        String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";
+        StringReader reader = new StringReader(xml);
+        InputSource source = new InputSource(reader);
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        builderFactory.setNamespaceAware(true);
+        Document doc = builderFactory.newDocumentBuilder().parse(source);
+
+        epService.getEPRuntime().sendEvent(doc);
+        EventBean event = updateListener.assertOneGetNewAndReset();
+        assertEquals("IBM", event.get("symbol_a"));
+        assertEquals("IBM", event.get("symbol_b"));
+    }
+
+    public void testNamespaceXPathAbsolute() throws Exception
+    {
+        // TODO: test for Esper-131
+        Configuration configuration = new Configuration();
+        ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
+        desc.addXPathProperty("symbol_a", "//m0:symbol", XPathConstants.STRING);
+        desc.addXPathProperty("symbol_b", "//*[local-name(.) = 'getQuote' and namespace-uri(.) = 'http://services.samples/xsd']", XPathConstants.STRING);
+        desc.addXPathProperty("symbol_c", "/m0:getQuote/m0:request/m0:symbol", XPathConstants.STRING);
+        desc.setRootElementName("getQuote");
+        desc.setDefaultNamespace("http://services.samples/xsd");
+        desc.setRootElementNamespace("http://services.samples/xsd");
+        desc.addNamespacePrefix("m0", "http://services.samples/xsd");
+        desc.setResolvePropertiesAbsolute(true);
+        configuration.addEventTypeAlias("StockQuote", desc);
+
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+        updateListener = new SupportUpdateListener();
+
+        String stmt = "select symbol_a, symbol_b, symbol_c, request.symbol as symbol_d, symbol as symbol_e from StockQuote";
         EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
         joinView.addListener(updateListener);
 
@@ -195,14 +225,14 @@ public class TestNoSchemaXMLEvent extends TestCase
         builderFactory.setNamespaceAware(true);
         Document doc = builderFactory.newDocumentBuilder().parse(source);
 
-        /*
         // For XPath resolution testing and namespaces...
+        /*
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         XPathNamespaceContext ctx = new XPathNamespaceContext();
         ctx.addPrefix("m0", "http://services.samples/xsd");
         xPath.setNamespaceContext(ctx);
-        XPathExpression expression = xPath.compile("//m0:symbol");
+        XPathExpression expression = xPath.compile("/m0:getQuote/m0:request/m0:symbol");
         xPath.setNamespaceContext(ctx);
         System.out.println("result=" + expression.evaluate(doc,XPathConstants.STRING));
         */
@@ -211,6 +241,9 @@ public class TestNoSchemaXMLEvent extends TestCase
         EventBean event = updateListener.assertOneGetNewAndReset();
         assertEquals("IBM", event.get("symbol_a"));
         assertEquals("IBM", event.get("symbol_b"));
+        assertEquals("IBM", event.get("symbol_c"));
+        assertEquals("IBM", event.get("symbol_d"));
+        assertEquals("", event.get("symbol_e"));    // should be empty string as we are doing absolute XPath
     }
 
     private void assertData(String element1)

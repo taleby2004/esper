@@ -4,6 +4,7 @@ package net.esper.event.xml;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPath;
 
 import net.esper.event.EventPropertyGetter;
 import net.esper.event.TypedEventPropertyGetter;
@@ -28,7 +29,9 @@ import java.util.HashMap;
  */
 public class SimpleXMLEventType extends BaseXMLEventType {
 
-    private Map<String, TypedEventPropertyGetter> propertyGetterCache;
+    private final Map<String, TypedEventPropertyGetter> propertyGetterCache;
+    private String defaultNamespacePrefix;
+    private final boolean isResolvePropertiesAbsolute;
 
     /**
      * Ctor.
@@ -37,19 +40,31 @@ public class SimpleXMLEventType extends BaseXMLEventType {
     public SimpleXMLEventType(ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
         super(configurationEventTypeXMLDOM);
+        isResolvePropertiesAbsolute = configurationEventTypeXMLDOM.isResolvePropertiesAbsolute();
 
         // Set of namespace context for XPath expressions
-        XPathNamespaceContext ctx = new XPathNamespaceContext();
-        if (configurationEventTypeXMLDOM.getDefaultNamespace() != null)
-        {
-            ctx.setDefaultNamespace(configurationEventTypeXMLDOM.getDefaultNamespace());
-        }
+        XPathNamespaceContext xPathNamespaceContext = new XPathNamespaceContext();
         for (Map.Entry<String, String> entry : configurationEventTypeXMLDOM.getNamespacePrefixes().entrySet())
         {
-            ctx.addPrefix(entry.getKey(), entry.getValue());
+            xPathNamespaceContext.addPrefix(entry.getKey(), entry.getValue());
         }
-        super.setNamespaceContext(ctx);
+        if (configurationEventTypeXMLDOM.getDefaultNamespace() != null)
+        {
+            String defaultNamespace = configurationEventTypeXMLDOM.getDefaultNamespace();
+            xPathNamespaceContext.setDefaultNamespace(defaultNamespace);
 
+            // determine a default namespace prefix to use to construct XPath expressions from pure property names
+            defaultNamespacePrefix = null;
+            for (Map.Entry<String, String> entry : configurationEventTypeXMLDOM.getNamespacePrefixes().entrySet())
+            {
+                if (entry.getValue().equals(defaultNamespace))
+                {
+                    defaultNamespacePrefix = entry.getKey();
+                    break;
+                }
+            }
+        }
+        super.setNamespaceContext(xPathNamespaceContext);
         super.setExplicitProperties(configurationEventTypeXMLDOM.getXPathProperties().values());
 
         propertyGetterCache = new HashMap<String, TypedEventPropertyGetter>();
@@ -68,7 +83,10 @@ public class SimpleXMLEventType extends BaseXMLEventType {
         XPathExpression xPathExpression = null;
         try
         {
-            xPathExpression = SimpleXMLPropertyParser.parse(property,getXPathFactory(),getRootElementName());
+            String xPathExpr = SimpleXMLPropertyParser.parse(property,getRootElementName(), defaultNamespacePrefix, isResolvePropertiesAbsolute);
+            XPath xpath = getXPathFactory().newXPath();
+            xpath.setNamespaceContext(namespaceContext);
+            xPathExpression = xpath.compile(xPathExpr);
         }
         catch (XPathExpressionException e)
         {

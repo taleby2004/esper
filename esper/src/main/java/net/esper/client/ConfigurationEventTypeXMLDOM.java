@@ -47,14 +47,16 @@ public class ConfigurationEventTypeXMLDOM
     private Map<String, XPathPropertyDesc> xPathProperties;
     private Map<String, String> namespacePrefixes;
 
+    private boolean resolvePropertiesAbsolute;
+
     /**
      * Ctor.
      */
-    @SuppressWarnings({"CollectionWithoutInitialCapacity"})
     public ConfigurationEventTypeXMLDOM()
     {
         xPathProperties = new HashMap<String, XPathPropertyDesc>();
         namespacePrefixes = new HashMap<String, String>();
+        resolvePropertiesAbsolute = true;
     }
 
     /**
@@ -169,6 +171,31 @@ public class ConfigurationEventTypeXMLDOM
     public void addNamespacePrefix(String prefix, String namespace)
     {
         namespacePrefixes.put(prefix, namespace);
+    }
+
+    /**
+     * Indicates whether properties are compiled into absolute or deep XPath expressions (see setter method for more detail).
+     * @return true for absolute properties, false for deep properties
+     */
+    public boolean isResolvePropertiesAbsolute()
+    {
+        return resolvePropertiesAbsolute;
+    }
+
+    /**
+     * When set to true (the default), indicates that when properties are compiled to XPath expressions that the
+     * compilation should generate an absolute XPath expression such as "/getQuote/request" for the
+     * simple request property, or "/getQuote/request/symbol" for a "request.symbol" nested property,
+     * wherein the root element node is "getQuote".
+     * <p>
+     * When set to false, indicates that when properties are compiled to XPath expressions that the
+     * compilation should generate a deep XPath expression such as "//symbol" for the
+     * simple symbol property, or "//request/symbol" for a "request.symbol" nested property.
+     * @param resolvePropertiesAbsolute true for absolute XPath for properties (default), false for deep XPath
+     */
+    public void setResolvePropertiesAbsolute(boolean resolvePropertiesAbsolute)
+    {
+        this.resolvePropertiesAbsolute = resolvePropertiesAbsolute;
     }
 
     /**
