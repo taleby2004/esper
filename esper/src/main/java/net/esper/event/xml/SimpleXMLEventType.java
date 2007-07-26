@@ -37,7 +37,21 @@ public class SimpleXMLEventType extends BaseXMLEventType {
     public SimpleXMLEventType(ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
     {
         super(configurationEventTypeXMLDOM);
+
+        // Set of namespace context for XPath expressions
+        XPathNamespaceContext ctx = new XPathNamespaceContext();
+        if (configurationEventTypeXMLDOM.getDefaultNamespace() != null)
+        {
+            ctx.setDefaultNamespace(configurationEventTypeXMLDOM.getDefaultNamespace());
+        }
+        for (Map.Entry<String, String> entry : configurationEventTypeXMLDOM.getNamespacePrefixes().entrySet())
+        {
+            ctx.addPrefix(entry.getKey(), entry.getValue());
+        }
+        super.setNamespaceContext(ctx);
+
         super.setExplicitProperties(configurationEventTypeXMLDOM.getXPathProperties().values());
+
         propertyGetterCache = new HashMap<String, TypedEventPropertyGetter>();
     }
 
