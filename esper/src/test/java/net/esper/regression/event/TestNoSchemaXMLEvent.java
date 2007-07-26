@@ -161,6 +161,42 @@ public class TestNoSchemaXMLEvent extends TestCase
         assertEquals("terminal.55", event.get("uid"));
     }
 
+    public void testNamespaceXPath() throws Exception
+    {
+        // TODO: test for Esper-131 currently failing
+        Configuration configuration = new Configuration();
+        ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
+        desc.addXPathProperty("symbol_a", "//m0:symbol", XPathConstants.STRING);
+        desc.addXPathProperty("symbol_b", "//*[local-name(.) = 'getQuote' and namespace-uri(.) = 'http://services.samples/xsd']", XPathConstants.STRING);
+        desc.setRootElementName("getQuote");
+        desc.setDefaultNamespace("http://services.samples/xsd");
+        desc.setRootElementNamespace("http://services.samples/xsd");
+        desc.addNamespacePrefix("m0", "http://services.samples/xsd");
+        configuration.addEventTypeAlias("StockQuote", desc);
+
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+        updateListener = new SupportUpdateListener();
+
+        String stmt = "select symbol_a from StockQuote";
+        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        joinView.addListener(updateListener);
+
+        String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";
+        StringReader reader = new StringReader(xml);
+        InputSource source = new InputSource(reader);
+        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+        builderFactory.setNamespaceAware(true);
+        Document doc = builderFactory.newDocumentBuilder().parse(source);
+        Element topElement = doc.getDocumentElement();
+
+        epService.getEPRuntime().sendEvent(topElement);
+        EventBean event = updateListener.assertOneGetNewAndReset();
+        assertEquals("IBM", event.get("symbol_a"));
+        assertEquals("IBM", event.get("symbol_b"));
+        assertEquals("IBM", event.get("symbol"));
+    }
+
     private void assertData(String element1)
     {
         assertNotNull(updateListener.getLastNewData());
