@@ -11,6 +11,7 @@
 	<!ENTITY references SYSTEM "modules/references.xml">
 	<!ENTITY outputmodel SYSTEM "modules/outputmodel.xml">
 	<!ENTITY extension SYSTEM "modules/extension.xml">
+    <!ENTITY performance SYSTEM "modules/performance.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -65,6 +66,11 @@
                     Then glance over the examples <xref linkend="examples-overview"/>
                 </para>
 			</listitem>
+            <listitem>
+                <para>
+                    Finally to test drive Esper performance, read <xref linkend="performance-intro"/>
+                </para>
+            </listitem>
 		</orderedlist>
 	</preface>
 
@@ -85,6 +91,8 @@
     &extension;
 
     &examples;
+
+    &performance;
     
     &references;
 </book>
