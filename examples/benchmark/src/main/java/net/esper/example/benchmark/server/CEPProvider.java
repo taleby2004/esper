@@ -1,0 +1,72 @@
+package net.esper.example.benchmark.server;
+
+import net.esper.client.*;
+import net.esper.event.EventBean;
+
+/**
+ * A factory and interface to wrap ESP/CEP engine dependency in a single space
+ */
+public class CEPProvider {
+
+    public static interface ICEPProvider {
+
+        public void init(int sleepListenerMillis);
+
+        public void registerStatement(String statement, String statementID);
+
+        public void sendEvent(Object event);
+    }
+
+    public static ICEPProvider getCEPProvider() {
+        String className = System.getProperty("esper.benchmark.provider", EsperCEPProvider.class.getName());
+        try {
+            Class klass = Class.forName(className);
+            return (ICEPProvider) klass.newInstance();
+        } catch (Throwable t) {
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
+    }
+
+    public static class EsperCEPProvider implements ICEPProvider {
+
+        private EPAdministrator epAdministrator;
+
+        private EPRuntime epRuntime;
+
+        private UpdateListener updateListener;
+
+        public EsperCEPProvider() {
+        }
+
+        public void init(final int sleepListenerMillis) {
+            Configuration configuration = new Configuration();
+            configuration.addEventTypeAlias("Market", MarketData.class);
+            EPServiceProvider epService = EPServiceProviderManager.getProvider("benchmark", configuration);
+            epAdministrator = epService.getEPAdministrator();
+            updateListener = new UpdateListener() {
+                public void update(EventBean[] newEvents, EventBean[] oldEvents) {
+                    if (newEvents != null) {
+                        if (sleepListenerMillis > 0) {
+                            try {
+                                Thread.sleep(sleepListenerMillis);
+                            } catch (InterruptedException ie) {
+                                ;
+                            }
+                        }
+                    }
+                }
+            };
+            epRuntime = epService.getEPRuntime();
+        }
+
+        public void registerStatement(String statement, String statementID) {
+            EPStatement stmt = epAdministrator.createEQL(statement, statementID);
+            stmt.addListener(updateListener);
+        }
+
+        public void sendEvent(Object event) {
+            epRuntime.sendEvent(event);
+        }
+    }
+}
