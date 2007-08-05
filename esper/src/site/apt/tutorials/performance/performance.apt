@@ -197,4 +197,9 @@ select * from MarketDataEvent(symbol regexp 'E[a-z]')
     }
 ----------------------------------------
 	
+* Turns off logging
+
+	Since Esper 1.10, even if you don't have a log4j configuration file in place, Esper will make sure to minimize execution path logging overhead.
+	For prior versions, and to reduce logging overhead overall, we recommend the "WARN" log level or the "INFO" log level.
 	
+	Please see the log4j configuration file in "etc/infoonly_log4j.xml" for example log4j settings.
