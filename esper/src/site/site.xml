@@ -36,6 +36,7 @@
 				<item name="FAQ for Java" href="/tutorials/faq_esper/faq.html"/>
 				<item name="FAQ for .NET" href="/tutorials/faq_nesper/faq.html"/>
 				<item name="Technology Links" href="/tutorials/links/links.html"/>
+				<item name="On Performance" href="/tutorials/performance/performance.html"/>
 			</item>
 			<item name="Esper for Java" href="/about/esper/esper.html" collapse="false">
 				<item name="Download" href="/esper/download/download.html"/>

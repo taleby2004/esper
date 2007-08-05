@@ -9,6 +9,7 @@ import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.EventPropertyAssertionUtil;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.event.EventBean;
 
 import java.util.*;
 
@@ -39,6 +40,20 @@ public class TestViewGroupBy extends TestCase
 
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    public void testGroupByPastWindow()
+    {
+		// TODO: Test for http://jira.codehaus.org/browse/ESPER-134 currently failing
+        String filter = "select avg(price), symbol from " + SupportMarketDataBean.class.getName() + ".win:length( 100 ).std:groupby('symbol')";
+        EPStatement stmt = epService.getEPAdministrator().createEQL(filter);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        sendEvent(SYMBOL_CISCO, 25, 50000);
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals(SYMBOL_CISCO, event.get("symbol"));
+        assertEquals(25, event.get("avg(price)"));
     }
 
     public void testStats()
@@ -127,7 +142,7 @@ public class TestViewGroupBy extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
-        
+
         sendEvent("IBM", 100);
     }
 

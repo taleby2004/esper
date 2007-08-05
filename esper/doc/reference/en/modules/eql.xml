@@ -871,17 +871,12 @@ having stddev(price) &gt; 0.8</programlisting>
 			</para>
 
 			<para>
-				The next example shows two queries that produce equivalent results. The query using the <emphasis>group by</emphasis> clause is generally preferable as it can be easier to read:
+				The next example shows two queries that produce equivalent results. The query using the <emphasis>group by</emphasis> clause is generally preferable as is easier to read. The second form introduces the <literal>stat:uni</literal> view which computes univariate statistics for a given property:
 			</para>
 
 			<programlisting>select symbol, sum(price) from StockTickEvent group by symbol
 // ... is equivalent to ...
-select symbol, sum(price) from StockTickEvent.std:groupby('symbol')</programlisting>
-
-			<para>
-				As a side note, by adding an output rate limiting clause to a statement that contains a <emphasis>group by</emphasis> clause we can control output of groups to obtain one row for each group, generating an event per group at the given output frequency:
-			</para>
-			<programlisting>select symbol, sum(price) from StockTickEvent group by symbol output every 5 seconds</programlisting>
+select symbol, sum from StockTickEvent.std:groupby('symbol').stat:uni('price')</programlisting>
 
 			<para>
 				The next example shows two queries that are NOT equivalent as the length window is ungrouped in the first query, and grouped in the second query:
@@ -962,6 +957,12 @@ select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:length(1
 				<para>
 Second, the <literal>last</literal> and <literal>all</literal> keywords have special meanings when used in a statement with aggregate functions and the <literal>group by</literal> clause. The <literal>last</literal> keyword specifies that only groups whose aggregate values have been updated with the most recent batch of events should be output. The <literal>all</literal> keyword (the default) specifies that the most recent data for all groups seen so far should be output, whether or not these groups' aggregate values have just been updated.
 				</para>
+
+			<para>
+				By adding an output rate limiting clause to a statement that contains a <emphasis>group by</emphasis> clause we can control output of groups to obtain one row for each group, generating an event per group at the given output frequency:
+			</para>
+			<programlisting>select symbol, sum(price) from StockTickEvent group by symbol output every 5 seconds</programlisting>
+
 		</sect2>
 
     </sect1>
