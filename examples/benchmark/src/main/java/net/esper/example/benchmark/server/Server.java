@@ -2,11 +2,10 @@ package net.esper.example.benchmark.server;
 
 import net.esper.example.benchmark.Symbols;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -96,7 +95,7 @@ public class Server extends Thread {
         } else {
             String stmtString = Server.MODES.getProperty(mode) + " " + suffix;
             System.out.println("Using " + mode + " : " + stmtString);
-            
+
             if (Server.MODES.getProperty(mode).indexOf('$') < 0) {
                 cepProvider.registerStatement(stmtString, mode);
             } else {
@@ -160,18 +159,12 @@ public class Server extends Thread {
     public void runServer() {
         try {
             System.out.println((new StringBuilder("Server accepting connections on port ")).append(port).append(".").toString());
-            ServerSocket serverSocket = new ServerSocket(port);
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.socket().bind(new InetSocketAddress(port));
             do {
-                Socket socket = serverSocket.accept();
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String connectionType = in.readLine();
-                if (connectionType.equals("client")) {
-                    System.out.println("Client connected to server.");
-                    (new ClientConnection(socket, executor, cepProvider)).start();
-                } else {
-                    System.err.println("Wrong Connection Type: " + connectionType);
-                    socket.close();
-                }
+                SocketChannel socketChannel = serverSocketChannel.accept();
+                System.out.println("Client connected to server.");
+                (new ClientConnection(socketChannel, executor, cepProvider)).start();
             } while (true);
         } catch (IOException e) {
             throw new RuntimeException(e);

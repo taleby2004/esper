@@ -9,7 +9,7 @@ package net.esper.example.benchmark.client;
 
 /**
  * A client that sends MarketData information over a TCP socket to a remote server.
- * For each MarketData, one line is sent
+ * MarketData packets are sent using NIO
  *
  * Run with no args to see available options
  * 

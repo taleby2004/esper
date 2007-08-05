@@ -1,18 +1,19 @@
 package net.esper.example.benchmark.server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import net.esper.example.benchmark.MarketData;
+
 /**
  * The ClientConnection handles unmarshalling from the connected client socket and delegates the event to
  * the underlying ESP/CEP engine by using/or not the executor policy.
  * Each ClientConnection manages a throughput statistic (evt/10s) over a 10s batched window
+ *
  * @See Server
  */
 public class ClientConnection extends Thread {
@@ -38,7 +39,7 @@ public class ClientConnection extends Thread {
         }
     }
 
-    private Socket socket;
+    private SocketChannel socketChannel;
     private CEPProvider.ICEPProvider cepProvider;
     private ThreadPoolExecutor executor;//this guy is shared
     private long countLast10s = 0;
@@ -47,9 +48,9 @@ public class ClientConnection extends Thread {
     private int myID;
     private static int ID = 0;
 
-    public ClientConnection(Socket socket, ThreadPoolExecutor executor, CEPProvider.ICEPProvider cepProvider) {
+    public ClientConnection(SocketChannel socketChannel, ThreadPoolExecutor executor, CEPProvider.ICEPProvider cepProvider) {
         super("EsperServer-cnx-" + ID++);
-        this.socket = socket;
+        this.socketChannel = socketChannel;
         this.executor = executor;
         this.cepProvider = cepProvider;
         myID = ID - 1;
@@ -59,13 +60,17 @@ public class ClientConnection extends Thread {
 
     public void run() {
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            socket.getOutputStream().write("server\n".getBytes());
-            socket.getOutputStream().flush();
+            ByteBuffer packet = ByteBuffer.allocateDirect(MarketData.SIZE / 8);
             do {
-                final String xml = in.readLine();
-                if (xml != null) {
-                    final MarketData event = MarketData.parseCSV(xml);
+                if (socketChannel.read(packet) < 0) {
+                    System.err.println("Error receiving data from client (got null). Did client disconnect?");
+                    break;
+                }
+                if (packet.hasRemaining()) {
+                    ;//System.err.println("partial packet");
+                } else {
+                    packet.flip();
+                    final MarketData event = MarketData.fromByteBuffer(packet);
                     if (executor == null) {
                         long ns = System.nanoTime();
                         cepProvider.sendEvent(event);
@@ -93,8 +98,7 @@ public class ClientConnection extends Thread {
                         countLast10s = 0;
                         lastThroughputTick = System.currentTimeMillis();
                     }
-                } else {
-                    System.err.println("Error receiving data from client (got null). Did client disconnect?");                    
+                    packet.clear();
                 }
             } while (true);
         } catch (Throwable t) {

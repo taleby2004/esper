@@ -12,26 +12,29 @@ import java.util.Random;
 /**
  * Holds the list of symbols.
  * Use -Desper.benchmark.symbol=100 to configure the number of symbols to use (hence the number of EQL statements)
- *
+ * <p/>
  * Each symbol is prefixed with "S" and suffixed with "A" to have all symbols have the same length
  * (f.e. S1AA S2AA ... S99A for 100 symbols)
  */
 public class Symbols {
 
-    static Random RAND = new Random();
+    private static final Random RAND = new Random();
+    public static final int SIZE;
+    public static final int LENGTH;
 
     static {
         int symbolcount = Integer.parseInt(System.getProperty("esper.benchmark.symbol", "100"));
-        int symbolStringLength = (""+symbolcount).length();// + 1/*S*/;
+        LENGTH = ("" + symbolcount).length();
         String[] symbols = new String[symbolcount];
         for (int i = 0; i < symbols.length; i++) {
-            symbols[i] = "S"+i;
-            while (symbols[i].length() < symbolStringLength) {
+            symbols[i] = "S" + i;
+            while (symbols[i].length() < LENGTH) {
                 symbols[i] += "A";
             }
         }
 
         SYMBOLS = symbols;
+        SIZE = LENGTH * Character.SIZE;
     }
 
     public static final String SYMBOLS[];
@@ -50,6 +53,6 @@ public class Symbols {
     }
 
     public static int nextVolume(int max) {
-        return RAND.nextInt(max-1) + 1;
+        return RAND.nextInt(max - 1) + 1;
     }
 }

@@ -3,6 +3,8 @@ package net.esper.example.benchmark.server;
 import net.esper.client.*;
 import net.esper.event.EventBean;
 
+import net.esper.example.benchmark.MarketData;
+
 /**
  * A factory and interface to wrap ESP/CEP engine dependency in a single space
  */

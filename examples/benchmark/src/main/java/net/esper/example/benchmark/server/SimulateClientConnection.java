@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import net.esper.example.benchmark.MarketData;
 
 public class SimulateClientConnection extends Thread {
 
@@ -58,10 +59,7 @@ public class SimulateClientConnection extends Thread {
         System.out.println("Event per 10ms = " + Math.max(eventPer10Millis, 1));
         final MarketData[] market = new MarketData[Symbols.SYMBOLS.length];
         for (int i = 0; i < market.length; i++) {
-            market[i] = new MarketData();
-            market[i].setTicker(Symbols.SYMBOLS[i]);
-            market[i].setPrice(Symbols.nextPrice(10));
-            market[i].setVolume(Symbols.nextVolume(10));
+            market[i] = new MarketData(Symbols.SYMBOLS[i], Symbols.nextPrice(10), Symbols.nextVolume(10));
         }
 
         try {
