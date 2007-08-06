@@ -107,7 +107,6 @@ public class MarketData {
     }
 
     public Object clone() throws CloneNotSupportedException {
-        super.clone();
         return new MarketData(ticker, price, volume);
     }
 }
