@@ -64,7 +64,7 @@
 
     <!-- use this target to zip the example code for distribution -->
     <target name="release" depends="clean, build">
-        <zip basedir="." destfile="esper-benchmark.zip" includes="**/*" excludes="lib/*,src/**"/>
+        <zip basedir="." destfile="esper-benchmark.zip" includes="build/**,etc/**,build.xml,readme.txt,lib/readme.txt"/>
     </target>
 
 </project>

@@ -10,8 +10,8 @@ package net.esper.example.benchmark;
 import java.util.Random;
 
 /**
- * Holds the list of symbols.
- * Use -Desper.benchmark.symbol=100 to configure the number of symbols to use (hence the number of EQL statements)
+ * Holds the list of symbols. Defaults to 1000
+ * Use -Desper.benchmark.symbol=1000 to configure the number of symbols to use (hence the number of EQL statements)
  * <p/>
  * Each symbol is prefixed with "S" and suffixed with "A" to have all symbols have the same length
  * (f.e. S1AA S2AA ... S99A for 100 symbols)
@@ -23,7 +23,7 @@ public class Symbols {
     public static final int LENGTH;
 
     static {
-        int symbolcount = Integer.parseInt(System.getProperty("esper.benchmark.symbol", "100"));
+        int symbolcount = Integer.parseInt(System.getProperty("esper.benchmark.symbol", "1000"));
         LENGTH = ("" + symbolcount).length();
         String[] symbols = new String[symbolcount];
         for (int i = 0; i < symbols.length; i++) {
