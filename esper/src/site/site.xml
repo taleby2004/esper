@@ -43,7 +43,7 @@
 				<item name="Documentation" href="/esper/documentation/documentation.html"/>
 				<item name="Reporting Issues" href="/esper/issues/issues.html"/>
 				<item name="Building" href="/esper/building/building.html"/>
-				<item name="On Performance" href="/tutorials/performance/performance.html"/>
+				<item name="On Performance" href="/esper/performance/performance.html"/>
 			</item>
 			<item name="NEsper for .NET" href="/about/nesper/nesper.html" collapse="false">
 				<item name="Download" href="/nesper/download/download.html"/>
