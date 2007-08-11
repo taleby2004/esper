@@ -705,6 +705,16 @@ public class TestEQLTreeWalker extends TestCase
         DBStatementStreamSpec dbSpec = (DBStatementStreamSpec) statementSpec.getStreamSpecs().get(1);
         assertEquals("mydb", dbSpec.getDatabaseName());
         assertEquals(sql, dbSpec.getSqlWithSubsParams());
+
+        expression = "select * from " + className + ", sql:mydb ['" + sql + "' metadatasql 'select * from B']";
+
+        walker = parseAndWalkEQL(expression);
+        statementSpec = walker.getStatementSpec();
+        assertEquals(2, statementSpec.getStreamSpecs().size());
+        dbSpec = (DBStatementStreamSpec) statementSpec.getStreamSpecs().get(1);
+        assertEquals("mydb", dbSpec.getDatabaseName());
+        assertEquals(sql, dbSpec.getSqlWithSubsParams());
+        assertEquals("select * from B", dbSpec.getMetadataSQL());
     }
 
     public void testRangeBetweenAndIn() throws Exception

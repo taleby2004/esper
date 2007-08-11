@@ -12,6 +12,8 @@ import net.esper.event.EventType;
 import net.esper.event.EventBean;
 import net.esper.collection.Pair;
 import net.esper.client.EPException;
+import net.esper.util.ExecutionPathDebugLog;
+import net.esper.util.DatabaseTypeBinding;
 
 import java.util.*;
 import java.sql.Connection;
@@ -19,11 +21,15 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Viewable providing historical data from a database.
  */
 public class PollExecStrategyDBQuery implements PollExecStrategy
 {
+    private static final Log log = LogFactory.getLog(PollExecStrategyDBQuery.class);
     private final EventAdapterService eventAdapterService;
     private final String preparedStatementText;
     private final Map<String, DBOutputTypeDesc> outputTypes;
@@ -87,12 +93,23 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
     private List<EventBean> execute(PreparedStatement preparedStatement,
                                     Object[] lookupValuePerStream)
     {
+        if (ExecutionPathDebugLog.isEnabled() && log.isInfoEnabled())
+        {
+            log.info(".execute Executing prepared statement '" + preparedStatementText + "'");
+        }
+
         // set parameters
         int count = 1;
         for (int i = 0; i < lookupValuePerStream.length; i++)
         {
             try
             {
+                Object parameter = lookupValuePerStream[i];
+                if (ExecutionPathDebugLog.isEnabled() && log.isInfoEnabled())
+                {
+                    log.info(".execute Setting parameter " + count + " to " + parameter + " typed " + ((parameter == null)? "null" : parameter.getClass()));
+                }
+
                 preparedStatement.setObject(count, lookupValuePerStream[i]);
             }
             catch (SQLException ex)
@@ -124,7 +141,18 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
                 for (Map.Entry<String, DBOutputTypeDesc> entry : outputTypes.entrySet())
                 {
                     String columnName = entry.getKey();
-                    Object value = resultSet.getObject(columnName);
+
+                    Object value;
+                    DatabaseTypeBinding binding = entry.getValue().getOptionalBinding();
+                    if (binding != null)
+                    {
+                        value = binding.getValue(resultSet, columnName);
+                    }
+                    else
+                    {
+                        value = resultSet.getObject(columnName);
+                    }
+
                     row.put(columnName, value);
                 }
                 EventBean eventBeanRow = eventAdapterService.createMapFromValues(row, eventType);

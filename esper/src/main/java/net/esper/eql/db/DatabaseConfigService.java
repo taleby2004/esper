@@ -24,6 +24,14 @@ public interface DatabaseConfigService
     public DatabaseConnectionFactory getConnectionFactory(String databaseName) throws DatabaseConfigException;
 
     /**
+     * Returns the column metadata settings for the database.
+     * @param databaseName is the database name
+     * @return indicators for change case, metadata retrieval strategy and others
+     * @throws DatabaseConfigException if the name was not configured
+     */
+    public ColumnSettings getQuerySetting(String databaseName) throws DatabaseConfigException;
+
+    /**
      * Returns true to indicate a setting to retain connections between lookups.
      * @param databaseName is the name of the database
      * @param preparedStatementText is the sql text

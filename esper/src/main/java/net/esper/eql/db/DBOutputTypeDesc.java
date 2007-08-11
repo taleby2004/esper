@@ -1,5 +1,7 @@
 package net.esper.eql.db;
 
+import net.esper.util.DatabaseTypeBinding;
+
 /**
  * Descriptor for SQL output columns.
  */
@@ -7,16 +9,19 @@ public class DBOutputTypeDesc
 {
     private int sqlType;
     private String className;
+    private DatabaseTypeBinding optionalBinding;
 
     /**
      * Ctor.
      * @param sqlType the type of the column
      * @param className the Java class reflecting column type
+     * @param optionalBinding is the optional mapping from output column type to Java built-in
      */
-    public DBOutputTypeDesc(int sqlType, String className)
+    public DBOutputTypeDesc(int sqlType, String className, DatabaseTypeBinding optionalBinding)
     {
         this.sqlType = sqlType;
         this.className = className;
+        this.optionalBinding = optionalBinding;
     }
 
     /**
@@ -35,6 +40,15 @@ public class DBOutputTypeDesc
     public String getClassName()
     {
         return className;
+    }
+
+    /**
+     * Returns the optional mapping from output column type to Java built-in.
+     * @return database type mapping to Java type
+     */
+    public DatabaseTypeBinding getOptionalBinding()
+    {
+        return optionalBinding;
     }
 
     public String toString()

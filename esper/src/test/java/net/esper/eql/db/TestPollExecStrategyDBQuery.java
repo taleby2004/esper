@@ -29,7 +29,7 @@ public class TestPollExecStrategyDBQuery extends TestCase
         EventType resultEventType = SupportEventAdapterService.getService().createAnonymousMapType(resultProperties);
 
         Map<String, DBOutputTypeDesc> propertiesOut = new HashMap<String, DBOutputTypeDesc>();
-        propertiesOut.put("myvarchar", new DBOutputTypeDesc(Types.VARCHAR, null));
+        propertiesOut.put("myvarchar", new DBOutputTypeDesc(Types.VARCHAR, null, null));
 
         dbPollExecStrategy = new PollExecStrategyDBQuery(SupportEventAdapterService.getService(),
                 resultEventType, connectionCache, sql, propertiesOut);

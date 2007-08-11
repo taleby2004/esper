@@ -131,6 +131,9 @@
 					<xs:element ref="connection-lifecycle" minOccurs="0"/>
 					<xs:element ref="lru-cache" minOccurs="0"/>
 					<xs:element ref="expiry-time-cache" minOccurs="0"/>
+					<xs:element ref="column-change-case" minOccurs="0" />
+					<xs:element ref="metadata-origin" minOccurs="0" />
+					<xs:element ref="sql-types-mapping" minOccurs="0" maxOccurs="unbounded"/>
 				</xs:sequence>
 			</xs:choice>
 			<xs:attribute name="name" type="xs:string" use="required"/>
@@ -326,4 +329,34 @@
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="column-change-case">
+		<xs:complexType>
+			<xs:attribute name="value" type="columnChangeCaseEnum" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="metadata-origin">
+		<xs:complexType>
+			<xs:attribute name="value" type="metadataOriginEnum" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="sql-types-mapping">
+		<xs:complexType>
+			<xs:attribute name="sql-type" type="xs:integer" use="required"/>
+			<xs:attribute name="java-type" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="metadataOriginEnum">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="default"/>
+			<xs:enumeration value="metadata"/>
+			<xs:enumeration value="sample"/>
+		</xs:restriction>
+	</xs:simpleType>	
+	<xs:simpleType name="columnChangeCaseEnum">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="none"/>
+			<xs:enumeration value="lowercase"/>
+			<xs:enumeration value="uppercase"/>
+		</xs:restriction>
+	</xs:simpleType>	
 </xs:schema>

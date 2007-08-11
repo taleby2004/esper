@@ -536,7 +536,15 @@ public class EQLTreeWalker extends EQLBaseWalker
             AST dbchildNode = node.getFirstChild().getFirstChild();
             String dbName = dbchildNode.getText();
             String sqlWithParams = StringValue.parseString(dbchildNode.getNextSibling().getText().trim());
-            streamSpec = new DBStatementStreamSpec(streamName, viewSpecs, dbName, sqlWithParams);
+
+            String sampleSQL = null;
+            if (dbchildNode.getNextSibling().getNextSibling() != null)
+            {
+                sampleSQL = dbchildNode.getNextSibling().getNextSibling().getText();
+                sampleSQL = StringValue.parseString(sampleSQL.trim());
+            }
+
+            streamSpec = new DBStatementStreamSpec(streamName, viewSpecs, dbName, sqlWithParams, sampleSQL);
         }
         else
         {

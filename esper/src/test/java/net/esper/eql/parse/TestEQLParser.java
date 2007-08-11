@@ -371,6 +371,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select * from x, sql:mydb ['whetever SQL $x.id google']");
         assertIsValid("select * from x, sql:mydb ['']");
         assertIsValid("select * from x, sql:mydb ['   ']");
+        assertIsValid("select * from x, sql:mydb ['whetever SQL $x.id google' metadatasql 'select 1 as myint']");
 
         // Previous and prior function
         assertIsValid("select prev(10, price) from x");

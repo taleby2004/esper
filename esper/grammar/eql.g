@@ -70,6 +70,7 @@ tokens
 	ISTREAM="istream";
 	PATTERN="pattern";
 	SQL="sql";
+	METADATASQL="metadatasql";
 	PREVIOUS="prev";
 	PRIOR="prior";
 	EXISTS="exists";
@@ -279,7 +280,7 @@ patternInclusionExpression
 	;
 	
 databaseJoinExpression
-	:	SQL! COLON! IDENT LBRACK! (STRING_LITERAL | QUOTED_STRING_LITERAL) RBRACK!
+	:	SQL! COLON! IDENT LBRACK! (STRING_LITERAL | QUOTED_STRING_LITERAL) (METADATASQL! (STRING_LITERAL | QUOTED_STRING_LITERAL))? RBRACK!
 		{ #databaseJoinExpression = #([DATABASE_JOIN_EXPR,"databaseJoinExpression"], #databaseJoinExpression); }
 	;	
 

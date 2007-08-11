@@ -2,20 +2,14 @@ package net.esper.regression.db;
 
 import junit.framework.TestCase;
 import net.esper.client.*;
-import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.CurrentTimeEvent;
-import net.esper.support.util.SupportUpdateListener;
-import net.esper.support.eql.SupportDatabaseService;
-import net.esper.support.client.SupportConfigFactory;
-import net.esper.support.bean.SupportBean;
-import net.esper.support.bean.SupportBeanComplexProps;
-import net.esper.support.bean.SupportBean_S0;
+import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
-import net.esper.event.EventType;
+import net.esper.support.client.SupportConfigFactory;
+import net.esper.support.eql.SupportDatabaseService;
+import net.esper.support.util.SupportUpdateListener;
 
 import java.util.Properties;
-import java.math.BigDecimal;
-import java.sql.*;
 
 public class TestDatabaseJoinInsertInto extends TestCase
 {

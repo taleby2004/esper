@@ -124,4 +124,14 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
 
         throw new IllegalStateException("Cache implementation class not configured");
     }
+
+    public ColumnSettings getQuerySetting(String databaseName) throws DatabaseConfigException
+    {
+        ConfigurationDBRef config = mapDatabaseRef.get(databaseName);
+        if (config == null)
+        {
+            throw new DatabaseConfigException("Cannot locate configuration information for database '" + databaseName + '\'');
+        }
+        return new ColumnSettings(config.getMetadataRetrievalEnum(), config.getColumnChangeCase(), config.getJavaSqlTypesMapping());
+    }
 }

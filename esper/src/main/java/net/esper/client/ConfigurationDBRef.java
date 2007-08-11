@@ -1,6 +1,11 @@
 package net.esper.client;
 
+import net.esper.util.DatabaseTypeEnum;
+
 import java.util.Properties;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
 
 /**
  * Container for database configuration information, such as
@@ -13,6 +18,9 @@ public class ConfigurationDBRef
     private ConnectionSettings connectionSettings;
     private ConnectionLifecycleEnum connectionLifecycleEnum;
     private DataCacheDesc dataCacheDesc;
+    private MetadataOriginEnum metadataOrigin;
+    private ColumnChangeCaseEnum columnChangeCase;
+    private Map<Integer, String> javaSqlTypesMapping;
 
     /**
      * Ctor.
@@ -21,6 +29,9 @@ public class ConfigurationDBRef
     {
         connectionLifecycleEnum = ConnectionLifecycleEnum.RETAIN;
         connectionSettings = new ConnectionSettings();
+        metadataOrigin = MetadataOriginEnum.DEFAULT;
+        columnChangeCase = ColumnChangeCaseEnum.NONE;
+        javaSqlTypesMapping = new HashMap<Integer, String>();
     }
 
     /**
@@ -173,6 +184,99 @@ public class ConfigurationDBRef
     public DataCacheDesc getDataCacheDesc()
     {
         return dataCacheDesc;
+    }
+
+    /**
+     * Returns an enumeration indicating how the engine retrieves metadata about the columns
+     * that a given SQL query returns.
+     * <p>
+     * The engine requires to retrieve result column names and types in order to build a resulting
+     * event type and perform expression type checking.
+     * @return indication how to retrieve metadata
+     */
+    public MetadataOriginEnum getMetadataRetrievalEnum()
+    {
+        return metadataOrigin;
+    }
+
+    /**
+     * Sets and indicator how the engine should retrieve metadata about the columns
+     * that a given SQL query returns.
+     * <p>
+     * The engine requires to retrieve result column names and types in order to build a resulting
+     * event type and perform expression type checking.
+     * @param metadataOrigin indication how to retrieve metadata
+     */
+    public void setMetadataOrigin(MetadataOriginEnum metadataOrigin)
+    {
+        this.metadataOrigin = metadataOrigin;
+    }
+
+    /**
+     * Returns enum value determining how the engine changes case on output column names
+     * returned from statement or statement result set metadata.
+     * @return change case enums
+     */
+    public ColumnChangeCaseEnum getColumnChangeCase()
+    {
+        return columnChangeCase;
+    }
+
+    /**
+     * Sets enum value determining how the engine should change case on output column names
+     * returned from statement or statement result set metadata.
+     * @param columnChangeCaseEnum change case enums
+     */
+    public void setColumnChangeCase(ColumnChangeCaseEnum columnChangeCaseEnum)
+    {
+        this.columnChangeCase = columnChangeCaseEnum;
+    }
+
+    /**
+     * Adds a mapping of a java.sql.Types type to a Java type.
+     * <p>
+     * The mapping dictates to the engine how the output column should be
+     * represented as a Java Object.
+     * <p>
+     * Accepts a Java classname (fully-qualified or simple) or primitive type name
+     * for the Java type parameter. See {@link DatabaseTypeEnum} for valid values for the java type name.
+     * @param sqlType is a java.sql.Types constant, for which output columns are converted to java type
+     * @param javaTypeName is a Java class name
+     */
+    public void addJavaSqlTypesBinding(int sqlType, String javaTypeName)
+    {
+        DatabaseTypeEnum typeEnum = DatabaseTypeEnum.getEnum(javaTypeName);
+        if (typeEnum == null)
+        {
+            String supported = Arrays.toString(DatabaseTypeEnum.values());
+            throw new ConfigurationException("Unsupported java type '" + javaTypeName + "' when expecting any of: " + supported);
+        }
+        this.javaSqlTypesMapping.put(sqlType, javaTypeName);
+    }
+
+    /**
+     * Adds a mapping of a java.sql.Types type to a Java type.
+     * <p>
+     * The mapping dictates to the engine how the output column should be
+     * represented as a Java Object.
+     * <p>
+     * Accepts a Java class for the Java type parameter. See {@link DatabaseTypeEnum} for valid values.
+     * @param sqlType is a java.sql.Types constant, for which output columns are converted to java type
+     * @param javaTypeName is a Java class
+     */
+    public void addJavaSqlTypesBinding(int sqlType, Class javaTypeName)
+    {
+        addJavaSqlTypesBinding(sqlType, javaTypeName.getName());
+    }
+
+    /**
+     * Returns the mapping of types that the engine must perform
+     * when receiving output columns of that sql types.
+     * @return map of {@link java.sql.Types} types to Java types
+     */
+    public Map<Integer, String> getJavaSqlTypesMapping()
+    {
+        return javaSqlTypesMapping;
     }
 
     /**
@@ -497,5 +601,52 @@ public class ConfigurationDBRef
         {
             return "ExpiryTimeCacheDesc maxAgeSeconds=" + maxAgeSeconds + " purgeIntervalSeconds=" + purgeIntervalSeconds;
         }
+    }
+
+    /**
+     * Indicates how the engine retrieves metadata about a statement's output columns.
+     */
+    public enum MetadataOriginEnum
+    {
+        /**
+         * By default, get output column metadata from the prepared statement, unless
+         * an Oracle connection class is used in which case the behavior is SAMPLE.
+         */
+        DEFAULT,
+
+        /**
+         * Always get output column metadata from the prepared statement regardless of what driver
+         * or connection is used.
+         */
+        METADATA,
+
+        /**
+         * Obtain output column metadata by executing a sample query statement at statement
+         * compilation time. The sample statement
+         * returns the same columns as the statement executed during event processing.
+         * See the documentation for the generation or specication of the sample query statement.
+         */
+        SAMPLE
+    }
+
+    /**
+     * Controls how output column names get reflected in the event type.
+     */
+    public enum ColumnChangeCaseEnum
+    {
+        /**
+         * Leave the column names the way the database driver represents the column.
+         */
+        NONE,
+
+        /**
+         * Change case to lowercase on any column names returned by statement metadata. 
+         */
+        LOWERCASE,
+
+        /**
+         * Change case to uppercase on any column names returned by statement metadata. 
+         */
+        UPPERCASE
     }
 }

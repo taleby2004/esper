@@ -106,6 +106,11 @@ public class TestConfigurationParser extends TestCase
         assertNull(configDBRef.getConnectionSettings().getTransactionIsolation());
         ConfigurationDBRef.LRUCacheDesc lruCache = (ConfigurationDBRef.LRUCacheDesc) configDBRef.getDataCacheDesc();
         assertEquals(10, lruCache.getSize());
+        assertEquals(ConfigurationDBRef.ColumnChangeCaseEnum.LOWERCASE, configDBRef.getColumnChangeCase());
+        assertEquals(ConfigurationDBRef.MetadataOriginEnum.SAMPLE, configDBRef.getMetadataRetrievalEnum());
+        assertEquals(2, configDBRef.getJavaSqlTypesMapping().size());
+        assertEquals("int", configDBRef.getJavaSqlTypesMapping().get(2));
+        assertEquals("float", configDBRef.getJavaSqlTypesMapping().get(6));
 
         // assert database reference - driver manager config
         configDBRef = config.getDatabaseReferences().get("mydb2");
@@ -123,6 +128,10 @@ public class TestConfigurationParser extends TestCase
         ConfigurationDBRef.ExpiryTimeCacheDesc expCache = (ConfigurationDBRef.ExpiryTimeCacheDesc) configDBRef.getDataCacheDesc();
         assertEquals(60.5, expCache.getMaxAgeSeconds());
         assertEquals(120.1, expCache.getPurgeIntervalSeconds());
+        assertEquals(ConfigurationDBRef.ColumnChangeCaseEnum.UPPERCASE, configDBRef.getColumnChangeCase());
+        assertEquals(ConfigurationDBRef.MetadataOriginEnum.METADATA, configDBRef.getMetadataRetrievalEnum());
+        assertEquals(1, configDBRef.getJavaSqlTypesMapping().size());
+        assertEquals("java.lang.String", configDBRef.getJavaSqlTypesMapping().get(99));
 
         // assert custom view implementations
         List<ConfigurationPlugInView> configViews = config.getPlugInViews();

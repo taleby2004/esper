@@ -327,6 +327,33 @@ class ConfigurationParser {
                     String size = subElement.getAttributes().getNamedItem("size").getTextContent();
                     configDBRef.setLRUCache(Integer.parseInt(size));
                 }
+                else if (subElement.getNodeName().equals("column-change-case"))
+                {
+                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                    ConfigurationDBRef.ColumnChangeCaseEnum parsed = ConfigurationDBRef.ColumnChangeCaseEnum.valueOf(value.toUpperCase());
+                    configDBRef.setColumnChangeCase(parsed);
+                }
+                else if (subElement.getNodeName().equals("metadata-origin"))
+                {
+                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                    ConfigurationDBRef.MetadataOriginEnum parsed = ConfigurationDBRef.MetadataOriginEnum.valueOf(value.toUpperCase());
+                    configDBRef.setMetadataOrigin(parsed);
+                }
+                else if (subElement.getNodeName().equals("sql-types-mapping"))
+                {
+                    String sqlType = subElement.getAttributes().getNamedItem("sql-type").getTextContent();
+                    String javaType = subElement.getAttributes().getNamedItem("java-type").getTextContent();
+                    Integer sqlTypeInt;
+                    try
+                    {
+                        sqlTypeInt = Integer.parseInt(sqlType);
+                    }
+                    catch (NumberFormatException ex)
+                    {
+                        throw new ConfigurationException("Error converting sql type '" + sqlType + "' to integer java.sql.Types constant");
+                    }
+                    configDBRef.addJavaSqlTypesBinding(sqlTypeInt, javaType);
+                }
             }
         }
     }

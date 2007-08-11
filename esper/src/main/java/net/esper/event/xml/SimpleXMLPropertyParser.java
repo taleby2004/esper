@@ -1,22 +1,18 @@
 package net.esper.event.xml;
 
-import java.io.StringReader;
-
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import antlr.RecognitionException;
+import antlr.TokenStreamException;
+import antlr.collections.AST;
 import net.esper.eql.generated.EQLStatementLexer;
 import net.esper.eql.generated.EQLStatementParser;
 import net.esper.eql.generated.EqlTokenTypes;
 import net.esper.event.PropertyAccessException;
 import net.esper.type.IntValue;
 import net.esper.type.StringValue;
-import antlr.RecognitionException;
-import antlr.TokenStreamException;
-import antlr.collections.AST;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.StringReader;
 
 /**
  * Parses event property names and transforms to XPath expressions. Supports
@@ -30,6 +26,9 @@ public class SimpleXMLPropertyParser implements EqlTokenTypes
      *
      * @param propertyName is the property name to parse
      * @param rootElementName is the name of the root element for generating the XPath expression
+     * @param defaultNamespacePrefix is the prefix of the default namespace
+     * @param isResolvePropertiesAbsolute is true to indicate to resolve XPath properties as absolute props
+     * or relative props
      * @return xpath expression
      */
     public static String parse(String propertyName, String rootElementName, String defaultNamespacePrefix, boolean isResolvePropertiesAbsolute)

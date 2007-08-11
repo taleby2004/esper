@@ -22,6 +22,7 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
 {
     private String databaseName;
     private String sqlWithSubsParams;
+    private String metadataSQL;
 
     /**
      * Ctor.
@@ -29,13 +30,15 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
      * @param viewSpecs is a list of views onto the stream
      * @param databaseName is the database name to poll
      * @param sqlWithSubsParams is the SQL with placeholder parameters
+     * @param metadataSQL is the sample SQL to retrieve statement metadata, if any was supplied
      */
-    public DBStatementStreamSpec(String optionalStreamName, List<ViewSpec> viewSpecs, String databaseName, String sqlWithSubsParams)
+    public DBStatementStreamSpec(String optionalStreamName, List<ViewSpec> viewSpecs, String databaseName, String sqlWithSubsParams, String metadataSQL)
     {
         super(optionalStreamName, viewSpecs);
 
         this.databaseName = databaseName;
         this.sqlWithSubsParams = sqlWithSubsParams;
+        this.metadataSQL = metadataSQL;
     }
 
     /**
@@ -54,6 +57,15 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
     public String getSqlWithSubsParams()
     {
         return sqlWithSubsParams;
+    }
+
+    /**
+     * Returns the optional sample metadata SQL
+     * @return null if not supplied, or SQL to fire to retrieve metadata
+     */
+    public String getMetadataSQL()
+    {
+        return metadataSQL;
     }
 
     public StreamSpecCompiled compile(EventAdapterService eventAdapterService,
