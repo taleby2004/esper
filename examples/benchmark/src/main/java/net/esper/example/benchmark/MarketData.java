@@ -18,7 +18,12 @@ import java.nio.CharBuffer;
  */
 public class MarketData {
 
-    public final static int SIZE = Symbols.SIZE + Double.SIZE + Long.SIZE + Integer.SIZE;
+    public final static int SIZE = Symbols.SIZE + Double.SIZE + Integer.SIZE + Long.SIZE;
+    static {
+        System.out.println("MarketData event = " + SIZE + " bit = " + SIZE/8 + " bytes");
+        System.out.println("  100 Mbit/s <==> " + (int) (100*1024*1024/SIZE/1000) + "k evt/s");
+        System.out.println("    1 Gbit/s <==> " + (int) (1024*1024*1024/SIZE/1000) + "k evt/s");
+    }
 
     private  String ticker;
     private  double price;

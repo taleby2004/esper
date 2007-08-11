@@ -20,18 +20,18 @@ public class ClientConnection extends Thread {
 
     static Map<Integer, ClientConnection> CLIENT_CONNECTIONS = Collections.synchronizedMap(new HashMap<Integer, ClientConnection>());
 
-    public static void dumpStats() {
+    public static void dumpStats(int statSec) {
         long totalCount = 0;
         int cnx = 0;
         ClientConnection any = null;
         for (ClientConnection m : CLIENT_CONNECTIONS.values()) {
             cnx++;
-            totalCount += m.countLast10sLast;
+            totalCount += m.countForStatSecLast;
             any = m;
         }
         if (any != null) {
-            System.out.printf("Throughput %f (active %d pending %d cnx %d)\n",
-                    (float) totalCount / 10,
+            System.out.printf("Throughput %.0f (active %d pending %d cnx %d)\n",
+                    (float) totalCount / statSec,
                     any.executor == null ? 0 : any.executor.getCorePoolSize(),
                     any.executor == null ? 0 : any.executor.getQueue().size(),
                     cnx
@@ -42,17 +42,19 @@ public class ClientConnection extends Thread {
     private SocketChannel socketChannel;
     private CEPProvider.ICEPProvider cepProvider;
     private ThreadPoolExecutor executor;//this guy is shared
-    private long countLast10s = 0;
-    private long countLast10sLast = 0;
+    private final int statSec;
+    private long countForStatSec = 0;
+    private long countForStatSecLast = 0;
     private long lastThroughputTick = System.currentTimeMillis();
     private int myID;
     private static int ID = 0;
 
-    public ClientConnection(SocketChannel socketChannel, ThreadPoolExecutor executor, CEPProvider.ICEPProvider cepProvider) {
+    public ClientConnection(SocketChannel socketChannel, ThreadPoolExecutor executor, CEPProvider.ICEPProvider cepProvider, int statSec) {
         super("EsperServer-cnx-" + ID++);
         this.socketChannel = socketChannel;
         this.executor = executor;
         this.cepProvider = cepProvider;
+        this.statSec = statSec;
         myID = ID - 1;
 
         CLIENT_CONNECTIONS.put(myID, this);
@@ -92,10 +94,10 @@ public class ClientConnection extends Thread {
                         });
                     }
                     //stats
-                    countLast10s++;
-                    if (System.currentTimeMillis() - lastThroughputTick > 10 * 1E3) {
-                        countLast10sLast = countLast10s;
-                        countLast10s = 0;
+                    countForStatSec++;
+                    if (System.currentTimeMillis() - lastThroughputTick > statSec * 1E3) {
+                        countForStatSecLast = countForStatSec;
+                        countForStatSec = 0;
                         lastThroughputTick = System.currentTimeMillis();
                     }
                     packet.clear();

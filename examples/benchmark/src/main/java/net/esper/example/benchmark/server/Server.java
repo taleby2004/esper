@@ -37,6 +37,7 @@ public class Server extends Thread {
     private int threadCore;
     private int queueMax;
     private int sleepListenerMillis;
+    private int statSec;
     private int simulationRate;
     private int simulationThread;
     private String mode;
@@ -55,13 +56,14 @@ public class Server extends Thread {
 
     private CEPProvider.ICEPProvider cepProvider;
 
-    public Server(String mode, int port, int threads, int queueMax, int sleep, int stat, int simulationThread, final int simulationRate) {
+    public Server(String mode, int port, int threads, int queueMax, int sleep, final int statSec, int simulationThread, final int simulationRate) {
         super("EsperServer-main");
         this.mode = mode;
         this.port = port;
         this.threadCore = threads;
         this.queueMax = queueMax;
         this.sleepListenerMillis = sleep;
+        this.statSec = statSec;
         this.simulationThread = simulationThread;
         this.simulationRate = simulationRate;
 
@@ -74,14 +76,17 @@ public class Server extends Thread {
                 StatsHolder.dump("endToEnd");
                 StatsHolder.reset();
                 if (simulationRate <= 0) {
-                    ClientConnection.dumpStats();
+                    ClientConnection.dumpStats(statSec);
                 } else {
-                    SimulateClientConnection.dumpStats();
+                    SimulateClientConnection.dumpStats(statSec);
                 }
             }
-        }, 0L, stat * 1000);
+        }, 0L, statSec * 1000);
     }
 
+    public void setCEPProvider(CEPProvider.ICEPProvider cepProvider) {
+        this.cepProvider = cepProvider;
+    }
 
     public synchronized void start() {
         // register ESP/CEP engine
@@ -98,6 +103,7 @@ public class Server extends Thread {
 
             if (Server.MODES.getProperty(mode).indexOf('$') < 0) {
                 cepProvider.registerStatement(stmtString, mode);
+                System.out.println("\nStatements registered # 1 only");
             } else {
                 // create a stmt for each symbol
                 for (int i = 0; i < Symbols.SYMBOLS.length; i++) {
@@ -164,7 +170,7 @@ public class Server extends Thread {
             do {
                 SocketChannel socketChannel = serverSocketChannel.accept();
                 System.out.println("Client connected to server.");
-                (new ClientConnection(socketChannel, executor, cepProvider)).start();
+                (new ClientConnection(socketChannel, executor, cepProvider, statSec)).start();
             } while (true);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -178,7 +184,7 @@ public class Server extends Thread {
         );
         SimulateClientConnection[] sims = new SimulateClientConnection[simulationThread];
         for (int i = 0; i < sims.length; i++) {
-            sims[i] = new SimulateClientConnection(simulationRate, executor, cepProvider);
+            sims[i] = new SimulateClientConnection(simulationRate, executor, cepProvider, statSec);
             sims[i].start();
         }
 

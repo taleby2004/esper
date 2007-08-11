@@ -13,7 +13,7 @@ public class SimulateClientConnection extends Thread {
 
     static Map<Integer, SimulateClientConnection> CLIENT_CONNECTIONS = Collections.synchronizedMap(new HashMap<Integer, SimulateClientConnection>());
 
-    public static void dumpStats() {
+    public static void dumpStats(int statSec) {
         long totalCount = 0;
         int cnx = 0;
         SimulateClientConnection any = null;
@@ -24,7 +24,7 @@ public class SimulateClientConnection extends Thread {
         }
         if (any != null) {
             System.out.printf("Throughput %.0f (active %d pending %d)\n",
-                    (float) totalCount / 10,
+                    (float) totalCount / statSec,
                     any.executor == null ? 0 : any.executor.getCorePoolSize(),
                     any.executor == null ? 0 : any.executor.getQueue().size()
             );
@@ -34,17 +34,19 @@ public class SimulateClientConnection extends Thread {
     private int simulationRate;
     private CEPProvider.ICEPProvider cepProvider;
     private ThreadPoolExecutor executor;
+    private final int statSec;
     private long countLast10sLast = 0;
     private long countLast10s = 0;
     private long lastThroughputTick = System.currentTimeMillis();
     private int myID;
     private static int ID = 0;
 
-    public SimulateClientConnection(int simulationRate, ThreadPoolExecutor executor, CEPProvider.ICEPProvider cepProvider) {
+    public SimulateClientConnection(int simulationRate, ThreadPoolExecutor executor, CEPProvider.ICEPProvider cepProvider, int statSec) {
         super("EsperServer-cnx-" + ID++);
         this.simulationRate = simulationRate;
         this.executor = executor;
         this.cepProvider = cepProvider;
+        this.statSec = statSec;
         myID = ID - 1;
 
         // simulationRate event / s
@@ -91,7 +93,7 @@ public class SimulateClientConnection extends Thread {
                     //stats
                     countLast10s++;
                 }
-                if (System.currentTimeMillis() - lastThroughputTick > 10 * 1E3) {
+                if (System.currentTimeMillis() - lastThroughputTick > statSec * 1E3) {
                     //System.out.println("Avg["+myID+"] " + countLast10s/10 + " active " + executor.getPoolSize() + " pending " + executor.getQueue().size());
                     countLast10sLast = countLast10s;
                     countLast10s = 0;
