@@ -1,5 +1,5 @@
 /**************************************************************************************
- * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
  * http://esper.codehaus.org                                                          *
  * ---------------------------------------------------------------------------------- *
  * The software in this package is published under the terms of the GPL license       *
@@ -14,6 +14,7 @@ package net.esper.example.benchmark.client;
  * Run with no args to see available options
  * 
  * @see MarketClient
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
  */
 public class Client {
 

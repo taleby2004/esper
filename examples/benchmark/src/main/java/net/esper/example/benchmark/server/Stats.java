@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.example.benchmark.server;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -8,6 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @see net.esper.example.benchmark.server.StatsHolder for thread safe access
  * Use createAndMergeFrom(proto) for best effort merge of this instance into the proto instance
  * (no read / write lock is performed so the actual counts are a best effort) 
+ *
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
  */
 public class Stats {
 

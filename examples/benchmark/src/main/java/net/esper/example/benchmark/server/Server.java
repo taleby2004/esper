@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.example.benchmark.server;
 
 import net.esper.example.benchmark.Symbols;
@@ -30,6 +37,8 @@ import java.util.concurrent.*;
  * <p/>
  * If you use -rate nxM (n threads, M event/s), the server will simulate the load for a standalone simulation without
  * any remote client(s).
+ *
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
  */
 public class Server extends Thread {
 

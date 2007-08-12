@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.example.benchmark.server;
 
 import java.util.ArrayList;
@@ -8,6 +15,8 @@ import java.util.List;
  * A container for thread local Stats instances.
  * Upon dump, data is gathered and merged from all registered thread local instances.
  * The stat name is used as a key for a dump.
+ *
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
  */
 public class StatsHolder {
 

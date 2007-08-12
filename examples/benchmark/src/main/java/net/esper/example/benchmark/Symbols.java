@@ -1,5 +1,5 @@
 /**************************************************************************************
- * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
  * http://esper.codehaus.org                                                          *
  * ---------------------------------------------------------------------------------- *
  * The software in this package is published under the terms of the GPL license       *
@@ -15,6 +15,8 @@ import java.util.Random;
  * <p/>
  * Each symbol is prefixed with "S" and suffixed with "A" to have all symbols have the same length
  * (f.e. S1AA S2AA ... S99A for 100 symbols)
+ *
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
  */
 public class Symbols {
 

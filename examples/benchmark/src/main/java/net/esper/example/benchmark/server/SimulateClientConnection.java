@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.example.benchmark.server;
 
 import net.esper.example.benchmark.Symbols;
@@ -9,6 +16,12 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import net.esper.example.benchmark.MarketData;
 
+/**
+ * A thread started by the Server when running in simulation mode.
+ * It acts as ClientConnection
+ *
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
+ */
 public class SimulateClientConnection extends Thread {
 
     static Map<Integer, SimulateClientConnection> CLIENT_CONNECTIONS = Collections.synchronizedMap(new HashMap<Integer, SimulateClientConnection>());

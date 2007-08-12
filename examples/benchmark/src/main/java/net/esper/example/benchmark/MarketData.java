@@ -1,5 +1,5 @@
 /**************************************************************************************
- * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * Copyright (C) 2007 Esper Team. All rights reserved.                                *
  * http://esper.codehaus.org                                                          *
  * ---------------------------------------------------------------------------------- *
  * The software in this package is published under the terms of the GPL license       *
@@ -15,6 +15,8 @@ import java.nio.CharBuffer;
  * The time property (ms) is the send time from the client sender, and can be used for end to end latency providing client(s)
  * and server OS clocks are in sync.
  * The inTime property is the unmarshal (local) time (ns).
+ *
+ * @author Alexandre Vasseur http://avasseur.blogspot.com
  */
 public class MarketData {
 
