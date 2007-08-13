@@ -1,9 +1,11 @@
 To run Server and Client, please use the provided runClient and runServer command or shell scripts.
 
+Please make sure the "lib" directory contains the Esper jar file, as well as all dependency jar files before running runClient or runServer.
+
+================
 
 To run Server and Client without Ant you need to write a sh/cmd script like this.
 Note that ./etc and ./build must be in the classpath.
-
 
 sh:
 
