@@ -1,3 +1,6 @@
+To run Server and Client, please use the provided runClient and runServer command or shell scripts.
+
+
 To run Server and Client without Ant you need to write a sh/cmd script like this.
 Note that ./etc and ./build must be in the classpath.
 
