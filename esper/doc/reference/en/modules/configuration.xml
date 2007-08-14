@@ -836,6 +836,10 @@ engine = EPServiceProviderManager.getDefaultProvider(config);]]></programlisting
 </engine-settings>]]></programlisting>
 			</sect3>
 
+				<para>
+					We recommend that when disabling the internal timer, applications send an external timer event setting the start time before creating statements,
+					such that statement start time is well-defined.
+				</para>
 		</sect2>
 
 		<sect2 id="config-engine-eventmeta" revision="1">

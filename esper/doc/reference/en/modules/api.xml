@@ -281,6 +281,11 @@ runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERN
 long timeInMillis = System.currentTimeMillis();	// Or get the time somewhere else
 runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
 ]]></programlisting>
+
+		<para>
+			We recommend that when disabling the internal timer, applications send an external timer event setting the start time before creating statements,
+			such that statement start time is well-defined.
+		</para>
     </sect1>
 
     <sect1 id="api-events-received">
