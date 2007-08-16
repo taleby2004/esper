@@ -20,7 +20,7 @@
 		<orderedlist spacing="compact">
 			<listitem>
 				<para>
-					Operators that control pattern sub-expression repetition: <literal>every</literal>
+					Operators that control pattern subexpression repetition: <literal>every</literal>
 				</para>
 			</listitem>
 			<listitem>
@@ -35,7 +35,7 @@
 			</listitem>
 			<listitem>
 				<para>
-					Guards are where-conditions that control the lifecycle of sub-expressions. Examples are <literal>timer:within</literal>.
+					Guards are where-conditions that control the lifecycle of subexpressions. Examples are <literal>timer:within</literal>.
 				</para>
 			</listitem>
 			<listitem>
@@ -156,8 +156,113 @@ else
 		</sect2>                
     </sect1>
 
+    <sect1 id="pattern-op-precedence">
+        <title>Operator Precedence</title>
+
+		<para>
+			The operators at the top of this table take precedence over operators lower on the table. 
+		</para>
+		
+	   <table frame="topbot">
+			<title>Pattern Operator Precedence</title>
+			<tgroup cols="4">
+				<colspec colwidth="0.4*"/>
+				<colspec colwidth="0.4*"/>
+				<colspec colwidth="0.8*"/>
+				<colspec colwidth="1.5*"/>
+				<thead>
+					<row>
+						<entry>Precedence</entry>
+						<entry>Operator</entry>
+						<entry>Description</entry>
+						<entry>Example</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>1</entry>
+						<entry>Guard postfix</entry>
+						<entry><literal>where timer:within</literal> (or plug-in pattern guard)</entry>
+						<entry><programlisting><![CDATA[MyEvent where timer:within(1 sec)]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>2</entry>
+						<entry>unary</entry>
+						<entry><literal>every, not</literal></entry>
+						<entry><programlisting><![CDATA[every MyEvent
+timer:interval(5 min) and not MyEvent]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>3</entry>
+						<entry>and</entry>
+						<entry><literal>and</literal></entry>
+						<entry><programlisting><![CDATA[every (MyEvent and MyOtherEvent)]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>4</entry>
+						<entry>or</entry>
+						<entry><literal>or</literal></entry>
+						<entry><programlisting><![CDATA[every (MyEvent or MyOtherEvent)]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>5</entry>
+						<entry>followed-by</entry>
+						<entry><literal>-&gt;</literal></entry>
+						<entry><programlisting><![CDATA[every (MyEvent -> MyOtherEvent)]]></programlisting></entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table> 
+
+		<para>
+			If you are not sure about the precedence, please consider placing parenthesis <literal>()</literal> around your subexpressions. Parenthesis can also help make
+			expressions easier to read and understand.
+		</para>
+		
+		<para>
+			Note that we are also providing the EQL grammar as a HTML file as part of the documentation set on the project website.
+		</para>
+
+		<para>
+			The following table outlines sample equivalent expressions, with and without the use of parenthesis for subexpressions.
+		</para>
+
+	   <table frame="topbot">
+			<title>Equivalent Pattern Expressions</title>
+			<tgroup cols="3">
+				<colspec colwidth="0.8*"/>
+				<colspec colwidth="0.8*"/>
+				<colspec colwidth="2*"/>
+				<thead>
+					<row>
+						<entry>Expression</entry>
+						<entry>Equivalent</entry>
+						<entry>Reason</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>every A or B</entry>
+						<entry>(every A) or B</entry>
+						<entry>The <literal>every</literal> operator has higher precedence then the <literal>or</literal> operator</entry>
+					</row>
+					<row>
+						<entry>every A -> B or C</entry>
+						<entry>(every A) -> (B or C)</entry>
+						<entry>The <literal>or</literal> operator has higher precedence then the <literal>followed-by</literal> operator</entry>
+					</row>
+					<row>
+						<entry>A and B or C</entry>
+						<entry>(A and B) or C</entry>
+						<entry>The <literal>and</literal> operator has higher precedence then the <literal>or</literal> operator</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table> 
+    </sect1>
+
     <sect1 id="pattern-filter">
-        <title>Pattern Filter Expressions</title>
+        <title>Filter Expressions In Patterns</title>
 
 		<para>
 			The simplest form of filter is a filter for events of a given type without any conditions on the event property values. This filter matches any event of that type regardless of the event's properties. The example below is such a filter. Note that this event pattern would stop firing as soon as the first RfidEvent is encountered.
@@ -247,7 +352,7 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 		</itemizedlist>
 
 		<para>
-			At compile time as well as at run time, the engine scans new filter expressions for sub-expressions that can be indexed. Indexing filter values to match event properties of incoming events enables the engine to match incoming events faster. The above list of operators represents the set of operators that the engine can best convert into indexes. The use of comma or logical <literal>and</literal> in filter expressions does not impact optimizations by the engine. 
+			At compile time as well as at run time, the engine scans new filter expressions for subexpressions that can be indexed. Indexing filter values to match event properties of incoming events enables the engine to match incoming events faster. The above list of operators represents the set of operators that the engine can best convert into indexes. The use of comma or logical <literal>and</literal> in filter expressions does not impact optimizations by the engine. 
 		</para>
 		
 		<para>
@@ -274,20 +379,20 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
            <title>Every</title>
     
             <para>				
-				The <literal>every</literal> operator indicates that the pattern sub-expression should restart when the sub-expression qualified by the <literal>every</literal> keyword evaluates to true or false.
-				Without the <literal>every</literal> operator the pattern sub-expression stops when the pattern sub-expression evaluates to true or false.
+				The <literal>every</literal> operator indicates that the pattern subexpression should restart when the subexpression qualified by the <literal>every</literal> keyword evaluates to true or false.
+				Without the <literal>every</literal> operator the pattern subexpression stops when the pattern subexpression evaluates to true or false.
             </para>
 				
             <para>
-				Thus the <literal>every</literal> operator works like a factory for the pattern sub-expression contained within. When the pattern sub-expression within it 
-				fires and thus quits checking for events, the <literal>every</literal> causes the start of a new pattern sub-expression listening for more occurances of the same
+				Thus the <literal>every</literal> operator works like a factory for the pattern subexpression contained within. When the pattern subexpression within it 
+				fires and thus quits checking for events, the <literal>every</literal> causes the start of a new pattern subexpression listening for more occurances of the same
 				event or set of events.
             </para>				
 
             <para>
-				Every time a pattern sub-expression within an <literal>every</literal> operator turns true the engine starts a new active sub-expression looking 
-				for more event(s) or timing conditions that match the pattern sub-expression. If the <literal>every</literal> operator is not specified for a sub-expression, 
-				the sub-expression stops after the first match was found.
+				Every time a pattern subexpression within an <literal>every</literal> operator turns true the engine starts a new active subexpression looking 
+				for more event(s) or timing conditions that match the pattern subexpression. If the <literal>every</literal> operator is not specified for a subexpression, 
+				the subexpression stops after the first match was found.
             </para>
             
             <para>
@@ -305,18 +410,18 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
             </para>
 
             <para>
-				A<subscript>1</subscript>   
-				B<subscript>1</subscript>   
-				C<subscript>1</subscript>   
-				B<subscript>2</subscript>   
-				A<subscript>2</subscript>   
-				D<subscript>1</subscript>   
-				A<subscript>3</subscript>   
-				B<subscript>3</subscript>   
-				E<subscript>1</subscript>   
-				A<subscript>4</subscript>   
-				F<subscript>1</subscript>   
-				B<subscript>4</subscript>   
+				A<subscript>1</subscript> &nbsp;
+				B<subscript>1</subscript> &nbsp;  
+				C<subscript>1</subscript> &nbsp;
+				B<subscript>2</subscript>  &nbsp;
+				A<subscript>2</subscript>  &nbsp;
+				D<subscript>1</subscript>  &nbsp;
+				A<subscript>3</subscript>  &nbsp;
+				B<subscript>3</subscript>  &nbsp;
+				E<subscript>1</subscript>  &nbsp;
+				A<subscript>4</subscript>  &nbsp;
+				F<subscript>1</subscript>  &nbsp;
+				B<subscript>4</subscript> 
             </para>
 
 			<table frame="topbot" id="pattern-every-samples" revision="2">
@@ -456,7 +561,7 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
             </para>
             
             <para>
-				Let's consider the <literal>every</literal> operator in conjunction with a sub-expression that matches 3 events that follow each other:
+				Let's consider the <literal>every</literal> operator in conjunction with a subexpression that matches 3 events that follow each other:
             </para>
 			<programlisting><![CDATA[every (A -> B -> C)]]></programlisting>
   
@@ -466,11 +571,11 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 
             <para>
 				Assume that between event B and event C a second event A<subscript>2</subscript> arrives. The pattern would ignore the A<subscript>2</subscript> entirely since it's then looking for event C.
-				As observed in the prior example, the <literal>every</literal> operator restarts the sub-expression <literal>A -> B -> C</literal> only when the sub-expression fires.
+				As observed in the prior example, the <literal>every</literal> operator restarts the subexpression <literal>A -> B -> C</literal> only when the subexpression fires.
             </para>
 
             <para>
-				In the next statement the <literal>every</literal> operator applies only to the A event, not the whole sub-expression:
+				In the next statement the <literal>every</literal> operator applies only to the A event, not the whole subexpression:
             </para>
 			<programlisting><![CDATA[every A -> B -> C]]></programlisting>
  
@@ -478,21 +583,105 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 				This pattern now matches for any event A that is followed by an event B and then event C, regardless of when the event A arrives. Oftentimes this can be practical in combination with the <literal>and not</literal> syntax and the <literal>timer:within</literal> syntax as the
 				next example shows. 
             </para>
+			
+			<sect3 id="pattern-every-sample1">
+				<title><literal>Every</literal> Operator Example</title>
+
+				<para>
+					In this example we consider a generic pattern in which the pattern must match for each A event followed by a B and followed by a C event, in which both B and C must arrive within 1 hour of the A event. The first approach to the pattern is as follows:
+				</para>
+
+				<programlisting><![CDATA[every A  -> (B -> C) where timer:within(1 hour)]]></programlisting>
+
+				<para>
+					Consider the following sequence of events arriving:
+				</para>
+				<para>
+					A<subscript>1</subscript> &nbsp;
+					A<subscript>2</subscript> &nbsp;  
+					B<subscript>1</subscript> &nbsp;
+					C<subscript>1</subscript> &nbsp;  
+					B<subscript>2</subscript> &nbsp;
+					C<subscript>2</subscript>
+				</para>
+
+				<para>
+					First, the pattern as above never stops looking for A events since the <literal>every</literal> operator instructs the pattern to keep looking for A events.
+				</para>
+					
+				<para>
+					When A<subscript>1</subscript> arrives, the pattern starts a new subexpression that keeps A<subscript>1</subscript> in memory and looks for any B event. At the same time, it also keeps looking for more A events. 
+				</para>
+					
+				<para>
+					When A<subscript>2</subscript> arrives, the pattern starts a new subexpression that keeps A<subscript>2</subscript> in memory and looks for any B event. At the same time, it also keeps looking for more A events. 
+				</para>
+					
+				<para>
+					After the arrival of A<subscript>2</subscript>, there are 3 subexpressions active:
+				</para>
+
+				<orderedlist spacing="compact">
+					<listitem>
+						<para>
+							The first active subexpression with A<subscript>1</subscript> in memory, looking for any B event
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							The second active subexpression with A<subscript>2</subscript> in memory, looking for any B event
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							A third active subexpression, looking for the next A event
+						</para>
+					</listitem>
+				</orderedlist>
+
+				<para>
+					In the pattern above, we have specified a 1-hour lifetime for subexpressions looking for B and C events. Thus, if no B and no C event arrive within 1 hour after A<subscript>1</subscript>, the first subexpression goes away. If no B and no C event arrive within 1 hour after A<subscript>2</subscript>, the second subexpression goes away. The third subexpression however stays around looking for more A events.
+				</para>
 				
-            <para>
-				This example looks at temperature sensor events named Sample. The pattern detects when 3 sensor events indicate a temperature of more then 50 degrees uninterrupted within 90 seconds of the first event, considering events for the same sensor only.
-            </para>
+				<para>
+					The pattern as shown above thus matches on arrival of C<subscript>1</subscript> for combination {A<subscript>1</subscript>, B<subscript>1</subscript>, C<subscript>1</subscript>} and
+					for combination {A<subscript>2</subscript>, B<subscript>1</subscript>, C<subscript>1</subscript>}, provided that B<subscript>1</subscript> and C<subscript>1</subscript> arrive within an hour of A<subscript>1</subscript> and A<subscript>2</subscript>.
+				</para>
+				
+				<para>
+					You may now ask how to match on {A<subscript>1</subscript>, B<subscript>1</subscript>, C<subscript>1</subscript>} and {A<subscript>2</subscript>, B<subscript>2</subscript>, C<subscript>2</subscript>} instead, since 
+					you may need to correlate on a given property.					
+				</para>
+				
+				<para>
+					The pattern as discussed above matches every A event followed by the first B event followed by the next C event, and doesn't specifically qualify the B or C events to look for based on the A event.  To look for specific B and C events in relation to a given A event, the correlation must use one or more of the properties of the A event, such as the "id" property:
+				</para>
+				<programlisting><![CDATA[every a=A -> (B(id=a.id -> C(id=a.id)) where timer:within(1 hour)]]></programlisting>
+				
+				<para>
+					The pattern as shown above thus matches on arrival of C<subscript>1</subscript> for combination {A<subscript>1</subscript>, B<subscript>1</subscript>, C<subscript>1</subscript>} and
+					on arrival of C<subscript>2</subscript> for combination {A<subscript>2</subscript>, B<subscript>2</subscript>, C<subscript>2</subscript>}.
+				</para>
 
-			<programlisting><![CDATA[every sample=Sample(temp > 50) ->
-  ( (Sample(sensor=sample.sensor, temp > 50) and not Sample(sensor=sample.sensor, temp <= 50))   
-      ->
-    (Sample(sensor=sample.sensor, temp > 50) and not Sample(sensor=sample.sensor, temp <= 50))   
-  ) where timer:within(90 seconds))]]></programlisting>
+			</sect3>
 
-            <para>
-				The pattern starts a new sub-expression in the round braces after the first followed-by operator for each time a sensor indicated more then 50 degrees. Each sub-expression then lives a maximum of 90 seconds. Each sub-expression ends if a temperature of 50 degress or less is encountered for the same sensor. Only if 3 temperature events in a row indicate more then 50 degrees, and within 90 seconds of the first event, and for the same sensor, does this pattern fire.
-            </para>
-
+			<sect3 id="pattern-every-sample2">
+				<title>Sensor Example</title>
+				<para>
+					This example looks at temperature sensor events named Sample. The pattern detects when 3 sensor events indicate a temperature of more then 50 degrees uninterrupted within 90 seconds of the first event, considering events for the same sensor only.
+				</para>
+	
+				<programlisting><![CDATA[every sample=Sample(temp > 50) ->
+( (Sample(sensor=sample.sensor, temp > 50) and not Sample(sensor=sample.sensor, temp <= 50))   
+  ->
+  (Sample(sensor=sample.sensor, temp > 50) and not Sample(sensor=sample.sensor, temp <= 50))   
+ ) where timer:within(90 seconds))]]></programlisting>
+	
+				<para>
+					The pattern starts a new subexpression in the round braces after the first followed-by operator for each time a sensor indicated more then 50 degrees. Each subexpression then lives a maximum of 90 seconds. Each subexpression ends if a temperature of 50 degress or less is encountered for the same sensor. Only if 3 temperature events in a row indicate more then 50 degrees, and within 90 seconds of the first event, and for the same sensor, does this pattern fire.
+				</para>
+			</sect3>
+			
         </sect2>
 
         <sect2 id="pattern-logical-and" >
@@ -590,7 +779,7 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
         <title>Pattern Guards</title>        
 
 		<para>
-			Guards are where-conditions that control the lifecycle of sub-expressions. Custom guard functions can also be used. The section <xref linkend="extension"/> outlines guard plug-in development in greater detail.
+			Guards are where-conditions that control the lifecycle of subexpressions. Custom guard functions can also be used. The section <xref linkend="extension"/> outlines guard plug-in development in greater detail.
 		</para>
 
         <para>
@@ -599,25 +788,25 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
 		<programlisting><![CDATA[MyEvent where timer.within(10 sec)]]></programlisting>
 
         <para>
-			In this pattern the <literal>timer:within</literal> guard controls the sub-expression that is looking for MyEvent events. The guard terminates the sub-expression looking for MyEvent events after 10 seconds after start of the pattern. Thus the pattern alerts only once when the first MyEvent event arrives within 10 seconds after start of the pattern.
+			In this pattern the <literal>timer:within</literal> guard controls the subexpression that is looking for MyEvent events. The guard terminates the subexpression looking for MyEvent events after 10 seconds after start of the pattern. Thus the pattern alerts only once when the first MyEvent event arrives within 10 seconds after start of the pattern.
         </para>
 
         <para>
-			The <literal>every</literal> keyword requires additional discussion since it also controls sub-expression lifecycle. Let's add the <literal>every</literal> keyword to the example pattern:
+			The <literal>every</literal> keyword requires additional discussion since it also controls subexpression lifecycle. Let's add the <literal>every</literal> keyword to the example pattern:
         </para>
 		<programlisting><![CDATA[every MyEvent where timer.within(10 sec)]]></programlisting>
 
         <para>
-			The difference to the pattern without <literal>every</literal> is that each MyEvent event that arrives now starts a new sub-expression, including a new guard, looking for a further MyEvent event. The result is that, when a MyEvent arrives within 10 seconds after pattern start, the pattern execution will look for the next MyEvent event to arrive within 10 seconds after the previous one.
+			The difference to the pattern without <literal>every</literal> is that each MyEvent event that arrives now starts a new subexpression, including a new guard, looking for a further MyEvent event. The result is that, when a MyEvent arrives within 10 seconds after pattern start, the pattern execution will look for the next MyEvent event to arrive within 10 seconds after the previous one.
         </para>
 
         <para>
-			By placing parentheses around the <literal>every</literal> keyword and its sub-expression, we can have the <literal>every</literal> under the control of the guard:
+			By placing parentheses around the <literal>every</literal> keyword and its subexpression, we can have the <literal>every</literal> under the control of the guard:
         </para>
 		<programlisting><![CDATA[(every MyEvent) where timer.within(10 sec)]]></programlisting>
 
         <para>
-			In the pattern above, the guard terminates the sub-expression looking for all MyEvent events after 10 seconds after start of the pattern. This pattern alerts for all MyEvent events arriving within 10 seconds after pattern start, and then stops.
+			In the pattern above, the guard terminates the subexpression looking for all MyEvent events after 10 seconds after start of the pattern. This pattern alerts for all MyEvent events arriving within 10 seconds after pattern start, and then stops.
         </para>
 
         <sect2 id="pattern-timer-within" >
