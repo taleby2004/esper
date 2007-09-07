@@ -5,6 +5,8 @@ Changes in version 1.11.0
 ------------------------
 * Fixed issue ESPER-129 
 * Fixed issue ESPER-131 (addition documentation of XPath and new configuration to be delivered)
+* Fixed issue ESPER-142 (Oracle JDBC) + write docs on additional configurations
+* Documentation for Esper-132
 
 Changes in version 1.10.0
 ------------------------

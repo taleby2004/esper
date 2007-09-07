@@ -11,6 +11,8 @@ import net.esper.client.EPException;
 import net.esper.client.EPStatementException;
 import antlr.TokenStreamException;
 import antlr.RecognitionException;
+import antlr.NoViableAltException;
+import antlr.Token;
 
 /**
  * This exception is thrown to indicate a problem in statement creation.
@@ -35,7 +37,14 @@ public class EPStatementSyntaxException extends EPStatementException
      */
     public static EPStatementSyntaxException convert(RecognitionException e, String expression)
     {
-        return new EPStatementSyntaxException(e.getMessage() + getPositionInfo(e), expression);
+        String tip = "";
+        if (e instanceof NoViableAltException)
+        {
+            NoViableAltException noViable = (NoViableAltException) e;
+            Token t = noViable.token;
+            tip = " (tip: check for reserved or misspelled keywords in the online grammar documentation near the token '" + t.getText() + "')";
+        }
+        return new EPStatementSyntaxException(e.getMessage() + getPositionInfo(e) + tip, expression);
     }
 
     /**

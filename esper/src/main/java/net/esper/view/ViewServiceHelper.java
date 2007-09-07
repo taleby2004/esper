@@ -21,10 +21,23 @@ public class ViewServiceHelper
      * @param specifications is a list of view definitions defining the chain of views.
      */
     protected static void addMergeViews(List<ViewSpec> specifications)
+            throws ViewProcessingException
     {
         if (log.isDebugEnabled())
         {
             log.debug(".addMergeViews Incoming specifications=" + Arrays.toString(specifications.toArray()));
+        }
+
+        // A grouping view requires a merge view and cannot be last since it would not group sub-views
+        if (specifications.size() > 0)
+        {
+            ViewSpec lastView = specifications.get(specifications.size() - 1);
+            ViewEnum viewEnum = ViewEnum.forName(lastView.getObjectNamespace(), lastView.getObjectName());
+            if ((viewEnum != null) && (viewEnum.getMergeView() != null))
+            {
+                throw new ViewProcessingException("Invalid use of the '" + lastView.getObjectNamespace() + ":" +
+                            lastView.getObjectName() + "' view, the view requires one or more child views to group, or consider using the group-by clause");
+            }
         }
 
         LinkedList<ViewSpec> mergeViewSpecs = new LinkedList<ViewSpec>();

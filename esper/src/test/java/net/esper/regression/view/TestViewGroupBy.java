@@ -1,10 +1,7 @@
 package net.esper.regression.view;
 
 import junit.framework.TestCase;
-import net.esper.client.EPAdministrator;
-import net.esper.client.EPServiceProvider;
-import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPStatement;
+import net.esper.client.*;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.EventPropertyAssertionUtil;
 import net.esper.support.util.SupportUpdateListener;
@@ -42,18 +39,18 @@ public class TestViewGroupBy extends TestCase
         epService.initialize();
     }
 
-    public void testGroupByPastWindow()
+    public void testInvalidGroupByNoChild()
     {
-		// TODO: Test for http://jira.codehaus.org/browse/ESPER-134 currently failing
-        String filter = "select avg(price), symbol from " + SupportMarketDataBean.class.getName() + ".win:length( 100 ).std:groupby('symbol')";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(filter);
-        SupportUpdateListener listener = new SupportUpdateListener();
-        stmt.addListener(listener);
+        String stmtText = "select avg(price), symbol from " + SupportMarketDataBean.class.getName() + ".win:length(100).std:groupby('symbol')";
 
-        sendEvent(SYMBOL_CISCO, 25, 50000);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(SYMBOL_CISCO, event.get("symbol"));
-        assertEquals(25, event.get("avg(price)"));
+        try
+        {
+            epService.getEPAdministrator().createEQL(stmtText);
+        }
+        catch (EPStatementException ex)
+        {
+            assertEquals("Error starting view: Invalid use of the 'std:groupby' view, the view requires one or more child views to group, or consider using the group-by clause [select avg(price), symbol from net.esper.support.bean.SupportMarketDataBean.win:length(100).std:groupby('symbol')]", ex.getMessage());
+        }
     }
 
     public void testStats()

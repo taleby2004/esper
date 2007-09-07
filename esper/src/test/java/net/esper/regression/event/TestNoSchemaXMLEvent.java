@@ -163,7 +163,6 @@ public class TestNoSchemaXMLEvent extends TestCase
 
     public void testNamespaceXPathRelative() throws Exception
     {
-        // TODO: test for Esper-131
         Configuration configuration = new Configuration();
         ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
         desc.setRootElementName("getQuote");

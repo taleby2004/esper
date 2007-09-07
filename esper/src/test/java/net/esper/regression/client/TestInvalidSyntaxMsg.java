@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.eql.parse.EPStatementSyntaxException;
+import net.esper.support.bean.SupportBeanReservedKeyword;
 import net.esper.support.client.SupportConfigFactory;
 
 public class TestInvalidSyntaxMsg extends TestCase
@@ -21,7 +22,7 @@ public class TestInvalidSyntaxMsg extends TestCase
         // This could be a better exception - outlining viable alternatives in ANTLR 2.7.5 cannot be done
         // Use ANTLR version 3 once out.
         tryCompile("select * from pattern[A -> B - C]",
-                   "unexpected token: B near line 1, column 28 [select * from pattern[A -> B - C]]");
+                   "unexpected token: B near line 1, column 28 (tip: check for reserved or misspelled keywords in the online grammar documentation near the token 'B') [select * from pattern[A -> B - C]]");
 
         tryCompile("insert into A (a",
                    "end of input when expecting a closing parenthesis ')' near line 1, column 17 [insert into A (a]");
@@ -45,7 +46,7 @@ public class TestInvalidSyntaxMsg extends TestCase
                    "expecting a numeric literal, found 'A' near line 1, column 14 [select prior(A, x) from A]");
 
         tryCompile("select * from A, into",
-                   "unexpected token: into near line 1, column 18 [select * from A, into]");
+                   "unexpected token: into near line 1, column 18 (tip: check for reserved or misspelled keywords in the online grammar documentation near the token 'into') [select * from A, into]");
 
         tryCompile("select * from pattern [",
                    "end of input near line 1, column 24 [select * from pattern []");
@@ -55,6 +56,9 @@ public class TestInvalidSyntaxMsg extends TestCase
 
         tryCompile("insert into into",
                    "expecting an identifier, found 'into' near line 1, column 13 [insert into into]");
+
+        tryCompile("select foo, seconds from " + SupportBeanReservedKeyword.class.getName(),
+                   "unexpected token: foo near line 1, column 8 (tip: check for reserved or misspelled keywords in the online grammar documentation near the token 'foo') [select foo, seconds from net.esper.support.bean.SupportBeanReservedKeyword]");
     }
 
     private void tryCompile(String expression, String expectedMsg)

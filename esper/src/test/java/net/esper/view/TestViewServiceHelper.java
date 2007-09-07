@@ -137,7 +137,7 @@ public class TestViewServiceHelper extends TestCase
         assertEquals(0, viewFactories.size());
     }
 
-    public void testAddMergeViews()
+    public void testAddMergeViews() throws Exception
     {
         List<ViewSpec> specOne = SupportViewSpecFactory.makeSpecListOne();
 
