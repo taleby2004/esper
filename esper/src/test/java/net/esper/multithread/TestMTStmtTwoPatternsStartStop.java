@@ -21,7 +21,7 @@ import net.esper.multithread.TwoPatternRunnable;
         ) -> eventFinal=SupportEvent(userID in ('100','101'), direction != event1.direction ) where timer:within(1 hour)
  *   4. Main thread waits for 2 seconds and stops all threads
  */
-public class TestMTStmtTwoPatterns extends TestCase
+public class TestMTStmtTwoPatternsStartStop extends TestCase
 {
     private EPServiceProvider engine;
 
@@ -41,7 +41,6 @@ public class TestMTStmtTwoPatterns extends TestCase
 
     public void test2Patterns() throws Exception
     {
-        // TODO: test for Esper-159
         String statementTwo = "( every event1=SupportEvent(userId in ('100','101')) ->\n" +
                 "         (SupportEvent(userId in ('100','101'), direction = event1.direction ) ->\n" +
                 "          SupportEvent(userId in ('100','101'), direction = event1.direction )\n" +
@@ -52,14 +51,16 @@ public class TestMTStmtTwoPatterns extends TestCase
         TwoPatternRunnable runnable = new TwoPatternRunnable(engine);
         Thread t = new Thread(runnable);
         t.start();
-        Thread.sleep(1000);
+        Thread.sleep(200);
 
-        // Create a second pattern, wait 500 msec, destroy second pattern in a loop
-        for (int i = 0; i < 100; i++)
+        // Create a second pattern, wait 200 msec, destroy second pattern in a loop
+        for (int i = 0; i < 10; i++)
         {
+            System.out.println("Creating second statement");
             EPStatement statement = engine.getEPAdministrator().createPattern(statementTwo);
-            Thread.sleep(500);
+            Thread.sleep(200);
             statement.destroy();
+            System.out.println("Destroying second statement");
         }
 
         runnable.setShutdown(true);

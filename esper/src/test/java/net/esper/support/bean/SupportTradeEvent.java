@@ -23,6 +23,11 @@ public class SupportTradeEvent
         this.amount = amount;
     }
 
+    public int getId()
+    {
+        return id;
+    }
+
     public String getUserId()
     {
         return userId;

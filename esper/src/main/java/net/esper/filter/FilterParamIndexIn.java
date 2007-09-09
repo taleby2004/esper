@@ -54,7 +54,9 @@ public final class FilterParamIndexIn extends FilterParamIndexPropBase
     {
         // Store evaluator keyed to set of values
         MultiKeyUntyped keys = (MultiKeyUntyped) filterConstant;
-        evaluatorsMap.put(keys, evaluator);
+
+        // make sure to remove the old evaluator for this constant
+        EventEvaluator oldEvaluator = evaluatorsMap.put(keys, evaluator);
 
         // Store each value to match against in Map with it's evaluator as a list
         Object[] keyValues = keys.getKeys();
@@ -65,6 +67,13 @@ public final class FilterParamIndexIn extends FilterParamIndexPropBase
             {
                 evaluators = new LinkedList<EventEvaluator>();
                 constantsMap.put(keyValues[i], evaluators);
+            }
+            else
+            {
+                if (oldEvaluator != null)
+                {
+                    evaluators.remove(oldEvaluator);
+                }
             }
             evaluators.add(evaluator);
         }

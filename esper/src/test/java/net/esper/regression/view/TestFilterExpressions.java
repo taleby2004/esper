@@ -3,9 +3,9 @@ package net.esper.regression.view;
 import junit.framework.TestCase;
 import net.esper.client.*;
 import net.esper.support.bean.*;
-import net.esper.support.util.SupportUpdateListener;
-import net.esper.support.eql.SupportStaticMethodLib;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.support.eql.SupportStaticMethodLib;
+import net.esper.support.util.SupportUpdateListener;
 
 public class TestFilterExpressions extends TestCase
 {
@@ -15,8 +15,29 @@ public class TestFilterExpressions extends TestCase
     public void setUp()
     {
         listener = new SupportUpdateListener();
-        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventTypeAlias("SupportEvent", SupportTradeEvent.class);
+
+        epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+    }
+
+    public void testFilterOverInClause()
+    {
+        // Test for Esper-159
+        String stmtOneText = "every event1=SupportEvent(userId in ('100','101'),amount>=1000)";
+        EPStatement statement = epService.getEPAdministrator().createPattern(stmtOneText);
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportTradeEvent(1, "100", 1001));
+        assertEquals(1, listener.assertOneGetNewAndReset().get("event1.id"));
+
+        String stmtTwoText = "every event1=SupportEvent(userId in ('100','101'))";
+        statement = epService.getEPAdministrator().createPattern(stmtTwoText);
+
+        epService.getEPRuntime().sendEvent(new SupportTradeEvent(2, "100", 1001));
+        assertEquals(2, listener.assertOneGetNewAndReset().get("event1.id"));
     }
 
     public void testEnumSyntaxOne()
