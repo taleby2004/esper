@@ -38,7 +38,7 @@ public class TestEPAdministrator extends TestCase
         }
         long end = System.currentTimeMillis();
         long delta = end - start;
-        assertTrue(".test10kValid delta=" + delta, delta < 4000);
+        assertTrue(".test10kValid delta=" + delta, delta < 5000);
     }
 
     public void test1kInvalidStmts()

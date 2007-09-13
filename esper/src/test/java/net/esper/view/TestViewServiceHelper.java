@@ -146,8 +146,8 @@ public class TestViewServiceHelper extends TestCase
 
         List<ViewSpec> specFour = SupportViewSpecFactory.makeSpecListTwo();
         ViewServiceHelper.addMergeViews(specFour);
-        assertEquals(2, specFour.size());
-        assertEquals("merge", specFour.get(1).getObjectName());
+        assertEquals(3, specFour.size());
+        assertEquals("merge", specFour.get(2).getObjectName());
         assertEquals(specFour.get(0).getObjectParameters().size(), specFour.get(1).getObjectParameters().size());
     }
 

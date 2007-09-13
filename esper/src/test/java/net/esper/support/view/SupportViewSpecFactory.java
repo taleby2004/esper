@@ -44,8 +44,11 @@ public class SupportViewSpecFactory
 
         ViewSpec specOne = makeSpec("std", "groupby",
                 new Class[] { String.class }, new String[] { "\"symbol\"" } );
+        ViewSpec specTwo = makeSpec("win", "length",
+                new Class[] { int.class }, new String[] { "100" } );
 
         specifications.add(specOne);
+        specifications.add(specTwo);
 
         return specifications;
     }

@@ -25,7 +25,7 @@ public class TestInvalidEQL extends TestCase
     public void testSyntaxException()
     {
         String exceptionText = getSyntaxExceptionEQL("select * from *");
-        assertEquals("unexpected token: * near line 1, column 15 [select * from *]", exceptionText);
+        assertEquals("unexpected token: * near line 1, column 15 (tip: check for reserved or misspelled keywords in the online grammar documentation near the token '*') [select * from *]", exceptionText);
     }
 
     public void testLongTypeConstant()
