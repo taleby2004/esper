@@ -12,7 +12,11 @@ import java.util.Map;
  */
 public class CompositeEventType implements EventType
 {
-    private final Map<String, EventType> taggedEventTypes;
+    /**
+     * Map of tag name and event type.
+     */
+    protected final Map<String, EventType> taggedEventTypes;
+    
     private String alias;
 
     /**
@@ -103,6 +107,11 @@ public class CompositeEventType implements EventType
 
                     return null;
                 }
+
+                public boolean isExistsProperty(EventBean eventBean)
+                {
+                    return true; // Property exists as the property is not dynamic (unchecked)
+                }
             };
         }
 
@@ -143,6 +152,10 @@ public class CompositeEventType implements EventType
 
                 return null;
             }
+            public boolean isExistsProperty(EventBean eventBean)
+            {
+                return true; // Property exists as the property is not dynamic (unchecked)
+            }
         };
     }
 
@@ -166,4 +179,6 @@ public class CompositeEventType implements EventType
     {
         return null;
     }
+
+    
 }

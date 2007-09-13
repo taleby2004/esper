@@ -1412,6 +1412,41 @@ select orderId, orderAmount from
 			</para>
 		</sect2>
 		
+		<sect2 id="histdata_nometadata" revision="1">
+			<title>Oracle Drivers and No-Metadata Workaround</title>
+
+			<para>
+			   The Esper determines SQL result types by obtaining metadata from the compiled JDBC prepared statement. Certain drivers, specifically Oracle and KDB database drivers, do not return 
+			</para>
+			<para>
+				
+				The issue is that the Esper engine requires the query result metadata to build an event type, and to use the types returned by the SQL statement to verify the expressions in the select-clause and other clauses of the EQL statement. Even the newest Oracle driver (see JIRA comments) does not return the metadata. We are planning to add a configuration item. If configured, the engine would not use to getMetadata for parameter and result metadata on a prepared statement. If configured, the engine would fire the SQL query with a where clause of "where 1=0" and then obtain the result column types form the actual empty result set.
+[ Show » ]
+Thomas Bernhardt - [09/Aug/07 09:11 AM ] The issue is that the Esper engine requires the query result metadata to build an event type, and to use the types returned by the SQL statement to verify the expressions in the select-clause and other clauses of the EQL statement. Even the newest Oracle driver (see JIRA comments) does not return the metadata. We are planning to add a configuration item. If configured, the engine would not use to getMetadata for parameter and result metadata on a prepared statement. If configured, the engine would fire the SQL query with a where clause of "where 1=0" and then obtain the result column types form the actual empty result set.
+
+[ Permlink | « Hide ]
+Thomas Bernhardt - [10/Aug/07 10:58 PM - edited ]
+This problem is address by the updated esper-1.10.0b.jar file downloadable at http://dist.codehaus.org/esper/esper-1.10.0b.jar
+
+The problem is rooted in the Oracle drivers not supporting retrieving SQL statement metadata on a SQL prepared statement after SQL prepared statement compilation. However, the engine must obtain metadata for the output columns of the SQL statement to determine output event types. At EQL statement compilation times the engine therefore prepares the SQL statement and attempts to inspect metadata.
+
+This problem has been addressed the following way: The engine detects an Oracle-connection and by default generates a "sample" statement that it executes at EQL statement complile time against the database and obtains the executed statement metadata.
+
+The engine uses "sample" statement to retrieve metadata for the column names and types returned by the actual statement. It uses the "sample" statement from any of these sources:
+(1) A sample statement has been supplied via the new "metadatasql" syntax:
+select mycol from sql:myDB ["'select mycol from mytesttable where ....' metadatasql 'select mycol from mytesttable'], .....
+(2) If no "metadatasql' keyword was supplied, the engine inspects the SQL statement supplied and through lexical analysis inserts a where-clause that returns no rows ("where 1=0")
+(3) if the tag "${$ESPER-SAMPLE-WHERE}" exists in the SQL statement, then the engine will not perform lexical analysis. This is for SQL statements that cannot be correctly lexically analyzed. The tag defines where to insert the "where 1=0" clause. The SQL text after the placeholder is ignored to construct the sample SQL. For example:
+select mycol from sql:myDB ["'select mycol from mytesttable ${$ESPER-SAMPLE-WHERE} where ....'], .....
+
+The following additional Configuration options have been added to ConfigurationDBRef:
+(1) a MetadataOrigin allows to override the strategy to obtain metadata
+(2) a mapping of SQL types (java.sql.Types) to Java built-in types such that awkward database types can easily be changed
+(3) a ColumnChangeCase that instructs the engine to automatically convert to lower or uppercase any output column names
+
+			</para>
+		</sect2>
+
 	</sect1>
 
 	<sect1 id="eql-single-row-function-ref">
@@ -1482,31 +1517,6 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 				</thead>
 				<tbody>
 					<row>
-						<entry><synopsis>max(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
-						<entry>
-							<para>
-								Returns the highest numeric value among the 2 or more comma-separated expressions.
-							</para>
-						</entry>
-					</row>
-					<row>
-						<entry><synopsis>min(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
-						<entry>
-							<para>
-								Returns the lowest numeric value among the 2 or more comma-separated expressions.
-							</para>
-						</entry>
-					</row>
-					<row>
-						<entry><synopsis>coalesce(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis>
-					</entry>
-						<entry>
-							<para>
-								Returns the first non-<literal>null</literal> value in the list, or <literal>null</literal> if there are no non-<literal>null</literal> values.
-							</para>
-						</entry>
-					</row>
-					<row>
 						<entry><synopsis>case <emphasis>value</emphasis> 
   when <emphasis>compare_value</emphasis> then <emphasis>result</emphasis>
   [when <emphasis>compare_value</emphasis> then <emphasis>result</emphasis> ...] 
@@ -1531,6 +1541,62 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 						</entry>
 					</row>
 					<row>
+						<entry><synopsis>cast(<emphasis>expression</emphasis>, <emphasis>type_name</emphasis>)</synopsis></entry>
+						<entry>
+							<para>
+								Casts the result of an expression to the given type. 
+							</para>
+						</entry>
+					</row>
+					<row>
+					  <entry><synopsis>coalesce(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
+						<entry>
+							<para>
+								Returns the first non-<literal>null</literal> value in the list, or <literal>null</literal> if there are no non-<literal>null</literal> values.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry><synopsis>current_timestamp[()]</synopsis></entry>
+						<entry>
+							<para>
+								Returns the current engine time as a <literal>long</literal> millisecond value. Reserved keyword with optional parenthesis.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry><synopsis>exists(<emphasis>dynamic_property_name</emphasis>)</synopsis></entry>
+						<entry>
+							<para>
+								Returns true if the dynamic property exists for the event, or false if the property does not exist.
+							</para>
+						</entry>
+					</row>
+					<row>
+					  <entry><synopsis>instanceof(<emphasis>expression</emphasis>, <emphasis>type_name</emphasis> [, <emphasis>type_name</emphasis> ...])</synopsis></entry>
+						<entry>
+							<para>
+								Returns true if the expression returns an object whose type is one of the types listed.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry><synopsis>max(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
+						<entry>
+							<para>
+								Returns the highest numeric value among the 2 or more comma-separated expressions.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry><synopsis>min(<emphasis>expression</emphasis>, <emphasis>expression</emphasis> [, <emphasis>expression</emphasis> ...])</synopsis></entry>
+						<entry>
+							<para>
+								Returns the lowest numeric value among the 2 or more comma-separated expressions.
+							</para>
+						</entry>
+					</row>
+					<row>
 						<entry><synopsis>prev(<emphasis>expression</emphasis>, <emphasis>event_property)</emphasis></synopsis></entry>
 						<entry>
 							<para>
@@ -1549,42 +1615,6 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 				</tbody>
 			</tgroup>
 		</table>
-
-		<sect2 id="eql-single-row-function-ref-minmax">
-			<title>The <literal>Min</literal> and <literal>Max</literal> Functions</title>
-
-			<para>
-				The <literal>min</literal> and <literal>max</literal> function take two or more parameters that itself can be expressions. The <literal>min</literal> function returns the lowest numeric value among the 2 or more comma-separated expressions, while the <literal>max</literal> function returns the highest numeric value.
-				The return type is the compatible aggregated type of all return values.
-			</para>
-
-			<para>
-				The next example shows the <literal>max</literal> function that has a <literal>Double</literal> return type and returns the value 1.1.
-			</para>
-			<programlisting>select max(1, 1.1, 2 * 0.5) from ...</programlisting>
-
-			<para>
-				The <literal>min</literal> function returns the lowest value. The statement below uses the function to determine the smaller of two timestamp values.
-			</para>
-	
-			<programlisting>select symbol, min(ticks.timestamp, news.timestamp) as minT
-	from StockTickEvent.win:time(30 sec) as ticks, NewsEvent.win:time(30 sec) as news
-	where ticks.symbol = news.symbol</programlisting>
-		</sect2>
-
-		<sect2 id="eql-single-row-function-ref-coalesce">
-			<title>The <literal>Coalesce</literal> Function</title>
-
-			<para>
-				The result of the <literal>coalesce</literal> function is the first expression in a list of expressions that returns a non-null value. The return type is the compatible aggregated type of all return values.
-			</para>
-			
-			<para>
-				This example returns a String-typed result of value 'foo'.
-			</para>
-			<programlisting>select coalesce(null, 'foo') from ...</programlisting>
-			
-		</sect2>
 
 		<sect2 id="eql-single-row-function-ref-case">
 			<title>The <literal>Case</literal> Control Flow Function</title>
@@ -1608,6 +1638,194 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			<programlisting>select case when 1>0 then true else false end from ...</programlisting>
 		</sect2>
 		
+
+		<sect2 id="eql-single-row-function-cast">
+			<title>The <literal>Cast</literal> Function</title>
+
+			<para>
+				The <literal>cast</literal> function casts the return type of an expression to a designated type. The function accepts two parameters: The first parameter is the property name or expression that returns the 
+				value to be casted. The second parameter is the type to cast to.
+			</para>
+
+			<para>
+				Valid parameters for the second (type) parameter are:
+			</para>
+	
+			<itemizedlist>
+				<listitem>
+					<para>
+						Any of the Java built-in types: <literal>int, long, byte, short, char, double, float, string</literal>, where <literal>string</literal>  is a short notation for <literal>java.lang.String</literal>. The type name is not case-sensitive. For example:
+						<synopsis>cast(price, double)</synopsis>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The fully-qualified class name of the class to cast to, for example: <synopsis>cast(product, org.myproducer.Product)</synopsis>
+					</para>
+				</listitem>
+			</itemizedlist>
+
+			<para>
+				The <literal>cast</literal> function is often used to provide a type for dynamic (unchecked) properties. Dynamic properties are properties whose type is not known at compile type. 
+				These properties are always of type <literal>java.lang.Object</literal>. 
+			</para>
+			
+			<para>
+				The <literal>cast</literal> function as shown in the next statement casts the dynamic "price" property of an "item" in the OrderEvent to a double value.
+			</para>
+			<programlisting><![CDATA[select cast(item.price?, double) from OrderEvent]]></programlisting>
+
+			<para>
+				The <literal>cast</literal> function returns a <literal>null</literal> value if the expression result cannot be casted to the desired type, or if the expression result itself is <literal>null</literal>.
+			</para>
+
+			<para>
+				The <literal>cast</literal> function adheres to the following type conversion rules:
+			</para>
+
+			<itemizedlist>
+				<listitem>
+					<para>
+						For all numeric types, the <literal>cast</literal> function utilitzes <literal>java.lang.Number</literal> to convert numeric types, if required. 
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						For casts to <literal>string</literal> or <literal>java.lang.String</literal>, the function calls <literal>toString</literal> on the expression result.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						For casts to other objects including application objects, the <literal>cast</literal> function considers a Java class's superclasses as well as all directly or indirectly-implemented interfaces by superclasses .
+					</para>
+				</listitem>
+			</itemizedlist>
+		</sect2>
+
+		<sect2 id="eql-single-row-function-ref-coalesce">
+			<title>The <literal>Coalesce</literal> Function</title>
+
+			<para>
+				The result of the <literal>coalesce</literal> function is the first expression in a list of expressions that returns a non-null value. The return type is the compatible aggregated type of all return values.
+			</para>
+			
+			<para>
+				This example returns a String-typed result of value 'foo':
+			</para>
+			<programlisting>select coalesce(null, 'foo') from ...</programlisting>			
+		</sect2>
+
+		<sect2 id="eql-single-row-function-ref-currenttime">
+			<title>The <literal>Current_Timestamp</literal> Function</title>
+
+			<para>
+				The <literal>current_timestamp</literal> function is a reserved keyword and requires no parameters. The result of the <literal>current_timestamp</literal> function is the <literal>long</literal>-type millisecond value of the current engine system time.
+			</para>
+			
+			<para>
+				The function returns the current engine timestamp at the time of expression evaluation. When using external-timer events, the function provides the last value of the externally-supplied time at the time of expression evaluation.
+			</para>
+
+			<para>
+				This example selects the current engine time:
+			</para>
+			<programlisting><![CDATA[select current_timestamp from MyEvent
+// equivalent to
+select current_timestamp from MyEvent]]></programlisting>
+		</sect2>
+
+		<sect2 id="eql-single-row-function-exists">
+			<title>The <literal>Exists</literal> Function</title>
+
+			<para>
+				The <literal>exists</literal> function returns a boolean value indicating whether the dynamic property, provided as a parameter to the function, exists on the event. The <literal>exists</literal> function accepts a single dynamic property name as it's only parameter. 
+			</para>
+
+			<para>
+				The <literal>exists</literal> function is for use with dynamic (unchecked) properties. Dynamic properties are properties whose type is not known at compile type. Dynamic properties return a null value
+				if the dynamic property does not exists on an event, or if the dynamic property exists but the value of the dynamic property is null. 
+			</para>
+			
+			<para>
+				The <literal>exists</literal> function as shown next returns true if the "item" property contains an object that has a "serviceName" property. It returns false if the "item" property is null, or if the "item" property does not 
+				contain an object that has a property named "serviceName" :
+			</para>
+			<programlisting><![CDATA[select exists(item.serviceName?) from OrderEvent]]></programlisting> 
+		</sect2>
+
+		<sect2 id="eql-single-row-function-instanceof">
+			<title>The <literal>Instance-Of</literal> Function</title>
+
+			<para>
+				The <literal>instanceof</literal> function returns a boolean value indicating whether the type of value returned by the expression is one of the given types. The first parameter to the <literal>instanceof</literal> function is an expression to evaluate. The second and subsequent parameters are Java type names.
+			</para>
+
+			<para>
+				The function determines the return type of the expression at runtime by evaluating the expression, and compares the type of object returned by the expression to the defined types. 
+				If the type of object returned by the expression matches any of the given types, the function returns <literal>true</literal>. If the expression returned <literal>null</literal> or a type that does not
+				match any of the given types, the function returns <literal>false</literal>.
+			</para>
+
+			<para>
+				The <literal>instanceof</literal> function is often used in conjunction with dynamic (unchecked) properties. Dynamic properties are properties whose type is not known at compile type. 
+			</para>
+
+			<para>
+				This example uses the <literal>instanceof</literal> function to select different properties based on the type:
+			</para>
+			<programlisting>select case when instanceof(item, com.mycompany.Service) then serviceName?
+  when instanceof(item, com.mycompany.Product) then productName? end 
+  from OrderEvent</programlisting>
+
+			<para>
+				The <literal>instanceof</literal> function returns <literal>false</literal> if the expression tested by instanceof returned null.
+			</para>
+
+			<para>
+				Valid parameters for the type parameter list are:
+			</para>
+	
+			<itemizedlist>
+				<listitem>
+					<para>
+						Any of the Java built-in types: <literal>int, long, byte, short, char, double, float, string</literal>, where <literal>string</literal>  is a short notation for <literal>java.lang.String</literal>. The type name is not case-sensitive. For example, the next function tests if the dynamic "price" property is either of type float or type double:
+						<synopsis>instanceof(price?, double, float)</synopsis>
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The fully-qualified class name of the class to cast to, for example: <synopsis>instanceof(product, org.myproducer.Product)</synopsis>
+					</para>
+				</listitem>
+			</itemizedlist>
+			
+			<para>
+				The function considers an event class's superclasses as well as all the directly or indirectly-implemented interfaces by superclasses.
+			</para>
+		</sect2>
+
+		<sect2 id="eql-single-row-function-ref-minmax">
+			<title>The <literal>Min</literal> and <literal>Max</literal> Functions</title>
+
+			<para>
+				The <literal>min</literal> and <literal>max</literal> function take two or more parameters that itself can be expressions. The <literal>min</literal> function returns the lowest numeric value among the 2 or more comma-separated expressions, while the <literal>max</literal> function returns the highest numeric value.
+				The return type is the compatible aggregated type of all return values.
+			</para>
+
+			<para>
+				The next example shows the <literal>max</literal> function that has a <literal>Double</literal> return type and returns the value 1.1.
+			</para>
+			<programlisting>select max(1, 1.1, 2 * 0.5) from ...</programlisting>
+
+			<para>
+				The <literal>min</literal> function returns the lowest value. The statement below uses the function to determine the smaller of two timestamp values.
+			</para>
+	
+			<programlisting>select symbol, min(ticks.timestamp, news.timestamp) as minT
+	from StockTickEvent.win:time(30 sec) as ticks, NewsEvent.win:time(30 sec) as news
+	where ticks.symbol = news.symbol</programlisting>
+		</sect2>
+
 		<sect2 id="eql-single-row-function-ref-previous">
 			<title>The <literal>Previous</literal> Function</title>
 

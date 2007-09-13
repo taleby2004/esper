@@ -13,6 +13,7 @@ import net.esper.eql.core.ViewResourceDelegate;
 import net.esper.util.JavaClassHelper;
 import net.esper.util.CoercionException;
 import net.esper.event.EventBean;
+import net.esper.schedule.TimeProvider;
 
 /**
  * Represents the COALESCE(a,b,...) function is an expression tree.
@@ -22,7 +23,7 @@ public class ExprCoalesceNode extends ExprNode
     private Class resultType;
     private boolean[] isNumericCoercion;
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider) throws ExprValidationException
     {
         if (this.getChildNodes().size() < 2)
         {
@@ -105,10 +106,14 @@ public class ExprCoalesceNode extends ExprNode
     public String toExpressionString()
     {
         StringBuilder buffer = new StringBuilder();
-        for (int i = 2; i < this.getChildNodes().size(); i++)
+        buffer.append("coalesce(");
+
+        String delimiter = "";
+        for (int i = 0; i < this.getChildNodes().size(); i++)
         {
-            buffer.append(',');
+            buffer.append(delimiter);
             buffer.append(this.getChildNodes().get(i).toExpressionString());
+            delimiter = ",";
         }
         buffer.append(')');
         return buffer.toString();

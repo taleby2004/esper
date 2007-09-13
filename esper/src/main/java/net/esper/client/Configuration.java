@@ -7,11 +7,7 @@
  **************************************************************************************/
 package net.esper.client;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -33,8 +29,8 @@ import org.w3c.dom.*;
  * The format of an Esper XML configuration file is defined in
  * <tt>esper-configuration-1.0.xsd</tt>.
  */
-public class Configuration implements ConfigurationOperations {
-
+public class Configuration implements ConfigurationOperations, ConfigurationInformation, Serializable
+{
 	private static Log log = LogFactory.getLog( Configuration.class );
 
     /**
@@ -106,14 +102,14 @@ public class Configuration implements ConfigurationOperations {
     protected List<ConfigurationAdapterLoader> adapterLoaders;
 
     /**
-     * Map of extension configuration objects.
-     */
-    protected Map<String, Object> extensionConfigurations;
-
-    /**
      * Saves engine default configs such as threading settings
      */
     protected ConfigurationEngineDefaults engineDefaults;
+
+    /**
+     * Saves the Java packages to search to resolve event type aliases.
+     */
+    protected Set<String> eventTypeAutoAliasPackages;
 
     /**
      * Constructs an empty configuration. The auto import values
@@ -134,10 +130,6 @@ public class Configuration implements ConfigurationOperations {
         this.epServicesContextFactoryClassName = epServicesContextFactoryClassName;
     }
 
-    /**
-     * Returns the service context factory class name
-     * @return class name
-     */
     public String getEPServicesContextFactoryClassName()
     {
         return epServicesContextFactoryClassName;
@@ -243,115 +235,54 @@ public class Configuration implements ConfigurationOperations {
     	imports.add(autoImport);
     }
 
-    /**
-     * Returns the mapping of event type alias to Java class name.
-     * @return event type aliases for Java class names
-     */
     public Map<String, String> getEventTypeAliases()
     {
         return eventClasses;
     }
 
-    /**
-     * Returns a map keyed by event type alias name, and values being the definition for the
-     * event type of the property names and types that make up the event.
-     * @return map of event type alias name and definition of event properties
-     */
     public Map<String, Properties> getEventTypesMapEvents()
     {
     	return mapAliases;
     }
     
-    /**
-     * Returns the mapping of event type alias to XML DOM event type information.
-     * @return event type aliases mapping to XML DOM configs
-     */
     public Map<String, ConfigurationEventTypeXMLDOM> getEventTypesXMLDOM()
     {
         return eventTypesXMLDOM;
     }
 
-    /**
-     * Returns the mapping of event type alias to legacy java event type information.
-     * @return event type aliases mapping to legacy java class configs
-     */
     public Map<String, ConfigurationEventTypeLegacy> getEventTypesLegacy()
     {
         return eventTypesLegacy;
     }
 
-    /**
-     * Returns the class and package imports.
-     * @return imported names
-     */
 	public List<String> getImports()
 	{
 		return imports;
 	}
 
-    /**
-     * Returns a map of string database names to database configuration options.
-     * @return map of database configurations
-     */
     public Map<String, ConfigurationDBRef> getDatabaseReferences()
     {
         return databaseReferences;
     }
 
-    /**
-     * Returns a list of configured plug-in views.
-     * @return list of plug-in view configs
-     */
     public List<ConfigurationPlugInView> getPlugInViews()
     {
         return plugInViews;
     }
 
-    /**
-     * Returns a list of configured adapter loaders.
-     * @return adapter loaders
-     */
     public List<ConfigurationAdapterLoader> getAdapterLoaders()
     {
         return adapterLoaders;
     }
 
-    /**
-     * Returns a list of configured plug-in aggregation functions.
-     * @return list of configured aggregations
-     */
     public List<ConfigurationPlugInAggregationFunction> getPlugInAggregationFunctions()
     {
         return plugInAggregationFunctions;
     }
 
-    /**
-     * Returns a list of configured plug-ins for pattern observers and guards.
-     * @return list of pattern plug-ins
-     */
     public List<ConfigurationPlugInPatternObject> getPlugInPatternObjects()
     {
         return plugInPatternObjects;
-    }
-
-    /**
-     * Adds a configuration object for a named extension.
-     * @param extensionName is the name of the extension module.
-     * @param configurationObject is the extension configuration.
-     */
-    public void addExtensionConfig(String extensionName, Object configurationObject)
-    {
-        extensionConfigurations.put(extensionName, configurationObject);
-    }
-
-    /**
-     * Returns extension configuration objects as a map of extension module name and
-     * configuration object.
-     * @return extension configuration objects
-     */
-    public Map<String, Object> getExtensionConfigs()
-    {
-        return extensionConfigurations;
     }
 
     /**
@@ -416,10 +347,27 @@ public class Configuration implements ConfigurationOperations {
         plugInPatternObjects.add(entry);
     }
 
+    public void addEventTypeAutoAlias(String javaPackageName)
+    {
+        eventTypeAutoAliasPackages.add(javaPackageName);
+    }
+
     /**
-     * Returns engine default settings.
-     * @return engine defaults
+     * Returns a set of Java package names that Java event classes reside in.
+     * <p>
+     * This setting allows an application to place all it's events into one or more Java packages
+     * and then declare these packages via this method. The engine
+     * attempts to resolve an event type alias to a Java class residing in each declared package.
+     * <p>
+     * For example, in the statement "select * from MyEvent" the engine attempts to load class "javaPackageName.MyEvent"
+     * and if successful, uses that class as the event type.
+     * @return set of Java package names to look for events types when encountering a new event type alias
      */
+    public Set<String> getEventTypeAutoAliasPackages()
+    {
+        return eventTypeAutoAliasPackages;
+    }
+
     public ConfigurationEngineDefaults getEngineDefaults()
     {
         return engineDefaults;
@@ -611,7 +559,7 @@ public class Configuration implements ConfigurationOperations {
         plugInAggregationFunctions = new ArrayList<ConfigurationPlugInAggregationFunction>();
         plugInPatternObjects = new ArrayList<ConfigurationPlugInPatternObject>();
         engineDefaults = new ConfigurationEngineDefaults();
-        extensionConfigurations = new HashMap<String, Object>();
+        eventTypeAutoAliasPackages = new LinkedHashSet<String>();
     }
 
     /**
@@ -662,4 +610,3 @@ public class Configuration implements ConfigurationOperations {
         }
     }
 }
-

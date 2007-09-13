@@ -1,20 +1,18 @@
 package net.esper.regression.view;
 
+import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
-import net.esper.client.EPStatement;
 import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPRuntime;
-import net.esper.client.time.TimerControlEvent;
-import net.esper.client.time.CurrentTimeEvent;
-import net.esper.support.util.SupportUpdateListener;
-import net.esper.support.bean.SupportMarketDataBean;
-import net.esper.support.bean.SupportBeanString;
-import net.esper.support.client.SupportConfigFactory;
+import net.esper.client.EPStatement;
+import net.esper.client.soda.*;
 import net.esper.event.EventBean;
-
+import net.esper.support.bean.SupportBeanString;
+import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.client.SupportConfigFactory;
+import net.esper.support.util.SupportUpdateListener;
+import net.esper.util.SerializableObjectCopier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import junit.framework.TestCase;
 
 public class TestGroupByMaxMin extends TestCase
 {
@@ -44,6 +42,59 @@ public class TestGroupByMaxMin extends TestCase
                           "group by symbol";
 
         selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        runAssertion();
+    }
+
+    public void testMinMaxView_OM() throws Exception
+    {
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.create()
+            .add("symbol")
+            .add(Expressions.min("volume"), "minVol")
+            .add(Expressions.max("volume"), "maxVol")
+            .add(Expressions.minDistinct("volume"), "minDistVol")
+            .add(Expressions.maxDistinct("volume"), "maxDistVol")
+            );
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 3)));
+        model.setWhereClause(Expressions.or()
+                .add(Expressions.eq("symbol", "DELL"))
+                .add(Expressions.eq("symbol", "IBM"))
+                .add(Expressions.eq("symbol", "GE")) );
+        model.setGroupByClause(GroupByClause.create("symbol"));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        String viewExpr = "select symbol, " +
+                                  "min(volume) as minVol, " +
+                                  "max(volume) as maxVol, " +
+                                  "min(distinct volume) as minDistVol, " +
+                                  "max(distinct volume) as maxDistVol " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
+                          "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
+                          "group by symbol";
+        assertEquals(viewExpr, model.toEQL());
+
+        selectTestView = epService.getEPAdministrator().create(model);
+        selectTestView.addListener(testListener);
+
+        runAssertion();
+    }
+
+    public void testMinMaxView_Compile()
+    {
+        String viewExpr = "select symbol, " +
+                                  "min(volume) as minVol, " +
+                                  "max(volume) as maxVol, " +
+                                  "min(distinct volume) as minDistVol, " +
+                                  "max(distinct volume) as maxDistVol " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
+                          "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
+                          "group by symbol";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(viewExpr);
+        assertEquals(viewExpr, model.toEQL());
+
+        selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
 
         runAssertion();
@@ -215,13 +266,6 @@ public class TestGroupByMaxMin extends TestCase
     {
         SupportMarketDataBean bean = new SupportMarketDataBean(symbol, 0, volume, null);
         epService.getEPRuntime().sendEvent(bean);
-    }
-
-    private void sendTimer(long timeInMSec)
-    {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
-        EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
     }
 
     private static final Log log = LogFactory.getLog(TestGroupByMaxMin.class);

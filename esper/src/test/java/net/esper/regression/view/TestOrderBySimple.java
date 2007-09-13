@@ -11,14 +11,17 @@ import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.client.EPStatementException;
+import net.esper.client.soda.*;
 import net.esper.client.time.CurrentTimeEvent;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.support.bean.SupportBeanString;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.SupportBean;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.util.SerializableObjectCopier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +73,36 @@ public class TestOrderBySimple extends TestCase {
        	assertOnlyProperties(Arrays.asList(new String[] {"symbol"}));
     	clearValues();
 	}
+
+    public void testDescending_OM() throws Exception
+	{
+        String stmtText = "select symbol from " +
+                SupportMarketDataBean.class.getName() + ".win:length(5) " +
+                "output every 6 events "  +
+                "order by price desc";
+
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.create("symbol"));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 5)));
+        model.setOutputLimitClause(OutputLimitClause.create(6, OutputLimitUnit.EVENTS));
+        model.setOrderByClause(OrderByClause.create().add("price", true));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+        assertEquals(stmtText, model.toEQL());
+
+        testListener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().create(model);
+        statement.addListener(testListener);
+        sendEvent("IBM", 2);
+        sendEvent("KGB", 1);
+        sendEvent("CMU", 3);
+        sendEvent("IBM", 6);
+        sendEvent("CAT", 6);
+        sendEvent("CAT", 5);
+
+		orderValuesByPriceDesc();
+		assertValues(symbols, "symbol");
+		clearValues();
+    }
 
     public void testDescending()
 	{

@@ -22,9 +22,17 @@ import java.util.Map;
  */
 public class WrapperEventType implements EventType
 {
-	private final EventType underlyingEventType;
-	private final MapEventType underlyingMapType;
-	private final String[] propertyNames;
+    /**
+     * The underlying wrapped event type.
+     */
+    protected final EventType underlyingEventType;
+
+    /**
+     * The map event type that provides the additional properties.
+     */
+    protected final MapEventType underlyingMapType;
+    
+    private final String[] propertyNames;
     private final int hashCode;
     private final boolean isNoMapProperties;
     private final String typeName;
@@ -82,11 +90,17 @@ public class WrapperEventType implements EventType
                 {
                     if(!(event instanceof WrapperEventBean))
                     {
-                        throw new PropertyAccessException("Mismathched property getter to EventBean type");
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
                     }
                     WrapperEventBean wrapperEvent = (WrapperEventBean) event;
                     EventBean wrappedEvent = wrapperEvent.getUnderlyingEvent();
-                    return underlyingEventType.getGetter(property).get(wrappedEvent);
+                    EventPropertyGetter underlyingGetter = underlyingEventType.getGetter(property);
+                    return underlyingGetter.get(wrappedEvent);
+                }
+
+                public boolean isExistsProperty(EventBean eventBean)
+                {
+                    return true; // Property exists as the property is not dynamic (unchecked)
                 }
             };
 		}
@@ -98,11 +112,16 @@ public class WrapperEventType implements EventType
                 {
                     if(!(event instanceof WrapperEventBean))
                     {
-                        throw new PropertyAccessException("Mismathched property getter to EventBean type");
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
                     }
                     WrapperEventBean wrapperEvent = (WrapperEventBean) event;
                     Map map = wrapperEvent.getUnderlyingMap();
                     return underlyingMapType.getValue(property, map);
+                }
+
+                public boolean isExistsProperty(EventBean eventBean)
+                {
+                    return true; // Property exists as the property is not dynamic (unchecked)
                 }
             };
 		}
@@ -152,7 +171,25 @@ public class WrapperEventType implements EventType
         }
     }
 
-	public boolean isProperty(String property) 
+    /**
+     * Returns the wrapped event type.
+     * @return wrapped type
+     */
+    public EventType getUnderlyingEventType()
+    {
+        return underlyingEventType;
+    }
+
+    /**
+     * Returns the map type.
+     * @return map type providing additional properties.
+     */
+    public MapEventType getUnderlyingMapType()
+    {
+        return underlyingMapType;
+    }
+
+    public boolean isProperty(String property)
 	{
 		return underlyingEventType.isProperty(property) || 
 			underlyingMapType.isProperty(property);

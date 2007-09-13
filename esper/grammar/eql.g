@@ -76,6 +76,9 @@ tokens
 	EXISTS="exists";
 	WEEKDAY="weekday";
 	LW="lastweekday";
+	INSTANCEOF="instanceof";
+	CAST="cast";
+	CURRENT_TIMESTAMP="current_timestamp";
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -120,6 +123,9 @@ tokens
    	EVENT_PROP_SIMPLE;
    	EVENT_PROP_MAPPED;
    	EVENT_PROP_INDEXED;
+   	EVENT_PROP_DYNAMIC_SIMPLE;
+   	EVENT_PROP_DYNAMIC_INDEXED;
+   	EVENT_PROP_DYNAMIC_MAPPED;
    	EVENT_LIMIT_EXPR;
 	SEC_LIMIT_EXPR;
 	MIN_LIMIT_EXPR;
@@ -153,6 +159,8 @@ tokens
 	IN_SUBSELECT_QUERY_EXPR;
 	LAST_OPERATOR;
 	WEEKDAY_OPERATOR;
+	SUBSTITUTION;
+	CAST_EXPR;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -185,6 +193,11 @@ number
     |   NUM_DOUBLE^ { #number.setType(DOUBLE_TYPE); }
     ;
 
+substitution
+	:	QUESTION!
+		{ #substitution = #([SUBSTITUTION,"substitution"], #substitution); }
+	;
+	
 constant
 	:	(m:MINUS! | PLUS!)? n:number { #constant.setType(#n.getType()); 
 	                                   #constant.setText( (m == null) ? #n.getText() : "-" + #n.getText()); 
@@ -457,6 +470,7 @@ multiplyExpression
 unaryExpression
 	: MINUS^ {#MINUS.setType(UNARY_MINUS);} eventProperty
 	| constant
+	| substitution
 	| LPAREN! expression RPAREN!
 	| eventPropertyOrLibFunction
 	| builtinFunc
@@ -464,7 +478,7 @@ unaryExpression
 	| subSelectExpression
 	| existsSubSelectExpression
 	;
-	
+	    
 subSelectExpression 
 	:	subQueryExpr
 		{ #subSelectExpression = #([SUBSELECT_EXPR,"subSelectExpression"], #subSelectExpression); }	
@@ -512,6 +526,10 @@ builtinFunc
 	| PRIOR^ LPAREN! NUM_INT COMMA! eventProperty RPAREN!
 	// MIN and MAX can also be "Math.min" static function and "min(price)" aggregation function and "min(a, b, c...)" built-in function
 	// therefore handled in code via libFunction as below
+	| INSTANCEOF^ LPAREN! expression COMMA! classIdentifier (COMMA! classIdentifier)* RPAREN!
+	| CAST^ LPAREN! expression (COMMA! | AS!) classIdentifier RPAREN!
+	| EXISTS^ LPAREN! eventProperty RPAREN!
+	| CURRENT_TIMESTAMP^ (LPAREN! RPAREN!)?
 	;
 	
 maxFunc
@@ -717,10 +735,22 @@ eventProperty
 eventPropertyAtomic
 	:	IDENT 
 		{ #eventPropertyAtomic = #([EVENT_PROP_SIMPLE,"eventPropertySimple"], #eventPropertyAtomic); }
-	|	IDENT LBRACK! NUM_INT RBRACK!
-		{ #eventPropertyAtomic = #([EVENT_PROP_INDEXED,"eventPropertyIndexed"], #eventPropertyAtomic); }
-	|	IDENT LPAREN! (STRING_LITERAL | QUOTED_STRING_LITERAL) RPAREN!
-		{ #eventPropertyAtomic = #([EVENT_PROP_MAPPED,"eventPropertyMapped"], #eventPropertyAtomic); }
+	|	IDENT LBRACK! NUM_INT RBRACK! (d:QUESTION!)?
+		{ 
+			if (d == null) 
+				#eventPropertyAtomic = #([EVENT_PROP_INDEXED,"eventPropertyIndexed"], #eventPropertyAtomic);
+			else
+				#eventPropertyAtomic = #([EVENT_PROP_DYNAMIC_INDEXED,"eventPropertyDynamicIndexed"], #eventPropertyAtomic); 
+		}				
+	|	IDENT LPAREN! (STRING_LITERAL | QUOTED_STRING_LITERAL) RPAREN! (q:QUESTION!)?
+		{ 
+			if (q == null) 
+				#eventPropertyAtomic = #([EVENT_PROP_MAPPED,"eventPropertyMapped"], #eventPropertyAtomic); 
+			else
+				#eventPropertyAtomic = #([EVENT_PROP_DYNAMIC_MAPPED,"eventPropertyDynamicMapped"], #eventPropertyAtomic); 				
+		}
+	|	IDENT QUESTION!
+		{ #eventPropertyAtomic = #([EVENT_PROP_DYNAMIC_SIMPLE,"eventPropertyDynamicSimple"], #eventPropertyAtomic); }
 	;
 
 time_period 	

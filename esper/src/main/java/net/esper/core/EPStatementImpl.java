@@ -24,6 +24,7 @@ public class EPStatementImpl implements EPStatementSPI
     private UpdateDispatchViewBase dispatchChildView;
     private StatementLifecycleSvc statementLifecycleSvc;
 
+    private long timeLastStateChange;
     private Viewable parentView;
     private EPStatementState currentState;
     private EventType eventType;
@@ -39,6 +40,7 @@ public class EPStatementImpl implements EPStatementSPI
      * @param isBlockingDispatch is true if the dispatch to listeners should block to preserve event generation order
      * @param msecBlockingTimeout is the max number of milliseconds of block time
      * @param epServiceProvider is the engine instance to provide to statement-aware update listeners
+     * @param timeLastStateChange the timestamp the statement was created and started
      */
     public EPStatementImpl(EPServiceProvider epServiceProvider,
                            String statementId,
@@ -47,6 +49,7 @@ public class EPStatementImpl implements EPStatementSPI
                               boolean isPattern,
                               DispatchService dispatchService,
                               StatementLifecycleSvc statementLifecycleSvc,
+                              long timeLastStateChange,
                               boolean isBlockingDispatch,
                               long msecBlockingTimeout)
     {
@@ -65,6 +68,7 @@ public class EPStatementImpl implements EPStatementSPI
             this.dispatchChildView = new UpdateDispatchViewNonBlocking(epServiceProvider, this, statementListenerSet, dispatchService);
         }
         this.currentState = EPStatementState.STOPPED;
+        this.timeLastStateChange = timeLastStateChange;
     }
 
     public String getStatementId()
@@ -88,6 +92,10 @@ public class EPStatementImpl implements EPStatementSPI
             throw new IllegalStateException("Cannot stop statement, statement is in destroyed state");
         }
         statementLifecycleSvc.stop(statementId);
+
+        // On stop, we give the dispatch view a chance to dispatch final results, if any
+        dispatchChildView.dispatchOnStop();
+        
         dispatchChildView.clear();
     }
 
@@ -109,9 +117,10 @@ public class EPStatementImpl implements EPStatementSPI
         return currentState;
     }
 
-    public void setCurrentState(EPStatementState currentState)
+    public void setCurrentState(EPStatementState currentState, long timeLastStateChange)
     {
         this.currentState = currentState;
+        this.timeLastStateChange = timeLastStateChange;
     }
 
     public void setParentView(Viewable viewable)
@@ -191,7 +200,7 @@ public class EPStatementImpl implements EPStatementSPI
         }
 
         statementListenerSet.addListener(listener);
-        statementLifecycleSvc.updatedListeners(statementId, statementListenerSet);
+        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
     }
 
     /**
@@ -206,7 +215,7 @@ public class EPStatementImpl implements EPStatementSPI
         }
 
         statementListenerSet.removeListener(listener);
-        statementLifecycleSvc.updatedListeners(statementId, statementListenerSet);
+        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
     }
 
     /**
@@ -215,7 +224,7 @@ public class EPStatementImpl implements EPStatementSPI
     public void removeAllListeners()
     {
         statementListenerSet.removeAllListeners();
-        statementLifecycleSvc.updatedListeners(statementId, statementListenerSet);
+        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
     }
 
     public void addListener(StatementAwareUpdateListener listener)
@@ -226,7 +235,7 @@ public class EPStatementImpl implements EPStatementSPI
         }
 
         statementListenerSet.addListener(listener);
-        statementLifecycleSvc.updatedListeners(statementId, statementListenerSet);
+        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
     }
 
     public void removeListener(StatementAwareUpdateListener listener)
@@ -237,7 +246,7 @@ public class EPStatementImpl implements EPStatementSPI
         }
 
         statementListenerSet.removeListener(listener);
-        statementLifecycleSvc.updatedListeners(statementId, statementListenerSet);
+        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
     }
 
     public Iterator<StatementAwareUpdateListener> getStatementAwareListeners()
@@ -248,5 +257,25 @@ public class EPStatementImpl implements EPStatementSPI
     public Iterator<UpdateListener> getUpdateListeners()
     {
         return statementListenerSet.getListeners().iterator();
+    }
+
+    public long getTimeLastStateChange()
+    {
+        return timeLastStateChange;
+    }
+
+    public boolean isStarted()
+    {
+        return currentState == EPStatementState.STARTED;
+    }
+
+    public boolean isStopped()
+    {
+        return currentState == EPStatementState.STOPPED;
+    }
+
+    public boolean isDestroyed()
+    {
+        return currentState == EPStatementState.DESTROYED;
     }
 }

@@ -8,10 +8,12 @@
 package net.esper.eql.spec;
 
 import net.esper.eql.expression.ExprNode;
+import net.esper.eql.expression.ExprSubstitutionNode;
 import net.esper.util.MetaDefItem;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.io.StringWriter;
 
 /**
  * Specification object representing a complete EQL statement including all EQL constructs.
@@ -28,6 +30,7 @@ public class StatementSpecRaw implements MetaDefItem
     private ExprNode havingExprRootNode;
     private OutputLimitSpec outputLimitSpec;
     private List<OrderByItem> orderByList = new LinkedList<OrderByItem>();
+    private boolean existsSubstitutionParameters;
 
     /**
      * Returns the FROM-clause stream definitions.
@@ -161,5 +164,32 @@ public class StatementSpecRaw implements MetaDefItem
     public void setSelectStreamDirEnum(SelectClauseStreamSelectorEnum selectStreamDirEnum)
     {
         this.selectStreamDirEnum = selectStreamDirEnum;
+    }
+
+    /**
+     * Sets the select clause.
+     * @param selectClauseSpec is the new select clause specification
+     */
+    public void setSelectClauseSpec(SelectClauseSpec selectClauseSpec)
+    {
+        this.selectClauseSpec = selectClauseSpec;
+    }
+
+    /**
+     * Returns true if there are one or more substitution parameters in the statement of contained-within subquery statements
+     * @return true if parameters exists
+     */
+    public boolean isExistsSubstitutionParameters()
+    {
+        return existsSubstitutionParameters;
+    }
+
+    /**
+     * Sets the substitution parameters.
+     * @param existsSubstitutionParameters true to indicate there are parameters
+     */
+    public void setExistsSubstitutionParameters(boolean existsSubstitutionParameters)
+    {
+        this.existsSubstitutionParameters = existsSubstitutionParameters;
     }
 }

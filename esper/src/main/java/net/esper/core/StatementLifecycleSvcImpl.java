@@ -32,13 +32,25 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 {
     private static Log log = LogFactory.getLog(StatementLifecycleSvcImpl.class);
 
+    /**
+     * Services context for statement lifecycle management.
+     */
+    protected final EPServicesContext services;
+
+    /**
+     * Maps of statement id to descriptor.
+     */
+    protected final Map<String, EPStatementDesc> stmtIdToDescMap;
+
+    /**
+     * Map of statement name to statement.
+     */
+    protected final Map<String, EPStatement> stmtNameToStmtMap;
+
     private final EPServiceProvider epServiceProvider;
-    private final EPServicesContext services;
     private final ManagedReadWriteLock eventProcessingRWLock;
 
     private final Map<String, String> stmtNameToIdMap;
-    private final Map<String, EPStatementDesc> stmtIdToDescMap;
-    private final Map<String, EPStatement> stmtNameToStmtMap;
     private final RefCountedMap<String, ManagedLock> insertIntoStreams;
 
     public void init()
@@ -68,7 +80,20 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     {
         // Generate statement id
         String statementId = UuidGenerator.generate(expression);
+        return createAndStart(statementSpec, expression, isPattern, optStatementName, statementId);
+    }
 
+    /**
+     * Creates and starts statement.
+     * @param statementSpec defines the statement
+     * @param expression is the EQL
+     * @param isPattern is true for patterns
+     * @param optStatementName is the optional statement name
+     * @param statementId is the statement id
+     * @return started statement
+     */
+    protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId)
+    {
         // Determine a statement name, i.e. use the id or use/generate one for the name passed in
         String statementName = statementId;
         if (optStatementName != null)
@@ -147,8 +172,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             // create statement - may fail for parser and simple validation errors
             boolean preserveDispatchOrder = services.getEngineSettingsService().getEngineSettings().getThreading().isListenerDispatchPreserveOrder();
             long blockingTimeout = services.getEngineSettingsService().getEngineSettings().getThreading().getListenerDispatchTimeout();
+            long timeLastStateChange = services.getSchedulingService().getTime();
             EPStatementSPI statement = new EPStatementImpl(epServiceProvider, statementId, statementName, expression, isPattern,
-                    services.getDispatchService(), this, preserveDispatchOrder, blockingTimeout);
+                    services.getDispatchService(), this, timeLastStateChange, preserveDispatchOrder, blockingTimeout);
 
             // create start method
             startMethod = new EPStatementStartMethod(compiledSpec, services, statementContext);
@@ -360,7 +386,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EPStatementStopMethod stopMethod = pair.getSecond();
         desc.setStopMethod(stopMethod);
         statement.setParentView(parentView);
-        statement.setCurrentState(EPStatementState.STARTED);
+        long timeLastStateChange = services.getSchedulingService().getTime();
+        statement.setCurrentState(EPStatementState.STARTED, timeLastStateChange);
     }
 
     public synchronized void stop(String statementId)
@@ -388,11 +415,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 throw new IllegalStateException("Statement already stopped");
             }
 
-            statement.setParentView(null);
             stopMethod.stop();
+            statement.setParentView(null);
             desc.setStopMethod(null);
 
-            statement.setCurrentState(EPStatementState.STOPPED);
+            long timeLastStateChange = services.getSchedulingService().getTime();
+            statement.setCurrentState(EPStatementState.STOPPED, timeLastStateChange);
         }
         catch (RuntimeException ex)
         {
@@ -425,7 +453,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 stopMethod.stop();
             }
 
-            statement.setCurrentState(EPStatementState.DESTROYED);
+            long timeLastStateChange = services.getSchedulingService().getTime();
+            statement.setCurrentState(EPStatementState.DESTROYED, timeLastStateChange);
 
             stmtNameToStmtMap.remove(statement.getName());
             stmtNameToIdMap.remove(statement.getName());
@@ -551,7 +580,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return finalStatementName;
     }
 
-    public void updatedListeners(String statementId, EPStatementListenerSet listeners)
+    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners)
     {
         log.debug(".updatedListeners No action for base implementation");
     }
@@ -648,7 +677,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService());
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService(), statementContext.getSchedulingService());
                 compiledStreams.add(compiled);
             }
         }

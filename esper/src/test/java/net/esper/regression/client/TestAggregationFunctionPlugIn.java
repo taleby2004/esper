@@ -2,11 +2,13 @@ package net.esper.regression.client;
 
 import junit.framework.TestCase;
 import net.esper.client.*;
+import net.esper.client.soda.*;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.eql.SupportPluginAggregationMethodTwo;
 import net.esper.support.eql.SupportPluginAggregationMethodOne;
 import net.esper.support.util.SupportUpdateListener;
+import net.esper.util.SerializableObjectCopier;
 
 public class TestAggregationFunctionPlugIn extends TestCase
 {
@@ -28,18 +30,55 @@ public class TestAggregationFunctionPlugIn extends TestCase
         epService.initialize();
     }
 
-    public void testGrouped()
+    public void testGrouped_OM() throws Exception
     {
         String text = "select concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
-        tryGrouped(text);
 
-        text = "select CONCATSTRING(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
-        tryGrouped(text);
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.create()
+                .add(Expressions.plugInAggregation("concatstring", Expressions.property("string")), "val"));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 10)));
+        model.setGroupByClause(GroupByClause.create("intPrimitive"));
+        assertEquals(text, model.toEQL());
+        SerializableObjectCopier.copy(model);
+
+        tryGrouped(null, model);
     }
 
-    private void tryGrouped(String text)
+    public void testGrouped_Compile() throws Exception
     {
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        String text = "select concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(text);
+        SerializableObjectCopier.copy(model);
+        assertEquals(text, model.toEQL());
+
+        tryGrouped(null, model);
+    }
+
+    public void testGroupedLowercase()
+    {
+        String text = "select CONCATSTRING(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        tryGrouped(text, null);
+    }
+
+    public void testGroupedUppercase()
+    {
+        String text = "select concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        tryGrouped(text, null);
+    }
+
+    private void tryGrouped(String text, EPStatementObjectModel model)
+    {
+        EPStatement statement;
+        if (model != null)
+        {
+            statement = epService.getEPAdministrator().create(model);
+        }
+        else
+        {
+            statement = epService.getEPAdministrator().createEQL(text);
+        }
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

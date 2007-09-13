@@ -9,11 +9,13 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.soda.*;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.util.SerializableObjectCopier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,6 +98,54 @@ public class TestOrderByAliases extends TestCase {
 		clearValues();
 	}
     
+    public void testAliasesAggregationOM() throws Exception
+    {
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.create("symbol", "volume").add(Expressions.sum("price")));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView(View.create("win", "length", 20))));
+        model.setGroupByClause(GroupByClause.create("symbol"));
+        model.setOutputLimitClause(OutputLimitClause.create(6, OutputLimitUnit.EVENTS));
+        model.setOrderByClause(OrderByClause.create(Expressions.sum("price")));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        String statementString = "select symbol, volume, sum(price) from " +
+                                SupportMarketDataBean.class.getName() + ".win:length(20) " +
+                                "group by symbol " +
+                                "output every 6 events " +
+                                "order by sum(price)";
+
+        assertEquals(statementString, model.toEQL());
+
+        createAndSendAggregate(model);
+        orderValuesBySumPriceEvent();
+        assertValues(prices, "sum(price)");
+        assertValues(symbols, "symbol");
+        assertValues(volumes, "volume");
+        assertOnlyProperties(Arrays.asList(new String[] {"symbol", "sum(price)", "volume"}));
+        clearValues();
+    }
+
+    public void testAliasesAggregationCompile() throws Exception
+    {
+        String statementString = "select symbol, volume, sum(price) from " +
+                                SupportMarketDataBean.class.getName() + ".win:length(20) " +
+                                "group by symbol " +
+                                "output every 6 events " +
+                                "order by sum(price)";
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(statementString);
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+        assertEquals(statementString, model.toEQL());
+
+        createAndSendAggregate(model);
+        orderValuesBySumPriceEvent();
+        assertValues(prices, "sum(price)");
+        assertValues(symbols, "symbol");
+        assertValues(volumes, "volume");
+        assertOnlyProperties(Arrays.asList(new String[] {"symbol", "sum(price)", "volume"}));
+        clearValues();
+    }
+
     private void assertOnlyProperties(List<String> requiredProperties)
     {
     	EventBean[] events = testListener.getLastNewData();
@@ -218,6 +268,18 @@ public class TestOrderByAliases extends TestCase {
     private void createAndSendAggregate(String statementString) {
         testListener = new SupportUpdateListener();
         EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        statement.addListener(testListener);
+        sendEvent("IBM", 3);
+        sendEvent("IBM", 4);
+        sendEvent("CMU", 1);
+        sendEvent("CMU", 2);
+        sendEvent("CAT", 5);
+        sendEvent("CAT", 6);
+    }
+
+    private void createAndSendAggregate(EPStatementObjectModel model) {
+        testListener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(testListener);
         sendEvent("IBM", 3);
         sendEvent("IBM", 4);

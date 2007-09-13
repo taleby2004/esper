@@ -18,15 +18,18 @@ import net.esper.eql.core.MethodResolutionService;
 public class DistinctValueAggregator implements AggregationMethod
 {
     private final AggregationMethod inner;
+    private final Class childType;
     private final RefCountedSet<Object> valueSet;
 
     /**
      * Ctor.
-     * @param inner is the aggregator function computing aggregation values 
+     * @param inner is the aggregator function computing aggregation values
+     * @param childType is the return type of the inner expression to aggregate, if any
      */
-    public DistinctValueAggregator(AggregationMethod inner)
+    public DistinctValueAggregator(AggregationMethod inner, Class childType)
     {
         this.inner = inner;
+        this.childType = childType;
         this.valueSet = new RefCountedSet<Object>();
     }
 
@@ -61,6 +64,6 @@ public class DistinctValueAggregator implements AggregationMethod
     public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
     {
         AggregationMethod innerCopy = inner.newAggregator(methodResolutionService);
-        return methodResolutionService.makeDistinctAggregator(innerCopy);
+        return methodResolutionService.makeDistinctAggregator(innerCopy, childType);
     }
 }

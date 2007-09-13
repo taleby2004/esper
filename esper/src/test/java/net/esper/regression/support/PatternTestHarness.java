@@ -1,22 +1,25 @@
 package net.esper.regression.support;
 
-import java.util.*;
-
 import junit.framework.TestCase;
-import net.esper.support.bean.SupportBeanConstants;
-import net.esper.support.util.SupportUpdateListener;
-import net.esper.support.client.SupportConfigFactory;
+import net.esper.client.EPRuntime;
+import net.esper.client.EPServiceProvider;
+import net.esper.client.EPServiceProviderManager;
+import net.esper.client.EPStatement;
+import net.esper.client.soda.EPStatementObjectModel;
+import net.esper.client.time.CurrentTimeEvent;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.TimerEvent;
-import net.esper.client.time.CurrentTimeEvent;
-import net.esper.client.EPStatement;
-import net.esper.client.EPServiceProviderManager;
-import net.esper.client.EPServiceProvider;
-import net.esper.client.EPRuntime;
 import net.esper.event.EventBean;
 import net.esper.event.EventBeanUtility;
-import org.apache.commons.logging.LogFactory;
+import net.esper.support.bean.SupportBeanConstants;
+import net.esper.support.client.SupportConfigFactory;
+import net.esper.support.util.SupportUpdateListener;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Test harness for testing expressions and comparing received MatchedEventMap instances against against expected results.
@@ -47,11 +50,13 @@ public class PatternTestHarness implements SupportBeanConstants
 
     public void runTest() throws Exception
     {
-        runTest(false);
-        runTest(true);
+        runTest(PatternTestStyle.USE_PATTERN_LANGUAGE);
+        runTest(PatternTestStyle.USE_EQL);
+        runTest(PatternTestStyle.COMPILE_TO_MODEL);
+        runTest(PatternTestStyle.COMPILE_TO_EQL);
     }
 
-    private void runTest(boolean useEQL) throws Exception
+    private void runTest(PatternTestStyle testStyle) throws Exception
     {
         EPServiceProvider serviceProvider = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         serviceProvider.initialize();
@@ -73,24 +78,57 @@ public class PatternTestHarness implements SupportBeanConstants
         for (EventExpressionCase descriptor : caseList.getResults())
         {
             String expressionText = descriptor.getExpressionText();
+            EPStatementObjectModel model = descriptor.getObjectModel();
 
             EPStatement statement = null;
 
             try
             {
-                if (useEQL)
+                if (model != null)
                 {
-                    expressionText = "select * from pattern [" + expressionText + "]";
-                    statement = serviceProvider.getEPAdministrator().createEQL(expressionText);
+                    statement = serviceProvider.getEPAdministrator().create(model);
                 }
                 else
                 {
-                    statement = serviceProvider.getEPAdministrator().createPattern(expressionText);
+                    if (testStyle == PatternTestStyle.USE_PATTERN_LANGUAGE)
+                    {
+                        statement = serviceProvider.getEPAdministrator().createPattern(expressionText);
+                    }
+                    else if (testStyle == PatternTestStyle.USE_EQL)
+                    {
+                        String text = "select * from pattern [" + expressionText + "]";
+                        statement = serviceProvider.getEPAdministrator().createEQL(text);
+                        expressionText = text;
+                    }
+                    else if (testStyle == PatternTestStyle.COMPILE_TO_MODEL)
+                    {
+                        String text = "select * from pattern [" + expressionText + "]";
+                        EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEQL(text);
+                        statement = serviceProvider.getEPAdministrator().create(mymodel);
+                        expressionText = text;
+                    }
+                    else if (testStyle == PatternTestStyle.COMPILE_TO_EQL)
+                    {
+                        String text = "select * from pattern [" + expressionText + "]";
+                        EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEQL(text);
+                        String reverse = mymodel.toEQL();
+                        statement = serviceProvider.getEPAdministrator().createEQL(reverse);
+                        expressionText = reverse;
+                    }
+                    else
+                    {
+                        throw new IllegalArgumentException("Unknown test style");
+                    }
                 }
             }
             catch (Exception ex)
             {
-                log.fatal(".runTest Failed to create statement for pattern expression=" + expressionText, ex);
+                String text = expressionText;
+                if (model != null)
+                {
+                    text = "Model: " + model.toEQL();
+                }
+                log.fatal(".runTest Failed to create statement for style " + testStyle + " pattern expression=" + text, ex);
                 TestCase.fail();
             }
 
@@ -114,14 +152,14 @@ public class PatternTestHarness implements SupportBeanConstants
         // event itself cannot carry any information and is thus ignore. Note subsequent events
         // generated by the same pattern are fine.
         int totalEventsReceived = 0;
-        if (useEQL)
+        if (testStyle != PatternTestStyle.USE_PATTERN_LANGUAGE)
         {
             clearListenerEvents();
             totalEventsReceived += countExpectedEvents(EventCollection.ON_START_EVENT_ID);
         }
         else    // Patterns do need to handle event publishing upon pattern expression start (patterns that turn true right away)
         {
-            checkResults(EventCollection.ON_START_EVENT_ID);
+            checkResults(testStyle, EventCollection.ON_START_EVENT_ID);
             totalEventsReceived += countListenerEvents();
             clearListenerEvents();
         }
@@ -145,7 +183,7 @@ public class PatternTestHarness implements SupportBeanConstants
             runtime.sendEvent(entry.getValue());
 
             // Check expected results for this event
-            checkResults(eventId);
+            checkResults(testStyle, eventId);
 
             // Count and clear the list of events that each listener has received
             totalEventsReceived += countListenerEvents();
@@ -192,7 +230,7 @@ public class PatternTestHarness implements SupportBeanConstants
         }
     }
 
-    private void checkResults(String eventId)
+    private void checkResults(PatternTestStyle testStyle, String eventId)
     {
         // For each test descriptor, make sure the listener has received exactly the events expected
         int index = 0;
@@ -211,7 +249,7 @@ public class PatternTestHarness implements SupportBeanConstants
             {
                 if ((receivedResults != null) && (receivedResults.length > 0))
                 {
-                    log.debug(".checkResults Incorrect result for expression : " + expressionText);
+                    log.debug(".checkResults Incorrect result for style " + testStyle + " expression : " + expressionText);
                     log.debug(".checkResults Expected no results for event " + eventId + ", but received " + receivedResults.length + " events");
                     log.debug(".checkResults Received, have " + receivedResults.length + " entries");
                     printList(receivedResults);
@@ -225,7 +263,7 @@ public class PatternTestHarness implements SupportBeanConstants
             // Compare the result lists, not caring about the order of the elements
             if (!(compareLists(receivedResults, expectedResults)))
             {
-                log.debug(".checkResults Incorrect result for expression : " + expressionText);
+                log.debug(".checkResults Incorrect result for style " + testStyle + " expression : " + expressionText);
                 log.debug(".checkResults Expected size=" + expectedResults.size() + " received size=" + (receivedResults == null ? 0 : receivedResults.length));
 
                 log.debug(".checkResults Expected, have " + expectedResults.size() + " entries");
@@ -386,6 +424,14 @@ public class PatternTestHarness implements SupportBeanConstants
             }
         }
         return result;
+    }
+
+    private enum PatternTestStyle
+    {
+        USE_PATTERN_LANGUAGE,
+        USE_EQL,
+        COMPILE_TO_MODEL,
+        COMPILE_TO_EQL;
     }
 
     private static final Log log = LogFactory.getLog(PatternTestHarness.class);

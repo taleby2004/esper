@@ -11,6 +11,7 @@ import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBeanComplexProps;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.event.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -151,14 +152,13 @@ public class TestMapEvent extends TestCase
         assertEquals(4, listener.getLastNewData()[0].get("myInt"));
         assertEquals("string2", listener.getLastNewData()[0].get("myString"));
 
-        // send Map<String, String> event, works too since not querying the fields
-        Map<String, String> mapStrings = new HashMap<String, String>();
-        mapStrings.put("myInt", "5");
+        Map<String, Object> mapStrings = new HashMap<String, Object>();
+        mapStrings.put("myInt", 5);
         mapStrings.put("myString", "string3");
         epService.getEPRuntime().sendEvent(mapStrings, "myMapEvent");
 
         assertTrue(listener.getAndClearIsInvoked());
-        assertEquals("5", listener.getLastNewData()[0].get("myInt"));
+        assertEquals(5, listener.getLastNewData()[0].get("myInt"));
         assertEquals("string3", listener.getLastNewData()[0].get("myString"));
     }
 

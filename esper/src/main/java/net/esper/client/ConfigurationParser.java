@@ -7,6 +7,7 @@
  **************************************************************************************/
 package net.esper.client;
 
+import net.esper.util.DOMElementIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -22,8 +23,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 
 /**
@@ -39,6 +38,12 @@ class ConfigurationParser {
      * @throws EPException is thrown when the configuration could not be parsed
      */
     protected static void doConfigure(Configuration configuration, InputStream stream, String resourceName) throws EPException
+    {
+        Document document = getDocument(stream, resourceName);
+        doConfigure(configuration, document);
+    }
+
+    protected static Document getDocument(InputStream stream, String resourceName) throws EPException
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
@@ -71,7 +76,7 @@ class ConfigurationParser {
             }
         }
 
-        doConfigure(configuration, document);
+        return document;
     }
 
     /**
@@ -84,37 +89,78 @@ class ConfigurationParser {
     {
         Element root = doc.getDocumentElement();
 
-        handleEventTypes(configuration, root);
-        handleAutoImports(configuration, root);
-        handleDatabaseRefs(configuration, root);
-        handlePlugInView(configuration, root);
-        handlePlugInAggregation(configuration, root);
-        handlePlugInPatternObjects(configuration, root);
-        handleAdapterLoaders(configuration, root);
-        handleEngineSettings(configuration, root);
-    }
-
-    private static void handleEventTypes(Configuration configuration, Element parentElement)
-    {
-        NodeList nodes = parentElement.getElementsByTagName("event-type");
-        for (int i = 0; i < nodes.getLength(); i++)
+        DOMElementIterator eventTypeNodeIterator = new DOMElementIterator(root.getChildNodes());
+        while (eventTypeNodeIterator.hasNext())
         {
-            String name = nodes.item(i).getAttributes().getNamedItem("alias").getTextContent();
-            Node classNode = nodes.item(i).getAttributes().getNamedItem("class");
-
-            String optionalClassName = null;
-            if (classNode != null)
+            Element element = eventTypeNodeIterator.next();
+            String nodeName = element.getNodeName();
+            if (nodeName.equals("event-type-auto-alias"))
             {
-                optionalClassName = classNode.getTextContent();
-                configuration.addEventTypeAlias(name, optionalClassName);
+                handleEventTypeAutoAliases(configuration, element);
             }
-            handleSubElement(name, optionalClassName, configuration, nodes.item(i));
+            else if (nodeName.equals("event-type"))
+            {
+                handleEventTypes(configuration, element);
+            }
+            else if(nodeName.equals("auto-import"))
+            {
+            	handleAutoImports(configuration, element);
+            }
+            else if (nodeName.equals("database-reference"))
+            {
+                handleDatabaseRefs(configuration, element);
+            }
+            else if (nodeName.equals("plugin-view"))
+            {
+                handlePlugInView(configuration, element);
+            }
+            else if (nodeName.equals("plugin-aggregation-function"))
+            {
+                handlePlugInAggregation(configuration, element);
+            }
+            else if (nodeName.equals("plugin-pattern-guard"))
+            {
+                handlePlugInPatternGuard(configuration, element);
+            }
+            else if (nodeName.equals("plugin-pattern-observer"))
+            {
+                handlePlugInPatternObserver(configuration, element);
+            }
+            else if (nodeName.equals("adapter-loader"))
+            {
+                handleAdapterLoaders(configuration, element);
+            }
+            else if (nodeName.equals("engine-settings"))
+            {
+                handleEngineSettings(configuration, element);
+            }
         }
     }
 
-    private static void handleSubElement(String aliasName, String optionalClassName, Configuration configuration, Node parentNode)
+    private static void handleEventTypeAutoAliases(Configuration configuration, Element element)
     {
-        ElementIterator eventTypeNodeIterator = new ElementIterator(parentNode.getChildNodes());
+        String name = element.getAttributes().getNamedItem("package-name").getTextContent();
+        configuration.addEventTypeAutoAlias(name);
+    }
+
+    private static void handleEventTypes(Configuration configuration, Element element)
+    {
+        String name = element.getAttributes().getNamedItem("alias").getTextContent();
+        Node classNode = element.getAttributes().getNamedItem("class");
+
+        String optionalClassName = null;
+        if (classNode != null)
+        {
+            optionalClassName = classNode.getTextContent();
+            configuration.addEventTypeAlias(name, optionalClassName);
+        }
+        
+        handleEventTypeDef(name, optionalClassName, configuration, element);
+    }
+
+    private static void handleEventTypeDef(String aliasName, String optionalClassName, Configuration configuration, Node parentNode)
+    {
+        DOMElementIterator eventTypeNodeIterator = new DOMElementIterator(parentNode.getChildNodes());
         while (eventTypeNodeIterator.hasNext())
         {
             Element eventTypeElement = eventTypeNodeIterator.next();
@@ -161,7 +207,7 @@ class ConfigurationParser {
         xmlDOMEventTypeDesc.setDefaultNamespace(defaultNamespace);
         configuration.addEventTypeAlias(aliasName, xmlDOMEventTypeDesc);
 
-        ElementIterator propertyNodeIterator = new ElementIterator(xmldomElement.getChildNodes());
+        DOMElementIterator propertyNodeIterator = new DOMElementIterator(xmldomElement.getChildNodes());
         while (propertyNodeIterator.hasNext())
         {
             Element propertyElement = propertyNodeIterator.next();
@@ -226,7 +272,7 @@ class ConfigurationParser {
         }
         configuration.addEventTypeAlias(aliasName, className, legacyDesc);
 
-        ElementIterator propertyNodeIterator = new ElementIterator(xmldomElement.getChildNodes());
+        DOMElementIterator propertyNodeIterator = new DOMElementIterator(xmldomElement.getChildNodes());
         while (propertyNodeIterator.hasNext())
         {
             Element propertyElement = propertyNodeIterator.next();
@@ -250,201 +296,172 @@ class ConfigurationParser {
         }
     }
 
-    private static void handleAutoImports(Configuration configuration, Element parentNode)
+    private static void handleAutoImports(Configuration configuration, Element element)
     {
-        NodeList importNodes = parentNode.getElementsByTagName("auto-import");
-        for (int i = 0; i < importNodes.getLength(); i++)
-        {
-            String name = importNodes.item(i).getAttributes().getNamedItem("import-name").getTextContent();
-            configuration.addImport(name);
-        }
+        String name = element.getAttributes().getNamedItem("import-name").getTextContent();
+        configuration.addImport(name);
     }
 
-    private static void handleDatabaseRefs(Configuration configuration, Element parentNode)
+    private static void handleDatabaseRefs(Configuration configuration, Element element)
     {
-        NodeList dbRefNodes = parentNode.getElementsByTagName("database-reference");
-        for (int i = 0; i < dbRefNodes.getLength(); i++)
-        {
-            String name = dbRefNodes.item(i).getAttributes().getNamedItem("name").getTextContent();
-            ConfigurationDBRef configDBRef = new ConfigurationDBRef();
-            configuration.addDatabaseReference(name, configDBRef);
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
+        ConfigurationDBRef configDBRef = new ConfigurationDBRef();
+        configuration.addDatabaseReference(name, configDBRef);
 
-            ElementIterator nodeIterator = new ElementIterator(dbRefNodes.item(i).getChildNodes());
-            while (nodeIterator.hasNext())
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("datasource-connection"))
             {
-                Element subElement = nodeIterator.next();
-                if (subElement.getNodeName().equals("datasource-connection"))
+                String lookup = subElement.getAttributes().getNamedItem("context-lookup-name").getTextContent();
+                Properties properties = handleProperties(subElement, "env-property");
+                configDBRef.setDataSourceConnection(lookup, properties);
+            }
+            else if (subElement.getNodeName().equals("drivermanager-connection"))
+            {
+                String className = subElement.getAttributes().getNamedItem("class-name").getTextContent();
+                String url = subElement.getAttributes().getNamedItem("url").getTextContent();
+                String userName = subElement.getAttributes().getNamedItem("user").getTextContent();
+                String password = subElement.getAttributes().getNamedItem("password").getTextContent();
+                Properties properties = handleProperties(subElement, "connection-arg");
+                configDBRef.setDriverManagerConnection(className, url, userName, password, properties);
+            }
+            else if (subElement.getNodeName().equals("connection-lifecycle"))
+            {
+                String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                configDBRef.setConnectionLifecycleEnum(ConfigurationDBRef.ConnectionLifecycleEnum.valueOf(value.toUpperCase()));
+            }
+            else if (subElement.getNodeName().equals("connection-settings"))
+            {
+                if (subElement.getAttributes().getNamedItem("auto-commit") != null)
                 {
-                    String lookup = subElement.getAttributes().getNamedItem("context-lookup-name").getTextContent();
-                    Properties properties = handleProperties(subElement, "env-property");
-                    configDBRef.setDataSourceConnection(lookup, properties);
+                    String autoCommit = subElement.getAttributes().getNamedItem("auto-commit").getTextContent();
+                    configDBRef.setConnectionAutoCommit(Boolean.parseBoolean(autoCommit));
                 }
-                else if (subElement.getNodeName().equals("drivermanager-connection"))
+                if (subElement.getAttributes().getNamedItem("transaction-isolation") != null)
                 {
-                    String className = subElement.getAttributes().getNamedItem("class-name").getTextContent();
-                    String url = subElement.getAttributes().getNamedItem("url").getTextContent();
-                    String userName = subElement.getAttributes().getNamedItem("user").getTextContent();
-                    String password = subElement.getAttributes().getNamedItem("password").getTextContent();
-                    Properties properties = handleProperties(subElement, "connection-arg");
-                    configDBRef.setDriverManagerConnection(className, url, userName, password, properties);
+                    String transactionIsolation = subElement.getAttributes().getNamedItem("transaction-isolation").getTextContent();
+                    configDBRef.setConnectionTransactionIsolation(Integer.parseInt(transactionIsolation));
                 }
-                else if (subElement.getNodeName().equals("connection-lifecycle"))
+                if (subElement.getAttributes().getNamedItem("catalog") != null)
                 {
-                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
-                    configDBRef.setConnectionLifecycleEnum(ConfigurationDBRef.ConnectionLifecycleEnum.valueOf(value.toUpperCase()));
+                    String catalog = subElement.getAttributes().getNamedItem("catalog").getTextContent();
+                    configDBRef.setConnectionCatalog(catalog);
                 }
-                else if (subElement.getNodeName().equals("connection-settings"))
+                if (subElement.getAttributes().getNamedItem("read-only") != null)
                 {
-                    if (subElement.getAttributes().getNamedItem("auto-commit") != null)
-                    {
-                        String autoCommit = subElement.getAttributes().getNamedItem("auto-commit").getTextContent();
-                        configDBRef.setConnectionAutoCommit(Boolean.parseBoolean(autoCommit));
-                    }
-                    if (subElement.getAttributes().getNamedItem("transaction-isolation") != null)
-                    {
-                        String transactionIsolation = subElement.getAttributes().getNamedItem("transaction-isolation").getTextContent();
-                        configDBRef.setConnectionTransactionIsolation(Integer.parseInt(transactionIsolation));
-                    }
-                    if (subElement.getAttributes().getNamedItem("catalog") != null)
-                    {
-                        String catalog = subElement.getAttributes().getNamedItem("catalog").getTextContent();
-                        configDBRef.setConnectionCatalog(catalog);
-                    }
-                    if (subElement.getAttributes().getNamedItem("read-only") != null)
-                    {
-                        String readOnly = subElement.getAttributes().getNamedItem("read-only").getTextContent();
-                        configDBRef.setConnectionReadOnly(Boolean.parseBoolean(readOnly));
-                    }
+                    String readOnly = subElement.getAttributes().getNamedItem("read-only").getTextContent();
+                    configDBRef.setConnectionReadOnly(Boolean.parseBoolean(readOnly));
                 }
-                else if (subElement.getNodeName().equals("expiry-time-cache"))
+            }
+            else if (subElement.getNodeName().equals("column-change-case"))
+            {
+                String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                ConfigurationDBRef.ColumnChangeCaseEnum parsed = ConfigurationDBRef.ColumnChangeCaseEnum.valueOf(value.toUpperCase());
+                configDBRef.setColumnChangeCase(parsed);
+            }
+            else if (subElement.getNodeName().equals("metadata-origin"))
+            {
+                String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                ConfigurationDBRef.MetadataOriginEnum parsed = ConfigurationDBRef.MetadataOriginEnum.valueOf(value.toUpperCase());
+                configDBRef.setMetadataOrigin(parsed);
+            }
+            else if (subElement.getNodeName().equals("sql-types-mapping"))
+            {
+                String sqlType = subElement.getAttributes().getNamedItem("sql-type").getTextContent();
+                String javaType = subElement.getAttributes().getNamedItem("java-type").getTextContent();
+                Integer sqlTypeInt;
+                try
                 {
-                    String maxAge = subElement.getAttributes().getNamedItem("max-age-seconds").getTextContent();
-                    String purgeInterval = subElement.getAttributes().getNamedItem("purge-interval-seconds").getTextContent();
-                    configDBRef.setExpiryTimeCache(Double.parseDouble(maxAge), Double.parseDouble(purgeInterval));
+                    sqlTypeInt = Integer.parseInt(sqlType);
                 }
-                else if (subElement.getNodeName().equals("lru-cache"))
+                catch (NumberFormatException ex)
                 {
-                    String size = subElement.getAttributes().getNamedItem("size").getTextContent();
-                    configDBRef.setLRUCache(Integer.parseInt(size));
+                    throw new ConfigurationException("Error converting sql type '" + sqlType + "' to integer java.sql.Types constant");
                 }
-                else if (subElement.getNodeName().equals("column-change-case"))
-                {
-                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
-                    ConfigurationDBRef.ColumnChangeCaseEnum parsed = ConfigurationDBRef.ColumnChangeCaseEnum.valueOf(value.toUpperCase());
-                    configDBRef.setColumnChangeCase(parsed);
-                }
-                else if (subElement.getNodeName().equals("metadata-origin"))
-                {
-                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
-                    ConfigurationDBRef.MetadataOriginEnum parsed = ConfigurationDBRef.MetadataOriginEnum.valueOf(value.toUpperCase());
-                    configDBRef.setMetadataOrigin(parsed);
-                }
-                else if (subElement.getNodeName().equals("sql-types-mapping"))
-                {
-                    String sqlType = subElement.getAttributes().getNamedItem("sql-type").getTextContent();
-                    String javaType = subElement.getAttributes().getNamedItem("java-type").getTextContent();
-                    Integer sqlTypeInt;
-                    try
-                    {
-                        sqlTypeInt = Integer.parseInt(sqlType);
-                    }
-                    catch (NumberFormatException ex)
-                    {
-                        throw new ConfigurationException("Error converting sql type '" + sqlType + "' to integer java.sql.Types constant");
-                    }
-                    configDBRef.addJavaSqlTypesBinding(sqlTypeInt, javaType);
-                }
+                configDBRef.addJavaSqlTypesBinding(sqlTypeInt, javaType);
+            }
+            else if (subElement.getNodeName().equals("expiry-time-cache"))
+            {
+                String maxAge = subElement.getAttributes().getNamedItem("max-age-seconds").getTextContent();
+                String purgeInterval = subElement.getAttributes().getNamedItem("purge-interval-seconds").getTextContent();
+                configDBRef.setExpiryTimeCache(Double.parseDouble(maxAge), Double.parseDouble(purgeInterval));
+            }
+            else if (subElement.getNodeName().equals("lru-cache"))
+            {
+                String size = subElement.getAttributes().getNamedItem("size").getTextContent();
+                configDBRef.setLRUCache(Integer.parseInt(size));
             }
         }
     }
 
-    private static void handlePlugInView(Configuration configuration, Element parentElement)
+    private static void handlePlugInView(Configuration configuration, Element element)
     {
-        NodeList nodes = parentElement.getElementsByTagName("plugin-view");
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            String namespace = nodes.item(i).getAttributes().getNamedItem("namespace").getTextContent();
-            String name = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
-            String factoryClassName = nodes.item(i).getAttributes().getNamedItem("factory-class").getTextContent();
-            configuration.addPlugInView(namespace, name, factoryClassName);
-        }
+        String namespace = element.getAttributes().getNamedItem("namespace").getTextContent();
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
+        String factoryClassName = element.getAttributes().getNamedItem("factory-class").getTextContent();
+        configuration.addPlugInView(namespace, name, factoryClassName);
     }
 
-    private static void handlePlugInAggregation(Configuration configuration, Element parentElement)
+    private static void handlePlugInAggregation(Configuration configuration, Element element)
     {
-        NodeList nodes = parentElement.getElementsByTagName("plugin-aggregation-function");
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            String name = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
-            String functionClassName = nodes.item(i).getAttributes().getNamedItem("function-class").getTextContent();
-            configuration.addPlugInAggregationFunction(name, functionClassName);
-        }
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
+        String functionClassName = element.getAttributes().getNamedItem("function-class").getTextContent();
+        configuration.addPlugInAggregationFunction(name, functionClassName);
     }
 
-    private static void handlePlugInPatternObjects(Configuration configuration, Element parentElement)
+    private static void handlePlugInPatternGuard(Configuration configuration, Element element)
     {
-        NodeList nodes = parentElement.getElementsByTagName("plugin-pattern-guard");
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            String namespace = nodes.item(i).getAttributes().getNamedItem("namespace").getTextContent();
-            String name = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
-            String factoryClassName = nodes.item(i).getAttributes().getNamedItem("factory-class").getTextContent();
-            configuration.addPlugInPatternGuard(namespace, name, factoryClassName);
-        }
-
-        nodes = parentElement.getElementsByTagName("plugin-pattern-observer");
-        for (int i = 0; i < nodes.getLength(); i++)
-        {
-            String namespace = nodes.item(i).getAttributes().getNamedItem("namespace").getTextContent();
-            String name = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
-            String factoryClassName = nodes.item(i).getAttributes().getNamedItem("factory-class").getTextContent();
-            configuration.addPlugInPatternObserver(namespace, name, factoryClassName);
-        }
+        String namespace = element.getAttributes().getNamedItem("namespace").getTextContent();
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
+        String factoryClassName = element.getAttributes().getNamedItem("factory-class").getTextContent();
+        configuration.addPlugInPatternGuard(namespace, name, factoryClassName);
     }
 
-    private static void handleAdapterLoaders(Configuration configuration, Element parentElement)
+    private static void handlePlugInPatternObserver(Configuration configuration, Element element)
     {
-        NodeList nodes = parentElement.getElementsByTagName("adapter-loader");
-        for (int i = 0; i < nodes.getLength(); i++)
+        String namespace = element.getAttributes().getNamedItem("namespace").getTextContent();
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
+        String factoryClassName = element.getAttributes().getNamedItem("factory-class").getTextContent();
+        configuration.addPlugInPatternObserver(namespace, name, factoryClassName);
+    }
+
+    private static void handleAdapterLoaders(Configuration configuration, Element element)
+    {
+        String loaderName = element.getAttributes().getNamedItem("name").getTextContent();
+        String className = element.getAttributes().getNamedItem("class-name").getTextContent();
+        Properties properties = new Properties();
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        while (nodeIterator.hasNext())
         {
-            String loaderName = nodes.item(i).getAttributes().getNamedItem("name").getTextContent();
-            String className = nodes.item(i).getAttributes().getNamedItem("class-name").getTextContent();
-            Properties properties = new Properties();
-            ElementIterator nodeIterator = new ElementIterator(nodes.item(i).getChildNodes());
-            while (nodeIterator.hasNext())
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("init-arg"))
             {
-                Element subElement = nodeIterator.next();
-                if (subElement.getNodeName().equals("init-arg"))
-                {
-                    String name = subElement.getAttributes().getNamedItem("name").getTextContent();
-                    String value = subElement.getAttributes().getNamedItem("value").getTextContent();
-                    properties.put(name, value);
-                }
+                String name = subElement.getAttributes().getNamedItem("name").getTextContent();
+                String value = subElement.getAttributes().getNamedItem("value").getTextContent();
+                properties.put(name, value);
             }
-            configuration.addAdapterLoader(loaderName, className, properties);
         }
+        configuration.addAdapterLoader(loaderName, className, properties);
     }
 
-    private static void handleEngineSettings(Configuration configuration, Element parentElement)
+    private static void handleEngineSettings(Configuration configuration, Element element)
     {
-        NodeList nodes = parentElement.getElementsByTagName("engine-settings");
-        for (int i = 0; i < nodes.getLength(); i++)
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        while (nodeIterator.hasNext())
         {
-            ElementIterator nodeIterator = new ElementIterator(nodes.item(i).getChildNodes());
-            while (nodeIterator.hasNext())
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("defaults"))
             {
-                Element subElement = nodeIterator.next();
-                if (subElement.getNodeName().equals("defaults"))
-                {
-                    handleEngineSettingsDefaults(configuration, subElement);
-                }
+                handleEngineSettingsDefaults(configuration, subElement);
             }
         }
     }
 
     private static void handleEngineSettingsDefaults(Configuration configuration, Element parentElement)
     {
-        ElementIterator nodeIterator = new ElementIterator(parentElement.getChildNodes());
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
             Element subElement = nodeIterator.next();
@@ -469,7 +486,7 @@ class ConfigurationParser {
 
     private static void handleDefaultsThreading(Configuration configuration, Element parentElement)
     {
-        ElementIterator nodeIterator = new ElementIterator(parentElement.getChildNodes());
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
             Element subElement = nodeIterator.next();
@@ -502,7 +519,7 @@ class ConfigurationParser {
 
     private static void handleDefaultsViewResources(Configuration configuration, Element parentElement)
     {
-        ElementIterator nodeIterator = new ElementIterator(parentElement.getChildNodes());
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
             Element subElement = nodeIterator.next();
@@ -517,7 +534,7 @@ class ConfigurationParser {
 
     private static void handleDefaultsLogging(Configuration configuration, Element parentElement)
     {
-        ElementIterator nodeIterator = new ElementIterator(parentElement.getChildNodes());
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
             Element subElement = nodeIterator.next();
@@ -532,7 +549,7 @@ class ConfigurationParser {
 
     private static void handleDefaultsEventMeta(Configuration configuration, Element parentElement)
     {
-        ElementIterator nodeIterator = new ElementIterator(parentElement.getChildNodes());
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
             Element subElement = nodeIterator.next();
@@ -548,7 +565,7 @@ class ConfigurationParser {
     private static Properties handleProperties(Element element, String propElementName)
     {
         Properties properties = new Properties();
-        ElementIterator nodeIterator = new ElementIterator(element.getChildNodes());
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
         while (nodeIterator.hasNext())
         {
             Element subElement = nodeIterator.next();
@@ -597,48 +614,6 @@ class ConfigurationParser {
             return valueNode.getTextContent();
         }
         return null;
-    }
-
-    private static class ElementIterator implements Iterator
-    {
-        private int index;
-        private NodeList nodeList;
-
-        public ElementIterator(NodeList nodeList) {
-            this.nodeList = nodeList;
-        }
-
-        public boolean hasNext() {
-            positionNext();
-            return index < nodeList.getLength();
-        }
-
-        public Element next() {
-            if (index >= nodeList.getLength())
-            {
-                throw new NoSuchElementException();
-            }
-            Element result = (Element) nodeList.item(index);
-            index++;
-            return result;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
-        private void positionNext()
-        {
-            while (index < nodeList.getLength())
-            {
-                Node node = nodeList.item(index);
-                if (node instanceof Element)
-                {
-                    break;
-                }
-                index++;
-            }
-        }
     }
 
     private static Log log = LogFactory.getLog(ConfigurationParser.class);

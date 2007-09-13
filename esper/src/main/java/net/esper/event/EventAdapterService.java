@@ -5,6 +5,7 @@ import java.util.Map;
 import org.w3c.dom.Node;
 import net.esper.client.ConfigurationEventTypeXMLDOM;
 import net.esper.client.ConfigurationEventTypeLegacy;
+import net.esper.client.Configuration;
 
 /**
  * Interface for a service to resolve event names to event type.
@@ -60,16 +61,6 @@ public interface EventAdapterService
     public EventType createAnonymousMapType(Map<String, Class> propertyTypes);
 
     /**
-     * Creates a new anonymous EventType instance for an event type that contains a map of name value pairs.
-     * The method accepts a Map that contains the property names as keys and EventType objects as the values.
-     * The EventType instances represent the property types whose underlying class is used to set the type,
-     * via method createAnonymousMapType.
-     * @param propertyTypes is a map of String to EventType objects
-     * @return EventType implementation for map field names and value types which are the underlying types to the event type passed in
-     */
-    public EventType createAnonymousMapTypeUnd(Map<String, EventType> propertyTypes);
-
-    /**
      * Create an event wrapper bean from a set of event properties (name and value objectes) stored in a Map.
      * @param properties is key-value pairs for the event properties
      * @param eventType is the type metadata for any maps of that type
@@ -87,14 +78,6 @@ public interface EventAdapterService
     public EventBean createWrapper(EventBean event, Map<String, Object> properties, EventType eventType);
 
     /**
-     * Create an aggregate event wrapper bean from a set of named events stored in a Map.
-     * @param events is key-value pairs where the key is the event name and the value is the event
-     * @param eventType is the type metadata for any maps of that type
-     * @return EventBean instance
-     */
-    public EventBean createMapFromUnderlying(Map<String, EventBean> events, EventType eventType);
-
-    /**
      * Add an event type with the given alias and Java fully-qualified class name.
      * <p>
      * If the alias already exists with the same class name, returns the existing EventType instance.
@@ -102,12 +85,16 @@ public interface EventAdapterService
      * If the alias already exists with different class name, throws an exception.
      * <p>
      * If the alias does not already exists, adds the alias and constructs a new {@link net.esper.event.BeanEventType}.
+     * <p>
+     * Takes into account all event-type-auto-alias-package names supplied and
+     * attempts to resolve the class name via the packages if the direct resolution failed. 
      * @param eventTypeAlias is the alias name for the event type
      * @param fullyQualClassName is the fully qualified class name
+     * @param considerAutoAlias whether auto-alias by Java packages should be considered
      * @return event type is the type added
      * @throws EventAdapterException if alias already exists and doesn't match class names
      */
-    public EventType addBeanType(String eventTypeAlias, String fullyQualClassName) throws EventAdapterException;
+    public EventType addBeanType(String eventTypeAlias, String fullyQualClassName, boolean considerAutoAlias) throws EventAdapterException;
 
     /**
      * Add an event type with the given alias and Java class.
@@ -198,4 +185,16 @@ public interface EventAdapterService
      * @param classLegacyInfo is configured legacy 
      */
     public void setClassLegacyConfigs(Map<String, ConfigurationEventTypeLegacy> classLegacyInfo);
+
+    /**
+     * Sets the resolution style for case-sentitivity.
+     * @param classPropertyResolutionStyle for resolving properties.
+     */    
+    public void setDefaultPropertyResolutionStyle(Configuration.PropertyResolutionStyle classPropertyResolutionStyle);
+
+    /**
+     * Adds a Java package name of a package that Java event classes reside in.
+     * @param javaPackageName is the fully-qualified Java package name of the Java package that event classes reside in
+     */
+    public void addAutoAliasPackage(String javaPackageName);
 }

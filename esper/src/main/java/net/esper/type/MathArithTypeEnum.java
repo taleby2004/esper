@@ -347,4 +347,22 @@ public enum MathArithTypeEnum
     {
         return expressionText;
     }
+
+    /**
+     * Returns the math operator for the string.
+     * @param operator to parse
+     * @return math enum
+     */
+    public static MathArithTypeEnum parseOperator(String operator)
+    {
+        for (int i = 0; i < MathArithTypeEnum.values().length; i++)
+        {
+            MathArithTypeEnum val = MathArithTypeEnum.values()[i];
+            if (val.getExpressionText().equals(operator))
+            {
+                return MathArithTypeEnum.values()[i];
+            }
+        }
+        throw new IllegalArgumentException("Unknown operator '" + operator + "'");
+    }
 }

@@ -150,6 +150,7 @@ evalExprChoice
 	
 valueExpr
 	: 	c:constant { leaveNode(#c); }
+	|	s:substitution { leaveNode(#s); }
 	| 	a:arithmeticExpr { leaveNode(#a); }
 	| 	eventPropertyExpr
 	|   evalExprChoice
@@ -228,6 +229,10 @@ builtinFunc
 	| 	#(COALESCE valueExpr valueExpr (valueExpr)* )
 	| 	#(PREVIOUS valueExpr eventPropertyExpr)
 	| 	#(PRIOR c:NUM_INT eventPropertyExpr) {leaveNode(#c);}
+	| 	#(INSTANCEOF valueExpr CLASS_IDENT (CLASS_IDENT)*) 
+	| 	#(CAST valueExpr CLASS_IDENT)
+	| 	#(EXISTS eventPropertyExpr)
+	|	#(CURRENT_TIMESTAMP {} )
 	;
 	
 arrayExpr
@@ -315,6 +320,9 @@ eventPropertyAtomic
 	:	#(EVENT_PROP_SIMPLE IDENT)
 	|	#(EVENT_PROP_INDEXED IDENT NUM_INT)
 	|	#(EVENT_PROP_MAPPED IDENT (STRING_LITERAL | QUOTED_STRING_LITERAL))
+	|	#(EVENT_PROP_DYNAMIC_SIMPLE IDENT)
+	|	#(EVENT_PROP_DYNAMIC_INDEXED IDENT NUM_INT)
+	|	#(EVENT_PROP_DYNAMIC_MAPPED IDENT (STRING_LITERAL | QUOTED_STRING_LITERAL))
 	;	
 	
 //----------------------------------------------------------------------------
@@ -382,6 +390,10 @@ secondPart
 
 millisecondPart
 	:	#( MILLISECOND_PART number)
+	;
+
+substitution
+	:	SUBSTITUTION
 	;
 
 constant

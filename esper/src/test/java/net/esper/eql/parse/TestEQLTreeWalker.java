@@ -14,6 +14,7 @@ import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
 import net.esper.support.eql.SupportPluginAggregationMethodOne;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.type.OuterJoinType;
+import net.esper.type.TimePeriodParameter;
 import net.esper.eql.spec.ViewSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,27 @@ public class TestEQLTreeWalker extends TestCase
     private static String EXPRESSION = "select * from " +
                     CLASSNAME + "(string='a').win:length(10).std:lastevent() as win1," +
                     CLASSNAME + "(string='b').win:length(10).std:lastevent() as win2 ";
+
+    public void testWalkSubstitutionParams() throws Exception
+    {
+        // try EQL
+        String expression = "select * from " + CLASSNAME + "(string=?, value=?)";
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        StatementSpecRaw raw = walker.getStatementSpec();
+        assertTrue(raw.isExistsSubstitutionParameters());
+
+        FilterStreamSpecRaw streamSpec = (FilterStreamSpecRaw) raw.getStreamSpecs().get(0);
+        ExprEqualsNode equalsFilter = (ExprEqualsNode) streamSpec.getRawFilterSpec().getFilterExpressions().get(0);
+        assertEquals(1, ((ExprSubstitutionNode) equalsFilter.getChildNodes().get(1)).getIndex());
+        equalsFilter = (ExprEqualsNode) streamSpec.getRawFilterSpec().getFilterExpressions().get(1);
+        assertEquals(2, ((ExprSubstitutionNode) equalsFilter.getChildNodes().get(1)).getIndex());
+
+        // try pattern
+        expression = CLASSNAME + "(string=?, value=?)";
+        walker = parseAndWalkPattern(expression);
+        raw = walker.getStatementSpec();
+        assertTrue(raw.isExistsSubstitutionParameters());
+    }
 
     public void testWalkEQLSimpleWhere() throws Exception
     {
@@ -68,7 +90,7 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalkEQL(expression);
 
-        // Stream spec validation
+        // ProjectedStream spec validation
         assertEquals(3, walker.getStatementSpec().getStreamSpecs().size());
         assertEquals("win1", walker.getStatementSpec().getStreamSpecs().get(0).getOptionalStreamName());
         assertEquals("win2", walker.getStatementSpec().getStreamSpecs().get(1).getOptionalStreamName());
@@ -372,7 +394,7 @@ public class TestEQLTreeWalker extends TestCase
 
     public void testComplexProperty() throws Exception
     {
-        String text = "select array [ 1 ],s0.map('a'),nested.nested2, a[1].b as x " +
+        String text = "select array [ 1 ],s0.map('a'),nested.nested2, a[1].b as x, nested.abcdef? " +
                 " from SupportBean_N().win:lenght(10) as win1 " +
                 " where a[1].b('a').nested.c[0] = 4";
         EQLTreeWalker walker = parseAndWalkEQL(text);
@@ -392,6 +414,10 @@ public class TestEQLTreeWalker extends TestCase
         identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectList().get(3).getSelectExpression();
         assertEquals("a[1].b", identNode.getUnresolvedPropertyName());
         assertEquals(null, identNode.getStreamOrPropertyName());
+
+        identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectList().get(4).getSelectExpression();
+        assertEquals("abcdef?", identNode.getUnresolvedPropertyName());
+        assertEquals("nested", identNode.getStreamOrPropertyName());
 
         identNode = (ExprIdentNode) walker.getStatementSpec().getFilterRootNode().getChildNodes().get(0);
         assertEquals("a[1].b('a').nested.c[0]", identNode.getUnresolvedPropertyName());
@@ -823,7 +849,7 @@ public class TestEQLTreeWalker extends TestCase
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         ExprNode exprNode = walker.getStatementSpec().getFilterRootNode().getChildNodes().get(0);
         ExprBitWiseNode bitWiseNode = (ExprBitWiseNode) (exprNode);
-        bitWiseNode.getValidatedSubtree(null, null, null);
+        bitWiseNode.getValidatedSubtree(null, null, null, null);
         return bitWiseNode.evaluate(null, false);
     }
 
@@ -833,7 +859,7 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         ExprNode exprNode = (walker.getStatementSpec().getFilterRootNode().getChildNodes().get(0));
-        exprNode = exprNode.getValidatedSubtree(null, null, null);
+        exprNode = exprNode.getValidatedSubtree(null, null, null, null);
         return exprNode.evaluate(null, false);
     }
 
@@ -843,7 +869,7 @@ public class TestEQLTreeWalker extends TestCase
 
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         ExprNode filterExprNode = walker.getStatementSpec().getFilterRootNode();
-        filterExprNode.getValidatedSubtree(null, null, null);
+        filterExprNode.getValidatedSubtree(null, null, null, null);
         return filterExprNode.evaluate(null, false);
     }
 

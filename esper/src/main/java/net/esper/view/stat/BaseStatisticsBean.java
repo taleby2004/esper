@@ -4,12 +4,14 @@ import net.esper.view.ViewProcessingException;
 import net.esper.client.EPException;
 import net.esper.util.MetaDefItem;
 
+import java.io.Serializable;
+
 /**
  * Bean for performing statistical calculations. The bean keeps sums of X and Y datapoints and sums on squares
  * that can be reused by subclasses. The bean calculates standard deviation (sample and population), variance,
  * average and sum.
   */
-public class BaseStatisticsBean implements Cloneable, MetaDefItem
+public class BaseStatisticsBean implements Cloneable, Serializable
 {
     private double sumX;
     private double sumXSq;
@@ -292,5 +294,59 @@ public class BaseStatisticsBean implements Cloneable, MetaDefItem
                "  sumY=" + this.sumY +
                "  sumYSq=" + this.sumYSq +
                "  sumXY=" + this.sumXY;
+    }
+
+    /**
+     * Sets the sum X.
+     * @param sumX to set
+     */
+    public void setSumX(double sumX)
+    {
+        this.sumX = sumX;
+    }
+
+    /**
+     * Sets the sum X square.
+     * @param sumXSq to set
+     */
+    public void setSumXSq(double sumXSq)
+    {
+        this.sumXSq = sumXSq;
+    }
+
+    /**
+     * Sets the sum Y.
+     * @param sumY to set
+     */
+    public void setSumY(double sumY)
+    {
+        this.sumY = sumY;
+    }
+
+    /**
+     * Sets the sum Y square.
+     * @param sumYSq to set
+     */
+    public void setSumYSq(double sumYSq)
+    {
+        this.sumYSq = sumYSq;
+    }
+
+    /**
+     * Sets the sum of x times y.
+     * @param sumXY sum of x times y.
+     */
+    public void setSumXY(double sumXY)
+    {
+        this.sumXY = sumXY;
+    }
+
+    /**
+     * Sets the number of datapoints
+     * @param dataPoints to set
+     */
+    public void setDataPoints(long dataPoints)
+    {
+        this.dataPoints = dataPoints;
     }
 }

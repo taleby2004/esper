@@ -10,6 +10,7 @@ import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.client.EPStatementException;
+import net.esper.client.soda.*;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportTemperatureBean;
@@ -18,6 +19,7 @@ import net.esper.support.bean.SupportBean_S0;
 import net.esper.support.eql.SupportStaticMethodLib;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.util.SerializableObjectCopier;
 
 import com.sun.org.apache.bcel.internal.util.ClassLoader;
 
@@ -120,7 +122,39 @@ public class TestStaticFunctions extends TestCase
 		}
 	}
 	
-	public void testSingleParameter()
+    public void testSingleParameterOM() throws Exception
+    {
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.create().add(Expressions.staticMethod("Integer", "toBinaryString", 7), "value"));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 5)));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+        statementText = "select Integer.toBinaryString(7) as value" + stream;
+
+        assertEquals(statementText.trim(), model.toEQL());
+        statement = epService.getEPAdministrator().create(model);
+        listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        sendEvent("IBM", 10d, 4l);
+        assertEquals(Integer.toBinaryString(7), listener.assertOneGetNewAndReset().get("value"));
+    }
+
+    public void testSingleParameterCompile() throws Exception
+    {
+        statementText = "select Integer.toBinaryString(7) as value" + stream;
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(statementText);
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        assertEquals(statementText.trim(), model.toEQL());
+        statement = epService.getEPAdministrator().create(model);
+        listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        sendEvent("IBM", 10d, 4l);
+        assertEquals(Integer.toBinaryString(7), listener.assertOneGetNewAndReset().get("value"));
+    }
+
+    public void testSingleParameter()
 	{
 		statementText = "select Integer.toBinaryString(7) " + stream;
 		Object[] result = createStatementAndGetProperty(true, "Integer.toBinaryString(7)");

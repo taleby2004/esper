@@ -5,12 +5,14 @@ import net.esper.client.Configuration;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.soda.*;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.support.bean.*;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.util.SerializableObjectCopier;
 
 public class TestSubselectFiltered extends TestCase
 {
@@ -34,6 +36,50 @@ public class TestSubselectFiltered extends TestCase
 
         // Use external clocking for the test, reduces logging
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+    }
+
+    public void testSameEventCompile() throws Exception
+    {
+        String stmtText = "select (select * from S1.win:length(1000)) as events1 from S1";
+        EPStatementObjectModel subquery = epService.getEPAdministrator().compileEQL(stmtText);
+        subquery = (EPStatementObjectModel) SerializableObjectCopier.copy(subquery);
+
+        EPStatement stmt = epService.getEPAdministrator().create(subquery);
+        stmt.addListener(listener);
+
+        EventType type = stmt.getEventType();
+        assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
+
+        Object event = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(event);
+        EventBean result = listener.assertOneGetNewAndReset();
+        assertSame(event, result.get("events1"));
+    }
+
+    public void testSameEventOM() throws Exception
+    {
+        EPStatementObjectModel subquery = new EPStatementObjectModel();
+        subquery.setSelectClause(SelectClause.createWildcard());
+        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView(View.create("win", "length", 1000))));
+
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setFromClause(FromClause.create(FilterStream.create("S1")));
+        model.setSelectClause(SelectClause.create().add(Expressions.subquery(subquery), "events1"));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        String stmtText = "select (select * from S1.win:length(1000)) as events1 from S1";
+        assertEquals(stmtText, model.toEQL());
+
+        EPStatement stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+
+        EventType type = stmt.getEventType();
+        assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
+
+        Object event = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(event);
+        EventBean result = listener.assertOneGetNewAndReset();
+        assertSame(event, result.get("events1"));
     }
 
     public void testSameEvent()
@@ -117,10 +163,44 @@ public class TestSubselectFiltered extends TestCase
     public void testWherePrevious()
     {
         String stmtText = "select (select prev(1, id) from S1.win:length(1000) where id=s0.id) as value from S0 as s0";
-
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
+        runWherePrevious();
+    }
 
+    public void testWherePreviousOM() throws Exception
+    {
+        EPStatementObjectModel subquery = new EPStatementObjectModel();
+        subquery.setSelectClause(SelectClause.create().add(Expressions.previous(1, "id")));
+        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView(View.create("win", "length", 1000))));
+        subquery.setWhereClause(Expressions.eqProperty("id","s0.id"));
+
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setFromClause(FromClause.create(FilterStream.create("S0", "s0")));
+        model.setSelectClause(SelectClause.create().add(Expressions.subquery(subquery), "value"));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        String stmtText = "select (select prev(1, id) from S1.win:length(1000) where (id = s0.id)) as value from S0 as s0";
+        assertEquals(stmtText, model.toEQL());
+
+        EPStatement stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+        runWherePrevious();
+    }
+
+    public void testWherePreviousCompile()
+    {
+        String stmtText = "select (select prev(1, id) from S1.win:length(1000) where (id = s0.id)) as value from S0 as s0";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        assertEquals(stmtText, model.toEQL());
+
+        EPStatement stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+        runWherePrevious();
+    }
+
+    private void runWherePrevious()
+    {
         epService.getEPRuntime().sendEvent(new SupportBean_S1(1));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
         assertNull(listener.assertOneGetNewAndReset().get("value"));

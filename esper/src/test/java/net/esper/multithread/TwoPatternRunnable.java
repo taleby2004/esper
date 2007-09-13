@@ -4,6 +4,7 @@ import junit.framework.Assert;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPStatement;
 import net.esper.event.EventBean;
+import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportTradeEvent;
 import net.esper.support.util.SupportStmtAwareUpdateListener;
 
@@ -39,20 +40,19 @@ public class TwoPatternRunnable implements Runnable
             countLoops++;
             List<SupportTradeEvent> matches = new ArrayList<SupportTradeEvent>();
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 SupportTradeEvent bean;
                 if (i % 1000 == 1)
                 {
                     bean = new SupportTradeEvent(i, "100", 1001);
                     matches.add(bean);
-                    engine.getEPRuntime().sendEvent(bean);
                 }
                 else
                 {
                     bean = new SupportTradeEvent(i, "101", 10);
-                    engine.getEPRuntime().sendEvent(bean);
                 }
+                engine.getEPRuntime().sendEvent(bean);
             }
 
             // check results
@@ -62,7 +62,7 @@ public class TwoPatternRunnable implements Runnable
             {
                 Assert.assertSame(matches.get(i), received[i].get("event1"));
             }
-            
+
             System.out.println("Found " + received.length + " matches in loop #" + countLoops);
             listener.reset();
         }

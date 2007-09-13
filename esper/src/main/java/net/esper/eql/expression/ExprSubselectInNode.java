@@ -6,6 +6,7 @@ import net.esper.eql.core.ViewResourceDelegate;
 import net.esper.eql.spec.StatementSpecRaw;
 import net.esper.event.EventBean;
 import net.esper.util.JavaClassHelper;
+import net.esper.schedule.TimeProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,7 +27,8 @@ public class ExprSubselectInNode extends ExprSubselectNode
     /**
      * Ctor.
      * @param statementSpec is the subquery statement spec from the parser, unvalidated
-     */    public ExprSubselectInNode(StatementSpecRaw statementSpec)
+     */
+    public ExprSubselectInNode(StatementSpecRaw statementSpec)
     {
         super(statementSpec);
     }
@@ -45,7 +47,16 @@ public class ExprSubselectInNode extends ExprSubselectNode
         isNotIn = notIn;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    /**
+     * Returns true for not-in, or false for in.
+     * @return true for not-in
+     */
+    public boolean isNotIn()
+    {
+        return isNotIn;
+    }
+
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {

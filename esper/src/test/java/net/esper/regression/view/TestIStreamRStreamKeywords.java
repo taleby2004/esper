@@ -3,9 +3,11 @@ package net.esper.regression.view;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.soda.*;
 import net.esper.support.util.SupportUpdateListener;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.client.SupportConfigFactory;
+import net.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
 public class TestIStreamRStreamKeywords extends TestCase
@@ -21,6 +23,53 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    public void testRStreamOnly_OM() throws Exception
+    {
+        String stmtText = "select rstream * from " + SupportBean.class.getName() + ".win:length(3)";
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.createWildcard(StreamSelector.RSTREAM_ONLY));
+        FromClause fromClause = FromClause.create(FilterStream.create(SupportBean.class.getName()).addView(View.create("win", "length", 3)));
+        model.setFromClause(fromClause);
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        assertEquals(stmtText, model.toEQL());
+        EPStatement statement = epService.getEPAdministrator().create(model);                
+        statement.addListener(testListener);
+
+        Object event = sendEvent("a");
+        assertFalse(testListener.isInvoked());
+
+        sendEvents(new String[] {"a", "b"});
+        assertFalse(testListener.isInvoked());
+
+        sendEvent("d");
+        assertSame(event, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
+        assertNull(testListener.getLastOldData());  // receive no more old data
+        testListener.reset();
+    }
+
+    public void testRStreamOnly_Compile() throws Exception
+    {
+        String stmtText = "select rstream * from " + SupportBean.class.getName() + ".win:length(3)";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+
+        assertEquals(stmtText, model.toEQL());
+        EPStatement statement = epService.getEPAdministrator().create(model);
+        statement.addListener(testListener);
+
+        Object event = sendEvent("a");
+        assertFalse(testListener.isInvoked());
+
+        sendEvents(new String[] {"a", "b"});
+        assertFalse(testListener.isInvoked());
+
+        sendEvent("d");
+        assertSame(event, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
+        assertNull(testListener.getLastOldData());  // receive no more old data
+        testListener.reset();
     }
 
     public void testRStreamOnly()

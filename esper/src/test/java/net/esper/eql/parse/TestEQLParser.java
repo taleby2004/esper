@@ -14,7 +14,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select b in (select * from A) from " + className;
+        String expression = "select current_timestamp() from " + className;
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
@@ -68,7 +68,6 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("select * from com.xxx().std:win(3) where b('aaa)=5");
 
         assertIsInvalid("select sum() from b.win:length(1)");
-        assertIsInvalid("select sum(?) from b.win:length(1)");
         assertIsInvalid("select sum(1+) from b.win:length(1)");
         assertIsInvalid("select sum(distinct) from b.win:length(1)");
         assertIsInvalid("select sum(distinct distinct a) from b.win:length(1)");
@@ -162,6 +161,23 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("select c from A where q*9 in in (select g*5 from C.win:length(100)) and r=6");
         assertIsInvalid("select c from A in (select g*5 from C.win:length(100)) and r=6");
         assertIsInvalid("select c from A where a in (select g*5 from C.win:length(100)) 9");
+
+        // Substitution parameters
+        assertIsInvalid("select ? ? from A");
+        assertIsInvalid("select * from A(??)");
+
+        // cast, instanceof, isnumeric and exists dynamic property
+        assertIsInvalid("select * from A(boolean = exists(a, b))");
+        assertIsInvalid("select * from A (boolean = exists())");
+        assertIsInvalid("select * from A (boolean = exists(1))");
+        assertIsInvalid("select * from A where exists(1 + a.b.c?.d.e)");
+        assertIsInvalid("select * from A(boolean = instanceof(, a))");
+        assertIsInvalid("select * from A(boolean = instanceof(b))");
+        assertIsInvalid("select * from A(boolean = instanceof('agc', ,))");
+        assertIsInvalid("select * from A(boolean = instanceof(b net.esper.support.AClass))");
+        assertIsInvalid("select * from A(cast(b, +1))");
+        assertIsInvalid("select * from A(cast(b?, a + 1))");
+        assertIsInvalid("select * from A(cast((), a + 1))");
     }
 
     public void testValidCases() throws Exception
@@ -417,6 +433,56 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("select c from A where b in (select * from C)");
         assertIsValid("select c from A where b not in (select b from C)");
         assertIsValid("select c from A where q*9 not in (select g*5 from C.win:length(100)) and r=6");
+
+        // dynamic properties
+        assertIsValid("select b.c.d? from E");
+        assertIsValid("select b.c.d?.e? from E");
+        assertIsValid("select b? from E");
+        assertIsValid("select b? as myevent from E");
+        assertIsValid("select * from pattern [every OrderEvent(item.name?)]");
+        assertIsValid("select * from pattern [every OrderEvent(item?.parent.name?='foo')]");
+        assertIsValid("select b.c[0].d? from E");
+        assertIsValid("select b.c[0]?.mapped('a')? from E");
+        assertIsValid("select b?.c[0].mapped('a') from E");
+
+        // Allow comments in EQL and patterns
+        assertIsValid("select b.c.d /* some comment */ from E");
+        assertIsValid("select b /* ajajaj */ .c.d /* some comment */ from E");
+        assertIsValid("select * from pattern [ /* filter */ every A() -> B() /* for B */]");
+        assertIsValid("select * from pattern [ \n// comment\nevery A() -> B() // same line\n]");
+
+        // Substitution parameters
+        assertIsValid(preFill + "(string=?)");
+        assertIsValid(preFill + "(string in (?, ?))");
+        assertIsValid(preFill + " where string=? and ?=val");
+        assertIsValid(preFill + " having avg(volume) > ?");
+        assertIsValid(preFill + " having avg(?) > ?");
+        assertIsValid("select sum(?) from b.win:length(1)");
+        assertIsValid("select ?||'a' from B(a=?) where c=? group by ? having d>? output every 10 events order by a, ?");
+
+        // cast, instanceof, isnumeric and exists dynamic property
+        assertIsValid(preFill + "(boolean = exists(a))");
+        assertIsValid(preFill + "(boolean = exists(a?))");
+        assertIsValid(preFill + "(boolean = exists(a?))");
+        assertIsValid(preFill + " where exists(a.b.c?.d.e)");
+        assertIsValid(preFill + "(boolean = instanceof(a + 2, a))");
+        assertIsValid(preFill + "(boolean = instanceof(b, a))");
+        assertIsValid(preFill + "(boolean = instanceof('agc', string, String, java.lang.String))");
+        assertIsValid(preFill + "(boolean = instanceof(b, net.esper.support.AClass))");
+        assertIsValid(preFill + "(boolean = instanceof(b, net.esper.support.AClass, int, long, java.lang.Long))");
+        assertIsValid(preFill + "(cast(b as boolean))");
+        assertIsValid(preFill + "(cast(b? as Boolean))");
+        assertIsValid(preFill + "(cast(b, boolean))");
+        assertIsValid(preFill + "(cast(b?, Boolean))");
+        assertIsValid(preFill + "(cast(b?, java.lang.String))");
+        assertIsValid(preFill + "(cast(b?, long))");
+        assertIsValid(preFill + "(cast(a + 5, long))");
+        assertIsValid(preFill + "(isnumeric(b?))");
+        assertIsValid(preFill + "(isnumeric(b + 2))");
+        assertIsValid(preFill + "(isnumeric(\"aa\"))");
+
+        // timestamp
+        assertIsValid("select timestamp() from B.win:length(1)");
     }
 
     public void testBitWiseCases() throws Exception

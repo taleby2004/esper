@@ -9,8 +9,10 @@ import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.client.EPRuntime;
+import net.esper.client.soda.*;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.client.time.CurrentTimeEvent;
+import net.esper.util.SerializableObjectCopier;
 
 public class TestTimerIntervalObserver extends TestCase implements SupportBeanConstants
 {
@@ -22,6 +24,17 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
 
         // The wait is done when 2 seconds passed
         testCase = new EventExpressionCase("timer:interval(1999 msec)");
+        testCase.add("B1");
+        testCaseList.addTest(testCase);
+
+        String text = "select * from pattern [timer:interval(1.999)]";
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.createWildcard());
+        PatternExpr pattern = Patterns.timerInterval(1.999);
+        model.setFromClause(FromClause.create(PatternStream.create(pattern)));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+        assertEquals(text, model.toEQL());
+        testCase = new EventExpressionCase(model);
         testCase.add("B1");
         testCaseList.addTest(testCase);
 

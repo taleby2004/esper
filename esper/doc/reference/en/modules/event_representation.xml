@@ -98,6 +98,115 @@
 
 	</sect1>
 		
+	<sect1 id="eventrep-dyncproperties">
+	   <title>Dynamic Event Properties</title>
+           
+		<para>
+			Dynamic (unchecked) properties are event properties that need not be known at statement compilation time. Such properties are resolved during runtime.
+		</para>
+			
+		<para>
+			The idea behind dynamic properties is that for a given underlying event representation we don't always know all properties in advance. An underlying event may have additional properties that are not known at statement compilation time, that we want to query on. The concept is especially useful for events that represent rich, object-oriented domain models.
+		</para>
+
+		<para>
+			The syntax of dynamic properties consists of the property name and a question mark. Indexed, mapped and nested properties can also be dynamic properties:
+		</para>
+
+		<table frame="topbot">
+			<title>Types of Event Properties</title>
+			<tgroup cols="2">
+				<colspec colwidth="1*"/>
+				<colspec colwidth="2.5*"/>
+				<thead>
+					<row>
+						<entry>Type</entry>
+						<entry>Syntax</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>Dynamic Simple</entry>
+						<entry><synopsis>name?</synopsis></entry>
+					</row>
+					<row>
+						<entry>Dynamic Indexed</entry>
+						<entry><synopsis>name[<emphasis>index</emphasis>]?</synopsis></entry>
+					</row>
+					<row>
+						<entry>Dynamic Mapped</entry>
+						<entry><synopsis>name('<emphasis>key</emphasis>')?</synopsis></entry>
+					</row>
+					<row>
+						<entry>Dynamic Nested</entry>
+						<entry><synopsis>name?.nestedPropertyName</synopsis></entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table> 
+
+		<para>
+			 Dynamic properties always return the <literal>java.lang.Object</literal> type. Also, dynamic properties return a <literal>null</literal> value if the dynamic property does not exist on events processed at runtime. 
+		</para>
+
+		<para>
+			As an example, consider an OrderEvent event that provides an "item" property. The "item" property is of type <literal>Object</literal> and holds a reference to an instance of either a Service or Product. 
+		</para>
+
+		<para>
+			Assume that both Service and Product classes provide a property named "price". Via a dynamic property we can specify a query that obtains the price property from either object (Service or Product):
+		</para>
+		<programlisting><![CDATA[select item.price? from OrderEvent]]></programlisting>		
+
+		<para>
+			 As a second example, assume that the Service class contains a "serviceName" property that the Product class does not possess. The following query returns the value of the "serviceName" property for Service objects. It returns a <literal>null</literal>-value for Product objects that do not have the "serviceName" property:
+		</para>
+		<programlisting><![CDATA[select item.serviceName? from OrderEvent]]></programlisting>		
+
+		<para>
+			Consider the case where OrderEvent has multiple implementation classes, some of which have a "timestamp" property. The next query returns the timestamp property of those implementations of the OrderEvent interface that feature the property:
+		</para>
+		<programlisting><![CDATA[select timestamp? from OrderEvent]]></programlisting>		
+		
+		<para>
+			The query as above returns a single column named "timestamp?" of type <literal>Object</literal>. 			
+		</para>
+
+		<para>
+			When dynamic properties are nested, then all properties under the dynamic property are also considered dynamic properties. In the below example the query asks for the "direction" property of the object returned by the "detail" dynamic property:
+		</para>
+		<programlisting><![CDATA[select detail?.direction from OrderEvent
+// equivalent to 
+select detail?.direction? from OrderEvent]]></programlisting>		
+
+		<para>
+			The functions that are often useful in conjunction with dynamic properties are:
+		</para>
+
+		<itemizedlist>
+			<listitem>
+				<para>
+                    The <literal>cast</literal> function casts the value of a dynamic property (or the value of an expression) to a given type.
+                </para>
+			</listitem>
+			<listitem>
+				<para>
+                    The <literal>exists</literal> function checks whether a dynamic property exists. It returns <literal>true</literal> if the event has a property of that name, or false if the property does not exist on that event.
+                </para>
+			</listitem>
+			<listitem>
+				<para>
+                    The <literal>instanceof</literal> function checks whether the value of a dynamic property (or the value of an expression) is of any of the given types.
+                </para>
+			</listitem>
+		</itemizedlist>
+
+		<para>
+			Dynamic event properties work with all event representations outlined next: Java objects, Map-based and XML DOM-based events.
+		</para>
+
+	</sect1>
+
 	<sect1 id="eventrep-javabean">
 	   <title>Plain Java Object Events</title>
 
@@ -218,9 +327,26 @@ where address('work').streetName = 'Park Ave'
 		</para>
 
 		<para>
-			The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names specified by pattern or EQL statements. Values can be of any type. JavaBean-style objects as values in a <literal>Map</literal> can also be processed by the engine. 
+			The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names specified by pattern or EQL statements. 
 		</para>
 			
+		<para>
+			Map event properties can be of any type. Map event properties that are Java application objects or that are of type <literal>java.util.Map</literal> offer additional power:
+		</para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						Properties that are Java application objects can be queried via the nested, indexed, mapped and dynamic property syntax as outlined earlier. 
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Properties that are of type <literal>Map</literal> allow Maps to be nested arbitrarily deep and thus can be used to represent complex domain information. The nested, indexed, mapped and dynamic property syntax can be used to query Maps within Maps.. 					
+					</para>
+				</listitem>
+			</itemizedlist>
+
 		<para>
 			In order to use <literal>Map</literal> events, the event type name and property names and types must be made known to the engine via Configuration. Please see the examples in <xref linkend="config-java-util-map"/>.
 		</para>

@@ -11,6 +11,7 @@ import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.expression.ExprValidationException;
 import net.esper.event.EventAdapterService;
 import net.esper.pattern.PatternObjectResolutionService;
+import net.esper.schedule.TimeProvider;
 
 /**
  * An uncompiled, unoptimize for of stream specification created by a parser.
@@ -23,12 +24,14 @@ public interface StreamSpecRaw extends StreamSpec
      * @param eventAdapterService supplies type information
      * @param methodResolutionService for resolving imports
      * @param patternObjectResolutionService for resolving pattern objects
+     * @param timeProvider - provides engine current time
      * @return compiled stream
      * @throws ExprValidationException to indicate validation errors
      */
     public StreamSpecCompiled compile(EventAdapterService eventAdapterService,
                                       MethodResolutionService methodResolutionService,
-                                      PatternObjectResolutionService patternObjectResolutionService)
+                                      PatternObjectResolutionService patternObjectResolutionService,
+                                      TimeProvider timeProvider)
         throws ExprValidationException;
 
 }

@@ -593,5 +593,26 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         }
     }
 
+    /**
+     * Destroy for destroying an engine instance: sets references to null and clears thread-locals
+     */
+    public void destroy()
+    {
+        services = null;
+        threadWorkQueue = null;
+
+        matchesArrayThreadLocal.remove();
+        locksHeldThreadLocal.remove();
+        matchesPerStmtThreadLocal.remove();
+        scheduleArrayThreadLocal.remove();
+        schedulePerStmtThreadLocal.remove();
+
+        matchesArrayThreadLocal = null;
+        locksHeldThreadLocal = null;
+        matchesPerStmtThreadLocal = null;
+        scheduleArrayThreadLocal = null;
+        schedulePerStmtThreadLocal = null;
+    }
+
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);
 }

@@ -42,6 +42,7 @@ public class EQLTreeWalker extends EQLBaseWalker
     private boolean isProcessingPattern;
 
     // AST Walk result
+    private List<ExprSubstitutionNode> substitutionParamNodes = new ArrayList<ExprSubstitutionNode>(); 
     private StatementSpecRaw statementSpec;
     private final Stack<StatementSpecRaw> statementSpecStack;
 
@@ -157,6 +158,9 @@ public class EQLTreeWalker extends EQLBaseWalker
             case STRING_TYPE:
             case NULL_TYPE:
                 leaveConstant(node);
+                break;
+            case SUBSTITUTION:
+                leaveSubstitution(node);
                 break;
             case STAR:
             case MINUS:
@@ -286,6 +290,18 @@ public class EQLTreeWalker extends EQLBaseWalker
             case IN_SUBSELECT_QUERY_EXPR:
                 leaveSubselectQueryIn(node);
                 break;
+            case INSTANCEOF:
+                leaveInstanceOf(node);
+                break;
+            case EXISTS:
+                leaveExists(node);
+                break;
+            case CAST:
+                leaveCast(node);
+                break;
+            case CURRENT_TIMESTAMP:
+                leaveTimestamp(node);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + '\'');
@@ -348,6 +364,50 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         ExprPriorNode priorNode = new ExprPriorNode();
         astExprNodeMap.put(node, priorNode);
+    }
+
+    private void leaveInstanceOf(AST node)
+    {
+        log.debug(".leaveInstanceOf");
+
+        AST classIdent = node.getFirstChild().getNextSibling();
+
+        // get class identifiers
+        List<String> classes = new ArrayList<String>();
+        while(classIdent != null)
+        {
+            classes.add(classIdent.getText());
+            classIdent = classIdent.getNextSibling();
+        }
+
+        String idents[] = classes.toArray(new String[0]);
+        ExprInstanceofNode instanceofNode = new ExprInstanceofNode(idents);
+        astExprNodeMap.put(node, instanceofNode);
+    }
+
+    private void leaveExists(AST node)
+    {
+        log.debug(".leaveExists");
+
+        ExprPropertyExistsNode instanceofNode = new ExprPropertyExistsNode();
+        astExprNodeMap.put(node, instanceofNode);
+    }
+
+    private void leaveCast(AST node)
+    {
+        log.debug(".leaveCast");
+
+        String classIdent = node.getFirstChild().getNextSibling().getText();
+        ExprCastNode castNode = new ExprCastNode(classIdent);
+        astExprNodeMap.put(node, castNode);
+    }
+
+    private void leaveTimestamp(AST node)
+    {
+        log.debug(".leaveTimestamp");
+
+        ExprTimestampNode timeNode = new ExprTimestampNode();
+        astExprNodeMap.put(node, timeNode);
     }
 
     private void leaveArray(AST node)
@@ -433,6 +493,7 @@ public class EQLTreeWalker extends EQLBaseWalker
 
         PatternStreamSpecRaw streamSpec = new PatternStreamSpecRaw(evalNode, new LinkedList<ViewSpec>(), null);
         statementSpec.getStreamSpecs().add(streamSpec);
+        statementSpec.setExistsSubstitutionParameters(substitutionParamNodes.size() > 0);
 
         astPatternNodeMap.clear();
     }
@@ -455,6 +516,8 @@ public class EQLTreeWalker extends EQLBaseWalker
             throw new ASTWalkException("Unexpected AST tree contains left over child elements," +
                     " not all pattern nodes have been removed from AST-to-pattern nodes map");
         }
+
+        statementSpec.setExistsSubstitutionParameters(substitutionParamNodes.size() > 0);
     }
 
     private void leaveSelectionElement(AST node) throws ASTWalkException
@@ -665,6 +728,28 @@ public class EQLTreeWalker extends EQLBaseWalker
         log.debug(".leaveConstant");
         ExprConstantNode constantNode = new ExprConstantNode(ASTConstantHelper.parse(node));
         astExprNodeMap.put(node, constantNode);
+    }
+
+    // TODO
+    // Expression tree contains ExprSubstitutionNode
+    // StatementSpec contains List<ExprSubstitutionNode>
+    // createEQL() checks that the list of ExprSubstitutionNode is empty
+    // compile() unmaps and returns a EPStatementObjectModel with a List<SubstitutionExpression>
+    // client gets QueryParameters from model, calls set(index, value) methods
+    // SubstitutionExpression is marked as happy
+    // client performs create(model), code maps and checks that all SubstitutionExpression are 'happy'
+    // client can perform multiple create(model)
+
+    private void leaveSubstitution(AST node)
+    {
+        log.debug(".leaveSubstitution");
+
+        // Add the substitution parameter node, for later replacement
+        int currentSize = this.substitutionParamNodes.size();
+        ExprSubstitutionNode substitutionNode = new ExprSubstitutionNode(currentSize + 1);
+        substitutionParamNodes.add(substitutionNode);
+
+        astExprNodeMap.put(node, substitutionNode);
     }
 
     private void leaveMath(AST node)

@@ -14,6 +14,7 @@ import net.esper.collection.UniformPair;
 import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.core.ViewResourceDelegate;
+import net.esper.schedule.TimeProvider;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -46,7 +47,16 @@ public class ExprCaseNode extends ExprNode
         this.isCase2 = isCase2;
     }
 
-    public void validate(StreamTypeService streamTypeService_, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate) throws ExprValidationException
+    /**
+     * Returns true if this is a switch-type case.
+     * @return true for switch-type case, or false for when-then type
+     */
+    public boolean isCase2()
+    {
+        return isCase2;
+    }
+
+    public void validate(StreamTypeService streamTypeService_, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider) throws ExprValidationException
     {
         if (isCase2)
         {
