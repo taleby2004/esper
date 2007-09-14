@@ -1,5 +1,5 @@
 <chapter id="event_patterns">
-    <title>Event Pattern Reference</title>
+    <title>EQL Reference: Patterns</title>
     
     <sect1 id="event-pattern-intro">
         <title>Event Pattern Overview</title>
@@ -70,6 +70,10 @@
 				The example above assigned the tags <literal>spike</literal> and <literal>error</literal> to the events in the pattern. The tags are important since the
 				engine only places tagged events into the output event(s) that a pattern generates, and that the engine supplies to listeners of the pattern statement. The tags can
 				further be selected in the select-clause of an EQL statement as discussed in <xref linkend="eql-from-clause-patterns"/>.
+			</para>
+			
+			<para>
+				Patterns can also contain comments within the pattern as outlined in <xref linkend="eql-syntax-comments"/>.
 			</para>
 
 			<para>

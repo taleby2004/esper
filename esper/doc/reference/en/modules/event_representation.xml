@@ -5,7 +5,8 @@
         <title>Event Underlying Java Objects</title>
 
         <para>
-			An event is an immutable record of a past occurrence of an action or state change. An event can have a set of event properties that supply information about the event. An event also has an underlying Java object type.
+			An event is an immutable record of a past occurrence of an action or state change. Event properties capture the state information for an event.
+			An event is represented by either a POJO (plain-old Java object), a <literal>java.util.Map</literal> or a XML document via <literal>org.w3c.dom.Node</literal>.
         </para>
 
         <para>
@@ -26,7 +27,7 @@
 				<tbody>
 					<row>
 						<entry><literal>java.lang.Object</literal></entry>
-						<entry>Any Java POJO (plain-old java object) with getter methods following JavaBean conventions;  Also legacy Java classes not following JavaBean conventions</entry>
+						<entry>Any Java POJO (plain-old java object) with getter methods following JavaBean conventions;  Legacy Java classes not following JavaBean conventions can also serve as events .</entry>
 					</row>
 					<row>
 						<entry><literal>java.util.Map</literal></entry>
@@ -45,7 +46,7 @@
 	   <title>Event Properties</title>
            
 		<para>
-			Esper expressions can include simple as well as indexed, mapped and nested event properties. The table below outlines the different types of properties and their syntax in an event expression. This syntax allows statements to query deep JavaBean objects graphs, XML structures and Map events. 
+			 Event properties capture the state information for an event. Event properties be simple as well as indexed, mapped and nested event properties. The table below outlines the different types of properties and their syntax in an event expression. This syntax allows statements to query deep JavaBean objects graphs, XML structures and Map events. 
 		</para>
 
 		<table frame="topbot">
@@ -208,14 +209,14 @@ select detail?.direction? from OrderEvent]]></programlisting>
 	</sect1>
 
 	<sect1 id="eventrep-javabean">
-	   <title>Plain Java Object Events</title>
+	   <title>Plain-Old Java Object Events</title>
 
 		<para>
-			Plain Java object events are object instances that expose event properties through JavaBean-style getter methods. Events classes or interfaces do not have to be fully compliant to the JavaBean specification; however for the Esper engine to obtain event properties, the required JavaBean getter methods must be present.
+			Plain-old Java object events are object instances that expose event properties through JavaBeans-style getter methods. Events classes or interfaces do not have to be fully compliant to the JavaBean specification; however for the Esper engine to obtain event properties, the required JavaBean getter methods must be present.
 		</para>
 
 		<para>
-			Esper supports JavaBean-style event classes that extend a superclass or implement one or more interfaces. Also, Esper event pattern and EQL statements can refer to Java interface classes and abstract classes. 
+			Esper supports JavaBeans-style event classes that extend a superclass or implement one or more interfaces. Also, Esper event pattern and EQL statements can refer to Java interface classes and abstract classes. 
 		</para>
 
 		<para>
@@ -288,7 +289,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 			</para>
 
 			<para>
-				All event pattern and EQL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions.
+				All event pattern and EQL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions:
 			</para>
 
 <programlisting><![CDATA[every EmployeeEvent(firstName='myName')
@@ -367,7 +368,7 @@ epRuntime.sendEvent(event, "CarLocUpdateEvent");]]></programlisting>
 		
 		<para>
 			The engine can also query Java objects as values in a <literal>Map</literal> event via the nested property syntax. Thus <literal>Map</literal> events can be used to 
-			aggregate multiple datastructures into a single event and query the composite information in a convenient way. The example below demonstrates a <literal>Map</literal> event with a transaction and an account object.
+			aggregate multiple data structures into a single event and query the composite information in a convenient way. The example below demonstrates a <literal>Map</literal> event with a transaction and an account object.
 		</para>
 		<programlisting><![CDATA[Map event = new HashMap();
 event.put("txn", txn);

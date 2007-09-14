@@ -471,7 +471,7 @@ desc.addXPathProperty("name2", "/element/subelement", XPathConstants.NUMBER);
 configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 
 			<para>
-				 The next example presents all relevant configuration options in a sample configuration entry.
+				 The next example presents configuration options in a sample configuration entry.
 			</para>
 
 			<programlisting><![CDATA[<event-type alias="AutoIdRFIDEvent">
@@ -565,6 +565,45 @@ configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 				
 		  </sect3>
 		  
+			<sect3 id="config-xml-dom-absolute" revision="1">
+				<title>Absolute or Deep Property Resolution</title>
+				
+				<para>
+					This setting indicates that when properties are compiled to XPath expressions that the compilation should generate an absolute XPath expression or a deep (find element) XPath expression. 					
+				</para>
+
+				<para>
+					For example, consider the following statement against an event type that is represented by a XML DOM document, assuming the event type GetQuote has been configured with the engine as an XML DOM event type:
+				</para>
+				<programlisting><![CDATA[select request, request.symbol from GetQuote]]></programlisting>
+
+				<para>
+					By default, the engine compiles the "request" property name to an XPath expression "/GetQuote/request". It compiles the nested property named "request.symbol" to an XPath expression "/GetQuote/request/symbol", wherein the root element node is "GetQuote".
+				</para>
+
+				<para>
+					By setting absolute property resolution to false, the engine compiles the "request" property name to an XPath expression "//request". It compiles the nested property named "request.symbol" to an XPath expression "//request/symbol".
+					This enables these elements to be located anywhere in the XML document.
+				</para>
+
+				<para>
+					The setting is available in XML via the attribute <literal>resolve-properties-absolute</literal>.
+				</para>
+
+				<para>
+					The configuration API provides the above settings as shown here in a sample code:
+				</para>
+
+				<programlisting><![CDATA[ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
+desc.setRootElementName("GetQuote");
+desc.setDefaultNamespace("http://services.samples/xsd");
+desc.setRootElementNamespace("http://services.samples/xsd");
+desc.addNamespacePrefix("m0", "http://services.samples/xsd");
+desc.setResolvePropertiesAbsolute(false);
+configuration.addEventTypeAlias("GetQuote", desc);]]></programlisting>
+			
+		  </sect3>
+
 		</sect2>
 					
 		<sect2 id="config-class--package-imports" revision="1">
@@ -796,6 +835,85 @@ Connection connection = dataSource.getConnection();]]></programlisting>
 				</sect4>
 			</sect3>
 
+			<sect3 id="config-database-columnchangecase" revision="1">
+				<title>Column Change Case</title>
+				
+				<para>
+					This setting instructs the engine to convert to lower- or uppercase any output column names returned by your database system. When using Oracle relational database software, for example, column names
+					can be changed to lowercase via this setting.
+				</para>
+				
+				<para>
+					A sample XML configuration entry for this setting is:
+				</para>
+				<programlisting><![CDATA[<column-change-case value="lowercase"/>]]></programlisting>				
+			</sect3>
+
+			<sect3 id="config-database-sqltypes" revision="1">
+				<title>SQL Types Mapping</title>				
+				<para>
+					By providing a mapping of SQL types (<literal>java.sql.Types</literal>) to Java built-in types your code can avoid using sometimes awkward default database types and can easily change the way Esper
+					returns Java types for columns returned by a SQL query.
+				</para>
+				
+				<para>
+					The mapping maps a constant as defined by <literal>java.sql.Types</literal> to a Java built-in type of any of the following Java type names: <literal>String, BigDecimal, Boolean, Byte, Short, Int, Long, Float, Double, ByteArray, SqlDate, SqlTime, SqlTimestamp</literal>.  The Java type names are not case-sensitive.
+				</para>
+				
+				<para>
+					A sample XML configuration entry for this setting is shown next. The sample maps <literal>Types.NUMERIC</literal> (of value <literal>2</literal>) to the Java <literal>int</literal> type.
+				</para>
+				<programlisting><![CDATA[<sql-types-mapping sql-type="2" java-type="int" />]]></programlisting>				
+			</sect3>
+
+			<sect3 id="config-database-metadata" revision="1">
+				<title>Metadata Origin</title>
+				
+				<para>
+					This setting controls how the engine retrieves SQL statement metadata from JDBC prepared statements.
+				</para>
+				
+				<table frame="topbot" id="eql-grouping-aggregate-func" revision="2">
+					<title>Syntax and results of aggregate functions</title>
+					<tgroup cols="2">
+						<colspec colwidth="0.5*"/>
+						<colspec colwidth="2.0*"/>
+						<thead>
+							<row>
+								<entry>Option</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry>default</entry>
+								<entry>
+									<para>
+										By default, the engine detects the driver name and queries prepared statement metadata if the driver is not an Oracle database driver. For Oracle drivers, the engine uses
+										lexical analysis of the SQL statement to construct a sample SQL statement and then fires that statement to retrieve statement metadata.
+									</para>
+								</entry>
+							</row>
+							<row>
+								<entry>metadata</entry>
+								<entry>
+									<para>
+										The engine always queries prepared statement metadata regardless of the database driver used.
+									</para>
+								</entry>
+							</row>
+							<row>
+								<entry>sample</entry>
+								<entry>
+									<para>
+										The engine always uses lexical analysis of the SQL statement to construct a sample SQL statement, and then fires that statement to retrieve statement metadata.
+									</para>
+								</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+			</sect3>
 		</sect2>
 
 		<sect2 id="config-engine-threading" revision="1">

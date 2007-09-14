@@ -199,12 +199,17 @@ class ConfigurationParser {
         String rootElementNamespace = getOptionalAttribute(xmldomElement, "root-element-namespace");
         String schemaResource = getOptionalAttribute(xmldomElement, "schema-resource");
         String defaultNamespace = getOptionalAttribute(xmldomElement, "default-namespace");
+        String resolvePropertiesAbsoluteStr = getOptionalAttribute(xmldomElement, "resolve-properties-absolute");
 
         ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
         xmlDOMEventTypeDesc.setRootElementName(rootElementName);
         xmlDOMEventTypeDesc.setSchemaResource(schemaResource);
         xmlDOMEventTypeDesc.setRootElementNamespace(rootElementNamespace);
         xmlDOMEventTypeDesc.setDefaultNamespace(defaultNamespace);
+        if (resolvePropertiesAbsoluteStr != null)
+        {
+            xmlDOMEventTypeDesc.setResolvePropertiesAbsolute(Boolean.parseBoolean(resolvePropertiesAbsoluteStr));
+        }
         configuration.addEventTypeAlias(aliasName, xmlDOMEventTypeDesc);
 
         DOMElementIterator propertyNodeIterator = new DOMElementIterator(xmldomElement.getChildNodes());

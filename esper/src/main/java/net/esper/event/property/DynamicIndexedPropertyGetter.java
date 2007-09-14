@@ -87,11 +87,6 @@ public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase impl
         }
     }
 
-    public String toString()
-    {
-        return "DynamicMethodPropertyGetter "; // TODO
-    }
-
     private static String getGetterMethodName(String propertyName)
     {
         StringWriter writer = new StringWriter();

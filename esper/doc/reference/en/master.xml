@@ -6,10 +6,13 @@
 	<!ENTITY api SYSTEM "modules/api.xml">
 	<!ENTITY event_representation SYSTEM "modules/event_representation.xml">
 	<!ENTITY examples SYSTEM "modules/examples.xml">
-	<!ENTITY EQL SYSTEM "modules/eql.xml">
+	<!ENTITY eql SYSTEM "modules/eql_clauses.xml">
 	<!ENTITY event_pattern SYSTEM "modules/event_pattern.xml">
 	<!ENTITY references SYSTEM "modules/references.xml">
-	<!ENTITY outputmodel SYSTEM "modules/outputmodel.xml">
+	<!ENTITY operatorreference SYSTEM "modules/operatorreference.xml">
+	<!ENTITY functionreference SYSTEM "modules/functionreference.xml">
+	<!ENTITY viewreference SYSTEM "modules/viewreference.xml">
+	<!ENTITY processingmodel SYSTEM "modules/processingmodel.xml">
 	<!ENTITY extension SYSTEM "modules/extension.xml">
     <!ENTITY performance SYSTEM "modules/performance.xml">
 ]>
@@ -31,6 +34,18 @@
 			for these types of applications.
         </para>
         
+        <para>
+			This document is a resource for software developers who develop event driven applications. It also contains information that is useful for business analysts and system architects who are evaluating Esper.
+        </para>
+
+        <para>
+			It is assumed that the reader is familiar with the Java programming language.
+        </para>
+
+        <para>
+			This document is relevant in all phases of your software development project: from design to deployment and support.
+        </para>
+
 		<para>
 			If you are new to Esper, please follow these steps:
 		</para>
@@ -53,7 +68,7 @@
 			</listitem>
 			<listitem>
 				<para>
-                    Read <xref linkend="outputmodel"/> to gain insight into EQL continuous query results
+                    Read <xref linkend="processingmodel"/> to gain insight into EQL continuous query results
                 </para>
 			</listitem>
 			<listitem>
@@ -83,13 +98,19 @@
 
     &event_representation;
 
-    &outputmodel;
+    &processingmodel;
 
-    &api;
-
-    &EQL;
+    &eql;
 
     &event_pattern;
+
+    &operatorreference;
+
+    &functionreference;
+
+    &viewreference;
+
+    &api;
 
     &configuration;
 

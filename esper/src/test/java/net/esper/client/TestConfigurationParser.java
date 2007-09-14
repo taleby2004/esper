@@ -76,6 +76,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(XPathConstants.NUMBER, schemaDesc.getXPathProperties().get("element1").getType());
         assertEquals(1, schemaDesc.getNamespacePrefixes().size());
         assertEquals("samples:schemas:simpleSchema", schemaDesc.getNamespacePrefixes().get("ss"));
+        assertFalse(schemaDesc.isResolvePropertiesAbsolute());
 
         // assert mapped events
         assertEquals(1, config.getEventTypesMapEvents().size());

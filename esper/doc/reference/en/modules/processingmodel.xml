@@ -1,12 +1,12 @@
-<chapter id="outputmodel">
+<chapter id="processingmodel">
 
-    <title>Understanding the Output Model</title>
+    <title>Processing Model</title>
 
-    <sect1 id="outputmodel_intro" revision="1">
+    <sect1 id="processingmodel_intro" revision="1">
         <title>Introduction</title>
         
         <para>
-			The Esper output model is continuous:  Update listeners to statements receive updated data as soon as the engine processes events for that statement, according to the statement's choice of event streams, views, filters and output rates.
+			The Esper processing model is continuous:  Update listeners to statements receive updated data as soon as the engine processes events for that statement, according to the statement's choice of event streams, views, filters and output rates.
         </para>
 			
         <para>
@@ -46,7 +46,7 @@
 
 	</sect1>
 	
-    <sect1 id="outputmodel_nowindow" revision="1">
+    <sect1 id="processingmodel_nowindow" revision="1">
         <title>Insert Stream</title>
         <para>
 			In this section we look at the output of a very simple EQL statement. The statement selects an event stream without using a data window and without applying any filtering, as follows:
@@ -66,7 +66,7 @@
 			The diagram below shows a series of Withdrawal events 1 to 6 arriving over time. The number in parenthesis is the withdrawal amount, an event property that is used in the examples that discuss filtering. 
         </para>
 
-        <figure id="outputmodel_nowindow_flow">
+        <figure id="processingmodel_nowindow_flow">
 			<title>Output  example for a simple statement</title>
 			<mediaobject>
 				<imageobject role="fo">
@@ -83,7 +83,7 @@
         </para>
     </sect1>
 
-    <sect1 id="outputmodel_lengthwindow" revision="1">
+    <sect1 id="processingmodel_lengthwindow" revision="1">
         <title>Insert and Remove Stream</title>
         <para>
 			A length window instructs the engine to only keep the last N events for a stream. The next statement applies a length window onto the Withdrawal event stream. The statement serves to illustrate the concept of data window and events entering and leaving a data window:
@@ -103,7 +103,7 @@
 			The next diagram illustrates how the length window contents change as events arrive and shows the events posted to an update listener.
         </para>
 
-        <figure id="outputmodel_lengthwindow_flow">
+        <figure id="processingmodel_lengthwindow_flow">
 			<title>Output  example for a length window</title>
 			<mediaobject>
 				<imageobject role="fo">
@@ -129,7 +129,7 @@
 
     </sect1>
 
-    <sect1 id="outputmodel_filter" revision="1">
+    <sect1 id="processingmodel_filter" revision="1">
         <title>Filters and Where-clauses</title>
         <para>
 			Filters to event streams allow filtering events out of a given stream before events enter a data window. The statement below shows a filter that selects Withdrawal events with an amount value of 200 or more.
@@ -141,7 +141,7 @@
 			With the filter, any Withdrawal events that have an amount of less then 200 do not enter the length window and are therefore not passed to update listeners. Filters are discussed in more detail in <xref linkend="eql-from-clause-filter"/> and <xref linkend="pattern-filter"/>.
         </para>
 
-        <figure id="outputmodel_filter_flow">
+        <figure id="processingmodel_filter_flow">
 			<title>Output example for a statement with an event stream filter</title>
 			<mediaobject>
 				<imageobject role="fo">
@@ -168,7 +168,7 @@
 			as events leave the data window, only those events that pass the conditions in the where-clause are posted to listeners as old events.
         </para>
 
-        <figure id="outputmodel_where">
+        <figure id="processingmodel_where">
 			<title>Output example for a statement with where-clause</title>
 			<mediaobject>
 				<imageobject role="fo">
@@ -188,14 +188,14 @@
 select * from WithdrawalFiltered]]></programlisting>
     </sect1>
     
-    <sect1 id="outputmodel_time_window" revision="1">
+    <sect1 id="processingmodel_time_window" revision="1">
         <title>Time Windows</title>
         
         <para>
 			In this section we explain the output model of statements employing a time window view and a time batch view.
         </para>
 
-		<sect2 id="outputmodel_time_window_1" revision="1">
+		<sect2 id="processingmodel_time_window_1" revision="1">
 			<title>Time Window</title>
 
 			<para>
@@ -221,7 +221,7 @@ having amount > 1000]]></programlisting>
 				The diagram starts at a given time <literal>t</literal> and displays the contents of the time window at <literal>t + 4</literal> and <literal>t + 5 seconds</literal> and so on.
 			</para>
 
-			<figure id="outputmodel_timewindow_flow">
+			<figure id="processingmodel_timewindow_flow">
 				<title>Output example for a statement with a time window</title>
 				<mediaobject>
 					<imageobject role="fo">
@@ -262,7 +262,7 @@ having amount > 1000]]></programlisting>
 
 		</sect2>
         
-		<sect2 id="outputmodel_time_batch_1" revision="1">
+		<sect2 id="processingmodel_time_batch_1" revision="1">
 			<title>Time Batch</title>
 
 			<para>
@@ -279,7 +279,7 @@ having amount > 1000]]></programlisting>
 				The diagram starts at a given time <literal>t</literal> and displays the contents of the time window at <literal>t + 4</literal> and <literal>t + 5 seconds</literal> and so on.
 			</para>
 
-			<figure id="outputmodel_timebatch_flow">
+			<figure id="processingmodel_timebatch_flow">
 				<title>Output example for a statement with a time batch view</title>
 				<mediaobject>
 					<imageobject role="fo">
@@ -327,10 +327,10 @@ having amount > 1000]]></programlisting>
 
     </sect1>
 
-    <sect1 id="outputmodel_aggregation" revision="1">
+    <sect1 id="processingmodel_aggregation" revision="1">
         <title>Aggregation and Grouping</title>
         
-		<sect2 id="outputmodel_aggregation_irstream" revision="1">
+		<sect2 id="processingmodel_aggregation_irstream" revision="1">
 			<title>Insert and Remove Stream</title>
 			<para>
 				Statements that aggregate events via aggregations functions also post remove stream events as aggregated values change.
@@ -353,7 +353,7 @@ having amount > 1000]]></programlisting>
 			<programlisting><![CDATA[select istream count(*) as mycount from Withdrawal having count(*) = 2]]></programlisting>
 		</sect2>
 		
-		<sect2 id="outputmodel_aggregation_batch" revision="1">
+		<sect2 id="processingmodel_aggregation_batch" revision="1">
 			<title>Output for Event Batches</title>
 
 			<para>
@@ -382,7 +382,7 @@ having amount > 1000]]></programlisting>
 				Note that output rate limiting also generates batches of events following the output model as discussed here.
 			</para>
 
-			<sect3 id="outputmodel_aggregation_batch_unagg" revision="1">
+			<sect3 id="processingmodel_aggregation_batch_unagg" revision="1">
 				<title>Un-aggregated and Un-grouped</title>
 
 				<para>
@@ -394,7 +394,7 @@ having amount > 1000]]></programlisting>
 				</para>
 			</sect3>
 
-			<sect3 id="outputmodel_aggregation_batch_full_agg" revision="1">
+			<sect3 id="processingmodel_aggregation_batch_full_agg" revision="1">
 				<title>Fully Aggregated and Un-grouped</title>
 
 				<para>
@@ -407,7 +407,7 @@ from Withdrawal.win:time_batch(1 sec)]]></programlisting>
 				</para>
 			</sect3>
 
-			<sect3 id="outputmodel_aggregation_batch_event_agg" revision="1">
+			<sect3 id="processingmodel_aggregation_batch_event_agg" revision="1">
 				<title>Aggregated and Un-Grouped</title>
 
 				<para>
@@ -420,7 +420,7 @@ from Withdrawal.win:time_batch(1 sec)]]></programlisting>
 				</para>
 			</sect3>
 
-			<sect3 id="outputmodel_aggregation_batch_group_agg" revision="1">
+			<sect3 id="processingmodel_aggregation_batch_group_agg" revision="1">
 				<title>Fully Aggregated and Grouped</title>
 
 				<para>
@@ -434,7 +434,7 @@ group by account]]></programlisting>
 				</para>
 			</sect3>
 
-			<sect3 id="outputmodel_aggregation_batch_event_agg_group" revision="1">
+			<sect3 id="processingmodel_aggregation_batch_event_agg_group" revision="1">
 				<title>Aggregated and Grouped</title>
 
 				<para>
@@ -452,7 +452,7 @@ group by account]]></programlisting>
 		
     </sect1>
 
-    <sect1 id="outputmodel_eventbean" revision="1">
+    <sect1 id="processingmodel_eventbean" revision="1">
         <title><literal>EventBean</literal> Query Results</title>
         
         <para>

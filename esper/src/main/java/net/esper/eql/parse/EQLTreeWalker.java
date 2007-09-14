@@ -730,16 +730,6 @@ public class EQLTreeWalker extends EQLBaseWalker
         astExprNodeMap.put(node, constantNode);
     }
 
-    // TODO
-    // Expression tree contains ExprSubstitutionNode
-    // StatementSpec contains List<ExprSubstitutionNode>
-    // createEQL() checks that the list of ExprSubstitutionNode is empty
-    // compile() unmaps and returns a EPStatementObjectModel with a List<SubstitutionExpression>
-    // client gets QueryParameters from model, calls set(index, value) methods
-    // SubstitutionExpression is marked as happy
-    // client performs create(model), code maps and checks that all SubstitutionExpression are 'happy'
-    // client can perform multiple create(model)
-
     private void leaveSubstitution(AST node)
     {
         log.debug(".leaveSubstitution");
