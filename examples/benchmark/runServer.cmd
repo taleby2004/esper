@@ -7,7 +7,7 @@ set PATH=%JAVA_HOME%\bin;%PATH%
 
 @rem # the classpath
 @rem # you need to get an Esper distribution separately from the benchmark kit
-set CP=etc;build;lib\esper-1.10.0.jar;lib\commons-logging-1.0.3.jar;lib\cglib-full-2.0.2.jar;lib\antlr-2.7.5.jar;lib\log4j-1.2.8.jar
+set CP=etc;build;lib\esper-1.11.0.jar;lib\commons-logging-1.0.3.jar;lib\cglib-full-2.0.2.jar;lib\antlr-2.7.5.jar;lib\log4j-1.2.8.jar
 
 @rem # JVM options
 set OPT=-Xms1024m -Xmx1024m

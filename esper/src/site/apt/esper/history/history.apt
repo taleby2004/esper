@@ -12,6 +12,57 @@ Change History
 	[]
 
 
+Version 1.11.0 Update
+
+	Released September 15, 2007
+	
+	Built using Sun JDK 5.0 Update 12
+
+* API changes
+
+	* Support for statement object model (ESPER-108)
+	
+  		* allows to build, change or interrogate an object-oriented representation of a statement
+  		
+  		* round-trip between EQL and object model
+  		
+  		[]
+  		
+	* Support for precompiled statements and substitution parameters (ESPER-50, ESPER-31)
+	
+	* Support for dynamic (unchecked) properties; Support for instanceof and cast (ESPER-135)
+	
+	* Support for the StatementStopCallback to deliver events raised by plug-in views (ESPER-158)
+	
+	* Support for automatic bean aliases by specifying imported packages (ESPER-149)
+	
+	* New "current_timestamp" reserved keyword returns the current engine time (ESPER-144)
+	
+	[]
+    
+* Major changes
+    
+    * None
+
+* Minor changes	    
+	
+	* API provides timestamp with last state change in EPStatement (ESPER-144)
+
+	* Fixed issue ESPER-129 "DOM expects a Document, no error checking if not"
+
+	* Fixed issue ESPER-131 "Namespace problem using XML events and XPath properties"
+
+	* Fixed issue ESPER-134 "EPException using std:groupby without child view"
+
+	* Fixed issue ESPER-142 "Relational Database Access does not work with Oracle JDBC"
+
+	* Fixed issue ESPER-159 "Two patterns with similar filters cause duplicates reported by one pattern"
+
+	* Fixed issue ESPER-155 "BeanEventType fails on write only property"
+
+	[]
+
+
 Version 1.10.0 Update
 
 	Released July 18, 2007

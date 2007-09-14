@@ -3,7 +3,7 @@
 
 # the classpath
 # you need to get an Esper distribution separately from the benchmark kit
-CP="etc:build:patch:classes:lib/esper-1.10.0.jar:lib/commons-logging-1.0.3.jar:lib/cglib-full-2.0.2.jar:lib/antlr-2.7.5.jar:lib/log4j-1.2.8.jar"
+CP="etc:build:patch:classes:lib/esper-1.11.0.jar:lib/commons-logging-1.0.3.jar:lib/cglib-full-2.0.2.jar:lib/antlr-2.7.5.jar:lib/log4j-1.2.8.jar"
 
 # JVM options
 OPT="-Xms128m -Xmx128m"
