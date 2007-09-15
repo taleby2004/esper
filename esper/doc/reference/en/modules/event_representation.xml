@@ -314,7 +314,7 @@ where address('work').streetName = 'Park Ave'
 
 			<table frame="topbot">
 				<title>JavaBeans-style Getter Methods and Property Names</title>
-				<tgroup cols="2">
+				<tgroup cols="3">
 					<colspec colwidth="1*"/>
 					<colspec colwidth="1*"/>
 					<colspec colwidth="2*"/>
