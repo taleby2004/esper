@@ -19,6 +19,7 @@ public class ViewServiceHelper
      * new view specifications that represent merge views.
      * Merge views have the same parameter list as the (group) view they merge data for.
      * @param specifications is a list of view definitions defining the chain of views.
+     * @throws ViewProcessingException indicating that the view chain configuration is invalid
      */
     protected static void addMergeViews(List<ViewSpec> specifications)
             throws ViewProcessingException

@@ -307,6 +307,63 @@ every EmployeeEvent(subordinate[0].address('home').streetName='Water Street')
 from EmployeeEvent
 where address('work').streetName = 'Park Ave'
 ]]></programlisting>
+
+			<para>
+				Property names follows Java standards: the class <literal>java.beans.Introspector</literal> and method <literal>getBeanInfo</literal> returns the property names as derived from the name of getter methods. In addition, Esper configuration provides a flag to turn off case-sensitive property names. A sample list of getter methods and property names is: 
+			</para>
+
+			<table frame="topbot">
+				<title>JavaBeans-style Getter Methods and Property Names</title>
+				<tgroup cols="2">
+					<colspec colwidth="1*"/>
+					<colspec colwidth="1*"/>
+					<colspec colwidth="2*"/>
+					<thead>
+						<row>
+							<entry>Method</entry>
+							<entry>Property Name</entry>
+							<entry>Example</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>getPrice()</literal></entry>
+							<entry>price</entry>
+							<entry><synopsis>select price from MyEvent</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>getNAME()</literal></entry>
+							<entry>NAME</entry>
+							<entry><synopsis>select NAME from MyEvent</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>getItemDesc()</literal></entry>
+							<entry>itemDesc</entry>
+							<entry><synopsis>select itemDesc from MyEvent</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>getQ()</literal></entry>
+							<entry>q</entry>
+							<entry><synopsis>select q from MyEvent</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>getQN()</literal></entry>
+							<entry>QN</entry>
+							<entry><synopsis>select QN from MyEvent</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>getqn()</literal></entry>
+							<entry>qn</entry>
+							<entry><synopsis>select qn from MyEvent</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>gets()</literal></entry>
+							<entry>s</entry>
+							<entry><synopsis>select s from MyEvent</synopsis></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
 		</sect2>
 		
 		<para>
