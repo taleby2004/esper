@@ -16,7 +16,8 @@
 	<property name="doc.api.dir" value="${doc.dir}/api"/>
 	<property name="dist.api.dir" value="doc/javadoc/api"/>
 
-	<property name="dist_excludes" value="**/target/site/**, **/target/*classes*/**, **/target/*reports*/**, **/intellij/**, **/doc/reference/support/**, examples/terminalsvc/terminalsvc-ear/target/example-terminalsvc-ear-1.0/**, examples/terminalsvc-jse/**"/>
+	<property name="dist_excludes" value="**/target/**, **/intellij/**, **/doc/reference/support/**, examples/terminalsvc/terminalsvc-ear/target/example-terminalsvc-ear-1.0/**, examples/terminalsvc-jse/**, esper/src/**, esper/grammar/**, esper/doc/api/**, esper/doc/reference/en/**, esper/etc/regression/**, esperio/src/**, esperio/etc/regression/**, esperio/doc/api/**, esperio/doc/reference/en/**, esper/**/build.xml, build.xml, esper/**/pom.xml, esperio/**/build.xml, esperio/**/pom.xml, esper/lib/*mysql*.jar, examples/benchmark/lib/*.jar"/>
+<!--	<property name="dist_excludes" value="**/target/site/**, **/target/*classes*/**, **/target/*reports*/**, **/intellij/**, **/doc/reference/support/**, examples/terminalsvc/terminalsvc-ear/target/example-terminalsvc-ear-1.0/**, examples/terminalsvc-jse/**, esper/src/**, esper/grammer/**,  "/> For source distribution --> 
 
 	<target name="info" description="The master build is done my Maven">
 		<echo message="Please use Maven 2 to build Esper and related components. Maven build instructions are available on the website." />

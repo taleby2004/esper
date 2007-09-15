@@ -46,7 +46,7 @@ Version 1.11.0 Update
 
 * Minor changes	    
 	
-	* API provides timestamp with last state change in EPStatement (ESPER-144)
+	* API provides timestamp of last state change in EPStatement (ESPER-144)
 
 	* Fixed issue ESPER-129 "DOM expects a Document, no error checking if not"
 
