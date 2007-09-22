@@ -1057,6 +1057,12 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 		<para>
 			The statement above joins the last 30 minutes of fraud warnings with a pattern. The pattern consists of every withdrawal event that is followed by a PIN change event for the same account number. It joins the two event streams on account number.
 		</para>
+
+		<para>
+			Naturally the <literal>insert into</literal> clause also works with pattern statements:
+		</para>
+<programlisting><![CDATA[insert into ReUpEvent
+  select linkUp.ip as ip from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)]]]></programlisting>
     </sect1>
 
     <sect1 id="eql-outerjoin">
