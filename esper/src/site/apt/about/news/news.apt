@@ -1,5 +1,20 @@
 News
 
+* September 23, 2007  -  NEsper for .NET 1.10.0 Beta 1
+
+    * Feature-equivalent to Esper 1.10.0
+    
+    * Includes NEsperIO as a port of EsperIO 1.10.0
+    
+    * Addition of database support to NEsper via ADO.NET and ODBC
+    
+    * Addition of parameter style support do address quirks in the ADO.NET parameter model
+    
+    * Addition of dynamic code generation to access properties and fields
+            
+    []
+
+
 * September 15, 2007  -  Esper 1.11.0
 
     * Support for statement object model (ESPER-108)

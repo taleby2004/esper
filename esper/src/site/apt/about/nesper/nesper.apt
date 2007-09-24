@@ -7,7 +7,7 @@ NEsper for .NET
 
 	NEsper is open-source software available under the {{{http://www.opensource.org/licenses/gpl-license.php}GNU General Public License (GPL)}}.
 	The GPL licenses you the right to redistribute NEsper under specific terms. Please {{{http://www.espertech.com/partners/embedded.php}contact us}} for any inquiry.
-
+	
 Guiding Philosophy
 
 	NEsper is derived from Esper and to that end we want to ensure that
@@ -24,14 +24,28 @@ Guiding Philosophy
 
 Features
 
-	Most of the features found in Esper are also duplicated in Nesper.
-	There are some feature gaps between Nesper and Esper.  NEsper does
-	not support the following Esper features:
-	
-		* Backing datastores.  This is a gap that will be addressed in an upcoming release.
+	All of the features found in Esper are also available in Nesper. NEsper version 1.10 is
+	feature-equivalent to Esper version 1.10. 
 
 Summary
 	
 	Like its namesake, NEsper was created to make it easier to build CEP
 	and ESP applications.  NEsper is open-source software available under
 	the GNU General Public License (GPL) license.
+
+
+Note on ADO.NET and ODBC Support
+
+	NEsper has been tested with both ADO.NET and ODBC drivers to relational database access.
+	As part of the regular build, NEsper tests against a MySQL database.
+	
+	The ADO.NET database model has one huge quirk: In ADO.NET parameters and their format are dictated by the driver.  
+	As such, you can end up with a driver like the MySQL driver which is a named-parameter driver. 
+	Parameters have to be written as @name in order to be processed.  
+	ODBC is a positional-parameter driver which means that parameters must be written using ? as their parameter.  
+	
+	What makes this even worse is that the prefix (the ? or @) is defined by the driver.  
+	Oracle, SQL Server and MySQL all have potentially different prefixes.  
+	The NEsper tests exercise code that allows the user to change the the provider and positional parameter style. 
+
+
