@@ -40,7 +40,7 @@ public class TwoPatternRunnable implements Runnable
             countLoops++;
             List<SupportTradeEvent> matches = new ArrayList<SupportTradeEvent>();
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 SupportTradeEvent bean;
                 if (i % 1000 == 1)

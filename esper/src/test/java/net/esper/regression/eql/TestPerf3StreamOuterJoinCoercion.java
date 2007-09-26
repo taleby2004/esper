@@ -55,7 +55,7 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     public void testPerfCoercion3waySceneTwo()
@@ -91,7 +91,7 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     public void testPerfCoercion3waySceneThree()
@@ -127,7 +127,7 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     private void sendEvent(String string, int intBoxed, long longBoxed, double doubleBoxed)

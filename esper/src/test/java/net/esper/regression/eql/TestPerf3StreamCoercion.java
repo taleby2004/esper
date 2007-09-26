@@ -50,7 +50,7 @@ public class TestPerf3StreamCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     public void testPerfCoercion3waySceneTwo()

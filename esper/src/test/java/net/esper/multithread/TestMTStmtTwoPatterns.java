@@ -51,13 +51,13 @@ public class TestMTStmtTwoPatterns extends TestCase
         TwoPatternRunnable runnable = new TwoPatternRunnable(engine);
         Thread t = new Thread(runnable);
         t.start();
-        Thread.sleep(1000);
+        Thread.sleep(100);
 
         // Create a second pattern, wait 500 msec, destroy second pattern in a loop
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 10; i++)
         {
             EPStatement statement = engine.getEPAdministrator().createPattern(statementTwo);
-            Thread.sleep(500);
+            Thread.sleep(200);
             statement.destroy();
         }
 

@@ -1,4 +1,4 @@
- <!--
+<!--
 Use these lifecyle phases :
 mvn compile
 mvn test
@@ -13,7 +13,6 @@ mvn jar:jar
 mvn install:install
 mvn javadoc:javadoc
 -->
-
 <project>
 	<modelVersion>4.0.0</modelVersion>
 	<name>Esper</name>
@@ -21,8 +20,20 @@ mvn javadoc:javadoc
 	<groupId>esper</groupId>
 	<version>1.11.0</version>
 	<packaging>jar</packaging>
-	<description>Esper CEP engine for Java</description>
 	<inceptionYear>2005</inceptionYear>
+	<url>http://esper.codehaus.org</url>
+	<description>Event stream and complex event processing component</description>
+	<licenses>
+		<license>
+			<name>GNU General Public License Version 2</name>
+			<url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<scm>
+		<url>http://svn.codehaus.org/esper</url>
+		<connection>http://xircles.codehaus.org/projects/esper/repo</connection>
+	</scm>
 	<dependencies>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -54,7 +65,7 @@ mvn javadoc:javadoc
 			<artifactId>mysql-connector-java</artifactId>
 			<version>3.1.14</version>
 		</dependency>
-    </dependencies>
+	</dependencies>
 	<build>
 		<plugins>
 			<plugin>
@@ -82,12 +93,12 @@ mvn javadoc:javadoc
 			</plugin>
 			<plugin>
 				<artifactId>maven-site-plugin</artifactId>
-              			<configuration>
+				<configuration>
 					<locales>en</locales>
 					<templateFile>src/site/site.vm</templateFile>
 				</configuration>
 			</plugin>
-            <plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
@@ -111,9 +122,9 @@ mvn javadoc:javadoc
 		</testResources>
 	</build>
 	<distributionManagement>
-	  <site>
-	    <id>Esper</id>
-	    <url>webdav://dav.codehaus.org/esper</url>
-	  </site>
+		<site>
+			<id>Esper</id>
+			<url>webdav://dav.codehaus.org/esper</url>
+		</site>
 	</distributionManagement>
 </project>
