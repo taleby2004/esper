@@ -18,7 +18,7 @@
 ]>
 <book lang="en">
 	<bookinfo>
-		<title>Esper - Java Event Stream Processor </title>
+		<title>Esper - Java Complex Event (CEP) and Event Stream (ESP) Processor</title>
 		<subtitle>Esper Reference Documentation</subtitle>
 		<releaseinfo>1.11.0</releaseinfo>
 	</bookinfo>

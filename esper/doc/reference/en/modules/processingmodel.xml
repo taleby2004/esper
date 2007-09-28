@@ -327,13 +327,39 @@ having amount > 1000]]></programlisting>
 
     </sect1>
 
+	<sect1 id="processingmodel_batch" revision="1">
+		<title>Batch Windows</title>
+
+		<para>
+			The built-in data windows that act on batches of events are the <literal>win:time_batch</literal> and the <literal>win:length_batch</literal> views. The <literal>win:time_batch</literal> data window collects events arriving during a given time interval and posts collected events as a batch to listeners at the end of the time interval. The <literal>win:length_batch</literal> data window collects a given number of events and posts collected events as a batch to listeners when the given number of events has collected.
+		</para>
+
+		<para>
+			Let's look at how a time batch window may be used:
+		</para>
+		<programlisting><![CDATA[select account, amount from Withdrawal.win:time_batch(1 sec)]]></programlisting>
+
+		<para>
+			The above statement collects events arriving during a one-second interval, at the end of which the engine posts the collected events as new events (insert stream) to each listener. The engine posts the events collected during the prior batch as old events (remove stream). The engine starts posting events to listeners one second after it receives the first event and thereon.
+		</para>
+
+		<para>
+			For statements containing aggregation functions and/or a <literal>group by</literal> clause, the engine posts consolidated aggregation results for an event batch. For example, consider the following statement:
+		</para>
+		<programlisting><![CDATA[select sum(amount) as mysum from Withdrawal.win:time_batch(1 sec)]]></programlisting>				
+
+		<para>
+			Note that output rate limiting also generates batches of events following the output model as discussed here.
+		</para>
+	</sect1>
+
     <sect1 id="processingmodel_aggregation" revision="1">
         <title>Aggregation and Grouping</title>
         
 		<sect2 id="processingmodel_aggregation_irstream" revision="1">
 			<title>Insert and Remove Stream</title>
 			<para>
-				Statements that aggregate events via aggregations functions also post remove stream events as aggregated values change.
+				Statements that aggregate events via aggregation functions also post remove stream events as aggregated values change.
 			</para>
 	
 			<para>
@@ -353,33 +379,23 @@ having amount > 1000]]></programlisting>
 			<programlisting><![CDATA[select istream count(*) as mycount from Withdrawal having count(*) = 2]]></programlisting>
 		</sect2>
 		
-		<sect2 id="processingmodel_aggregation_batch" revision="1">
-			<title>Output for Event Batches</title>
+		<sect2 id="processingmodel_aggregation_output" revision="1">
+			<title>Output for Aggregations</title>
 
 			<para>
-				The built-in data windows that act on batches of events are the <literal>win:time_batch</literal> and the <literal>win:length_batch</literal> views. The <literal>win:time_batch</literal> data window collects events arriving during a given time interval and posts collected events as a batch to listeners at the end of the time interval. The <literal>win:length_batch</literal> data window collects a given number of events and posts collected events as a batch to listeners when the given number of events has collected.
-			</para>
-	
-			<para>
-				Let's look at how a time batch window may be used:
-			</para>
-			<programlisting><![CDATA[select account, amount from Withdrawal.win:time_batch(1 sec)]]></programlisting>
-
-			<para>
-				The above statement collects events arriving during a one-second interval, at the end of which the engine posts the collected events as new events (insert stream) to each listener. The engine posts the events collected during the prior batch as old events (remove stream). The engine starts posting events to listeners one second after it receives the first event and thereon.
+				Following SQL (Standard Query Language) standards for queries against relational databases, the presence or absence of aggregation functions and the presence or absence of the <literal>group by</literal> clause dictates the number of rows posted by the engine to listeners. The next sections outline the output model for batched events under aggregation and grouping. The examples also apply to data windows that don't batch events and post results continously as events arrive or leave data windows. The examples also apply to patterns providing events when a complete pattern matches.
 			</para>
 
 			<para>
-				For statements containing aggregation functions and/or a <literal>group by</literal> clause, the engine posts consolidated aggregation results for an event batch. For example, consider the following statement:
-			</para>
-			<programlisting><![CDATA[select sum(amount) as mysum from Withdrawal.win:time_batch(1 sec)]]></programlisting>
-				
-			<para>
-				Following SQL (Standard Query Language) standards for queries against relational databases, the presence or absence of aggregation functions and the presence or absence of the <literal>group by</literal> clause dictates the number of rows posted by the engine to listeners at the end of a batch. The next sections outline the output model for batched events under aggregation and grouping.
+				In summary, as in SQL, if your query only selects aggregation values, the engine provides one row of aggregated values. It provides that row every time the aggregation is updated (insert stream), which is when events arrive or a batch of events gets processed, and when the events leave a data window or a new batch of events arrives. The remove stream then consists of prior aggregation values.
 			</para>
 
 			<para>
-				Note that output rate limiting also generates batches of events following the output model as discussed here.
+				Also as in SQL, if your query selects non-aggregated values along with aggregation values in the select clause, the engine provides a row per event. The insert stream then consists of the aggregation values at the time the event arrives, while the remove stream is the aggregation value at the time the event leaves a data window, if any is defined in your query.
+			</para>
+
+			<para>
+				The next sections provide examples for each case.
 			</para>
 
 			<sect3 id="processingmodel_aggregation_batch_unagg" revision="1">

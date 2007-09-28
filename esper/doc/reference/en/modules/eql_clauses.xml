@@ -826,11 +826,18 @@ select symbol, sum from StockTickEvent.std:groupby('symbol').stat:uni('price')</
 
 			<programlisting>select symbol, sum(price) from StockTickEvent.win:length(10) group by symbol
 // ... NOT equivalent to ...
-select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:length(10)</programlisting>
+select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:length(10) group by symbol</programlisting>
 
 			<para>
-				The key difference between the two statements is that in the first statement the length window is ungrouped and applies to all events regardless of group. While in the second query each group gets its own instance of a length window. For example, in the second query events arriving for symbol "ABC" get a length window of 10 events, and events arriving for symbol "DEF" get their own length window of 10 events. 
+				The key difference between the two statements is that in the first statement the length window is ungrouped and applies to all events regardless of group. While in the second query each group gets its own instance of a length window. For example, in the second query events arriving for symbol "ABC" get a length window of 10 events, and events arriving for symbol "DEF" get their own length window of 10 events, thus considering the last 10 events per group rather then the last 10 events overall.
 			</para>
+
+			<para>
+				It is equivalent to have a time window per group compared to an ungrouped time window, as the set of events in data windows is the same, since with each approach events are pushed out of a data window when the time period has passed:
+			</para>
+			<programlisting>select symbol, sum(price) from StockTickEvent.win:time(10 sec) group by symbol
+// ... IS equivalent to ...
+select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:time(10 sec) group by symbol</programlisting>
 
 		</sect2>
 
@@ -1025,6 +1032,15 @@ select A.customerId, A.timestamp - B.timestamp
 select A.customerId as custId, A.timestamp - B.timestamp as latency
   from EventA.win:time(30 min) A, EventB.win:time(30 min) B
  where A.txnId = B.txnId</programlisting>
+
+		<para>
+			Pattern statements can also serve as sources for event streams via the <literal>insert into</literal> keyword:
+		</para>
+
+		<programlisting>insert into ReUpEvent 
+select linkUp.ip as ip from pattern 
+    [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)] 
+</programlisting>
 	</sect1>
 
     <sect1 id="eql-join">
