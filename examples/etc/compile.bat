@@ -11,4 +11,4 @@ if not exist "..\target\classes" (
 
 set SOURCEPATH=..\src\main\java
 
-"%JAVA_HOME%"\bin\javac -d ..\target\classes -source 1.5 -sourcepath %SOURCEPATH% %SOURCEPATH%\net\esper\example\transaction\sim\TxnGenMain.java %SOURCEPATH%\net\esper\example\marketdatafeed\FeedSimMain.java %SOURCEPATH%\net\esper\example\autoid\AutoIdSimMain.java %SOURCEPATH%\net\esper\example\stockticker\monitor\StockTickerMonitor.java %SOURCEPATH%\net\esper\example\rfid\RFIDMouseDragExample.java %SOURCEPATH%\net\esper\example\rfid\LRMovingSimMain.java
+"%JAVA_HOME%"\bin\javac -d ..\target\classes -source 1.5 -sourcepath %SOURCEPATH% %SOURCEPATH%\net\esper\example\transaction\sim\TxnGenMain.java %SOURCEPATH%\net\esper\example\marketdatafeed\FeedSimMain.java %SOURCEPATH%\net\esper\example\autoid\AutoIdSimMain.java %SOURCEPATH%\net\esper\example\stockticker\monitor\StockTickerMonitor.java %SOURCEPATH%\net\esper\example\rfid\RFIDMouseDragExample.java %SOURCEPATH%\net\esper\example\rfid\LRMovingSimMain.java %SOURCEPATH%\net\esper\example\servershell\ServerShellMain.java %SOURCEPATH%\net\esper\example\servershellclient\ServerShellClientMain.java
