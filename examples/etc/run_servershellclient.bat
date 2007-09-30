@@ -1,6 +1,6 @@
 @echo off
 
-REM Script to run server shell
+REM Script to run server shell client
 REM
 
 call setenv.bat

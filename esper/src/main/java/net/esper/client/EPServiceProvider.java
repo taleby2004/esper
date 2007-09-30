@@ -48,4 +48,19 @@ public interface EPServiceProvider
      * @return provider URI
      */
     public String getURI();
+
+    /**
+     * Destroys the service.
+     * <p>
+     * Releases any resources held by the service. The service enteres a state in
+     * which operations provided by administrative and runtime interfaces originiated by the service
+     * are not guaranteed to operate properly.   
+     */
+    public void destroy();
+
+    /**
+     * Returns true if the service is in destroyed state, or false if not.
+     * @return indicator whether the service has been destroyed
+     */
+    public boolean isDestroyed();
 }

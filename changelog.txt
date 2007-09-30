@@ -1,6 +1,13 @@
 Esper Changelog
 ===================
 
+Changes in version 1.12.0
+------------------------
+
+* New example: Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
+* Destroy method available in EPServiceProvider
+
+
 Changes in version 1.11.0
 ------------------------
 

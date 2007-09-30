@@ -48,15 +48,4 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      * @return extension services context
      */
     public ExtensionServicesContext getExtensionServicesContext();
-
-    /**
-     * Destroys the service.
-     */
-    public void destroy();
-
-    /**
-     * Returns true if the service is in destroyed state, or false if not.
-     * @return indicator whether the service has been destroyed
-     */
-    public boolean isDestroyed();
 }
