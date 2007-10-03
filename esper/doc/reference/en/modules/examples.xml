@@ -1,10 +1,6 @@
 <chapter id="examples">
     <title>Examples, Tutorials, Case Studies</title>
     
-	<para>
-		The tutorial and case studies are available on the public web site at <literal>http://esper.codehaus.org/evaluating/evaluating.html</literal>.
-	</para>
-
     <sect1 id="examples-overview">
         <title>Examples Overview</title>
         
