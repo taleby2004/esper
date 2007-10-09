@@ -180,6 +180,27 @@
         </p>
       </answer>
     </faq>    
+    <faq id="resource-consumption">
+      <question>What is the footprint of Esper in a typical installation, i.e. what is the RAM, disk and CPU usage?</question>
+      <answer>
+        <p>
+          The kernel itself if very lightweight and fits in a few MB heap (in RAM).
+	  The disk usage is also limited (logs, jar file of a about 2 MB incl.
+	  third party jars, and a few KB for configuration files).
+        </p>	  
+        <p>
+	  The CPU consumption is a factor of the events entering and exiting the
+	  system, and also of the actual listeners you register with the
+	  statements.
+        </p>	 
+        <p>
+	  The heap consumption (RAM) is proportional to the number of streams
+	  and statements you deal with and the window sizes
+	  (correlating / computing average over 100 events or 100000 events, or
+	  for 10 seconds or 10 days).
+        </p>
+      </answer>
+    </faq>    
   </part>
 
   <part id="ESP and CEP">
