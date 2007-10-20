@@ -538,6 +538,10 @@ every a=F -> (
 ) where timer:within(5 min)
 </pre></div>
 
+		<p>
+			This solution works for all cases, including case 2. Even though the pattern looks for only 5 events in a row, it looks at any 5 subsequent events for the same source, matching case 2 for events F4 to F8 and S1 (the active expressions that include F1, F2 and F3 end when F6, F7 and F8 arrive).  
+		</p>
+
       </answer>
     </faq>    
 
