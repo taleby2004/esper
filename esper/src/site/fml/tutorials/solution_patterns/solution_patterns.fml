@@ -478,6 +478,69 @@ MaxReading[type='Temperature',device='A',measurement=51,confidence=99.5]</pre></
       </answer>
     </faq>    
 
+    <faq id="pattern_succes_fail">
+      <question>How do I detect a specific sequence of events and get all events that take part in this sequence?</question>
+      <answer>
+		<p>
+			I have events coming from different sources.  They have 2 states: success and failure, and they have a source. I would like to create a query to know when there are, for example, for a specific source 5 failure events followed by a success one. Of course as soon as there's a success event, the previous failure events shouldn't count anymore.
+		</p>
+			
+		<p>
+			There needs to be a maximum time to wait until a success event to arrive, since we don't want to keep looking without end for a matching success event. We'll put a maximum time to wait for a success event to arrive, let's say 5 minutes. So we'll just drop failure events after 5 minutes.
+		</p>
+
+		<p>
+			Let's look at some samples: F5 means 5th failure event, S3 means 3rd success event. Also let's say we only need 5 failure events before a success one to have an alert.
+		</p>
+
+		<p>
+		<b>Case1</b> - If within 5 minutes I have (from the same source) 
+<pre>F1 F2 F3 F4 F5 S1</pre>
+then I want to throw an alert. The alert must know about those events meaning I would like the listener to get those events.
+		</p>
+
+		<p>
+<b>Case2</b> - If within 5 minutes I have (from the same source)
+<pre>F1 F2 F3 F4 F5 F6 F7 F8 S1</pre>
+then I would have an alert knowing about F4 to F8 and S1.
+		</p>
+
+		<p>
+<b>Case3</b> - If within 5 minutes I have (from the same source)
+<pre>F1 F2 F3 F4 S1 F5 F6 S2</pre>
+then no alert would be emitted since once S1 arrives there were only 4 failure events.
+		</p>
+
+		<p>
+<b>Case4</b> - still from the same source
+<pre>F1 F2 F3 F4 (then 10 minutes later) F5 S1</pre>
+then of course no alert as all the events aren't within the 5 minutes window.
+		</p>
+
+		<p>
+<b>Case5</b> - If within 5 minutes (this time we have the sources a and b)
+<pre>F1a F1b F2a F3a F2b F4a S1b F5a F3b S1a</pre>
+No alert will be create when S1b arrive because there's only 2 failures for b. When S1a arrives an alert is created because we have F1a to F5a before, with no success concerning a in between. 
+		</p>
+
+		<p>
+			<b>Solution:</b> Since we are looking for a very specific sequence of events, a pattern is the best way to go. We want to make sure the pattern subexpressions end when a success event arrives, and this can be 
+			accomplished via the <literal>not</literal>-operator. We also want to limit the expression to live 5 minutes from the first failure event:
+		</p>
+<div class="source"><pre>
+every a=F -> (
+        (b=F(src=a.src) and not S(src=a.src)) ->
+        (c=F(src=a.src) and not S(src=a.src)) ->
+        (d=F(src=a.src) and not S(src=a.src)) ->
+        (d=F(src=a.src) and not S(src=a.src)) ->
+        (e=S(src=a.src) and not F(src=a.src))
+     )
+) where timer:within(5 min)
+</pre></div>
+
+      </answer>
+    </faq>    
+
   </part>
 
 </faqs>
