@@ -13,7 +13,7 @@ package net.esper.util;
  */
 public class ExecutionPathDebugLog
 {
-    public static Boolean isDebugEnabled;
+    public static boolean isDebugEnabled = false;
 
     /**
      * Sets execution path debug logging.

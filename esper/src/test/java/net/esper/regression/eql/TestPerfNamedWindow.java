@@ -25,6 +25,9 @@ public class TestPerfNamedWindow extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listenerWindow = new SupportUpdateListener();
+
+        // force GC
+        System.gc();
     }
 
     public void testDeletePerformance()

@@ -89,27 +89,12 @@ public class TestSortedRefCountedSet extends TestCase
         assertNull(refSet.maxValue());
         assertNull(refSet.minValue());
 
-        try
-        {
-            refSet.remove("c");
-            fail();
-        }
-        catch (IllegalStateException ex)
-        {
-            // expected
-        }
+        // nothing to remove
+        refSet.remove("c");
 
-        try
-        {
-            refSet.add("a");
-            refSet.remove("a");
-            refSet.remove("a");
-            fail();
-        }
-        catch (IllegalStateException ex)
-        {
-            // expected
-        }
+        refSet.add("a");
+        refSet.remove("a");
+        refSet.remove("a");
     }
 
     private static Log log = LogFactory.getLog(TestSortedRefCountedSet.class);

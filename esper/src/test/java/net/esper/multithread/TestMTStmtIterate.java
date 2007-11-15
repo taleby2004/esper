@@ -19,7 +19,7 @@ public class TestMTStmtIterate extends TestCase
     public void setUp()
     {
         Configuration config = new Configuration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);        
         engine = EPServiceProviderManager.getProvider("TestMTStmtIterate", config);
     }
 

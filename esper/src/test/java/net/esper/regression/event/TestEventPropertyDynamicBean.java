@@ -214,7 +214,7 @@ public class TestEventPropertyDynamicBean extends TestCase
         assertEquals(inner.getMapped("keyOne"), event.get("mapped"));
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 50000; i++)
+        for (int i = 0; i < 10000; i++)
         {
             epService.getEPRuntime().sendEvent(inner);
             if (i % 1000 == 0)
@@ -224,6 +224,6 @@ public class TestEventPropertyDynamicBean extends TestCase
         }
         long end = System.currentTimeMillis();
         long delta = end - start;
-        assertTrue("delta=" + delta, delta < 2000);
+        assertTrue("delta=" + delta, delta < 1000);
     }
 }
