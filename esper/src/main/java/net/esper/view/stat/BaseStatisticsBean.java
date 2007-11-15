@@ -172,8 +172,7 @@ public class BaseStatisticsBean implements Cloneable, Serializable
             return Double.NaN;
         }
 
-        double variance = (sumXSq - sumX * sumX / dataPoints) / (dataPoints - 1);
-        return variance;
+        return (sumXSq - sumX * sumX / dataPoints) / (dataPoints - 1);
     }
 
     /**
@@ -188,8 +187,7 @@ public class BaseStatisticsBean implements Cloneable, Serializable
             return Double.NaN;
         }
 
-        double variance = (sumYSq - sumY * sumY / dataPoints) / (dataPoints - 1);
-        return variance;
+        return (sumYSq - sumY * sumY / dataPoints) / (dataPoints - 1);
     }
 
     /**

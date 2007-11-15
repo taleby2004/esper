@@ -147,8 +147,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
         {
             return new NullIterator();
         }
-        SingleEventIterator iterator = new SingleEventIterator(selectNewEvents[0]);
-        return iterator;
+        return new SingleEventIterator(selectNewEvents[0]);
     }
 
     public Iterator<EventBean> getIterator(Set<MultiKey<EventBean>> joinSet)

@@ -104,8 +104,7 @@ public final class JMXLastCubeElementDynamicMBean implements JMXLastElementObser
     {
         if (cells.containsKey(attribute))
         {
-            Object value = cells.get(attribute);
-            return value;
+            return cells.get(attribute);
         }
         if (tables.containsKey(attribute))
         {

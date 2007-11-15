@@ -157,9 +157,8 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
                 EventBean nextEvent = parentIterator.next();
                 if (mustAddProperty)
                 {
-                    EventBean event = addProperty(nextEvent, propertyNames, propertyValues, eventType,
+                    return addProperty(nextEvent, propertyNames, propertyValues, eventType,
                             statementContext.getEventAdapterService());
-                    return event;
                 }
                 else
                 {

@@ -57,8 +57,7 @@ public class PropertyIndTableCoerceAll extends PropertyIndTableCoerceAdd
             }
         }
         MultiKeyUntyped key = new MultiKeyUntyped(keys);
-        Set<EventBean> events = propertyIndex.get(key);
-        return events;
+        return propertyIndex.get(key);
     }
 
 }

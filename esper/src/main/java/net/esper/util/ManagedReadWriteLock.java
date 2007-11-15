@@ -7,6 +7,9 @@
  **************************************************************************************/
 package net.esper.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.TimeUnit;
 
@@ -16,6 +19,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ManagedReadWriteLock
 {
+    private static final Log log = LogFactory.getLog(ManagedReadWriteLock.class);
+    
     /**
      * Acquire text.
      */
@@ -92,6 +97,7 @@ public class ManagedReadWriteLock
         }
         catch (InterruptedException ex)
         {
+            log.warn("Lock wait interupted");
         }
 
         if (ThreadLogUtil.ENABLED_TRACE)

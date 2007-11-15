@@ -52,7 +52,7 @@ public class UuidGenerator {
         long timeNow = System.currentTimeMillis();
 
         // get int value as unsigned
-        int timeLow = (int) timeNow & 0xFFFFFFFF;
+        int timeLow = (int) timeNow;
         int node = s_seeder.nextInt();
         return (hexFormat(timeLow, 8) + s_midValue + hexFormat(node, 8));
     }

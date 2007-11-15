@@ -9,10 +9,10 @@ Changes in version 1.12.0
 * New multi-policy tumbling window (ESPER-165)
 * New accumulating time-based data window (ESPER-166)
 * New safe iterator to provide a concurrent-safe pull API (ESPER-172)
-* Added unmatched event that receives a callback if an event matches no statement (ESPER-160)
 * Support for indexing of cached result sets of SQL poll queries
 * Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)
 * Support for iterator and safe iterator to iterate over joins and outer joins (ESPER-173)
+* Added unmatched event listener that receives a callback if an event matches no statement (ESPER-160)
 * New example: Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
 
 Changes in version 1.11.0

@@ -273,8 +273,7 @@ public final class MultiDimStatsView extends ViewSupport implements CloneableVie
 
         Map<String, Object> result = new HashMap<String, Object>();
         result.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), cube);
-        EventBean eventBean = statementContext.getEventAdapterService().createMapFromValues(result, eventType);
-        return eventBean;
+        return statementContext.getEventAdapterService().createMapFromValues(result, eventType);
     }
 
     /**
@@ -286,8 +285,7 @@ public final class MultiDimStatsView extends ViewSupport implements CloneableVie
     {
         Map<String, Class> schemaMap = new HashMap<String, Class>();
         schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
-        EventType eventType = statementContext.getEventAdapterService().createAnonymousMapType(schemaMap);
-        return eventType;
+        return statementContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }
     
     private static final Log log = LogFactory.getLog(MultiDimStatsView.class);

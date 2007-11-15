@@ -179,7 +179,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
      * @param result is the resulting list of MatchedEventMap
      * @param matchEvent is the start MatchedEventMap to generate from
      */
-    protected final static void generateMatchEvents(ArrayList<List<MatchedEventMap>> eventList,
+    protected static void generateMatchEvents(ArrayList<List<MatchedEventMap>> eventList,
                                                    int index,
                                                    List<MatchedEventMap> result,
                                                    MatchedEventMap matchEvent)

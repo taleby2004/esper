@@ -55,7 +55,7 @@ public final class IntValue extends PrimitiveValueBase
      * @param value to parse
      * @return parsed value
      */
-    public final static int parseString(String value)
+    public static int parseString(String value)
     {
         return Integer.parseInt(value);
     }

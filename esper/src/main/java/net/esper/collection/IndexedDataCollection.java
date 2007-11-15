@@ -69,8 +69,7 @@ public final class IndexedDataCollection
      */
     public final List<Object> get(Object key)
     {
-        LinkedList<Object> listOfBeans = eventIndex.get(key);
-        return listOfBeans;
+        return eventIndex.get(key);
     }
 
 

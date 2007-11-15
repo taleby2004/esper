@@ -340,6 +340,7 @@ public class PollingViewableFactory
             }
             catch (TokenStreamException e)
             {
+                log.warn("Error parsing string '" + querySQL + "' for analysis :" + e.getMessage(), e);
             }
         }
 

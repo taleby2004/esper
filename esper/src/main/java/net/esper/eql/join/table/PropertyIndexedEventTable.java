@@ -115,8 +115,7 @@ public class PropertyIndexedEventTable implements EventTable
     public Set<EventBean> lookup(Object[] keys)
     {
         MultiKeyUntyped key = new MultiKeyUntyped(keys);
-        Set<EventBean> events = propertyIndex.get(key);
-        return events;
+        return propertyIndex.get(key);
     }
 
     private void add(EventBean event)

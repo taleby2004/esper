@@ -111,10 +111,8 @@ public class NStreamOuterQueryPlanBuilder
         BaseAssemblyNode assemblyTopNode = AssemblyStrategyTreeBuilder.build(streamNo, substreamsPerStream, requiredPerStream);
         List<BaseAssemblyNode> assemblyInstructions = BaseAssemblyNode.getDescendentNodesBottomUp(assemblyTopNode);
 
-        QueryPlanNode planNode = new LookupInstructionQueryPlanNode(streamNo, streamNames[streamNo], numStreams, requiredPerStream,
+        return new LookupInstructionQueryPlanNode(streamNo, streamNames[streamNo], numStreams, requiredPerStream,
                 lookupInstructions, assemblyInstructions);
-
-        return planNode;
     }
 
     private static List<LookupInstructionPlan> buildLookupInstructions(

@@ -128,8 +128,7 @@ public class ConstructorHelper
     // Try to find an Object[] constructor
     private static Constructor getObjectArrayConstructor(Class clazz) throws NoSuchMethodException
     {
-        Constructor ctor = clazz.getConstructor(EMPTY_OBJECT_ARRAY_TYPE);
-        return ctor;
+        return clazz.getConstructor(EMPTY_OBJECT_ARRAY_TYPE);
     }
 
     private static void logConstructors(Class clazz)

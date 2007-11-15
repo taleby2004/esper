@@ -88,8 +88,7 @@ public class ExprMathNode extends ExprNode
         }
 
         // arithTypeEnumComputer is initialized by validation
-        Object result = arithTypeEnumComputer.compute((Number) valueChildOne, (Number) valueChildTwo);
-        return result;
+        return arithTypeEnumComputer.compute((Number) valueChildOne, (Number) valueChildTwo);
     }
 
     public String toExpressionString()

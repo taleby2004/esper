@@ -137,7 +137,7 @@ public class JavaClassHelper
      * @param parameterization type to assign to
      * @return true if assignment compatible, false if not
      */
-    public static final boolean isAssignmentCompatible(Class parameterType, Class parameterization)
+    public static boolean isAssignmentCompatible(Class parameterType, Class parameterization)
     {
         if (parameterType.isAssignableFrom(parameterization))
         {

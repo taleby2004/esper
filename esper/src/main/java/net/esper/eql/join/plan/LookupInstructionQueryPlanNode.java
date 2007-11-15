@@ -67,10 +67,8 @@ public class LookupInstructionQueryPlanNode extends QueryPlanNode
             count++;
         }
 
-        LookupInstructionExecNode execNode = new LookupInstructionExecNode(rootStream, rootStreamName,
+        return new LookupInstructionExecNode(rootStream, rootStreamName,
                 numStreams, execs, requiredPerStream, assemblyInstructions.toArray(new BaseAssemblyNode[0]));
-
-        return execNode;
     }
 
     protected void print(IndentWriter writer)

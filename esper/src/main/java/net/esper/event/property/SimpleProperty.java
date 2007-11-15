@@ -42,11 +42,11 @@ public class SimpleProperty extends PropertyBase
 
     public Class getPropertyTypeMap()
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     public EventPropertyGetter getGetterMap()
     {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }

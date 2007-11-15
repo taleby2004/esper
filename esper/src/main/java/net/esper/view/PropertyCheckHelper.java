@@ -112,8 +112,7 @@ public final class PropertyCheckHelper
      */
     private static Class getClass(EventType type, String fieldName)
     {
-        Class clazz = type.getPropertyType(fieldName);
-        return clazz;
+        return type.getPropertyType(fieldName);
     }
 
     // Perform the schema checking for if a field exists and is numeric

@@ -13,7 +13,6 @@ public class NamedWindowProcessor
 {
     private final NamedWindowTailView tailView;
     private final NamedWindowRootView rootView;
-    private final String windowName;
     private final EventType eventType;
 
     /**
@@ -24,7 +23,6 @@ public class NamedWindowProcessor
      */
     public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType)
     {
-        this.windowName = windowName;
         this.eventType = eventType;
 
         rootView = new NamedWindowRootView();

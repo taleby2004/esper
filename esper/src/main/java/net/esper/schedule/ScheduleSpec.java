@@ -173,8 +173,7 @@ public final class ScheduleSpec implements MetaDefItem
         {
             if (entry.getValue() != null)
             {
-                Integer firstValue = entry.getValue().iterator().next();
-                hashCode ^= firstValue;
+                hashCode ^= entry.getValue().iterator().next();
             }
         }
         return hashCode;

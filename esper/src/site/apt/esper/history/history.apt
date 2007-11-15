@@ -12,6 +12,50 @@ Change History
 	[]
 
 
+Version 1.12.0 Update
+
+	Released Novemeber 19, 2007
+	
+	Built using Sun JDK 5.0 Update 12; Tested and certified for JDK 6 Update 1.3 with exceptions as below
+
+* API changes
+
+	* New statement object model for creating named windows and for specifying on-delete statements
+	
+	[]
+    
+* Major changes
+    
+	* New feature 'named windows': Allows to share data windows between statements; Explicitly defines entry criteria via insert-into; Allows exit criteria via on-delete
+
+	* New time-ordering window for more flexibility in handling out-of-order events (ESPER-147)
+
+	* New multi-policy tumbling window (ESPER-165)
+
+	* New accumulating time-based data window (ESPER-166)
+
+	* New safe iterator to provide a concurrent-safe pull API (ESPER-172)
+
+	* Added unmatched event listener that receives a callback if an event matches no statement (ESPER-160)
+
+	* Support for iterator and safe iterator to iterate over joins and outer joins (ESPER-173)
+
+	[]
+
+* Minor changes	    	
+
+	* Support for indexing of cached result sets of SQL poll queries
+
+	* Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)
+
+	* New example: Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
+	
+	* JDK6 - certified, exception: XML DOM support requires native JDK 6 build
+
+	[]
+	
+
+
 Version 1.11.0 Update
 
 	Released September 15, 2007

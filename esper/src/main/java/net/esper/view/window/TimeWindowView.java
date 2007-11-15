@@ -12,9 +12,9 @@ import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.schedule.ScheduleSlot;
 import net.esper.util.ExecutionPathDebugLog;
 import net.esper.view.CloneableView;
+import net.esper.view.DataWindowView;
 import net.esper.view.View;
 import net.esper.view.ViewSupport;
-import net.esper.view.DataWindowView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,7 +38,6 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
     private final long millisecondsBeforeExpiry;
     private final TimeWindow timeWindow;
     private final ViewUpdatedCollection viewUpdatedCollection;
-    private final boolean isRemoveStreamHandling;
     private final StatementContext statementContext;
     private final ScheduleSlot scheduleSlot;
 
@@ -60,7 +59,6 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         this.viewUpdatedCollection = viewUpdatedCollection;
         this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
         this.timeWindow = new TimeWindow(isRemoveStreamHandling);
-        this.isRemoveStreamHandling = isRemoveStreamHandling;
     }
 
     public View cloneView(StatementContext statementContext)

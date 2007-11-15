@@ -31,7 +31,7 @@ tokens
 	protected void setIsPatternWalk(boolean isPatternWalk) throws SemanticException {}
 	protected void endPattern() throws SemanticException {}
 	
-	protected void pushStmtContext() throws SemanticException {};
+	protected void pushStmtContext() throws SemanticException {}
 	protected void leaveNode(AST node) throws SemanticException {}
 	protected void end() throws SemanticException {}
 }
@@ -108,7 +108,7 @@ outerJoinIdent
 	;
 
 streamExpression
-	:	#(v:STREAM_EXPR (eventFilterExpr | patternInclusionExpression | databaseJoinExpression | referenceJoinExpression) (viewListExpr)? (IDENT)? { leaveNode(#v); } )
+	:	#(v:STREAM_EXPR (eventFilterExpr | patternInclusionExpression | databaseJoinExpression) (viewListExpr)? (IDENT)? { leaveNode(#v); } )
 	;
 
 patternInclusionExpression
@@ -119,10 +119,6 @@ databaseJoinExpression
 	:	#(d:DATABASE_JOIN_EXPR IDENT (STRING_LITERAL | QUOTED_STRING_LITERAL) (STRING_LITERAL | QUOTED_STRING_LITERAL)?)
 	;
 	
-referenceJoinExpression
-	:	#(r:REFERENCE_JOIN_EXPR IDENT (valueExpr)*)
-	;
-
 viewListExpr
 	:	viewExpr (viewExpr)*
 	;

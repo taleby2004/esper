@@ -113,14 +113,17 @@ public abstract class ObjectSpec implements MetaDefItem
     public final String toString()
     {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("objectName=" + objectName + "  objectParameters=(");
+        buffer.append("objectName=");
+        buffer.append(objectName);
+        buffer.append("  objectParameters=(");
         char delimiter = ' ';
 
         if (objectParameters != null)
         {
             for (Object param : objectParameters)
             {
-                buffer.append(delimiter + param.toString());
+                buffer.append(delimiter);
+                buffer.append(param.toString());
                 delimiter = ',';
             }
         }

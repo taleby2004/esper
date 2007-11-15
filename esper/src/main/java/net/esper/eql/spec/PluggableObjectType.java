@@ -22,5 +22,5 @@ public enum PluggableObjectType
     /**
      * View object type.
      */
-    VIEW;
+    VIEW
 }

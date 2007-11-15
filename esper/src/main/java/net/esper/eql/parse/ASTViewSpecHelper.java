@@ -40,7 +40,6 @@ public class ASTViewSpecHelper implements EqlTokenTypes
             child = child.getNextSibling();
         }
 
-        ViewSpec viewSpec = new ViewSpec(objectNamespace, objectName, objectParams);
-        return viewSpec;
+        return new ViewSpec(objectNamespace, objectName, objectParams);
     }
 }

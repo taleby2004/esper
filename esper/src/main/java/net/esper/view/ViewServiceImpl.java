@@ -102,9 +102,7 @@ public final class ViewServiceImpl implements ViewService
             ViewSupport.dumpChildViews("EventStream ", eventStreamViewable);
         }
 
-        View lastView = views.get(views.size() - 1);
-
-        return lastView;
+        return views.get(views.size() - 1);
     }
 
     public void remove(EventStream eventStream, Viewable viewToRemove)

@@ -116,8 +116,7 @@ public enum BitWiseOpEnum
         {
         	Byte n1 = (Byte) objOne;
         	Byte n2 = (Byte) objTwo;
-            Byte result = (byte) (n1.byteValue() & n2.byteValue());
-            return result;
+            return (byte) (n1.byteValue() & n2.byteValue());
         }
     }
     /**
@@ -129,8 +128,7 @@ public enum BitWiseOpEnum
         {
         	Byte n1 = (Byte) objOne;
         	Byte n2 = (Byte) objTwo;
-            Byte result = (byte) (n1.byteValue() | n2.byteValue());
-            return result;
+            return (byte) (n1.byteValue() | n2.byteValue());
         }
     }
     /**
@@ -142,8 +140,7 @@ public enum BitWiseOpEnum
         {
         	Byte n1 = (Byte) objOne;
         	Byte n2 = (Byte) objTwo;
-            Byte result = (byte) (n1.byteValue() ^ n2.byteValue());
-            return result;
+            return (byte) (n1.byteValue() ^ n2.byteValue());
         }
     }
 
@@ -159,8 +156,7 @@ public enum BitWiseOpEnum
         {
         	Short n1 = (Short) objOne;
         	Short n2 = (Short) objTwo;
-            Short result = (short) (n1.shortValue() & n2.shortValue());
-            return result;
+            return (short) (n1.shortValue() & n2.shortValue());
         }
     }
     /**
@@ -172,8 +168,7 @@ public enum BitWiseOpEnum
         {
         	Short n1 = (Short) objOne;
         	Short n2 = (Short) objTwo;
-            Short result = (short) (n1.shortValue() | n2.shortValue());
-            return result;
+            return (short) (n1.shortValue() | n2.shortValue());
         }
     }
     /**
@@ -185,8 +180,7 @@ public enum BitWiseOpEnum
         {
         	Short n1 = (Short) objOne;
         	Short n2 = (Short) objTwo;
-            Short result = (short) (n1.shortValue() ^ n2.shortValue());
-            return result;
+            return (short) (n1.shortValue() ^ n2.shortValue());
         }
     }
 
@@ -202,8 +196,7 @@ public enum BitWiseOpEnum
         {
         	Integer n1 = (Integer) objOne;
         	Integer n2 = (Integer) objTwo;
-            Integer result = n1.intValue() & n2.intValue();
-            return result;
+            return n1.intValue() & n2.intValue();
         }
     }
     /**
@@ -215,8 +208,7 @@ public enum BitWiseOpEnum
         {
         	Integer n1 = (Integer) objOne;
         	Integer n2 = (Integer) objTwo;
-        	Integer result = n1.intValue() | n2.intValue();
-            return result;
+        	return n1.intValue() | n2.intValue();
         }
     }
     /**
@@ -228,8 +220,7 @@ public enum BitWiseOpEnum
         {
         	Integer n1 = (Integer) objOne;
         	Integer n2 = (Integer) objTwo;
-        	Integer result = n1.intValue() ^ n2.intValue();
-            return result;
+        	return n1.intValue() ^ n2.intValue();
         }
     }
 
@@ -245,8 +236,7 @@ public enum BitWiseOpEnum
         {
         	Long n1 = (Long) objOne;
         	Long n2 = (Long) objTwo;
-            Long result = n1.longValue() & n2.longValue();
-            return result;
+            return n1.longValue() & n2.longValue();
         }
     }
     /**
@@ -258,8 +248,7 @@ public enum BitWiseOpEnum
         {
         	Long n1 = (Long) objOne;
         	Long n2 = (Long) objTwo;
-        	Long result = n1.longValue() | n2.longValue();
-            return result;
+        	return n1.longValue() | n2.longValue();
         }
     }
     /**
@@ -271,8 +260,7 @@ public enum BitWiseOpEnum
         {
         	Long n1 = (Long) objOne;
         	Long n2 = (Long) objTwo;
-        	Long result = n1.longValue() ^ n2.longValue();
-            return result;
+        	return n1.longValue() ^ n2.longValue();
         }
     }
 
@@ -288,8 +276,7 @@ public enum BitWiseOpEnum
         {
         	Boolean b1 = (Boolean) objOne;
         	Boolean b2 = (Boolean) objTwo;
-        	Boolean result = b1.booleanValue() & b2.booleanValue();
-            return result;
+        	return b1.booleanValue() & b2.booleanValue();
         }
     }
     /**
@@ -301,8 +288,7 @@ public enum BitWiseOpEnum
         {
         	Boolean b1 = (Boolean) objOne;
         	Boolean b2 = (Boolean) objTwo;
-        	Boolean result = b1.booleanValue() | b2.booleanValue();
-            return result;
+        	return b1.booleanValue() | b2.booleanValue();
         }
     }
     /**
@@ -314,8 +300,7 @@ public enum BitWiseOpEnum
         {
         	Boolean b1 = (Boolean) objOne;
         	Boolean b2 = (Boolean) objTwo;
-        	Boolean result = b1.booleanValue() ^ b2.booleanValue();
-            return result;
+        	return b1.booleanValue() ^ b2.booleanValue();
         }
     }
 

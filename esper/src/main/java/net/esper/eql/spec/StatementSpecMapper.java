@@ -1062,8 +1062,7 @@ public class StatementSpecMapper
             expr.add(exprNode);
         }
 
-        FilterSpecRaw raw = new FilterSpecRaw(filter.getEventTypeAlias(), expr);
-        return raw;
+        return new FilterSpecRaw(filter.getEventTypeAlias(), expr);
     }
 
     private static Filter unmapFilter(FilterSpecRaw filter, StatementSpecUnMapContext unmapContext)

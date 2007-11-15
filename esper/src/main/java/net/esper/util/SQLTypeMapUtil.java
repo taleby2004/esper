@@ -114,8 +114,7 @@ public class SQLTypeMapUtil
             }
             try
             {
-                Class clazz = Class.forName(className);
-                return clazz;
+                return Class.forName(className);
             }
             catch (ClassNotFoundException e)
             {

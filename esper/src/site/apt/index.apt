@@ -21,7 +21,7 @@ Technology Introduction
 	
 	* Network and application monitoring (intrusion detection, SLA monitoring) 
 	
-	* Sensor network applications (RFID reading, scheduling and control of frabrication lines, air traffic) 
+	* Sensor network applications (RFID reading, scheduling and control of fabrication lines, air traffic) 
 	
 	[]
 
@@ -31,30 +31,32 @@ Features
 	
 * Event Stream Processing
 
-		* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed
+	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed
 
-		* Tumbling windows: time, length and multi-policy
+	* Tumbling windows: time, length and multi-policy
 
-		* Grouping, aggregation, sorting, filtering and merging of event streams
+	* Grouping, aggregation, sorting, filtering and merging of event streams
 
-		* Tailored SQL-like query language using <insert into>, <select>, <from>, <where>, <group-by>, <having> and <order-by> clauses
+	* Tailored SQL-like query language using <insert into>, <select>, <from>, <where>, <group-by>, <having> and <order-by> clauses
 
-		* Inner-joins and outer joins (left, right, full) of an unlimited number of streams or windows
+	* Inner-joins and outer joins (left, right, full) of an unlimited number of streams or windows
 
-		* Subqueries including <exists> and <in>
-		
-		* Output rate limiting and stabilizing
-		
-		[]
+	* Subqueries including <exists> and <in>
+
+	* Output rate limiting and stabilizing
+	
+	* Named windows allow sharing data windows between statements; Define multiple explicit entry and exit criteria for events
+
+	[]
 		
         
 * Event Pattern Matching
 
-		* Logical and temporal event correlation
+	* Logical and temporal event correlation
 
-		* Crontab-like timer <'at'> operator
+	* Crontab-like timer <'at'> operator
 
-		* Lifecyle of pattern can be controlled by timer and via operators
+	* Lifecycle of pattern can be controlled by timer and via operators
 
         * Pattern-matched events provided to listeners
 
@@ -68,7 +70,7 @@ Features
 
         * Event properties can be simple, indexed, mapped or nested - allows querying of deep Java object graphs and XML structures
         
-        * Dynamic properties allow dynamic typing of properties, suppored by <cast>, <instanceof> and <exists> functions
+        * Dynamic properties allow dynamic typing of properties, supported by <cast>, <instanceof> and <exists> functions
 
         []
         
@@ -106,8 +108,14 @@ Features
 
 * Other
 
-    * Relational database access via SQL-query joins with event streams; LRU and expiry-time query result caches
+    * Relational database access via SQL-query joins with event streams
 	
+    	* LRU (least-recently used) and expiry-time query result caches
+    	
+    	* Keyed cache entries for fast cache lookup
+    	
+    	* Engine indexes cached rows for fast filtering within a large number of SQL-query result rows
+
     * Support for both the listener (push/subscription) API and the consumer (pull/receive) API for querying results
 	
     * Supports externally-provided time as well as Java system time, allowing applications full control over the concept of time within the engine
@@ -128,8 +136,21 @@ Features
     		  
     * Pluggable architecture for event pattern and event stream analysis via user-defined functions, plug-in views, plug-in aggregation functions, plug-in 
       pattern guards and plug-in pattern event observers
+      
+    * Unmatched event listener receives a callback if an event does not match any started statement
+    
+    * Performance-minded design: query strategy analysis and index building; array-based collections; delta networks and many other techniques
+    
+    * Large number of examples showcasing integration into many environments
+    
+    * Performance benchmark kit for download
+
+    []		
+    
+* Excellent documentation 
+
+* Supportive user and developer community
 	  
-	[]		
 
 
 Typical Uses

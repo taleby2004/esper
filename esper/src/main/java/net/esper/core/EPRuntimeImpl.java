@@ -443,7 +443,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
     private void processThreadWorkQueue()
     {
         Object event;
-        while ( (event = threadWorkQueue.next()) != null)
+        while ( (event = ThreadWorkQueue.next()) != null)
         {
             EventBean eventBean;
             if (event instanceof EventBean)
@@ -483,7 +483,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             dispatch();
         }
 
-        if (!(threadWorkQueue.isEmpty()))
+        if (!(ThreadWorkQueue.isEmpty()))
         {
             processThreadWorkQueue();
         }

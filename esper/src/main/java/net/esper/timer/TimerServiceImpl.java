@@ -99,6 +99,7 @@ public final class TimerServiceImpl implements TimerService
         }
         catch (InterruptedException e)
         {
+            log.info("Timer start wait interval interruped");
         }
 
         timer = null;

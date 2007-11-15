@@ -65,8 +65,7 @@ public class MapEventType implements EventType
                     Map map = (Map) obj.getUnderlying();
 
                     // If the map does not contain the key, this is allowed and represented as null
-                    Object value = map.get(name);
-                    return value;
+                    return map.get(name);
                 }
 
                 public boolean isExistsProperty(EventBean eventBean)

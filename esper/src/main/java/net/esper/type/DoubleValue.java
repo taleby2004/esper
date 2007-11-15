@@ -40,7 +40,7 @@ public class DoubleValue extends PrimitiveValueBase
      * @param value to parse
      * @return parsed value
      */
-    public final static double parseString(String value)
+    public static double parseString(String value)
     {
         return Double.parseDouble(value);
     }

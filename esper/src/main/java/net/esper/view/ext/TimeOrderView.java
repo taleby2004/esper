@@ -41,7 +41,6 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
     private final long intervalSize;
     private final IStreamTimeOrderRandomAccess optionalSortedRandomAccess;
     private final ScheduleSlot scheduleSlot;
-    private final ScheduleHandleCallback callback;
     private final EPStatementHandleCallback handle;
 
     private EventPropertyGetter timestampFieldGetters;
@@ -80,7 +79,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
 
         sortedEvents = new TreeMap<Long, ArrayList<EventBean>>();
 
-        callback = new ScheduleHandleCallback() {
+        ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
                 TimeOrderView.this.expire();

@@ -45,8 +45,7 @@ public class XPathPropertyGetter implements TypedEventPropertyGetter {
             throw new PropertyAccessException("Unexpected underlying event of type '" + und.getClass() + "' encountered, expecting org.w3c.dom.Node as underlying");
         }
         try {
-            Object result = expression.evaluate(und,resultType);
-            return result;
+            return expression.evaluate(und,resultType);
 		}
         catch (XPathExpressionException e) {
 			throw new PropertyAccessException("Error getting property " + property,e);

@@ -86,8 +86,7 @@ public final class StringValue extends PrimitiveValueBase
         {
             if (value.length() > 1)
             {
-                String stringValue = value.substring(1, value.length() - 1);
-                return stringValue;
+                return value.substring(1, value.length() - 1);
             }
         }
 

@@ -202,8 +202,7 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
             child = child.getNextSibling();
         }
 
-        Object result = parseStringArray(node.getFirstChild().getType(), values);
-        return result;
+        return parseStringArray(node.getFirstChild().getType(), values);
     }
 
     private static Object parseStringArray(int nodeType, String[] nodeValues) throws ASTWalkException

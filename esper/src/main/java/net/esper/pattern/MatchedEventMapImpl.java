@@ -107,9 +107,13 @@ public final class MatchedEventMapImpl implements MatchedEventMap
 
         for (Map.Entry<String, EventBean> entry : events.entrySet())
         {
-            buffer.append(" (" + (count++) + ") ");
-            buffer.append("tag=" + entry.getKey());
-            buffer.append("  event=" + entry.getValue());
+            buffer.append(" (");
+            buffer.append(count++);
+            buffer.append(") ");
+            buffer.append("tag=");
+            buffer.append(entry.getKey());
+            buffer.append("  event=");
+            buffer.append(entry.getValue());
         }
 
         return buffer.toString();

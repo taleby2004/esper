@@ -68,8 +68,7 @@ public class JoinExecStrategyDispatchable implements EPStatementDispatch, Buffer
         {
             return null;
         }
-        EventBean[] events = buffer.getAndFlush();
-        return events;
+        return buffer.getAndFlush();
     }
 
     public void newData(int streamId, FlushedEventBuffer newEventBuffer, FlushedEventBuffer oldEventBuffer)

@@ -164,8 +164,7 @@ public final class ScheduleComputeHelper
                 continue;
             }
 
-            Date resultDate = getTime(result, after.get(Calendar.YEAR));
-            return resultDate;
+            return getTime(result, after.get(Calendar.YEAR));
         }
     }
 

@@ -25,7 +25,6 @@ public class SerializableObjectCopier
         out.close();
 
         ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
-        Object result = in.readObject();
-        return result;
+        return in.readObject();
     }
 }

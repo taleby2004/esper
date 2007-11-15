@@ -67,8 +67,7 @@ public class OuterInnerDirectionalGraph
     public Set<Integer> getInner(int outerStream)
     {
         checkArgs(outerStream);
-        Set<Integer> innerSet = streamToInnerMap.get(outerStream);
-        return innerSet;
+        return streamToInnerMap.get(outerStream);
     }
 
     /**

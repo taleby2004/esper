@@ -9,11 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Implementation for engine-level imports.
  */
 public class EngineImportServiceImpl implements EngineImportService
 {
+    private static final Log log = LogFactory.getLog(EngineImportServiceImpl.class);
 	private final List<String> imports;
     private final Map<String, String> aggregationFunctions;
 
@@ -133,7 +137,13 @@ public class EngineImportServiceImpl implements EngineImportService
 		{
 			return Class.forName(className);
 		}
-		catch(ClassNotFoundException e){}
+		catch(ClassNotFoundException e)
+        {
+            if (log.isDebugEnabled())
+            {
+                log.debug("Class not found for resolving from name as-is:" + className);
+            }
+        }
 
 		// Try all the imports
 		for(String importName : imports)
@@ -156,7 +166,12 @@ public class EngineImportServiceImpl implements EngineImportService
 				{
 					return Class.forName(prefixedClassName);
 				}
-				catch(ClassNotFoundException e){}
+				catch(ClassNotFoundException e){
+                    if (log.isDebugEnabled())
+                    {
+                        log.debug("Class not found for resolving from name as-is:" + className);
+                    }                    
+                }
 			}
 		}
 

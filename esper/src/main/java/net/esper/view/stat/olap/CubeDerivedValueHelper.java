@@ -18,7 +18,7 @@ public final class CubeDerivedValueHelper
      * @param cube holds the n-dimensional cells
      * @return dimensions and cells
      */
-    public static final Pair<Dimension[], Cell[]> derive(String[] measuresToDerive, MultidimCube<BaseStatisticsBean> cube)
+    public static Pair<Dimension[], Cell[]> derive(String[] measuresToDerive, MultidimCube<BaseStatisticsBean> cube)
     {
         int numDimensions = cube.getNumDimensions();
         String[] dimPropertyNames = cube.getDimensionNames();

@@ -261,9 +261,7 @@ public final class CubeTabularDataRenderer
             columnNameList.add(rendered);
         }
 
-        String[] columnNames = columnNameList.toArray(new String[0]);
-
-        return columnNames;
+        return columnNameList.toArray(new String[0]);
     }
 
     // Compile list of column types from dimension members
@@ -284,14 +282,12 @@ public final class CubeTabularDataRenderer
             columnTypeList.add(SimpleType.DOUBLE);
         }
 
-        OpenType[] columnTypes = columnTypeList.toArray(new OpenType[0]);
-        return columnTypes;
+        return columnTypeList.toArray(new OpenType[0]);
     }
 
     private static String renderColumnId(int columnId)
     {
-        String result = "(" + columnId + ')';
-        return result;
+        return "(" + columnId + ')';
     }
 
     private static final Log log = LogFactory.getLog(CubeTabularDataRenderer.class);

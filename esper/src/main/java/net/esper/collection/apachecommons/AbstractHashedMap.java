@@ -1291,22 +1291,17 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      *
      * @return a shallow clone
      */
-    protected Object clone() {
-        try {
-            AbstractHashedMap cloned = (AbstractHashedMap) super.clone();
-            cloned.data = new HashEntry[data.length];
-            cloned.entrySet = null;
-            cloned.keySet = null;
-            cloned.values = null;
-            cloned.modCount = 0;
-            cloned.size = 0;
-            cloned.init();
-            cloned.putAll(this);
-            return cloned;
-
-        } catch (CloneNotSupportedException ex) {
-            return null;  // should never happen
-        }
+    protected Object clone() throws CloneNotSupportedException {
+        AbstractHashedMap cloned = (AbstractHashedMap) super.clone();
+        cloned.data = new HashEntry[data.length];
+        cloned.entrySet = null;
+        cloned.keySet = null;
+        cloned.values = null;
+        cloned.modCount = 0;
+        cloned.size = 0;
+        cloned.init();
+        cloned.putAll(this);
+        return cloned;
     }
 
     /**

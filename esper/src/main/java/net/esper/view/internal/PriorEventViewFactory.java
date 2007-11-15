@@ -133,8 +133,7 @@ public class PriorEventViewFactory implements ViewFactory
             relativeIndex++;
         }
 
-        PriorEventView priorEventView = new PriorEventView(viewUpdatedCollection);
-        return priorEventView;
+        return new PriorEventView(viewUpdatedCollection);
     }
 
     public EventType getEventType()

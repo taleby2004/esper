@@ -37,6 +37,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
     /**
      * Ctor.
+     * @param statementLockFactory statement lock factory
      */
     public NamedWindowServiceImpl(StatementLockFactory statementLockFactory)
     {

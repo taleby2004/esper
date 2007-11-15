@@ -72,7 +72,6 @@ tokens
 	ISTREAM="istream";
 	PATTERN="pattern";
 	SQL="sql";
-	REFERENCE="reference";
 	METADATASQL="metadatasql";
 	PREVIOUS="prev";
 	PRIOR="prior";
@@ -105,7 +104,6 @@ tokens
    	VIEW_EXPR;
    	PATTERN_INCL_EXPR;
    	DATABASE_JOIN_EXPR;
-   	REFERENCE_JOIN_EXPR;
    	WHERE_EXPR;
    	HAVING_EXPR;
 	EVAL_BITWISE_EXPR;
@@ -318,7 +316,7 @@ selectionListElement
 	;
 	
 streamExpression
-	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression | referenceJoinExpression)
+	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression)
 		(DOT! viewExpression (DOT! viewExpression)*)? (AS! IDENT | IDENT)?
 		{ #streamExpression = #([STREAM_EXPR,"streamExpression"], #streamExpression); }
 	;
@@ -331,11 +329,6 @@ patternInclusionExpression
 databaseJoinExpression
 	:	SQL! COLON! IDENT LBRACK! (STRING_LITERAL | QUOTED_STRING_LITERAL) (METADATASQL! (STRING_LITERAL | QUOTED_STRING_LITERAL))? RBRACK!
 		{ #databaseJoinExpression = #([DATABASE_JOIN_EXPR,"databaseJoinExpression"], #databaseJoinExpression); }
-	;	
-
-referenceJoinExpression
-	:	REFERENCE! COLON! IDENT LPAREN! (expression (COMMA! expression)*)? RPAREN!
-		{ #referenceJoinExpression = #([REFERENCE_JOIN_EXPR,"referenceJoinExpression"], #referenceJoinExpression); }
 	;	
 
 viewExpression

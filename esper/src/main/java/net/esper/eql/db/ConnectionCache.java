@@ -69,7 +69,9 @@ public abstract class ConnectionCache
             {
                 pair.getFirst().close();
             }
-            catch (SQLException e) {}
+            catch (SQLException e) {
+                log.error("Error closing JDBC connection:" + e.getMessage(), e);
+            }
             throw new EPException("Error closing statement", ex);
         }
 

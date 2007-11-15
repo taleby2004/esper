@@ -68,9 +68,7 @@ public class PropertyHelper
         propertyOrigClasses.add(clazz);
 
         // Get the set of property names for all classes
-        List<EventPropertyDescriptor> properties = getPropertiesForClasses(propertyOrigClasses);
-
-        return properties;
+        return getPropertiesForClasses(propertyOrigClasses);
     }
 
     private static void getImplementedInterfaceParents(Class clazz, Set<Class> classesResult)

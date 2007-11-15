@@ -121,8 +121,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.doubleValue() + d2.doubleValue();
-            return result;
+            return d1.doubleValue() + d2.doubleValue();
         }
     }
     /**
@@ -132,8 +131,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.floatValue() + d2.floatValue();
-            return result;
+            return d1.floatValue() + d2.floatValue();
         }
     }
     /**
@@ -143,8 +141,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.longValue() + d2.longValue();
-            return result;
+            return d1.longValue() + d2.longValue();
         }
     }
     /**
@@ -154,8 +151,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.intValue() + d2.intValue();
-            return result;
+            return d1.intValue() + d2.intValue();
         }
     }
 
@@ -166,8 +162,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.doubleValue() - d2.doubleValue();
-            return result;
+            return d1.doubleValue() - d2.doubleValue();
         }
     }
     /**
@@ -177,8 +172,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.floatValue() - d2.floatValue();
-            return result;
+            return d1.floatValue() - d2.floatValue();
         }
     }
     /**
@@ -188,8 +182,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.longValue() - d2.longValue();
-            return result;
+            return d1.longValue() - d2.longValue();
         }
     }
     /**
@@ -199,8 +192,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.intValue() - d2.intValue();
-            return result;
+            return d1.intValue() - d2.intValue();
         }
     }
 
@@ -211,8 +203,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.doubleValue() / d2.doubleValue();
-            return result;
+            return d1.doubleValue() / d2.doubleValue();
         }
     }
     /**
@@ -222,8 +213,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.floatValue() / d2.floatValue();
-            return result;
+            return d1.floatValue() / d2.floatValue();
         }
     }
     /**
@@ -233,8 +223,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.longValue() / d2.longValue();
-            return result;
+            return d1.longValue() / d2.longValue();
         }
     }
     /**
@@ -244,8 +233,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.intValue() / d2.intValue();
-            return result;
+            return d1.intValue() / d2.intValue();
         }
     }
 
@@ -256,8 +244,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.doubleValue() * d2.doubleValue();
-            return result;
+            return d1.doubleValue() * d2.doubleValue();
         }
     }
     /**
@@ -267,8 +254,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.floatValue() * d2.floatValue();
-            return result;
+            return d1.floatValue() * d2.floatValue();
         }
     }
     /**
@@ -278,8 +264,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.longValue() * d2.longValue();
-            return result;
+            return d1.longValue() * d2.longValue();
         }
     }
     /**
@@ -289,8 +274,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.intValue() * d2.intValue();
-            return result;
+            return d1.intValue() * d2.intValue();
         }
     }
 
@@ -301,8 +285,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.doubleValue() % d2.doubleValue();
-            return result;
+            return d1.doubleValue() % d2.doubleValue();
         }
     }
     /**
@@ -312,8 +295,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.floatValue() % d2.floatValue();
-            return result;
+            return d1.floatValue() % d2.floatValue();
         }
     }
     /**
@@ -323,8 +305,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.longValue() % d2.longValue();
-            return result;
+            return d1.longValue() % d2.longValue();
         }
     }
     /**
@@ -334,8 +315,7 @@ public enum MathArithTypeEnum
     {
         public Number compute(Number d1, Number d2)
         {
-            Number result = d1.intValue() % d2.intValue();
-            return result;
+            return d1.intValue() % d2.intValue();
         }
     }
 
