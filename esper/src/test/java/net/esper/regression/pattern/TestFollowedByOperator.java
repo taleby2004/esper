@@ -9,6 +9,7 @@ import net.esper.regression.support.*;
 import net.esper.support.bean.*;
 import net.esper.support.client.SupportConfigFactory;
 import net.esper.support.util.SupportUpdateListener;
+import net.esper.support.util.ArrayAssertionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -336,6 +337,45 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(2, listener.getNewDataList().get(0).length);
+    }
+
+    public void testFollowedEveryMultiple()
+    {
+        String expression = "select * from pattern [every a=" + SupportBean_A.class.getName() +
+                " -> b=" + SupportBean_B.class.getName() +
+                " -> c=" + SupportBean_C.class.getName() +
+                " -> d=" + SupportBean_D.class.getName() +
+                "]";
+
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+        epService.initialize();
+
+        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        Object[] events = new Object[10];
+        events[0] = new SupportBean_A("A1");
+        epService.getEPRuntime().sendEvent(events[0]);
+
+        events[1] = new SupportBean_A("A2");
+        epService.getEPRuntime().sendEvent(events[1]);
+
+        events[2] = new SupportBean_B("B1");
+        epService.getEPRuntime().sendEvent(events[2]);
+
+        events[3] = new SupportBean_C("C1");
+        epService.getEPRuntime().sendEvent(events[3]);
+        assertFalse(listener.isInvoked());
+
+        events[4] = new SupportBean_D("D1");
+        epService.getEPRuntime().sendEvent(events[4]);
+        assertEquals(2, listener.getLastNewData().length); 
+        String fields[] = new String[] {"a", "b", "c", "d"};
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {events[0], events[2], events[3], events[4]});
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[] {events[1], events[2], events[3], events[4]});
     }
 
     private long dateToLong(String dateText) throws ParseException
