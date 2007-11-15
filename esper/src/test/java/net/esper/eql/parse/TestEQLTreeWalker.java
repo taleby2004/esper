@@ -28,6 +28,73 @@ public class TestEQLTreeWalker extends TestCase
                     CLASSNAME + "(string='a').win:length(10).std:lastevent() as win1," +
                     CLASSNAME + "(string='b').win:length(10).std:lastevent() as win2 ";
 
+    public void testWalkReferenceJoin() throws Exception
+    {
+        String expression = "select * from reference:MyImpl() as ref, SomeClass";
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        StatementSpecRaw raw = walker.getStatementSpec();
+
+        ReferenceJoinStreamSpec streamSpec = (ReferenceJoinStreamSpec) raw.getStreamSpecs().get(0);
+        assertEquals("MyImpl", streamSpec.getReferenceName());
+        assertEquals(0, streamSpec.getExpressions().size());
+        assertEquals("ref", streamSpec.getOptionalStreamName());
+
+        // with expressions
+        expression = "select * from SomeClass as a, reference:MyImpl(a, 2*b) as b";
+        walker = parseAndWalkEQL(expression);
+        raw = walker.getStatementSpec();
+
+        streamSpec = (ReferenceJoinStreamSpec) raw.getStreamSpecs().get(1);
+        assertEquals("MyImpl", streamSpec.getReferenceName());
+        assertEquals(2, streamSpec.getExpressions().size());
+        assertEquals("b", streamSpec.getOptionalStreamName());
+    }
+
+    public void testWalkOnExprDelete() throws Exception
+    {
+        String expression = "on com.MyClass(myval != 0) as myevent delete from MyNamedWindow as mywin where mywin.key = myevent.otherKey";
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        StatementSpecRaw raw = walker.getStatementSpec();
+
+        FilterStreamSpecRaw streamSpec = (FilterStreamSpecRaw) raw.getStreamSpecs().get(0);
+        assertEquals("com.MyClass", streamSpec.getRawFilterSpec().getEventTypeAlias());
+        assertEquals(1, streamSpec.getRawFilterSpec().getFilterExpressions().size());
+        assertEquals("myevent", streamSpec.getOptionalStreamName());
+
+        assertEquals("MyNamedWindow", raw.getOnDeleteDesc().getWindowName());
+        assertEquals("mywin", raw.getOnDeleteDesc().getOptionalAsName());
+
+        assertTrue(raw.getOnDeleteDesc().getJoinExpr() instanceof ExprEqualsNode);
+    }
+
+    public void testWalkCreateWindow() throws Exception
+    {
+        String expression = "create window MyWindow.std:groupby('symbol').win:length(20) as select *, aprop, bprop as someval from com.MyClass";
+        EQLTreeWalker walker = parseAndWalkEQL(expression);
+        StatementSpecRaw raw = walker.getStatementSpec();
+
+        // window name
+        assertEquals("MyWindow", raw.getCreateWindowDesc().getWindowName());
+
+        // select clause
+        assertTrue(raw.getSelectClauseSpec().isUsingWildcard());
+        List<SelectExprElementRawSpec> selectSpec = raw.getSelectClauseSpec().getSelectList();
+        assertEquals(2, selectSpec.size());
+        assertEquals("aprop", ((ExprIdentNode)selectSpec.get(0).getSelectExpression()).getUnresolvedPropertyName());
+        assertEquals("bprop", ((ExprIdentNode)selectSpec.get(1).getSelectExpression()).getUnresolvedPropertyName());
+        assertEquals("someval", selectSpec.get(1).getOptionalAsName());
+
+        // filter is the event type
+        FilterStreamSpecRaw streamSpec = (FilterStreamSpecRaw) raw.getStreamSpecs().get(0);
+        assertEquals("com.MyClass", streamSpec.getRawFilterSpec().getEventTypeAlias());
+
+        // 2 views
+        assertEquals(2, raw.getCreateWindowDesc().getViewSpecs().size());
+        assertEquals("groupby", raw.getCreateWindowDesc().getViewSpecs().get(0).getObjectName());
+        assertEquals("std", raw.getCreateWindowDesc().getViewSpecs().get(0).getObjectNamespace());
+        assertEquals("length", raw.getCreateWindowDesc().getViewSpecs().get(1).getObjectName());
+    }
+
     public void testWalkSubstitutionParams() throws Exception
     {
         // try EQL

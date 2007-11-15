@@ -24,4 +24,13 @@ public class SupportJoinSetComposer implements JoinSetComposer
     {
         return result;
     }
+
+    public Set<MultiKey<EventBean>> staticJoin()
+    {
+        return null;
+    }
+
+    public void destroy()
+    {        
+    }
 }

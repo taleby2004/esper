@@ -1,21 +1,27 @@
 package net.esper.eql.db;
 
-import net.esper.event.EventBean;
-import net.esper.schedule.SchedulingService;
-import net.esper.schedule.ScheduleSlot;
-import net.esper.schedule.ScheduleHandleCallback;
+import net.esper.client.ConfigurationDBRef;
 import net.esper.collection.MultiKey;
+import net.esper.collection.apachecommons.ReferenceMap;
 import net.esper.core.EPStatementHandle;
 import net.esper.core.EPStatementHandleCallback;
 import net.esper.core.ExtensionServicesContext;
+import net.esper.eql.join.table.EventTable;
+import net.esper.schedule.ScheduleHandleCallback;
+import net.esper.schedule.ScheduleSlot;
+import net.esper.schedule.SchedulingService;
 
-import java.util.List;
-import java.util.WeakHashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.HashMap;
 
 /**
  * Implements an expiry-time cache that evicts data when data becomes stale
  * after a given number of seconds.
+ * <p>
+ * The cache reference type indicates which backing Map is used: Weak type uses the WeakHashMap,
+ * Soft type uses the apache commons ReferenceMap, and Hard type simply uses a HashMap.
  */
 public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 {
@@ -23,7 +29,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
     private final long purgeIntervalMSec;
     private final SchedulingService schedulingService;
     private final ScheduleSlot scheduleSlot;
-    private final WeakHashMap<MultiKey<Object>, Item> cache;
+    private final Map<MultiKey<Object>, Item> cache;
     private final EPStatementHandle epStatementHandle;
 
     private boolean isScheduled;
@@ -32,11 +38,15 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
      * Ctor.
      * @param maxAgeSec is the maximum age in seconds
      * @param purgeIntervalSec is the purge interval in seconds
+     * @param cacheReferenceType indicates whether hard, soft or weak references are used in the cache
      * @param schedulingService is a service for call backs at a scheduled time, for purging
      * @param scheduleSlot slot for scheduling callbacks for this cache
      * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
      */
-    public DataCacheExpiringImpl(double maxAgeSec, double purgeIntervalSec, SchedulingService schedulingService,
+    public DataCacheExpiringImpl(double maxAgeSec,
+                                 double purgeIntervalSec,
+                                 ConfigurationDBRef.CacheReferenceType cacheReferenceType,
+                                 SchedulingService schedulingService,
                                  ScheduleSlot scheduleSlot,
                                  EPStatementHandle epStatementHandle)
     {
@@ -44,11 +54,24 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
         this.purgeIntervalMSec = (long) purgeIntervalSec * 1000;
         this.schedulingService = schedulingService;
         this.scheduleSlot = scheduleSlot;
-        this.cache = new WeakHashMap<MultiKey<Object>, Item>();
+
+        if (cacheReferenceType == ConfigurationDBRef.CacheReferenceType.HARD)
+        {
+            this.cache = new HashMap<MultiKey<Object>, Item>();
+        }
+        else if (cacheReferenceType == ConfigurationDBRef.CacheReferenceType.SOFT)
+        {
+            this.cache = new ReferenceMap(ReferenceMap.SOFT, ReferenceMap.SOFT);
+        }
+        else
+        {
+            this.cache = new WeakHashMap<MultiKey<Object>, Item>();
+        }
+
         this.epStatementHandle = epStatementHandle;
     }
 
-    public List<EventBean> getCached(Object[] lookupKeys)
+    public EventTable getCached(Object[] lookupKeys)
     {
         MultiKey key = new MultiKey<Object>(lookupKeys);
         Item item = cache.get(key);
@@ -67,7 +90,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
         return item.getData();
     }
 
-    public void put(Object[] lookupKeys, List<EventBean> rows)
+    public void put(Object[] lookupKeys, EventTable rows)
     {
         MultiKey key = new MultiKey<Object>(lookupKeys);
         long now = schedulingService.getTime();
@@ -100,6 +123,11 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
         return purgeIntervalMSec;
     }
 
+    public boolean isActive()
+    {
+        return true;
+    }
+
     /**
      * Returns the current cache size.
      * @return cache size
@@ -128,16 +156,16 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 
     private static class Item
     {
-        private List<EventBean> data;
+        private EventTable data;
         private long time;
 
-        public Item(List<EventBean> data, long time)
+        public Item(EventTable data, long time)
         {
             this.data = data;
             this.time = time;
         }
 
-        public List<EventBean> getData()
+        public EventTable getData()
         {
             return data;
         }

@@ -1,31 +1,30 @@
 package net.esper.eql.db;
 
 import junit.framework.TestCase;
-import net.esper.event.EventBean;
+import net.esper.client.ConfigurationDBRef;
+import net.esper.eql.join.table.EventTable;
+import net.esper.eql.join.table.UnindexedEventTable;
 import net.esper.schedule.SchedulingServiceImpl;
 import net.esper.support.schedule.SupportSchedulingServiceImpl;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class TestDataCacheExpiringImpl extends TestCase
 {
     private SupportSchedulingServiceImpl scheduler;
     private DataCacheExpiringImpl cache;
-    private List<EventBean>[] lists = new LinkedList[10];
+    private EventTable[] lists = new EventTable[10];
 
     public void setUp()
     {
         for (int i = 0; i < lists.length; i++)
         {
-            lists[i] = new LinkedList<EventBean>();
+            lists[i] = new UnindexedEventTable(0);
         }
     }
 
     public void testPurgeInterval()
     {
         SchedulingServiceImpl scheduler = new SchedulingServiceImpl();
-        cache = new DataCacheExpiringImpl(10, 20, scheduler, null, null);   // age 10 sec, purge 1000 seconds
+        cache = new DataCacheExpiringImpl(10, 20, ConfigurationDBRef.CacheReferenceType.HARD, scheduler, null, null);   // age 10 sec, purge 1000 seconds
 
         // test single entry in cache
         scheduler.setTime(5000);
@@ -60,7 +59,7 @@ public class TestDataCacheExpiringImpl extends TestCase
     public void testGet()
     {
         scheduler = new SupportSchedulingServiceImpl();
-        cache = new DataCacheExpiringImpl(10, 1000, scheduler, null, null);   // age 10 sec, purge 1000 seconds
+        cache = new DataCacheExpiringImpl(10, 1000, ConfigurationDBRef.CacheReferenceType.HARD, scheduler, null, null);   // age 10 sec, purge 1000 seconds
 
         assertNull(cache.getCached(make("a")));
 

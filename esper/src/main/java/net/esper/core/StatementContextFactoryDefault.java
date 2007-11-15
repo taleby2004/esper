@@ -4,6 +4,8 @@ import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.MethodResolutionServiceImpl;
 import net.esper.eql.join.JoinSetComposerFactoryImpl;
 import net.esper.eql.spec.PluggableObjectCollection;
+import net.esper.eql.spec.OnDeleteDesc;
+import net.esper.eql.spec.CreateWindowDesc;
 import net.esper.pattern.*;
 import net.esper.pattern.PatternObjectHelper;
 import net.esper.schedule.ScheduleBucket;
@@ -12,6 +14,9 @@ import net.esper.view.StatementStopServiceImpl;
 import net.esper.view.ViewEnumHelper;
 import net.esper.view.ViewResolutionService;
 import net.esper.view.ViewResolutionServiceImpl;
+import net.esper.client.EPStatementException;
+
+import java.util.Map;
 
 /**
  * Default implementation for making a statement-specific context class.
@@ -40,14 +45,43 @@ public class StatementContextFactoryDefault implements StatementContextFactory
     public StatementContext makeContext(String statementId,
                                     String statementName,
                                     String expression,
-                                    EPServicesContext engineServices)
+                                    EPServicesContext engineServices,
+                                    Map<String, Object> optAdditionalContext,
+                                    OnDeleteDesc optOnDeleteDesc,
+                                    CreateWindowDesc optCreateWindowDesc)
     {
         // Allocate the statement's schedule bucket which stays constant over it's lifetime.
         // The bucket allows callbacks for the same time to be ordered (within and across statements) and thus deterministic.
         ScheduleBucket scheduleBucket = engineServices.getSchedulingService().allocateBucket();
 
         // Create a lock for the statement
-        ManagedLock statementResourceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression);
+        ManagedLock statementResourceLock = null;
+
+        // For on-delete statements, use the create-named-window statement lock 
+        if (optOnDeleteDesc != null)
+        {
+            statementResourceLock = engineServices.getNamedWindowService().getNamedWindowLock(optOnDeleteDesc.getWindowName());
+            if (statementResourceLock == null)
+            {
+                throw new EPStatementException("Named window '" + optOnDeleteDesc.getWindowName() + "' has not been declared", expression);
+            }
+        }
+        // For creating a named window, save the lock for use with on-delete statements
+        else if (optCreateWindowDesc != null)
+        {
+            statementResourceLock = engineServices.getNamedWindowService().getNamedWindowLock(optCreateWindowDesc.getWindowName());
+            if (statementResourceLock == null)
+            {
+                statementResourceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression);
+                engineServices.getNamedWindowService().addNamedWindowLock(optCreateWindowDesc.getWindowName(), statementResourceLock);
+            }
+        }
+        else
+        {
+            statementResourceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression);
+        }
+
+
         EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementResourceLock, expression);
 
         MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService());
@@ -75,6 +109,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 patternContextFactory,
                 engineServices.getFilterService(),
                 new JoinSetComposerFactoryImpl(),
-                engineServices.getOutputConditionFactory());
+                engineServices.getOutputConditionFactory(),
+                engineServices.getNamedWindowService());
     }
 }

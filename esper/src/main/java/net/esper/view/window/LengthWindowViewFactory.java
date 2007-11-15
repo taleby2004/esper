@@ -1,17 +1,18 @@
 package net.esper.view.window;
 
+import net.esper.core.StatementContext;
 import net.esper.eql.core.ViewResourceCallback;
+import net.esper.eql.named.RemoveStreamViewCapability;
 import net.esper.event.EventType;
 import net.esper.util.JavaClassHelper;
 import net.esper.view.*;
-import net.esper.core.StatementContext;
 
 import java.util.List;
 
 /**
  * Factory for {@link LengthWindowView}. 
  */
-public class LengthWindowViewFactory implements ViewFactory
+public class LengthWindowViewFactory implements DataWindowViewFactory
 {
     /**
      * Size of length window.
@@ -22,6 +23,11 @@ public class LengthWindowViewFactory implements ViewFactory
      * The access into the data window.
      */
     protected RandomAccessByIndexGetter randomAccessGetterImpl;
+
+    /**
+     * Flag to indicate that the view must handle the removed events from a parent view.
+     */
+    protected boolean isRemoveStreamHandling;
 
     private EventType eventType;
 
@@ -63,6 +69,10 @@ public class LengthWindowViewFactory implements ViewFactory
         {
             return true;
         }
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            return true;
+        }
         else
         {
             return false;
@@ -74,6 +84,11 @@ public class LengthWindowViewFactory implements ViewFactory
         if (!canProvideCapability(viewCapability))
         {
             throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
+        }
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            isRemoveStreamHandling = true;
+            return;
         }
         if (randomAccessGetterImpl == null)
         {
@@ -92,7 +107,14 @@ public class LengthWindowViewFactory implements ViewFactory
             randomAccessGetterImpl.updated(randomAccess);
         }
 
-        return new LengthWindowView(this, size, randomAccess);
+        if (isRemoveStreamHandling)
+        {
+            return new LengthWindowViewRStream(this, size);
+        }
+        else
+        {
+            return new LengthWindowView(this, size, randomAccess);
+        }
     }
 
     public EventType getEventType()

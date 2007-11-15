@@ -7,6 +7,9 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.lang.reflect.Array;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import net.esper.event.EventBean;
 
@@ -88,6 +91,34 @@ public class ArrayAssertionUtil
         }
 
         assertEqualsExactOrder(data, expectedValues);
+    }
+
+    /**
+     * Comparing the underlying events to the expected events using equals-semantics.
+     * @param events is an event array to get the underlying objects
+     * @param expectedValues is an array of expected underlying events
+     */
+    public static void assertEqualsExactOrderUnderlying(EventBean[] events, Object[] expectedValues)
+    {
+        if ((expectedValues == null) && (events == null))
+        {
+            return;
+        }
+        if ( ((expectedValues == null) && (events != null)) ||
+             ((expectedValues != null) && (events == null)) )
+        {
+            TestCase.assertTrue(false);
+        }
+
+        TestCase.assertEquals(expectedValues.length, events.length);
+
+        ArrayList<Object> underlying = new ArrayList<Object>();
+        for (EventBean event : events)
+        {
+            underlying.add(event.getUnderlying());
+        }
+
+        assertEqualsExactOrder(underlying.toArray(), expectedValues);
     }
 
     /**
@@ -347,6 +378,139 @@ public class ArrayAssertionUtil
         TestCase.assertEquals(numMatches, expected.length);
     }
 
+    public static void assertPropsPerRow(EventBean[] received, Object[][] propertiesPerRow)
+    {
+        if (propertiesPerRow == null)
+        {
+            if ((received == null) || (received.length == 0))
+            {
+                return;
+            }
+        }
+        Assert.assertEquals(propertiesPerRow.length, received.length);
+
+        for (int i = 0; i < propertiesPerRow.length; i++)
+        {
+            String name = (String) propertiesPerRow[i][0];
+            Object value = propertiesPerRow[i][1];
+            Object eventProp = received[i].get(name);
+            Assert.assertEquals("Error asserting property named " + name,value,eventProp);
+        }
+    }
+
+    public static void assertPropsPerRow(EventBean[] received, String[] propertyNames, Object[][] propertiesListPerRow)
+    {
+        if (propertiesListPerRow == null)
+        {
+            if ((received == null) || (received.length == 0))
+            {
+                return;
+            }
+        }
+        Assert.assertEquals(propertiesListPerRow.length, received.length);
+
+        for (int i = 0; i < propertiesListPerRow.length; i++)
+        {
+            Object[] propertiesThisRow = propertiesListPerRow[i];
+            for (int j = 0; j < propertiesThisRow.length; j++)
+            {
+                String name = propertyNames[j];
+                Object value = propertiesThisRow[j];
+                Object eventProp = received[i].get(name);
+                Assert.assertEquals("Error asserting property named " + name,value,eventProp);
+            }
+        }
+    }
+
+    public static void assertProps(EventBean received, String[] propertyNames, Object[] propertiesThisRow)
+    {
+        if (propertiesThisRow == null)
+        {
+            if (received == null)
+            {
+                return;
+            }
+        }
+
+        for (int j = 0; j < propertiesThisRow.length; j++)
+        {
+            String name = propertyNames[j];
+            Object value = propertiesThisRow[j];
+            Object eventProp = received.get(name);
+            Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);
+        }
+    }
+
+    public static void assertEqualsAnyOrder(Iterator<EventBean> iterator, String[] propertyNames, Object[][] propertiesListPerRow)
+    {
+        // convert to array of events
+        EventBean[] received = iteratorToArray(iterator);
+        if (propertiesListPerRow == null)
+        {
+            if ((received == null) || (received.length == 0))
+            {
+                return;
+            }
+        }
+        Assert.assertEquals(propertiesListPerRow.length, received.length);
+
+        // build map of event and values
+        Map<EventBean, Object[]> valuesEachEvent = new HashMap<EventBean, Object[]>();
+        for (int i = 0; i < received.length; i++)
+        {
+            Object[] values = new Object[propertyNames.length];
+            for (int j = 0; j < propertyNames.length; j++)
+            {
+                values[j] = received[i].get(propertyNames[j]);
+            }
+            valuesEachEvent.put(received[i], values);
+        }
+
+        // Find each list of properties
+        for (int i = 0; i < propertiesListPerRow.length; i++)
+        {
+            Object[] propertiesThisRow = propertiesListPerRow[i];
+            boolean isFound = false;
+
+            for (Map.Entry<EventBean, Object[]> entry : valuesEachEvent.entrySet())
+            {
+                if (Arrays.equals(entry.getValue(), propertiesThisRow))
+                {
+                    entry.setValue(null);
+                    isFound = true;
+                    break;
+                }
+            }
+
+            if (!isFound)
+            {
+                String text = "Error finding property set: " + Arrays.toString(propertiesListPerRow[i]) + " among values: \n" + dump(valuesEachEvent);
+                Assert.fail(text);
+            }
+        }
+
+        // Should be all null values
+        for (Map.Entry<EventBean, Object[]> entry : valuesEachEvent.entrySet())
+        {
+            if (entry.getValue() != null)
+            {
+                Assert.fail();
+            }
+        }
+    }
+
+    private static String dump(Map<EventBean, Object[]> valuesEachEvent)
+    {
+        StringWriter buf = new StringWriter();
+        PrintWriter writer = new PrintWriter(buf);
+        for (Map.Entry<EventBean, Object[]> entry : valuesEachEvent.entrySet())
+        {
+            String values = Arrays.toString(entry.getValue());
+            writer.println(values);
+        }
+        return buf.toString();
+    }
+
     public static void assertEqualsAnyOrder(EventBean[][] expected, EventBean[][] received)
     {
         // Empty lists are fine
@@ -477,6 +641,41 @@ public class ArrayAssertionUtil
         assertEqualsAnyOrder(resultClasses, classes);
     }
 
+    public static EventBean[] iteratorToArray(Iterator<EventBean> iterator)
+    {
+        if (iterator == null)
+        {
+            Assert.fail("Null iterator");
+        }
+        ArrayList<EventBean> events = new ArrayList<EventBean>();
+        for (;iterator.hasNext();)
+        {
+            events.add(iterator.next());
+        }
+        return events.toArray(new EventBean[0]);
+    }
+
+    public static Object[] iteratorToArrayUnderlying(Iterator<EventBean> iterator)
+    {
+        ArrayList<Object> events = new ArrayList<Object>();
+        for (;iterator.hasNext();)
+        {
+            events.add(iterator.next().getUnderlying());
+        }
+        return events.toArray();
+    }
+
+    public static int iteratorCount(Iterator<EventBean> iterator)
+    {
+        int count = 0;
+        for (;iterator.hasNext();)
+        {
+            iterator.next();
+            count++;
+        }
+        return count;
+    }
+
     public static Object[] sum(Object[] srcOne, Object[] srcTwo)
     {
         Object[] result = new Object[srcOne.length + srcTwo.length];
@@ -521,6 +720,11 @@ public class ArrayAssertionUtil
         }
 
         Object[][] data = rows.toArray(new Object[0][]);
+        if ((expectedValues == null) && (data != null))
+        {
+            Assert.fail("Expected no values but received data: " + data.length + " elements");
+        }
+
         Assert.assertEquals(expectedValues.length, data.length);
         for (int i = 0; i < data.length; i++)
         {

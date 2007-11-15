@@ -1,6 +1,7 @@
 package net.esper.view.window;
 
 import net.esper.eql.core.ViewResourceCallback;
+import net.esper.eql.named.RemoveStreamViewCapability;
 import net.esper.type.TimePeriodParameter;
 import net.esper.event.EventType;
 import net.esper.util.JavaClassHelper;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Factory for {@link TimeBatchView}. 
  */
-public class TimeBatchViewFactory implements ViewFactory
+public class TimeBatchViewFactory implements DataWindowViewFactory
 {
     private EventType eventType;
 
@@ -30,6 +31,11 @@ public class TimeBatchViewFactory implements ViewFactory
      * The access into the data window.
      */
     protected RelativeAccessByEventNIndexGetter relativeAccessGetterImpl;
+
+    /**
+     * Flag to indicate that the view must handle the removed events from a parent view.
+     */
+    protected boolean isRemoveStreamHandling;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {
@@ -85,6 +91,10 @@ public class TimeBatchViewFactory implements ViewFactory
 
     public boolean canProvideCapability(ViewCapability viewCapability)
     {
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            return true;
+        }
         return viewCapability instanceof ViewCapDataWindowAccess;
     }
 
@@ -93,6 +103,11 @@ public class TimeBatchViewFactory implements ViewFactory
         if (!canProvideCapability(viewCapability))
         {
             throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
+        }
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            isRemoveStreamHandling = true;
+            return;
         }
         if (relativeAccessGetterImpl == null)
         {
@@ -111,7 +126,14 @@ public class TimeBatchViewFactory implements ViewFactory
             relativeAccessGetterImpl.updated(relativeAccessByEvent, null);
         }
 
-        return new TimeBatchView(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, relativeAccessByEvent);
+        if (isRemoveStreamHandling)
+        {
+            return new TimeBatchViewRStream(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint);            
+        }
+        else
+        {
+            return new TimeBatchView(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, relativeAccessByEvent);
+        }
     }
 
     public EventType getEventType()

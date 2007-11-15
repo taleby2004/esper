@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package net.esper.client;
 
 import java.io.Serializable;
@@ -18,8 +25,8 @@ public class ConfigurationPlugInAggregationFunction implements Serializable
     }
 
     /**
-     * Returns the view name.
-     * @return view name
+     * Returns the aggregation function name.
+     * @return aggregation function name
      */
     public String getName()
     {
@@ -27,7 +34,7 @@ public class ConfigurationPlugInAggregationFunction implements Serializable
     }
 
     /**
-     * Sets the view name.
+     * Sets the aggregation function name.
      * @param name to set
      */
     public void setName(String name)

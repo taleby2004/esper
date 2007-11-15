@@ -30,7 +30,7 @@ public class TestViewFactoryDelegateImpl extends TestCase
         delegate = new ViewResourceDelegateImpl(factories, null);
     }
 
-    public void testRequest()
+    public void testRequest() throws Exception
     {
         ViewResourceCallback callback = new ViewResourceCallback() {
 
@@ -48,6 +48,11 @@ public class TestViewFactoryDelegateImpl extends TestCase
         public boolean inspect(int streamNumber, List<ViewFactory> viewFactories, StatementContext statementContext)
         {
             return true;
+        }
+
+        public boolean requiresChildViews()
+        {
+            return false;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }

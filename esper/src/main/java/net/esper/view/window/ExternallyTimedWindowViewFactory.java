@@ -1,6 +1,7 @@
 package net.esper.view.window;
 
 import net.esper.eql.core.ViewResourceCallback;
+import net.esper.eql.named.RemoveStreamViewCapability;
 import net.esper.type.TimePeriodParameter;
 import net.esper.event.EventType;
 import net.esper.util.JavaClassHelper;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Factory for {@link ExternallyTimedWindowView}.
  */
-public class ExternallyTimedWindowViewFactory implements ViewFactory
+public class ExternallyTimedWindowViewFactory implements DataWindowViewFactory
 {
     private EventType eventType;
 
@@ -25,6 +26,11 @@ public class ExternallyTimedWindowViewFactory implements ViewFactory
      * The number of msec to expire.
      */
     protected long millisecondsBeforeExpiry;
+
+    /**
+     * Flag to indicate that the view must handle the removed events from a parent view.
+     */
+    protected boolean isRemoveStreamHandling;
 
     /**
      * The getter for direct access into the window. 
@@ -85,6 +91,10 @@ public class ExternallyTimedWindowViewFactory implements ViewFactory
         {
             return true;
         }
+        else if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            return true;
+        }
         else
         {
             return false;
@@ -96,6 +106,11 @@ public class ExternallyTimedWindowViewFactory implements ViewFactory
         if (!canProvideCapability(viewCapability))
         {
             throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
+        }
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            isRemoveStreamHandling = true;
+            return;
         }
         if (randomAccessGetterImpl == null)
         {
@@ -114,7 +129,7 @@ public class ExternallyTimedWindowViewFactory implements ViewFactory
             randomAccessGetterImpl.updated(randomAccess);
         }
 
-        return new ExternallyTimedWindowView(this, timestampFieldName, millisecondsBeforeExpiry, randomAccess);
+        return new ExternallyTimedWindowView(this, timestampFieldName, millisecondsBeforeExpiry, randomAccess, isRemoveStreamHandling);
     }
 
     public EventType getEventType()

@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 
 /**
- * Test for multithread-safety of a subquery statement.
+ * Test for multithread-safety of a lookup statement.
  */
 public class TestMTStmtSubquery extends TestCase
 {
@@ -28,6 +28,7 @@ public class TestMTStmtSubquery extends TestCase
         Configuration config = new Configuration();
         config.addEventTypeAlias("S0", SupportBean_S0.class);
         config.addEventTypeAlias("S1", SupportBean_S1.class);
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         engine = EPServiceProviderManager.getProvider("TestMTStmtSubquery", config);
         // Use external time for this test, since time is not used here
         engine.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));

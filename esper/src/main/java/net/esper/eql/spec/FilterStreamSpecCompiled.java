@@ -41,4 +41,13 @@ public class FilterStreamSpecCompiled extends StreamSpecBase implements StreamSp
     {
         return filterSpec;
     }
+
+    /**
+     * Sets a filter specification.
+     * @param filterSpec to set
+     */
+    public void setFilterSpec(FilterSpecCompiled filterSpec)
+    {
+        this.filterSpec = filterSpec;
+    }
 }

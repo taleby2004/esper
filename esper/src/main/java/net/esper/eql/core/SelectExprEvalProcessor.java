@@ -191,14 +191,16 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         		if(wrapper != null)
         		{
         			Map<String, Object> map = wrapper.getDecoratingProperties();
-                    if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+                    if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
                     {
         			    log.debug(".process additional properties=" + map);
                     }
                     props.putAll(map);
         		}
         	}
-        	return eventAdapterService.createWrapper(getEvent(eventsPerStream, isNewData), props, resultEventType);
+            // Using a wrapper bean since we cannot use the same event type else same-type filters match.
+            // Wrapping it even when not adding properties is very inexpensive.
+            return eventAdapterService.createWrapper(getEvent(eventsPerStream, isNewData), props, resultEventType);
         }
         else
         {

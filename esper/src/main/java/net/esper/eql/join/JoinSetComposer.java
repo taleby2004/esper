@@ -31,4 +31,13 @@ public interface JoinSetComposer
      * @return join tuples
      */
     public UniformPair<Set<MultiKey<EventBean>>> join(EventBean[][] newDataPerStream, EventBean[][] oldDataPerStream);
+
+    /**
+     * For use in iteration over join statements, this must build a join tuple result set from
+     * all events in indexes, executing query strategies for each.
+     * @return static join result
+     */
+    public Set<MultiKey<EventBean>> staticJoin();
+
+    public void destroy();
 }

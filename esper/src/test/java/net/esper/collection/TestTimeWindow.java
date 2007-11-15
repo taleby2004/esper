@@ -1,22 +1,21 @@
 package net.esper.collection;
 
-import junit.framework.*;
-
-import java.util.List;
-import java.util.Iterator;
-import java.util.ConcurrentModificationException;
-
+import junit.framework.TestCase;
+import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.util.ArrayAssertionUtil;
-import net.esper.event.EventBean;
-import net.esper.client.EPException;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
 
 public class TestTimeWindow extends TestCase
 {
-    private final TimeWindow window = new TimeWindow();
+    private final TimeWindow window = new TimeWindow(false);
+    private final TimeWindow windowRemovable = new TimeWindow(true);
     private final EventBean[] beans = new EventBean[6];
 
     public void setUp()
@@ -77,11 +76,62 @@ public class TestTimeWindow extends TestCase
         assertTrue(window.getOldestTimestamp() == null);
     }
 
+    public void testAddRemove()
+    {
+        assertTrue(windowRemovable.getOldestTimestamp() == null);
+        assertTrue(windowRemovable.isEmpty());
+
+        windowRemovable.add(19,beans[0]);
+        assertTrue(windowRemovable.getOldestTimestamp() == 19L);
+        assertFalse(windowRemovable.isEmpty());
+        windowRemovable.add(19,beans[1]);
+        assertTrue(windowRemovable.getOldestTimestamp() == 19L);
+        windowRemovable.add(20,beans[2]);
+        assertTrue(windowRemovable.getOldestTimestamp() == 19L);
+        windowRemovable.add(20,beans[3]);
+        windowRemovable.add(21,beans[4]);
+        windowRemovable.add(22,beans[5]);
+        assertTrue(windowRemovable.getOldestTimestamp() == 19L);
+
+        windowRemovable.remove(beans[4]);
+        windowRemovable.remove(beans[0]);
+        windowRemovable.remove(beans[3]);
+
+        List<EventBean> beanList = windowRemovable.expireEvents(19);
+        assertTrue(beanList == null);
+
+        beanList = windowRemovable.expireEvents(20);
+        assertTrue(beanList.size() == 1);
+        assertTrue(beanList.get(0) == beans[1]);
+
+        beanList = windowRemovable.expireEvents(21);
+        assertTrue(beanList.size() == 1);
+        assertTrue(beanList.get(0) == beans[2]);
+        assertFalse(windowRemovable.isEmpty());
+        assertTrue(windowRemovable.getOldestTimestamp() == 21);
+
+        beanList = windowRemovable.expireEvents(22);
+        assertTrue(beanList.size() == 0);
+
+        beanList = windowRemovable.expireEvents(23);
+        assertTrue(beanList.size() == 1);
+        assertTrue(beanList.get(0) == beans[5]);
+        assertTrue(windowRemovable.isEmpty());
+        assertTrue(windowRemovable.getOldestTimestamp() == null);
+
+        beanList = windowRemovable.expireEvents(23);
+        assertTrue(beanList == null);
+        assertTrue(windowRemovable.isEmpty());
+        assertTrue(windowRemovable.getOldestTimestamp() == null);
+
+        assertEquals(0, windowRemovable.getReverseIndex().size());
+    }
+
     public void testTimeWindowPerformance()
     {
         log.info(".testTimeWindowPerformance Starting");
 
-        TimeWindow window = new TimeWindow();
+        TimeWindow window = new TimeWindow(false);
 
         // 1E7 yields for implementations...on 2.8GHz JDK 1.5
         // about 7.5 seconds for a LinkedList-backed

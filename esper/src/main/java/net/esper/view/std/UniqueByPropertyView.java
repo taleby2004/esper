@@ -11,6 +11,7 @@ import net.esper.event.EventType;
 import net.esper.view.*;
 import net.esper.core.StatementContext;
 import net.esper.util.ExecutionPathDebugLog;
+import net.esper.collection.OneEventLinkedList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,17 +78,17 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".update Updating view");
             dumpUpdateParams("UniqueByPropertyView", newData, oldData);
         }
 
-        LinkedList<EventBean> postOldData = null;
+        OneEventLinkedList postOldData = null;
 
         if (this.hasViews())
         {
-            postOldData = new LinkedList<EventBean>();
+            postOldData = new OneEventLinkedList();
         }
 
         if (newData != null)
@@ -145,7 +146,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
             }
             else
             {
-                updateChildren(newData, postOldData.toArray(new EventBean[0]));
+                updateChildren(newData, postOldData.toArray());
             }
         }
     }

@@ -8,6 +8,7 @@
 package net.esper.eql.spec;
 
 import net.esper.eql.core.MethodResolutionService;
+import net.esper.eql.named.NamedWindowService;
 import net.esper.eql.expression.ExprValidationException;
 import net.esper.event.EventAdapterService;
 import net.esper.pattern.PatternObjectResolutionService;
@@ -25,13 +26,15 @@ public interface StreamSpecRaw extends StreamSpec
      * @param methodResolutionService for resolving imports
      * @param patternObjectResolutionService for resolving pattern objects
      * @param timeProvider - provides engine current time
+     * @param namedWindowService is the service managing named windows
      * @return compiled stream
      * @throws ExprValidationException to indicate validation errors
      */
     public StreamSpecCompiled compile(EventAdapterService eventAdapterService,
                                       MethodResolutionService methodResolutionService,
                                       PatternObjectResolutionService patternObjectResolutionService,
-                                      TimeProvider timeProvider)
+                                      TimeProvider timeProvider,
+                                      NamedWindowService namedWindowService)
         throws ExprValidationException;
 
 }

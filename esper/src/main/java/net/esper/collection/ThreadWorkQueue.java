@@ -52,4 +52,14 @@ public class ThreadWorkQueue
         LinkedList<Object> queue = threadQueue.get();
         return queue.poll();
     }
+
+    /**
+     * Returns an indicator whether the queue is empty.
+     * @return true for empty, false for not empty
+     */
+    public static boolean isEmpty()
+    {
+        LinkedList<Object> queue = threadQueue.get();
+        return queue.isEmpty();
+    }
 }

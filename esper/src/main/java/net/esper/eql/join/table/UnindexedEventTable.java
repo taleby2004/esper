@@ -11,6 +11,7 @@ import net.esper.event.EventBean;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Simple table of events without an index.
@@ -27,6 +28,11 @@ public class UnindexedEventTable implements EventTable
     public UnindexedEventTable(int streamNum)
     {
         this.streamNum = streamNum;
+    }
+
+    public void clear()
+    {
+        eventSet.clear();
     }
 
     public void add(EventBean[] addEvents)
@@ -55,6 +61,11 @@ public class UnindexedEventTable implements EventTable
         }
     }
 
+    public boolean isEmpty()
+    {
+        return eventSet.isEmpty();
+    }
+
     /**
      * Returns events in table.
      * @return all events
@@ -62,6 +73,11 @@ public class UnindexedEventTable implements EventTable
     public Set<EventBean> getEventSet()
     {
         return eventSet;
+    }
+
+    public Iterator<EventBean> iterator()
+    {
+        return eventSet.iterator();
     }
 
     public String toString()

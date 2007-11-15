@@ -10,10 +10,11 @@ import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.schedule.ScheduleHandleCallback;
 import net.esper.schedule.ScheduleSlot;
+import net.esper.util.ExecutionPathDebugLog;
 import net.esper.view.CloneableView;
 import net.esper.view.View;
 import net.esper.view.ViewSupport;
-import net.esper.util.ExecutionPathDebugLog;
+import net.esper.view.DataWindowView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,9 +36,9 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
 {
     private final TimeWindowViewFactory timeWindowViewFactory;
     private final long millisecondsBeforeExpiry;
-    private final TimeWindow timeWindow = new TimeWindow();
+    private final TimeWindow timeWindow;
     private final ViewUpdatedCollection viewUpdatedCollection;
-
+    private final boolean isRemoveStreamHandling;
     private final StatementContext statementContext;
     private final ScheduleSlot scheduleSlot;
 
@@ -48,14 +49,18 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
      * @param viewUpdatedCollection is a collection the view must update when receiving events
      * @param statementContext is required view services
      * @param timeWindowViewFactory for copying the view in a group-by
+     * @param isRemoveStreamHandling flag to indicate that the view must handle the removed events from a parent view
      */
-    public TimeWindowView(StatementContext statementContext, TimeWindowViewFactory timeWindowViewFactory, long millisecondsBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection)
+    public TimeWindowView(StatementContext statementContext, TimeWindowViewFactory timeWindowViewFactory, long millisecondsBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection,
+                          boolean isRemoveStreamHandling)
     {
         this.statementContext = statementContext;
         this.timeWindowViewFactory = timeWindowViewFactory;
         this.millisecondsBeforeExpiry = millisecondsBeforeExpiry;
         this.viewUpdatedCollection = viewUpdatedCollection;
         this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+        this.timeWindow = new TimeWindow(isRemoveStreamHandling);
+        this.isRemoveStreamHandling = isRemoveStreamHandling;
     }
 
     public View cloneView(StatementContext statementContext)
@@ -97,34 +102,40 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
 
         long timestamp = statementContext.getSchedulingService().getTime();
 
+        if (oldData != null)
+        {
+            for (int i = 0; i < oldData.length; i++)
+            {
+                timeWindow.remove(oldData[i]);
+            }
+        }
+
         // we don't care about removed data from a prior view
-        if ((newData == null) || (newData.length == 0))
+        if ((newData != null) && (newData.length > 0))
         {
-            return;
-        }
+            // If we have an empty window about to be filled for the first time, schedule a callback
+            // for now plus millisecondsBeforeExpiry
+            if (timeWindow.isEmpty())
+            {
+                scheduleCallback(millisecondsBeforeExpiry);
+            }
 
-        // If we have an empty window about to be filled for the first time, schedule a callback
-        // for now plus millisecondsBeforeExpiry
-        if (timeWindow.isEmpty())
-        {
-            scheduleCallback(millisecondsBeforeExpiry);
-        }
+            // add data points to the timeWindow
+            for (int i = 0; i < newData.length; i++)
+            {
+                timeWindow.add(timestamp, newData[i]);
+            }
 
-        // add data points to the timeWindow
-        for (int i = 0; i < newData.length; i++)
-        {
-            timeWindow.add(timestamp, newData[i]);
-        }
-
-        if (viewUpdatedCollection != null)
-        {
-            viewUpdatedCollection.update(newData, null);
+            if (viewUpdatedCollection != null)
+            {
+                viewUpdatedCollection.update(newData, null);
+            }
         }
 
         // update child views
         if (this.hasViews())
         {
-            updateChildren(newData, null);
+            updateChildren(newData, oldData);
         }
     }
 
@@ -136,7 +147,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
     {
         long expireBeforeTimestamp = statementContext.getSchedulingService().getTime() - millisecondsBeforeExpiry + 1;
 
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".expire Expiring messages before " +
                     "msec=" + expireBeforeTimestamp +
@@ -161,7 +172,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
             }
         }
 
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".expire Expired messages....size=" + expired.size());
             for (Object object : expired)
@@ -180,7 +191,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         long scheduleMillisec = millisecondsBeforeExpiry - (currentTimestamp - oldestTimestamp);
         scheduleCallback(scheduleMillisec);
 
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".expire Scheduled new callback for now plus msec=" + scheduleMillisec);
         }

@@ -1,15 +1,14 @@
 package net.esper.core;
 
 import net.esper.client.*;
-import net.esper.eql.core.EngineImportException;
-import net.esper.eql.core.EngineImportService;
-import net.esper.eql.core.EngineImportServiceImpl;
-import net.esper.eql.core.EngineSettingsService;
+import net.esper.eql.core.*;
 import net.esper.eql.db.DatabaseConfigService;
 import net.esper.eql.db.DatabaseConfigServiceImpl;
 import net.esper.eql.spec.PluggableObjectCollection;
 import net.esper.eql.view.OutputConditionFactory;
 import net.esper.eql.view.OutputConditionFactoryDefault;
+import net.esper.eql.named.NamedWindowServiceImpl;
+import net.esper.eql.named.NamedWindowService;
 import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterServiceImpl;
 import net.esper.event.EventAdapterService;
@@ -20,6 +19,10 @@ import net.esper.util.JavaClassHelper;
 import net.esper.util.ManagedReadWriteLock;
 import net.esper.timer.TimerService;
 import net.esper.timer.TimerServiceImpl;
+import net.esper.filter.FilterServiceProvider;
+import net.esper.filter.FilterService;
+import net.esper.view.stream.StreamFactoryServiceProvider;
+import net.esper.view.stream.StreamFactoryService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +40,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         init(eventAdapterService, configSnapshot);
 
         // New read-write lock for concurrent event processing
-        ManagedReadWriteLock eventProcessingRWLock = new ManagedReadWriteLock("EventProcLock");
+        ManagedReadWriteLock eventProcessingRWLock = new ManagedReadWriteLock("EventProcLock", false);
 
         SchedulingService schedulingService = SchedulingServiceProvider.newService();
         EngineImportService engineImportService = makeEngineImportService(configSnapshot);
@@ -64,11 +67,16 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         }
         TimerService timerService = new TimerServiceImpl(msecTimerResolution);
 
+        StatementLockFactory statementLockFactory = new StatementLockFactoryImpl();
+        StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(configSnapshot.getEngineDefaults().getViewResources().isShareViews());
+        FilterService filterService = FilterServiceProvider.newService();
+        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory);
+
         // New services context
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
-                new StatementLockFactoryImpl(), eventProcessingRWLock, null, jndiContext, statementContextFactory,
-                plugInPatternObj, outputConditionFactory, timerService, configSnapshot.getEngineDefaults().getViewResources().isShareViews());
+                statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
+                plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService, namedWindowService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);

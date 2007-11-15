@@ -21,11 +21,10 @@ public class OutputProcessViewDirect extends OutputProcessView
     /**
      * Ctor.
      * @param resultSetProcessor is processing the result set for publishing it out
-     * @param isJoin is true for join statements
      */
-    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, boolean isJoin)
+    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor)
     {
-        super(resultSetProcessor, isJoin);
+        super(resultSetProcessor);
 
         log.debug(".ctor");
         if (resultSetProcessor == null)
@@ -41,7 +40,7 @@ public class OutputProcessViewDirect extends OutputProcessView
      */
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".update Received update, " +
                     "  newData.length==" + ((newData == null) ? 0 : newData.length) +
@@ -66,14 +65,14 @@ public class OutputProcessViewDirect extends OutputProcessView
      */
     public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
     {
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".process Received update, " +
                     "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
                     "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
         }
 
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".continueOutputProcessingJoin");
         }

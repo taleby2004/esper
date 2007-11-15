@@ -55,4 +55,13 @@ public final class BufferView extends ViewSupport
         oldDataBuffer.add(oldData);
         observer.newData(streamId, newDataBuffer, oldDataBuffer);
     }
+
+    /**
+     * Returns the buffer for new data.
+     * @return new data buffer
+     */
+    public FlushedEventBuffer getNewDataBuffer()
+    {
+        return newDataBuffer;
+    }
 }

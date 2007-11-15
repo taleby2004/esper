@@ -13,19 +13,18 @@ import net.esper.emit.EmitService;
 import net.esper.emit.EmitServiceProvider;
 import net.esper.eql.core.EngineImportService;
 import net.esper.eql.core.EngineSettingsService;
+import net.esper.eql.named.NamedWindowService;
 import net.esper.eql.db.DatabaseConfigService;
 import net.esper.eql.spec.PluggableObjectCollection;
 import net.esper.eql.view.OutputConditionFactory;
 import net.esper.event.EventAdapterService;
 import net.esper.filter.FilterService;
-import net.esper.filter.FilterServiceProvider;
 import net.esper.schedule.SchedulingService;
 import net.esper.timer.TimerService;
 import net.esper.util.ManagedReadWriteLock;
 import net.esper.view.ViewService;
 import net.esper.view.ViewServiceProvider;
 import net.esper.view.stream.StreamFactoryService;
-import net.esper.view.stream.StreamFactoryServiceProvider;
 
 /**
  * Convenience class to hold implementations for all services.
@@ -53,6 +52,7 @@ public final class EPServicesContext
     private StatementContextFactory statementContextFactory;
     private PluggableObjectCollection plugInPatternObjects;
     private OutputConditionFactory outputConditionFactory;
+    private NamedWindowService namedWindowService;
 
     // Supplied after construction to avoid circular dependency
     private StatementLifecycleSvc statementLifecycleSvc;
@@ -75,7 +75,9 @@ public final class EPServicesContext
      * @param plugInPatternObjects resolves plug-in pattern objects
      * @param outputConditionFactory factory for output condition objects
      * @param timerService is the timer service
-     * @param isShareViews is a boolean indicating whether the engine shares view resources between statements
+     * @param filterService the filter service
+     * @param streamFactoryService is hooking up filters to streams
+     * @param namedWindowService is holding information about the named windows active in the system
      */
     public EPServicesContext(String engineURI,
                              SchedulingService schedulingService,
@@ -92,7 +94,10 @@ public final class EPServicesContext
                              PluggableObjectCollection plugInPatternObjects,
                              OutputConditionFactory outputConditionFactory,
                              TimerService timerService,
-                             boolean isShareViews)
+                             FilterService filterService,
+                             StreamFactoryService streamFactoryService,
+                             NamedWindowService namedWindowService
+                             )
     {
         this.engineURI = engineURI;
         this.schedulingService = schedulingService;
@@ -100,12 +105,12 @@ public final class EPServicesContext
         this.engineImportService = engineImportService;
         this.engineSettingsService = engineSettingsService;
         this.databaseConfigService = databaseConfigService;
-        this.filterService = FilterServiceProvider.newService();
+        this.filterService = filterService;
         this.timerService = timerService;
         this.emitService = EmitServiceProvider.newService();
         this.dispatchService = DispatchServiceProvider.newService();
         this.viewService = ViewServiceProvider.newService();
-        this.streamFactoryService = StreamFactoryServiceProvider.newService(isShareViews);
+        this.streamFactoryService = streamFactoryService;
         this.plugInViews = plugInViews;
         this.statementLockFactory = statementLockFactory;
         this.eventProcessingRWLock = eventProcessingRWLock;
@@ -114,6 +119,7 @@ public final class EPServicesContext
         this.statementContextFactory = statementContextFactory;
         this.plugInPatternObjects = plugInPatternObjects;
         this.outputConditionFactory = outputConditionFactory;
+        this.namedWindowService = namedWindowService;
     }
 
     /**
@@ -305,6 +311,26 @@ public final class EPServicesContext
         {
             extensionServicesContext.destroy();
         }
+        if (statementLifecycleSvc != null)
+        {
+            statementLifecycleSvc.destroy();
+        }
+        if (filterService != null)
+        {
+            filterService.destroy();
+        }
+        if (schedulingService != null)
+        {
+            schedulingService.destroy();
+        }
+        if (streamFactoryService != null)
+        {
+            streamFactoryService.destroy();
+        }
+        if (namedWindowService != null)
+        {
+            namedWindowService.destroy();
+        }
     }
 
     /**
@@ -333,6 +359,7 @@ public final class EPServicesContext
         this.engineEnvContext = null;
         this.statementContextFactory = null;
         this.plugInPatternObjects = null;
+        this.namedWindowService = null;
     }
 
     /**
@@ -378,5 +405,14 @@ public final class EPServicesContext
     public OutputConditionFactory getOutputConditionFactory()
     {
         return outputConditionFactory;
+    }
+
+    /**
+     * Returns the named window management service.
+     * @return service for managing named windows
+     */
+    public NamedWindowService getNamedWindowService()
+    {
+        return namedWindowService;
     }
 }

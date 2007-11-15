@@ -1,6 +1,7 @@
 package net.esper.view;
 
 import net.esper.core.StatementContext;
+import net.esper.eql.expression.ExprValidationException;
 
 import java.util.List;
 
@@ -17,6 +18,14 @@ public interface ViewCapability
      * @param viewFactories is a list of view factories that originate the final views
      * @param statementContext is the statement-level services
      * @return true to indicate inspection success, or false to indicate inspection failure
+     * @throws ExprValidationException to indicate the inspect operation failed and a capability is not provided 
      */
-    public boolean inspect(int streamNumber, List<ViewFactory> viewFactories, StatementContext statementContext);
+    public boolean inspect(int streamNumber, List<ViewFactory> viewFactories, StatementContext statementContext)
+        throws ExprValidationException;
+
+    /**
+     * Returns true to indicate that the capability requirs one or more child views, or can work without child views.
+     * @return true for child views required, false for not required
+     */
+    public boolean requiresChildViews();
 }

@@ -4,6 +4,7 @@ import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.collection.Pair;
 import net.esper.collection.MultiKey;
+import net.esper.collection.UniformPair;
 import net.esper.view.Viewable;
 
 import java.util.Set;
@@ -49,4 +50,11 @@ public interface ResultSetProcessor
      * @return event iterator
      */
     public Iterator<EventBean> getIterator(Viewable parent);
+
+    /**
+     * Returns the iterator for iterating over a join-result.
+     * @param joinSet is the join result set
+     * @return iterator over join results
+     */
+    public Iterator<EventBean> getIterator(Set<MultiKey<EventBean>> joinSet);
 }

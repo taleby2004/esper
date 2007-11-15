@@ -1,6 +1,7 @@
 package net.esper.view.window;
 
 import net.esper.eql.core.ViewResourceCallback;
+import net.esper.eql.named.RemoveStreamViewCapability;
 import net.esper.event.EventType;
 import net.esper.util.JavaClassHelper;
 import net.esper.view.*;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Factory for {@link net.esper.view.window.TimeBatchView}.
  */
-public class LengthBatchViewFactory implements ViewFactory
+public class LengthBatchViewFactory implements DataWindowViewFactory
 {
     /**
      * The length window size.
@@ -23,6 +24,11 @@ public class LengthBatchViewFactory implements ViewFactory
      */
     protected RelativeAccessByEventNIndexGetter relativeAccessGetterImpl;
     
+    /**
+     * Flag to indicate that the view must handle the removed events from a parent view.
+     */
+    protected boolean isRemoveStreamHandling;
+
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
@@ -59,6 +65,10 @@ public class LengthBatchViewFactory implements ViewFactory
 
     public boolean canProvideCapability(ViewCapability viewCapability)
     {
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            return true;
+        }
         return viewCapability instanceof ViewCapDataWindowAccess;
     }
 
@@ -67,6 +77,11 @@ public class LengthBatchViewFactory implements ViewFactory
         if (!canProvideCapability(viewCapability))
         {
             throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
+        }
+        if (viewCapability instanceof RemoveStreamViewCapability)
+        {
+            isRemoveStreamHandling = true;
+            return;
         }
         if (relativeAccessGetterImpl == null)
         {
@@ -85,7 +100,14 @@ public class LengthBatchViewFactory implements ViewFactory
             relativeAccessGetterImpl.updated(relativeAccessByEvent, null);
         }
 
-        return new LengthBatchView(this, size, relativeAccessByEvent);
+        if (isRemoveStreamHandling)
+        {
+            return new LengthBatchViewRStream(this, size);
+        }
+        else
+        {
+            return new LengthBatchView(this, size, relativeAccessByEvent);
+        }
     }
 
     public EventType getEventType()

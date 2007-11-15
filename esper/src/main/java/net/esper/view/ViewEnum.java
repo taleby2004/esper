@@ -32,9 +32,24 @@ public enum ViewEnum
     TIME_BATCH("win","time_batch", TimeBatchViewFactory.class, null),
 
     /**
+     * Time length batch.
+     */
+    TIME_LENGTH_BATCH("win","time_length_batch", TimeLengthBatchViewFactory.class, null),
+
+    /**
+     * Time accumulating view.
+     */
+    TIME_ACCUM("win","time_accum", TimeAccumViewFactory.class, null),
+
+    /**
      * Externally timed window.
      */
     EXT_TIMED_WINDOW("win", "ext_timed", ExternallyTimedWindowViewFactory.class, null),
+
+    /**
+     * Keep-all data window.
+     */
+    KEEPALL_WINDOW("win", "keepall", KeepAllViewFactory.class, null),
 
     /**
      * Size view.
@@ -90,6 +105,11 @@ public enum ViewEnum
      * Sorted window.
      */
     SORT_WINDOW("ext", "sort", SortWindowViewFactory.class, null),
+
+    /**
+     * Time order event window.
+     */
+    TIME_ORDER("ext", "time_order", TimeOrderViewFactory.class, null),
 
     /**
      * Prior event view.

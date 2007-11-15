@@ -41,6 +41,11 @@ public class EventTypeIndex implements EventEvaluator
         eventTypesRWLock = new ReentrantReadWriteLock();
     }
 
+    public void destroy()
+    {
+        eventTypes.clear();
+    }
+
     /**
      * Add a new event type to the index and use the specified node for the root node of its subtree.
      * If the event type already existed, the method will throw an IllegalStateException.
@@ -80,7 +85,7 @@ public class EventTypeIndex implements EventEvaluator
 
     public void matchEvent(EventBean event, Collection<FilterHandle> matches)
     {
-        if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".matchEvent Event received for matching, event=" + event);
         }
@@ -129,7 +134,7 @@ public class EventTypeIndex implements EventEvaluator
         // In this case, log a message and done.
         if (rootNode == null)
         {
-            if ((ExecutionPathDebugLog.isEnabled()) && (log.isDebugEnabled()))
+            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
             {
                 String message = "Event type is not known to the filter service, eventType=" + eventType;
                 log.debug(".matchEvent " + message);
