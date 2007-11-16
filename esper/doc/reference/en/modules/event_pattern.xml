@@ -747,14 +747,31 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
     
             <para>
 				The <literal>not</literal> operator negates the truth value of an expression. Pattern expressions prefixed with <literal>not</literal> are automatically 
-				defaulted to true.
+				defaulted to true upon start, and turn permanently false when the expression within turns true.
             </para>
             
-           <para>
-				This pattern matches only when an event A is encountered followed by event B but only if no event C was encountered before event B.          
+            <para>
+				The <literal>not</literal> operator is generally used in conjuntion with the <literal>and</literal> operator or subexpressions as the below examples show.
             </para>
-			<programlisting><![CDATA[( A -> B ) and not C]]></programlisting>
+
+           <para>
+				This pattern matches only when an event A is encountered followed by event B but only if no event C was encountered before either event A and B, counting from the time the pattern is started:
+            </para>
+			<programlisting><![CDATA[(A -> B) and not C]]></programlisting>
 			            
+            <para>
+				Assume we'd like to detect when an event A is followed by event D, without any B or C events between the A and D events:
+            </para>
+			<programlisting><![CDATA[A -> (D and not (B or C))]]></programlisting>
+
+            <para>
+				It may help your understanding to discuss a pattern that uses the <literal>or</literal> operator and the <literal>not</literal> operator together:				
+            </para>
+			<programlisting><![CDATA[a=A -> (b=B or not C)]]></programlisting>
+
+            <para>
+				In the pattern above, when an A event arrives then the engine starts the subexpression <literal>B or not C</literal>. As soon as the subexpression starts, the <literal>not</literal> operator turns to true. The <literal>or</literal> expression turns true and thus your listener receives an invocation providing the A event in the property 'a'. The subexpression does not end and continues listening for B and C events. Upon arrival of a B event your listener receives a second invocation. If instead a C event arrives, the <literal>not</literal> turns permanently false however that does not affect the <literal>or</literal> operator (but would end an <literal>and</literal> operator).
+            </para>
         </sect2>
 
         <sect2 id="pattern-temporal-followed-by" >

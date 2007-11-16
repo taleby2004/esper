@@ -105,6 +105,10 @@ countStmt.addListener(myListener);]]></programlisting>
 			</para>		
 
 			<para>			
+				It is important to understand that <literal>UpdateListener</literal> listeners receive multiple result rows in one invocation by the engine: the new data and old data parameters to your listener are array parameters. For example, if your application uses one of the batch data windows, or your application creates a pattern that matches multiple times when a single event arrives, then the engine indicates such multiple result rows in one invocation and your new data array carries two or more rows.
+			</para>		
+
+			<para>			
 				A second listener interface is the <literal>StatementAwareUpdateListener</literal> interface. A <literal>StatementAwareUpdateListener</literal> is especially useful for registering the same listener object with multiple statements, 
 				as the listener receives the statement instance and engine instance in addition to new and old data when the engine indicates new results to a listener.
 			</para>		
