@@ -4,6 +4,7 @@
     <sect1 id="eventrep_intro">
         <title>Event Underlying Java Objects</title>
 
+		<indexterm><primary>event</primary><secondary>underlying representation</secondary></indexterm>
         <para>
 			An event is an immutable record of a past occurrence of an action or state change. Event properties capture the state information for an event.
 			An event is represented by either a POJO (plain-old Java object), a <literal>java.util.Map</literal> or a XML document via <literal>org.w3c.dom.Node</literal>.
@@ -45,6 +46,7 @@
 	<sect1 id="eventrep-properties">
 	   <title>Event Properties</title>
            
+		<indexterm><primary>event</primary><secondary>properties</secondary></indexterm>
 		<para>
 			 Event properties capture the state information for an event. Event properties be simple as well as indexed, mapped and nested event properties. The table below outlines the different types of properties and their syntax in an event expression. This syntax allows statements to query deep JavaBean objects graphs, XML structures and Map events. 
 		</para>
@@ -102,6 +104,8 @@
 	<sect1 id="eventrep-dyncproperties">
 	   <title>Dynamic Event Properties</title>
            
+		<indexterm><primary>dynamic event properties</primary></indexterm>
+		<indexterm><primary>event</primary><secondary>dynamic properties</secondary></indexterm>
 		<para>
 			Dynamic (unchecked) properties are event properties that need not be known at statement compilation time. Such properties are resolved during runtime.
 		</para>
@@ -211,6 +215,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 	<sect1 id="eventrep-javabean">
 	   <title>Plain-Old Java Object Events</title>
 
+		<indexterm><primary>event</primary><secondary>Java object</secondary></indexterm>
 		<para>
 			Plain-old Java object events are object instances that expose event properties through JavaBeans-style getter methods. Events classes or interfaces do not have to be fully compliant to the JavaBean specification; however for the Esper engine to obtain event properties, the required JavaBean getter methods must be present.
 		</para>
@@ -379,6 +384,8 @@ where address('work').streetName = 'Park Ave'
 	<sect1 id="eventrep-java-util-map">
 	   <title><literal>java.util.Map</literal> Events</title>
 	   
+		<indexterm><primary>Map event representation</primary></indexterm>
+		<indexterm><primary>event</primary><secondary>Map representation</secondary></indexterm>
 		<para>
 			Events can also be represented by objects that implement the <literal>java.util.Map</literal> interface. 
 			Event properties of <literal>Map</literal> events are the values in the map accessible through the <literal>get</literal> method exposed by the <literal>java.util.Map</literal> interface.
@@ -442,6 +449,8 @@ epRuntime.sendEvent(event, "TxnEvent");]]></programlisting>
 	<sect1 id="eventrep-xml-dom">
 	   <title><literal>org.w3c.dom.Node</literal> XML Events</title>
 	   
+		<indexterm><primary>XML event representation</primary></indexterm>
+		<indexterm><primary>event</primary><secondary>XML representation</secondary></indexterm>
 		<para>
 			Events can also be represented as <literal>org.w3c.dom.Node</literal> instances and send into the engine via the <literal>sendEvent</literal> method on <literal>EPRuntime</literal>. Please note that configuration is required for allowing the engine to map the event type alias to <literal>Node</literal> element names. See <xref linkend="configuration"/>.
 		</para>

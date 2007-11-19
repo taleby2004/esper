@@ -7,6 +7,9 @@
 
 		<sect1 id="eql-operator-ref-arithmatic">
 			<title>Arithmatic Operators</title>
+
+			<indexterm><primary>arithmatic operators</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary>arithmatic</secondary></indexterm>
 			<para>
 				The below table outlines the arithmatic operators available.
 			</para>
@@ -48,6 +51,9 @@
 		
 		<sect1 id="eql-operator-ref-logical">
 			<title>Logical And Comparsion Operators</title>
+
+			<indexterm><primary>logical and comparison operators</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary>logical and comparison</secondary></indexterm>
 			<para>
 				The below table outlines the logical and comparison operators available.
 			</para>
@@ -95,6 +101,9 @@
 		
 		<sect1 id="eql-operator-ref-string">
 			<title>Concatenation Operators</title>
+
+			<indexterm><primary>concatenation operators</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary>concatenation</secondary></indexterm>
 			<para>
 				The below table outlines the concatenation operators available.
 			</para>
@@ -124,6 +133,9 @@
 
 		<sect1 id="eql-operator-ref-binary">
 			<title>Binary Operators</title>
+
+			<indexterm><primary>binary operators</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary>binary</secondary></indexterm>
 			<para>
 				The below table outlines the binary operators available.
 			</para>
@@ -165,6 +177,9 @@
 
 		<sect1 id="eql-operator-ref-array">
 			<title>Array Definition Operator</title>
+
+			<indexterm><primary>array definition operator</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary>array definition</secondary></indexterm>
 			<para>
 				The <literal>{</literal> and <literal>}</literal> curly braces are array definition operators following the Java array initialization syntax. Arrays can be useful to pass to user-defined functions or to select array data in a select clause.
 			</para>
@@ -192,6 +207,9 @@
 
 		<sect1 id="eql-operator-ref-keyword-in">
 			<title>The '<literal>in</literal>' Keyword</title>
+
+			<indexterm><primary><literal>in</literal> set operator</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary><literal>in</literal></secondary></indexterm>
 			<para>
 				The <literal>in</literal> keyword determines if a given value matches any value in a list. The syntax of the keyword is:	
 			</para>
@@ -218,6 +236,9 @@
 
 		<sect1 id="eql-operator-ref-keyword-between">
 			<title>The '<literal>between</literal>' Keyword</title>
+
+			<indexterm><primary><literal>between</literal> operator</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary><literal>between</literal></secondary></indexterm>
 			<para>
 				The <literal>between</literal> keyword specifies a range to test. The syntax of the keyword is:	
 			</para>
@@ -248,6 +269,9 @@
 
 		<sect1 id="eql-operator-ref-keyword-like">
 			<title>The '<literal>like</literal>' Keyword</title>
+
+			<indexterm><primary><literal>like</literal> operator</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary><literal>like</literal></secondary></indexterm>
 			<para>
 				The <literal>like</literal> keyword provides standard SQL pattern matching. SQL pattern matching allows you to use <literal>'_'</literal> to match any single character and <literal>'%'</literal> to match an arbitrary number of characters (including zero characters). In Esper, SQL patterns are case-sensitive by default. The syntax of <literal>like</literal> is:	
 			</para>
@@ -275,6 +299,9 @@
 
 		<sect1 id="eql-operator-ref-keyword-regexp">
 			<title>The '<literal>regexp</literal>' Keyword</title>
+
+			<indexterm><primary><literal>regexp</literal> operator</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary><literal>regexp</literal></secondary></indexterm>
 			<para>
 				The <literal>regexp</literal> keyword is a form of pattern matching based on regular expressions implemented through the Java <literal>java.util.regex</literal> package. The syntax of <literal>regexp</literal> is:	
 			</para>

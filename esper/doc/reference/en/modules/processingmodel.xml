@@ -22,6 +22,7 @@
 			</imageobject>
 		</mediaobject>
 
+		<indexterm><primary>EventBean interface</primary></indexterm>
         <para>
 			The engine provides statement results to update listeners by placing results in <literal>net.esper.event.EventBean</literal> instances. A typical listener implementation queries the <literal>EventBean</literal> instances via getter methods to obtain the statement-generated results. 
         </para>
@@ -48,6 +49,8 @@
 	
     <sect1 id="processingmodel_nowindow" revision="1">
         <title>Insert Stream</title>
+
+		<indexterm><primary>insert stream</primary></indexterm>
         <para>
 			In this section we look at the output of a very simple EQL statement. The statement selects an event stream without using a data window and without applying any filtering, as follows:
         </para>
@@ -85,6 +88,8 @@
 
     <sect1 id="processingmodel_lengthwindow" revision="1">
         <title>Insert and Remove Stream</title>
+
+		<indexterm><primary>remove stream</primary></indexterm>
         <para>
 			A length window instructs the engine to only keep the last N events for a stream. The next statement applies a length window onto the Withdrawal event stream. The statement serves to illustrate the concept of data window and events entering and leaving a data window:
         </para>
@@ -198,6 +203,7 @@ select * from WithdrawalFiltered]]></programlisting>
 		<sect2 id="processingmodel_time_window_1" revision="1">
 			<title>Time Window</title>
 
+			<indexterm><primary>time window view</primary></indexterm>
 			<para>
 				A time window is a moving window extending to the specified time interval into the past based on the system time. Time windows enable us to limit the number of events considered by a query, as do length windows. 
 			</para>
@@ -265,6 +271,7 @@ having amount > 1000]]></programlisting>
 		<sect2 id="processingmodel_time_batch_1" revision="1">
 			<title>Time Batch</title>
 
+			<indexterm><primary>time batch view</primary></indexterm>
 			<para>
 				The time batch view buffers events and releases them every specified time interval in one update. Time windows control the evaluation of events, as does the length batch window. 
 			</para>
@@ -330,6 +337,7 @@ having amount > 1000]]></programlisting>
 	<sect1 id="processingmodel_batch" revision="1">
 		<title>Batch Windows</title>
 
+		<indexterm><primary>views</primary><secondary>batch window processing</secondary></indexterm>
 		<para>
 			The built-in data windows that act on batches of events are the <literal>win:time_batch</literal> and the <literal>win:length_batch</literal> views. The <literal>win:time_batch</literal> data window collects events arriving during a given time interval and posts collected events as a batch to listeners at the end of the time interval. The <literal>win:length_batch</literal> data window collects a given number of events and posts collected events as a batch to listeners when the given number of events has collected.
 		</para>
@@ -471,6 +479,7 @@ group by account]]></programlisting>
     <sect1 id="processingmodel_eventbean" revision="1">
         <title><literal>EventBean</literal> Query Results</title>
         
+		<indexterm><primary>EventBean interface</primary></indexterm>
         <para>
 			The engine posts events to <literal>UpdateListener</literal> implementations as <literal>net.esper.event.EventBean</literal> instances. The <literal>EventBean</literal> represents a row (event) in your continuous query's result set.  
         </para>
@@ -592,4 +601,3 @@ Long count= (Long) newEvents[0].get("mycount");]]></programlisting>
 		<programlisting><![CDATA[StockTickEvent tick = (StockTickEvent) newEvents[0].getUnderlying();]]></programlisting>
 	</sect1>
 </chapter>
-

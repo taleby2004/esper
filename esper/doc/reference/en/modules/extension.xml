@@ -26,6 +26,8 @@
     <sect1 id="custom-views" revision="1">
         <title>Custom View Implementation</title>
         
+		<indexterm><primary>view</primary><secondary>custom plug-in view</secondary></indexterm>
+		<indexterm><primary>data window view</primary><secondary>custom plug-in view</secondary></indexterm>
         <para>
 			Views in Esper are used to derive information from an event stream, and to represent data windows onto an event stream. This chapter describes how to plug-in a new, custom view. 
         </para>
@@ -298,6 +300,7 @@
     <sect1 id="custom-aggregation-function" revision="1">
         <title>Custom Aggregation Functions</title>
         
+		<indexterm><primary>aggregation functions</primary><secondary>custom plug-in</secondary></indexterm>
         <para>
 			Aggregation functions aggregate event property values or expression results obtained from one or more streams. Examples for built-in aggregation functions are <literal>count(*)</literal>, <literal>sum(price * volume)</literal> or <literal>avg(distinct volume)</literal>.
         </para>
@@ -450,6 +453,7 @@
     <sect1 id="custom-pattern-guard" revision="1">
         <title>Custom Pattern Guard</title>
         
+		<indexterm><primary>pattern guard</primary><secondary>custom plug-in</secondary></indexterm>
         <para>
 			Pattern guards are pattern objects that control the lifecycle of the guarded sub-expression, and can filter the events fired by the subexpression. 
         </para>
@@ -616,6 +620,8 @@
     <sect1 id="custom-pattern-observer" revision="1">
         <title>Custom Pattern Observer</title>
         
+		<indexterm><primary>pattern observer</primary><secondary>custom plug-in</secondary></indexterm>
+
         <para>
 			Pattern observers are pattern objects that are executed as part of a pattern expression and can observe events or test conditions. Examples for built-in observers are <literal>timer:at</literal> and <literal>timer:interval</literal>. Some suggested uses of observer objects are: 
         </para>
@@ -795,4 +801,3 @@
 	</sect1>
 
 </chapter>
-

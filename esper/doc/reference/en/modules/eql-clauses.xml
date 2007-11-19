@@ -135,6 +135,8 @@ select * from MyEvent  /* this also works */]]></programlisting>
     <sect1 id="eql-select-list">
         <title>Choosing Event Properties And Events: the <emphasis>Select</emphasis> Clause</title>
         
+		<indexterm><primary>select clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>select clause</secondary></indexterm>
 		<para>
 			The select clause is required in all EQL statements. The select clause can be used to select all properties via the wildcard <literal>*</literal>, or to specify a list of event properties and expressions. The select clause defines the event type (event property names and types) of the resulting events published by the statement, or pulled from the statement via the iterator methods.
 		</para>
@@ -254,6 +256,8 @@ select * from MyEvent  /* this also works */]]></programlisting>
     <sect1 id="eql-from-clause">
         <title>Specifying Event Streams : the <emphasis>From</emphasis> Clause</title>
 
+		<indexterm><primary>from clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>from clause</secondary></indexterm>
 		<para>
 			The <literal>from</literal> clause is required in all EQL statements. It specifies one or more event streams or named windows. Each event stream or named window can optionally be given a name by means of the <literal>as</literal> syntax.
 		</para>
@@ -534,6 +538,8 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
     <sect1 id="eql-where-clause">
         <title>Specifying Search Conditions: the <emphasis>Where</emphasis> Clause</title>
 
+		<indexterm><primary>where clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>where clause</secondary></indexterm>
 		<para>
 			The <literal>where</literal> clause is an optional clause in EQL statements. Via the <literal>where</literal> clause event streams can be joined and events can be filtered. 
 		</para>
@@ -619,6 +625,10 @@ where symbol='IBM'</programlisting>
 
         <sect2 id="eql-grouping-group-by" >
 				 <title>Organizing statement results into groups: the <emphasis>Group-by</emphasis> clause</title>
+
+				<indexterm><primary>group-by clause</primary></indexterm>
+				<indexterm><primary>EQL</primary><secondary>group-by clause</secondary></indexterm>
+
 				<para>
 					The <literal>group by</literal> clause is optional in all EQL statements. The <literal>group by</literal> clause divides the output of an EQL statement into groups. You can group by one or more event property names, or by the result of computed expressions. When used with aggregate functions, <literal>group by</literal> retrieves the calculations in each subgroup. You can use <literal>group by</literal> without aggregate functions, but generally that can produce confusing results.
 				</para>
@@ -701,6 +711,9 @@ group by symbol, tickDataFeed</programlisting>
 
         <sect2 id="eql-grouping-having" >
 			 <title>Selecting groups of events: the <emphasis>Having</emphasis> clause</title>
+
+				<indexterm><primary>having clause</primary></indexterm>
+				<indexterm><primary>EQL</primary><secondary>having clause</secondary></indexterm>
 				<para>
 					Use the <literal>having</literal> clause to pass or reject events defined by the <literal>group-by</literal> clause. The <literal>having</literal> clause sets conditions for the <literal>group by</literal> clause in the same way <literal>where</literal> sets conditions for the <literal>select</literal> clause, except <literal>where</literal> cannot include aggregate functions, while <literal>having</literal> often does.
 				</para>
@@ -837,6 +850,9 @@ select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:length(1
     <sect1 id="eql-output-rate">
         <title>Stabilizing and Limiting Output: the <emphasis>Output</emphasis> Clause</title>
 
+		<indexterm><primary>output limiting and stabilizing clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>output limiting and stabilizing</secondary></indexterm>
+
         <sect2 id="eql-output-options" >
 				<title>Output Clause Options</title>
 			
@@ -910,6 +926,9 @@ Second, the <literal>last</literal> and <literal>all</literal> keywords have spe
     <sect1 id="eql-order-by">
         <title>Sorting Output: the <emphasis>Order By</emphasis> Clause</title>
 
+		<indexterm><primary>order-by clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>order-by clause</secondary></indexterm>
+
 		<para>
 			The <literal>order by</literal> clause is optional in Esper. It is used for ordering output events by their properties, or by expressions involving those properties. For example, the following statement outputs batches of 5 or more stock tick events that are sorted first by price and then by volume.				
 		</para>
@@ -944,6 +963,9 @@ order by price, volume</programlisting>
 
     <sect1 id="eql-insert-into">
         <title>Merging Streams and Continuous Insertion: the <emphasis>Insert Into</emphasis> Clause</title>
+
+		<indexterm><primary>insert into clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>insert into clause</secondary></indexterm>
 
 		<para>
 			The <literal>insert into</literal> clause is optional in Esper. This clause can be specified to make the results of a statement available as an event stream for use
@@ -1036,6 +1058,9 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
     <sect1 id="eql-join">
         <title>Joining Event Streams</title>
 
+		<indexterm><primary>join</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>join</secondary></indexterm>
+
 		<para>
 			Two or more event streams can be part of the <literal>from</literal> clause and thus both streams determine the resulting events. The where-clause lists the join conditions that Esper uses to relate events in the two or more streams. Reference and historical data such as stored in your relational database can also be included in joins. Please see <xref linkend="histdata_overview"/> for details.
 		</para>
@@ -1067,6 +1092,9 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 
     <sect1 id="eql-outerjoin">
         <title>Outer Joins</title>
+
+		<indexterm><primary>outer join</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>outer join</secondary></indexterm>
 
 		<para>
 			Esper supports left outer joins, right outer joins and full outer joins between an unlimited number of event streams. Outer joins can also join reference and historical data as explained in <xref linkend="histdata_overview"/>.
@@ -1107,6 +1135,9 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 
     <sect1 id="eql-subqueries">
         <title>Subqueries</title>
+
+		<indexterm><primary>subqueries</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>subqueries</secondary></indexterm>
 
 		<para>
 			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the select-clause and in the where-clause of EQL statements. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins. 
@@ -1220,6 +1251,10 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 	<sect1 id="histdata_overview" revision="1">
 		<title>Joining Relational Data via SQL</title>
 		
+		<indexterm><primary>SQL</primary></indexterm>
+		<indexterm><primary>relational databases</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>joining relational data via SQL</secondary></indexterm>
+
 		<para>
 			This chapter outlines how reference data and historical data that are stored in a relational database can be queried via SQL within EQL statements. 
 		</para>
@@ -1449,6 +1484,9 @@ select orderId, orderAmount from
 	<sect1 id="named_overview" revision="1">
 		<title>Creating and Using Named Windows</title>
 		
+		<indexterm><primary>named window</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>named window</secondary></indexterm>
+
 		<para>
 			A <emphasis>named window</emphasis> is a global data window that can take part in many statement queries, and that can be inserted-into and deleted-from by multiple statements.
 		</para>
@@ -1526,6 +1564,10 @@ select orderId, orderAmount from
 		<sect2 id="named_delete" revision="1">
 			<title>Deleting From Named Windows: the <literal>On Delete</literal> clause</title>
 			
+			<indexterm><primary>on-delete</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>deleting from</secondary></indexterm>
+			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>deleting from</tertiary></indexterm>
+
 			<para>
 				An <literal>on delete</literal> clause removes events from a named window. The clause can be used to remove all events, or only events that match certain criteria, or events that correlate with an arriving event.
 			</para>
@@ -1582,6 +1624,9 @@ where myNamedWindow.symbol = myNewOrders.symbol]]></programlisting>
 		<sect2 id="named_inserting" revision="1">
 			<title>Inserting Into Named Windows</title>
 			
+			<indexterm><primary>named window</primary><secondary>inserting into</secondary></indexterm>
+			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>inserting into</tertiary></indexterm>
+
 			<para>
 				The <literal>insert into</literal> clause inserts events into named windows. Your application must ensure that the column names and types match the declared column names and types of the named window to be inserted into.
 			</para>
@@ -1630,6 +1675,9 @@ insert into OrdersWindow select * from MerchandiseProductEvent]]></programlistin
 		<sect2 id="named_selecting" revision="1">
 			<title>Selecting From Named Windows</title>
 			
+			<indexterm><primary>named window</primary><secondary>selecting from</secondary></indexterm>
+			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>selecting from</tertiary></indexterm>
+
 			<para>
 				A named window can be referred to by any statement in the <literal>from</literal> clause of the statement. Additional views may be used onto named windows however such views cannot include data window views.
 			</para>

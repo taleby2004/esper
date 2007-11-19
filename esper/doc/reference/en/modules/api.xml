@@ -25,6 +25,8 @@
     <sect1 id="api-engine-instances">
         <title>Engine Instances</title>
 
+		<indexterm><primary>EPServiceProviderManager class</primary></indexterm>
+
         <para>
 			Each instance of an Esper engine is completely independent of other engine instances and has its own administrative and runtime interface.
         </para>
@@ -53,6 +55,9 @@
 
     <sect1 id="api-administrative">
         <title>The Administrative Interface</title>
+
+		<indexterm><primary>EPAdministrator interface</primary></indexterm>
+		<indexterm><primary>EPStatement interface</primary></indexterm>
 
 		<sect2 id="api-admin-creating">
         <title>Creating Statements</title>
@@ -92,6 +97,9 @@ countStmt.start();]]></programlisting>
 
 	  <sect2 id="api-admin-listeners">		
 			<title>Adding Listeners</title>
+
+			<indexterm><primary>UpdateListener interface</primary></indexterm>
+			<indexterm><primary>StatementAwareUpdateListener interface</primary></indexterm>
 			<para>
 				We can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods on <literal>EPStatement</literal> . We need to provide an implementation of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement:
 			</para>
@@ -123,6 +131,9 @@ statement.addListener(myListener);]]></programlisting>
 
 	  <sect2 id="api-admin-iterators">		
 			<title>Using Iterators</title>
+			<indexterm><primary>iterator</primary></indexterm>
+			<indexterm><primary>pull API</primary></indexterm>
+			<indexterm><primary>safe iterator</primary></indexterm>
 			<para>
 				Subscribing to events posted by a statement is following a push model. The engine pushes data to listeners when events are received that cause data to change or patterns to match. Alternatively, you need to know that statements serve up data that your application can obtain via the <literal>safeIterator</literal> and <literal>iterator</literal> methods on <literal>EPStatement</literal>. This is called the pull API and can come in handy if your application is not interested in all new updates, and only needs to perform a frequent or infrequent poll for the latest data. 
 			</para>
@@ -217,6 +228,8 @@ finally {
 
 	    <sect2 id="api-admin-runtime-config">		
 			<title>Runtime Engine Configuration</title>
+
+			<indexterm><primary>configuration</primary><secondary>runtime</secondary></indexterm>
 			<para>
 				Certain configuration changes are available to perform on an engine instance while in operation. Such configuration operations are available via the <literal>getConfiguration</literal> method on <literal>EPAdministrator</literal>,
 				which returns an <literal>ConfigurationOperations</literal> object.
@@ -250,6 +263,7 @@ finally {
     <sect1 id="api-runtime">
         <title>The Runtime Interface</title>
 
+		<indexterm><primary>EPRuntime interface</primary></indexterm>
         <para>
 			The <literal>EPRuntime</literal> interface is used to send events for processing into an Esper engine, and to emit Events from an engine instance to the outside world.
         </para>
@@ -281,6 +295,8 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
 
 	    <sect2 id="api-runtime-unmatched">		
 			<title>Receiving Unmatched Events</title>
+
+			<indexterm><primary>UnmatchedListener interface</primary></indexterm>
 			<para>
 				Your application can register an implementation of the <literal>UnmatchedListener</literal> interface with the <literal>EPRuntime</literal> runtime via the <literal>setUnmatchedListener</literal> method to receive events that were not matched by any statement.
 			</para>
@@ -320,6 +336,7 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
     <sect1 id="api-controlling-time">
         <title>Time-Keeping Events</title>
 
+		<indexterm><primary>time</primary><secondary>controlling</secondary></indexterm>
         <para>
 			Special events are provided that can be used to control the time-keeping of an engine instance. There are two models for an engine to keep track of time.
 			Internal clocking is when the engine instance relies on the <literal>java.util.Timer</literal> class for time tick events. External clocking can be used to supply time ticks to the engine. The latter is useful for testing time-based event sequences or for synchronizing the engine with an external time source.
@@ -348,6 +365,7 @@ runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
     <sect1 id="api-events-received">
         <title>Events Received from the Engine</title>
 
+		<indexterm><primary>UpdateListener interface</primary></indexterm>
         <para>
 			The Esper engine posts events to registered <literal>UpdateListener</literal> instances ('push' method for receiving events). For all statements events can also be pulled from statements via the <literal>safeIterator</literal> and <literal>iterator</literal> methods. Both pull and push supply <literal>EventBean</literal> instances representing the events generated by the engine or events supplied to the engine. Each <literal>EventBean</literal> instance represents an event, with each event being either an artificial event, composite event or an event supplied to the engine via its runtime interface.
         </para>
@@ -409,6 +427,7 @@ public class MyUpdateListener implements UpdateListener
     <sect1 id="api-threading">
         <title>Engine Threading and Concurrency</title>
 
+		<indexterm><primary>threading</primary></indexterm>
         <para>
 			Esper is designed from the ground up to operate as a component to multi-threaded, highly-concurrent applications that require efficient use of Java VM resources. In addition, multi-threaded execution requires guarantees in predictability of results and deterministic processing. This section discusses these concerns in detail. 
         </para>
@@ -459,6 +478,7 @@ We generally recommended that listener implementations do not block. By implemen
     <sect1 id="api-soda">
         <title>Statement Object Model</title>
         
+		<indexterm><primary>EPStatementObjectModel interface</primary></indexterm>
         <para>
 			The statement object model is a set of classes that provide an object-oriented representation of an EQL or pattern statement. The object model classes are found in package <literal>net.esper.client.soda</literal>. An instance of <literal>EPStatementObjectModel</literal> represents a statement's object model.
         </para>
