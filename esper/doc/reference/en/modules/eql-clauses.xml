@@ -626,8 +626,8 @@ where symbol='IBM'</programlisting>
         <sect2 id="eql-grouping-group-by" >
 				 <title>Organizing statement results into groups: the <emphasis>Group-by</emphasis> clause</title>
 
-				<indexterm><primary>group-by clause</primary></indexterm>
-				<indexterm><primary>EQL</primary><secondary>group-by clause</secondary></indexterm>
+				<indexterm><primary>group by clause</primary></indexterm>
+				<indexterm><primary>EQL</primary><secondary>group by clause</secondary></indexterm>
 
 				<para>
 					The <literal>group by</literal> clause is optional in all EQL statements. The <literal>group by</literal> clause divides the output of an EQL statement into groups. You can group by one or more event property names, or by the result of computed expressions. When used with aggregate functions, <literal>group by</literal> retrieves the calculations in each subgroup. You can use <literal>group by</literal> without aggregate functions, but generally that can produce confusing results.
@@ -926,8 +926,8 @@ Second, the <literal>last</literal> and <literal>all</literal> keywords have spe
     <sect1 id="eql-order-by">
         <title>Sorting Output: the <emphasis>Order By</emphasis> Clause</title>
 
-		<indexterm><primary>order-by clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>order-by clause</secondary></indexterm>
+		<indexterm><primary>order by clause</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>order by clause</secondary></indexterm>
 
 		<para>
 			The <literal>order by</literal> clause is optional in Esper. It is used for ordering output events by their properties, or by expressions involving those properties. For example, the following statement outputs batches of 5 or more stock tick events that are sorted first by price and then by volume.				

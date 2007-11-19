@@ -203,7 +203,7 @@ select * from WithdrawalFiltered]]></programlisting>
 		<sect2 id="processingmodel_time_window_1" revision="1">
 			<title>Time Window</title>
 
-			<indexterm><primary>time window view</primary></indexterm>
+			<indexterm><primary>time window</primary></indexterm>
 			<para>
 				A time window is a moving window extending to the specified time interval into the past based on the system time. Time windows enable us to limit the number of events considered by a query, as do length windows. 
 			</para>
@@ -271,7 +271,7 @@ having amount > 1000]]></programlisting>
 		<sect2 id="processingmodel_time_batch_1" revision="1">
 			<title>Time Batch</title>
 
-			<indexterm><primary>time batch view</primary></indexterm>
+			<indexterm><primary>time batch window</primary></indexterm>
 			<para>
 				The time batch view buffers events and releases them every specified time interval in one update. Time windows control the evaluation of events, as does the length batch window. 
 			</para>

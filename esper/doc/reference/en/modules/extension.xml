@@ -26,8 +26,8 @@
     <sect1 id="custom-views" revision="1">
         <title>Custom View Implementation</title>
         
-		<indexterm><primary>view</primary><secondary>custom plug-in view</secondary></indexterm>
-		<indexterm><primary>data window view</primary><secondary>custom plug-in view</secondary></indexterm>
+		<indexterm><primary>views</primary><secondary>custom plug-in view</secondary></indexterm>
+		<indexterm><primary>data window views</primary><secondary>custom plug-in view</secondary></indexterm>
         <para>
 			Views in Esper are used to derive information from an event stream, and to represent data windows onto an event stream. This chapter describes how to plug-in a new, custom view. 
         </para>

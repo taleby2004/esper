@@ -384,7 +384,7 @@ where address('work').streetName = 'Park Ave'
 	<sect1 id="eventrep-java-util-map">
 	   <title><literal>java.util.Map</literal> Events</title>
 	   
-		<indexterm><primary>Map event representation</primary></indexterm>
+		<indexterm><primary>map event representation</primary></indexterm>
 		<indexterm><primary>event</primary><secondary>Map representation</secondary></indexterm>
 		<para>
 			Events can also be represented by objects that implement the <literal>java.util.Map</literal> interface. 

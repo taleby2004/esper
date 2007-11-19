@@ -2,7 +2,7 @@
 
     <title>Configuration</title>
     
-	<indexterm><primary>configuring</primary><secondary>overview</secondary></indexterm>
+	<indexterm><primary>configuration</primary><secondary>overview</secondary></indexterm>
 	<indexterm><primary>Configuration class</primary></indexterm>
     <para>
         Esper engine configuration is entirely optional. Esper has a very small number of configuration parameters that can be used to simplify event 
@@ -17,7 +17,7 @@
     <sect1 id="configuration-programmatic" revision="1">
         <title>Programmatic Configuration</title>
 
-	<indexterm><primary>configuring</primary><secondary>programmatic</secondary></indexterm>
+	<indexterm><primary>configuration</primary><secondary>programmatic</secondary></indexterm>
         <para>
             An instance of <literal>net.esper.client.Configuration</literal> represents all configuration parameters. The <literal>Configuration</literal> is used to build an <literal>EPServiceProvider</literal>, which provides the administrative and runtime interfaces for an Esper engine instance.
         </para>
@@ -49,7 +49,7 @@ EPServiceProvider epService = EPServiceProviderManager.getProvider("sample", con
 	<sect1 id="configuration-via-xml" revision="1">
         <title>Configuration via XML File</title>
 
-		<indexterm><primary>configuring</primary><secondary>via XML</secondary></indexterm>
+		<indexterm><primary>configuration</primary><secondary>via XML</secondary></indexterm>
         <para>
 			An alternative approach to configuration is to specify a configuration in an XML file. 
         </para>
@@ -92,7 +92,7 @@ configuration.configure("myengine.esper.cfg.xml");
 	<sect1 id="configuration-items" revision="1">
         <title>Configuration Items</title>
 
-		<indexterm><primary>configuring</primary><secondary>items to configure</secondary></indexterm>
+		<indexterm><primary>configuration</primary><secondary>items to configure</secondary></indexterm>
 		<sect2 id="config-java" revision="1">
 			<title>Events represented by Java Classes</title>
 			

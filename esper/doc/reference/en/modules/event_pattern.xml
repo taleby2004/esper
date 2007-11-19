@@ -819,7 +819,7 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
     <sect1 id="pattern-guards">
         <title>Pattern Guards</title>        
 
-		<indexterm><primary>pattern guards</primary></indexterm>
+		<indexterm><primary>pattern guard</primary></indexterm>
 		<para>
 			Guards are where-conditions that control the lifecycle of subexpressions. Custom guard functions can also be used. The section <xref linkend="extension"/> outlines guard plug-in development in greater detail.
 		</para>
@@ -901,7 +901,7 @@ timer:within(125)</programlisting>
     <sect1 id="pattern-observers">
         <title>Pattern Observers</title>
 
-		<indexterm><primary>pattern observers</primary></indexterm>
+		<indexterm><primary>pattern observer</primary></indexterm>
 		<para>
 			Observers observe time-based events for which the thread-of-control originates by the engine timer thread. Custom observers can also be developed that observe timer events or other engine-external events. The section <xref linkend="extension"/> outlines observer plug-in development in greater detail.
 		</para>
