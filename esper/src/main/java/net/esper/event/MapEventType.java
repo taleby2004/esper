@@ -358,7 +358,7 @@ public class MapEventType implements EventType
         return types;
     }
 
-    protected static boolean isEqualsProperties(Map<String, Class> setOne, Map<String, Class> setTwo)
+    public static boolean isEqualsProperties(Map<String, Class> setOne, Map<String, Class> setTwo)
     {
         // Should have the same number of properties
         if (setOne.size() != setTwo.size())

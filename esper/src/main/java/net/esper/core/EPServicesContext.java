@@ -307,13 +307,13 @@ public final class EPServicesContext
      */
     public void destroy()
     {
-        if (extensionServicesContext != null)
-        {
-            extensionServicesContext.destroy();
-        }
         if (statementLifecycleSvc != null)
         {
             statementLifecycleSvc.destroy();
+        }
+        if (extensionServicesContext != null)
+        {
+            extensionServicesContext.destroy();
         }
         if (filterService != null)
         {

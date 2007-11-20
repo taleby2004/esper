@@ -1,11 +1,12 @@
 package net.esper.eql.spec;
 
 import net.esper.eql.expression.ExprNode;
+import net.esper.util.MetaDefItem;
 
 /**
  * Specification for the on-delete statement.
  */
-public class OnDeleteDesc
+public class OnDeleteDesc implements MetaDefItem
 {
     private String windowName;
     private String optionalAsName;

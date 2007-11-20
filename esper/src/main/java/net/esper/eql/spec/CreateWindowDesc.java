@@ -1,11 +1,13 @@
 package net.esper.eql.spec;
 
+import net.esper.util.MetaDefItem;
+
 import java.util.List;
 
 /**
  * Specification for creating a named window.
  */
-public class CreateWindowDesc
+public class CreateWindowDesc implements MetaDefItem
 {
     private String windowName;
     private List<ViewSpec> viewSpecs;

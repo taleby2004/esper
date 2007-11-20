@@ -99,7 +99,6 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
             throw new EPException(message);
         }
 
-        // we don't care about removed data from a prior view
         if ((newData != null) && (newData.length > 0))
         {
             // If we have an empty window about to be filled for the first time, add a callback

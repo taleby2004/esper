@@ -29,6 +29,11 @@ public class TestOutputLimitSimple extends TestCase
         epService.initialize();
     }
 
+    public void testOutputAll()
+    {
+        
+    }
+
     public void testIterator()
 	{
         String[] fields = new String[] {"symbol", "price"};

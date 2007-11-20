@@ -355,7 +355,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 	    return newEventType;
 	}
 
-    private boolean isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Class> propertyTypes)
+    public static boolean isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Class> propertyTypes)
     {
         if (!(existingType instanceof WrapperEventType))
         {
