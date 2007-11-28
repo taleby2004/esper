@@ -31,7 +31,7 @@ Features
 	
 * Event Stream Processing
 
-	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed
+	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing)
 
 	* Tumbling windows: time, length and multi-policy
 
