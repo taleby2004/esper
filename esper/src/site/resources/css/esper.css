@@ -32,21 +32,21 @@ hr { height: 1px; border-style: none; color: #d0d0d0; background-color: #C0C0C0;
 
 /* maven apt source snip */
 pre {font-size: 1.2em; font-weight: bold; color:#000099;}
-.source { width: 602px; overflow: scroll; border: solid 1px #000099; padding: 10px;}
+.source { width: 640px; overflow: scroll; border: solid 1px #000099; padding: 10px;}
 
 /* 800 , 212 , 560 */ 
 .content { margin: 0px auto; width: 900px; }
 
 /* Top part */
-#top { padding-top: 0px; background: transparent; height: 60px; }
+#top { padding-top: 0px; background: transparent; height: 71px; }
 	#top h1 { font: bold 1.8em Arial, Sans-Serif; padding: 8px 0 4px 0; margin: 0; letter-spacing: 1px; color: #FFF }
 	#top h2 { font: 1.0em Arial, Sans-Serif; letter-spacing: 0px; color: #868686; margin:0; padding: 0 }
 	#top a {text-decoration: none; }
 	#top #icons { float: right; margin:20px 0; padding:0 }
 	#top #icons img { padding-right: 2px; border: 0 }
 
-/* Second part was 220px*/
-#prec { 	height: 0px; 	margin:0; padding: 0px; background: #F6F6F6; border-bottom: 0px solid #DCDCDC; overflow: hidden; margin-bottom: 10px }
+/* Second part was 190px*/
+#prec { 	height: 130px; 	margin:0; padding: 0px; background: #F6F6F6; border-bottom: 1px solid #DCDCDC; overflow: hidden; margin-bottom: 10px }
 	#wrap { margin: 0 auto; width: 900px; }
 		#wrap #pic { margin: 10px; float: right; background: url(../images/mainimg.jpg) no-repeat; height: 160px; width: 680px; overflow: hidden}
 			#wrap #pic #slogan { float: right; padding: 25px 130px 10px 30px; text-align: left; color: #FFF; font: 1.5em Arial, Sans-Serif}
@@ -56,13 +56,13 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 			
 		#wrap #menu { padding: 0; margin:0; background: inherit; }
 		#wrap #menu a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #F6F6F6 url(../images/lm-li.gif) no-repeat left;  }
-		#wrap #menu ul { padding: 10px 0 }
+		#wrap #menu ul { padding: 0px 0 }
 		#wrap #menu li { line-height: 26px; background: #F6F6F6 url(../images/li-line.gif) no-repeat bottom left; list-style: none }
 		
 		#wrap #menu2 {background: inherit;}
 		/* float: right; width: 200; padding-right: 450px; margin-top: 27px; */
 		#wrap #menu2 a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #F6F6F6 url(../images/lm-li.gif) no-repeat left;  }
-		#wrap #menu2 ul { padding: 10px 0 }
+		#wrap #menu2 ul { padding: 0px 0 }
 		#wrap #menu2 li { line-height: 26px; background: #F6F6F6 url(../images/li-line.gif) no-repeat bottom left; list-style: none }
 
 /*  Advertising #FFF url(../images/download.jpg) no-repeat left; min-height: 80px;*/

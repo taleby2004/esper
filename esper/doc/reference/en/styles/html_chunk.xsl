@@ -41,6 +41,8 @@
     <xsl:param name="callout.extensions">1</xsl:param>
     <xsl:param name="graphicsize.extension">0</xsl:param>
     <xsl:template name="user.footer.content">
+    <hr/>
+    <center>&#169; 2007 EsperTech Inc. All Rights Reserved</center>    
 	<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 	</script>
 	<script type="text/javascript">

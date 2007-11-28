@@ -57,6 +57,7 @@ public final class SchedulingServiceImpl implements SchedulingService
 
     public long getTime()
     {
+        // note that this.currentTime is volatile
         return this.currentTime;
     }
 

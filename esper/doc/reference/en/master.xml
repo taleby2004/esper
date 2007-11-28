@@ -18,9 +18,13 @@
 ]>
 <book lang="en">
 	<bookinfo>
-		<title>Esper - Java Complex Event (CEP) and Event Stream (ESP) Processor</title>
-		<subtitle>Esper Reference Documentation</subtitle>
+		<title>Esper - Event Stream and Complex Event Processing for Java</title>
+		<subtitle>Reference Documentation</subtitle>
 		<releaseinfo>1.12.0</releaseinfo>
+		<copyright>
+			<year>2007</year>
+			<holder>EsperTech Inc.</holder>
+		</copyright>
 	</bookinfo>
 	<toc/>
 	<preface id="preface" revision="1">

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="Esper">
+	<publishDate format="MMM dd, yyyy"/>
 	<bannerLeft>
 		<name>Esper</name>
 		<src>./images/logos/codehaus-small.gif</src>

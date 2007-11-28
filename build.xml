@@ -16,7 +16,23 @@
 	<property name="doc.api.dir" value="${doc.dir}/api"/>
 	<property name="dist.api.dir" value="doc/javadoc/api"/>
 
-	<property name="dist_excludes" value="**/target/**, **/intellij/**, **/doc/reference/support/**, examples/terminalsvc/terminalsvc-ear/target/example-terminalsvc-ear-1.0/**, examples/terminalsvc-jse/**, esper/src/**, esper/grammar/**, esper/doc/api/**, esper/doc/reference/en/**, esper/etc/regression/**, esperio/src/**, esperio/etc/regression/**, esperio/doc/api/**, esperio/doc/reference/en/**, esper/**/build.xml, build.xml, esper/**/pom.xml, esperio/**/build.xml, esperio/**/pom.xml, esper/lib/*mysql*.jar, examples/benchmark/lib/*.jar"/>
+	<property name="dist_includes" value="
+	    esper-license.txt, esperio-license.txt, changelog.txt, index.html,
+	    esper-${version}.jar, esperio-${version}.jar,
+	    esper/doc/site/**,
+	    esper/lib/**, esper/etc/*.*, esper/doc/grammar/**,
+	    esperio/lib/**, esperio/etc/*.*,
+	    examples/*.*,
+	    examples/benchmark/**,
+	    examples/terminalsvc/**,
+        examples/terminalsvc-jse/**,
+        examples/src/**, examples/etc/**, examples/lib/**"/>
+    <!-- examples has specific excludes -->
+    <!-- doc is handled separately for folder remapping (remove of build/en) -->
+    <property name="dist_excludes" value="
+        **/target/**, **/intellij/**, **/_classes/**
+        examples/benchmark/lib/*.jar,
+        examples/terminalsvc-jse/lib/*.jar"/>
 
 	<target name="info" description="The master build is done my Maven">
 		<echo message="Please use Maven 2 to build Esper and related components. Maven build instructions are available on the website." />
@@ -51,8 +67,12 @@
 		<echo message="Building a zip for distribution" />
 		<property name="zip-file" value="${dist.dir}/${fullname}.zip"/>
 		<zip zipfile="${zip-file}">
-			<zipfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
-		</zip>
+			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
+            <zipfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
+            <zipfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
+            <zipfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
+            <zipfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>
+        </zip>
 		<checksum file="${zip-file}" algorithm="MD5" fileext=".md5"/>
 		<checksum file="${zip-file}" algorithm="SHA" fileext=".asc"/>		
 	</target>
@@ -65,9 +85,13 @@
 		       eof="remove"
 		       includes="**/*.sh"/>
 		<tar longfile="gnu" tarfile="${tar-file}">
-			<tarfileset prefix="${name}-${version}" dir="." excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
 			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="examples/etc/*.sh"/>
-		</tar>
+            <tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
+            <tarfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
+            <tarfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
+            <tarfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>            
+        </tar>
 		<gzip zipfile="${tar-file}.gz" src="${tar-file}" />			
 		<checksum file="${tar-file}.gz" algorithm="MD5" fileext=".md5"/>
 		<checksum file="${tar-file}.gz" algorithm="SHA" fileext=".asc"/>		

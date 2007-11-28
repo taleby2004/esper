@@ -30,5 +30,5 @@ junit-3.8.1.jar (3.8.1)
 - buildtime, not required for runtime
 
 mysql-connector-java-3.1.14-bin.jar
-- MySQL JDBC driver,
+- MySQL JDBC driver, for unit testing of database connectivity
 - buildtime, not required for runtime

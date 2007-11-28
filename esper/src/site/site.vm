@@ -315,15 +315,41 @@
 					<a href="http://www.espertech.com/company/contact.php" title="Contact us"><img src="$relativePath/images/contact.gif" alt="Contact" /></a>
 				</div>
 				<a href="$relativePath/index.html" title="Home page">
-					<h1>Esper</h1>
+					<h1>EsperTech - Esper: Event Stream and Complex Event Processing</h1>
 					<h2>Event Stream Intelligence</h2>
 				</a>
 	</div>
 	<!-- end of the Top part -->
 </div>
-
-<div id="prec"></div><!-- required -->
-  
+<div id="prec">
+	<div id="wrap">
+		<table border="0" width="100%">
+			<tr valign="top">
+				<td width="180px">
+					<div id="menu">
+					<ul>
+						<li><a href="http://www.espertech.com/index.php" title="EsperTech home page" target="_blank">HOME</a></li>
+						<li><a href="http://www.espertech.com/products/" title="Products" target="_blank"><b>PRODUCTS</b></a></li>
+						<li><a href="http://www.espertech.com/company/" title="Company" target="_blank">COMPANY</a></li>
+						<li><a href="http://www.espertech.com/support/" title="Support & Services" target="_blank">SUPPORT & SERVICES</a></li>
+						<li><a href="http://www.espertech.com/partners/" title="Partners & OEM" target="_blank">PARTNERS & OEM</a></li>
+						##<li><a href="http://esper.codehaus.org" target="_blank" onClick="javascript:urchinTracker('/out/esper_codehaus_org');">COMMUNITY AREA <img src="/images/cat-li.gif"/></a></li>
+						##<li><a href="http://www.espertech.com/download/" title="Download">DOWNLOAD</a></li>
+					</ul>
+					</div>
+				</td>
+				<td>
+					<div id="menu2"><ul>
+<li>&nbsp;</li>
+<li><a href="http://www.espertech.com/products/index.php" title="Products" target="_blank">Products</a></li>
+<li><a href="http://esper.codehaus.org" title="Esper"><b>Esper</b></a></li>
+<li><a href="http://www.espertech.com/products/esperha.php" title="EsperHA" target="_blank">EsperHA</a></li>
+</ul></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
 <div class="content">
 	<div id="main">
 		<div id="right_side">
