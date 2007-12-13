@@ -18,18 +18,21 @@ public class EPStatementHandle implements MetaDefItem
     // handles self-join (ie. statement where from-clause lists the same event type or a super-type more then once)
     // such that the internal dispatching must occur after both matches are processed
     private boolean canSelfJoin;
-    private ManagedLock routedInsertStreamLock;
+    private boolean hasVariables;
+    private InsertIntoLatchFactory insertIntoLatchFactory;
 
     /**
      * Ctor.
      * @param statementId is the statement id uniquely indentifying the handle
      * @param statementLock is the statement resource lock
      * @param expressionText is the expression
+     * @param hasVariables indicator whether the statement uses variables
      */
-    public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText)
+    public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText, boolean hasVariables)
     {
         this.statementId = statementId;
         this.statementLock = statementLock;
+        this.hasVariables = hasVariables;
         hashCode = expressionText.hashCode() ^ statementLock.hashCode();
     }
 
@@ -46,21 +49,21 @@ public class EPStatementHandle implements MetaDefItem
     }
 
     /**
-     * Set a insert-into stream lock to use for reserving order in generated streams.
-     * @param routedInsertStreamLock is a lock to use to lock the stream when routing events into it
+     * Sets the factory for latches in insert-into guaranteed order of delivery.
+     * @param insertIntoLatchFactory latch factory for the statement if it performs insert-into (route) of events
      */
-    public void setRoutedInsertStreamLock(ManagedLock routedInsertStreamLock)
+    public void setInsertIntoLatchFactory(InsertIntoLatchFactory insertIntoLatchFactory)
     {
-        this.routedInsertStreamLock = routedInsertStreamLock;
+        this.insertIntoLatchFactory = insertIntoLatchFactory;
     }
 
     /**
-     * Returns the insert-into stream lock to use for reserving order in generated streams.
-     * @return lock
+     * Returns the factory for latches in insert-into guaranteed order of delivery.
+     * @return latch factory for the statement if it performs insert-into (route) of events 
      */
-    public ManagedLock getRoutedInsertStreamLock()
+    public InsertIntoLatchFactory getInsertIntoLatchFactory()
     {
-        return routedInsertStreamLock;
+        return insertIntoLatchFactory;
     }
 
     /**
@@ -70,6 +73,15 @@ public class EPStatementHandle implements MetaDefItem
     public ManagedLock getStatementLock()
     {
         return statementLock;
+    }
+
+    /**
+     * Returns true if the statement uses variables, false if not.
+     * @return indicator if variables are used by statement
+     */
+    public boolean isHasVariables()
+    {
+        return hasVariables;
     }
 
     /**

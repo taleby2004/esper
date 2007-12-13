@@ -29,16 +29,21 @@ public class TestConfigurationParser extends TestCase
         config = new Configuration();
         
         assertTrue(config.getEngineDefaults().getThreading().isInsertIntoDispatchPreserveOrder());
+        assertEquals(100, config.getEngineDefaults().getThreading().getInsertIntoDispatchTimeout());
         assertTrue(config.getEngineDefaults().getThreading().isListenerDispatchPreserveOrder());
         assertEquals(1000, config.getEngineDefaults().getThreading().getListenerDispatchTimeout());
         assertTrue(config.getEngineDefaults().getThreading().isInternalTimerEnabled());
         assertEquals(100, config.getEngineDefaults().getThreading().getInternalTimerMsecResolution());
+        assertEquals(ConfigurationEngineDefaults.Threading.Locking.SPIN, config.getEngineDefaults().getThreading().getInsertIntoDispatchLocking());
+        assertEquals(ConfigurationEngineDefaults.Threading.Locking.SPIN, config.getEngineDefaults().getThreading().getListenerDispatchLocking());
 
         assertEquals(Configuration.PropertyResolutionStyle.CASE_SENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
 
         assertTrue(config.getEngineDefaults().getViewResources().isShareViews());
 
         assertFalse(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
+
+        assertEquals(15000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
     }
 
     protected static void assertFileConfig(Configuration config)
@@ -200,12 +205,39 @@ public class TestConfigurationParser extends TestCase
 
         // assert engine defaults
         assertFalse(config.getEngineDefaults().getThreading().isInsertIntoDispatchPreserveOrder());
+        assertEquals(3000, config.getEngineDefaults().getThreading().getInsertIntoDispatchTimeout());
+        assertEquals(ConfigurationEngineDefaults.Threading.Locking.SUSPEND, config.getEngineDefaults().getThreading().getInsertIntoDispatchLocking());
+
         assertFalse(config.getEngineDefaults().getThreading().isListenerDispatchPreserveOrder());
         assertEquals(2000, config.getEngineDefaults().getThreading().getListenerDispatchTimeout());
+        assertEquals(ConfigurationEngineDefaults.Threading.Locking.SUSPEND, config.getEngineDefaults().getThreading().getListenerDispatchLocking());
+
         assertFalse(config.getEngineDefaults().getThreading().isInternalTimerEnabled());
         assertEquals(1234567, config.getEngineDefaults().getThreading().getInternalTimerMsecResolution());
         assertFalse(config.getEngineDefaults().getViewResources().isShareViews());
         assertEquals(Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertTrue(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
+        assertEquals(30000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
+
+        // variables
+        assertEquals(2, config.getVariables().size());
+        ConfigurationVariable variable = config.getVariables().get("var1");
+        assertEquals(Integer.class, variable.getType());
+        assertEquals("1", variable.getInitializationValue());
+        variable = config.getVariables().get("var2");
+        assertEquals(String.class, variable.getType());
+        assertEquals(null, variable.getInitializationValue());
+
+        // method references
+        assertEquals(2, config.getMethodInvocationReferences().size());
+        ConfigurationMethodRef ref = config.getMethodInvocationReferences().get("abc");
+        expCache = (ConfigurationDBRef.ExpiryTimeCacheDesc) ref.getDataCacheDesc();
+        assertEquals(91.0, expCache.getMaxAgeSeconds());
+        assertEquals(92.2, expCache.getPurgeIntervalSeconds());
+        assertEquals(ConfigurationDBRef.CacheReferenceType.WEAK, expCache.getCacheReferenceType());
+
+        ref = config.getMethodInvocationReferences().get("def");
+        lruCache = (ConfigurationDBRef.LRUCacheDesc) ref.getDataCacheDesc();
+        assertEquals(20, lruCache.getSize());
     }
 }

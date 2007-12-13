@@ -11,10 +11,11 @@ import net.esper.collection.Pair;
 import net.esper.eql.core.MethodResolutionService;
 import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.expression.*;
+import net.esper.eql.variable.VariableService;
 import net.esper.event.EventType;
+import net.esper.schedule.TimeProvider;
 import net.esper.type.RelationalOpEnum;
 import net.esper.util.JavaClassHelper;
-import net.esper.schedule.TimeProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,6 +46,7 @@ public final class FilterSpecCompiler
      * @param streamTypeService is used to set rules for resolving properties
      * @param methodResolutionService resolved imports for static methods and such
      * @param timeProvider - provides engine current time
+     * @param variableService - provides access to variables
      * @return compiled filter specification
      * @throws ExprValidationException if the expression or type validations failed
      */
@@ -53,15 +55,16 @@ public final class FilterSpecCompiler
                                                     LinkedHashMap<String, EventType> taggedEventTypes,
                                                     StreamTypeService streamTypeService,
                                                     MethodResolutionService methodResolutionService,
-                                                    TimeProvider timeProvider)
+                                                    TimeProvider timeProvider,
+                                                    VariableService variableService)
             throws ExprValidationException
     {
         // Validate all nodes, make sure each returns a boolean and types are good;
         // Also decompose all AND super nodes into individual expressions
-        List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService, timeProvider);
+        List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService, timeProvider, variableService);
 
         // From the constituents make a filter specification
-        FilterSpecCompiled spec = makeFilterSpec(eventType, constituents, taggedEventTypes);
+        FilterSpecCompiled spec = makeFilterSpec(eventType, constituents, taggedEventTypes, variableService);
         if (log.isDebugEnabled())
         {
             log.debug(".makeFilterSpec spec=" + spec);
@@ -89,10 +92,21 @@ public final class FilterSpecCompiler
         }
     }
 
-    private static List<ExprNode> validateAndDecompose(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider)
+    /**
+     * Validates expression nodes and returns a list of validated nodes.
+     * @param exprNodes is the nodes to validate
+     * @param streamTypeService is provding type information for each stream
+     * @param methodResolutionService for resolving functions
+     * @param timeProvider for providing current time
+     * @param variableService provides access to variables
+     * @return list of validated expression nodes
+     * @throws ExprValidationException for validation errors
+     */
+    public static List<ExprNode> validateDisallowSubquery(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider, VariableService variableService)
             throws ExprValidationException
     {
         List<ExprNode> validatedNodes = new ArrayList<ExprNode>();
+        
         for (ExprNode node : exprNodes)
         {
             // Ensure there is no subselects
@@ -103,7 +117,7 @@ public final class FilterSpecCompiler
                 throw new ExprValidationException("Subselects not allowed within filters");
             }
 
-            ExprNode validated = node.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider);
+            ExprNode validated = node.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService);
             validatedNodes.add(validated);
 
             if ((validated.getType() != Boolean.class) && ((validated.getType() != boolean.class)))
@@ -111,6 +125,14 @@ public final class FilterSpecCompiler
                 throw new ExprValidationException("Filter expression not returning a boolean value: '" + validated.toExpressionString() + "'");
             }
         }
+
+        return validatedNodes;
+    }
+
+    private static List<ExprNode> validateAndDecompose(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider, VariableService variableService)
+            throws ExprValidationException
+    {
+        List<ExprNode> validatedNodes = validateDisallowSubquery(exprNodes, streamTypeService, methodResolutionService, timeProvider, variableService);
 
         // Break a top-level AND into constituent expression nodes
         List<ExprNode> constituents = new ArrayList<ExprNode>();
@@ -181,7 +203,10 @@ public final class FilterSpecCompiler
         while(haveConsolidated);
     }
 
-    private static FilterSpecCompiled makeFilterSpec(EventType eventType, List<ExprNode> constituents, LinkedHashMap<String, EventType> taggedEventTypes)
+    private static FilterSpecCompiled makeFilterSpec(EventType eventType,
+                                                     List<ExprNode> constituents,
+                                                     LinkedHashMap<String, EventType> taggedEventTypes,
+                                                     VariableService variableService)
             throws ExprValidationException
     {
         FilterParamExprMap filterParamExprMap = new FilterParamExprMap();
@@ -224,7 +249,7 @@ public final class FilterSpecCompiler
         // if there are boolean expressions, add
         if (exprNode != null)
         {
-            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes);
+            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, variableService);
             filterParams.add(param);
         }
 

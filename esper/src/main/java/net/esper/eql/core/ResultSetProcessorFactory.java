@@ -20,8 +20,12 @@ import net.esper.eql.expression.*;
 import net.esper.eql.spec.*;
 import net.esper.eql.agg.AggregationServiceFactory;
 import net.esper.eql.agg.AggregationService;
+import net.esper.eql.variable.VariableService;
 import net.esper.event.EventAdapterService;
+import net.esper.event.CompositeEventType;
+import net.esper.event.TaggedCompositeEventType;
 import net.esper.schedule.TimeProvider;
+import net.esper.util.JavaClassHelper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,7 +71,8 @@ public class ResultSetProcessorFactory
      * @param eventAdapterService - wrapping service for events
      * @param methodResolutionService - for resolving class names
      * @param viewResourceDelegate - delegates views resource factory to expression resources requirements
-     * @param timeProvider - provides engine current time for selection on of filtering and grouping 
+     * @param timeProvider - provides engine current time for selection on of filtering and grouping
+     * @param variableService - for providing variable access 
      * @return result set processor instance
      * @throws ExprValidationException when any of the expressions is invalid
      */
@@ -81,13 +86,14 @@ public class ResultSetProcessorFactory
                                                   EventAdapterService eventAdapterService,
                                                   MethodResolutionService methodResolutionService,
                                                   ViewResourceDelegate viewResourceDelegate,
-                                                  TimeProvider timeProvider)
+                                                  TimeProvider timeProvider,
+                                                  VariableService variableService)
             throws ExprValidationException
     {
         if (log.isDebugEnabled())
         {
             log.debug(".getProcessor Getting processor for " +
-                    " selectionList=" + selectClauseSpec.getSelectList() +
+                    " selectionList=" + selectClauseSpec.getSelectExprList() +
                     " isUsingWildcard=" + selectClauseSpec.isUsingWildcard() + 
                     " groupByNodes=" + Arrays.toString(groupByNodes.toArray()) +
                     " optionalHavingNode=" + optionalHavingNode);
@@ -95,15 +101,15 @@ public class ResultSetProcessorFactory
 
         // Expand any instances of select-clause aliases in the
         // order-by clause with the full expression
-        expandAliases(selectClauseSpec.getSelectList(), orderByList);
+        expandAliases(selectClauseSpec.getSelectExprList(), orderByList);
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
         List<SelectExprElementCompiledSpec> namedSelectionList = new LinkedList<SelectExprElementCompiledSpec>();
-        for (int i = 0; i < selectClauseSpec.getSelectList().size(); i++)
+        for (int i = 0; i < selectClauseSpec.getSelectExprList().size(); i++)
         {
             // validate element
-            SelectExprElementRawSpec element = selectClauseSpec.getSelectList().get(i);
-            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider);
+            SelectExprElementRawSpec element = selectClauseSpec.getSelectExprList().get(i);
+            ExprNode validatedExpression = element.getSelectExpression().getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService);
 
             // determine an element name if none assigned
             String asName = element.getOptionalAsName();
@@ -116,6 +122,42 @@ public class ResultSetProcessorFactory
             namedSelectionList.add(validatedElement);
         }
         boolean isUsingWildcard = selectClauseSpec.isUsingWildcard();
+
+        // Validate stream selections, if any (such as stream.*)
+        List<SelectExprElementStreamCompiledSpec> namedStreamList = new LinkedList<SelectExprElementStreamCompiledSpec>();
+        for (SelectExprElementStreamRawSpec raw : selectClauseSpec.getSelectStreamsList())
+        {
+            int streamNum = Integer.MIN_VALUE;
+            boolean isTaggedEvent = false;
+            for (int i = 0; i < typeService.getStreamNames().length; i++)
+            {
+                String streamAlias = raw.getStreamAliasName();
+                if (typeService.getStreamNames()[i].equals(streamAlias))
+                {
+                    streamNum = i;
+                    break;
+                }
+
+                if (typeService.getEventTypes()[i] instanceof TaggedCompositeEventType)
+                {
+                    TaggedCompositeEventType compositeType = (TaggedCompositeEventType) typeService.getEventTypes()[i];
+                    if (compositeType.getTaggedEventTypes().get(streamAlias) != null)
+                    {
+                        streamNum = i;
+                        isTaggedEvent = true;
+                        break;
+                    }
+                }
+            }
+
+            if (streamNum == Integer.MIN_VALUE)
+            {
+                throw new ExprValidationException("Stream selector '" + raw.getStreamAliasName() + ".*' does not match any stream alias name in the from clause");
+            }
+
+            SelectExprElementStreamCompiledSpec validatedElement = new SelectExprElementStreamCompiledSpec(raw.getStreamAliasName(), raw.getOptionalAsName(), streamNum, isTaggedEvent);
+            namedStreamList.add(validatedElement);
+        }
         selectClauseSpec = null;
 
         // Validate group-by expressions, if any (could be empty list for no group-by)
@@ -129,7 +171,7 @@ public class ResultSetProcessorFactory
                 throw new ExprValidationException("Subselects not allowed within group-by");
             }
 
-            groupByNodes.set(i, groupByNodes.get(i).getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider));
+            groupByNodes.set(i, groupByNodes.get(i).getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService));
         }
 
         // Validate having clause, if present
@@ -143,7 +185,7 @@ public class ResultSetProcessorFactory
                 throw new ExprValidationException("Subselects not allowed within having-clause");
             }
 
-            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider);
+            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService);
         }
 
         // Validate order-by expressions, if any (could be empty list for no order-by)
@@ -160,7 +202,7 @@ public class ResultSetProcessorFactory
             }
 
             Boolean isDescending = orderByList.get(i).isDescending();
-        	OrderByItem validatedOrderBy = new OrderByItem(orderByNode.getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider), isDescending);
+        	OrderByItem validatedOrderBy = new OrderByItem(orderByNode.getValidatedSubtree(typeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService), isDescending);
         	orderByList.set(i, validatedOrderBy);
         }
 
@@ -213,7 +255,7 @@ public class ResultSetProcessorFactory
                 groupByNodes, orderByList, aggregationService, eventAdapterService);
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(namedSelectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService);
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(namedSelectionList, namedStreamList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesAggregatedSelect = getAggregatedProperties(selectAggregateExprNodes);
@@ -232,7 +274,7 @@ public class ResultSetProcessorFactory
 
         // Determine if any output rate limiting must be performed early while processing results
         boolean isOutputLimiting = outputLimitSpec != null;
-        boolean isOutputLimitLastOnly = outputLimitSpec != null ? outputLimitSpec.isDisplayLastOnly() : false;
+        boolean isOutputLimitLastOnly = outputLimitSpec != null ? (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.LAST) : false;
 
         // (1)
         // There is no group-by clause and no aggregate functions with event properties in the select clause and having clause (simplest case)

@@ -40,18 +40,44 @@ tokens
 // EQL expression
 //----------------------------------------------------------------------------
 startEQLExpressionRule
-	:	(selectExpr | createWindowExpr | onExpr)		 
+	:	(selectExpr | createWindowExpr | createVariableExpr | onExpr)		 
 		{ end(); }
 	;
 
 onExpr 
-	:	#(i:ON_EXPR eventFilterExpr (IDENT)? DELETE IDENT (IDENT)? (whereClause)? { leaveNode(#i); } )
+	:	#(i:ON_EXPR (eventFilterExpr | patternInclusionExpression) (IDENT)? 
+		(onDeleteExpr | onSelectExpr | onSetExpr)
+		{ leaveNode(#i); } )
+	;
+	
+onDeleteExpr
+	:	#(ON_DELETE_EXPR onExprFrom (whereClause)? )
+	;	
+
+onSelectExpr
+	:	#(ON_SELECT_EXPR (insertIntoExpr)? selectionList onExprFrom (whereClause)? (groupByClause)? (havingClause)? (orderByClause)?)
+	;	
+	
+onSetExpr
+	:	#(ON_SET_EXPR onSetAssignment (onSetAssignment)*)
+	;
+	
+onSetAssignment
+	:	IDENT valueExpr
+	;
+
+onExprFrom
+	:	#(ON_EXPR_FROM IDENT (IDENT)? )
 	;
 
 createWindowExpr
 	:	#(i:CREATE_WINDOW_EXPR IDENT (viewListExpr)? (createSelectionList)? CLASS_IDENT { leaveNode(#i); } )
 	;
 	
+createVariableExpr
+	:	#(i:CREATE_VARIABLE_EXPR IDENT IDENT (valueExpr)? { leaveNode(#i); } )
+	;
+
 createSelectionList
 	:	#(s:CREATE_WINDOW_SELECT_EXPR createSelectionListElement (createSelectionListElement)* { leaveNode(#s); } )
 	;
@@ -94,7 +120,8 @@ selectionList
 	
 selectionListElement
 	:	w:WILDCARD_SELECT { leaveNode(#w); }
-	|	#(s:SELECTION_ELEMENT_EXPR valueExpr (IDENT)? { leaveNode(#s); } )
+	|	#(e:SELECTION_ELEMENT_EXPR valueExpr (IDENT)? { leaveNode(#e); } )
+	|	#(s:SELECTION_STREAM IDENT (IDENT)? { leaveNode(#s); } )
 	;
 		
 outerJoin
@@ -102,13 +129,13 @@ outerJoin
 	;
 
 outerJoinIdent
-	:	#(tl:LEFT_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr { leaveNode(#tl); } )
-	|	#(tr:RIGHT_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr { leaveNode(#tr); } )
-	|	#(tf:FULL_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr { leaveNode(#tf); } )
+	:	#(tl:LEFT_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode(#tl); } )
+	|	#(tr:RIGHT_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode(#tr); } )
+	|	#(tf:FULL_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode(#tf); } )
 	;
 
 streamExpression
-	:	#(v:STREAM_EXPR (eventFilterExpr | patternInclusionExpression | databaseJoinExpression) (viewListExpr)? (IDENT)? { leaveNode(#v); } )
+	:	#(v:STREAM_EXPR (eventFilterExpr | patternInclusionExpression | databaseJoinExpression | methodJoinExpression) (viewListExpr)? (IDENT)? { leaveNode(#v); } )
 	;
 
 patternInclusionExpression
@@ -119,6 +146,10 @@ databaseJoinExpression
 	:	#(d:DATABASE_JOIN_EXPR IDENT (STRING_LITERAL | QUOTED_STRING_LITERAL) (STRING_LITERAL | QUOTED_STRING_LITERAL)?)
 	;
 	
+methodJoinExpression
+	:	#(d:METHOD_JOIN_EXPR IDENT CLASS_IDENT (valueExpr)*)
+	;
+
 viewListExpr
 	:	viewExpr (viewExpr)*
 	;
@@ -148,9 +179,9 @@ havingClause
 	;
 
 outputLimitExpr
-	:	#(e:EVENT_LIMIT_EXPR (ALL|FIRST|LAST)? number { leaveNode(#e); } ) 
-	|   #(sec:SEC_LIMIT_EXPR (ALL|FIRST|LAST)? number { leaveNode(#sec); } )
-	|   #(min:MIN_LIMIT_EXPR (ALL|FIRST|LAST)? number { leaveNode(#min); } )
+	:	#(e:EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) { leaveNode(#e); } ) 
+	|   	#(sec:SEC_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) { leaveNode(#sec); } )
+	|   	#(min:MIN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) { leaveNode(#min); } )
 	;
 
 relationalExpr

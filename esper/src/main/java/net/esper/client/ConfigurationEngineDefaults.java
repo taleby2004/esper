@@ -18,6 +18,7 @@ public class ConfigurationEngineDefaults implements Serializable
     private ViewResources viewResources;
     private EventMeta eventMeta;
     private Logging logging;
+    private Variables variables;
 
     /**
      * Ctor.
@@ -28,6 +29,7 @@ public class ConfigurationEngineDefaults implements Serializable
         viewResources = new ViewResources();
         eventMeta = new EventMeta();
         logging = new Logging();
+        variables = new Variables();
     }
 
     /**
@@ -67,13 +69,27 @@ public class ConfigurationEngineDefaults implements Serializable
     }
 
     /**
+     * Returns engine defaults applicable to variables.
+     * @return variable engine defaults
+     */
+    public Variables getVariables()
+    {
+        return variables;
+    }
+
+    /**
      * Holds threading settings.
      */
     public static class Threading implements Serializable
     {
         private boolean isListenerDispatchPreserveOrder;
         private long listenerDispatchTimeout;
+        private Locking listenerDispatchLocking;
+
         private boolean isInsertIntoDispatchPreserveOrder;
+        private long insertIntoDispatchTimeout;
+        private Locking insertIntoDispatchLocking;
+
         private long internalTimerMsecResolution;
         private boolean internalTimerEnabled;
 
@@ -84,7 +100,12 @@ public class ConfigurationEngineDefaults implements Serializable
         {
             listenerDispatchTimeout = 1000;
             isListenerDispatchPreserveOrder = true;
+            listenerDispatchLocking = Locking.SPIN;
+
+            insertIntoDispatchTimeout = 100;
             isInsertIntoDispatchPreserveOrder = true;
+            insertIntoDispatchLocking = Locking.SPIN;
+
             internalTimerEnabled = true;
             internalTimerMsecResolution = 100;
         }
@@ -192,6 +213,86 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setInternalTimerMsecResolution(long internalTimerMsecResolution)
         {
             this.internalTimerMsecResolution = internalTimerMsecResolution;
+        }
+
+        /**
+         * Returns the number of milliseconds that a thread may maximually be blocking
+         * to deliver statement results from a producing statement that employs insert-into
+         * to a consuming statement.
+         * @return millisecond timeout for order-of-delivery blocking between statements 
+         */
+        public long getInsertIntoDispatchTimeout()
+        {
+            return insertIntoDispatchTimeout;
+        }
+
+        /**
+         * Sets the blocking strategy to use when multiple threads deliver results for
+         * a single statement to listeners, and the guarantee of order of delivery must be maintained.
+         * @param listenerDispatchLocking is the blocking technique
+         */
+        public void setListenerDispatchLocking(Locking listenerDispatchLocking)
+        {
+            this.listenerDispatchLocking = listenerDispatchLocking;
+        }
+
+        /**
+         * Sets the number of milliseconds that a thread may maximually be blocking
+         * to deliver statement results from a producing statement that employs insert-into
+         * to a consuming statement.
+         * @param msecTimeout timeout for order-of-delivery blocking between statements 
+         */
+        public void setInsertIntoDispatchTimeout(long msecTimeout)
+        {
+            this.insertIntoDispatchTimeout = msecTimeout;
+        }
+
+        /**
+         * Sets the blocking strategy to use when multiple threads deliver results for
+         * a single statement to consuming statements of an insert-into, and the guarantee of order of delivery must be maintained.
+         * @param insertIntoDispatchLocking is the blocking technique
+         */
+        public void setInsertIntoDispatchLocking(Locking insertIntoDispatchLocking)
+        {
+            this.insertIntoDispatchLocking = insertIntoDispatchLocking;
+        }
+
+        /**
+         * Returns the blocking strategy to use when multiple threads deliver results for
+         * a single statement to listeners, and the guarantee of order of delivery must be maintained.
+         * @return is the blocking technique
+         */
+        public Locking getListenerDispatchLocking()
+        {
+            return listenerDispatchLocking;
+        }
+
+        /**
+         * Returns the blocking strategy to use when multiple threads deliver results for
+         * a single statement to consuming statements of an insert-into, and the guarantee of order of delivery must be maintained.
+         * @return is the blocking technique
+         */
+        public Locking getInsertIntoDispatchLocking()
+        {
+            return insertIntoDispatchLocking;
+        }
+
+        /**
+         * Enumeration of blocking techniques.
+         */
+        public enum Locking
+        {
+            /**
+             * Spin lock blocking is good for locks held very shortly or generally uncontended locks and
+             * is therefore the default.
+             */
+            SPIN,
+
+            /**
+             * Blocking that suspends a thread and notifies a thread to wake up can be
+             * more expensive then spin locks.
+             */
+            SUSPEND
         }
     }
 
@@ -304,6 +405,50 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setEnableExecutionDebug(boolean enableExecutionDebug)
         {
             this.enableExecutionDebug = enableExecutionDebug;
+        }
+    }
+
+    /**
+     * Holds variables settings.
+     */
+    public static class Variables implements Serializable
+    {
+        private long msecVersionRelease;
+
+        /**
+         * Ctor - sets up defaults.
+         */
+        protected Variables()
+        {
+            msecVersionRelease = 15000;
+        }
+
+        /**
+         * Returns the number of milliseconds that a version of a variables is held stable for
+         * use by very long-running atomic statement execution.
+         * <p>
+         * A slow-executing statement such as an SQL join may use variables that, at the time
+         * the statement starts to execute, have certain values. The engine guarantees that during
+         * statement execution the value of the variables stays the same as long as the statement
+         * does not take longer then the given number of milliseconds to execute. If the statement does take longer
+         * to execute then the variables release time, the current variables value applies instead.
+         * @return millisecond time interval that a variables version is guaranteed to be stable
+         * in the context of an atomic statement execution
+         */
+        public long getMsecVersionRelease()
+        {
+            return msecVersionRelease;
+        }
+
+        /**
+         * Sets the number of milliseconds that a version of a variables is held stable for
+         * use by very long-running atomic statement execution.
+         * @param msecVersionRelease millisecond time interval that a variables version is guaranteed to be stable
+         * in the context of an atomic statement execution
+         */
+        public void setMsecVersionRelease(long msecVersionRelease)
+        {
+            this.msecVersionRelease = msecVersionRelease;
         }
     }
 }

@@ -8,9 +8,11 @@
 package net.esper.filter;
 
 import net.esper.eql.expression.ExprNode;
-import net.esper.pattern.MatchedEventMap;
-import net.esper.event.EventType;
+import net.esper.eql.expression.ExprNodeVariableVisitor;
+import net.esper.eql.variable.VariableService;
 import net.esper.event.EventBean;
+import net.esper.event.EventType;
+import net.esper.pattern.MatchedEventMap;
 
 import java.util.LinkedHashMap;
 
@@ -21,6 +23,8 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
 {
     private final ExprNode exprNode;
     private final LinkedHashMap<String, EventType> taggedEventTypes;
+    private final VariableService variableService;
+    private final boolean hasVariable;
 
     /**
      * Ctor.
@@ -28,12 +32,14 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
      * @param filterOperator is expected to be the BOOLEAN_EXPR operator
      * @param exprNode represents the boolean expression
      * @param taggedEventTypes is null if the expression doesn't need other streams, or is filled with a ordered list of stream names and types
+     * @param variableService - provides access to variables
      * @throws IllegalArgumentException for illegal args
      */
     public FilterSpecParamExprNode(String propertyName,
                              FilterOperator filterOperator,
                              ExprNode exprNode,
-                             LinkedHashMap<String, EventType> taggedEventTypes)
+                             LinkedHashMap<String, EventType> taggedEventTypes,
+                             VariableService variableService)
         throws IllegalArgumentException
     {
         super(propertyName, filterOperator);
@@ -43,6 +49,11 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         }
         this.exprNode = exprNode;
         this.taggedEventTypes = taggedEventTypes;
+        this.variableService = variableService;
+
+        ExprNodeVariableVisitor visitor = new ExprNodeVariableVisitor();
+        exprNode.accept(visitor);
+        this.hasVariable = visitor.isHasVariables();
     }
 
     /**
@@ -77,7 +88,15 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
                 count++;
             }
         }
-        return new ExprNodeAdapter(exprNode, events);
+
+        if (hasVariable)
+        {
+            return new ExprNodeAdapter(exprNode, events, variableService);
+        }
+        else
+        {
+            return new ExprNodeAdapter(exprNode, events, null);
+        }
     }
 
     public final String toString()

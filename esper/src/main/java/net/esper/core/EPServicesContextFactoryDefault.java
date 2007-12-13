@@ -9,6 +9,10 @@ import net.esper.eql.view.OutputConditionFactory;
 import net.esper.eql.view.OutputConditionFactoryDefault;
 import net.esper.eql.named.NamedWindowServiceImpl;
 import net.esper.eql.named.NamedWindowService;
+import net.esper.eql.variable.VariableService;
+import net.esper.eql.variable.VariableExistsException;
+import net.esper.eql.variable.VariableTypeException;
+import net.esper.eql.variable.VariableServiceImpl;
 import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterServiceImpl;
 import net.esper.event.EventAdapterService;
@@ -67,22 +71,49 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         }
         TimerService timerService = new TimerServiceImpl(msecTimerResolution);
 
+        VariableService variableService = new VariableServiceImpl(configSnapshot.getEngineDefaults().getVariables().getMsecVersionRelease(), schedulingService, null);
+        initVariables(variableService, configSnapshot.getVariables());
+
         StatementLockFactory statementLockFactory = new StatementLockFactoryImpl();
         StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(configSnapshot.getEngineDefaults().getViewResources().isShareViews());
         FilterService filterService = FilterServiceProvider.newService();
-        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory);
+        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService);
 
         // New services context
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
-                plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService, namedWindowService);
+                plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService, namedWindowService, variableService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
         services.setStatementLifecycleSvc(statementLifecycleSvc);
 
         return services;
+    }
+
+    /**
+     * Adds configured variables to the variable service.
+     * @param variableService service to add to
+     * @param variables configured variables
+     */
+    protected static void initVariables(VariableService variableService, Map<String, ConfigurationVariable> variables)
+    {
+        for (Map.Entry<String, ConfigurationVariable> entry : variables.entrySet())
+        {
+            try
+            {
+                variableService.createNewVariable(entry.getKey(), entry.getValue().getType(), entry.getValue().getInitializationValue(), null);
+            }
+            catch (VariableExistsException e)
+            {
+                throw new ConfigurationException("Error configuring variables: " + e.getMessage(), e);
+            }
+            catch (VariableTypeException e)
+            {
+                throw new ConfigurationException("Error configuring variables: " + e.getMessage(), e);
+            }
+        }
     }
 
     /**
@@ -165,7 +196,8 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
      */
     protected static EngineImportService makeEngineImportService(ConfigurationInformation configSnapshot)
     {
-        EngineImportService engineImportService = new EngineImportServiceImpl();
+        EngineImportServiceImpl engineImportService = new EngineImportServiceImpl();
+        engineImportService.addMethodRefs(configSnapshot.getMethodInvocationReferences());
 
         // Add auto-imports
         try
@@ -219,25 +251,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         for(Object property : properties.keySet())
         {
             String className = (String) properties.get(property);
-
-            if ("string".equals(className))
-            {
-                className = String.class.getName();
-            }
-
-            // use the boxed type for primitives
-            String boxedClassName = JavaClassHelper.getBoxedClassName(className);
-
-            Class clazz = null;
-            try
-            {
-                clazz = Class.forName(boxedClassName);
-            }
-            catch (ClassNotFoundException ex)
-            {
-                throw new EventAdapterException("Unable to load class '" + boxedClassName + "', class not found", ex);
-            }
-
+            Class clazz = JavaClassHelper.getClassForSimpleName(className);
             propertyTypes.put((String) property, clazz);
         }
         return propertyTypes;

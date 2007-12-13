@@ -9,12 +9,15 @@ package net.esper.eql.expression;
 
 import net.esper.eql.core.*;
 import net.esper.eql.agg.AggregationSupport;
+import net.esper.eql.variable.VariableService;
 import net.esper.util.MetaDefItem;
 import net.esper.schedule.TimeProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.LinkedList;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * Superclass for filter nodes in a filter expression tree. Allow
@@ -63,6 +66,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
      * @param methodResolutionService - for resolving class names in library method invocations
      * @param viewResourceDelegate - delegates for view resources to expression nodes
      * @param timeProvider - provides engine current time
+     * @param variableService - provides access to variable values
      * @throws ExprValidationException when the validation fails
      * @return the root node of the validated subtree, possibly
      *         different than the root node of the unvalidated subtree
@@ -70,24 +74,25 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
     public ExprNode getValidatedSubtree(StreamTypeService streamTypeService,
                                         MethodResolutionService methodResolutionService,
                                         ViewResourceDelegate viewResourceDelegate,
-                                        TimeProvider timeProvider) throws ExprValidationException
+                                        TimeProvider timeProvider,
+                                        VariableService variableService) throws ExprValidationException
     {
         ExprNode result = this;
 
         for (int i = 0; i < childNodes.size(); i++)
         {
-            childNodes.set(i, childNodes.get(i).getValidatedSubtree(streamTypeService, methodResolutionService, viewResourceDelegate, timeProvider));
+            childNodes.set(i, childNodes.get(i).getValidatedSubtree(streamTypeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService));
         }
 
         try
         {
-            validate(streamTypeService, methodResolutionService, viewResourceDelegate, timeProvider);
+            validate(streamTypeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService);
         }
         catch(ExprValidationException e)
         {
             if(this instanceof ExprIdentNode)
             {
-                result = resolveIdentAsStaticMethod(streamTypeService, methodResolutionService, e, timeProvider);
+                result = resolveIdentAsStaticMethod(streamTypeService, methodResolutionService, e, timeProvider, variableService);
             }
             else
             {
@@ -188,7 +193,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
     // look the same, however as the validation could not resolve "Stream.property('key')" before calling this method,
     // this method tries to resolve the mapped property as a static method.
     // Assumes that this is an ExprIdentNode.
-    private ExprNode resolveIdentAsStaticMethod(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprValidationException propertyException, TimeProvider timeProvider)
+    private ExprNode resolveIdentAsStaticMethod(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprValidationException propertyException, TimeProvider timeProvider, VariableService variableService)
     throws ExprValidationException
     {
         // Reconstruct the original string
@@ -203,7 +208,15 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
         MappedPropertyParseResult parse = parseMappedProperty(mappedProperty.toString());
         if (parse == null)
         {
-            throw propertyException;
+            ExprConstantNode constNode = resolveIdentAsEnumConst(mappedProperty.toString(), methodResolutionService);
+            if (constNode == null)
+            {
+                throw propertyException;
+            }
+            else
+            {
+                return constNode;
+            }
         }
 
         // If there is a class name, assume a static method is possible
@@ -215,7 +228,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             // Validate
             try
             {
-                result.validate(streamTypeService, methodResolutionService, null, timeProvider);
+                result.validate(streamTypeService, methodResolutionService, null, timeProvider, variableService);
             }
             catch(ExprValidationException e)
             {
@@ -235,7 +248,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             // Validate
             try
             {
-                result.validate(streamTypeService, methodResolutionService, null, timeProvider);
+                result.validate(streamTypeService, methodResolutionService, null, timeProvider, variableService);
             }
             catch (RuntimeException e)
             {
@@ -255,6 +268,54 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
 
         // absolutly cannot be resolved
         throw propertyException;
+    }
+
+    private ExprConstantNode resolveIdentAsEnumConst(String constant, MethodResolutionService methodResolutionService)
+            throws ExprValidationException
+    {
+        int lastDotIndex = constant.lastIndexOf('.');
+        if (lastDotIndex == -1)
+        {
+            return null;
+        }
+        String className = constant.substring(0, lastDotIndex);
+        String constName = constant.substring(lastDotIndex + 1);
+
+        Class clazz;
+        try
+        {
+            clazz = methodResolutionService.resolveClass(className);
+        }
+        catch (EngineImportException e)
+        {
+            return null;
+        }
+
+        Field field;
+        try
+        {
+            field = clazz.getField(constName);
+        }
+        catch (NoSuchFieldException e)
+        {
+            return null;
+        }
+        
+        int modifiers = field.getModifiers();
+        if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers))
+        {
+            try
+            {
+                Object value = field.get(null);
+                return new ExprConstantNode(value);
+            }
+            catch (IllegalAccessException e)
+            {
+                throw new ExprValidationException("Exception accessing field '" + field.getName() + "': " + e.getMessage(), e);
+            }
+        }
+
+        return null;
     }
 
     /**

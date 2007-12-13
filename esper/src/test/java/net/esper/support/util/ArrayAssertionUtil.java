@@ -330,18 +330,20 @@ public class ArrayAssertionUtil
         assertEqualsAnyOrder(expected, intSet);
     }
 
-    public static void assertEqualsAnyOrder(Object[] expected, Object[] received)
+    public static void assertEqualsAnyOrder(Object[] expected, Object[] receivedObj)
     {
         // Empty lists are fine
-        if ( ((received == null) && (expected == null)) ||
-             ((received.length == 0) && (expected == null)) ||
-             ((received == null) && (expected.length == 0)) )
+        if ( ((receivedObj == null) && (expected == null)) ||
+             ((receivedObj.length == 0) && (expected == null)) ||
+             ((receivedObj == null) && (expected.length == 0)) )
         {
             return;
         }
 
         // Same number
-        TestCase.assertEquals(expected.length, received.length);
+        TestCase.assertEquals(expected.length, receivedObj.length);
+        Object[] received = new Object[receivedObj.length];
+        System.arraycopy(receivedObj, 0, received, 0, receivedObj.length);
 
         // For each expected object find a received object
         int numMatches = 0;
@@ -434,7 +436,7 @@ public class ArrayAssertionUtil
 
         for (int j = 0; j < propertiesThisRow.length; j++)
         {
-            String name = propertyNames[j];
+            String name = propertyNames[j].trim();
             Object value = propertiesThisRow[j];
             Object eventProp = received.get(name);
             Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);

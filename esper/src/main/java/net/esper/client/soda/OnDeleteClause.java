@@ -1,42 +1,37 @@
 package net.esper.client.soda;
 
-import java.io.Serializable;
 import java.io.StringWriter;
 
 /**
  * A clause to delete from a named window based on a triggering event arriving and correlated to the named window events to be deleted.
  */
-public class OnDeleteClause implements Serializable
+public class OnDeleteClause extends OnClause
 {
     private static final long serialVersionUID = 0L;
 
     private String windowName;
     private String optionalAsName;
-    private Expression joinExpr;
 
     /**
-     * Creates a on-delete clause for deleting from a named window.
+     * Creates an on-delete clause.
      * @param windowName is the named window name
-     * @param asNameAlias is the alias name of the named window
-     * @param joinExpr is the where-clause expression for the on-delete
-     * @return on-delete clause
+     * @param optionalAsName is the optional alias
+     * @return on-delete clause 
      */
-    public static OnDeleteClause create(String windowName, String asNameAlias, Expression joinExpr)
+    public static OnDeleteClause create(String windowName, String optionalAsName)
     {
-        return new OnDeleteClause(windowName, asNameAlias, joinExpr);
+        return new OnDeleteClause(windowName, optionalAsName);
     }
 
     /**
      * Ctor.
      * @param windowName is the named window name
      * @param optionalAsName is the alias name of the named window
-     * @param joinExpr is the where-clause expression for the on-delete
      */
-    public OnDeleteClause(String windowName, String optionalAsName, Expression joinExpr)
+    public OnDeleteClause(String windowName, String optionalAsName)
     {
         this.windowName = windowName;
         this.optionalAsName = optionalAsName;
-        this.joinExpr = joinExpr;
     }
 
     /**
@@ -45,17 +40,11 @@ public class OnDeleteClause implements Serializable
      */
     public void toEQL(StringWriter writer)
     {
-        writer.write(" delete from ");
         writer.write(windowName);
         if (optionalAsName != null)
         {
             writer.write(" as ");
             writer.write(optionalAsName);
-        }
-        if (joinExpr != null)
-        {
-            writer.write(" where ");
-            joinExpr.toEQL(writer);
         }
     }
 
@@ -93,23 +82,5 @@ public class OnDeleteClause implements Serializable
     public void setOptionalAsName(String optionalAsName)
     {
         this.optionalAsName = optionalAsName;
-    }
-
-    /**
-     * Returns the where-clause of the on-delete statement, or null if none defined 
-     * @return where-clause
-     */
-    public Expression getJoinExpr()
-    {
-        return joinExpr;
-    }
-
-    /**
-     * Sets the where-clause.
-     * @param joinExpr is the where-clause expression, or null if 
-     */
-    public void setJoinExpr(Expression joinExpr)
-    {
-        this.joinExpr = joinExpr;
     }
 }

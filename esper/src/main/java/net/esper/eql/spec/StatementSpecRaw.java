@@ -18,8 +18,9 @@ import java.util.List;
  */
 public class StatementSpecRaw implements MetaDefItem
 {
-    private OnDeleteDesc onDeleteDesc;
+    private OnTriggerDesc onTriggerDesc;
     private CreateWindowDesc createWindowDesc;
+    private CreateVariableDesc createVariableDesc;
     private InsertIntoDesc insertIntoDesc;
     private SelectClauseStreamSelectorEnum selectStreamDirEnum = SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH;
     private SelectClauseSpec selectClauseSpec = new SelectClauseSpec();
@@ -31,6 +32,7 @@ public class StatementSpecRaw implements MetaDefItem
     private OutputLimitSpec outputLimitSpec;
     private List<OrderByItem> orderByList = new LinkedList<OrderByItem>();
     private boolean existsSubstitutionParameters;
+    private boolean hasVariables;
 
     /**
      * Returns the FROM-clause stream definitions.
@@ -134,7 +136,7 @@ public class StatementSpecRaw implements MetaDefItem
      * Sets the where clause filter expression node.
      * @param filterExprRootNode the where clause expression
      */
-    public void setFilterExprRootNode(ExprNode filterExprRootNode)
+    public void setFilterRootNode(ExprNode filterExprRootNode)
     {
         this.filterExprRootNode = filterExprRootNode;
     }
@@ -215,17 +217,71 @@ public class StatementSpecRaw implements MetaDefItem
      * Returns the on-delete statement specification.
      * @return descriptor for creating a an on-delete statement
      */
-    public OnDeleteDesc getOnDeleteDesc()
+    public OnTriggerDesc getOnTriggerDesc()
     {
-        return onDeleteDesc;
+        return onTriggerDesc;
     }
 
     /**
      * Sets the on-delete statement specification.
-     * @param onDeleteDesc descriptor for creating an on-delete statement
+     * @param onTriggerDesc descriptor for creating an on-delete statement
      */
-    public void setOnDeleteDesc(OnDeleteDesc onDeleteDesc)
+    public void setOnTriggerDesc(OnTriggerDesc onTriggerDesc)
     {
-        this.onDeleteDesc = onDeleteDesc;
+        this.onTriggerDesc = onTriggerDesc;
+    }
+
+    /**
+     * Gets the where clause.
+     * @return where clause or null if none
+     */
+    public ExprNode getFilterExprRootNode()
+    {
+        return filterExprRootNode;
+    }
+
+    /**
+     * Sets the where clause or null if none
+     * @param filterExprRootNode where clause expression
+     */
+    public void setFilterExprRootNode(ExprNode filterExprRootNode)
+    {
+        this.filterExprRootNode = filterExprRootNode;
+    }
+
+    /**
+     * Returns true if a statement (or subquery sub-statements) use variables.
+     * @return indicator if variables are used
+     */
+    public boolean isHasVariables()
+    {
+        return hasVariables;
+    }
+
+    /**
+     * Sets the flag indicating the statement uses variables.
+     * @param hasVariables true if variables are used
+     */
+    public void setHasVariables(boolean hasVariables)
+    {
+        this.hasVariables = hasVariables;
+    }
+
+    /**
+     * Returns the descriptor for create-variable statements.
+     * @return create-variable info
+     */
+    public CreateVariableDesc getCreateVariableDesc()
+    {
+        return createVariableDesc;
+    }
+
+    /**
+     * Sets the descriptor for create-variable statements, if this is one. 
+     * @param createVariableDesc create-variable info
+     */
+    public void setCreateVariableDesc(CreateVariableDesc createVariableDesc)
+    {
+        this.createVariableDesc = createVariableDesc;
     }
 }

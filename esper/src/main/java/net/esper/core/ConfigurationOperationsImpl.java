@@ -15,6 +15,9 @@ import net.esper.event.EventAdapterService;
 import net.esper.util.JavaClassHelper;
 import net.esper.eql.core.EngineImportService;
 import net.esper.eql.core.EngineImportException;
+import net.esper.eql.variable.VariableService;
+import net.esper.eql.variable.VariableExistsException;
+import net.esper.eql.variable.VariableTypeException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,19 +28,23 @@ import java.util.Properties;
  */
 public class ConfigurationOperationsImpl implements ConfigurationOperations
 {
-    private EventAdapterService eventAdapterService;
-    private EngineImportService engineImportService;
+    private final EventAdapterService eventAdapterService;
+    private final EngineImportService engineImportService;
+    private final VariableService variableService;
 
     /**
      * Ctor.
      * @param eventAdapterService is the event wrapper and type service
      * @param engineImportService for imported aggregation functions and static functions
+     * @param variableService - provides access to variable values
      */
     public ConfigurationOperationsImpl(EventAdapterService eventAdapterService,
-                                       EngineImportService engineImportService)
+                                       EngineImportService engineImportService,
+                                       VariableService variableService)
     {
         this.eventAdapterService = eventAdapterService;
         this.engineImportService = engineImportService;
+        this.variableService = variableService;
     }
 
     public void addEventTypeAutoAlias(String javaPackageName)
@@ -86,6 +93,18 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         try
         {
             eventAdapterService.addBeanType(eventTypeAlias, javaEventClass);
+        }
+        catch (EventAdapterException t)
+        {
+            throw new ConfigurationException(t.getMessage(), t);
+        }
+    }
+
+    public void addEventTypeAliasSimpleName(Class javaEventClass)
+    {
+        try
+        {
+            eventAdapterService.addBeanType(javaEventClass.getSimpleName(), javaEventClass);
         }
         catch (EventAdapterException t)
         {
@@ -158,5 +177,21 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
             propertyTypes.put((String) entry.getKey(), clazz);
         }
         return propertyTypes;
+    }
+
+    public void addVariable(String variableName, Class type, Object initializationValue) throws ConfigurationException
+    {
+        try
+        {
+            variableService.createNewVariable(variableName, type, initializationValue, null);
+        }
+        catch (VariableExistsException e)
+        {
+            throw new ConfigurationException("Error creating variable: " + e.getMessage(), e);
+        }
+        catch (VariableTypeException e)
+        {
+            throw new ConfigurationException("Error creating variable: " + e.getMessage(), e);
+        }
     }
 }

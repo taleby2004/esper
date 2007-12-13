@@ -82,6 +82,9 @@ tokens
 	CAST="cast";
 	CURRENT_TIMESTAMP="current_timestamp";
 	DELETE="delete";
+	SNAPSHOT="snapshot";
+	SET="set";
+	VARIABLE="variable";
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -114,6 +117,7 @@ tokens
    	EVAL_IDENT;
    	SELECTION_EXPR;
    	SELECTION_ELEMENT_EXPR;
+   	SELECTION_STREAM;
    	STREAM_EXPR;
    	OUTERJOIN_EXPR;
    	LEFT_OUTERJOIN_EXPR;
@@ -167,6 +171,12 @@ tokens
 	CREATE_WINDOW_EXPR;
 	CREATE_WINDOW_SELECT_EXPR;
 	ON_EXPR;
+	ON_DELETE_EXPR;
+	ON_SELECT_EXPR;
+	ON_EXPR_FROM;
+	ON_SET_EXPR;
+	CREATE_VARIABLE_EXPR;
+	METHOD_JOIN_EXPR;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -225,6 +235,7 @@ stringconstant
 eqlExpression 
 	:	selectExpr
 	|	createWindowExpr
+	|	createVariableExpr
 	|	onExpr
 	;
 	
@@ -240,15 +251,53 @@ selectExpr
 	;
 	
 onExpr 
-	:	ON! eventFilterExpression (AS! IDENT | IDENT)? DELETE FROM! IDENT (AS! IDENT | IDENT)? (WHERE! whereClause)?
+	:	ON! (eventFilterExpression | patternInclusionExpression) (AS! IDENT | IDENT)? 
+		(onDeleteExpr | onSelectExpr | onSetExpr)
 		{ #onExpr = #([ON_EXPR,"onExpr"], #onExpr); }
 	;
 	
+onSelectExpr	
+	:	(INSERT! insertIntoExpr)?
+		SELECT! selectionList
+		onExprFrom
+		(WHERE! whereClause)?		
+		(GROUP! BY! groupByListExpr)?
+		(HAVING! havingClause)?
+		(ORDER! BY! orderByListExpr)?
+		{ #onSelectExpr = #([ON_SELECT_EXPR,"onSelectExpr"], #onSelectExpr); }
+	;
+	
+onDeleteExpr	
+	:	DELETE!
+		onExprFrom
+		(WHERE! whereClause)?		
+		{ #onDeleteExpr = #([ON_DELETE_EXPR,"onDeleteExpr"], #onDeleteExpr); }
+	;
+	
+onSetExpr
+	:	SET! onSetAssignment (COMMA! onSetAssignment)*
+		{ #onSetExpr = #([ON_SET_EXPR,"onSetExpr"], #onSetExpr); }
+	;
+	
+onSetAssignment
+	:	IDENT EQUALS! expression
+	;
+		
+onExprFrom
+	:	FROM! IDENT (AS! IDENT | IDENT)?
+		{ #onExprFrom = #([ON_EXPR_FROM,"onExprFrom"], #onExprFrom); }
+	;
+
 createWindowExpr
 	:	CREATE! WINDOW! IDENT (DOT! viewExpression (DOT! viewExpression)*)? AS! (SELECT! createSelectionList FROM!)? classIdentifier
 		{ #createWindowExpr = #([CREATE_WINDOW_EXPR,"createWindowExpr"], #createWindowExpr); }
 	;
 		
+createVariableExpr
+	:	CREATE! VARIABLE! IDENT IDENT (EQUALS! expression)?
+		{ #createVariableExpr = #([CREATE_VARIABLE_EXPR,"createVariableExpr"], #createVariableExpr); }
+	;
+
 createSelectionList 	
 	:	createSelectionListElement (COMMA! createSelectionListElement)*
 		{ #createSelectionList = #([CREATE_WINDOW_SELECT_EXPR,"createSelectionList"], #createSelectionList); }
@@ -290,8 +339,12 @@ outerJoin
 	;
 
 outerJoinIdent
-	:	ON! eventProperty EQUALS! eventProperty
+	:	ON! outerJoinIdentPair (AND_EXPR! outerJoinIdentPair)*
 		{ #outerJoinIdent = #([OUTERJOIN_EXPR,"outerJoinIdent"], #outerJoinIdent); }
+	;
+	
+outerJoinIdentPair 
+	:	eventProperty EQUALS! eventProperty
 	;
 
 whereClause
@@ -311,12 +364,18 @@ selectionList
 selectionListElement
 	:   	STAR 
 		{ #selectionListElement = #[WILDCARD_SELECT, "wildcard-select"]; }
+	|	(streamSelector) => streamSelector
 	|	expression (AS! IDENT)?
 		{ #selectionListElement = #([SELECTION_ELEMENT_EXPR,"selectionListElement"], #selectionListElement); }
 	;
 	
+streamSelector
+	:	IDENT DOT! STAR! (AS! IDENT)?
+		{ #streamSelector = #([SELECTION_STREAM,"streamSelector"], #streamSelector); }
+	;
+	
 streamExpression
-	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression)
+	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression)
 		(DOT! viewExpression (DOT! viewExpression)*)? (AS! IDENT | IDENT)?
 		{ #streamExpression = #([STREAM_EXPR,"streamExpression"], #streamExpression); }
 	;
@@ -330,12 +389,15 @@ databaseJoinExpression
 	:	SQL! COLON! IDENT LBRACK! (STRING_LITERAL | QUOTED_STRING_LITERAL) (METADATASQL! (STRING_LITERAL | QUOTED_STRING_LITERAL))? RBRACK!
 		{ #databaseJoinExpression = #([DATABASE_JOIN_EXPR,"databaseJoinExpression"], #databaseJoinExpression); }
 	;	
+	
+methodJoinExpression
+    	:   	i:IDENT! COLON! (c:classIdentifier!) (LPAREN! (s:expressionList!)? RPAREN!)?
+       		{ #methodJoinExpression = #([METHOD_JOIN_EXPR,"methodJoinExpression"], #i, #c, #s); }
+    	;
 
 viewExpression
 	:	IDENT COLON! IDENT LPAREN! (parameterSet)? RPAREN!
-		{ 
-		 	#viewExpression = #([VIEW_EXPR,"viewExpression"], #viewExpression); 
-		 }
+		{ #viewExpression = #([VIEW_EXPR,"viewExpression"], #viewExpression); }
 	;
 
 groupByListExpr
@@ -359,7 +421,7 @@ havingClause
 	;
 
 outputLimit
-	:   (ALL|FIRST|LAST)? EVERY_EXPR! number (e:EVENTS!|sec:SECONDS!|min:MINUTES!)
+	:   (ALL|FIRST|LAST|SNAPSHOT)? EVERY_EXPR! (number | IDENT) (e:EVENTS!|sec:SECONDS!|min:MINUTES!)
 		{ 
 			if (e != null) #outputLimit = #([EVENT_LIMIT_EXPR,"outputLimitEvent"], #outputLimit); 
 			if (sec != null) #outputLimit = #([SEC_LIMIT_EXPR,"outputLimitSec"], #outputLimit); 
@@ -507,7 +569,7 @@ unaryExpression
 	| substitution
 	| LPAREN! expression RPAREN!
 	| eventPropertyOrLibFunction
-	| builtinFunc
+	| (builtinFunc) => (builtinFunc)
 	| arrayExpression
 	| subSelectExpression
 	| existsSubSelectExpression
@@ -718,7 +780,7 @@ arrayParameterList
 eventFilterExpression
     :   ( i:IDENT! EQUALS! { #i.setType(EVENT_FILTER_NAME_TAG); } )?
     	(c:classIdentifier!)
-       	(LPAREN! (s:filterParamSet!)? RPAREN!)?
+       	(LPAREN! (s:expressionList!)? RPAREN!)?
        	{ #eventFilterExpression = #([EVENT_FILTER_EXPR,"eventFilterExpression"], #i, #c, #s); }
     ;
 
@@ -757,7 +819,7 @@ classIdentifierNonGreedy
 	    }
 	;	
 	
-filterParamSet
+expressionList
     :   expression (COMMA! expression)*
     ;
    	

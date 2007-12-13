@@ -36,11 +36,15 @@
 		</orderedlist>
 
         <para>
-			EQL provides the concept of <emphasis>named window</emphasis>. Named windows are data windows that can be inserted-into and deleted-from by one or more statements, and that can queried by one or more statements. Named windows have a global character, being visible and shared across an engine instance beyond a single statement. Use the <literal>CREATE WINDOW</literal> clause to create named windows. Use the <literal>INSERT INTO</literal> clause to insert data into a named window, and the <literal>ON DELETE</literal> clause to remove events from a named window. Finally, the name of the named window can occur in a statement's <literal>FROM</literal> clause to query a named window or include the named window in a join or subquery. 
+			EQL provides the concept of <emphasis>named window</emphasis>. Named windows are data windows that can be inserted-into and deleted-from by one or more statements, and that can queried by one or more statements. Named windows have a global character, being visible and shared across an engine instance beyond a single statement. Use the <literal>CREATE WINDOW</literal> clause to create named windows. Use the <literal>INSERT INTO</literal> clause to insert data into a named window, the <literal>ON DELETE</literal> clause to remove events from a named window, and the <literal>ON SELECT</literal> clause to perform a non-continuous fire-once query on a named window. Finally, the name of the named window can occur in a statement's <literal>FROM</literal> clause to query a named window or include the named window in a join or subquery.
         </para>
 
         <para>
-			Esper can be extended by plugging-in custom developed views.
+			<emphasis>Variables</emphasis> can come in handy to parameterize statements and change parameters on-the-fly and in response to events. Variables can be used in an expression anywhere in a statement as well as in the output clause for dynamic control of output rates.
+        </para>
+
+        <para>
+			Esper can be extended by plugging-in custom developed views and aggregation functions.
         </para>
 
     </sect1>
@@ -53,13 +57,13 @@
 		</para>
 
 		<para>
-			The <literal>select</literal> clause in an EQL query specifies the event properties or events to retrieve. The <literal>from</literal>-clause in an EQL query specifies the event stream definitions and stream names to use. The <literal>where</literal>-clause in an EQL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds.
+			The <literal>select</literal> clause in an EQL query specifies the event properties or events to retrieve. The <literal>from</literal> clause in an EQL query specifies the event stream definitions and stream names to use. The <literal>where</literal> clause in an EQL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds.
 		</para>
 
 			<programlisting><![CDATA[select avg(price) from StockTick.win:time(30 sec) where symbol='IBM']]></programlisting>
 
 		<para>
-			EQL queries follow the below syntax. EQL queries can be simple queries or more complex queries. A simple select contains only a select clause and a single stream definition. Complex EQL queries can be build that feature a more elaborate select list utilizing expressions, may join multiple streams, may contain a where clause with search conditions and so on.
+			EQL queries follow the below syntax. EQL queries can be simple queries or more complex queries. A simple select contains only a <literal>select</literal> clause and a single stream definition. Complex EQL queries can be build that feature a more elaborate select list utilizing expressions, may join multiple streams, may contain a <literal>where</literal> clause with search conditions and so on.
 		</para>
 
 <synopsis>[insert into <emphasis>insert_into_def</emphasis>]
@@ -138,11 +142,11 @@ select * from MyEvent  /* this also works */]]></programlisting>
 		<indexterm><primary>select clause</primary></indexterm>
 		<indexterm><primary>EQL</primary><secondary>select clause</secondary></indexterm>
 		<para>
-			The select clause is required in all EQL statements. The select clause can be used to select all properties via the wildcard <literal>*</literal>, or to specify a list of event properties and expressions. The select clause defines the event type (event property names and types) of the resulting events published by the statement, or pulled from the statement via the iterator methods.
+			The <literal>select</literal> clause is required in all EQL statements. The <literal>select</literal> clause can be used to select all properties via the wildcard <literal>*</literal>, or to specify a list of event properties and expressions. The <literal>select</literal> clause defines the event type (event property names and types) of the resulting events published by the statement, or pulled from the statement via the iterator methods.
 		</para>
 
 		<para>
-			The select clause also offers optional <literal>istream</literal> and <literal>rstream</literal> keywords to control how events are posted to <literal>UpdateListener</literal> instances listening to the statement.
+			The <literal>select</literal> clause also offers optional <literal>istream</literal> and <literal>rstream</literal> keywords to control how events are posted to <literal>UpdateListener</literal> instances listening to the statement.
 		</para>
 
 		<para>
@@ -160,13 +164,9 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			<synopsis>select * from <emphasis>stream_def</emphasis></synopsis>
 
 			<para>
-				The following statement selects univariate statistics for the last 30 seconds of IBM stock ticks for price.
+				The following statement selects StockTick events for the last 30 seconds of IBM stock ticks.
 			</para>
-			<programlisting><![CDATA[select * from StockTick(symbol='IBM').win:time(30 sec).stat:uni('price')]]></programlisting>
-
-			<para>
-				In a join statement, using the <literal>select *</literal> syntax selects event properties that contain the events representing the joined streams themselves.
-			</para>
+			<programlisting><![CDATA[select * from StockTick(symbol='IBM').win:time(30 sec)]]></programlisting>
 
 			<para>
 				The <literal>*</literal> wildcard and expressions can also be combined in a <literal>select</literal> clause. The combination selects all event properties and in addition the computed values
@@ -174,12 +174,21 @@ select * from MyEvent  /* this also works */]]></programlisting>
 				statement names 'pricevolume':
 			</para>
 			<programlisting><![CDATA[select *, price * volume as pricevolume from StockTick(symbol='IBM')]]></programlisting>
+
+			<para>
+				When using wildcard (*), Esper does not actually copy your event properties out of your event or events. It simply wraps your native type in an <literal>EventBean</literal> interface. Your application has access to
+				the underlying event object through the <literal>getUnderlying</literal> method and has access to the property values through the <literal>get</literal> method.
+			</para>
+
+			<para>
+				In a join statement, using the <literal>select *</literal> syntax selects one event property per stream to hold the event for that stream. The property name is the stream alias name in the <literal>from</literal> clause. 
+			</para>
 		</sect2>
 
         <sect2 id="eql-select-event-props" >
            <title>Choosing specific event properties</title>
 			<para>
-				To chose the particular event properties to return:
+				To choose the particular event properties to return:
 			</para>
 			<synopsis>select <emphasis>event_property</emphasis> [, <emphasis>event_property</emphasis>] [, ...] from <emphasis>stream_def</emphasis></synopsis>
 
@@ -193,7 +202,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
         <sect2 id="eql-select-expressions" >
            <title>Expressions</title>
 			<para>
-				The select clause can contain one or more expressions.
+				The <literal>select</literal> clause can contain one or more expressions.
 			</para>
 			<synopsis>select <emphasis>expression</emphasis> [, <emphasis>expression</emphasis>] [, ...] from <emphasis>stream_def</emphasis></synopsis>
 
@@ -218,11 +227,79 @@ select * from MyEvent  /* this also works */]]></programlisting>
 ]]></programlisting>
 		</sect2>
 		
+        <sect2 id="eql-select-all-join">
+           <title>Choosing event properties and events in a join</title>
+           
+			<para>
+				If your statement is joining multiple streams, your may specify property names that are unique among the joined streams, or use wildcard (*) as explained earlier.
+			</para>
+
+			<para>
+				In case the property name in your <literal>select</literal> or other clauses is not unique considering all joined streams, you will need to use the alias name of the stream as a prefix to the property.
+			</para>
+
+			<para>
+				This example is a join between the two streams StockTick and News, respectively named as 'tick' and 'news'. The example selects from the StockTick event the symbol value using the 'tick' stream alias as a prefix:
+			</para>
+			<programlisting><![CDATA[select tick.symbol from StockTick.win:time(10) as tick, News.win:time(10) as news]]></programlisting>
+
+			<para>
+				Use the wildcard (*) selector in a join to generate a property for each stream, with the property value being the event itself. The output events of the statement below have two properties: the 'tick' property holds the StockTick event and the 'news' property holds the News event:
+			</para>
+			<programlisting><![CDATA[select * from StockTick.win:time(10) as tick, News.win:time(10) as news]]></programlisting>
+
+			<para>
+				The following syntax can also be used to specify what stream's properties to select:
+			</para>
+			<synopsis>select <emphasis>stream_name</emphasis>.* [as <emphasis>alias</emphasis>] from ...</synopsis>
+
+			<para>
+				The selection of <literal>tick.*</literal> selects the StockTick stream events only:
+			</para>
+			<programlisting><![CDATA[select tick.* from StockTick.win:time(10) as tick, News.win:time(10) as news
+where tick.symbol = news.symbol]]></programlisting>
+
+			<para>
+				The next example uses the <literal>as</literal> keyword to name each stream's joined events. This instructs the engine to create a property for each named event:
+			</para>
+			<programlisting><![CDATA[select tick.* as stocktick, news.* as news 
+from StockTick.win:time(10) as tick, News.win:time(10) as news
+where stock.symbol = news.symbol]]></programlisting>
+
+			<para>
+				The output events of the above example have two properties 'stocktick' and 'news' that are the StockTick and News events.
+			</para>
+		</sect2>
+
+        <sect2 id="eql-select-pattern" >
+           <title>Choosing event properties and events from a pattern</title>
+           
+			<para>
+				If your statement employs pattern expressions, then your pattern expression tags events with a tag name. Each tag name becomes available for use as a property in the <literal>select</literal> clause and all other clauses.
+			</para>
+			
+			<para>
+				For example, here is a very simple pattern that matches on every StockTick event received within 30 seconds after start of the statement. The sample selects the symbol and price properties of the matching events:
+			</para>
+			<programlisting><![CDATA[select tick.symbol as symbol, tick.price as price
+from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting>
+
+			<para>
+				The use of the wildcard selector, as shown in the next statement, creates a property for each tagged event in the output. The next statement outputs events that hold a single 'tick' property whose value is the event itself:
+			</para>
+			<programlisting><![CDATA[select * from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting>
+
+			<para>
+				You may also select the matching event itself using the <literal>tick.*</literal> syntax. The engine outputs the StockTick event itself to listeners:
+			</para>
+			<programlisting><![CDATA[select tick.* from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting>
+		</sect2>
+
         <sect2 id="eql-select-using-istream-rstream" >
             <title>Selecting <literal>istream</literal> and <literal>rstream</literal> events</title>
 
 			<para>
-				The optional <literal>istream</literal> and <literal>rstream</literal> keywords in the select clause define the event stream posted to listeners to the statement. 
+				The optional <literal>istream</literal> and <literal>rstream</literal> keywords in the <literal>select</literal> clause define the event stream posted to listeners to the statement. 
 			</para>
 
 			<para>
@@ -247,15 +324,16 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			<programlisting><![CDATA[select rstream * from StockTick.win:time(30 sec)]]></programlisting>
 
 			<para>
-				The <literal>istream</literal> and <literal>rstream</literal> keywords in the select clause are matched by same-name keywords available in the insert into clause. While the keywords in the select clause control the event stream posted to listeners to the statement, the same keywords in the insert into clause specify the event stream that the engine makes available to other statements.
+				The <literal>istream</literal> and <literal>rstream</literal> keywords in the <literal>select</literal> clause are matched by same-name keywords available in the <literal>insert into</literal> clause. While the keywords in the <literal>select</literal> clause control the event stream posted to listeners to the statement, the same keywords in the <literal>insert into</literal> clause specify the event stream that the engine makes available to other statements.
 			</para>
 		</sect2>
 
     </sect1>
 
     <sect1 id="eql-from-clause">
-        <title>Specifying Event Streams : the <emphasis>From</emphasis> Clause</title>
+        <title>Specifying Event Streams: the <emphasis>From</emphasis> Clause</title>
 
+		<indexterm><primary>join</primary><secondary>from clause</secondary></indexterm>
 		<indexterm><primary>from clause</primary></indexterm>
 		<indexterm><primary>EQL</primary><secondary>from clause</secondary></indexterm>
 		<para>
@@ -279,7 +357,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
            <title>Filter-based event streams</title>
 
 			<para>
-				For filter-based event streams, the event stream definition <emphasis>stream_def</emphasis> as shown in the from-clause syntax consists of an event type, optional filter expressions and an optional list of views that derive data from a stream. The syntax for a filter-based event stream is as below:
+				For filter-based event streams, the event stream definition <emphasis>stream_def</emphasis> as shown in the <literal>from</literal> clause syntax consists of an event type, optional filter expressions and an optional list of views that derive data from a stream. The syntax for a filter-based event stream is as below:
 			</para>
 	
 			<synopsis><emphasis>event_type</emphasis> ( [<emphasis>filter_criteria</emphasis>] ) [.<emphasis>view_spec</emphasis>] [.<emphasis>view_spec</emphasis>] [...]</synopsis>
@@ -291,7 +369,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
   org.esper.example.StockTick(symbol='IBM').win:length(100).stat:uni('volume') as volumeStats]]></programlisting>
 	
 			<para>
-				Esper filters out events in an event stream as defined by filter criteria before it sends events to subsequent views. Thus, compared to search conditions in a where-clause, filter criteria remove unneeded events early. In the above example, events with a symbol other then IBM do not enter the time window.
+				Esper filters out events in an event stream as defined by filter criteria before it sends events to subsequent views. Thus, compared to search conditions in a <literal>where</literal> clause, filter criteria remove unneeded events early. In the above example, events with a symbol other then IBM do not enter the time window.
 			</para>
 
 			<sect3 id="eql-filter-event-type" >
@@ -545,7 +623,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 		</para>
 		
 		<para>
-			Comparison operators <literal>=, &lt; , &gt; , &gt;=, &lt;=, !=, &lt;&gt;, is null, is not null</literal> and logical combinations via <literal>and</literal> and <literal>or</literal> are supported in the where clause. The where clause can also introduce join conditions as outlined in <xref linkend="eql-join"/>. Where-clauses can also contain expressions. Some examples are listed below.
+			Comparison operators <literal>=, &lt; , &gt; , &gt;=, &lt;=, !=, &lt;&gt;, is null, is not null</literal> and logical combinations via <literal>and</literal> and <literal>or</literal> are supported in the <literal>where</literal> clause. The <literal>where</literal> clause can also introduce join conditions as outlined in <xref linkend="eql-join"/>. <literal>where</literal> clauses can also contain expressions. Some examples are listed below.
 		</para>
 		<programlisting>...where fraud.severity = 5 and amount > 500
 ...where (orderItem.orderId is null) or (orderItem.class != 10)		 
@@ -593,14 +671,14 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 				</para>
 			
 				<para>
-					You can use aggregation functions in a <literal>select</literal> clause and in a <literal>having</literal> clause. You cannot use aggregate functions in a <literal>where</literal> clause, but you can use the where clause to restrict the events to which the aggregate is applied. The next query computes the average and sum of the price of stock tick events for the symbol IBM only, for the last 10 stock tick events regardless of their symbol.
+					You can use aggregation functions in a <literal>select</literal> clause and in a <literal>having</literal> clause. You cannot use aggregate functions in a <literal>where</literal> clause, but you can use the <literal>where</literal> clause to restrict the events to which the aggregate is applied. The next query computes the average and sum of the price of stock tick events for the symbol IBM only, for the last 10 stock tick events regardless of their symbol.
 				</para>
 			    <programlisting>select 'IBM stats' as title, avg(price) as avgPrice, sum(price) as sumPrice
 from StockTickEvent.win:length(10)
 where symbol='IBM'</programlisting>				
 								
 				<para>
-					In the above example the length window of 10 elements is not affected by the where-clause, i.e. all events enter and leave the length window regardless of their symbol. If we only care about the last 10 IBM events, we need to add filter criteria as below.
+					In the above example the length window of 10 elements is not affected by the <literal>where</literal> clause, i.e. all events enter and leave the length window regardless of their symbol. If we only care about the last 10 IBM events, we need to add filter criteria as below.
 				</para>
 			    <programlisting>select 'IBM stats' as title, avg(price) as avgPrice, sum(price) as sumPrice
 from StockTickEvent(symbol='IBM').win:length(10)
@@ -639,7 +717,7 @@ where symbol='IBM'</programlisting>
 				<programlisting>select symbol, sum(price) from StockTickEvent.win:time(30 sec) group by symbol</programlisting>
 	
 				<para>
-					The syntax of the group by clause is:
+					The syntax of the <literal>group by</literal> clause is:
 				</para>
 				<synopsis>group by <emphasis>arregate_free_expression</emphasis> [, <emphasis>arregate_free_expression</emphasis>] [, ...]</synopsis>
 			
@@ -704,7 +782,7 @@ group by symbol, tickDataFeed</programlisting>
 				</para>
 
 				<para>
-					You can use a <literal>where</literal>	clause in a statement with <literal>group by</literal>. Events that do not satisfy the conditions in the <literal>where</literal> clause are eliminated before any grouping is done. For example, the statement below posts the number of stock ticks in the last 30 seconds with a volume larger then 100, posting one event per group (symbol).
+					You can use a <literal>where</literal> clause in a statement with <literal>group by</literal>. Events that do not satisfy the conditions in the <literal>where</literal> clause are eliminated before any grouping is done. For example, the statement below posts the number of stock ticks in the last 30 seconds with a volume larger then 100, posting one event per group (symbol).
 				</para>
 				<programlisting>select symbol, count(*) from StockTickEvent.win:time(30 sec) where volume &gt; 100 group by symbol</programlisting>
 		</sect2>
@@ -827,9 +905,9 @@ having stddev(price) &gt; 0.8</programlisting>
 				The next example shows two queries that produce equivalent results. The query using the <emphasis>group by</emphasis> clause is generally preferable as is easier to read. The second form introduces the <literal>stat:uni</literal> view which computes univariate statistics for a given property:
 			</para>
 
-			<programlisting>select symbol, sum(price) from StockTickEvent group by symbol
+			<programlisting>select symbol, avg(price) from StockTickEvent group by symbol
 // ... is equivalent to ...
-select symbol, sum from StockTickEvent.std:groupby('symbol').stat:uni('price')</programlisting>
+select symbol, average from StockTickEvent.std:groupby('symbol').stat:uni('price')</programlisting>
 
 			<para>
 				The next example shows two queries that are NOT equivalent as the length window is ungrouped in the first query, and grouped in the second query:
@@ -857,14 +935,14 @@ select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:length(1
 				<title>Output Clause Options</title>
 			
 				<para>
-				The <literal>output</literal> clause is optional in Esper and is used to control or stabilize the rate at which events are output. For example, the following statement batches old and new events and outputs them at the end of every 90 second interval.				
+				The <literal>output</literal> clause is optional in Esper and is used to control or stabilize the rate at which events are output. For example, the following statement outputs, every 60 seconds, the total price for all orders in the 30-minute time window:		
 				</para>
-			    <programlisting>select * from StockTickEvent.win:length(5) output every 90 seconds</programlisting>
+			    <programlisting>select sum(price) from OrderEvent.win:time(30 min) output every 60 seconds</programlisting>
 
 				<para>
 					Here is the syntax for output rate limiting: 
 				</para>
-				<synopsis>output [all | first | last] every <emphasis>number</emphasis> [minutes | seconds | events]</synopsis>
+				<synopsis>output [all | first | last | snapshot] every <emphasis>output_rate</emphasis> [minutes | seconds | events]</synopsis>
 
 				<para>
 					The <literal>all</literal> keyword is the default and specifies that all events in a batch should be output. The batch size can be specified in terms of time or number of events.
@@ -879,6 +957,14 @@ select symbol, sum(price) from StockTickEvent.std:groupby('symbol').win:length(1
 				<para>
 					The <literal>last</literal> keyword specifies to only output the last event at the end of the given time interval or after the given number of matching events
 					have been accumulated.
+				</para>
+
+				<para>
+					The <literal>snapshot</literal> keyword indicates that the engine output current computation results considering all events as per views specified and/or current aggregation results. While the other keywords control how a batch of events between output intervals is being considered, the <literal>snapshot</literal> keyword outputs all current state of a statement independent of the last batch. 
+				</para>
+
+				<para>
+					The <emphasis>output_rate</emphasis> is the frequency at which the engine outputs events. The value can be a number to denote a fixed output rate, or the name of a variable whose value is the output rate. By means of a variable the output rate can be controlled externally and changed dynamically at runtime. 
 				</para>
 
 				<para>
@@ -1062,11 +1148,11 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		<indexterm><primary>EQL</primary><secondary>join</secondary></indexterm>
 
 		<para>
-			Two or more event streams can be part of the <literal>from</literal> clause and thus both streams determine the resulting events. The where-clause lists the join conditions that Esper uses to relate events in the two or more streams. Reference and historical data such as stored in your relational database can also be included in joins. Please see <xref linkend="histdata_overview"/> for details.
+			Two or more event streams can be part of the <literal>from</literal> clause and thus both streams determine the resulting events. The <literal>where</literal> clause lists the join conditions that Esper uses to relate events in the two or more streams. Reference and historical data such as stored in your relational database can also be included in joins. Please see <xref linkend="histdata_overview"/> for details.
 		</para>
 
 		<para>
-			Each point in time that an event arrives to one of the event streams, the two event streams are joined and output events are produced according to the where-clause.
+			Each point in time that an event arrives to one of the event streams, the two event streams are joined and output events are produced according to the <literal>where</literal> clause.
 		</para>
 
 		<para>
@@ -1101,36 +1187,55 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		</para>
 
 		<para>
+			The keywords <literal>left, right</literal> and <literal>full</literal> control the type of the join between two streams. The <literal>on</literal> clause specifies one or more properties that join each stream. The synopsis is as follows:
+		</para>
+
+<synopsis>...from <emphasis>stream_def</emphasis> [as name] 
+  left|right|full outer join <emphasis>stream_def</emphasis> 
+  on <emphasis>property</emphasis> = <emphasis>property</emphasis> [and <emphasis>property</emphasis> = <emphasis>property</emphasis> ...]
+  [left|right|full outer join <emphasis>stream_def</emphasis> on ...]...
+</synopsis>
+
+		<para>
 			If the outer join is a left outer join, there will be an output event for each event of the stream on the left-hand side of the clause. For example, in the left outer join shown below we will get output for each event in the stream RfidEvent, even if the event does not match any event in the event stream OrderList.
 		</para>
 
-<programlisting><![CDATA[select * from net.esper.example.rfid.RfidEvent.win:time(30 sec) as rfid
+<programlisting><![CDATA[select * from RfidEvent.win:time(30 sec) as rfid
        left outer join
-       net.esper.example.rfid.OrderList.win:length(10000) as orderlist
+       OrderList.win:length(10000) as orderlist
      on rfid.itemId = orderList.itemId]]></programlisting>
 		
 		<para>
 			Similarly, if the join is a Right Outer Join, then there will be an output event for each event of the stream on the right-hand side of the clause. For example, in the right outer join shown below we will get output for each event in the stream OrderList, even if the event does not match any event in the event stream RfidEvent.
 		</para>
 
-<programlisting><![CDATA[select * from net.esper.example.rfid.RfidEvent.win:time(30 sec) as rfid
+<programlisting><![CDATA[select * from RfidEvent.win:time(30 sec) as rfid
        right outer join
-       net.esper.example.rfid.OrderList.win:length(10000) as orderlist
-     on rfid.itemId = orderList.itemId]]></programlisting>
+       OrderList.win:length(10000) as orderlist
+       on rfid.itemId = orderList.itemId]]></programlisting>
 
 		<para>
 			For all types of outer joins, if the join condition is not met, the select list is computed with the event properties of the arrived event while all other event properties are considered to be null.
 		</para>
 		
-<programlisting><![CDATA[select * from net.esper.example.rfid.RfidEvent.win:time(30 sec) as rfid
-       full outer join
-       net.esper.example.rfid.OrderList.win:length(10000) as orderlist
-     on rfid.itemId = orderList.itemId]]></programlisting>
-
 		<para>
-			The last type of outer join is a full outer join. In a full outer join, each point in time that an event arrives to one of the event streams, one or more output events are produced. In the example below, when either an RfidEvent or an OrderList event arrive, one or more output event is produced.
+			The last type of outer join is a full outer join. In a full outer join, each point in time that an event arrives to one of the event streams, one or more output events are produced. In the example below, when either an RfidEvent or an OrderList event arrive, one or more output event is produced. The next example shows a full outer join that joins on multiple properties:
 		</para>
 
+<programlisting><![CDATA[select * from RfidEvent.win:time(30 sec) as rfid
+       full outer join
+       OrderList.win:length(10000) as orderlist
+       on rfid.itemId = orderList.itemId and rfid.assetId = orderList.assetId]]></programlisting>
+
+		<para>
+			Finally, this example outer joins multiple streams. Here the RfidEvent stream is outer joined to both ProductName and LocationDescription via left outer join:
+		</para>
+
+<programlisting><![CDATA[select * from RfidEvent.win:time(30 sec) as rfid
+      left outer join ProductName.win:keepall() as refprod
+        on rfid.productId = refprod.prodId
+      left outer join LocationDescription.win:keepall() as refdesc
+        on rfid.location = refdesc.locId]]></programlisting>
     </sect1>
 
     <sect1 id="eql-subqueries">
@@ -1140,28 +1245,28 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		<indexterm><primary>EQL</primary><secondary>subqueries</secondary></indexterm>
 
 		<para>
-			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the select-clause and in the where-clause of EQL statements. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins. 
+			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the <literal>select</literal> clause and in the <literal>where</literal> clause of EQL statements. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins. 
 	    </para>
 
 		<para>
-			Esper supports both simple subqueries as well as correlated subqueries. In a simple subquery, the inner query is not correlated to the outer query. Here is an example simple subquery within a select-clause:
+			Esper supports both simple subqueries as well as correlated subqueries. In a simple subquery, the inner query is not correlated to the outer query. Here is an example simple subquery within a <literal>select</literal> clause:
 	    </para>
 			
 		<programlisting><![CDATA[select assetId, (select zone from ZoneClosed.std:lastevent) as lastClosed from RFIDEvent]]></programlisting>
 
 		<para>
-			If the inner query is dependent on the outer query, we will have a correlated subquery. An example of a correlated subquery is shown below. Notice the where-clause in the inner query, where the condition involves a stream from the outer query:
+			If the inner query is dependent on the outer query, we will have a correlated subquery. An example of a correlated subquery is shown below. Notice the <literal>where</literal> clause in the inner query, where the condition involves a stream from the outer query:
 	    </para>
 
 		<programlisting><![CDATA[select * from RfidEvent as RFID where 'Dock 1' = 
   (select name from Zones.std:unique('zoneId') where zoneId = RFID.zoneId)]]></programlisting>
 		
 		<para>
-			The example above shows a subquery in the where-clause. The statement selects RFID events in which the zone name matches a string constant based on zone id. The statement uses the view <literal>std:unique</literal> to guarantee that only the last event per zone id is held from processing by the subquery.
+			The example above shows a subquery in the <literal>where</literal> clause. The statement selects RFID events in which the zone name matches a string constant based on zone id. The statement uses the view <literal>std:unique</literal> to guarantee that only the last event per zone id is held from processing by the subquery.
 		</para>
 
 		<para>
-			The next example is a correlated subquery within a select-clause. In this statement the select-clause retrieves the zone name by means of a subquery against the Zones set of events correlated by zone id:
+			The next example is a correlated subquery within a <literal>select</literal> clause. In this statement the <literal>select</literal> clause retrieves the zone name by means of a subquery against the Zones set of events correlated by zone id:
 		</para>
 
 		<programlisting><![CDATA[select zoneId, (select name from Zones.std:unique('zoneId') 
@@ -1172,7 +1277,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		</para>
 
 		<para>
-			The select clause of a subquery also allows wildcard selects, which return as an event property the underlying event object of the event type as defined in the from-clause. An example:
+			The <literal>select</literal> clause of a subquery also allows wildcard selects, which return as an event property the underlying event object of the event type as defined in the <literal>from</literal> clause. An example:
 		</para>
 
 		<programlisting><![CDATA[select (select * from MarketData.std:lastevent()) as md 
@@ -1194,18 +1299,18 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 			</listitem>
 			<listitem>
 				<para>
-					Aggregation functions cannot be used in subqueries. Instead, the insert-into clause can be used to provide aggregation results for use in subqueries
+					Aggregation functions cannot be used in subqueries. Instead, the <literal>insert into</literal> clause can be used to provide aggregation results for use in subqueries
 				</para>
 			</listitem>
 			<listitem>
 				<para>
-					Subqueries can only consist of a select-clause, a from-clause and a where-clause. The group-by and having-clauses, as well as joins, outer-joins and output rate limiting are not permitted within subqueries.
+					Subqueries can only consist of a <literal>select</literal> clause, a <literal>from</literal> clause and a <literal>where</literal> clause. The <literal>group by</literal> and <literal>having</literal> clauses, as well as joins, outer-joins and output rate limiting are not permitted within subqueries.
 				</para>
 			</listitem>
 		</orderedlist>
 
 		<para>
-			Performance of your statement containing one or more subqueries principally depends on two parameters. First, if your subquery correlates one or more columns in the subquery stream with the enclosing statement's streams via equals '=', the engine automatically builds the appropriate indexes for fast row retrieval based on the key values correlated (joined). The second parameter is the number of rows found in the subquery stream and the complexity of the filter criteria (where-clause), as each row in the subquery stream must evaluate against the where-clause filter.
+			Performance of your statement containing one or more subqueries principally depends on two parameters. First, if your subquery correlates one or more columns in the subquery stream with the enclosing statement's streams via equals '=', the engine automatically builds the appropriate indexes for fast row retrieval based on the key values correlated (joined). The second parameter is the number of rows found in the subquery stream and the complexity of the filter criteria (<literal>where</literal> clause), as each row in the subquery stream must evaluate against the <literal>where</literal> clause filter.
 		</para>
 
 		<sect2 id="eql-subqueries-exists">
@@ -1252,6 +1357,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		<title>Joining Relational Data via SQL</title>
 		
 		<indexterm><primary>SQL</primary></indexterm>
+		<indexterm><primary>join</primary><secondary>relational data via SQL</secondary></indexterm>
 		<indexterm><primary>relational databases</primary></indexterm>
 		<indexterm><primary>EQL</primary><secondary>joining relational data via SQL</secondary></indexterm>
 
@@ -1311,7 +1417,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 			<title>Joining SQL Query Results</title>
 			
 			<para>
-				To join an event stream against stored data, specify the <literal>sql</literal> keyword followed by the name of the database and a parameterized SQL query. The syntax to use in the from-clause of an EQL statement is:
+				To join an event stream against stored data, specify the <literal>sql</literal> keyword followed by the name of the database and a parameterized SQL query. The syntax to use in the <literal>from</literal> clause of an EQL statement is:
 			</para>
 	
 			<synopsis>sql:<emphasis>database_name</emphasis> [" <emphasis>parameterized_sql_query</emphasis> "]</synopsis>
@@ -1341,7 +1447,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
   sql:MyCustomerDB [' select cust_name from Customer where cust_id = ${custId} ']]]></programlisting>
 
 			<para>
-				The example above assumes that <literal>CustomerCallEvent</literal> supplies an event property named <literal>custId</literal>. The SQL query selects the customer name from the Customer table. The where-clause in the SQL matches the Customer table column <literal>cust_id</literal> with the value of <literal>custId</literal> in each <literal>CustomerCallEvent</literal> event. The engine executes the SQL query for each new <literal>CustomerCallEvent</literal> encountered.
+				The example above assumes that <literal>CustomerCallEvent</literal> supplies an event property named <literal>custId</literal>. The SQL query selects the customer name from the Customer table. The <literal>where</literal> clause in the SQL matches the Customer table column <literal>cust_id</literal> with the value of <literal>custId</literal> in each <literal>CustomerCallEvent</literal> event. The engine executes the SQL query for each new <literal>CustomerCallEvent</literal> encountered.
 			</para>
 
 			<para>
@@ -1349,7 +1455,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 			</para>
 
 			<para>
-				The next example adds a time window of 30 seconds to the event stream <literal>CustomerCallEvent</literal>. It also renames the selected properties to customerName and customerId to demonstrate how the naming of columns in an SQL query can be used in the select clause in the EQL query. And the example uses explicit stream names via the <literal>as</literal> keyword.
+				The next example adds a time window of 30 seconds to the event stream <literal>CustomerCallEvent</literal>. It also renames the selected properties to customerName and customerId to demonstrate how the naming of columns in an SQL query can be used in the <literal>select</literal> clause in the EQL query. And the example uses explicit stream names via the <literal>as</literal> keyword.
 			</para>
 
 			<programlisting><![CDATA[select customerId, customerName from
@@ -1358,7 +1464,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
                   where cust_id = ${cce.custId}"] as cq]]></programlisting>
 
 			<para>
-				Any window, such as the time window, generates insert stream (istream) events as events enter the window, and remove stream (rstream) events as events leave the window. The engine executes the given SQL query for each <literal>CustomerCallEvent</literal> in both the insert stream and the remove stream. As a performance optimization, the <literal>istream</literal> or <literal>rstream</literal> keywords in the select-clause can be used to instruct the engine to only join insert stream or remove stream events, reducing the number of SQL query executions.
+				Any window, such as the time window, generates insert stream (istream) events as events enter the window, and remove stream (rstream) events as events leave the window. The engine executes the given SQL query for each <literal>CustomerCallEvent</literal> in both the insert stream and the remove stream. As a performance optimization, the <literal>istream</literal> or <literal>rstream</literal> keywords in the <literal>select</literal> clause can be used to instruct the engine to only join insert stream or remove stream events, reducing the number of SQL query executions.
 			</para>
 			
 		</sect2>
@@ -1473,7 +1579,7 @@ select orderId, orderAmount from
 
 			<para>
 				Alternatively, applications can add the following tag to the SQL statement: <literal>${$ESPER-SAMPLE-WHERE}</literal>. If the tag  exists in the SQL statement, the engine does not perform lexical analysis and simply replaces the 
-				tag with the SQL where-clause "where 1=0". Therefore this workaround is applicable to SQL statements that cannot be correctly lexically analyzed. The SQL text after the placeholder is not part of the sample query. For example:
+				tag with the SQL <literal>where</literal> clause "where 1=0". Therefore this workaround is applicable to SQL statements that cannot be correctly lexically analyzed. The SQL text after the placeholder is not part of the sample query. For example:
 			</para>
 			<programlisting><![CDATA[select mycol from sql:myDB [
   'select mycol from mytesttable ${$ESPER-SAMPLE-WHERE} where ....'], ...]]></programlisting>
@@ -1481,6 +1587,130 @@ select orderId, orderAmount from
 
 	</sect1>
 	
+	<sect1 id="joining_method" revision="1">
+		<title>Joining Non-Relational Data via Method Invocation</title>
+		
+		<indexterm><primary>join</primary><secondary>non-relational data via method invocation</secondary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>joining non-relational data via method invocation</secondary></indexterm>
+
+		<para>
+			Your application may need to join data that originates from a web service, a distributed cache, an object-oriented database or simply data held in memory by your application. Esper accommodates this need by allowing
+			a method invocation (or procedure call or function) in the <literal>from</literal> clause of a statement. 
+		</para>
+			
+		<para>
+			Esper can join and outer join all types of event streams to the data returned by your method invocation. In addition, Esper can be configured to cache the data returned by your method invocations.
+		</para>
+		
+		<para>
+			The following restrictions currently apply:
+		</para>
+
+		<itemizedlist spacing="compact">
+			<listitem>
+				<para>
+					Only one event stream and one method invocation can be joined; That is, in a join with a method invocation only one other event stream is allowed.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Sub-views on a method invocations are not allowed; That is, one cannot create a time or length window on a method invocation. However one can use the <literal>insert into</literal> syntax to make join results available to a further statement.
+				</para>
+			</listitem>
+		</itemizedlist>
+
+		<sect2 id="joining_method_syntax" revision="1">
+			<title>Joining Method Invocation Results</title>
+			<para>
+				The syntax for a method invocation in the <literal>from</literal> clause of an EQL statement is:
+			</para>
+			<synopsis>method:<emphasis>class_name</emphasis>.<emphasis>method_name</emphasis>[(<emphasis>parameter_expressions</emphasis>)]</synopsis>
+	
+			<para>
+				The <literal>method</literal> keyword denotes a method invocation. It is followed by a class name and a method name separated by a dot (.) character. If you have parameters to your method invocation, these are placed in 
+				round brackets after the method name. Any expression is allowed as a parameter, and individual parameter expressions are separated by a comma. Expressions may also use event properties of the joined stream. 
+			</para>
+	
+			<para>
+				In the sample join statement shown next, the method 'lookupAsset' provided by class 'MyLookupLib' returns one or more rows based on the asset id (a property of the AssetMoveEvent) that is passed to the method:
+			</para>
+			<programlisting><![CDATA[select * from AssetMoveEvent, MyLookupLib.lookupAsset(assetId)]]></programlisting>
+	
+			<para>
+				The following statement demonstrates the use of the <literal>where</literal> clause to join events to the rows returned by a method invocation, which in this example does not take parameters:
+			</para>
+			<programlisting><![CDATA[select assetId, assetDesc from AssetMoveEvent as asset, 
+    MyLookupLib.getAssetDescriptions() as desc 
+  where asset.assetid = desc.assetid]]></programlisting>
+	
+			<para>
+				Your method invocation may return zero, one or many rows for each method invocation. If you have caching enabled through configuration, then Esper can avoid the method invocation and instead use cached results. Similar to SQL joins, Esper also indexes cached result rows such that join operations based on the <literal>where</literal> clause can be very efficient, especially if your method invocation returns a large number of rows.
+			</para>
+
+			<para>
+				If the time taken by method invocations is critical to your application, you may configure local caches as <xref linkend="config-method-invocations"/> describes.
+			</para>
+		</sect2>
+				
+		<sect2 id="joining_method_exposing" revision="1">
+			<title>Providing the Method</title>
+			
+			<para>
+				Your application must provide a Java class that exposes a public static method. The method must accept the same number and type of parameters as listed in the parameter expression list. 
+			</para>
+			
+			<para>
+				If your method invocation returns either no row or only one row, then the return type of the method can be a Java class. If your method invocation can return more then one row, then the return type of the method must be an array of Java class. The Java class in the return type must adhere to JavaBean conventions: it must expose properties through getter methods.
+			</para>
+			
+			<para>
+				The method must return either of the following:
+			</para>
+			
+			<orderedlist>
+				<listitem>
+					<para>
+						A <literal>null</literal> value or an empty array to indicate an empty result (no rows).
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						A Java object to indicate a one-row result, or an array that consists of a single Java object.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						An array of Java objects to return multiple result rows.
+					</para>
+				</listitem>
+			</orderedlist>
+			
+			<para>
+				As an example, consider the method 'getAssetDescriptions' provided by class 'MyLookupLib' as discussed earlier:
+			</para>
+			<programlisting><![CDATA[]]>select assetId, assetDesc from AssetMoveEvent as asset,
+    com.mypackage.MyLookupLib.getAssetDescriptions() as desc 
+  where asset.assetid = desc.assetid</programlisting>
+																	
+			<para>
+				The 'getAssetDescriptions' method may return multiple rows and is therefore declared to return an array of the class 'AssetDesc'. The class AssetDesc is a POJO class (not shown here):
+			</para>
+			<programlisting><![CDATA[public class MyLookupLib {
+  ...
+  public static AssetDesc[] getAssetDescriptions() {
+    ...
+    return new AssetDesc[] {...};
+  }]]></programlisting>
+
+			<para>
+				The example above specifies the full Java class name of the 'MyLookupLib' class in the EQL statement. The package name does not need to be part of the EQL if your application imports the package using the auto-import configuration through the API or XML, as outlined in <xref linkend="config-class--package-imports"/>.
+			</para>
+			
+
+		</sect2>
+
+	</sect1>
+
 	<sect1 id="named_overview" revision="1">
 		<title>Creating and Using Named Windows</title>
 		
@@ -1569,7 +1799,7 @@ select orderId, orderAmount from
 			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>deleting from</tertiary></indexterm>
 
 			<para>
-				An <literal>on delete</literal> clause removes events from a named window. The clause can be used to remove all events, or only events that match certain criteria, or events that correlate with an arriving event.
+				An <literal>on delete</literal> clause removes events from a named window. The clause can be used to remove all events, or only events that match certain criteria, or events that correlate with an arriving event or a pattern of arriving events.
 			</para>
 
 			<para>
@@ -1580,15 +1810,19 @@ delete from <emphasis>window_name</emphasis> [as <emphasis>alias_name</emphasis>
 [where <emphasis>criteria_expression</emphasis>]</synopsis>
 				
 			<para>
-				The <emphasis>event_type</emphasis> is the name or alias of the type of events that trigger removal from the named window. It is optionally followed by <emphasis>filter_criteria</emphasis> which are filter expressions to apply to arriving events. The optional <literal>as</literal> keyword can be used to assign an alias for use in the <literal>where</literal> clause.
+				The <emphasis>event_type</emphasis> is the name or alias of the type of events that trigger removal from the named window. It is optionally followed by <emphasis>filter_criteria</emphasis> which are filter expressions to apply to arriving events. The optional <literal>as</literal> keyword can be used to assign an alias for use in the <literal>where</literal> clause. Patterns can also be specified in the <literal>on</literal> clause as described in the next section.
 			</para>
 				
 			<para>
-				The <emphasis>window_name</emphasis> is simply the name of the named window to delete events from. The <literal>as</literal> keyword is also available to assign an alias to the named window.
+				The <emphasis>window_name</emphasis> is the name of the named window to delete events from. The <literal>as</literal> keyword is also available to assign an alias to the named window.
 			</para>
 				
 			<para>
 				The optional <literal>where</literal> clause contains a <emphasis>criteria_expression</emphasis> that correlates the arriving (triggering) event to the events to be removed from the named window. The <emphasis>criteria_expression</emphasis> may also simply filter for events in the named window to be removed from the named window.
+			</para>
+
+			<para>
+				The <literal>iterator</literal> of the <literal>EPStatement</literal> object representing the <literal>on delete</literal> clause can also be helpful: It returns the last batch of deleted events in response to the last triggering event, in any order, or null if the last triggering event did not remove any rows.
 			</para>
 
 			<para>				
@@ -1619,6 +1853,39 @@ where myNamedWindow.symbol = myNewOrders.symbol]]></programlisting>
 			<para>
 				Your application can subscribe a listener to your <literal>on delete</literal> statements to determine removed events. The statement post any events that are deleted from a named window to all listeners attached to the statement as new data. Upon iteration, the statement provides the last deleted event, if any.
 			</para>
+
+			<sect3 id="named_delete_pattern" >
+			   <title>Using Patterns in the <literal>On Delete</literal> Clause</title>
+
+				<para>
+					By means of patterns the <literal>on delete</literal> clause and <literal>on select</literal> clause (described below) can look for more complex conditions to occur, possibly involving multiple events or the passing of time. The syntax for <literal>on delete</literal> with a pattern expression is show next:
+				</para>
+				<synopsis>on pattern [<emphasis>pattern_expression</emphasis>] [as <emphasis>alias_name</emphasis>]
+delete from <emphasis>window_name</emphasis> [as <emphasis>alias_name</emphasis>]
+[where <emphasis>criteria_expression</emphasis>]</synopsis>
+					
+				<para>
+					The <emphasis>pattern_expression</emphasis> is any pattern that matches zero or more arriving events. Tags can be used to name events in the pattern and can occur in the optional <literal>where</literal> clause to correlate to events to be removed from a named window.
+				</para>
+					
+				<para>
+					In the next example the triggering pattern fires every 10 seconds. The effect is that every 10 seconds the statement removes from 'MyNamedWindow' all rows:
+				</para>
+				<programlisting><![CDATA[on pattern [every timer:interval(10 sec)] delete from MyNamedWindow]]></programlisting>
+
+				<para>
+					The following example shows the use of tags in a pattern: 
+				</para>
+				<programlisting><![CDATA[on pattern [every ord=OrderEvent(volume>0) or every flush=FlushOrderEvent] 
+delete from OrderWindow as win
+where ord.id = win.id or flush.id = win.id]]></programlisting>
+
+				<para>
+					The pattern above looks for OrderEvent events with a volume value greater then zero and tags such events as 'ord'. 
+					The pattern also looks for FlushOrderEvent events and tags such events as 'flush'. The <literal>where</literal> clause deletes from the 'OrderWindow' named window any events that match in the value of the 'id' property either of the arriving events.
+				</para>
+
+			</sect3>
 		</sect2>
 
 		<sect2 id="named_inserting" revision="1">
@@ -1670,6 +1937,20 @@ insert into OrdersWindow select * from ServiceProductEvent
 
 // The MerchandiseProductEvent class subclasses the ProductBaseEvent class
 insert into OrdersWindow select * from MerchandiseProductEvent]]></programlisting>
+
+			<para>
+				To avoid duplicate events stored in a named window, use a subquery to test whether an event already exists in the named window:
+			</para>
+			<programlisting><![CDATA[insert into OrdersWindow
+select * from ServiceProductEvent as spe
+where not exists (select * from OrdersWindow as win where win.id = spe.id)]]></programlisting>
+
+			<para>
+				A statement that removes events from a named window via the <literal>on delete</literal> clause and a statement that inserts events into a named window via the <literal>insert into</literal> can be combined to replace events in the named window, by creating the two statements in the order as indicated by the sample:
+			</para>
+			<programlisting><![CDATA[// create in this order
+on ServiceProductEvent as spe delete from OrdersWindow as win where win.id = spe.id
+insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
 		</sect2>
 
 		<sect2 id="named_selecting" revision="1">
@@ -1679,38 +1960,342 @@ insert into OrdersWindow select * from MerchandiseProductEvent]]></programlistin
 			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>selecting from</tertiary></indexterm>
 
 			<para>
-				A named window can be referred to by any statement in the <literal>from</literal> clause of the statement. Additional views may be used onto named windows however such views cannot include data window views.
+				A named window can be referred to by any statement in the <literal>from</literal> clause of the statement. Filter criteria can also be specified. Additional views may be used onto named windows however such views cannot include data window views.
 			</para>
 			
 			<para>
-				A statement selecting from a named window 'AllOrdersNamedWindow' is shown next. The named window must first be created via the <literal>create window</literal> clause before use.
+				A statement selecting all events from a named window 'AllOrdersNamedWindow' is shown next. The named window must first be created via the <literal>create window</literal> clause before use.
 			</para>
 			<programlisting><![CDATA[select * from AllOrdersNamedWindow]]></programlisting>
 			
 			<para>
-				The statement as above simply receives the insert and remove stream of the named window and reports that stream to its listeners. An iterator on such statement returns the last new event in the named window, if any.
+				The statement as above simply receives the unfiltered insert and remove stream of the named window and reports that stream to its listeners. An iterator on such statement returns the last new event in the named window, if any.
 			</para>
 
 			<para>
-				The next statement derives an average price per symbol from events posted by a named window: 
+				The next statement derives an average price per symbol from all events posted by a named window: 
 			</para>
 			<programlisting><![CDATA[select symbol, avg(price) from AllOrdersNamedWindow group by symbol]]></programlisting>
 			
 			<para>
 				Your application may create a consuming statement such as above on an empty named window, or your application may create the above statement on an already filled named window. The engine provides correct results in either case: 
-				At the time of statement creation the Esper engine provides the current named window contents to the consuming statement. Thus, your statement deriving data from a named window does not start empty if the named window already holds one or more events.
+				At the time of statement creation the Esper engine internally initializes the consuming statement from the current named window, also taking your declared filters into consideration. Thus, your statement deriving data from a named window does not start empty if the named window already holds one or more events.
 			</para>
 
 			<para>
-				The following example declares a further view into the named window. Such a view can be a plug-in view or one of the built-in views, but cannot be a data window view (with the exception of the group-by view which is allowed).
+				If you require a subset of the data in the named window, you can specify one or more filter expressions onto the named window as shown here:
 			</para>
-			<programlisting><![CDATA[select * from AllOrdersNamedWindow.mycompany:mypluginview()]]></programlisting>
+			<programlisting><![CDATA[select symbol, avg(price) from AllOrdersNamedWindow(sector='energy') group by symbol]]></programlisting>
+			
+			<para>
+				By adding a filter to the named window, the aggregation and grouping as well as any views that may be declared onto to the named window receive a filtered insert and remove stream. The above statement thus outputs, continuously, the average price per symbol for all orders in the named window that belong to a certain sector.
+			</para>
+
+			<para>
+				The following example further declares a view into the named window. Such a view can be a plug-in view or one of the built-in views, but cannot be a data window view (with the exception of the group-by view which is allowed).
+			</para>
+			<programlisting><![CDATA[select * from AllOrdersNamedWindow(volume>0, price>0).mycompany:mypluginview()]]></programlisting>
 			
 			<para>
 				Data window views cannot be used onto named windows since named windows post insert and remove streams for the events entering and leaving the named window, thus the expiry policy and batch behavior are well defined by the data window declared for the named window. For example, the following is not allowed and fails at time of statement creation:
 			</para>
 			<programlisting><![CDATA[// not a valid statement
 select * from AllOrdersNamedWindow.win:time(30 sec)]]></programlisting>
+		</sect2>
+
+		<sect2 id="named_querying" revision="1">
+			<title>Triggered Select on Named Windows: the <literal>On Select</literal> clause</title>
+			
+			<indexterm><primary>on-select</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>triggered select using On Select</secondary></indexterm>
+			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>triggered select using On Select</tertiary></indexterm>
+
+			<para>
+				The <literal>on select</literal> clause performs a one-time, non-continuous query on a named window every time a triggering event arrives or a triggering pattern matches. The query can consider all events in the named window, or only events that match certain criteria, or events that correlate with an arriving event or a pattern of arriving events.
+			</para>
+			
+			<para>
+				The syntax for the <literal>on select</literal> clause is as follows: 
+			</para>
+			<synopsis>on <emphasis>event_type</emphasis>[<emphasis>(filter_criteria)</emphasis>] [as <emphasis>alias_name</emphasis>]
+[insert into <emphasis>insert_into_def</emphasis>]
+select <emphasis>select_list</emphasis>
+from <emphasis>window_name</emphasis> [as <emphasis>alias_name</emphasis>]
+[where <emphasis>criteria_expression</emphasis>]
+[group by <emphasis>grouping_expression_list</emphasis>]
+[having <emphasis>grouping_search_conditions</emphasis>]
+[order by <emphasis>order_by_expression_list</emphasis>]
+</synopsis>
+				
+			<para>
+				The <emphasis>event_type</emphasis> is the name or alias of the type of events that trigger the query against the named window. It is optionally followed by <emphasis>filter_criteria</emphasis> which are filter expressions to apply to arriving events. The optional <literal>as</literal> keyword can be used to assign an alias. Patterns can also be specified in the <literal>on</literal> clause, see the samples in <xref linkend="named_delete_pattern"/>.
+			</para>
+				
+			<para>
+				The <emphasis>insert into</emphasis> clause works as described in <xref linkend="eql-insert-into"/>. The <emphasis>select</emphasis> clause is described in <xref linkend="eql-select-list"/>. For all clauses the semantics are equivalent to a join operation: The properties of the triggering event or events are available in the <literal>select</literal> clause and all other clauses.
+			</para>
+
+			<para>
+				The <emphasis>window_name</emphasis> in the <literal>from</literal> clause is the name of the named window to select events from. The <literal>as</literal> keyword is also available to assign an alias to the named window. The <literal>as</literal> keyword is helpful in conjunction with wildcard in the <literal>select</literal> clause to select named window events via the syntax <literal>select alias.* </literal>.
+			</para>
+				
+			<para>
+				The optional <literal>where</literal> clause contains a <emphasis>criteria_expression</emphasis> that correlates the arriving (triggering) event to the events to be considered from the named window. The <emphasis>criteria_expression</emphasis> may also simply filter for events in the named window to be considered by the query.
+			</para>
+
+			<para>
+				The <literal>group by</literal> clause, the <literal>having</literal> clause and the <literal>order by</literal> clause are all optional and work as described in earlier chapters.
+			</para>
+
+			<para>
+				The similarities and differences between an <literal>on select</literal> clause and a regular or outer join are as follows: 
+			</para>
+		<orderedlist>
+			<listitem>
+				<para>
+                    A join is evaluated when any of the streams participating in the join have new events (insert stream) or events leaving data windows (remove stream).  A join is therefore bi-directional or multi-directional. However, the <literal>on select</literal> statement has one triggering event or pattern that causes the query to be evaluated and is thus uni-directional.
+                </para>
+			</listitem>
+			<listitem>
+				<para>
+					The query within the <literal>on select</literal> statement is not continuous: It executes only when a triggering event or pattern occurs. Aggregation and groups are computed anew considering the contents of the named window at the time the triggering event arrives.
+                </para>
+			</listitem>
+		</orderedlist>
+
+			<para>
+				The <literal>iterator</literal> of the <literal>EPStatement</literal> object representing the <literal>on select</literal> clause returns the last batch of selected events in response to the last triggering event, or null if the last triggering event did not select any rows.
+			</para>
+
+			<para>
+				For correlated queries that correlate triggering events with events held by a named window, Esper internally creates efficient indexes to enable high performance querying of events. It analyzes the <literal>where</literal> clause to build one or more indexes for fast lookup in the named window based on the properties of the triggering event.
+			</para>
+
+			<para>				
+				The next statement demonstrates the concept. Upon arrival of a QueryEvent event the statement selects all events in the 'OrdersNamedWindow' named window:
+			</para>
+			<programlisting><![CDATA[on QueryEvent select win.* from OrdersNamedWindow as win]]></programlisting>
+			
+			<para>
+				 The engine executes the query on arrival of a triggering event, in this case a QueryEvent. It posts the query results to any listeners to the statement, in a single invocation, as the new data array. By prefixing the wildcard (*) selector with the stream name, the <literal>select</literal> clause returns only events of the named window and does not also return triggering events.
+			 </para>
+
+			<para>
+				The <literal>where</literal> clause filters and correlates events in the named window with the triggering event, as shown next: 
+			</para>
+			<programlisting><![CDATA[on QueryEvent(volume>0) as query
+select query.symbol, query.volume, win.symbol  from OrdersNamedWindow as win
+where win.symbol = query.symbol]]></programlisting>
+			
+			<para>
+				 Upon arrival of a QueryEvent, if that event has a value for the volume property that is greater then zero, the engine executes the query. The query considers all events currently held by the 'OrdersNamedWindow' that match the symbol property value of the triggering QueryEvent event. The engine then posts query results to the statement's listeners.
+			 </para>
+
+			<para>
+				Aggregation, grouping and ordering of results are possible as this example shows:
+			</para>
+			<programlisting><![CDATA[on QueryEvent as queryEvent
+select symbol, sum(volume) from OrdersNamedWindow as win
+group by symbol
+having volume > 0
+order by symbol]]></programlisting>
+			
+			<para>
+				 The above statement outputs the total volume per symbol for those groups where the sum of the volume is greater then zero, ordered by symbol ascending. The engine computes and posts the output based on the current contents of the 'OrdersNamedWindow' named window considering all events in the named window, since the query does not have a <literal>where</literal> clause.
+			 </para>
+		</sect2>
+
+		<sect2 id="named_playback" revision="1">
+			<title>Triggered Playback from Named Windows: the <literal>On Insert</literal> clause</title>
+			
+			<indexterm><primary>on-insert</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>triggered playback using On Insert</secondary></indexterm>
+			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>triggered playback using On Insert</tertiary></indexterm>
+
+			<para>
+				The <literal>on insert</literal> clause is an <literal>on select</literal> clause as described in the prior chapter with the addition of an <literal>insert into</literal> clause. 
+			</para>
+
+			<para>
+				Similar to the <literal>on select</literal> clause, the engine executes the query when a triggering event arrives. It then provides the query results as an event stream to further statements. It populates the event stream that is named in the <literal>insert into</literal> clause.
+			</para>
+
+			<para>
+				The statement below provides the query results to any consumers of the MyOrderStream, upon arrival of a QueryEvent event:
+			</para>
+			<programlisting><![CDATA[on QueryEvent as query
+insert into MyOrderStream
+select win.* from OrdersNamedWindow as win]]></programlisting>
+
+			<para>
+				Here is a sample consuming statement of the MyOrderStream. The statement further filters the events provided by the <literal>on insert</literal> statement by user id and reports a total of volume per symbol:
+			</para>
+			<programlisting><![CDATA[select symbol, sum(volume) from MyOrderStream(userId='user1') group by symbol]]></programlisting>
+		</sect2>
+
+	</sect1>
+	
+	<sect1 id="variables_overview" revision="1">
+		<title>Variables</title>
+		
+		<indexterm><primary>variable</primary></indexterm>
+		<indexterm><primary>EQL</primary><secondary>variable</secondary></indexterm>
+
+		<para>
+			A <emphasis>variable</emphasis> is a scalar value that is available for use in all statements including patterns. Variables can be used in an expression anywhere in a statement as well as in the <literal>output</literal> clause for output rate limiting.
+		</para>
+			
+		<para>
+			Variables must first be declared or configured before use, by defining each variable's type and name. Variables can be created via the <literal>create variable</literal> syntax or declared by configuration. Variables can be assigned new values by using the <literal>on set</literal> syntax.
+		</para>
+			
+		<para>
+			 The engine guarantees consistency and atomicity of variable reads and writes on a statement-level (this is a soft guarantee, see below). Variables are optimized for fast read access and are also multithread-safe.
+		</para>		
+		
+		<sect2 id="variable_create" revision="1">
+			<title>Creating Variables: the <literal>Create Variable</literal> clause</title>
+
+			<para>
+				The <literal>create variable</literal> syntax creates a new variable by defining the variable type and name. In alternative to the syntax, variables can also be declared in the runtime and engine configuration options.
+			</para>
+
+			<para>
+				The synopsis for creating a variable is as follows: 
+			</para>
+			<synopsis>create variable <emphasis>variable_type</emphasis> <emphasis>variable_name</emphasis> [ = <emphasis>assignment_expression</emphasis> ]</synopsis>
+				
+			<para>
+				The <emphasis>variable_type</emphasis> can be any of the following:
+			</para>
+			<synopsis>variable_type
+	:  string
+	|  char 
+	|  character
+	|  bool 
+	|  boolean
+	|  byte
+	|  short 
+	|  int 
+	|  integer 
+	|  long 
+	|  double
+	|  float</synopsis>
+				
+			<para>
+				The <emphasis>variable_name</emphasis> is an identifier that names the variable. The variable name should not already be in use by another variable.
+			</para>
+				
+			<para>				
+				The <literal>assignment_expression</literal> is optional. Without an assignment expression the initial value for the variable is <literal>null</literal>. If present, it supplies the initial value for the variable.
+			</para>
+
+			<para>
+				The <literal>EPStatement</literal> object of the <literal>create variable</literal> statement provides access to variable values. The pull API methods <literal>iterator</literal> and <literal>safeIterator</literal> return the current variable value. Listeners to the 
+				<literal>create variable</literal> statement subscribe to changes in variable value: the engine posts new and old value of the variable to all listeners when the variable value is updated by an <literal>on set</literal> statement.
+			</para>
+
+			<para>
+				The example below creates a variable that provides a threshold value. The name of the variable is <literal>var_threshold</literal> and its type is <literal>long</literal>. The variable's initial value is <literal>null</literal> as no other value has been assigned:
+			</para>
+			<programlisting><![CDATA[create variable long var_threshold]]></programlisting>
+
+			<para>
+				This statement creates an integer-type variable named <literal>var_output_rate</literal> and initializes it to the value ten (10):
+			</para>
+			<programlisting><![CDATA[create variable integer var_output_rate = 10]]></programlisting>
+
+			<para>
+				In addition to creating a variable via the <literal>create variable</literal> syntax, the runtime and engine configuration API also allows adding variables. The next code snippet illustrates the
+				use of the runtime configuration API to create a string-typed variable:
+			</para>
+			<programlisting><![CDATA[epService.getEPAdministrator().getConfiguration()
+  .addVariable("myVar", String.class, "init value");]]></programlisting>
+
+		</sect2>
+
+		<sect2 id="variable_set" revision="1">
+			<title>Setting Variable Values: the <literal>On Set</literal> clause</title>
+
+			<para>
+				The <literal>on set</literal> statement assigns a new value to one or more variables when a triggering event arrives or a triggering pattern occurs.
+			</para>
+
+			<para>
+				The synopsis for setting variable values is: 
+			</para>
+			<synopsis>on <emphasis>event_type</emphasis>[<emphasis>(filter_criteria)</emphasis>] [as <emphasis>alias_name</emphasis>]
+  set <emphasis>variable_name</emphasis> = <emphasis>expression</emphasis> [, <emphasis>variable_name</emphasis> = <emphasis>expression</emphasis> [,...]]
+</synopsis>
+								
+			<para>
+				The <emphasis>event_type</emphasis> is the name or alias of the type of events that trigger the variable assignments. It is optionally followed by <emphasis>filter_criteria</emphasis> which are filter expressions to apply to arriving events. The optional <literal>as</literal> keyword can be used to assign an alias. Patterns can also be specified in the <literal>on</literal> clause.
+			</para>
+			
+			<para>
+				The comma-separated list of variable names and expressions set the value of one or more variables. All new variable values are applied atomically: the changes to variable values by the <literal>on set</literal> statement 
+				become visible to other statements all at the same time. No changes are visible to other processing threads until the <literal>on set</literal> statement completed processing, and at that time all changes become visible at once.
+			</para>
+
+			<para>
+				The <literal>EPStatement</literal> object provides access to variable values. The pull API methods <literal>iterator</literal> and <literal>safeIterator</literal> return the current variable values for each of the variables set by the statement. 
+				Listeners to the statement subscribe to changes in variable values: the engine posts new variable values of all variables to any listeners.
+			</para>
+
+			<para>
+				In the following example, a variable by name <literal>var_output_rate</literal> has been declared previously. When a NewOutputRateEvent event arrives, the variable is updated to a new value supplied by the event property 'rate':
+			</para>
+			<programlisting><![CDATA[on NewOutputRateEvent set var_output_rate = rate]]></programlisting>
+
+			<para>
+				The next example shows two variables that are updated when a ThresholdUpdateEvent arrives:
+			</para>
+			<programlisting><![CDATA[on ThresholdUpdateEvent as t 
+  set var_threshold_lower = t.lower,
+      var_threshold_higher = t.higher]]></programlisting>
+
+			<para>
+				The sample statement shown next counts the number of pattern matches using a variable. The pattern looks for OrderEvent events that are followed by CancelEvent events for the same order id within 10 seconds of the OrderEvent:
+			</para>
+			<programlisting><![CDATA[on pattern[every a=OrderEvent -> (CancelEvent(orderId=a.orderId) where timer:within(10 sec))]
+  set var_counter = var_counter + 1]]></programlisting>
+		</sect2>
+
+		<sect2 id="variable_using" revision="1">
+			<title>Using Variables</title>
+
+			<para>
+				A variable name can be used in any expression and can also occur in an output rate limiting clause. This section presents examples and discusses performance, consistency and atomicity attributes of variables.
+			</para>
+
+			<para>
+				The next statement assumes that a variable named 'var_threshold' was created to hold a total price threshold value. 
+				The statement outputs an event when the total price for a symbol is greater then the current threshold value:
+			</para>
+			<programlisting><![CDATA[select symbol, sum(price) from TickEvent 
+group by symbol 
+having sum(price) > var_threshold]]></programlisting>
+
+			<para>
+				In this example we use a variable to dynamically change the output rate on-the-fly. The variable 'var_output_rate' holds the current rate at which the statement posts a current count to listeners:
+			</para>
+			<programlisting><![CDATA[select count(*) from TickEvent output every var_output_rate seconds]]></programlisting>
+			
+			<para>
+				Variables are optimized towards high read frequency and lower write frequency. Variable reads do not incur locking overhead (99% of the time) while variable writes do incur locking overhead. 
+			</para>
+				
+			<para>
+				The engine softly guarantees consistency and atomicity of variables when your statement executes in response to an event or timer invocation. Variables acquire a stable value (implemented by versioning) when your statement starts executing in response to an event or timer invocation, and variables do not change value during execution. When one or more variable values are updated via <literal>on set</literal> statements, the changes to all updated variables become visible to statements as one unit and only when the <literal>on set</literal> statement completes successfully.
+			</para>
+
+			<para>
+				The atomicity and consistency guarantee is a soft guarantee. If any of your application statements, in response to an event or timer invocation, execute for a time interval longer then 15 seconds (default interval length), then the engine may use current variable values after 15 seconds passed, rather then then-current variable values at the time the statement started executing in response to an event or timer invocation.				
+			</para>
+
+			<para>
+				The length of the time interval that variable values are held stable for the duration of execution of a given statement is by default 15 seconds, but can be configured via engine default settings.
+			</para>
 		</sect2>
 
 	</sect1>

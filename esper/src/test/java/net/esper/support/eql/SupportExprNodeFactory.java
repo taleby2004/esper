@@ -3,12 +3,15 @@ package net.esper.support.eql;
 import net.esper.eql.expression.*;
 import net.esper.eql.core.ViewResourceDelegateImpl;
 import net.esper.eql.core.MethodResolutionServiceImpl;
+import net.esper.eql.variable.VariableService;
+import net.esper.eql.variable.VariableServiceImpl;
 import net.esper.type.MathArithTypeEnum;
 import net.esper.type.RelationalOpEnum;
 import net.esper.view.ViewFactoryChain;
 import net.esper.view.ViewFactory;
 import net.esper.view.window.LengthWindowViewFactory;
 import net.esper.support.view.SupportStatementContextFactory;
+import net.esper.schedule.SchedulingServiceImpl;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -308,6 +311,10 @@ public class SupportExprNodeFactory
         }
         ViewResourceDelegateImpl viewResources = new ViewResourceDelegateImpl(factoriesPerStream, SupportStatementContextFactory.makeContext());
 
-        topNode.getValidatedSubtree(streamTypeService, new MethodResolutionServiceImpl(null), viewResources, null);
+        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(), null);
+        variableService.createNewVariable("intPrimitive", Integer.class, 10, null);
+        variableService.createNewVariable("var1", String.class, "my_variable_value", null);
+
+        topNode.getValidatedSubtree(streamTypeService, new MethodResolutionServiceImpl(null), viewResources, null, variableService);
     }
 }

@@ -1,20 +1,20 @@
 package net.esper.eql.parse;
 
+import antlr.collections.AST;
 import junit.framework.TestCase;
+import net.esper.eql.generated.EqlTokenTypes;
+import net.esper.support.bean.SupportBean;
+import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
+import net.esper.support.eql.parse.SupportParserHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import net.esper.support.eql.parse.SupportParserHelper;
-import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
-import net.esper.support.bean.SupportBean;
-import net.esper.eql.generated.EqlTokenTypes;
-import antlr.collections.AST;
 
 public class TestEQLParser extends TestCase implements EqlTokenTypes
 {
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "on MyEvent delete from MyNamedWindow";
+        String expression = "create variable uu aa = b";
 
         log.debug(".testDisplayAST parsing: " + expression);
         AST ast = parse(expression);
@@ -190,16 +190,33 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("create window AAA");
         assertIsInvalid("create window AAA as select a*5 from MyType");
 
-        // delete statement
+        // on-delete statement
         assertIsInvalid("on MyEvent from MyNamedWindow");
         assertIsInvalid("on  delete from MyNamedWindow");
         assertIsInvalid("on MyEvent abc def delete from MyNamedWindow");
         assertIsInvalid("on MyEvent(a<2)(a) delete from MyNamedWindow");
         assertIsInvalid("on MyEvent delete from MyNamedWindow where");
+
+        // on-select statement
+        assertIsInvalid("on MyEvent select from MyNamedWindow");
+        assertIsInvalid("on MyEvent select * from MyNamedWindow.win:time(30)");
+        assertIsInvalid("on MyEvent select * from MyNamedWindow where");
+        assertIsInvalid("on MyEvent insert into select * from MyNamedWindow");
+
+        // on-set statement
+        assertIsInvalid("on MyEvent set");
+        assertIsInvalid("on MyEvent set a=dkdkd a");
+        assertIsInvalid("on MyEvent set a=, b=");
     }
 
     public void testValidCases() throws Exception
     {
+        assertIsValid("select * " +
+                      "from A " +
+                      "left outer join " +
+                      "B" +
+                      " on a = b and c=d");
+
         String className = SupportBean.class.getName();
         String preFill = "select * from " + className;
 
@@ -284,10 +301,19 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
                       "left outer join " +
                       "a.b(string[0]='test').win:lenght(100) as y " +
                       "on y.array[1].map('a').nested = x.nested2");
+        assertIsValid("select * " +
+                      "from A " +
+                      "left outer join " +
+                      "B" +
+                      " on a = b and c=d");
         assertIsValid("select a and b from b.win:length(1)");
         assertIsValid("select a or b from b.win:length(1)");
         assertIsValid("select a = b from b.win:length(1)");
         assertIsValid("select a != b from b.win:length(1)");
+        assertIsValid("select a.* from b.win:length(1) as a");
+        assertIsValid("select a.* as myfield from b.win:length(1) as abc");
+        assertIsValid("select a.*, b.*, c.* from b.win:length(1) as a");
+        assertIsValid("select a.* as x1, b.* as x2, x.* as x3 from b.win:length(1) as a, t as x");
 
         assertIsValid("select sum(a), avg(b) from b.win:length(1)");
         assertIsValid("select sum(all a), avg(all b), avg(all b/c) from b.win:length(1)");
@@ -477,6 +503,7 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid(preFill + " having avg(?) > ?");
         assertIsValid("select sum(?) from b.win:length(1)");
         assertIsValid("select ?||'a' from B(a=?) where c=? group by ? having d>? output every 10 events order by a, ?");
+        assertIsValid("select a from B output snapshot every 10 events order by a, ?");
 
         // cast, instanceof, isnumeric and exists dynamic property
         assertIsValid(preFill + "(boolean = exists(a))");
@@ -512,12 +539,44 @@ public class TestEQLParser extends TestCase implements EqlTokenTypes
         assertIsValid("create window AAA.win:length(10) as select a,b from MyType");
         assertIsValid("create window AAA.win:length(10).win:time(1 sec) as select a,b from MyType");
 
-        // delete statement
+        // on-delete statement
         assertIsValid("on MyEvent delete from MyNamedWindow");
         assertIsValid("on MyEvent delete from MyNamedWindow where key = myotherkey");
         assertIsValid("on MyEvent(myval != 0) as myevent delete from MyNamedWindow as mywin where mywin.key = myevent.otherKey");
         assertIsValid("on com.my.MyEvent(a=1, b=2 or c.d>3) as myevent delete from MyNamedWindow as mywin where a=b and c<d");
         assertIsValid("on MyEvent yyy delete from MyNamedWindow xxx where mywin.key = myevent.otherKey");
+        assertIsValid("on pattern [every MyEvent or every MyEvent] delete from MyNamedWindow");
+
+        // on-select statement
+        assertIsValid("on MyEvent select * from MyNamedWindow");
+        assertIsValid("on MyEvent select a, b, c from MyNamedWindow");
+        assertIsValid("on MyEvent select a, b, c from MyNamedWindow where a<b");
+        assertIsValid("on MyEvent as event select a, b, c from MyNamedWindow as win where a.b = b.a");
+        assertIsValid("on MyEvent(hello) select *, c from MyNamedWindow");
+        assertIsValid("on pattern [every X] select a, b, c from MyNamedWindow");
+        assertIsValid("on MyEvent insert into YooStream select a, b, c from MyNamedWindow");
+        assertIsValid("on MyEvent insert into YooStream (p, q) select a, b, c from MyNamedWindow");
+        assertIsValid("on MyEvent select a, b, c from MyNamedWindow where a=b group by c having d>e order by f");
+
+        // on-set statement
+        assertIsValid("on MyEvent set var=1");
+        assertIsValid("on MyEvent set var = true");
+        assertIsValid("on MyEvent as event set var = event.val");
+        assertIsValid("on MyEvent as event set var = event.val");
+        assertIsValid("on MyEvent as event set var = event.val * 2, var2='abc', var3='def'");
+
+        // create variable
+        assertIsValid("create variable integer a = 77");
+        assertIsValid("create variable sometype b = 77");
+        assertIsValid("create variable sometype b");
+        
+        // use variable in output clause
+        assertIsValid("select count(*) from A output every VAR1 events");
+
+        // join with method result
+        assertIsValid("select * from A, method:myClass.myname() as b where a.x = b.x");
+        assertIsValid("select method, a, b from A, METHOD:com.maypack.myClass.myname() as b where a.x = b.x");
+        assertIsValid("select method, a, b from A, someident:com.maypack.myClass.myname() as b where a.x = b.x");
     }
 
     public void testBitWiseCases() throws Exception

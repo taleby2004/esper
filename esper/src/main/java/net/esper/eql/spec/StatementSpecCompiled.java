@@ -17,8 +17,9 @@ import java.util.List;
  */
 public class StatementSpecCompiled
 {
-    private final OnDeleteDesc onDeleteDesc;
+    private final OnTriggerDesc onTriggerDesc;
     private final CreateWindowDesc createWindowDesc;
+    private final CreateVariableDesc createVariableDesc;
     private final InsertIntoDesc insertIntoDesc;
     private final SelectClauseStreamSelectorEnum selectStreamDirEnum;
     private final SelectClauseSpec selectClauseSpec;
@@ -30,6 +31,7 @@ public class StatementSpecCompiled
     private final OutputLimitSpec outputLimitSpec;
     private final List<OrderByItem> orderByList;
     private final List<ExprSubselectNode> subSelectExpressions;
+    private final boolean hasVariables;
 
     /**
      * Ctor.
@@ -44,11 +46,14 @@ public class StatementSpecCompiled
      * @param outputLimitSpec output limit
      * @param orderByList order by
      * @param subSelectExpressions list of subqueries
-     * @param onDeleteDesc describes on-delete statements
+     * @param onTriggerDesc describes on-delete statements
      * @param createWindowDesc describes create-window statements
+     * @param createVariableDesc describes create-variable statements
+     * @param hasVariables indicator whether the statement uses variables
      */
-    public StatementSpecCompiled(OnDeleteDesc onDeleteDesc,
+    public StatementSpecCompiled(OnTriggerDesc onTriggerDesc,
                                  CreateWindowDesc createWindowDesc,
+                                 CreateVariableDesc createVariableDesc,
                                  InsertIntoDesc insertIntoDesc,
                                  SelectClauseStreamSelectorEnum selectClauseStreamSelectorEnum,
                                  SelectClauseSpec selectClauseSpec,
@@ -59,10 +64,12 @@ public class StatementSpecCompiled
                                  ExprNode havingExprRootNode,
                                  OutputLimitSpec outputLimitSpec,
                                  List<OrderByItem> orderByList,
-                                 List<ExprSubselectNode> subSelectExpressions)
+                                 List<ExprSubselectNode> subSelectExpressions,
+                                 boolean hasVariables)
     {
-        this.onDeleteDesc = onDeleteDesc; 
+        this.onTriggerDesc = onTriggerDesc;
         this.createWindowDesc = createWindowDesc;
+        this.createVariableDesc = createVariableDesc;
         this.insertIntoDesc = insertIntoDesc;
         this.selectStreamDirEnum = selectClauseStreamSelectorEnum;
         this.selectClauseSpec = selectClauseSpec;
@@ -74,6 +81,7 @@ public class StatementSpecCompiled
         this.outputLimitSpec = outputLimitSpec;
         this.orderByList = orderByList;
         this.subSelectExpressions = subSelectExpressions;
+        this.hasVariables = hasVariables;
     }
 
     /**
@@ -83,6 +91,15 @@ public class StatementSpecCompiled
     public CreateWindowDesc getCreateWindowDesc()
     {
         return createWindowDesc;
+    }
+
+    /**
+     * Returns the create-variable statement descriptor.
+     * @return create-variable spec
+     */
+    public CreateVariableDesc getCreateVariableDesc()
+    {
+        return createVariableDesc;
     }
 
     /**
@@ -193,11 +210,20 @@ public class StatementSpecCompiled
     }
 
     /**
-     * Returns the specification for an on-delete statement.
-     * @return on-delete spec, or null if not such a statement
+     * Returns the specification for an on-delete or on-select statement.
+     * @return on-trigger spec, or null if not such a statement
      */
-    public OnDeleteDesc getOnDeleteDesc()
+    public OnTriggerDesc getOnTriggerDesc()
     {
-        return onDeleteDesc;
+        return onTriggerDesc;
+    }
+
+    /**
+     * Returns true to indicate the statement has vaiables.
+     * @return true for statements that use variables
+     */
+    public boolean isHasVariables()
+    {
+        return hasVariables;
     }
 }

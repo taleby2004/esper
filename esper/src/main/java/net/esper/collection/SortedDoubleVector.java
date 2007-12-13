@@ -25,6 +25,14 @@ public class SortedDoubleVector
     }
 
     /**
+     * Clear out the collection.
+     */
+    public void clear()
+    {
+        values.clear();
+    }
+
+    /**
      * Returns the number of items in the collection.
      * @return size
      */

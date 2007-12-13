@@ -8,6 +8,8 @@
 package net.esper.client;
 
 import net.esper.util.DOMElementIterator;
+import net.esper.util.JavaClassHelper;
+import net.esper.event.EventAdapterException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -106,6 +108,10 @@ class ConfigurationParser {
             {
             	handleAutoImports(configuration, element);
             }
+            else if(nodeName.equals("method-reference"))
+            {
+            	handleMethodReference(configuration, element);
+            }
             else if (nodeName.equals("database-reference"))
             {
                 handleDatabaseRefs(configuration, element);
@@ -125,6 +131,10 @@ class ConfigurationParser {
             else if (nodeName.equals("plugin-pattern-observer"))
             {
                 handlePlugInPatternObserver(configuration, element);
+            }
+            else if (nodeName.equals("variable"))
+            {
+                handleVariable(configuration, element);
             }
             else if (nodeName.equals("adapter-loader"))
             {
@@ -407,6 +417,36 @@ class ConfigurationParser {
         }
     }
 
+    private static void handleMethodReference(Configuration configuration, Element element)
+    {
+        String className = element.getAttributes().getNamedItem("class-name").getTextContent();
+        ConfigurationMethodRef configMethodRef = new ConfigurationMethodRef();
+        configuration.addMethodRef(className, configMethodRef);
+
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("expiry-time-cache"))
+            {
+                String maxAge = subElement.getAttributes().getNamedItem("max-age-seconds").getTextContent();
+                String purgeInterval = subElement.getAttributes().getNamedItem("purge-interval-seconds").getTextContent();
+                ConfigurationDBRef.CacheReferenceType refTypeEnum = ConfigurationDBRef.CacheReferenceType.getDefault();
+                if (subElement.getAttributes().getNamedItem("ref-type") != null)
+                {
+                    String refType = subElement.getAttributes().getNamedItem("ref-type").getTextContent();
+                    refTypeEnum = ConfigurationDBRef.CacheReferenceType.valueOf(refType.toUpperCase());
+                }
+                configMethodRef.setExpiryTimeCache(Double.parseDouble(maxAge), Double.parseDouble(purgeInterval), refTypeEnum);
+            }
+            else if (subElement.getNodeName().equals("lru-cache"))
+            {
+                String size = subElement.getAttributes().getNamedItem("size").getTextContent();
+                configMethodRef.setLRUCache(Integer.parseInt(size));
+            }
+        }
+    }
+
     private static void handlePlugInView(Configuration configuration, Element element)
     {
         String namespace = element.getAttributes().getNamedItem("namespace").getTextContent();
@@ -436,6 +476,31 @@ class ConfigurationParser {
         String name = element.getAttributes().getNamedItem("name").getTextContent();
         String factoryClassName = element.getAttributes().getNamedItem("factory-class").getTextContent();
         configuration.addPlugInPatternObserver(namespace, name, factoryClassName);
+    }
+
+    private static void handleVariable(Configuration configuration, Element element)
+    {
+        String variableName = element.getAttributes().getNamedItem("name").getTextContent();
+        String type = element.getAttributes().getNamedItem("type").getTextContent();
+
+        Class variableType;
+        try
+        {
+            variableType = JavaClassHelper.getClassForSimpleName(type);
+        }
+        catch (EventAdapterException ex)
+        {
+            throw new ConfigurationException("Invalid variable type for variable '" + variableName + "': " + ex.getMessage());
+        }
+
+        Node initValueNode = element.getAttributes().getNamedItem("initialization-value");
+        String initValue = null;
+        if (initValueNode != null)
+        {
+            initValue = initValueNode.getTextContent();
+        }
+
+        configuration.addVariable(variableName, variableType, initValue);
     }
 
     private static void handleAdapterLoaders(Configuration configuration, Element element)
@@ -492,6 +557,10 @@ class ConfigurationParser {
             {
                 handleDefaultsLogging(configuration, subElement);
             }
+            if (subElement.getNodeName().equals("variables"))
+            {
+                handleDefaultsVariables(configuration, subElement);
+            }
         }
     }
 
@@ -505,16 +574,41 @@ class ConfigurationParser {
             {
                 String preserveOrderText = subElement.getAttributes().getNamedItem("preserve-order").getTextContent();
                 Boolean preserveOrder = Boolean.parseBoolean(preserveOrderText);
-                String timeoutMSecText = subElement.getAttributes().getNamedItem("timeout-msec").getTextContent();
-                Long timeoutMSec = Long.parseLong(timeoutMSecText);
                 configuration.getEngineDefaults().getThreading().setListenerDispatchPreserveOrder(preserveOrder);
-                configuration.getEngineDefaults().getThreading().setListenerDispatchTimeout(timeoutMSec);
+
+                if (subElement.getAttributes().getNamedItem("timeout-msec") != null)
+                {
+                    String timeoutMSecText = subElement.getAttributes().getNamedItem("timeout-msec").getTextContent();
+                    Long timeoutMSec = Long.parseLong(timeoutMSecText);
+                    configuration.getEngineDefaults().getThreading().setListenerDispatchTimeout(timeoutMSec);
+                }
+
+                if (subElement.getAttributes().getNamedItem("locking") != null)
+                {
+                    String value = subElement.getAttributes().getNamedItem("locking").getTextContent();
+                    configuration.getEngineDefaults().getThreading().setListenerDispatchLocking(
+                            ConfigurationEngineDefaults.Threading.Locking.valueOf(value.toUpperCase()));
+                }
             }
             if (subElement.getNodeName().equals("insert-into-dispatch"))
             {
                 String preserveOrderText = subElement.getAttributes().getNamedItem("preserve-order").getTextContent();
                 Boolean preserveOrder = Boolean.parseBoolean(preserveOrderText);
                 configuration.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(preserveOrder);
+
+                if (subElement.getAttributes().getNamedItem("timeout-msec") != null)
+                {
+                    String timeoutMSecText = subElement.getAttributes().getNamedItem("timeout-msec").getTextContent();
+                    Long timeoutMSec = Long.parseLong(timeoutMSecText);
+                    configuration.getEngineDefaults().getThreading().setInsertIntoDispatchTimeout(timeoutMSec);
+                }
+
+                if (subElement.getAttributes().getNamedItem("locking") != null)
+                {
+                    String value = subElement.getAttributes().getNamedItem("locking").getTextContent();
+                    configuration.getEngineDefaults().getThreading().setInsertIntoDispatchLocking(
+                            ConfigurationEngineDefaults.Threading.Locking.valueOf(value.toUpperCase()));
+                }
             }
             if (subElement.getNodeName().equals("internal-timer"))
             {
@@ -554,6 +648,21 @@ class ConfigurationParser {
                 String valueText = subElement.getAttributes().getNamedItem("enabled").getTextContent();
                 Boolean value = Boolean.parseBoolean(valueText);
                 configuration.getEngineDefaults().getLogging().setEnableExecutionDebug(value);
+            }
+        }
+    }
+
+    private static void handleDefaultsVariables(Configuration configuration, Element parentElement)
+    {
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("msec-version-release"))
+            {
+                String valueText = subElement.getAttributes().getNamedItem("value").getTextContent();
+                Long value = Long.parseLong(valueText);
+                configuration.getEngineDefaults().getVariables().setMsecVersionRelease(value);
             }
         }
     }

@@ -2,11 +2,18 @@ package net.esper.support.eql;
 
 import net.esper.eql.agg.AggregationSupport;
 
-public class SupportPluginAggregationMethodTwo extends AggregationSupport
+import java.io.Serializable;
+
+public class SupportPluginAggregationMethodTwo extends AggregationSupport implements Serializable
 {
     public void validate(Class childNodeType)
     {
         throw new IllegalArgumentException("Invalid node type: " + childNodeType.getName());
+    }
+
+    public void clear()
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public void enter(Object value)

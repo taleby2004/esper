@@ -12,6 +12,8 @@ import net.esper.eql.core.StreamTypeService;
 import net.esper.eql.core.StreamTypeServiceImpl;
 import net.esper.eql.named.NamedWindowService;
 import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.expression.ExprNode;
+import net.esper.eql.variable.VariableService;
 import net.esper.event.EventAdapterException;
 import net.esper.event.EventAdapterService;
 import net.esper.event.EventType;
@@ -63,7 +65,8 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
                                       MethodResolutionService methodResolutionService,
                                       PatternObjectResolutionService patternObjectResolutionService,
                                       TimeProvider timeProvider,
-                                      NamedWindowService namedWindowService)
+                                      NamedWindowService namedWindowService,
+                                      VariableService variableService)
             throws ExprValidationException
     {
         // Determine the event type
@@ -72,13 +75,13 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         // Could be a named window
         if (namedWindowService.isNamedWindow(eventName))
         {
-            // Validate that no filter criteria have been used, and no views
-            if (!rawFilterSpec.getFilterExpressions().isEmpty())
-            {
-                throw new ExprValidationException("Use of named window '" + eventName + "' does not allow filter expressions");
-            }
+            EventType namedWindowType = namedWindowService.getProcessor(eventName).getTailView().getEventType();
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType}, new String[] {"s0"});
 
-            return new NamedWindowConsumerStreamSpec(eventName, this.getOptionalStreamName(), this.getViewSpecs());
+            List<ExprNode> validatedNodes = FilterSpecCompiler.validateDisallowSubquery(rawFilterSpec.getFilterExpressions(),
+                streamTypeService, methodResolutionService, timeProvider, variableService);
+            
+            return new NamedWindowConsumerStreamSpec(eventName, this.getOptionalStreamName(), this.getViewSpecs(), validatedNodes);
         }
         
         EventType eventType = resolveType(eventName, eventAdapterService);
@@ -88,7 +91,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {eventType}, new String[] {"s0"});
 
         FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, rawFilterSpec.getFilterExpressions(), null,
-                streamTypeService, methodResolutionService, timeProvider);
+                streamTypeService, methodResolutionService, timeProvider, variableService);
 
         return new FilterStreamSpecCompiled(spec, this.getViewSpecs(), this.getOptionalStreamName());
     }

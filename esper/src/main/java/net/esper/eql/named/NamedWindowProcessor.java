@@ -1,9 +1,14 @@
 package net.esper.eql.named;
 
-import net.esper.eql.spec.OnDeleteDesc;
+import net.esper.eql.spec.OnTriggerDesc;
+import net.esper.eql.core.ResultSetProcessor;
+import net.esper.eql.expression.ExprNode;
 import net.esper.view.StatementStopService;
 import net.esper.event.EventType;
 import net.esper.core.EPStatementHandle;
+import net.esper.core.InternalEventRouter;
+
+import java.util.List;
 
 /**
  * An instance of this class is associated with a specific named window. The processor
@@ -51,15 +56,19 @@ public class NamedWindowProcessor
     }
 
     /**
-     * Returns a new view for a new on-delete statement.
-     * @param onDeleteDesc descriptor describing the on-delete specification
+     * Returns a new view for a new on-delete or on-select statement.
+     * @param onTriggerDesc descriptor describing the on-trigger specification
      * @param filterEventType event type to trigger on
      * @param statementStopService to indicate a on-delete was stopped
-     * @return delete handling view
+     * @param internalEventRouter for insert-into handling
+     * @param optionalResultSetProcessor for select-clause processing
+     * @param statementHandle is the handle to the statement, used for routing/insert-into
+     * @param joinExpr is the join expression or null if there is none
+     * @return on trigger handling view
      */
-    public NamedWindowDeleteView addDeleter(OnDeleteDesc onDeleteDesc, EventType filterEventType, StatementStopService statementStopService)
+    public NamedWindowOnExprBaseView addOnExpr(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType, StatementStopService statementStopService, InternalEventRouter internalEventRouter, ResultSetProcessor optionalResultSetProcessor, EPStatementHandle statementHandle)
     {
-        return rootView.addDeleter(onDeleteDesc, filterEventType, statementStopService);
+        return rootView.addOnExpr(onTriggerDesc, joinExpr, filterEventType, statementStopService, internalEventRouter, optionalResultSetProcessor, statementHandle);
     }
 
     /**
@@ -75,11 +84,12 @@ public class NamedWindowProcessor
      * Adds a consuming (selecting) statement to the named window.
      * @param statementHandle is the statement's handle for locking
      * @param statementStopService for indicating the consuming statement is stopped or destroyed
+     * @param filterList is a list of filter expressions
      * @return consumer view
      */
-    public NamedWindowConsumerView addConsumer(EPStatementHandle statementHandle, StatementStopService statementStopService)
+    public NamedWindowConsumerView addConsumer(List<ExprNode> filterList, EPStatementHandle statementHandle, StatementStopService statementStopService)
     {
-        return tailView.addConsumer(statementHandle, statementStopService);
+        return tailView.addConsumer(filterList, statementHandle, statementStopService);
     }
 
     /**

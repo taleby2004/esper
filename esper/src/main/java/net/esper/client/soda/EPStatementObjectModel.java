@@ -44,8 +44,9 @@ public class EPStatementObjectModel implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
+    private CreateVariableClause createVariable;
     private CreateWindowClause createWindow;
-    private OnDeleteClause onDelete;
+    private OnClause onExpr;
     private InsertIntoClause insertInto;
     private SelectClause selectClause;
     private FromClause fromClause;
@@ -242,29 +243,58 @@ public class EPStatementObjectModel implements Serializable
             return writer.toString();
         }
 
-        if (onDelete != null)
+        if (createVariable != null)
         {
-            writer.write("on ");
-            fromClause.getStreams().get(0).toEQL(writer);
-            onDelete.toEQL(writer);
+            createVariable.toEQL(writer);
             return writer.toString();
         }
 
-        if (selectClause == null)
+        if (onExpr != null)
         {
-            throw new IllegalStateException("Select-clause has not been defined");
-        }
-        if (fromClause == null)
-        {
-            throw new IllegalStateException("From-clause has not been defined");
-        }
+            writer.write("on ");
+            fromClause.getStreams().get(0).toEQL(writer);
 
-        if (insertInto != null)
-        {
-            insertInto.toEQL(writer);
+            if (onExpr instanceof OnDeleteClause)
+            {
+                writer.write(" delete from ");
+                ((OnDeleteClause)onExpr).toEQL(writer);
+            }
+            else if (onExpr instanceof OnSelectClause)
+            {
+                writer.write(" ");
+                if (insertInto != null)
+                {
+                    insertInto.toEQL(writer);
+                }
+                selectClause.toEQL(writer);
+                writer.write(" from ");
+                ((OnSelectClause)onExpr).toEQL(writer);
+            }
+            else
+            {
+                OnSetClause onSet = (OnSetClause) onExpr;
+                onSet.toEQL(writer);
+            }
         }
-        selectClause.toEQL(writer);
-        fromClause.toEQL(writer);
+        else
+        {
+            if (selectClause == null)
+            {
+                throw new IllegalStateException("Select-clause has not been defined");
+            }
+            if (fromClause == null)
+            {
+                throw new IllegalStateException("From-clause has not been defined");
+            }
+
+            if (insertInto != null)
+            {
+                insertInto.toEQL(writer);
+            }
+            selectClause.toEQL(writer);
+            fromClause.toEQL(writer);
+        }
+        
         if (whereClause != null)
         {
             writer.write(" where ");
@@ -319,18 +349,36 @@ public class EPStatementObjectModel implements Serializable
      * does not delete from a named window
      * @return on delete clause
      */
-    public OnDeleteClause getOnDelete()
+    public OnClause getOnExpr()
     {
-        return onDelete;
+        return onExpr;
     }
 
     /**
-     * Sets the on-delete clause for deleting from named windows, or null if this statement
-     * does not delete from a named window
-     * @param onDelete is the on-delete clause to set
+     * Sets the on-delete or on-select clause for selecting or deleting from named windows, or null if this statement
+     * does not on-select or on-delete from a named window
+     * @param onExpr is the on-expression (on-select and on-delete) clause to set
      */
-    public void setOnDelete(OnDeleteClause onDelete)
+    public void setOnExpr(OnClause onExpr)
     {
-        this.onDelete = onDelete;
+        this.onExpr = onExpr;
+    }
+
+    /**
+     * Returns the create-variable clause if this is a statement creating a variable, or null if not.
+     * @return create-variable clause
+     */
+    public CreateVariableClause getCreateVariable()
+    {
+        return createVariable;
+    }
+
+    /**
+     * Sets the create-variable clause if this is a statement creating a variable, or null if not.
+     * @param createVariable create-variable clause
+     */
+    public void setCreateVariable(CreateVariableClause createVariable)
+    {
+        this.createVariable = createVariable;
     }
 }

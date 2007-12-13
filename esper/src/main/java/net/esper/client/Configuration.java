@@ -112,6 +112,16 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     protected Set<String> eventTypeAutoAliasPackages;
 
     /**
+     * Map of variables.
+     */
+    protected Map<String, ConfigurationVariable> variables;
+
+    /**
+     * Map of class name and configuration for method invocations on that class.
+     */
+	protected Map<String, ConfigurationMethodRef> methodInvocationReferences;
+
+    /**
      * Constructs an empty configuration. The auto import values
      * are set by default to java.lang, java.math, java.text and
      * java.util.
@@ -161,6 +171,16 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void addEventTypeAlias(String eventTypeAlias, Class javaEventClass)
     {
         addEventTypeAlias(eventTypeAlias, javaEventClass.getName());
+    }
+
+    /**
+     * Add an alias for an event type represented by Java-bean plain-old Java object events,
+     * and the alias is the simple class name of the class.
+     * @param javaEventClass is the Java event class for which to create the alias
+     */
+    public void addEventTypeAliasSimpleName(Class javaEventClass)
+    {
+        addEventTypeAlias(javaEventClass.getSimpleName(), javaEventClass.getName());
     }
 
     /**
@@ -235,6 +255,26 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     	imports.add(autoImport);
     }
 
+    /**
+     * Adds a cache configuration for a class providing methods for use in the from-clause.
+     * @param className is the class name (simple or fully-qualified) providing methods
+     * @param methodInvocationConfig is the cache configuration
+     */
+    public void addMethodRef(String className, ConfigurationMethodRef methodInvocationConfig)
+    {
+        this.methodInvocationReferences.put(className, methodInvocationConfig);
+    }
+
+    /**
+     * Adds a cache configuration for a class providing methods for use in the from-clause.
+     * @param clazz is the class providing methods
+     * @param methodInvocationConfig is the cache configuration
+     */
+    public void addMethodRef(Class clazz, ConfigurationMethodRef methodInvocationConfig)
+    {
+        this.methodInvocationReferences.put(clazz.getName(), methodInvocationConfig);
+    }
+
     public Map<String, String> getEventTypeAliases()
     {
         return eventClasses;
@@ -283,6 +323,16 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public List<ConfigurationPlugInPatternObject> getPlugInPatternObjects()
     {
         return plugInPatternObjects;
+    }
+
+    public Map<String, ConfigurationVariable> getVariables()
+    {
+        return variables;
+    }
+
+    public Map<String, ConfigurationMethodRef> getMethodInvocationReferences()
+    {
+        return methodInvocationReferences;
     }
 
     /**
@@ -350,6 +400,14 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void addEventTypeAutoAlias(String javaPackageName)
     {
         eventTypeAutoAliasPackages.add(javaPackageName);
+    }
+
+    public void addVariable(String variableName, Class type, Object initializationValue)
+    {
+        ConfigurationVariable configVar = new ConfigurationVariable();
+        configVar.setType(type);
+        configVar.setInitializationValue(initializationValue);
+        variables.put(variableName, configVar);
     }
 
     /**
@@ -560,6 +618,8 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         plugInPatternObjects = new ArrayList<ConfigurationPlugInPatternObject>();
         engineDefaults = new ConfigurationEngineDefaults();
         eventTypeAutoAliasPackages = new LinkedHashSet<String>();
+        variables = new HashMap<String, ConfigurationVariable>();
+        methodInvocationReferences = new HashMap<String, ConfigurationMethodRef>();
     }
 
     /**

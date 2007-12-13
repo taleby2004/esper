@@ -328,7 +328,21 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public synchronized EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException
 	{
-	    WrapperEventType newEventType = new WrapperEventType(eventTypeAlias, underlyingEventType, propertyTypes, this);
+        // If we are wrapping an underlying type that is itself a wrapper, then this is a special case
+        if (underlyingEventType instanceof WrapperEventType)
+        {
+            WrapperEventType underlyingWrapperType = (WrapperEventType) underlyingEventType;
+
+            // the underlying type becomes the type already wrapped
+            // properties are a superset of the wrapped properties and the additional properties
+            underlyingEventType = underlyingWrapperType.getUnderlyingEventType();
+            Map<String, Class> propertiesSuperset = new HashMap<String, Class>();
+            propertiesSuperset.putAll(underlyingWrapperType.getUnderlyingMapType().getTypes());
+            propertiesSuperset.putAll(propertyTypes);
+            propertyTypes = propertiesSuperset;
+        }
+
+        WrapperEventType newEventType = new WrapperEventType(eventTypeAlias, underlyingEventType, propertyTypes, this);
 
 	    EventType existingType = aliasToTypeMap.get(eventTypeAlias);
 	    if (existingType != null)
@@ -355,6 +369,14 @@ public class EventAdapterServiceImpl implements EventAdapterService
 	    return newEventType;
 	}
 
+    /**
+     * Returns true if the wrapper type is compatible with an existing wrapper type, for the reason that
+     * the underlying event is a subtype of the existing underlying wrapper's type.
+     * @param existingType is the existing wrapper type
+     * @param underlyingType is the proposed new wrapper type's underlying type
+     * @param propertyTypes is the additional properties
+     * @return true for compatible, or false if not
+     */
     public static boolean isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Class> propertyTypes)
     {
         if (!(existingType instanceof WrapperEventType))
@@ -423,8 +445,17 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
 	public final EventBean createWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
 	{
-		return new WrapperEventBean(event, properties, eventType);
-	}
+        if (event instanceof WrapperEventBean)
+        {
+            WrapperEventBean wrapper = (WrapperEventBean) event;
+            properties.putAll(wrapper.getDecoratingProperties());
+            return new WrapperEventBean(wrapper.getUnderlyingEvent(), properties, eventType);
+        }
+        else
+        {
+            return new WrapperEventBean(event, properties, eventType);
+        }
+    }
 
     public final EventBean adapterForCompositeEvent(EventType eventType, Map<String, EventBean> taggedEvents)
     {

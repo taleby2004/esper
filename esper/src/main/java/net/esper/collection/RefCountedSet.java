@@ -30,6 +30,15 @@ public class RefCountedSet<K>
     }
 
     /**
+     * Clear out the collection.
+     */
+    public void clear()
+    {
+        refSet.clear();
+        numValues = 0;
+    }
+
+    /**
      * Add a key to the set. Add with a reference count of one if the key didn't exist in the set.
      * Increase the reference count by one if the key already exists.
      * Return true if this is the first time the key was encountered, or false if key is already in set.

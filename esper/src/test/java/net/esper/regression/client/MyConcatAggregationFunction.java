@@ -2,7 +2,9 @@ package net.esper.regression.client;
 
 import net.esper.eql.agg.AggregationSupport;
 
-public class MyConcatAggregationFunction extends AggregationSupport
+import java.io.Serializable;
+
+public class MyConcatAggregationFunction extends AggregationSupport implements Serializable
 {
     private final static char DELIMITER = ' ';
     private StringBuilder builder;
@@ -18,6 +20,11 @@ public class MyConcatAggregationFunction extends AggregationSupport
     public void validate(Class childNodeType)
     {
         // No need to check the expression node type
+    }
+
+    public void clear()
+    {
+        builder = new StringBuilder();
     }
 
     public void enter(Object value)
