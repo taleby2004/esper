@@ -23,11 +23,13 @@ Changes in version 1.12.0
 * New safe iterator to provide a concurrent-safe pull API (ESPER-172)
 * Support for iterator and safe iterator to iterate over joins and outer joins (ESPER-173)
 * Support for stream-wildcard "stream.*" selections for more flexibility selecting from joins and patterns (ESPER-174)
+* Support for the stream name or pattern tag name as a valid property in expressions, returning the underlying event for the stream
 * Support for method invocations in the from-clause; For example to query a distributed, object database or web service
 * Support for indexing of cached result sets of SQL poll queries and method invocations
 * Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)
 * Support for an unmatched event listener that receives a callback if an event matches no statement (ESPER-160)
 * Support for JDK5 enum classes natively (ESPER-13)
+* Support for constants (public static final fields) in expressions
 * Fixed issue ESPER-125 IllegalStateException in a self-joining statement without join condition using sorted window
 * Fixed issue ESPER-177 Deadlock in EPRuntimeImpl.sendEvent
 * Fixed issue ESPER-176 NullPointerException for grouped-by length view and previous operator
