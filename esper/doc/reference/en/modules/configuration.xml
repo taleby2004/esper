@@ -520,7 +520,7 @@ configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							Determines the type of the event property allowing event properties to be used in type-sensitive expressions such as expressions involving arithmatic (Note: XPath properties are also typed)
+							Determines the type of the event property allowing event properties to be used in type-sensitive expressions such as expressions involving arithmetic (Note: XPath properties are also typed)
 						</para>
 					</listitem>
 					<listitem>

@@ -103,7 +103,7 @@
         <xsl:variable name="Version">
             <xsl:choose>
                 <xsl:when test="//releaseinfo">
-                    <xsl:text>Esper - &#169; 2007 EsperTech Inc. All Rights Reserved</xsl:text>
+                    <xsl:text>&#169; 2007 EsperTech Inc. - Esper</xsl:text>
                     <xsl:value-of select="//releaseinfo"/>
                 </xsl:when>
                 <xsl:otherwise>

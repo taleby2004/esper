@@ -2,20 +2,20 @@
     <title>EQL Reference: Operators</title>
         		
 		<para>
-			Esper arithmatic and logical operator precedence follows Java standard arithmatic and logical operator precedence.
+			Esper arithmetic and logical operator precedence follows Java standard arithmetic and logical operator precedence.
 		</para>
 
-		<sect1 id="eql-operator-ref-arithmatic">
-			<title>Arithmatic Operators</title>
+		<sect1 id="eql-operator-ref-arithmetic">
+			<title>Arithmetic Operators</title>
 
-			<indexterm><primary>arithmatic operators</primary></indexterm>
-			<indexterm><primary>operators</primary><secondary>arithmatic</secondary></indexterm>
+			<indexterm><primary>arithmetic operators</primary></indexterm>
+			<indexterm><primary>operators</primary><secondary>arithmetic</secondary></indexterm>
 			<para>
-				The below table outlines the arithmatic operators available.
+				The below table outlines the arithmetic operators available.
 			</para>
 	
 			<table frame="topbot" id="eql-arith-operators" revision="2">
-				<title>Syntax and results of arithmatic operators</title>
+				<title>Syntax and results of arithmetic operators</title>
 				<tgroup cols="2">
 					<colspec colwidth="2.0*"/>
 					<colspec colwidth="1.5*"/>
@@ -185,7 +185,7 @@
 			</para>
 
 			<para>
-				Array definitions consist of zero or more expressions within curly braces. Any type of expression is allowed within array definitions including constants, arithmatic expressions or event properties. This is the syntax of an array definition:
+				Array definitions consist of zero or more expressions within curly braces. Any type of expression is allowed within array definitions including constants, arithmetic expressions or event properties. This is the syntax of an array definition:
 			</para>
 			<synopsis><emphasis>{</emphasis> [<emphasis>expression</emphasis> [,<emphasis>expression</emphasis>...]] }</synopsis>
 
