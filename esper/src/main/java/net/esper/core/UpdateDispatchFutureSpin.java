@@ -5,11 +5,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * UpdateDispatchFutureWait can be added to a dispatch queue that is thread-local. It represents
+ * UpdateDispatchFutureSpin can be added to a dispatch queue that is thread-local. It represents
  * is a stand-in for a future dispatching of a statement result to statement listeners.
  * <p>
- * UpdateDispatchFutureWait is aware of future and past dispatches:
- * (newest) DF3   <-->   DF2  <-->  DF1  (oldest)
+ * UpdateDispatchFutureSpin is aware of future and past dispatches:
+ * (newest) DF3   <-->   DF2  <-->  DF1  (oldest), and uses a spin lock to block if required
  */
 public class UpdateDispatchFutureSpin implements Dispatchable
 {

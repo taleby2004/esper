@@ -25,6 +25,11 @@ public class SupportMarketDataBean implements Serializable
         this.price = price;
     }
 
+    public double getPriceTimesVolume(double factor)
+    {
+        return price * volume * factor;
+    }
+
     public String getSymbol()
     {
         return symbol;

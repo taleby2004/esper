@@ -3,6 +3,7 @@ package net.esper.support.eql;
 import net.esper.eql.expression.*;
 import net.esper.eql.core.ViewResourceDelegateImpl;
 import net.esper.eql.core.MethodResolutionServiceImpl;
+import net.esper.eql.core.EngineImportServiceImpl;
 import net.esper.eql.variable.VariableService;
 import net.esper.eql.variable.VariableServiceImpl;
 import net.esper.type.MathArithTypeEnum;
@@ -315,6 +316,6 @@ public class SupportExprNodeFactory
         variableService.createNewVariable("intPrimitive", Integer.class, 10, null);
         variableService.createNewVariable("var1", String.class, "my_variable_value", null);
 
-        topNode.getValidatedSubtree(streamTypeService, new MethodResolutionServiceImpl(null), viewResources, null, variableService);
+        topNode.getValidatedSubtree(streamTypeService, new MethodResolutionServiceImpl(new EngineImportServiceImpl()), viewResources, null, variableService);
     }
 }

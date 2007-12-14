@@ -13,6 +13,16 @@ import java.lang.reflect.Method;
 public interface MethodResolutionService
 {
     /**
+     * Resolves a given method name and list of parameter types to an instance or static method exposed by the given class.
+     * @param clazz is the class to look for a fitting method
+     * @param methodName is the method name
+     * @param paramTypes is parameter types match expression sub-nodes
+     * @return method this resolves to
+     * @throws EngineImportException if the method cannot be resolved to a visible static or instance method
+     */
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;
+
+    /**
      * Resolves a given class, method and list of parameter types to a static method.
      * @param classNameAlias is the class name to use
      * @param methodName is the method name

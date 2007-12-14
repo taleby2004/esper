@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Used for retrieving static method objects. It
+ * Used for retrieving static and instance method objects. It
  * provides two points of added functionality over the standard 
  * java.lang.reflect mechanism of retrieving methods. First, 
  * class names can be partial, and if the class name is partial
@@ -22,9 +22,9 @@ import java.util.Set;
  * will make the invocation valid. Preference is given to those 
  * methods that require the fewest widening conversions.
  */
-public class StaticMethodResolver 
+public class MethodResolver
 {
-	private static final Log log = LogFactory.getLog(StaticMethodResolver.class);
+	private static final Log log = LogFactory.getLog(MethodResolver.class);
 	
 	private static final Map<Class, Set<Class>> wideningConversions = new HashMap<Class, Set<Class>>();
 	private static final Map<Class, Set<Class>> wrappingConversions = new HashMap<Class, Set<Class>>();
@@ -35,85 +35,86 @@ public class StaticMethodResolver
 		Set<Class> booleanWrappers = new HashSet<Class>();
 		booleanWrappers.add(boolean.class);
 		booleanWrappers.add(Boolean.class);
-		StaticMethodResolver.wrappingConversions.put(boolean.class, booleanWrappers);
-		StaticMethodResolver.wrappingConversions.put(Boolean.class, booleanWrappers);
+		wrappingConversions.put(boolean.class, booleanWrappers);
+		wrappingConversions.put(Boolean.class, booleanWrappers);
 		
 		Set<Class> charWrappers = new HashSet<Class>();
 		charWrappers.add(char.class);
 		charWrappers.add(Character.class);		
-		StaticMethodResolver.wrappingConversions.put(char.class, charWrappers);
-		StaticMethodResolver.wrappingConversions.put(Character.class, charWrappers);
+		wrappingConversions.put(char.class, charWrappers);
+		wrappingConversions.put(Character.class, charWrappers);
 		
 		Set<Class> byteWrappers = new HashSet<Class>();
 		byteWrappers.add(byte.class);
 		byteWrappers.add(Byte.class);
-		StaticMethodResolver.wrappingConversions.put(byte.class, byteWrappers);
-		StaticMethodResolver.wrappingConversions.put(Byte.class, byteWrappers);
+		wrappingConversions.put(byte.class, byteWrappers);
+		wrappingConversions.put(Byte.class, byteWrappers);
 		
 		Set<Class> shortWrappers = new HashSet<Class>();
 		shortWrappers.add(short.class);
 		shortWrappers.add(Short.class);
-		StaticMethodResolver.wrappingConversions.put(short.class, shortWrappers);
-		StaticMethodResolver.wrappingConversions.put(Short.class, shortWrappers);
+		wrappingConversions.put(short.class, shortWrappers);
+		wrappingConversions.put(Short.class, shortWrappers);
 		
 		Set<Class> intWrappers = new HashSet<Class>();
 		intWrappers.add(int.class);
 		intWrappers.add(Integer.class);
-		StaticMethodResolver.wrappingConversions.put(int.class, intWrappers);
-		StaticMethodResolver.wrappingConversions.put(Integer.class, intWrappers);
+		wrappingConversions.put(int.class, intWrappers);
+		wrappingConversions.put(Integer.class, intWrappers);
 		
 		Set<Class> longWrappers = new HashSet<Class>();
 		longWrappers.add(long.class);
 		longWrappers.add(Long.class);
-		StaticMethodResolver.wrappingConversions.put(long.class, longWrappers);
-		StaticMethodResolver.wrappingConversions.put(Long.class, longWrappers);
+		wrappingConversions.put(long.class, longWrappers);
+		wrappingConversions.put(Long.class, longWrappers);
 		
 		Set<Class> floatWrappers = new HashSet<Class>();
 		floatWrappers.add(float.class);
 		floatWrappers.add(Float.class);
-		StaticMethodResolver.wrappingConversions.put(float.class, floatWrappers);
-		StaticMethodResolver.wrappingConversions.put(Float.class, floatWrappers);
+		wrappingConversions.put(float.class, floatWrappers);
+		wrappingConversions.put(Float.class, floatWrappers);
 		
 		Set<Class> doubleWrappers = new HashSet<Class>();
 		doubleWrappers.add(double.class);
 		doubleWrappers.add(Double.class);
-		StaticMethodResolver.wrappingConversions.put(double.class, doubleWrappers);
-		StaticMethodResolver.wrappingConversions.put(Double.class, doubleWrappers);
+		wrappingConversions.put(double.class, doubleWrappers);
+		wrappingConversions.put(Double.class, doubleWrappers);
 
 		// Initialize the map of widening conversions
 		Set<Class> wideningConversions = new HashSet<Class>(byteWrappers);
-		StaticMethodResolver.wideningConversions.put(short.class, new HashSet<Class>(wideningConversions));
-		StaticMethodResolver.wideningConversions.put(Short.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(short.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(Short.class, new HashSet<Class>(wideningConversions));
 		
 		wideningConversions.addAll(shortWrappers);
 		wideningConversions.addAll(charWrappers);
-		StaticMethodResolver.wideningConversions.put(int.class, new HashSet<Class>(wideningConversions));
-		StaticMethodResolver.wideningConversions.put(Integer.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(int.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(Integer.class, new HashSet<Class>(wideningConversions));
 		
 		wideningConversions.addAll(intWrappers);
-		StaticMethodResolver.wideningConversions.put(long.class, new HashSet<Class>(wideningConversions));
-		StaticMethodResolver.wideningConversions.put(Long.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(long.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(Long.class, new HashSet<Class>(wideningConversions));
 
 		wideningConversions.addAll(longWrappers);
-		StaticMethodResolver.wideningConversions.put(float.class, new HashSet<Class>(wideningConversions));
-		StaticMethodResolver.wideningConversions.put(Float.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(float.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(Float.class, new HashSet<Class>(wideningConversions));
 	
 		wideningConversions.addAll(floatWrappers);
-		StaticMethodResolver.wideningConversions.put(double.class, new HashSet<Class>(wideningConversions));
-		StaticMethodResolver.wideningConversions.put(Double.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(double.class, new HashSet<Class>(wideningConversions));
+		MethodResolver.wideningConversions.put(Double.class, new HashSet<Class>(wideningConversions));
 	}
 	
 	/**
-	 * Attempts to find the static method described by the parameters, 
+	 * Attempts to find the static or instance method described by the parameters,
 	 * or a method of the same name that will accept the same type of
 	 * parameters.
      * @param declaringClass - the class to search for the method
 	 * @param methodName - the name of the method
 	 * @param paramTypes - the parameter types for the method
+     * @param allowInstance - true to allow instance methods as well, false to allow only static method
 	 * @return - the Method object for this method
 	 * @throws NoSuchMethodException if the method could not be found
 	 */
-	public static Method resolveMethod(Class declaringClass, String methodName, Class[] paramTypes)
+	public static Method resolveMethod(Class declaringClass, String methodName, Class[] paramTypes, boolean allowInstance)
 	throws NoSuchMethodException
 	{
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
@@ -130,9 +131,8 @@ public class StaticMethodResolver
 		// Examine each method, checking if the signature is compatible 
 		for(Method method : methods)
 		{
-			// Check the modifiers: we only want public and static
-			// methods
-			if(!isPublicAndStatic(method))
+			// Check the modifiers: we only want public and static, if required			
+			if(!isPublicAndStatic(method, allowInstance))
 			{
 				continue;
 			}
@@ -210,11 +210,18 @@ public class StaticMethodResolver
 		}
 	}
 	
-	private static boolean isPublicAndStatic(Method method)
+	private static boolean isPublicAndStatic(Method method, boolean allowInstance)
 	{
 		int modifiers = method.getModifiers();
-		return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers);
-	}
+        if (allowInstance)
+        {
+            return Modifier.isPublic(modifiers);
+        }
+        else
+        {
+            return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers);
+        }
+    }
 	
 	// Returns -1 if the invocation parameters aren't applicable
 	// to the method. Otherwise returns the number of parameters

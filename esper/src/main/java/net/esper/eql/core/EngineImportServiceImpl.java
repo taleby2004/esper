@@ -1,7 +1,7 @@
 package net.esper.eql.core;
 
 import net.esper.eql.agg.AggregationSupport;
-import net.esper.util.StaticMethodResolver;
+import net.esper.util.MethodResolver;
 import net.esper.client.ConfigurationMethodRef;
 
 import java.lang.reflect.Method;
@@ -134,7 +134,7 @@ public class EngineImportServiceImpl implements EngineImportService
 
         try
         {
-            return StaticMethodResolver.resolveMethod(clazz, methodName, paramTypes);
+            return MethodResolver.resolveMethod(clazz, methodName, paramTypes, false);
         }
         catch (NoSuchMethodException e)
         {
@@ -252,6 +252,19 @@ public class EngineImportServiceImpl implements EngineImportService
 		// No import worked, the class isn't resolved
 		throw new ClassNotFoundException("Unknown class " + className);
 	}
+
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes)
+			throws EngineImportException
+    {
+        try
+        {
+            return MethodResolver.resolveMethod(clazz, methodName, paramTypes, true);
+        }
+        catch (NoSuchMethodException e)
+        {
+            throw new EngineImportException("Could not find a method named '" + methodName + "' in class '" + clazz.getName() + "' and matching the required parameter types", e);
+        }
+    }
 
     /**
      * For testing, returns imports.

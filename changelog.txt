@@ -24,6 +24,7 @@ Changes in version 1.12.0
 * Support for iterator and safe iterator to iterate over joins and outer joins (ESPER-173)
 * Support for stream-wildcard "stream.*" selections for more flexibility selecting from joins and patterns (ESPER-174)
 * Support for the stream name or pattern tag name as a valid property in expressions, returning the underlying event for the stream
+* Support for instance method calls on stream events that are Java objects
 * Support for method invocations in the from-clause; For example to query a distributed, object database or web service
 * Support for indexing of cached result sets of SQL poll queries and method invocations
 * Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)

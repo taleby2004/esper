@@ -3,12 +3,12 @@ package net.esper.eql.expression;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
-import net.esper.util.StaticMethodResolver;
+import net.esper.util.MethodResolver;
 import net.esper.eql.core.*;
 
 public class TestExprStaticMethodNode extends TestCase
 {
-    StaticMethodResolver staticMethodResolver;
+    MethodResolver staticMethodResolver;
     StreamTypeService streamTypeService;
     MethodResolutionService methodResolutionService;
     ExprNode intThree;
@@ -26,7 +26,7 @@ public class TestExprStaticMethodNode extends TestCase
         EngineImportService engineImportService = new EngineImportServiceImpl();
         engineImportService.addImport("java.lang.*");
         methodResolutionService = new MethodResolutionServiceImpl(engineImportService);
-        staticMethodResolver = new StaticMethodResolver();
+        staticMethodResolver = new MethodResolver();
         intThree = new ExprConstantNode(3);
         intFive = new ExprConstantNode(5);
         short nine = 9;
