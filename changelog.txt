@@ -21,11 +21,11 @@ Changes in version 1.12.0
 * New accumulating time-based data window (ESPER-166)
 * New 'snapshot' keyword for the output rate limiting clause for outputting full statement state
 * New safe iterator to provide a concurrent-safe pull API (ESPER-172)
+* Support for method invocations in the from-clause; For example to query a distributed, object database or web service
 * Support for iterator and safe iterator to iterate over joins and outer joins (ESPER-173)
 * Support for stream-wildcard "stream.*" selections for more flexibility selecting from joins and patterns (ESPER-174)
 * Support for the stream name or pattern tag name as a valid property in expressions, returning the underlying event for the stream
-* Support for instance method calls on stream events that are Java objects
-* Support for method invocations in the from-clause; For example to query a distributed, object database or web service
+* Support for instance method calls on stream or pattern events that are Java objects
 * Support for indexing of cached result sets of SQL poll queries and method invocations
 * Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)
 * Support for an unmatched event listener that receives a callback if an event matches no statement (ESPER-160)
@@ -35,13 +35,13 @@ Changes in version 1.12.0
 * Fixed issue ESPER-177 Deadlock in EPRuntimeImpl.sendEvent
 * Fixed issue ESPER-176 NullPointerException for grouped-by length view and previous operator
 * Fixed issue ESPER-175 ArrayIndexOutOfBoundsException when no event posted 
-* Fixed JDK6 compatibility issue ESPER-171 AutoID example in Sun JDK6 fails with Invalid schema error
+* Fixed issue ESPER-171 AutoID example in Sun JDK6 fails with Invalid schema error (a JDK6 compatibility issue)
 * New example: Java Messaging Service (JMS) server shell 
   - demonstrates a multi-threaded JMS server 
   - with dynamic statement management using Java Management Extensions (JMX)
 * API change: AggregationSupport now requires an implementation of the clear() method
 * documentation improvements
-* performance improvements: new insert and listener blocking techniques for reliable ordered delivery, other changes
+* performance improvements: rewritten insert-into and listener thread blocking techniques for reliable ordered delivery, other changes
 
 
 Changes in version 1.11.0

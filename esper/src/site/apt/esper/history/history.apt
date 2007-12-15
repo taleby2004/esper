@@ -14,43 +14,95 @@ Change History
 
 Version 1.12.0 Update
 
-	Released Novemeber 19, 2007
+	Released December 15, 2007
 	
-	Built using Sun JDK 5.0 Update 12; Tested and certified for JDK 6 Update 1.3 with exceptions as below
+	Built using Sun JDK 5.0 Update 12; Tested and certified for JDK 6 Update 1.3
 
 * API changes
 
-	* New statement object model for creating named windows and for specifying on-delete statements
+	* API change: AggregationSupport for plug-in aggregation functions now requires an implementation of the clear() method
 	
 	[]
     
 * Major changes
     
-	* New feature 'named windows': Allows to share data windows between statements; Explicitly defines entry criteria via insert-into; Allows exit criteria via on-delete
-
-	* New time-ordering window for more flexibility in handling out-of-order events (ESPER-147)
-
+	* New feature: Named windows
+	
+	  * Share data windows between statements
+	  
+	  * New create-window syntax to create named windows
+	  
+	  * Define entry criteria via insert-into
+	  
+	  * Define exit criteria via the new on-delete syntax
+	  
+	  * Perform on-demand queries using the new on-select syntax
+	  
+	* New feature: Variables
+	
+	  * New create-variable syntax declares a variable
+	  
+	  * Variables can occur in any expression
+	  
+	  * A variable can occur in an output-rate limit to dynamically control output rate
+	  
+	  * Update variables via the new on-set syntax
+	  
+	  * The engine makes consistency and atomicity guarantees
+	  
 	* New multi-policy tumbling window (ESPER-165)
-
+	
+	* New time-ordering window for more flexibility in handling out-of-order events (ESPER-147)
+	
 	* New accumulating time-based data window (ESPER-166)
-
+	
+	* New 'snapshot' keyword for the output rate limiting clause for outputting full statement state
+	
 	* New safe iterator to provide a concurrent-safe pull API (ESPER-172)
-
-	* Added unmatched event listener that receives a callback if an event matches no statement (ESPER-160)
-
+	
+	* Support for method invocations in the from-clause; For example to query a distributed, object database or web service
+	
 	* Support for iterator and safe iterator to iterate over joins and outer joins (ESPER-173)
+	
+	* Support for stream-wildcard "stream.*" selections for more flexibility selecting from joins and patterns (ESPER-174)
+	
+	* Support for the stream name or pattern tag name as a valid property in expressions, returning the underlying event for the stream
+	
+	* Support for instance method calls on stream or pattern events that are Java objects
+	
+	* Support for indexing of cached result sets of SQL poll queries and method invocations
+	
+	* Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)
+	
+	* Support for an unmatched event listener that receives a callback if an event matches no statement (ESPER-160)
+	
+	* Support for JDK5 enum classes natively (ESPER-13)
+	
+	* Support for constants (public static final fields) in expressions
+	
+	* Performance improvements: rewritten insert-into and listener thread blocking techniques for reliable ordered delivery, other changes
 
 	[]
 
 * Minor changes	    	
 
-	* Support for indexing of cached result sets of SQL poll queries
-
-	* Support for expiry time cache backed by soft-reference Map and hard-reference map (ESPER-167)
-
-	* New example: Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
+	* Fixed issue ESPER-125 IllegalStateException in a self-joining statement without join condition using sorted window
 	
-	* JDK6 - certified, exception: XML DOM support requires native JDK 6 build
+	* Fixed issue ESPER-177 Deadlock in EPRuntimeImpl.sendEvent
+	
+	* Fixed issue ESPER-176 NullPointerException for grouped-by length view and previous operator
+	
+	* Fixed issue ESPER-175 ArrayIndexOutOfBoundsException when no event posted 
+	
+	* Fixed issue ESPER-171 AutoID example in Sun JDK6 fails with Invalid schema error (a JDK6 compatibility issue)
+	
+	* New example: Java Messaging Service (JMS) server shell 
+	
+	  * demonstrates a multi-threaded JMS server 
+	  
+	  * with dynamic statement management using Java Management Extensions (JMX)
+	  
+	* Documentation improvements
 
 	[]
 	
