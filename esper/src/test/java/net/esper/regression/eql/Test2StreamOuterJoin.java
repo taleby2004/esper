@@ -4,11 +4,13 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.SafeIterator;
 import net.esper.client.soda.*;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean_S0;
 import net.esper.support.bean.SupportBean_S1;
 import net.esper.support.bean.SupportBean;
+import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.client.SupportConfigFactory;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.util.SupportUpdateListener;
@@ -41,6 +43,62 @@ public class Test2StreamOuterJoin extends TestCase
         {
             eventsS1[i] = new SupportBean_S1(count++, Integer.toString(i));
         }
+    }
+
+    public void testFullOuterIteratorGroupBy()
+    {
+        String stmt = "select string, intPrimitive, symbol, volume " +
+                      "from " + SupportMarketDataBean.class.getName() + ".win:keepall() " +
+                      "full outer join " +
+                      SupportBean.class.getName() + ".std:groupby(\"string\", \"intPrimitive\").win:length(2) " +
+                      "on string = symbol group by string, intPrimitive, symbol " +
+                      "order by string, intPrimitive, symbol, volume";
+
+        outerJoinView = epService.getEPAdministrator().createEQL(stmt);
+        outerJoinView.addListener(updateListener);
+
+        sendEventMD("c0", 200L);
+        sendEventMD("c3", 400L);
+
+        sendEvent("c0", 0);
+        sendEvent("c0", 1);
+        sendEvent("c0", 2);
+        sendEvent("c1", 0);
+        sendEvent("c1", 1);
+        sendEvent("c1", 2);
+        sendEvent("c2", 0);
+        sendEvent("c2", 1);
+        sendEvent("c2", 2);
+
+        SafeIterator iterator = outerJoinView.safeIterator();
+        EventBean[] events = ArrayAssertionUtil.iteratorToArray(iterator);
+        assertEquals(10, events.length);
+
+        /* For debugging, comment in
+        for (int i = 0; i < events.length; i++)
+        {
+            System.out.println(
+                   "string=" + events[i].get("string") +
+                   "  int=" + events[i].get("intPrimitive") +
+                   "  symbol=" + events[i].get("symbol") +
+                   "  volume="  + events[i].get("volume")
+                );
+        }
+        */
+
+        ArrayAssertionUtil.assertPropsPerRow(events, "string,intPrimitive,symbol,volume".split(","),
+                new Object[][] {
+                        {null, null, "c3", 400L},
+                        {"c0", 0, "c0", 200L},
+                        {"c0", 1, "c0", 200L},
+                        {"c0", 2, "c0", 200L},
+                        {"c1", 0, null, null},
+                        {"c1", 1, null, null},
+                        {"c1", 2, null, null},
+                        {"c2", 0, null, null},
+                        {"c2", 1, null, null},
+                        {"c2", 2, null, null}
+                    });
     }
 
     public void testFullOuterJoin()
@@ -427,6 +485,20 @@ public class Test2StreamOuterJoin extends TestCase
         bean.setString(s);
         bean.setIntPrimitive(intPrimitive);
         bean.setDoublePrimitive(doublePrimitive);
+        epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendEvent(String s, int intPrimitive)
+    {
+        SupportBean bean = new SupportBean();
+        bean.setString(s);
+        bean.setIntPrimitive(intPrimitive);
+        epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendEventMD(String symbol, long volume)
+    {
+        SupportMarketDataBean bean = new SupportMarketDataBean(symbol, 0, volume, "");
         epService.getEPRuntime().sendEvent(bean);
     }
 

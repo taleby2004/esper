@@ -43,7 +43,7 @@ Features
 
 	* Subqueries including <exists> and <in>
 
-	* Output rate limiting and stabilizing
+	* Output rate limiting and stabilizing, snapshot output
 	
 	* Named windows allow sharing data windows between statements; Define multiple explicit entry and exit criteria for events
 
@@ -115,12 +115,16 @@ Features
     	* Keyed cache entries for fast cache lookup
     	
     	* Engine indexes cached rows for fast filtering within a large number of SQL-query result rows
+    	
+    * Joins to method invocation allows easy integration with distributed caches, web services and object-oriented databases 
 
+    * Variables can occur in any expression and can dynamically control output rate
+
+        * Guarantees of consistency and atomicity of variable updates
+ 
     * Support for both the listener (push/subscription) API and the consumer (pull/receive) API for querying results
 	
-    * Supports externally-provided time as well as Java system time, allowing applications full control over the concept of time within the engine
-
-    * Concurrency-safe iterator provides complete query capability for all statements
+    * Concurrency-safe iterator provides complete query capability for all statements    * Supports externally-provided time as well as Java system time, allowing applications full control over the concept of time within the engine
     		
     * Multithread-safe as of release 1.5
     
@@ -130,27 +134,32 @@ Features
     	
     	* Applications can retain full control over threading
     	
-    	* Efficiently sharing resources between statements
+    	* Efficiently sharing resources between statements and low thread blocking 
     	
     * Supports multiple independent Esper engines per JavaVM
     		  
     * Pluggable architecture for event pattern and event stream analysis via user-defined functions, plug-in views, plug-in aggregation functions, plug-in 
-      pattern guards and plug-in pattern event observers
+      pattern guards and plug-in pattern event observers, event instance methods
       
     * Unmatched event listener receives a callback if an event does not match any started statement
     
     * Performance-minded design: query strategy analysis and index building; array-based collections; delta networks and many other techniques
     
-    * Large number of examples showcasing integration into many environments
-    
-    * Performance benchmark kit for download
-
+    	* Benchmark kit available for download; Performance testing results and tips see page in menu
+            
     []		
     
 * Excellent documentation 
 
+* Many examples
+
+    * J2EE and non-J2EE, from many different domains
+    
+    * Java Messaging Service (JMS) server shell demonstrates a multi-threaded JMS server with dynamic statement management using Java Management Extensions (JMX)
+
 * Supportive user and developer community
 	  
+* Performance tested
 
 
 Typical Uses
@@ -174,11 +183,7 @@ Java - Known Limitations
 	* Esper requires a Java Virtual Machine version 5.0 runtime, or above. 
 	
 	* Esper will not work with JavaVM versions 1.4.2 or below.
-	
-	* An Esper engine instance is multithread-safe, i.e. 2 or more threads sending events to the
-	  same engine instance is supported as of release 1.5. Multiple engine instances in the same Java JVM 
-	  has also been tested and is a supported configuration.
-	  	
+		  	
 
 .NET - Known Limitations
 
