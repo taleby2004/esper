@@ -1,11 +1,13 @@
 package net.esper.eql.named;
 
+import net.esper.collection.ArrayEventIterator;
+import net.esper.collection.NullIterator;
 import net.esper.core.EPStatementHandle;
+import net.esper.eql.expression.ExprNode;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
 import net.esper.view.StatementStopService;
 import net.esper.view.ViewSupport;
-import net.esper.eql.expression.ExprNode;
 
 import java.util.*;
 
@@ -15,10 +17,12 @@ import java.util.*;
  */
 public class NamedWindowTailView extends ViewSupport implements Iterable<EventBean>
 {
+    private final static Iterator<EventBean> nullIterator = new NullIterator<EventBean>();
     private final EventType eventType;
     private final NamedWindowRootView namedWindowRootView;
     private final NamedWindowService namedWindowService;
-    private final Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;
+    private transient Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;
+    private final EPStatementHandle createWindowStmtHandle;
 
     /**
      * Ctor.
@@ -26,12 +30,13 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
      * @param namedWindowService the service for dispatches to consumers for hooking into the dispatch loop
      * @param namedWindowRootView the root data window view for indicating remove stream events to be removed from possible on-delete indexes
      */
-    public NamedWindowTailView(EventType eventType, NamedWindowService namedWindowService, NamedWindowRootView namedWindowRootView)
+    public NamedWindowTailView(EventType eventType, NamedWindowService namedWindowService, NamedWindowRootView namedWindowRootView, EPStatementHandle createWindowStmtHandle)
     {
         this.eventType = eventType;
         this.namedWindowService = namedWindowService;
         consumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
-        this.namedWindowRootView = namedWindowRootView; 
+        this.namedWindowRootView = namedWindowRootView;
+        this.createWindowStmtHandle = createWindowStmtHandle;
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)
@@ -67,7 +72,13 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         if (viewsPerStatements == null)
         {
             viewsPerStatements = new ArrayList<NamedWindowConsumerView>();
-            consumers.put(statementHandle, viewsPerStatements);
+
+            // avoid concurrent modification as a thread may currently iterate over consumers as its dispatching
+            // without the engine lock
+            Map<EPStatementHandle, List<NamedWindowConsumerView>> newConsumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
+            newConsumers.putAll(consumers);
+            newConsumers.put(statementHandle, viewsPerStatements);
+            consumers = newConsumers;
         }
         viewsPerStatements.add(consumerView);
 
@@ -107,7 +118,25 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
 
     public Iterator<EventBean> iterator()
     {
-        return this.parent.iterator();
+        createWindowStmtHandle.getStatementLock().acquireLock(null);
+        try
+        {
+            Iterator<EventBean> it = parent.iterator();
+            if (!it.hasNext())
+            {
+                return nullIterator;
+            }
+            ArrayList<EventBean> list = new ArrayList<EventBean>();
+            while (it.hasNext())
+            {
+                list.add(it.next());
+            }
+            return new ArrayEventIterator(list.toArray(new EventBean[0]));
+        }
+        finally
+        {
+            createWindowStmtHandle.getStatementLock().releaseLock(null);
+        }
     }
 
     /**

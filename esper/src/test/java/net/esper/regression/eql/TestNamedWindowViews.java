@@ -108,7 +108,7 @@ public class TestNamedWindowViews extends TestCase
         ArrayAssertionUtil.assertProps(listenerStmtThree.assertOneGetNewAndReset(), fields, new Object[] {"E2", 20L});
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 20L});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 10L}, {"E2", 20L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelectOne.iterator(), fields, new Object[][] {{"E2", 40L}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelectOne.iterator(), fields, new Object[][] {{"E1", 20L}, {"E2", 40L}});
 
         sendSupportBean("E3", 5L);
         ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E3", 10L});
@@ -1223,15 +1223,70 @@ public class TestNamedWindowViews extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"G3", -1});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"G1", 15}, {"G3", -1}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelectOne.iterator(), fields, new Object[][] {{"G2", 8}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelectOne.iterator(), fields, null);
 
         // delete G2
         sendMarketBean("G3");
         assertFalse(listenerStmtOne.isInvoked());
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"G3", -1});
 
+        sendSupportBeanInt("G1", 6);
+        sendSupportBeanInt("G2", 7);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelectOne.iterator(), fields, new Object[][] {{"G1", 6}, {"G2", 7}});
+
         stmtSelectOne.destroy();
         stmtDelete.destroy();
+    }
+
+    public void testSelectGroupedViewLateStart()
+    {
+        // TODO
+
+        // create window
+        String stmtTextCreate = "create window MyWindow.std:groupby({'string', 'intPrimitive'}).win:length(9) as select string, intPrimitive from " + SupportBean.class.getName();
+        EPStatement stmtCreate = epService.getEPAdministrator().createEQL(stmtTextCreate);
+
+        // create insert into
+        String stmtTextInsert = "insert into MyWindow select string, intPrimitive from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextInsert);
+
+        // fill window
+        String[] stringValues = new String[] {"c0", "c1", "c2"};
+        for (int i = 0; i < stringValues.length; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                epService.getEPRuntime().sendEvent(new SupportBean(stringValues[i], j));
+            }
+        }
+        epService.getEPRuntime().sendEvent(new SupportBean("c0", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("c1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("c3", 3));
+        EventBean[] received = ArrayAssertionUtil.iteratorToArray(stmtCreate.iterator());
+        assertEquals(12, received.length);
+
+        // create select stmt
+        String stmtTextSelect = "select string, intPrimitive, count(*) from MyWindow group by string, intPrimitive order by string, intPrimitive";
+        EPStatement stmtSelect = epService.getEPAdministrator().createEQL(stmtTextSelect);
+        received = ArrayAssertionUtil.iteratorToArray(stmtSelect.iterator());
+        assertEquals(10, received.length);
+
+        ArrayAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,count(*)".split(","),
+                new Object[][] {
+                        {"c0", 0, 1L},
+                        {"c0", 1, 2L},
+                        {"c0", 2, 1L},
+                        {"c1", 0, 1L},
+                        {"c1", 1, 1L},
+                        {"c1", 2, 2L},
+                        {"c2", 0, 1L},
+                        {"c2", 1, 1L},
+                        {"c2", 2, 1L},
+                        {"c3", 3, 1L},
+                    });
+
+        stmtSelect.destroy();
+        stmtCreate.destroy();
     }
 
     public void testFilteringConsumerLateStart()

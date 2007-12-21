@@ -2048,7 +2048,7 @@ insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
 			<programlisting><![CDATA[select * from AllOrdersNamedWindow]]></programlisting>
 			
 			<para>
-				The statement as above simply receives the unfiltered insert and remove stream of the named window and reports that stream to its listeners. An iterator on such statement returns the last new event in the named window, if any.
+				The statement as above simply receives the unfiltered insert and remove stream of the named window and reports that stream to its listeners. An iterator on such statement returns all events in the named window, if any.
 			</para>
 
 			<para>

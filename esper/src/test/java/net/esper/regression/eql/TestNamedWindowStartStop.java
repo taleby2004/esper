@@ -125,14 +125,14 @@ public class TestNamedWindowStartStop extends TestCase
 
         // start consumer: the consumer has the last event even though he missed it
         stmtSelect.start();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E2", 2}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
 
         // consumer receives the next event
         sendSupportBean("E3", 3);
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
         ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
 
         // destroy consumer
         stmtSelect.destroy();
@@ -178,7 +178,7 @@ public class TestNamedWindowStartStop extends TestCase
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
         ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
 
         // destroy inserter
         stmtInsert.destroy();
@@ -240,7 +240,7 @@ public class TestNamedWindowStartStop extends TestCase
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E4", 4});
         ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E4", 4});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E4", 4}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
 
         // destroy creator
         stmtCreate.destroy();
@@ -248,7 +248,7 @@ public class TestNamedWindowStartStop extends TestCase
         assertFalse(listenerSelect.isInvoked());
         assertFalse(listenerWindow.isInvoked());
         assertNull(stmtCreate.iterator());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E4", 4}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
 
         // create window anew
         stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
@@ -259,7 +259,7 @@ public class TestNamedWindowStartStop extends TestCase
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E6", 6});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E6", 6}});
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E4", 4}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
     }
 
     private SupportBean_A sendSupportBean_A(String id)

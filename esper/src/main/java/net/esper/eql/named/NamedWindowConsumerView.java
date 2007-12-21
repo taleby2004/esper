@@ -71,7 +71,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
 
         if ((newData != null) || (oldData != null))
         {
-            updateChildren(newData, oldData);            
+            updateChildren(newData, oldData);
         }
     }
 
@@ -121,7 +121,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
 
     public Iterator<EventBean> iterator()
     {
-        return new SingleEventIterator(lastEvent);  // May reach this iterator if a consumer does not declare a window itself 
+        return new FilteredEventIterator(filterList, tailView.iterator()); 
     }
 
     public void statementStopped()

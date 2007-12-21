@@ -243,7 +243,7 @@ public class EPStatementStartMethod
         final FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) statementSpec.getStreamSpecs().get(0);
         String windowName = statementSpec.getCreateWindowDesc().getWindowName();
         EventType windowType = filterStreamSpec.getFilterSpec().getEventType();
-        services.getNamedWindowService().addProcessor(windowName, windowType);
+        services.getNamedWindowService().addProcessor(windowName, windowType, statementContext.getEpStatementHandle());
 
         // Create streams and views
         Viewable eventStreamParentViewable;

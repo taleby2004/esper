@@ -25,13 +25,14 @@ public class NamedWindowProcessor
      * @param namedWindowService service for dispatching results
      * @param windowName the window name
      * @param eventType the type of event held by the named window
+     * @param createWindowStmtHandle the statement handle of the statement that created the named window
      */
-    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType)
+    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle)
     {
         this.eventType = eventType;
 
         rootView = new NamedWindowRootView();
-        tailView = new NamedWindowTailView(eventType, namedWindowService, rootView);
+        tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle);
         rootView.setDataWindowContents(tailView);   // for iteration used for delete without index
     }
 

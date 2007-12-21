@@ -34,10 +34,11 @@ public interface NamedWindowService
      * Create a new named window.
      * @param name window name
      * @param eventType the event type of the window
+     * @param createWindowStmtHandle is the handle and lock of the create-named-window statement
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.
