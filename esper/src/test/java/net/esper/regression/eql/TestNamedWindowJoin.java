@@ -5,6 +5,7 @@ import net.esper.client.Configuration;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportBean_A;
 import net.esper.support.bean.SupportMarketDataBean;
@@ -31,6 +32,78 @@ public class TestNamedWindowJoin extends TestCase
         listenerStmtOne = new SupportUpdateListener();
     }
 
+    public void testFullOuterJoinNamedAggregationLateStart()
+    {
+        // create window
+        String stmtTextCreate = "create window MyWindow.std:groupby({'string', 'intPrimitive'}).win:length(3) as select string, intPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        EPStatement stmtCreate = epService.getEPAdministrator().createEQL(stmtTextCreate);
+
+        // create insert into
+        String stmtTextInsert = "insert into MyWindow select string, intPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextInsert);
+
+        // fill window
+        String[] stringValues = new String[] {"c0", "c1", "c2"};
+        for (int i = 0; i < stringValues.length; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    SupportBean bean = new SupportBean(stringValues[i], j);
+                    bean.setBoolPrimitive(true);
+                    epService.getEPRuntime().sendEvent(bean);
+                }
+            }
+        }
+        SupportBean bean = new SupportBean("c1", 2);
+        bean.setBoolPrimitive(true);
+        epService.getEPRuntime().sendEvent(bean);
+
+        EventBean[] received = ArrayAssertionUtil.iteratorToArray(stmtCreate.iterator());
+        assertEquals(19, received.length);
+
+        // create select stmt
+        String stmtTextSelect = "select string, intPrimitive, count(boolPrimitive) as cntBool, symbol " +
+                                "from MyWindow full outer join " + SupportMarketDataBean.class.getName() + ".win:keepall() " +
+                                "on string = symbol " +
+                                "group by string, intPrimitive, symbol order by string, intPrimitive, symbol";
+        EPStatement stmtSelect = epService.getEPAdministrator().createEQL(stmtTextSelect);
+
+        // send outer join events
+        this.sendMarketBean("c0");
+        this.sendMarketBean("c3");
+
+        // get iterator results
+        received = ArrayAssertionUtil.iteratorToArray(stmtSelect.iterator());
+        ArrayAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,cntBool,symbol".split(","),
+                new Object[][] {
+                        {null, null, 0L, "c3"},
+                        {"c0", 0, 2L, "c0"},
+                        {"c0", 1, 2L, "c0"},
+                        {"c0", 2, 2L, "c0"},
+                        {"c1", 0, 2L, null},
+                        {"c1", 1, 2L, null},
+                        {"c1", 2, 3L, null},
+                        {"c2", 0, 2L, null},
+                        {"c2", 1, 2L, null},
+                        {"c2", 2, 2L, null},
+                    });
+        /*
+        for (int i = 0; i < received.length; i++)
+        {
+            System.out.println("string=" + received[i].get("string") +
+                    " intPrimitive=" + received[i].get("intPrimitive") +
+                    " cntBool=" + received[i].get("cntBool") +
+                    " symbol=" + received[i].get("symbol"));
+        }
+        */
+
+        stmtSelect.destroy();
+        stmtCreate.destroy();
+
+    }
+    
     public void testJoinNamedAndStream()
     {
         // create window

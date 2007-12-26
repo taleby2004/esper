@@ -2,6 +2,11 @@ package net.esper.eql.join;
 
 import net.esper.event.EventBean;
 import net.esper.view.internal.BufferView;
+import net.esper.eql.core.ResultSetProcessor;
+import net.esper.collection.MultiKey;
+
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Implements a method for pre-loading (initializing) join indexes from a filled buffer.
@@ -40,5 +45,12 @@ public class JoinPreloadMethodImpl implements JoinPreloadMethod
         EventBean[][] eventsPerStream = new EventBean[numStreams][];
         eventsPerStream[stream] = preloadEvents;
         joinSetComposer.init(eventsPerStream);
+    }
+
+    public void preloadAggregation(ResultSetProcessor resultSetProcessor)
+    {
+        Set<MultiKey<EventBean>> newEvents = joinSetComposer.staticJoin();
+        Set<MultiKey<EventBean>> oldEvents = new HashSet<MultiKey<EventBean>>();
+        resultSetProcessor.processJoinResult(newEvents, oldEvents);
     }
 }

@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * An iterator that filters events suppied by another iterator,
+ * using a list of one or more filter expressions as filter.
+ */
 public class FilteredEventIterator implements Iterator<EventBean>
 {
     private final Iterator<EventBean> parent;
@@ -14,6 +18,11 @@ public class FilteredEventIterator implements Iterator<EventBean>
     private final EventBean[] eventPerStream = new EventBean[1];
     private EventBean next;
 
+    /**
+     * Ctor.
+     * @param filters is a list of expression nodes for filtering
+     * @param parent is the iterator supplying the events to apply the filter on
+     */
     public FilteredEventIterator(List<ExprNode> filters, Iterator<EventBean> parent)
     {
         this.parent = parent;

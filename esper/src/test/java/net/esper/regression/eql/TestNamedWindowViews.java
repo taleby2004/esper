@@ -6,6 +6,7 @@ import net.esper.client.time.CurrentTimeEvent;
 import net.esper.event.EventBean;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.SupportVariableSetEvent;
 import net.esper.support.client.SupportConfigFactory;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.util.SupportUpdateListener;
@@ -1240,8 +1241,6 @@ public class TestNamedWindowViews extends TestCase
 
     public void testSelectGroupedViewLateStart()
     {
-        // TODO
-
         // create window
         String stmtTextCreate = "create window MyWindow.std:groupby({'string', 'intPrimitive'}).win:length(9) as select string, intPrimitive from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEQL(stmtTextCreate);
@@ -1283,6 +1282,74 @@ public class TestNamedWindowViews extends TestCase
                         {"c2", 1, 1L},
                         {"c2", 2, 1L},
                         {"c3", 3, 1L},
+                    });
+
+        stmtSelect.destroy();
+        stmtCreate.destroy();
+    }
+
+    public void testSelectGroupedViewLateStartVariableIterate()
+    {
+        // create window
+        String stmtTextCreate = "create window MyWindow.std:groupby({'string', 'intPrimitive'}).win:length(9) as select string, intPrimitive, longPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        EPStatement stmtCreate = epService.getEPAdministrator().createEQL(stmtTextCreate);
+
+        // create insert into
+        String stmtTextInsert = "insert into MyWindow select string, intPrimitive, longPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextInsert);
+
+        // create variable
+        epService.getEPAdministrator().createEQL("create variable string var_1_1_1");
+        epService.getEPAdministrator().createEQL("on " + SupportVariableSetEvent.class.getName() + "(variableName='var_1_1_1') set var_1_1_1 = value");
+
+        // fill window
+        String[] stringValues = new String[] {"c0", "c1", "c2"};
+        for (int i = 0; i < stringValues.length; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                SupportBean bean = new SupportBean(stringValues[i], j);
+                bean.setLongPrimitive(j);
+                bean.setBoolPrimitive(true);
+                epService.getEPRuntime().sendEvent(bean);
+            }
+        }
+        // extra record to create non-uniform data
+        SupportBean bean = new SupportBean("c1", 1);
+        bean.setLongPrimitive(10);
+        bean.setBoolPrimitive(true);
+        epService.getEPRuntime().sendEvent(bean);
+        EventBean[] received = ArrayAssertionUtil.iteratorToArray(stmtCreate.iterator());
+        assertEquals(10, received.length);
+
+        // create select stmt
+        String stmtTextSelect = "select string, intPrimitive, avg(longPrimitive) as avgLong, count(boolPrimitive) as cntBool" +
+                                " from MyWindow group by string, intPrimitive having string = var_1_1_1 order by string, intPrimitive";
+        EPStatement stmtSelect = epService.getEPAdministrator().createEQL(stmtTextSelect);
+
+        // set variable to C0
+        epService.getEPRuntime().sendEvent(new SupportVariableSetEvent("var_1_1_1", "c0"));
+
+        // get iterator results
+        received = ArrayAssertionUtil.iteratorToArray(stmtSelect.iterator());
+        assertEquals(3, received.length);
+        ArrayAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,avgLong,cntBool".split(","),
+                new Object[][] {
+                        {"c0", 0, 0.0, 1L},
+                        {"c0", 1, 1.0, 1L},
+                        {"c0", 2, 2.0, 1L},
+                    });
+
+        // set variable to C1
+        epService.getEPRuntime().sendEvent(new SupportVariableSetEvent("var_1_1_1", "c1"));
+
+        received = ArrayAssertionUtil.iteratorToArray(stmtSelect.iterator());
+        assertEquals(3, received.length);
+        ArrayAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,avgLong,cntBool".split(","),
+                new Object[][] {
+                        {"c1", 0, 0.0, 1L},
+                        {"c1", 1, 5.5, 2L},
+                        {"c1", 2, 2.0, 1L},
                     });
 
         stmtSelect.destroy();

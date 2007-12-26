@@ -346,7 +346,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 		</para>
 
 		<para>
-			For joins and outer joins, specify two or more event streams. Joins between pattern-based and filter-based event streams are also supported.
+			For joins and outer joins, specify two or more event streams. Joins between pattern-based and filter-based event streams are also supported. Joins are described in more detail in <xref linkend="eql-join"/>.
 		</para>
 
 		<para>
@@ -1227,7 +1227,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		<indexterm><primary>EQL</primary><secondary>join</secondary></indexterm>
 
 		<para>
-			Two or more event streams can be part of the <literal>from</literal> clause and thus both streams determine the resulting events. The <literal>where</literal> clause lists the join conditions that Esper uses to relate events in the two or more streams. Reference and historical data such as stored in your relational database can also be included in joins. Please see <xref linkend="histdata_overview"/> for details.
+			Two or more event streams can be part of the <literal>from</literal> clause and thus both (all) streams determine the resulting events. The <literal>where</literal> clause lists the join conditions that Esper uses to relate events in the two or more streams. Reference and historical data such as stored in your relational database, and data returned by a method invocation, can also be included in joins. Please see <xref linkend="histdata_overview"/> and <xref linkend="joining_method"/> for details.
 		</para>
 
 		<para>
@@ -1262,7 +1262,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		<indexterm><primary>EQL</primary><secondary>outer join</secondary></indexterm>
 
 		<para>
-			Esper supports left outer joins, right outer joins and full outer joins between an unlimited number of event streams. Outer joins can also join reference and historical data as explained in <xref linkend="histdata_overview"/>.
+			Esper supports left outer joins, right outer joins and full outer joins between an unlimited number of event streams. Outer joins can also join reference and historical data as explained in <xref linkend="histdata_overview"/>, as well as join data returned by a method invocation as outlined in <xref linkend="joining_method"/>.
 		</para>
 
 		<para>
