@@ -311,6 +311,31 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 
 		</sect2>
 
+		<sect2 id="perf-tips-12">
+			<title>Performance, JVM, OS and hardware</title>
+
+			<para>
+				Performance will also depends on your JVM (Sun HotSpot, BEA JRockit, IBM J9), your operating system and your hardware.
+				A JVM performance index such as specJBB at <ulink url="http://www.spec.org">spec.org</ulink> can be used. For memory intensive statement, you may want
+				to consider 64bit architecture that can address more than 2GB or 3GB of memory, although a 64bit JVM usually comes with a slow performance penalty due to
+				more complex pointer address management.
+			</para>
+			<para>
+				The choice of JVM, OS and hardware depends on a number of factors and therefore a definite suggestion is hard to make.
+				The choice depends on the number of statements, and number of threads.
+				A larger number of threads would benefit of more CPU and cores. If you have very low latency requirements, you should consider
+				getting more GHz per core, and possibly soft realtime JVM to enforce GC determinism at the JVM level, or even consider dedicated hardware such as Azul.
+				If your statements utilize large data windows, more RAM and heap space will be utilized hence you should clearly plan and account for that and possibly consider 64bit architectures or consider
+				<ulink url="http://www.espertech.com/products/">EsperHA</ulink>.
+			</para>
+			<para>
+				The number and type of statements is a factor that cannot be generically accounted for.
+				The benchmark kit can help test out some requirements and establish baselines, and for more complex use cases
+				a simulation or proof of concept would certainly works best.
+				<ulink url="http://www.espertech.com/support/services.php">EsperTech' experts</ulink> can be available to help write interfaces in a consulting relationship.
+
+			</para>
+		</sect2>
     </sect1>
 
     <sect1 id="performance-kit" revision="1">
