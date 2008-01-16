@@ -34,6 +34,134 @@ public class TestGroupByEventPerGroup extends TestCase
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
+    public void testAggregateGroupedProps()
+    {
+        // test for ESPER-185
+        String fields[] = "mycount".split(",");
+        String viewExpr = "select count(price) as mycount " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
+                          "group by price";
+
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(listener);
+
+        sendEvent(SYMBOL_DELL, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_DELL, 11);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1L}, {1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_IBM, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {2L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{2L}, {1L}});
+        listener.reset();
+    }
+
+    public void testAggregateGroupedPropsPerGroup()
+    {
+        // test for ESPER-185
+        String fields[] = "mycount".split(",");
+        String viewExpr = "select count(price) as mycount " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
+                          "group by symbol, price";
+
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(listener);
+
+        sendEvent(SYMBOL_DELL, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_DELL, 11);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1L}, {1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_DELL, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {2L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{2L}, {1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_IBM, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{2L}, {1L}, {1L}});
+        listener.reset();
+    }
+
+    public void testAggregationOverGroupedProps()
+    {
+        // test for ESPER-185
+        String fields[] = "symbol,price,mycount".split(",");
+        String viewExpr = "select symbol,price,count(price) as mycount " +
+                          "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
+                          "group by symbol, price";
+
+        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView.addListener(listener);
+
+        sendEvent(SYMBOL_DELL, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"DELL", 10.0, 1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"DELL", 10.0, 0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 10.0, 1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_DELL, 11);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"DELL", 11.0, 1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"DELL", 11.0, 0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 10.0, 1L},{"DELL", 11.0, 1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_DELL, 10);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"DELL", 10.0, 2L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"DELL", 10.0, 1L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 10.0, 2L},{"DELL", 11.0, 1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_IBM, 5);
+        assertEquals(1, listener.getNewDataList().size());
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"IBM", 5.0, 1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"IBM", 5.0, 0L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 10.0, 2L},{"DELL", 11.0, 1L}, {"IBM", 5.0, 1L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_IBM, 5);
+        assertEquals(1, listener.getLastNewData().length);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"IBM", 5.0, 2L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"IBM", 5.0, 1L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 10.0, 2L},{"DELL", 11.0, 1L}, {"IBM", 5.0, 2L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_IBM, 5);
+        assertEquals(2, listener.getLastNewData().length);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[] {"IBM", 5.0, 3L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[] {"IBM", 5.0, 2L});
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"DELL", 10.0, 1L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"DELL", 10.0, 2L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 11.0, 1L},{"DELL", 10.0, 1L}, {"IBM", 5.0, 3L}});
+        listener.reset();
+
+        sendEvent(SYMBOL_IBM, 5);
+        assertEquals(2, listener.getLastNewData().length);
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[] {"IBM", 5.0, 4L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[] {"IBM", 5.0, 3L});
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"DELL", 11.0, 0L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"DELL", 11.0, 1L});
+        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{"DELL", 10.0, 1L}, {"IBM", 5.0, 4L}});
+        listener.reset();
+    }
+
     public void testSumOneView()
     {
         String viewExpr = "select symbol," +

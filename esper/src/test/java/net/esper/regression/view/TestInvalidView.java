@@ -93,10 +93,6 @@ public class TestInvalidView extends TestCase
         exceptionText = getStatementExceptionView("select intPrimitive from " + EVENT_ALLTYPES + ".win:length(1) group by sum(intPrimitive)");
         assertEquals("Error starting view: Group-by expressions cannot contain aggregate functions [select intPrimitive from net.esper.support.bean.SupportBean.win:length(1) group by sum(intPrimitive)]", exceptionText);
 
-        // group-by specifying a property that is aggregated through select clause
-        exceptionText = getStatementExceptionView("select intPrimitive, sum(doublePrimitive) from " + EVENT_ALLTYPES + ".win:length(1) group by doublePrimitive");
-        assertEquals("Error starting view: Group-by property 'doublePrimitive' cannot also occur in an aggregate function in the select clause [select intPrimitive, sum(doublePrimitive) from net.esper.support.bean.SupportBean.win:length(1) group by doublePrimitive]", exceptionText);
-
         // invalid property in having clause
         exceptionText = getStatementExceptionView("select 2 * 's' from " + EVENT_ALLTYPES + ".win:length(1) group by intPrimitive having xxx > 5");
         assertEquals("Error starting view: Implicit conversion from datatype 'String' to numeric is not allowed [select 2 * 's' from net.esper.support.bean.SupportBean.win:length(1) group by intPrimitive having xxx > 5]", exceptionText);
