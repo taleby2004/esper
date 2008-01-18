@@ -6,12 +6,12 @@ import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
 import net.esper.event.EventBean;
-import net.esper.support.bean.SupportBean;
-import net.esper.support.bean.SupportBean_A;
-import net.esper.support.bean.SupportMarketDataBean;
+import net.esper.support.bean.*;
 import net.esper.support.client.SupportConfigFactory;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.util.SupportUpdateListener;
+
+import java.util.Iterator;
 
 public class TestNamedWindowJoin extends TestCase
 {
@@ -30,6 +30,78 @@ public class TestNamedWindowJoin extends TestCase
         listenerWindow = new SupportUpdateListener();
         listenerWindowTwo = new SupportUpdateListener();
         listenerStmtOne = new SupportUpdateListener();
+    }
+
+    public void testRightOuterJoinLateStart()
+    {
+        // TODO: Associate to JIRA issue 
+
+        // create window for Leave events
+        String stmtTextCreate = "create window WindowLeave.win:time(6000) as select timeLeave, id, location from " + SupportQueueLeave.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextCreate);
+        String stmtTextInsert = "insert into WindowLeave select timeLeave, id, location from " + SupportQueueLeave.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextInsert);
+
+        // create second window for enter events
+        stmtTextCreate = "create window WindowEnter.win:time(6000) as select location, sku, timeEnter, id from " + SupportQueueEnter.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextCreate);
+        stmtTextInsert = "insert into WindowEnter select location, sku, timeEnter, id from " + SupportQueueEnter.class.getName();
+        epService.getEPAdministrator().createEQL(stmtTextInsert);
+
+        String stmtTextOne = "select s1.location as loc, sku, avg((coalesce(timeLeave, 250) - timeEnter)) as avgTime, " +
+                          "count(timeEnter) as cntEnter, count(timeLeave) as cntLeave, (count(timeEnter) - count(timeLeave)) as diff " +
+                          "from WindowLeave as s0 right outer join WindowEnter as s1 " +
+                          "on s0.id = s1.id and s0.location = s1.location " +
+                          "group by s1.location, sku " +
+                          "output every 1.0 seconds " +
+                          "order by s1.location";
+        EPStatement stmtOne = epService.getEPAdministrator().createEQL(stmtTextOne);
+
+        String stmtTextTwo = "select s1.location as loc, sku, avg((coalesce(timeLeave, 250) - timeEnter)) as avgTime, " +
+                          "count(timeEnter) as cntEnter, count(timeLeave) as cntLeave, (count(timeEnter) - count(timeLeave)) as diff " +
+                          "from WindowEnter as s1 left outer join WindowLeave as s0 " +
+                          "on s0.id = s1.id and s0.location = s1.location " +
+                          "group by s1.location, sku " +
+                          "output every 1.0 seconds " +
+                          "order by s1.location";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(stmtTextTwo);
+
+        // fill data
+        for (int i = 0; i < 8; i++)
+        {
+            String location = Integer.toString(i / 2);
+            epService.getEPRuntime().sendEvent(new SupportQueueLeave(i + 1, location, 247));
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            String location = Integer.toString(i / 2);
+            String sku = (i % 2 == 0) ? "166583" : "169254";
+            epService.getEPRuntime().sendEvent(new SupportQueueEnter(i + 1, location, sku, 123));
+        }
+
+        System.out.println("Statement 1");
+        for (Iterator<EventBean> it = stmtOne.iterator(); it.hasNext();)
+        {
+            EventBean event = it.next();
+            System.out.println(event.get("loc") +
+                               " " + event.get("sku") +
+                    " " + event.get("avgTime") +
+                    " " + event.get("cntEnter") +
+                    " " + event.get("cntLeave") +
+                    " " + event.get("diff"));
+        }
+
+        System.out.println("Statement 2");
+        for (Iterator<EventBean> it = stmtTwo.iterator(); it.hasNext();)
+        {
+            EventBean event = it.next();
+            System.out.println(event.get("loc") +
+                               " " + event.get("sku") +
+                    " " + event.get("avgTime") +
+                    " " + event.get("cntEnter") +
+                    " " + event.get("cntLeave") +
+                    " " + event.get("diff"));
+        }
     }
 
     public void testFullOuterJoinNamedAggregationLateStart()
