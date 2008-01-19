@@ -576,10 +576,10 @@ public class EPStatementStartMethod
         }
 
         // Replay any named window data, for later consumers of named data windows
+        boolean hasNamedWindow = false;
         for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)
         {
             StreamSpecCompiled streamSpec = statementSpec.getStreamSpecs().get(i);
-            boolean hasNamedWindow = false;
             if (streamSpec instanceof NamedWindowConsumerStreamSpec)
             {
                 hasNamedWindow = true;
@@ -606,12 +606,11 @@ public class EPStatementStartMethod
                     joinPreloadMethod.preloadFromBuffer(i);
                 }
             }
-
-            // last, for aggregation we need to send the current join results to the result set processor
-            if ((hasNamedWindow) && (joinPreloadMethod != null))
-            {
-                joinPreloadMethod.preloadAggregation(optionalResultSetProcessor);
-            }
+        }
+        // last, for aggregation we need to send the current join results to the result set processor
+        if ((hasNamedWindow) && (joinPreloadMethod != null))
+        {
+            joinPreloadMethod.preloadAggregation(optionalResultSetProcessor);
         }
 
         // Hook up internal event route for insert-into if required

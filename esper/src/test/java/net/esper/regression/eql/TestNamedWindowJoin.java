@@ -11,8 +11,6 @@ import net.esper.support.client.SupportConfigFactory;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.support.util.SupportUpdateListener;
 
-import java.util.Iterator;
-
 public class TestNamedWindowJoin extends TestCase
 {
     private EPServiceProvider epService;
@@ -34,19 +32,55 @@ public class TestNamedWindowJoin extends TestCase
 
     public void testRightOuterJoinLateStart()
     {
-        // TODO: Associate to JIRA issue 
+        // Test for ESPER-186 Iterator not honoring order by clause for grouped join query with output-rate clause
+        // Test for ESPER-187 Join of two or more named windows on late start may not return correct aggregation state on iterate
 
         // create window for Leave events
         String stmtTextCreate = "create window WindowLeave.win:time(6000) as select timeLeave, id, location from " + SupportQueueLeave.class.getName();
-        epService.getEPAdministrator().createEQL(stmtTextCreate);
+        EPStatement stmtNamedOne = epService.getEPAdministrator().createEQL(stmtTextCreate);
         String stmtTextInsert = "insert into WindowLeave select timeLeave, id, location from " + SupportQueueLeave.class.getName();
         epService.getEPAdministrator().createEQL(stmtTextInsert);
 
         // create second window for enter events
         stmtTextCreate = "create window WindowEnter.win:time(6000) as select location, sku, timeEnter, id from " + SupportQueueEnter.class.getName();
-        epService.getEPAdministrator().createEQL(stmtTextCreate);
+        EPStatement stmtNamedTwo = epService.getEPAdministrator().createEQL(stmtTextCreate);
         stmtTextInsert = "insert into WindowEnter select location, sku, timeEnter, id from " + SupportQueueEnter.class.getName();
         epService.getEPAdministrator().createEQL(stmtTextInsert);
+
+        // fill data
+        for (int i = 0; i < 8; i++)
+        {
+            String location = Integer.toString(i / 2);
+            epService.getEPRuntime().sendEvent(new SupportQueueLeave(i + 1, location, 247));
+        }
+        /** Comment in for debug
+        System.out.println("Leave events:");
+        for (Iterator<EventBean> it = stmtNamedOne.iterator(); it.hasNext();)
+        {
+            EventBean event = it.next();
+            System.out.println(event.get("timeLeave") +
+                               " " + event.get("id") +
+                    " " + event.get("location"));
+        }
+         */
+
+        for (int i = 0; i < 10; i++)
+        {
+            String location = Integer.toString(i / 2);
+            String sku = (i % 2 == 0) ? "166583" : "169254";
+            epService.getEPRuntime().sendEvent(new SupportQueueEnter(i + 1, location, sku, 123));
+        }
+        /** Comment in for debug
+        System.out.println("Enter events:");
+        for (Iterator<EventBean> it = stmtNamedTwo.iterator(); it.hasNext();)
+        {
+            EventBean event = it.next();
+            System.out.println(event.get("timeEnter") +
+                               " " + event.get("id") +
+                    " " + event.get("sku") +
+                    " " + event.get("location"));
+        }
+         */
 
         String stmtTextOne = "select s1.location as loc, sku, avg((coalesce(timeLeave, 250) - timeEnter)) as avgTime, " +
                           "count(timeEnter) as cntEnter, count(timeLeave) as cntLeave, (count(timeEnter) - count(timeLeave)) as diff " +
@@ -54,7 +88,7 @@ public class TestNamedWindowJoin extends TestCase
                           "on s0.id = s1.id and s0.location = s1.location " +
                           "group by s1.location, sku " +
                           "output every 1.0 seconds " +
-                          "order by s1.location";
+                          "order by s1.location, sku";
         EPStatement stmtOne = epService.getEPAdministrator().createEQL(stmtTextOne);
 
         String stmtTextTwo = "select s1.location as loc, sku, avg((coalesce(timeLeave, 250) - timeEnter)) as avgTime, " +
@@ -63,45 +97,41 @@ public class TestNamedWindowJoin extends TestCase
                           "on s0.id = s1.id and s0.location = s1.location " +
                           "group by s1.location, sku " +
                           "output every 1.0 seconds " +
-                          "order by s1.location";
+                          "order by s1.location, sku";
         EPStatement stmtTwo = epService.getEPAdministrator().createEQL(stmtTextTwo);
 
-        // fill data
-        for (int i = 0; i < 8; i++)
-        {
-            String location = Integer.toString(i / 2);
-            epService.getEPRuntime().sendEvent(new SupportQueueLeave(i + 1, location, 247));
-        }
-        for (int i = 0; i < 10; i++)
-        {
-            String location = Integer.toString(i / 2);
-            String sku = (i % 2 == 0) ? "166583" : "169254";
-            epService.getEPRuntime().sendEvent(new SupportQueueEnter(i + 1, location, sku, 123));
-        }
-
+        /** Comment in for debugging
         System.out.println("Statement 1");
         for (Iterator<EventBean> it = stmtOne.iterator(); it.hasNext();)
         {
             EventBean event = it.next();
-            System.out.println(event.get("loc") +
-                               " " + event.get("sku") +
-                    " " + event.get("avgTime") +
-                    " " + event.get("cntEnter") +
-                    " " + event.get("cntLeave") +
-                    " " + event.get("diff"));
+            System.out.println("loc " + event.get("loc") +
+                               " sku " + event.get("sku") +
+                    " avgTime " + event.get("avgTime") +
+                    " cntEnter " + event.get("cntEnter") +
+                    " cntLeave " + event.get("cntLeave") +
+                    " diff " + event.get("diff"));
         }
+         */
 
-        System.out.println("Statement 2");
-        for (Iterator<EventBean> it = stmtTwo.iterator(); it.hasNext();)
-        {
-            EventBean event = it.next();
-            System.out.println(event.get("loc") +
-                               " " + event.get("sku") +
-                    " " + event.get("avgTime") +
-                    " " + event.get("cntEnter") +
-                    " " + event.get("cntLeave") +
-                    " " + event.get("diff"));
-        }
+        Object[][] expected = new Object[][] {
+                        {"0", "166583", 124.0, 1L, 1L, 0L},
+                        {"0", "169254", 124.0, 1L, 1L, 0L},
+                        {"1", "166583", 124.0, 1L, 1L, 0L},
+                        {"1", "169254", 124.0, 1L, 1L, 0L},
+                        {"2", "166583", 124.0, 1L, 1L, 0L},
+                        {"2", "169254", 124.0, 1L, 1L, 0L},
+                        {"3", "166583", 124.0, 1L, 1L, 0L},
+                        {"3", "169254", 124.0, 1L, 1L, 0L},
+                        {"4", "166583", 127.0, 1L, 0L, 1L},
+                        {"4", "169254", 127.0, 1L, 0L, 1L}
+                    };
+
+        // assert iterator results
+        EventBean[] received = ArrayAssertionUtil.iteratorToArray(stmtTwo.iterator());
+        ArrayAssertionUtil.assertPropsPerRow(received, "loc,sku,avgTime,cntEnter,cntLeave,diff".split(","),expected);
+        received = ArrayAssertionUtil.iteratorToArray(stmtOne.iterator());
+        ArrayAssertionUtil.assertPropsPerRow(received, "loc,sku,avgTime,cntEnter,cntLeave,diff".split(","),expected);
     }
 
     public void testFullOuterJoinNamedAggregationLateStart()
