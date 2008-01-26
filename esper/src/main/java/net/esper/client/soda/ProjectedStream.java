@@ -17,6 +17,7 @@ import java.util.List;
 public abstract class ProjectedStream extends Stream
 {
     private List<View> views;
+    private boolean isUnidirectional;
 
     /**
      * Represent as textual.
@@ -110,6 +111,30 @@ public abstract class ProjectedStream extends Stream
     {
         toEQLProjectedStream(writer);
         toEQLViews(writer, views);
+        if (isUnidirectional)
+        {
+            writer.write(" unidirectional");
+        }
+    }
+
+    /**
+     * Returns true if the stream as unidirectional, for use in unidirectional joins.
+     * @return true for unidirectional stream, applicable only for joins
+     */
+    public boolean isUnidirectional()
+    {
+        return isUnidirectional;
+    }
+
+    /**
+     * Set to true to indicate that a stream is unidirectional, for use in unidirectional joins.
+     * @param isUnidirectional true for unidirectional stream, applicable only for joins
+     * @return projected stream
+     */
+    public ProjectedStream setUnidirectional(boolean isUnidirectional)
+    {
+        this.isUnidirectional = isUnidirectional;
+        return this;
     }
 
     /**

@@ -4,6 +4,16 @@ Esper Changelog
 Changes in version 1.12.0
 ------------------------
 
+* Use map return type in from-clause method invocations
+* Use unidirectional join
+* API for setting variable values
+* std:unique allows multiple fields
+* property names allowed in view parameters
+
+
+Changes in version 1.12.0
+------------------------
+
 * New feature: Named window
   - Allows to share data windows between statements
   - New create-window syntax to create named windows

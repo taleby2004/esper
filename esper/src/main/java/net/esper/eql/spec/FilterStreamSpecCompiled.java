@@ -26,10 +26,11 @@ public class FilterStreamSpecCompiled extends StreamSpecBase implements StreamSp
      * @param filterSpec - specifies what events we are interested in.
      * @param viewSpecs - specifies what view to use to derive data
      * @param optionalStreamName - stream name, or null if none supplied
+     * @param isUnidirectional - true to indicate a unidirectional stream in a join, applicable for joins
      */
-    public FilterStreamSpecCompiled(FilterSpecCompiled filterSpec, List<ViewSpec> viewSpecs, String optionalStreamName)
+    public FilterStreamSpecCompiled(FilterSpecCompiled filterSpec, List<ViewSpec> viewSpecs, String optionalStreamName, boolean isUnidirectional)
     {
-        super(optionalStreamName, viewSpecs);
+        super(optionalStreamName, viewSpecs, isUnidirectional);
         this.filterSpec = filterSpec;
     }
 
