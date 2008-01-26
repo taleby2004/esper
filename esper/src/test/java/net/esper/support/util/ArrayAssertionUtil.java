@@ -12,6 +12,7 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 
 import net.esper.event.EventBean;
+import net.esper.support.event.SupportEventAdapterService;
 
 public class ArrayAssertionUtil
 {
@@ -400,6 +401,80 @@ public class ArrayAssertionUtil
         }
     }
 
+    public static void assertPropsPerRow(List<Object[]> received, Object[][] propertiesListPerRow)
+    {
+        if (propertiesListPerRow == null)
+        {
+            if ((received == null) || (received.size() == 0))
+            {
+                return;
+            }
+        }
+        Assert.assertEquals(propertiesListPerRow.length, received.size());
+
+        for (int i = 0; i < propertiesListPerRow.length; i++)
+        {
+            Object[] receivedThisRow = received.get(i);
+            Object[] propertiesThisRow = propertiesListPerRow[i];
+            Assert.assertEquals(receivedThisRow.length, propertiesThisRow.length);
+
+            for (int j = 0; j < propertiesThisRow.length; j++)
+            {
+                Object expectedValue = propertiesThisRow[j];
+                Object receivedValue = receivedThisRow[j];
+                Assert.assertEquals("Error asserting property", expectedValue, receivedValue);
+            }
+        }
+    }
+
+    public static void assertPropsPerRow(Map[] received, String[] propertyNames, Object[][] propertiesListPerRow)
+    {
+        if (propertiesListPerRow == null)
+        {
+            if ((received == null) || (received.length == 0))
+            {
+                return;
+            }
+        }
+        Assert.assertEquals(propertiesListPerRow.length, received.length);
+
+        for (int i = 0; i < propertiesListPerRow.length; i++)
+        {
+            Object[] propertiesThisRow = propertiesListPerRow[i];
+            for (int j = 0; j < propertiesThisRow.length; j++)
+            {
+                String name = propertyNames[j];
+                Object value = propertiesThisRow[j];
+                Object eventProp = received[i].get(name);
+                Assert.assertEquals("Error asserting property named " + name,value,eventProp);
+            }
+        }
+    }
+
+    public static void assertPropsPerRow(Object[][] received, String[] propertyNames, Object[][] propertiesListPerRow)
+    {
+        if (propertiesListPerRow == null)
+        {
+            if ((received == null) || (received.length == 0))
+            {
+                return;
+            }
+        }
+        Assert.assertEquals(propertiesListPerRow.length, received.length);
+
+        for (int i = 0; i < propertiesListPerRow.length; i++)
+        {
+            Object[] propertiesThisRow = propertiesListPerRow[i];
+            for (int j = 0; j < propertiesThisRow.length; j++)
+            {
+                String name = propertyNames[j];
+                Object value = propertiesThisRow[j];
+                Object eventProp = received[i][j];
+                Assert.assertEquals("Error asserting property named " + name,value,eventProp);
+            }
+        }
+    }
+
     public static void assertPropsPerRow(EventBean[] received, String[] propertyNames, Object[][] propertiesListPerRow)
     {
         if (propertiesListPerRow == null)
@@ -441,6 +516,31 @@ public class ArrayAssertionUtil
             Object eventProp = received.get(name);
             Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);
         }
+    }
+
+    public static void assertProps(Map pojo, String[] propertyNames, Object... propertiesThisRow)
+    {
+        if (propertiesThisRow == null)
+        {
+            if (pojo == null)
+            {
+                return;
+            }
+        }
+
+        for (int j = 0; j < propertiesThisRow.length; j++)
+        {
+            String name = propertyNames[j].trim();
+            Object value = propertiesThisRow[j];
+            Object eventProp = pojo.get(name);
+            Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);
+        }
+    }
+
+    public static void assertProps(Object pojo, String[] propertyNames, Object... propertiesThisRow)
+    {
+        EventBean pojoEvent = SupportEventAdapterService.getService().adapterForBean(pojo);
+        assertProps(pojoEvent, propertyNames, propertiesThisRow);
     }
 
     public static void assertEqualsAnyOrder(Iterator<EventBean> iterator, String[] propertyNames, Object[][] propertiesListPerRow)

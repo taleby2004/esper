@@ -1,24 +1,23 @@
 package net.esper.eql.parse;
 
-import antlr.collections.AST;
 import junit.framework.TestCase;
+import net.esper.eql.core.EngineImportService;
+import net.esper.eql.core.EngineImportServiceImpl;
 import net.esper.eql.expression.*;
 import net.esper.eql.spec.*;
-import net.esper.eql.core.EngineImportServiceImpl;
-import net.esper.eql.core.EngineImportService;
+import net.esper.eql.variable.VariableService;
+import net.esper.eql.variable.VariableServiceImpl;
 import net.esper.event.EventAdapterService;
 import net.esper.pattern.*;
+import net.esper.schedule.SchedulingServiceImpl;
 import net.esper.support.bean.*;
-import net.esper.support.eql.parse.SupportParserHelper;
-import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
 import net.esper.support.eql.SupportPluginAggregationMethodOne;
+import net.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
+import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.type.OuterJoinType;
 import net.esper.type.TimePeriodParameter;
-import net.esper.eql.spec.ViewSpec;
-import net.esper.eql.variable.VariableService;
-import net.esper.eql.variable.VariableServiceImpl;
-import net.esper.schedule.SchedulingServiceImpl;
+import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,24 +30,18 @@ public class TestEQLTreeWalker extends TestCase
                     CLASSNAME + "(string='a').win:length(10).std:lastevent() as win1," +
                     CLASSNAME + "(string='b').win:length(10).std:lastevent() as win2 ";
 
-    // todo
-    public void testtodo() throws Exception
+    public void testWalkViewExpressions() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select 1 from " + className + " unidirectional, method:com.MyClass.myMethod(string, 2*intPrimitive) as s0";
+        String expression = "select * from " + className + ".win:x(intPrimitive, a.nested, b, c.nested.nested)";
 
         EQLTreeWalker walker = parseAndWalkEQL(expression);
-        StatementSpecRaw statementSpec = walker.getStatementSpec();
-        assertEquals(2, statementSpec.getStreamSpecs().size());
-        assertTrue(statementSpec.getStreamSpecs().get(0).isUnidirectional());
-
-        MethodStreamSpec methodSpec = (MethodStreamSpec) statementSpec.getStreamSpecs().get(1);
-        assertEquals("method", methodSpec.getIdent());
-        assertEquals("com.MyClass", methodSpec.getClassName());
-        assertEquals("myMethod", methodSpec.getMethodName());
-        assertEquals(2, methodSpec.getExpressions().size());
-        assertTrue(methodSpec.getExpressions().get(0) instanceof ExprIdentNode);
-        assertTrue(methodSpec.getExpressions().get(1) instanceof ExprMathNode);
+        List<ViewSpec> viewSpecs = walker.getStatementSpec().getStreamSpecs().get(0).getViewSpecs();
+        List<Object> parameters = viewSpecs.get(0).getObjectParameters();
+        assertEquals("intPrimitive", parameters.get(0));
+        assertEquals("a.nested", parameters.get(1));
+        assertEquals("b", parameters.get(2));
+        assertEquals("c.nested.nested", parameters.get(3));
     }
 
     public void testWalkJoinMethodStatement() throws Exception
@@ -140,12 +133,13 @@ public class TestEQLTreeWalker extends TestCase
 
         assertNull(raw.getInsertIntoDesc());
         assertTrue(raw.getSelectClauseSpec().isUsingWildcard());
-        assertEquals(0, raw.getSelectClauseSpec().getSelectExprList().size());
-        assertEquals(2, raw.getSelectClauseSpec().getSelectStreamsList().size());
-        assertEquals("mywin", raw.getSelectClauseSpec().getSelectStreamsList().get(0).getStreamAliasName());
-        assertEquals("abc", raw.getSelectClauseSpec().getSelectStreamsList().get(0).getOptionalAsName());
-        assertEquals("myevent", raw.getSelectClauseSpec().getSelectStreamsList().get(1).getStreamAliasName());
-        assertNull(raw.getSelectClauseSpec().getSelectStreamsList().get(1).getOptionalAsName());
+        assertEquals(3, raw.getSelectClauseSpec().getSelectExprList().size());
+        assertTrue(raw.getSelectClauseSpec().getSelectExprList().get(0) instanceof SelectClauseElementWildcard);
+        assertEquals("mywin", ((SelectClauseStreamRawSpec) raw.getSelectClauseSpec().getSelectExprList().get(1)).getStreamAliasName());
+        assertEquals("mywin", ((SelectClauseStreamRawSpec) raw.getSelectClauseSpec().getSelectExprList().get(1)).getStreamAliasName());
+        assertEquals("abc", ((SelectClauseStreamRawSpec) raw.getSelectClauseSpec().getSelectExprList().get(1)).getOptionalAsName());
+        assertEquals("myevent", (((SelectClauseStreamRawSpec) raw.getSelectClauseSpec().getSelectExprList().get(2)).getStreamAliasName()));
+        assertNull(((SelectClauseStreamRawSpec) raw.getSelectClauseSpec().getSelectExprList().get(2)).getOptionalAsName());
         assertTrue(raw.getFilterRootNode() instanceof ExprEqualsNode);
     }
 
@@ -209,7 +203,7 @@ public class TestEQLTreeWalker extends TestCase
 
     public void testWalkCreateWindow() throws Exception
     {
-        String expression = "create window MyWindow.std:groupby('symbol').win:length(20) as select *, aprop, bprop as someval from com.MyClass";
+        String expression = "create window MyWindow.std:groupby(symbol).win:length(20) as select *, aprop, bprop as someval from com.MyClass";
         EQLTreeWalker walker = parseAndWalkEQL(expression);
         StatementSpecRaw raw = walker.getStatementSpec();
 
@@ -218,11 +212,14 @@ public class TestEQLTreeWalker extends TestCase
 
         // select clause
         assertTrue(raw.getSelectClauseSpec().isUsingWildcard());
-        List<SelectExprElementRawSpec> selectSpec = raw.getSelectClauseSpec().getSelectExprList();
-        assertEquals(2, selectSpec.size());
-        assertEquals("aprop", ((ExprIdentNode)selectSpec.get(0).getSelectExpression()).getUnresolvedPropertyName());
-        assertEquals("bprop", ((ExprIdentNode)selectSpec.get(1).getSelectExpression()).getUnresolvedPropertyName());
-        assertEquals("someval", selectSpec.get(1).getOptionalAsName());
+        List<SelectClauseElementRaw> selectSpec = raw.getSelectClauseSpec().getSelectExprList();
+        assertEquals(3, selectSpec.size());
+        assertTrue(raw.getSelectClauseSpec().getSelectExprList().get(0) instanceof SelectClauseElementWildcard);
+        SelectClauseExprRawSpec rawSpec = (SelectClauseExprRawSpec) selectSpec.get(1);
+        assertEquals("aprop", ((ExprIdentNode)rawSpec.getSelectExpression()).getUnresolvedPropertyName());
+        rawSpec = (SelectClauseExprRawSpec) selectSpec.get(2);
+        assertEquals("bprop", ((ExprIdentNode)rawSpec.getSelectExpression()).getUnresolvedPropertyName());
+        assertEquals("someval", rawSpec.getOptionalAsName());
 
         // filter is the event type
         FilterStreamSpecRaw streamSpec = (FilterStreamSpecRaw) raw.getStreamSpecs().get(0);
@@ -415,7 +412,7 @@ public class TestEQLTreeWalker extends TestCase
 
     public void testWalkView() throws Exception
     {
-        String text = "select * from " + SupportBean.class.getName() + "(string=\"IBM\").win:lenght(10, 1.1, \"a\").stat:uni('price', false)";
+        String text = "select * from " + SupportBean.class.getName() + "(string=\"IBM\").win:lenght(10, 1.1, \"a\").stat:uni(price, false)";
 
         EQLTreeWalker walker = parseAndWalkEQL(text);
         FilterSpecRaw filterSpec = ((FilterStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0)).getRawFilterSpec();
@@ -448,19 +445,27 @@ public class TestEQLTreeWalker extends TestCase
     {
         String text = "select intPrimitive, 2 * intBoxed, 5 as myConst, stream0.string as theString from " + SupportBean.class.getName() + "().win:lenght(10) as stream0";
         EQLTreeWalker walker = parseAndWalkEQL(text);
-        List<SelectExprElementRawSpec> selectExpressions = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList();
+        List<SelectClauseElementRaw> selectExpressions = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList();
         assertEquals(4, selectExpressions.size());
-        assertTrue(selectExpressions.get(0).getSelectExpression() instanceof ExprIdentNode);
-        assertTrue(selectExpressions.get(1).getSelectExpression() instanceof ExprMathNode);
-        assertTrue(selectExpressions.get(2).getSelectExpression() instanceof ExprConstantNode);
-        assertEquals("myConst", selectExpressions.get(2).getOptionalAsName());
-        assertTrue(selectExpressions.get(3).getSelectExpression() instanceof ExprIdentNode);
-        assertEquals("theString", selectExpressions.get(3).getOptionalAsName());
+
+        SelectClauseExprRawSpec rawSpec = (SelectClauseExprRawSpec) selectExpressions.get(0);
+        assertTrue(rawSpec.getSelectExpression() instanceof ExprIdentNode);
+
+        rawSpec = (SelectClauseExprRawSpec) selectExpressions.get(1);
+        assertTrue(rawSpec.getSelectExpression() instanceof ExprMathNode);
+
+        rawSpec = (SelectClauseExprRawSpec) selectExpressions.get(2);
+        assertTrue(rawSpec.getSelectExpression() instanceof ExprConstantNode);
+        assertEquals("myConst", rawSpec.getOptionalAsName());
+
+        rawSpec = (SelectClauseExprRawSpec) selectExpressions.get(3);
+        assertTrue(rawSpec.getSelectExpression() instanceof ExprIdentNode);
+        assertEquals("theString", rawSpec.getOptionalAsName());
         assertNull(walker.getStatementSpec().getInsertIntoDesc());
 
         text = "select * from " + SupportBean.class.getName() + "().win:lenght(10)";
         walker = parseAndWalkEQL(text);
-        assertEquals(0, walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().size());
+        assertEquals(1, walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().size());
     }
 
     public void testArrayViewParams() throws Exception
@@ -529,14 +534,7 @@ public class TestEQLTreeWalker extends TestCase
                       "max(intPrimitive,intBoxed), min(intPrimitive,intBoxed)," +
                       "max(distinct intPrimitive), min(distinct intPrimitive)" +
                       fromClause;
-        EQLTreeWalker walker = parseAndWalkEQL(text);
-        List<SelectExprElementRawSpec> select = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList();
-        assertTrue(select.get(0).getSelectExpression() instanceof ExprMinMaxAggrNode);
-        assertTrue(select.get(1).getSelectExpression() instanceof ExprMinMaxAggrNode);
-        assertTrue(select.get(2).getSelectExpression() instanceof ExprMinMaxRowNode);
-        assertTrue(select.get(3).getSelectExpression() instanceof ExprMinMaxRowNode);
-        assertTrue(select.get(4).getSelectExpression() instanceof ExprMinMaxAggrNode);
-        assertTrue(select.get(5).getSelectExpression() instanceof ExprMinMaxAggrNode);
+        parseAndWalkEQL(text);
 
         try
         {
@@ -595,7 +593,9 @@ public class TestEQLTreeWalker extends TestCase
         String text = "select sum(distinct intPrimitive) from SupportBean_N().win:lenght(10) as win1";
         EQLTreeWalker walker = parseAndWalkEQL(text);
 
-        ExprAggregateNode aggrNode = (ExprAggregateNode) walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(0).getSelectExpression();
+        SelectClauseElementRaw rawElement = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(0);
+        SelectClauseExprRawSpec exprSpec = (SelectClauseExprRawSpec) rawElement;
+        ExprAggregateNode aggrNode = (ExprAggregateNode) exprSpec.getSelectExpression();
         assertTrue(aggrNode.isDistinct());
     }
 
@@ -606,23 +606,23 @@ public class TestEQLTreeWalker extends TestCase
                 " where a[1].b('a').nested.c[0] = 4";
         EQLTreeWalker walker = parseAndWalkEQL(text);
 
-        ExprIdentNode identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(0).getSelectExpression();
+        ExprIdentNode identNode = (ExprIdentNode) getSelectExprSpec(walker.getStatementSpec(), 0).getSelectExpression();
         assertEquals("array[1]", identNode.getUnresolvedPropertyName());
         assertNull(identNode.getStreamOrPropertyName());
 
-        identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(1).getSelectExpression();
+        identNode = (ExprIdentNode) getSelectExprSpec(walker.getStatementSpec(), 1).getSelectExpression();
         assertEquals("map('a')", identNode.getUnresolvedPropertyName());
         assertEquals("s0", identNode.getStreamOrPropertyName());
 
-        identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(2).getSelectExpression();
+        identNode = (ExprIdentNode) getSelectExprSpec(walker.getStatementSpec(), 2).getSelectExpression();
         assertEquals("nested2", identNode.getUnresolvedPropertyName());
         assertEquals("nested", identNode.getStreamOrPropertyName());
 
-        identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(3).getSelectExpression();
+        identNode = (ExprIdentNode) getSelectExprSpec(walker.getStatementSpec(), 3).getSelectExpression();
         assertEquals("a[1].b", identNode.getUnresolvedPropertyName());
         assertEquals(null, identNode.getStreamOrPropertyName());
 
-        identNode = (ExprIdentNode) walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(4).getSelectExpression();
+        identNode = (ExprIdentNode) getSelectExprSpec(walker.getStatementSpec(), 4).getSelectExpression();
         assertEquals("abcdef?", identNode.getUnresolvedPropertyName());
         assertEquals("nested", identNode.getStreamOrPropertyName());
 
@@ -635,9 +635,9 @@ public class TestEQLTreeWalker extends TestCase
     {
         String text = "select intPrimitive & intBoxed from " + SupportBean.class.getName() + "().win:lenght(10) as stream0";
         EQLTreeWalker walker = parseAndWalkEQL(text);
-        List<SelectExprElementRawSpec> selectExpressions = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList();
+        List<SelectClauseElementRaw> selectExpressions = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList();
         assertEquals(1, selectExpressions.size());
-        assertTrue(selectExpressions.get(0).getSelectExpression() instanceof ExprBitWiseNode);
+        assertTrue(getSelectExprSpec(walker.getStatementSpec(), 0).getSelectExpression() instanceof ExprBitWiseNode);
 
         assertEquals(0, tryBitWise("1&2"));
         assertEquals(3, tryBitWise("1|2"));
@@ -897,14 +897,14 @@ public class TestEQLTreeWalker extends TestCase
 
     public void testWalkInAndBetween() throws Exception
     {
-        assertFalse((Boolean) tryRelationalOp("1 in (2,3)"));
-        assertTrue((Boolean) tryRelationalOp("1 in (2,3,1)"));
-        assertTrue((Boolean) tryRelationalOp("1 not in (2,3)"));
-
         assertTrue((Boolean) tryRelationalOp("1 between 0 and 2"));
         assertFalse((Boolean) tryRelationalOp("-1 between 0 and 2"));
         assertFalse((Boolean) tryRelationalOp("1 not between 0 and 2"));
         assertTrue((Boolean) tryRelationalOp("-1 not between 0 and 2"));
+
+        assertFalse((Boolean) tryRelationalOp("1 in (2,3)"));
+        assertTrue((Boolean) tryRelationalOp("1 in (2,3,1)"));
+        assertTrue((Boolean) tryRelationalOp("1 not in (2,3)"));
     }
 
     public void testWalkLikeRegex() throws Exception
@@ -927,7 +927,7 @@ public class TestEQLTreeWalker extends TestCase
         String text = "select MyClass.someFunc(1) from SupportBean_N";
         EQLTreeWalker walker = parseAndWalkEQL(text);
 
-        SelectExprElementRawSpec spec = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(0);
+        SelectClauseExprRawSpec spec = getSelectExprSpec(walker.getStatementSpec(), 0);
         ExprStaticMethodNode staticMethod = (ExprStaticMethodNode) spec.getSelectExpression();
         assertEquals("MyClass", staticMethod.getClassName());
         assertEquals("someFunc", staticMethod.getMethodName());
@@ -971,7 +971,7 @@ public class TestEQLTreeWalker extends TestCase
     {
         String expression = "select (select a from B(id=1) where cox=mox) from C";
         EQLTreeWalker walker = parseAndWalkEQL(expression);
-        SelectExprElementRawSpec element = walker.getStatementSpec().getSelectClauseSpec().getSelectExprList().get(0);
+        SelectClauseExprRawSpec element = getSelectExprSpec(walker.getStatementSpec(), 0);
         ExprSubselectNode exprNode = (ExprSubselectNode) element.getSelectExpression();
 
         // check select expressions
@@ -1027,12 +1027,12 @@ public class TestEQLTreeWalker extends TestCase
     private static EQLTreeWalker parseAndWalkPattern(String expression) throws Exception
     {
         log.debug(".parseAndWalk Trying text=" + expression);
-        AST ast = SupportParserHelper.parsePattern(expression);
+        Tree ast = SupportParserHelper.parsePattern(expression);
         log.debug(".parseAndWalk success, tree walking...");
         SupportParserHelper.displayAST(ast);
 
-        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker();        
-        walker.startPatternExpressionRule(ast);
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
+        walker.startPatternExpressionRule();
         return walker;
     }
 
@@ -1044,15 +1044,15 @@ public class TestEQLTreeWalker extends TestCase
     private static EQLTreeWalker parseAndWalkEQL(String expression, EngineImportService engineImportService, VariableService variableService) throws Exception
     {
         log.debug(".parseAndWalk Trying text=" + expression);
-        AST ast = SupportParserHelper.parseEQL(expression);
+        Tree ast = SupportParserHelper.parseEQL(expression);
         log.debug(".parseAndWalk success, tree walking...");
         SupportParserHelper.displayAST(ast);
 
         EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
         eventAdapterService.addBeanType("SupportBean_N", SupportBean_N.class);
 
-        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(engineImportService, variableService);        
-        walker.startEQLExpressionRule(ast);
+        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast, engineImportService, variableService);
+        walker.startEPLExpressionRule();
         return walker;
     }
 
@@ -1085,6 +1085,12 @@ public class TestEQLTreeWalker extends TestCase
         ExprNode filterExprNode = walker.getStatementSpec().getFilterRootNode();
         filterExprNode.getValidatedSubtree(null, null, null, null, null);
         return filterExprNode.evaluate(null, false);
+    }
+
+    private SelectClauseExprRawSpec getSelectExprSpec(StatementSpecRaw statementSpec, int index)
+    {
+        SelectClauseElementRaw raw = statementSpec.getSelectClauseSpec().getSelectExprList().get(index);
+        return (SelectClauseExprRawSpec) raw;
     }
 
     private static final Log log = LogFactory.getLog(TestEQLTreeWalker.class);

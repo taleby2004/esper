@@ -4,8 +4,8 @@ import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
 import net.esper.core.StatementContext;
 import net.esper.eql.core.ResultSetProcessor;
-import net.esper.eql.spec.OutputLimitSpec;
 import net.esper.eql.spec.OutputLimitLimitType;
+import net.esper.eql.spec.OutputLimitSpec;
 import net.esper.event.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,13 +20,12 @@ import java.util.*;
  */
 public class OutputProcessViewPolicy extends OutputProcessView
 {
-    private final boolean outputLastOnly;
     private final OutputCondition outputCondition;
     private final boolean outputSnapshot;
 
     // Posted events in ordered form (for applying to aggregates) and summarized per type
     private List<EventBean> newEventsList = new ArrayList<EventBean>();
-	private List<EventBean> oldEventsList = new ArrayList<EventBean>();    
+	private List<EventBean> oldEventsList = new ArrayList<EventBean>();
 	private Set<MultiKey<EventBean>> newEventsSet = new LinkedHashSet<MultiKey<EventBean>>();
 	private Set<MultiKey<EventBean>> oldEventsSet = new LinkedHashSet<MultiKey<EventBean>>();
 
@@ -38,13 +37,17 @@ public class OutputProcessViewPolicy extends OutputProcessView
      * @param streamCount is the number of streams, indicates whether or not this view participates in a join
      * @param outputLimitSpec is the specification for limiting output (the output condition and the result set processor)
      * @param statementContext is the services the output condition may depend on
+     * @param isInsertInto is true if the statement is a insert-into
+     * @param outputStrategy is the method to use to produce output
      */
     public OutputProcessViewPolicy(ResultSetProcessor resultSetProcessor,
-    					  int streamCount,
+                          OutputStrategy outputStrategy,
+                          boolean isInsertInto,
+                          int streamCount,
     					  OutputLimitSpec outputLimitSpec,
     					  StatementContext statementContext)
     {
-        super(resultSetProcessor);
+        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext.getStatementResultService());
         log.debug(".ctor");
 
     	if(streamCount < 1)
@@ -54,7 +57,6 @@ public class OutputProcessViewPolicy extends OutputProcessView
 
     	OutputCallback outputCallback = getCallbackToLocal(streamCount);
     	this.outputCondition = statementContext.getOutputConditionFactory().createCondition(outputLimitSpec, statementContext, outputCallback);
-        this.outputLastOnly = (outputLimitSpec != null) && (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.LAST);
         this.outputSnapshot = (outputLimitSpec != null) && (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.SNAPSHOT);
     }
 
@@ -148,19 +150,16 @@ public class OutputProcessViewPolicy extends OutputProcessView
 		EventBean[] newEvents = !newEventsList.isEmpty() ? newEventsList.toArray(new EventBean[0]) : null;
 		EventBean[] oldEvents = !oldEventsList.isEmpty() ? oldEventsList.toArray(new EventBean[0]) : null;
 
-		if(resultSetProcessor != null)
-		{
-			// Process the events and get the result
-			Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processViewResult(newEvents, oldEvents);
-			newEvents = newOldEvents != null ? newOldEvents.getFirst() : null;
-			oldEvents = newOldEvents != null ? newOldEvents.getSecond() : null;
-		}
-		else if(outputLastOnly)
-		{
-			// Keep only the last event, if there is one
-			newEvents = newEvents != null ? new EventBean[] { newEvents[newEvents.length - 1] } : null;
-			oldEvents = oldEvents != null ? new EventBean[] { oldEvents[oldEvents.length - 1] } : null;
-		}
+        boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
+        boolean isGenerateNatural = statementResultService.isMakeNatural();
+
+        // Process the events and get the result
+        Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processViewResult(newEvents, oldEvents, isGenerateSynthetic);
+
+        if ((!isGenerateSynthetic) && (!isGenerateNatural))
+        {
+            return;
+        }
 
         if (outputSnapshot)
         {
@@ -180,25 +179,23 @@ public class OutputProcessViewPolicy extends OutputProcessView
                 newEvents = null;
                 oldEvents = null;
             }
+            newOldEvents = new Pair<EventBean[], EventBean[]>(newEvents, oldEvents); 
         }
 
         if(doOutput)
 		{
-			output(forceUpdate, newEvents, oldEvents);
+			output(forceUpdate, newOldEvents);
 		}
 		resetEventBatches();
 	}
 
-	private void output(boolean forceUpdate, EventBean[] newEvents, EventBean[] oldEvents)
+	private void output(boolean forceUpdate, Pair<EventBean[], EventBean[]> results)
 	{
-		if(newEvents != null || oldEvents != null)
-		{
-			updateChildren(newEvents, oldEvents);
-		}
-		else if(forceUpdate)
-		{
-			updateChildren(null, null);
-		}
+        // Child view can be null in replay from named window
+        if (childView != null)
+        {
+            outputStrategy.output(forceUpdate, results, childView);
+        }
 	}
 
 	private void resetEventBatches()
@@ -220,19 +217,20 @@ public class OutputProcessViewPolicy extends OutputProcessView
 	{
 		log.debug(".continueOutputProcessingJoin");
 
-		EventBean[] newEvents = null;
-		EventBean[] oldEvents = null;
+        boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
+        boolean isGenerateNatural = statementResultService.isMakeNatural();
 
-		Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEventsSet, oldEventsSet);
-		if (newOldEvents != null)
-		{
-			newEvents = newOldEvents.getFirst();
-			oldEvents = newOldEvents.getSecond();
-		}
+        // Process the events and get the result
+        Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEventsSet, oldEventsSet, isGenerateSynthetic);
+
+        if ((!isGenerateSynthetic) && (!isGenerateNatural))
+        {
+            return;
+        }
 
 		if(doOutput)
 		{
-			output(forceUpdate, newEvents, oldEvents);
+			output(forceUpdate, newOldEvents);
 		}
 		resetEventBatches();
 	}

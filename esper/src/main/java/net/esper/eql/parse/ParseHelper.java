@@ -8,18 +8,19 @@
 package net.esper.eql.parse;
 
 import java.io.StringReader;
+import java.io.IOException;
+import java.util.Stack;
 
 import net.esper.client.EPException;
-import net.esper.eql.generated.EQLBaseWalker;
-import net.esper.eql.generated.EQLStatementLexer;
-import net.esper.eql.generated.EQLStatementParser;
-import net.esper.util.DebugFacility;
+import net.esper.eql.generated.EsperEPL2GrammarParser;
+import net.esper.eql.generated.EsperEPL2GrammarLexer;
+import net.esper.antlr.NoCaseSensitiveStream;
+import net.esper.antlr.ASTUtil;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import antlr.*;
-import antlr.collections.AST;
+import org.antlr.runtime.tree.Tree;
+import org.antlr.runtime.*;
 
 /**
  * Helper class for parsing an expression and walking a parse tree.
@@ -33,7 +34,7 @@ public class ParseHelper
      * @param walkRuleSelector - walk rule
      * @param expression - the expression we are walking in string form
      */
-    public static void walk(AST ast, EQLBaseWalker walker, WalkRuleSelector walkRuleSelector, String expression)
+    public static void walk(Tree ast, EQLTreeWalker walker, WalkRuleSelector walkRuleSelector, String expression)
     {
         // Walk tree
         try
@@ -43,17 +44,30 @@ public class ParseHelper
                 log.debug(".walk Walking AST using walker " + walker.getClass().getName());
             }
 
-            walkRuleSelector.invokeWalkRule(walker, ast);
+            walkRuleSelector.invokeWalkRule(walker);
 
             if (log.isDebugEnabled())
             {
                 log.debug(".walk AST tree after walking");
-                DebugFacility.dumpAST(ast);
+                ASTUtil.dumpAST(ast);
+            }
+        }
+        catch (RuntimeException e)
+        {
+            log.info("Error walking statement [" + expression + "]", e);
+            if (e.getCause() instanceof RecognitionException)
+            {
+                throw EPStatementSyntaxException.convert((RecognitionException)e.getCause(), expression, walker);
+            }
+            else
+            {
+                throw e;
             }
         }
         catch (RecognitionException e)
         {
-            throw EPStatementSyntaxException.convert(e, expression);
+            log.info("Error walking statement [" + expression + "]", e);
+            throw EPStatementSyntaxException.convert(e, expression, walker);
         }
     }
 
@@ -64,79 +78,58 @@ public class ParseHelper
      * @return AST - syntax tree
      * @throws EPException when the AST could not be parsed
      */
-    public static AST parse(String expression, ParseRuleSelector parseRuleSelector) throws EPException
+    public static Tree parse(String expression, ParseRuleSelector parseRuleSelector) throws EPException
     {
         if (log.isDebugEnabled())
         {
             log.debug(".parse Parsing expr=" + expression);
         }
 
-        EQLStatementLexer lexer = new EQLStatementLexer(new StringReader(expression));
-        EQLStatementParser parser = new EQLStatementParser(lexer);
-
+        CharStream input;
         try
         {
-            parseRuleSelector.invokeParseRule(parser);
+            input = new NoCaseSensitiveStream(new StringReader(expression));
         }
-        catch(MismatchedTokenException mte)
+        catch (IOException ex)
         {
-            if(mte.token.getText() == null)
-            {
-                throw EPStatementSyntaxException.convertEndOfInput(mte, EQLStatementParser._tokenNames[mte.expecting], expression);
-            }
-            else
-            {
-                throw EPStatementSyntaxException.convert(mte, expression);
-            }
-        }
-        catch (TokenStreamRecognitionException e)
-        {
-            if (e.recog instanceof MismatchedCharException)
-            {
-                MismatchedCharException mme = (MismatchedCharException) e.recog;
-                // indicates EOF char
-                if (mme.foundChar == 65535)
-                {
-                    char expected = (char) mme.expecting;
-                    String wrapped = "'" + Character.toString(expected) + "'";
-                    if (expected == '\'')
-                    {
-                        wrapped = "a singe quote \"'\"";
-                    }
-                    throw EPStatementSyntaxException.convertEndOfInput(mme, wrapped, expression);
-                }
-            }
-            throw EPStatementSyntaxException.convert(e, expression);
-        }
-        catch (TokenStreamException e)
-        {
-            throw EPStatementSyntaxException.convert(e, expression);
-        }
-        catch (NoViableAltException e)
-        {
-            if(e.token.getText() == null)
-            {
-                throw EPStatementSyntaxException.convertEndOfInput(e, expression);
-            }
-            else
-            {
-                throw EPStatementSyntaxException.convert(e, expression);
-            }
-        }
-        catch (RecognitionException e)
-        {
-            throw EPStatementSyntaxException.convert(e, expression);
+            throw new EPException("IOException parsing expression '" + expression + '\'', ex);
         }
 
-        AST ast = parser.getAST();
+        EsperEPL2GrammarLexer lex = new EsperEPL2GrammarLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lex);
+        EsperEPL2GrammarParser parser = new EsperEPL2GrammarParser(tokens);
+        EsperEPL2GrammarParser.startEventPropertyRule_return r;
+
+        Tree tree;
+        try
+        {
+            tree = parseRuleSelector.invokeParseRule(parser);
+        }
+        catch (RuntimeException e)
+        {
+            log.info("Error parsing statement [" + expression + "]", e);
+            if (e.getCause() instanceof RecognitionException)
+            {
+                throw EPStatementSyntaxException.convert((RecognitionException)e.getCause(), expression, parser);
+            }
+            else
+            {
+                throw e;
+            }
+        }
+        catch (RecognitionException ex)
+        {
+            log.info("Error parsing statement [" + expression + "]", ex);
+            throw EPStatementSyntaxException.convert(ex, expression, parser);
+        }
 
         if (log.isDebugEnabled())
         {
             log.debug(".parse Dumping AST...");
-            DebugFacility.dumpAST(ast);
+            ASTUtil.dumpAST(tree);
         }
 
-        return ast;
+        return tree;
     }
 
     private static Log log = LogFactory.getLog(ParseHelper.class);

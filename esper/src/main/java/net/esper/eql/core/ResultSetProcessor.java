@@ -1,14 +1,13 @@
 package net.esper.eql.core;
 
+import net.esper.collection.MultiKey;
+import net.esper.collection.Pair;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
-import net.esper.collection.Pair;
-import net.esper.collection.MultiKey;
-import net.esper.collection.UniformPair;
 import net.esper.view.Viewable;
 
-import java.util.Set;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Processor for result sets coming from 2 sources. First, out of a simple view (no join).
@@ -29,9 +28,10 @@ public interface ResultSetProcessor
      * old events as specified.
      * @param newData - new events posted by view
      * @param oldData - old events posted by view
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return pair of new events and old events
      */
-    public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData);
+    public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize);
 
     /**
      * For use by joins posting their result, process the event rows that are entered and removed (new and old events).
@@ -39,9 +39,10 @@ public interface ResultSetProcessor
      * old events as specified.
      * @param newEvents - new events posted by join
      * @param oldEvents - old events posted by join
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return pair of new events and old events
      */
-    public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents);
+    public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize);
 
     /**
      * Returns the iterator implementing the group-by and aggregation and order-by logic

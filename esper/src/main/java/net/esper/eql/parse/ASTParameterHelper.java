@@ -8,33 +8,34 @@
 package net.esper.eql.parse;
 
 import net.esper.type.*;
-import net.esper.eql.generated.EqlEvalTokenTypes;
-import antlr.collections.AST;
+import net.esper.eql.generated.EsperEPL2GrammarParser;
 
 import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.antlr.runtime.tree.Tree;
 
 /**
  * Parse AST parameter nodes including constants, arrays, lists.
  * Distinguishes between uniform and non-uniform arrays.
  */
-public class ASTParameterHelper implements EqlEvalTokenTypes
+public class ASTParameterHelper
 {
 
     /**
      * Returns the parse Object for the parameter/constant AST node whose text to parse.
      * @param parameterNode - AST node to parse
+     * @param engineTime the engine current time
      * @return object value
      * @throws ASTWalkException is thrown to indicate a parse error
      */
-    public static Object makeParameter(AST parameterNode) throws ASTWalkException
+    public static Object makeParameter(Tree parameterNode, long engineTime) throws ASTWalkException
     {
-        return parseConstant(parameterNode);
+        return parseConstant(parameterNode, engineTime);
     }
 
-    private static Object parseConstant(AST node) throws ASTWalkException
+    private static Object parseConstant(Tree node, long engineTime) throws ASTWalkException
     {
         if (log.isDebugEnabled())
         {
@@ -43,73 +44,70 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
 
         switch(node.getType())
         {
-            case NUM_INT:
-            case INT_TYPE:
-            case LONG_TYPE:
-            case BOOL_TYPE:
-            case FLOAT_TYPE:
-            case DOUBLE_TYPE:
-            case STRING_TYPE:               return ASTConstantHelper.parse(node);
-            case NUMERIC_PARAM_FREQUENCY:   return makeFrequency(node);
-            case NUMERIC_PARAM_RANGE:       return makeRange(node);
-            case LAST:
-            case LW:
-            case WEEKDAY_OPERATOR:
-            case LAST_OPERATOR:             return makeCronParameter(node);
-            case STAR:                      return new WildcardParameter();
-            case NUMERIC_PARAM_LIST:        return makeList(node);
-            case ARRAY_PARAM_LIST:          return makeArray(node);
-            case TIME_PERIOD:               return makeTimePeriod(node);
+            case EsperEPL2GrammarParser.NUM_INT:
+            case EsperEPL2GrammarParser.INT_TYPE:
+            case EsperEPL2GrammarParser.LONG_TYPE:
+            case EsperEPL2GrammarParser.BOOL_TYPE:
+            case EsperEPL2GrammarParser.FLOAT_TYPE:
+            case EsperEPL2GrammarParser.DOUBLE_TYPE:
+            case EsperEPL2GrammarParser.STRING_TYPE:               return ASTConstantHelper.parse(node);
+            case EsperEPL2GrammarParser.NUMERIC_PARAM_FREQUENCY:   return makeFrequency(node);
+            case EsperEPL2GrammarParser.NUMERIC_PARAM_RANGE:       return makeRange(node);
+            case EsperEPL2GrammarParser.LAST:
+            case EsperEPL2GrammarParser.LW:
+            case EsperEPL2GrammarParser.WEEKDAY_OPERATOR:
+            case EsperEPL2GrammarParser.LAST_OPERATOR:             return makeCronParameter(node, engineTime);
+            case EsperEPL2GrammarParser.STAR:                      return new WildcardParameter();
+            case EsperEPL2GrammarParser.NUMERIC_PARAM_LIST:        return makeList(node, engineTime);
+            case EsperEPL2GrammarParser.ARRAY_PARAM_LIST:          return makeArray(node, engineTime);
+            case EsperEPL2GrammarParser.TIME_PERIOD:               return makeTimePeriod(node, engineTime);
             default:
                 throw new ASTWalkException("Unexpected constant of type " + node.getType() + " encountered");
         }
     }
 
-    private static TimePeriodParameter makeTimePeriod(AST node)
+    private static TimePeriodParameter makeTimePeriod(Tree node, long engineTime)
     {
-        AST child = node.getFirstChild();
         double result = 0;
-
-        while(child != null)
+        for (int i = 0; i < node.getChildCount(); i++)
         {
-            Number numValue = (Number) parseConstant(child.getFirstChild());
+        	Tree child = node.getChild(i);
+            Number numValue = (Number) parseConstant(child.getChild(0), engineTime);
             double partValue = numValue.doubleValue();
 
             switch (child.getType())
             {
-                case MILLISECOND_PART :
+                case EsperEPL2GrammarParser.MILLISECOND_PART :
                     result += partValue / 1000d;
                     break;
-                case SECOND_PART :
+                case EsperEPL2GrammarParser.SECOND_PART :
                     result += partValue;
                     break;
-                case MINUTE_PART :
+                case EsperEPL2GrammarParser.MINUTE_PART :
                     result += 60 * partValue;
                     break;
-                case HOUR_PART :
+                case EsperEPL2GrammarParser.HOUR_PART :
                     result += 60 * 60 * partValue;
                     break;
-                case DAY_PART :
+                case EsperEPL2GrammarParser.DAY_PART :
                     result += 24 * 60 * 60 * partValue;
                     break;
                 default:
                     throw new IllegalStateException("Illegal part of interval encountered, type=" + child.getType() + " text=" + child.getText());
             }
-
-            child = child.getNextSibling();
         }
 
         return new TimePeriodParameter(result);
     }
 
-    private static Object makeList(AST node) throws ASTWalkException
+    private static Object makeList(Tree node, long engineTime) throws ASTWalkException
     {
         ListParameter list = new ListParameter();
 
-        AST child = node.getFirstChild();
-        while(child != null)
+        for (int i = 0; i < node.getChildCount(); i++)
         {
-            Object parsedChild = parseConstant(child);
+        	Tree child = node.getChild(i);
+            Object parsedChild = parseConstant(child, engineTime);
 
             if (parsedChild instanceof Integer)
             {
@@ -119,44 +117,43 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
             {
                 list.add((NumberSetParameter) parsedChild);
             }
-            child = child.getNextSibling();
         }
 
         return list;
     }
 
-    private static Object makeFrequency(AST node)
+    private static Object makeFrequency(Tree node)
     {
-        int frequency = IntValue.parseString(node.getFirstChild().getText());
+        int frequency = IntValue.parseString(node.getChild(0).getText());
         return new FrequencyParameter(frequency);
     }
 
-    private static Object makeRange(AST node)
+    private static Object makeRange(Tree node)
     {
-        int low = IntValue.parseString(node.getFirstChild().getText());
-        int high = IntValue.parseString(node.getFirstChild().getNextSibling().getText());
+        int low = IntValue.parseString(node.getChild(0).getText());
+        int high = IntValue.parseString(node.getChild(1).getText());
         return new RangeParameter(low, high);
     }
 
-    private static Object makeCronParameter(AST node)
+    private static Object makeCronParameter(Tree node, long engineTime)
     {
-       if (node.getFirstChild() == null) {
-           return new CronParameter(node.getText(), null);
-       } else {
-        return new CronParameter(node.getText(), node.getFirstChild().getText());
+       if (node.getChild(0) == null) {
+          return new CronParameter(node.getType(), null, engineTime);
+       }
+       else {
+          return new CronParameter(node.getType(), node.getChild(0).getText(), engineTime);
        }
     }
 
-    private static Object makeArray(AST node) throws ASTWalkException
+    private static Object makeArray(Tree node, long engineTime) throws ASTWalkException
     {
         // Determine the distinct node types in the AST
         Set<Integer> nodeTypes = new HashSet<Integer>();
-        AST child = node.getFirstChild();
 
-        while(child != null)
+        for (int i = 0; i < node.getChildCount(); i++)
         {
-            nodeTypes.add(child.getType());
-            child = child.getNextSibling();
+        	Tree childNode = node.getChild(i);
+            nodeTypes.add(childNode.getType());
         }
 
         if (nodeTypes.isEmpty())
@@ -169,40 +166,36 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
         }
         else
         {
-            return makeNonUniform(node);
+            return makeNonUniform(node, engineTime);
         }
     }
 
-    private static Object makeNonUniform(AST node) throws ASTWalkException
+    private static Object makeNonUniform(Tree node, long engineTime) throws ASTWalkException
     {
-        int count = node.getNumberOfChildren();
+        int count = node.getChildCount();
         Object[] result = new Object[count];
 
-        AST child = node.getFirstChild();
-        int index = 0;
-        while(child != null)
+        for (int i = 0; i < node.getChildCount(); i++)
         {
-            result[index++] = parseConstant(child);
-            child = child.getNextSibling();
+        	Tree child = node.getChild(i);
+            result[i] = parseConstant(child, engineTime);
         }
 
         return result;
     }
 
-    private static Object makeUniform(AST node) throws ASTWalkException
+    private static Object makeUniform(Tree node) throws ASTWalkException
     {
-        int count = node.getNumberOfChildren();
+        int count = node.getChildCount();
         String[] values = new String[count];
 
-        AST child = node.getFirstChild();
-        int index = 0;
-        while(child != null)
+        for (int i = 0; i < node.getChildCount(); i++)
         {
-            values[index++] = child.getText();
-            child = child.getNextSibling();
+        	Tree child = node.getChild(i);
+            values[i] = child.getText();
         }
 
-        return parseStringArray(node.getFirstChild().getType(), values);
+        return parseStringArray(node.getChild(0).getType(), values);
     }
 
     private static Object parseStringArray(int nodeType, String[] nodeValues) throws ASTWalkException
@@ -214,12 +207,12 @@ public class ASTParameterHelper implements EqlEvalTokenTypes
 
         switch(nodeType)
         {
-            case INT_TYPE:  return IntValue.parseString(nodeValues);
-            case LONG_TYPE:  return LongValue.parseString(nodeValues);
-            case BOOL_TYPE:  return BoolValue.parseString(nodeValues);
-            case FLOAT_TYPE:  return FloatValue.parseString(nodeValues);
-            case DOUBLE_TYPE:  return DoubleValue.parseString(nodeValues);
-            case STRING_TYPE:  return StringValue.parseString(nodeValues);
+            case EsperEPL2GrammarParser.INT_TYPE:  return IntValue.parseString(nodeValues);
+            case EsperEPL2GrammarParser.LONG_TYPE:  return LongValue.parseString(nodeValues);
+            case EsperEPL2GrammarParser.BOOL_TYPE:  return BoolValue.parseString(nodeValues);
+            case EsperEPL2GrammarParser.FLOAT_TYPE:  return FloatValue.parseString(nodeValues);
+            case EsperEPL2GrammarParser.DOUBLE_TYPE:  return DoubleValue.parseString(nodeValues);
+            case EsperEPL2GrammarParser.STRING_TYPE:  return StringValue.parseString(nodeValues);
             default:
                 throw new IllegalStateException("Unexpected constant of type " + nodeType + " encountered");
         }

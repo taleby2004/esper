@@ -11,6 +11,7 @@ import net.esper.eql.expression.ExprNode;
 import net.esper.eql.expression.ExprSubselectNode;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Specification object representing a complete EQL statement including all EQL constructs.
@@ -22,7 +23,7 @@ public class StatementSpecCompiled
     private final CreateVariableDesc createVariableDesc;
     private final InsertIntoDesc insertIntoDesc;
     private final SelectClauseStreamSelectorEnum selectStreamDirEnum;
-    private final SelectClauseSpec selectClauseSpec;
+    private final SelectClauseSpecCompiled selectClauseSpec;
     private final List<StreamSpecCompiled> streamSpecs;
     private final List<OuterJoinDesc> outerJoinDescList;
     private ExprNode filterExprRootNode;
@@ -56,7 +57,7 @@ public class StatementSpecCompiled
                                  CreateVariableDesc createVariableDesc,
                                  InsertIntoDesc insertIntoDesc,
                                  SelectClauseStreamSelectorEnum selectClauseStreamSelectorEnum,
-                                 SelectClauseSpec selectClauseSpec,
+                                 SelectClauseSpecCompiled selectClauseSpec,
                                  List<StreamSpecCompiled> streamSpecs,
                                  List<OuterJoinDesc> outerJoinDescList,
                                  ExprNode filterExprRootNode,
@@ -82,6 +83,28 @@ public class StatementSpecCompiled
         this.orderByList = orderByList;
         this.subSelectExpressions = subSelectExpressions;
         this.hasVariables = hasVariables;
+    }
+
+    /**
+     * Ctor.
+     */
+    public StatementSpecCompiled()
+    {
+        onTriggerDesc = null;
+        createWindowDesc = null;
+        createVariableDesc = null;
+        insertIntoDesc = null;
+        selectStreamDirEnum = SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH;
+        selectClauseSpec = new SelectClauseSpecCompiled();
+        streamSpecs = new ArrayList<StreamSpecCompiled>();
+        outerJoinDescList = new ArrayList<OuterJoinDesc>();
+        filterExprRootNode = null;
+        groupByExpressions = new ArrayList<ExprNode>();
+        havingExprRootNode = null;
+        outputLimitSpec = null;
+        orderByList = new ArrayList<OrderByItem>();
+        subSelectExpressions = new ArrayList<ExprSubselectNode>();
+        hasVariables = false;
     }
 
     /**
@@ -115,7 +138,7 @@ public class StatementSpecCompiled
      * Returns SELECT-clause list of expressions.
      * @return list of expressions and optional name
      */
-    public SelectClauseSpec getSelectClauseSpec()
+    public SelectClauseSpecCompiled getSelectClauseSpec()
     {
         return selectClauseSpec;
     }

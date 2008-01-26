@@ -1,29 +1,29 @@
 package net.esper.eql.parse;
 
-import antlr.CommonAST;
-import antlr.collections.AST;
 import junit.framework.TestCase;
-import net.esper.eql.generated.EqlEvalTokenTypes;
+import net.esper.eql.generated.EsperEPL2GrammarParser;
+import org.antlr.runtime.CommonToken;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 
-public class TestASTConstantHelper extends TestCase implements EqlEvalTokenTypes
+public class TestASTConstantHelper extends TestCase
 {
     public void testParse()
     {
-        assertEquals(5, ASTConstantHelper.parse(makeAST(NUM_INT, "5")));
-        assertEquals(-1, ASTConstantHelper.parse(makeAST(INT_TYPE, "-1")));
-        assertEquals(35983868567L, ASTConstantHelper.parse(makeAST(LONG_TYPE, "35983868567")));
-        assertEquals(1.45656f, ASTConstantHelper.parse(makeAST(FLOAT_TYPE, "1.45656")));
-        assertEquals(-3.346456456d, ASTConstantHelper.parse(makeAST(DOUBLE_TYPE, "-3.346456456")));
-        assertEquals("a", ASTConstantHelper.parse(makeAST(STRING_TYPE, "'a'")));
-        assertEquals(true, ASTConstantHelper.parse(makeAST(BOOL_TYPE, "true")));
-        assertNull(ASTConstantHelper.parse(makeAST(NULL_TYPE, null)));
+        assertEquals(5, ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.NUM_INT, "5")));
+        assertEquals(-1, ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.INT_TYPE, "-1")));
+        assertEquals(35983868567L, ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.LONG_TYPE, "35983868567")));
+        assertEquals(1.45656f, ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.FLOAT_TYPE, "1.45656")));
+        assertEquals(-3.346456456d, ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.DOUBLE_TYPE, "-3.346456456")));
+        assertEquals("a", ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.STRING_TYPE, "'a'")));
+        assertEquals(true, ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.BOOL_TYPE, "true")));
+        assertNull(ASTConstantHelper.parse(makeAST(EsperEPL2GrammarParser.NULL_TYPE, null)));
     }
 
-    private AST makeAST(int type, String text)
+    private Tree makeAST(int type, String text)
     {
-        AST ast = new CommonAST();
-        ast.setType(type);
-        ast.setText(text);
+        CommonTree ast = new CommonTree();
+        ast.token = new CommonToken(type, text);
         return ast;
     }
 }

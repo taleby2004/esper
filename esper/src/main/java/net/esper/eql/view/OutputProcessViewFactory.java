@@ -1,53 +1,66 @@
 package net.esper.eql.view;
 
-import net.esper.view.ViewSupport;
-import net.esper.eql.join.JoinSetIndicator;
-import net.esper.eql.core.ResultSetProcessor;
-import net.esper.eql.spec.OutputLimitSpec;
-import net.esper.eql.expression.ExprValidationException;
-import net.esper.event.EventBean;
-import net.esper.event.EventType;
-import net.esper.collection.MultiKey;
-import net.esper.collection.Pair;
-import net.esper.collection.TransformEventIterator;
-import net.esper.collection.TransformEventMethod;
+import net.esper.core.InternalEventRouter;
 import net.esper.core.StatementContext;
-
-import java.util.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import net.esper.eql.core.ResultSetProcessor;
+import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.spec.OutputLimitSpec;
+import net.esper.eql.spec.SelectClauseStreamSelectorEnum;
+import net.esper.eql.spec.StatementSpecCompiled;
 
 /**
  * Factory for output processing views.
- * <p>
- *
  */
 public class OutputProcessViewFactory
 {
     /**
      * Creates an output processor view depending on the presence of output limiting requirements.
      * @param resultSetProcessor is the processing for select-clause and grouping
-     * @param streamCount is the number of streams
-     * @param outputLimitSpec is the output rate limiting requirements
      * @param statementContext is the statement-level services
+     * @param internalEventRouter service for routing events internally
+     * @param statementSpec the statement specification
      * @return output processing view
      * @throws ExprValidationException to indicate 
      */
     public static OutputProcessView makeView(ResultSetProcessor resultSetProcessor,
-    					  int streamCount,
-    					  OutputLimitSpec outputLimitSpec,
-    					  StatementContext statementContext)
+                          StatementSpecCompiled statementSpec,
+                          StatementContext statementContext,
+                          InternalEventRouter internalEventRouter)
             throws ExprValidationException
     {
+        boolean isRouted = false;
+        if (statementSpec.getInsertIntoDesc() != null)
+        {
+            isRouted = true;
+        }
+
+        OutputStrategy outputStrategy;
+        if ((statementSpec.getInsertIntoDesc() != null) || statementSpec.getSelectStreamSelectorEnum() != SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH)
+        {
+            boolean isRouteRStream = false;
+            if (statementSpec.getInsertIntoDesc() != null)
+            {
+                isRouteRStream = !statementSpec.getInsertIntoDesc().isIStream();
+            }
+
+            outputStrategy = new OutputStrategyPostProcess(isRouted, isRouteRStream, statementSpec.getSelectStreamSelectorEnum(), internalEventRouter, statementContext.getEpStatementHandle());
+        }
+        else
+        {
+            outputStrategy = new OutputStrategySimple();
+        }
+
+        // Do we need to enforce an output policy?
+        int streamCount = statementSpec.getStreamSpecs().size();
+        OutputLimitSpec outputLimitSpec = statementSpec.getOutputLimitSpec();
+
         try
         {
-            // Do we need to enforce an output policy?
             if (outputLimitSpec != null)
             {
-                return new OutputProcessViewPolicy(resultSetProcessor, streamCount, outputLimitSpec, statementContext);
+                return new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext);
             }
-            return new OutputProcessViewDirect(resultSetProcessor);
+            return new OutputProcessViewDirect(resultSetProcessor, outputStrategy, isRouted, statementContext.getStatementResultService());
         }
         catch (RuntimeException ex)
         {

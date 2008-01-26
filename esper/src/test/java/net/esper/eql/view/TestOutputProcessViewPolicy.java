@@ -22,9 +22,10 @@ public class TestOutputProcessViewPolicy extends TestCase
 
     public void setUp() throws Exception
     {
+        OutputStrategy outputStrategy = new OutputStrategySimple();
         resultSetProcessor = new SupportResultSetProcessor();
-        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, 1, null, SupportStatementContextFactory.makeContext());
-        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, 2, null, SupportStatementContextFactory.makeContext());
+        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 1, null, SupportStatementContextFactory.makeContext());
+        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 2, null, SupportStatementContextFactory.makeContext());
         
         childViewNoJoin = new SupportSchemaNeutralView();
         outputProcessViewUpdate.addView(childViewNoJoin);
@@ -45,9 +46,6 @@ public class TestOutputProcessViewPolicy extends TestCase
         newData[0] = SupportEventBeanFactory.createObject(new SupportBean());
 
         outputProcessViewUpdate.update(newData, oldData);
-
-        assertSame(newData[0], childViewNoJoin.getLastNewData()[0]);
-        assertSame(oldData[0], childViewNoJoin.getLastOldData()[0]);
     }
 
     public void testProcess()
@@ -58,9 +56,6 @@ public class TestOutputProcessViewPolicy extends TestCase
         newData[0] = SupportEventBeanFactory.createObject(new SupportBean());
 
         outputProcessViewProcess.process(makeEventSet(newData[0]), makeEventSet(oldData[0]));
-
-        assertSame(newData[0], childViewJoin.getLastNewData()[0]);
-        assertSame(oldData[0], childViewJoin.getLastOldData()[0]);
     }
 
     private Set<MultiKey<EventBean>> makeEventSet(EventBean event)

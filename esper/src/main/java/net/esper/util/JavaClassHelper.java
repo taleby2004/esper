@@ -12,8 +12,7 @@ import net.esper.type.*;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import antlr.collections.AST;
+import java.util.Set;
 
 /**
  * Helper for questions about Java classes such as
@@ -64,6 +63,41 @@ public class JavaClassHelper
             return Long.class;
         }
         return clazz;
+    }
+
+    /**
+     * Returns a comma-separated parameter type list in readable form,
+     * considering arrays and null-type parameters.
+     * @param parameters is the parameter types to render
+     * @return rendered list of parameters
+     */
+    public static String getParameterAsString(Class[] parameters)
+    {
+        StringBuilder builder = new StringBuilder();
+        String delimiterComma = ", ";
+        String delimiter = "";
+        for (Class param : parameters)
+        {
+            builder.append(delimiter);
+            builder.append(getParameterAsString(param));
+            delimiter = delimiterComma;
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Returns a parameter as a string text, allowing null values to represent a null
+     * select expression type.
+     * @param param is the parameter type
+     * @return string representation of parameter
+     */
+    public static String getParameterAsString(Class param)
+    {
+        if (param == null)
+        {
+            return "null (any type)";
+        }
+        return param.getSimpleName();
     }
 
     /**
@@ -160,27 +194,53 @@ public class JavaClassHelper
 
     /**
      * Returns true if 2 classes are assignment compatible.
-     * @param parameterType type to assign from
-     * @param parameterization type to assign to
+     * @param invocationType type to assign from
+     * @param declarationType type to assign to
      * @return true if assignment compatible, false if not
      */
-    public static boolean isAssignmentCompatible(Class parameterType, Class parameterization)
+    public static boolean isAssignmentCompatible(Class invocationType, Class declarationType)
     {
-        if (parameterType.isAssignableFrom(parameterization))
+        if (invocationType == null)
+        {
+            return true;
+        }
+        if (declarationType.isAssignableFrom(invocationType))
         {
             return true;
         }
 
-        if (parameterType.isPrimitive())
+        if (declarationType.isPrimitive())
         {
-            Class parameterWrapperClazz = getBoxedType(parameterType);
+            Class parameterWrapperClazz = getBoxedType(declarationType);
             if (parameterWrapperClazz != null)
             {
-                return parameterWrapperClazz.equals(parameterization);
+                if (parameterWrapperClazz.equals(invocationType))
+                {
+                    return true;
+                }
             }
         }
 
-        return false;
+        if (getBoxedType(invocationType) == declarationType)
+        {
+            return true;
+        }
+
+        Set<Class> widenings = MethodResolver.getWideningConversions().get(declarationType);
+        if (widenings != null)
+        {
+            return widenings.contains(invocationType);
+        }
+
+        if (declarationType.isInterface())
+        {
+            if (isImplementsInterface(invocationType, declarationType))
+            {
+                return true;
+            }
+        }
+        
+        return recursiveIsSuperClass(invocationType, declarationType);
     }
 
     /**
@@ -808,6 +868,28 @@ public class JavaClassHelper
             return true;
         }
         return recursiveSuperclassImplementsInterface(clazz, interfaceClass);
+    }
+
+    private static boolean recursiveIsSuperClass(Class clazz, Class superClass)
+    {
+        if (clazz == null)
+        {
+            return false;
+        }
+        if (clazz.isPrimitive())
+        {
+            return false;
+        }
+        Class mySuperClass = clazz.getSuperclass();
+        if (mySuperClass == superClass)
+        {
+            return true;
+        }
+        if (mySuperClass == Object.class)
+        {
+            return false;
+        }
+        return recursiveIsSuperClass(mySuperClass, superClass);
     }
 
     private static boolean recursiveSuperclassImplementsInterface(Class clazz, Class interfaceClass)

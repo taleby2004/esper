@@ -83,7 +83,8 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
-                plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService, namedWindowService, variableService);
+                plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
+                namedWindowService, variableService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -141,6 +142,10 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         }
         eventAdapterService.setClassLegacyConfigs(classLegacyInfo);
         eventAdapterService.setDefaultPropertyResolutionStyle(configSnapshot.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
+        for (String javaPackage : configSnapshot.getEventTypeAutoAliasPackages())
+        {
+            eventAdapterService.addAutoAliasPackage(javaPackage);    
+        }
 
         // Add from the configuration the Java event class aliases
         Map<String, String> javaClassAliases = configSnapshot.getEventTypeAliases();

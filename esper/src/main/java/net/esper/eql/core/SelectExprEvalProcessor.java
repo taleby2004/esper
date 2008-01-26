@@ -7,18 +7,16 @@
  **************************************************************************************/
 package net.esper.eql.core;
 
-import net.esper.event.*;
-import net.esper.eql.spec.InsertIntoDesc;
-import net.esper.eql.spec.SelectExprElementCompiledSpec;
 import net.esper.eql.expression.ExprNode;
 import net.esper.eql.expression.ExprValidationException;
+import net.esper.eql.spec.InsertIntoDesc;
+import net.esper.eql.spec.SelectClauseExprCompiledSpec;
+import net.esper.event.*;
 import net.esper.util.ExecutionPathDebugLog;
-import net.esper.util.JavaClassHelper;
-
-import java.util.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
 
 /**
  * Processor for select-clause expressions that handles a list of selection items represented by
@@ -46,7 +44,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
      * @param eventAdapterService - service for generating events and handling event types
      * @throws net.esper.eql.expression.ExprValidationException thrown if any of the expressions don't validate
      */
-    public SelectExprEvalProcessor(List<SelectExprElementCompiledSpec> selectionList,
+    public SelectExprEvalProcessor(List<SelectClauseExprCompiledSpec> selectionList,
                                    InsertIntoDesc insertIntoDesc,
                                    boolean isUsingWildcard, 
                                    StreamTypeService typeService, 
@@ -60,7 +58,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             throw new IllegalArgumentException("Empty selection list not supported");
         }
 
-        for (SelectExprElementCompiledSpec entry : selectionList)
+        for (SelectClauseExprCompiledSpec entry : selectionList)
         {
             if (entry.getAssignedName() == null)
             {
@@ -101,7 +99,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         init(selectionList, insertIntoDesc, underlyingType, eventAdapterService);
     }
 
-    private void init(List<SelectExprElementCompiledSpec> selectionList,
+    private void init(List<SelectClauseExprCompiledSpec> selectionList,
                       InsertIntoDesc insertIntoDesc,
                       EventType eventType, 
                       EventAdapterService eventAdapterService)
@@ -196,7 +194,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
     {
         // Evaluate all expressions and build a map of name-value pairs
         Map<String, Object> props = new HashMap<String, Object>();
@@ -227,7 +225,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             EventBean event;
             if(joinWildcardProcessor != null)
             {
-                event = joinWildcardProcessor.process(eventsPerStream, isNewData);
+                event = joinWildcardProcessor.process(eventsPerStream, isNewData, isSynthesize);
             }
             else
             {
@@ -268,7 +266,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
     }
 
     private static void verifyInsertInto(InsertIntoDesc insertIntoDesc,
-                                         List<SelectExprElementCompiledSpec> selectionList)
+                                         List<SelectClauseExprCompiledSpec> selectionList)
         throws ExprValidationException
     {
         // Verify all column names are unique

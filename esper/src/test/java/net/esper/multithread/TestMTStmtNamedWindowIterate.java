@@ -4,11 +4,13 @@ import junit.framework.TestCase;
 import net.esper.client.EPServiceProvider;
 import net.esper.client.EPServiceProviderManager;
 import net.esper.client.EPStatement;
+import net.esper.client.Configuration;
 import net.esper.client.time.TimerControlEvent;
 import net.esper.support.util.SupportMTUpdateListener;
 import net.esper.support.bean.SupportBean;
 import net.esper.support.bean.SupportMarketDataBean;
 import net.esper.support.bean.SupportBean_A;
+import net.esper.support.client.SupportConfigFactory;
 import net.esper.event.EventBean;
 
 import java.util.concurrent.*;
@@ -25,12 +27,14 @@ public class TestMTStmtNamedWindowIterate extends TestCase
 
     public void setUp()
     {
-        engine = EPServiceProviderManager.getDefaultProvider();
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        engine = EPServiceProviderManager.getDefaultProvider(configuration);
         engine.initialize();
         engine.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
         engine.getEPAdministrator().createEQL(
-                "create window MyWindow.std:groupby('string').win:keepall() as select string, longPrimitive from " + SupportBean.class.getName());
+                "create window MyWindow.std:groupby(string).win:keepall() as select string, longPrimitive from " + SupportBean.class.getName());
 
         engine.getEPAdministrator().createEQL(
                 "insert into MyWindow(string, longPrimitive) " +

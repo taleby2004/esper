@@ -23,7 +23,7 @@ public class StatementSpecRaw implements MetaDefItem
     private CreateVariableDesc createVariableDesc;
     private InsertIntoDesc insertIntoDesc;
     private SelectClauseStreamSelectorEnum selectStreamDirEnum = SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH;
-    private SelectClauseSpec selectClauseSpec = new SelectClauseSpec();
+    private SelectClauseSpecRaw selectClauseSpec = new SelectClauseSpecRaw();
     private List<StreamSpecRaw> streamSpecs = new LinkedList<StreamSpecRaw>();
     private List<OuterJoinDesc> outerJoinDescList = new LinkedList<OuterJoinDesc>();
     private ExprNode filterExprRootNode;
@@ -47,7 +47,7 @@ public class StatementSpecRaw implements MetaDefItem
      * Returns SELECT-clause list of expressions.
      * @return list of expressions and optional name
      */
-    public SelectClauseSpec getSelectClauseSpec()
+    public SelectClauseSpecRaw getSelectClauseSpec()
     {
         return selectClauseSpec;
     }
@@ -172,7 +172,7 @@ public class StatementSpecRaw implements MetaDefItem
      * Sets the select clause.
      * @param selectClauseSpec is the new select clause specification
      */
-    public void setSelectClauseSpec(SelectClauseSpec selectClauseSpec)
+    public void setSelectClauseSpec(SelectClauseSpecRaw selectClauseSpec)
     {
         this.selectClauseSpec = selectClauseSpec;
     }

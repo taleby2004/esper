@@ -1,10 +1,12 @@
 package net.esper.type;
 
-import net.esper.type.IntValue;
+import net.esper.eql.generated.EsperEPL2GrammarParser;
+import net.esper.client.EPException;
 
-import java.util.*;
-import java.text.SimpleDateFormat;
 import java.io.StringWriter;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Hold parameters for timer:at.
@@ -43,13 +45,15 @@ public class CronParameter implements NumberSetParameter {
      * Ctor.
      * @param cronOperator is the operator as text
      * @param day is the day text
+     * @param engineTime is the current engine time
      */
-    public CronParameter(String cronOperator, String day) {
+    public CronParameter(int cronOperator, String day, long engineTime) {
         this.operator = assignOperator(cronOperator);
         if (day != null) {
             this.day = IntValue.parseString(day);
-        }
+        }        
         calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(engineTime);
         calendar.setFirstDayOfWeek(FIRST_DAY_OF_WEEK);
     }
 
@@ -190,35 +194,25 @@ public class CronParameter implements NumberSetParameter {
         return true;
     }
 
-    private static CronOperator assignOperator(String name)
+    private static CronOperator assignOperator(int nodeType)
     {
-        if (name.equalsIgnoreCase("last") || (name.equalsIgnoreCase("lastoperator"))) {
+        if ((nodeType == EsperEPL2GrammarParser.LAST) || (nodeType == EsperEPL2GrammarParser.LAST_OPERATOR)) {
             return CronOperator.last;
         }
-        if (name.equalsIgnoreCase("weekdayoperator")) {
+        else if (nodeType == EsperEPL2GrammarParser.WEEKDAY_OPERATOR) {
             return CronOperator.w;
         }
-        if (name.equalsIgnoreCase("lastweekday")) {
+        else if (nodeType == EsperEPL2GrammarParser.LW) {
             return CronOperator.lw;
         }
-        return null;
-    }
-
-    private void printTime() {
-     Date date = calendar.getTime();
-     String aMonth = new SimpleDateFormat("MMM").format(date);
-     String aDay = new SimpleDateFormat("EEE").format(date);
-     System.out.println("This day: "+ aDay + " of " + aMonth + " " + calendar.get(Calendar.YEAR));
+        throw new EPException("Unrecognized cron-operator node type '" + nodeType + "'");
     }
 
     private void setTime() {
-        Date date = new Date();
-        calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         if (month != null) {
           calendar.set(Calendar.MONTH, month);
         }
-        //printTime();
     }
 
 }

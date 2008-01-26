@@ -3,19 +3,19 @@ package net.esper.eql.parse;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.antlr.runtime.tree.Tree;
 import net.esper.support.eql.parse.SupportParserHelper;
 import net.esper.support.bean.SupportBean;
-import net.esper.eql.generated.EqlTokenTypes;
-import antlr.collections.AST;
+import net.esper.eql.generated.EsperEPL2GrammarParser;
 
-public class TestEventPatternParser extends TestCase implements EqlTokenTypes
+public class TestEventPatternParser extends TestCase
 {
     public void testDisplayAST() throws Exception
     {
         String expression = "B(a('aa').b.c[1].d.e(\"ee\")=2)";
 
         log.debug(".testDisplayAST parsing: " + expression);
-        AST ast = parse(expression);
+        Tree ast = parse(expression);
         SupportParserHelper.displayAST(ast);
     }
 
@@ -31,7 +31,7 @@ public class TestEventPatternParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("a(a=2 3)");
         assertIsInvalid("a(a=2a)");
         assertIsInvalid("a(a=\"2)");
-        assertIsInvalid("a(a=1EE5)");
+        assertIsInvalid("a(a=1x5)");
         assertIsInvalid("a(a=)");
         assertIsInvalid("a(=2)");
         assertIsInvalid("a(a=2b=3)");
@@ -87,12 +87,11 @@ public class TestEventPatternParser extends TestCase implements EqlTokenTypes
 
         // where a:b
         assertIsInvalid("a() where a:b(a=b)");
-        assertIsInvalid("a() where a:b(A)");
         assertIsInvalid("a() where a:b(g=5l)");
         assertIsInvalid("a() where a:b(33s)");
         assertIsInvalid("a() where a:b(m=3.3)");
         assertIsInvalid("a() where a:b('+1E4)");
-        assertIsInvalid("a() where a:b(o22L2)");
+        assertIsInvalid("a() where a:b(22L2)");
         assertIsInvalid("a() where a:b(x=2)");
         assertIsInvalid("a() where a:b(2) or b() every where a:b(3)");
         assertIsInvalid("a() where a:b(2) or b() not where a:b(3)");
@@ -107,7 +106,7 @@ public class TestEventPatternParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("a() timer:interval(10)");
         assertIsInvalid("timer:interval(10) b()");
         assertIsInvalid("timer:interval(10) -> b() or timer:interval(20))");
-        assertIsInvalid("timer:interval(x)");
+        assertIsInvalid("timer:interval(1x)");
         assertIsInvalid("a() or timer:interval(10) b()");
         assertIsInvalid("unmatched timer:interval()");
 
@@ -118,22 +117,22 @@ public class TestEventPatternParser extends TestCase implements EqlTokenTypes
         assertIsInvalid("timer:at(*,*,*,*,)");
         assertIsInvalid("timer:at(*,*,*,*,*,)");
         assertIsInvalid("timer:at(*,*,*,*,*,)");
-        assertIsInvalid("timer:at(*,*,*,*,G)");
-        assertIsInvalid("timer:at(a,*,*,*,*)");
+        assertIsInvalid("timer:at(*,*,*,*,1G)");
+        assertIsInvalid("timer:at(1a,*,*,*,*)");
         assertIsInvalid("timer:at(*,*,=2*,*,*)");
-        assertIsInvalid("timer:at(*,*,*,*,a=3) or b()");
+        assertIsInvalid("timer:at(*,*,*,*,1a=3) or b()");
         assertIsInvalid("timer:at(*,[],*,*,*)");
-        assertIsInvalid("timer:at(*,[a],*,*,*)");
-        assertIsInvalid("timer:at(*,[E1],*,*,*)");
-        assertIsInvalid("timer:at(*,[a=3],*,*,*)");
+        assertIsInvalid("timer:at(*,[1a],*,*,*)");
+        assertIsInvalid("timer:at(*,[],*,*,*)");
+        assertIsInvalid("timer:at(*,[1a=3],*,*,*)");
         assertIsInvalid("timer:at(*,[2,,5],*,*,*)");
         assertIsInvalid("timer:at(*,[,2,5,7],*,*,*)");
         assertIsInvalid("timer:at(*,[2,5,7,],*,*,*)");
         assertIsInvalid("timer:at(*,[2,5][2,4],*,*,*)");
-        assertIsInvalid("timer:at(*,*,x:y,*,*)");
-        assertIsInvalid("timer:at(*,*,1:y,*,*)");
+        assertIsInvalid("timer:at(*,*,1x:1y,*,*)");
+        assertIsInvalid("timer:at(*,*,1:1y,*,*)");
         assertIsInvalid("timer:at(*,*,1.0:2,*,*)");
-        assertIsInvalid("timer:at(*,*,x:2,*,*)");
+        assertIsInvalid("timer:at(*,*,1x:2,*,*)");
         assertIsInvalid("timer:at(*,*,:2,*,*)");
         assertIsInvalid("timer:at(*,*,2:,*,*)");
         assertIsInvalid("timer:at(*,*,:,*,*)");
@@ -369,40 +368,40 @@ public class TestEventPatternParser extends TestCase implements EqlTokenTypes
         String expression = "a(m=1) -> not b() or every c() and d() where a:b (5) and timer:interval(10)";
 
         log.debug(".testParserNodeGeneration parsing: " + expression);
-        AST ast = parse(expression);
+        Tree ast = parse(expression);
         SupportParserHelper.displayAST(ast);
 
-        assertTrue(ast.getType() == FOLLOWED_BY_EXPR);
+        assertTrue(ast.getType() == EsperEPL2GrammarParser.FOLLOWED_BY_EXPR);
 
         // 2 Children: filter a  and  or-subexpression with the rest
-        assertTrue(ast.getNumberOfChildren() == 2);
-        assertTrue(ast.getFirstChild().getType() == EVENT_FILTER_EXPR);
+        assertTrue(ast.getChildCount() == 2);
+        assertTrue(ast.getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
 
         // Assert on or-subexpression
-        AST orExpr = ast.getFirstChild().getNextSibling();
-        assertTrue(orExpr.getType() == OR_EXPR);
-        assertTrue(orExpr.getNumberOfChildren() == 2);
-        assertTrue(orExpr.getFirstChild().getType() == NOT_EXPR);
-        assertTrue(orExpr.getFirstChild().getNumberOfChildren() == 1);
-        assertTrue(orExpr.getFirstChild().getFirstChild().getType() == EVENT_FILTER_EXPR);
+        Tree orExpr = ast.getChild(1);
+        assertTrue(orExpr.getType() == EsperEPL2GrammarParser.OR_EXPR);
+        assertTrue(orExpr.getChildCount() == 2);
+        assertTrue(orExpr.getChild(0).getType() == EsperEPL2GrammarParser.NOT_EXPR);
+        assertTrue(orExpr.getChild(0).getChildCount() == 1);
+        assertTrue(orExpr.getChild(0).getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
 
         // Assert on and-subexpression
-        AST andExpr = orExpr.getFirstChild().getNextSibling();
-        assertTrue(andExpr.getType() == AND_EXPR);
-        assertTrue(andExpr.getNumberOfChildren() == 3);
-        assertTrue(andExpr.getFirstChild().getType() == EVERY_EXPR);
-        assertTrue(andExpr.getFirstChild().getNumberOfChildren() == 1);
-        assertTrue(andExpr.getFirstChild().getFirstChild().getType() == EVENT_FILTER_EXPR);
+        Tree andExpr = orExpr.getChild(1);
+        assertTrue(andExpr.getType() == EsperEPL2GrammarParser.AND_EXPR);
+        assertTrue(andExpr.getChildCount() == 3);
+        assertTrue(andExpr.getChild(0).getType() == EsperEPL2GrammarParser.EVERY_EXPR);
+        assertTrue(andExpr.getChild(0).getChildCount() == 1);
+        assertTrue(andExpr.getChild(0).getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
 
         // Assert on where a:b and timer:interval sub-expressions
-        AST guardPostFix = andExpr.getFirstChild().getNextSibling();
-        assertTrue(guardPostFix.getNumberOfChildren() == 4);
-        assertTrue(guardPostFix.getFirstChild().getType() == EVENT_FILTER_EXPR);
-        assertTrue(guardPostFix.getFirstChild().getNextSibling().getType() == IDENT);
+        Tree guardPostFix = andExpr.getChild(1);
+        assertTrue(guardPostFix.getChildCount() == 4);
+        assertTrue(guardPostFix.getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
+        assertTrue(guardPostFix.getChild(1).getType() == EsperEPL2GrammarParser.IDENT);
 
-        AST timerIntervalExpr = guardPostFix.getNextSibling();
-        assertTrue(timerIntervalExpr.getNumberOfChildren() == 3);
-        assertTrue(timerIntervalExpr.getFirstChild().getType() == IDENT);
+        Tree timerIntervalExpr = andExpr.getChild(2);
+        assertTrue(timerIntervalExpr.getChildCount() == 3);
+        assertTrue(timerIntervalExpr.getChild(0).getType() == EsperEPL2GrammarParser.IDENT);
 
         // The tree generated....
         /*
@@ -437,7 +436,7 @@ followedByExpression [18]
     private void assertIsValid(String text) throws Exception
     {
         log.debug(".assertIsValid Trying text=" + text);
-        AST ast = parse(text);
+        Tree ast = parse(text);
         log.debug(".assertIsValid success, tree walking...");
 
         SupportParserHelper.displayAST(ast);
@@ -459,7 +458,7 @@ followedByExpression [18]
         }
     }
 
-    private AST parse(String expression) throws Exception
+    private Tree parse(String expression) throws Exception
     {
         return SupportParserHelper.parsePattern(expression);
     }

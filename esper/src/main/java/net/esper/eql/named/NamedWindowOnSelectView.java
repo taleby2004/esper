@@ -5,6 +5,7 @@ import net.esper.collection.MultiKey;
 import net.esper.collection.Pair;
 import net.esper.core.EPStatementHandle;
 import net.esper.core.InternalEventRouter;
+import net.esper.core.StatementResultService;
 import net.esper.eql.core.ResultSetProcessor;
 import net.esper.event.EventBean;
 import net.esper.event.EventType;
@@ -24,8 +25,9 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
     private static final Log log = LogFactory.getLog(NamedWindowOnSelectView.class);
 
     private final InternalEventRouter internalEventRouter;
-    private final ResultSetProcessor optionalResultSetProcessor;
+    private final ResultSetProcessor resultSetProcessor;
     private final EPStatementHandle statementHandle;
+    private final StatementResultService statementResultService;
     private EventBean[] lastResult;
     private Set<MultiKey<EventBean>> oldEvents = new HashSet<MultiKey<EventBean>>();
 
@@ -35,75 +37,77 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
      * @param lookupStrategy for handling trigger events to determine deleted events
      * @param rootView the named window root view
      * @param internalEventRouter for insert-into behavior
-     * @param optionalResultSetProcessor for processing aggregation, having and ordering
+     * @param resultSetProcessor for processing aggregation, having and ordering
      * @param statementHandle required for routing events
      */
     public NamedWindowOnSelectView(StatementStopService statementStopService,
                                    LookupStrategy lookupStrategy,
                                    NamedWindowRootView rootView,
                                    InternalEventRouter internalEventRouter,
-                                   ResultSetProcessor optionalResultSetProcessor,
-                                   EPStatementHandle statementHandle)
+                                   ResultSetProcessor resultSetProcessor,
+                                   EPStatementHandle statementHandle,
+                                   StatementResultService statementResultService)
     {
         super(statementStopService, lookupStrategy, rootView);
         this.internalEventRouter = internalEventRouter;
-        this.optionalResultSetProcessor = optionalResultSetProcessor;
+        this.resultSetProcessor = resultSetProcessor;
         this.statementHandle = statementHandle;
+        this.statementResultService = statementResultService;
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
     {
         EventBean[] newData = null;
 
-        if (optionalResultSetProcessor != null)
-        {
-            // clear state from prior results
-            optionalResultSetProcessor.clear();
+        // clear state from prior results
+        resultSetProcessor.clear();
 
-            // build join result
-            Set<MultiKey<EventBean>> newEvents = new HashSet<MultiKey<EventBean>>();
-            for (int i = 0; i < triggerEvents.length; i++)
+        // build join result
+        Set<MultiKey<EventBean>> newEvents = new HashSet<MultiKey<EventBean>>();
+        for (int i = 0; i < triggerEvents.length; i++)
+        {
+            EventBean triggerEvent = triggerEvents[0];
+            if (matchingEvents != null)
             {
-                EventBean triggerEvent = triggerEvents[0];
-                if (matchingEvents != null)
+                for (int j = 0; j < matchingEvents.length; j++)
                 {
-                    for (int j = 0; j < matchingEvents.length; j++)
-                    {
-                        EventBean[] eventsPerStream = new EventBean[2];
-                        eventsPerStream[0] = matchingEvents[j];
-                        eventsPerStream[1] = triggerEvent;
-                        newEvents.add(new MultiKey<EventBean>(eventsPerStream));
-                    }
+                    EventBean[] eventsPerStream = new EventBean[2];
+                    eventsPerStream[0] = matchingEvents[j];
+                    eventsPerStream[1] = triggerEvent;
+                    newEvents.add(new MultiKey<EventBean>(eventsPerStream));
                 }
             }
-            
-            // process matches
-            Pair<EventBean[], EventBean[]> pair = optionalResultSetProcessor.processJoinResult(newEvents, oldEvents);
-            newData = pair.getFirst();
         }
-        else
-        {
-            newData = matchingEvents;
-        }
+
+        // process matches
+        Pair<EventBean[], EventBean[]> pair = resultSetProcessor.processJoinResult(newEvents, oldEvents, false);
+        newData = pair.getFirst();
 
         if (internalEventRouter != null)
         {
-            internalEventRouter.route(newData, statementHandle);
+            for (int i = 0; i < newData.length; i++)
+            {
+                internalEventRouter.route(newData[i], statementHandle);
+            }
         }
 
         // The on-select listeners receive the events selected
         if ((newData != null) && (newData.length > 0))
         {
-            updateChildren(newData, null);
+            // And post only if we have listeners/subscribers that need the data 
+            if (statementResultService.isMakeNatural() || statementResultService.isMakeSynthetic())
+            {
+                updateChildren(newData, null);
+            }
         }
         lastResult = newData;
     }
 
     public EventType getEventType()
     {
-        if (optionalResultSetProcessor != null)
+        if (resultSetProcessor != null)
         {
-            return optionalResultSetProcessor.getResultEventType();
+            return resultSetProcessor.getResultEventType();
         }
         else
         {

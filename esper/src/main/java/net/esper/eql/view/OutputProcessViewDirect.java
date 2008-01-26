@@ -5,6 +5,7 @@ import net.esper.collection.Pair;
 import net.esper.eql.core.ResultSetProcessor;
 import net.esper.event.EventBean;
 import net.esper.util.ExecutionPathDebugLog;
+import net.esper.core.StatementResultService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,10 +22,13 @@ public class OutputProcessViewDirect extends OutputProcessView
     /**
      * Ctor.
      * @param resultSetProcessor is processing the result set for publishing it out
+     * @param outputStrategy is the execution of output to sub-views or natively
+     * @param isInsertInto is true if the statement is a insert-into
+     * @param statementResultService service for managing listener/subscribers and result generation needs
      */
-    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor)
+    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, OutputStrategy outputStrategy, boolean isInsertInto, StatementResultService statementResultService)
     {
-        super(resultSetProcessor);
+        super(resultSetProcessor, outputStrategy, isInsertInto, statementResultService);
 
         log.debug(".ctor");
         if (resultSetProcessor == null)
@@ -47,15 +51,28 @@ public class OutputProcessViewDirect extends OutputProcessView
                     "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
         }
 
-        Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processViewResult(newData, oldData);
+        boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
+        boolean isGenerateNatural = statementResultService.isMakeNatural();
 
-        EventBean[] newEventArr = newOldEvents != null ? newOldEvents.getFirst() : null;
-        EventBean[] oldEventArr = newOldEvents != null ? newOldEvents.getSecond() : null;
+        Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processViewResult(newData, oldData, isGenerateSynthetic);
 
-        if(newEventArr != null || oldEventArr != null)
+        if ((!isGenerateSynthetic) && (!isGenerateNatural))
         {
-            updateChildren(newEventArr, oldEventArr);
-        }        
+            return;
+        }
+
+        boolean forceOutput = false;
+        if ((newData == null) && (oldData == null) &&
+                ((newOldEvents == null) || (newOldEvents.getFirst() == null && newOldEvents.getSecond() == null)))
+        {
+            forceOutput = true;
+        }
+
+        // Child view can be null in replay from named window
+        if (childView != null)
+        {
+            outputStrategy.output(forceOutput, newOldEvents, childView);
+        }
     }
 
     /**
@@ -72,23 +89,25 @@ public class OutputProcessViewDirect extends OutputProcessView
                     "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
         }
 
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".continueOutputProcessingJoin");
-        }
+        boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
+        boolean isGenerateNatural = statementResultService.isMakeNatural();
 
-        Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEvents, oldEvents);
+        Pair<EventBean[], EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEvents, oldEvents, isGenerateSynthetic);
+
+        if ((!isGenerateSynthetic) && (!isGenerateNatural))
+        {
+            return;
+        }
 
         if (newOldEvents == null)
         {
             return;
         }
-        EventBean[] newEventArr = newOldEvents.getFirst();
-        EventBean[] oldEventArr = newOldEvents.getSecond();
 
-        if (newEventArr != null || oldEventArr != null)
+        // Child view can be null in replay from named window
+        if (childView != null)
         {
-            updateChildren(newEventArr, oldEventArr);
+            outputStrategy.output(false, newOldEvents, childView);
         }
     }
 }

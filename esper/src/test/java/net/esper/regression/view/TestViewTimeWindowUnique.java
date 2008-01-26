@@ -28,7 +28,7 @@ public class TestViewTimeWindowUnique extends TestCase
         // Set up a time window with a unique view attached
         EPStatement windowUniqueView = epService.getEPAdministrator().createEQL(
                 "select * from " + SupportMarketDataBean.class.getName() +
-                ".win:time(3.0).std:unique('symbol')");
+                ".win:time(3.0).std:unique(symbol)");
         windowUniqueView.addListener(listener);
 
         sendTimer(0);

@@ -3,7 +3,6 @@ package net.esper.core;
 import net.esper.client.UpdateListener;
 import net.esper.client.StatementAwareUpdateListener;
 
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
@@ -16,8 +15,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class EPStatementListenerSet
 {
+    Object subscriber;
     CopyOnWriteArraySet<UpdateListener> listeners;
     CopyOnWriteArraySet<StatementAwareUpdateListener> stmtAwareListeners;
+
 
     /**
      * Ctor.
@@ -130,5 +131,23 @@ public class EPStatementListenerSet
         }
 
         stmtAwareListeners.remove(listener);
+    }
+
+    /**
+     * Sets a subscriber instance.
+     * @param subscriber is the subscriber to set
+     */
+    public void setSubscriber(Object subscriber)
+    {
+        this.subscriber = subscriber;
+    }
+
+    /**
+     * Returns the subscriber instance.
+     * @return subscriber
+     */
+    public Object getSubscriber()
+    {
+        return subscriber;
     }
 }

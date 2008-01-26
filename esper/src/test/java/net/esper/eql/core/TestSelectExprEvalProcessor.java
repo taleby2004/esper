@@ -1,6 +1,5 @@
 package net.esper.eql.core;
 
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -14,7 +13,7 @@ import net.esper.support.event.SupportEventBeanFactory;
 import net.esper.support.event.SupportEventAdapterService;
 import net.esper.support.util.ArrayAssertionUtil;
 import net.esper.eql.spec.InsertIntoDesc;
-import net.esper.eql.spec.SelectExprElementCompiledSpec;
+import net.esper.eql.spec.SelectClauseExprCompiledSpec;
 
 public class TestSelectExprEvalProcessor extends TestCase
 {
@@ -23,7 +22,7 @@ public class TestSelectExprEvalProcessor extends TestCase
 
     public void setUp() throws Exception
     {
-        List<SelectExprElementCompiledSpec> selectList = SupportSelectExprFactory.makeNoAggregateSelectList();
+        List<SelectClauseExprCompiledSpec> selectList = SupportSelectExprFactory.makeNoAggregateSelectList();
         EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
 
         methodOne = new SelectExprEvalProcessor(selectList, null, false, new SupportStreamTypeSvc1Stream(), eventAdapterService);
@@ -52,11 +51,11 @@ public class TestSelectExprEvalProcessor extends TestCase
     {
         EventBean[] events = new EventBean[] {makeEvent(8.8, 3, 4)};
 
-        EventBean result = methodOne.process(events, true);
+        EventBean result = methodOne.process(events, true, false);
         assertEquals(8.8d, result.get("resultOne"));
         assertEquals(12, result.get("resultTwo"));
 
-        result = methodTwo.process(events, true);
+        result = methodTwo.process(events, true, false);
         assertEquals(8.8d, result.get("a"));
         assertEquals(12, result.get("b"));
         assertSame(result.getEventType(), methodTwo.getResultEventType());

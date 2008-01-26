@@ -1,10 +1,10 @@
 package net.esper.core;
 
 import net.esper.eql.core.MethodResolutionService;
-import net.esper.eql.named.NamedWindowService;
 import net.esper.eql.join.JoinSetComposerFactory;
-import net.esper.eql.view.OutputConditionFactory;
+import net.esper.eql.named.NamedWindowService;
 import net.esper.eql.variable.VariableService;
+import net.esper.eql.view.OutputConditionFactory;
 import net.esper.event.EventAdapterService;
 import net.esper.filter.FilterService;
 import net.esper.pattern.PatternContextFactory;
@@ -39,6 +39,7 @@ public final class StatementContext
     private final OutputConditionFactory outputConditionFactory;
     private final NamedWindowService namedWindowService;
     private final VariableService variableService;
+    private final StatementResultService statementResultService;
 
     /**
      * Constructor.
@@ -62,6 +63,7 @@ public final class StatementContext
      * @param outputConditionFactory is the factory for output condition objects
      * @param namedWindowService is holding information about the named windows active in the system
      * @param variableService provides access to variable values
+     * @param statementResultService handles awareness of listeners/subscriptions for a statement customizing output produced
      */
     public StatementContext(String engineURI,
                             String engineInstanceId,
@@ -82,7 +84,8 @@ public final class StatementContext
                               JoinSetComposerFactory joinSetComposerFactory,
                               OutputConditionFactory outputConditionFactory,
                               NamedWindowService namedWindowService,
-                              VariableService variableService)
+                              VariableService variableService,
+                              StatementResultService statementResultService)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -104,6 +107,7 @@ public final class StatementContext
         this.outputConditionFactory = outputConditionFactory;
         this.namedWindowService = namedWindowService;
         this.variableService = variableService;
+        this.statementResultService = statementResultService;
     }
 
     /**
@@ -284,6 +288,15 @@ public final class StatementContext
     public VariableService getVariableService()
     {
         return variableService;
+    }
+
+    /**
+     * Returns the service that handles awareness of listeners/subscriptions for a statement customizing output produced
+     * @return statement result svc
+     */
+    public StatementResultService getStatementResultService()
+    {
+        return statementResultService;
     }
 
     public String toString()

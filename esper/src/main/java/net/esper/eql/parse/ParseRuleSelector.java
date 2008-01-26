@@ -7,9 +7,9 @@
  **************************************************************************************/
 package net.esper.eql.parse;
 
-import net.esper.eql.generated.EQLStatementParser;
-import antlr.TokenStreamException;
-import antlr.RecognitionException;
+import net.esper.eql.generated.EsperEPL2GrammarParser;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.tree.Tree;
 
 /**
  * For selection of the parse rule to use.
@@ -19,11 +19,12 @@ public interface ParseRuleSelector
     /**
      * Implementations can invoke a parse rule of their choice on the parser.
      * @param parser - to invoke parse rule on
-     * @throws TokenStreamException is a parse exception
+     * @return the AST tree as a result of the parsing
      * @throws RecognitionException is a parse exception
      */
-    public void invokeParseRule(EQLStatementParser parser) throws TokenStreamException, RecognitionException;
+    public Tree invokeParseRule(EsperEPL2GrammarParser parser) throws RecognitionException;
 }
+
 
 
 

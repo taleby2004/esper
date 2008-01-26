@@ -149,7 +149,7 @@ statement.addListener(myListener);]]></programlisting>
 			<para>
 				The next code snippet shows a short example of use of safe iterators:
 			</para>
-			<programlisting><![CDATA[EPStatement statement = epAdmin.createEQL("select avg('price') as avgPrice from MyTick");
+			<programlisting><![CDATA[EPStatement statement = epAdmin.createEQL("select avg(price) as avgPrice from MyTick");
 // .. send events into the engine
 // then use the pull API...
 SafeIterator<EventBean> safeIter = statement.safeIterator();
@@ -378,7 +378,7 @@ runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
 			The engine may generate artificial events that contain information derived from event streams. A typical example for artificial events is the events posted for a statement to calculate univariate statistics on an event property. The below example shows such a statement and queries the generated events for an average value.
         </para>
 		<programlisting><![CDATA[// Derive univariate statistics on price for the last 100 market data events
-String stmt = "select * from MarketDataBean(symbol='IBM').win:length(100).stat:uni('price')";
+String stmt = "select * from MarketDataBean(symbol='IBM').win:length(100).stat:uni(price)";
 EPStatement priceStatsView = epService.getEPAdministrator().createEQL(stmt);
 priceStatsView.addListener(testListener);
 ]]></programlisting>
@@ -605,6 +605,29 @@ model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEv
 					</para>
 				</listitem>
 			</itemizedlist>
+			
+			<para>
+				Notes on usage: 
+			</para>			
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						Variable names can simply be treated as property names
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						When selecting from named windows, the name of the named window is the event type alias for us in <literal>FilterStream</literal> instances or patterns
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						To compile an arbitrary sub-expression text into an <literal>Expression</literal> object representation, simply add the expression text to a <literal>where</literal> clause,
+						compile the EQL string into an object model via the <literal>compileEQL</literal> method on <literal>EPAdministrator</literal>, and obtain the compiled <literal>where</literal> clause expression 
+						object from the <literal>EPStatementObjectModel</literal> via the <literal>getWhereClause</literal> method.
+					</para>
+				</listitem>
+			</itemizedlist>
 		</sect2>
 		
 		<sect2 id="api-soda-building-step2">
@@ -715,6 +738,14 @@ model.setHavingClause(Expressions.lt(Expressions.avg("age"), Expressions.constan
 model.setOutputLimitClause(OutputLimitClause.create(10, OutputLimitUnit.SECONDS));
 model.setOrderByClause(OrderByClause.create("line"));]]></programlisting>
 		</sect2>
+		
+				<sect2 id="api-soda-building-step5">
+			<title>Building a Create-Variable and On-Set Statement</title>
+			
+			<para>
+				This sample statement creates a variable:
+			</para>
+			<programlisting><![CDATA[create variable integer var_output_rate = 10]]></programlisting>
 
 		<sect2 id="api-soda-building-step5">
 			<title>Building a Create-Variable and On-Set Statement</title>
