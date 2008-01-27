@@ -86,6 +86,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         return engine.getServices().getExtensionServicesContext();
     }
 
+    public StatementLifecycleSvc getStatementLifecycleSvc()
+    {
+        return engine.getServices().getStatementLifecycleSvc();
+    }
+
     public Context getContext()
     {
         return engine.getServices().getEngineEnvContext();

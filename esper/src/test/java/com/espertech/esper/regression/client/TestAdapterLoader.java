@@ -25,4 +25,6 @@ public class TestAdapterLoader extends TestCase
         assertEquals("MyLoader", SupportAdapterLoader.getNames().get(0));
         assertEquals("val", SupportAdapterLoader.getProps().get(0).get("name"));
     }
+
+    
 }

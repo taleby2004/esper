@@ -15,6 +15,14 @@ public interface StatementLifecycleSvc
     public void init();
 
     /**
+     * Add an observer to be called back when statement-state or listener/subscriber changes are registered.
+     * <p>
+     * The observers list is backed by a Set.
+     * @param observer to add
+     */
+    public void addObserver(StatementLifecycleObserver observer);
+
+    /**
      * Create and start the statement.
      * @param statementSpec is the statement definition in bean object form, raw unvalidated and unoptimized.
      * @param expression is the expression text

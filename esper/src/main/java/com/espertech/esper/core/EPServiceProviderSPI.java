@@ -20,6 +20,12 @@ import javax.naming.Context;
 public interface EPServiceProviderSPI extends EPServiceProvider
 {
     /**
+     * Returns statement management service for the engine.
+     * @return the StatementLifecycleSvc
+     */
+    public StatementLifecycleSvc getStatementLifecycleSvc();
+
+    /**
      * Get the EventAdapterService for this engine.
      * @return the EventAdapterService
      */

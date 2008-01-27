@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Provides statement lifecycle services.
@@ -50,15 +51,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
     private final Map<String, String> stmtNameToIdMap;
 
-    public void destroy()
-    {
-        this.destroyAllStatements();
-    }
-
-    public void init()
-    {
-        // called after services are activated, to begin statement loading from store
-    }
+    // Observers to statement-related events
+    private final Set<StatementLifecycleObserver> observers;
 
     /**
      * Ctor.
@@ -76,6 +70,23 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         this.stmtIdToDescMap = new HashMap<String, EPStatementDesc>();
         this.stmtNameToStmtMap = new HashMap<String, EPStatement>();
         this.stmtNameToIdMap = new HashMap<String, String>();
+
+        observers = new CopyOnWriteArraySet<StatementLifecycleObserver>();
+    }
+
+    public void addObserver(StatementLifecycleObserver observer)
+    {
+        observers.add(observer);
+    }
+
+    public void destroy()
+    {
+        this.destroyAllStatements();
+    }
+
+    public void init()
+    {
+        // called after services are activated, to begin statement loading from store
     }
 
     public synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName)
@@ -435,6 +446,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
             long timeLastStateChange = services.getSchedulingService().getTime();
             statement.setCurrentState(EPStatementState.STOPPED, timeLastStateChange);
+
+            sendObserverEvent(new StatementLifecycleEvent(statementId, desc.getEpStatement().getName()));
         }
         catch (RuntimeException ex)
         {
@@ -878,5 +891,13 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
 
         return selectProps;
+    }
+
+    private void sendObserverEvent(StatementLifecycleEvent event)
+    {
+        for (StatementLifecycleObserver observer : observers)
+        {
+            observer.observe(event);
+        }
     }
 }
