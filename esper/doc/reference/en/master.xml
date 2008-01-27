@@ -20,7 +20,7 @@
 	<bookinfo>
 		<title>Esper - Event Stream and Complex Event Processing for Java</title>
 		<subtitle>Reference Documentation</subtitle>
-		<releaseinfo>1.12.0</releaseinfo>
+		<releaseinfo>2.0.0</releaseinfo>
 		<copyright>
 			<year>2007</year>
 			<holder>EsperTech Inc.</holder>

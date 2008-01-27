@@ -310,8 +310,9 @@ config.getEngineDefaults().getThreading().setListenerDispatchPreserveOrder(false
 config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(false);]]></programlisting>
 
 		</sect2>
-
+		
 		<sect2 id="perf-tips-12">
+
 			<title>Performance, JVM, OS and hardware</title>
 
 			<para>
@@ -328,6 +329,7 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 				If your statements utilize large data windows, more RAM and heap space will be utilized hence you should clearly plan and account for that and possibly consider 64bit architectures or consider
 				<ulink url="http://www.espertech.com/products/">EsperHA</ulink>.
 			</para>
+
 			<para>
 				The number and type of statements is a factor that cannot be generically accounted for.
 				The benchmark kit can help test out some requirements and establish baselines, and for more complex use cases
@@ -336,6 +338,7 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 
 			</para>
 		</sect2>
+
     </sect1>
 
     <sect1 id="performance-kit" revision="1">

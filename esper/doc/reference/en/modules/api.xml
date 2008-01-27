@@ -675,7 +675,7 @@ where (line=8) or (line=10 and age<5)]]></programlisting>
 		</sect2>
 		
 		<sect2 id="api-soda-building-step3">
-			<title>Building A Pattern Statement</title>
+			<title>Building a Pattern Statement</title>
 			
 			<para>
 				The <literal>Patterns</literal> class is a factory for building pattern expressions. It provides convenient methods to create all pattern expressions of the pattern language.
@@ -739,14 +739,6 @@ model.setOutputLimitClause(OutputLimitClause.create(10, OutputLimitUnit.SECONDS)
 model.setOrderByClause(OrderByClause.create("line"));]]></programlisting>
 		</sect2>
 		
-				<sect2 id="api-soda-building-step5">
-			<title>Building a Create-Variable and On-Set Statement</title>
-			
-			<para>
-				This sample statement creates a variable:
-			</para>
-			<programlisting><![CDATA[create variable integer var_output_rate = 10]]></programlisting>
-
 		<sect2 id="api-soda-building-step5">
 			<title>Building a Create-Variable and On-Set Statement</title>
 			
@@ -829,7 +821,6 @@ model.setFromClause(FromClause.create(FilterStream.create("QueryEvent", "query",
 model.setSelectClause(SelectClause.create().add(Expressions.countStar()));
 EPStatement stmtOnSelect = epService.getEPAdministrator().create(model);]]></programlisting>
 		</sect2>
-
     </sect1>
 
     <sect1 id="api-prepared">
