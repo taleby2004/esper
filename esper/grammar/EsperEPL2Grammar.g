@@ -186,10 +186,10 @@ tokens
 }
 
 @header {
-  package net.esper.eql.generated;
+  package com.espertech.esper.eql.generated;
 }
 @lexer::header {
-  package net.esper.eql.generated;
+  package com.espertech.esper.eql.generated;
 }
 @lexer::members {
   protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {

@@ -9,7 +9,7 @@ options
 }
 
 @header {
-  package net.esper.eql.generated;
+  package com.espertech.esper.eql.generated;
   import java.util.Stack;
   import org.apache.commons.logging.Log;
   import org.apache.commons.logging.LogFactory;

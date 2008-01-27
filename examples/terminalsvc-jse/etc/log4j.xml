@@ -14,7 +14,7 @@
    <!-- 
    		Modify to DEBUG for more output, or INFO or WARN for less output 
    	-->  
-   <logger name="net.esper">
+   <logger name="com.espertech.esper">
       <level value="WARN"/>
    </logger>
 
