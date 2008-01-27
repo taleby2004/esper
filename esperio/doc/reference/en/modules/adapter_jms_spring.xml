@@ -115,7 +115,7 @@
 		<programlisting><![CDATA[<esper-configuration>
 
   <!-- Sample configuration for an input/output adapter loader -->
-  <adapter-loader name="MyLoader" class-name="net.esper.adapter.SpringContextLoader">
+  <adapter-loader name="MyLoader" class-name="com.espertech.esper.adapter.SpringContextLoader">
     <!-- SpringApplicationContext translates into Spring ClassPathXmlApplicationContext 
            or FileSystemXmlApplicationContext. Only one app-context of a sort can be used. 
            When both attributes are used classpath and file, classpath prevails -->
@@ -182,10 +182,10 @@
 
   <!-- Default unmarshaller -->
   <bean id="jmsMessageUnmarshaller" 
-              class="net.esper.adapter.jms.JMSDefaultAnyMessageUnmarshaller"/>
+              class="com.espertech.esper.adapter.jms.JMSDefaultAnyMessageUnmarshaller"/>
 
   <!-- Input adapter -->
-  <bean id="jmsInputAdapter" class="net.esper.adapter.jms.SpringJMSTemplateInputAdapter">
+  <bean id="jmsInputAdapter" class="com.espertech.esper.adapter.jms.SpringJMSTemplateInputAdapter">
     <property name="jmsTemplate">
       <ref bean="jmsActiveMQTemplate"/>
     </property>
@@ -280,11 +280,11 @@ mapMessage.setObject(InputAdapter.ESPERIO_MAP_EVENT_TYPE, "MyInputEvent");]]></p
   </bean>
 
   <!--  Marshaller marshals events into map messages -->
-  <bean id="jmsMessageMarshaller" class="net.esper.adapter.jms.JMSDefaultMapMessageMarshaller"/>
-  <bean id="myCustomMarshaller" class="net.esper.adapter.jms.JMSDefaultMapMessageMarshaller"/>
+  <bean id="jmsMessageMarshaller" class="com.espertech.esper.adapter.jms.JMSDefaultMapMessageMarshaller"/>
+  <bean id="myCustomMarshaller" class="com.espertech.esper.adapter.jms.JMSDefaultMapMessageMarshaller"/>
 
   <!--  Output adapter puts it all together -->
-  <bean id="jmsOutputAdapter" class="net.esper.adapter.jms.SpringJMSTemplateOutputAdapter">
+  <bean id="jmsOutputAdapter" class="com.espertech.esper.adapter.jms.SpringJMSTemplateOutputAdapter">
     <property name="jmsTemplate">
       <ref bean="jmsActiveMQTemplate"/>
     </property>
@@ -305,11 +305,11 @@ mapMessage.setObject(InputAdapter.ESPERIO_MAP_EVENT_TYPE, "MyInputEvent");]]></p
     </property>
   </bean>
 
-  <bean id="subscriptionOne" class="net.esper.adapter.jms.JMSSubscription">
+  <bean id="subscriptionOne" class="com.espertech.esper.adapter.jms.JMSSubscription">
     <property name="eventTypeAlias" value="MyOutputStream"/>
   </bean>
 
-  <bean id="subscriptionTwo" class="net.esper.adapter.jms.JMSSubscription">
+  <bean id="subscriptionTwo" class="com.espertech.esper.adapter.jms.JMSSubscription">
     <property name="eventTypeAlias" value="MyOtherOutputStream"/>
     <property name="jmsMessageMarshaller">
       <ref bean="myCustomMarshaller"/>
@@ -324,7 +324,7 @@ mapMessage.setObject(InputAdapter.ESPERIO_MAP_EVENT_TYPE, "MyInputEvent");]]></p
 			<title>JMS Message Marshalling</title>
 			<para>
 				EsperIO provides a marshal implementation in the class <literal>JMSDefaultMapMessageMarshaller</literal>. This marshaller constructs a JMS <literal>MapMessage</literal> from any event received by copying 
-				event properties into the name-value pairs of the message. The configuration file makes it easy to configure a custom marshaller that adheres to the <literal>net.esper.adapter.jms.JMSMessageMarshaller</literal> interface.
+				event properties into the name-value pairs of the message. The configuration file makes it easy to configure a custom marshaller that adheres to the <literal>com.espertech.esper.adapter.jms.JMSMessageMarshaller</literal> interface.
 			</para>
             <para>
                 Note that this marshaller uses <literal>javax.jms.MapMessage</literal> name-value pairs and not general <literal>javax.jms.Message</literal> properties.

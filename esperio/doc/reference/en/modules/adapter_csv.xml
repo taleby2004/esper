@@ -3,7 +3,7 @@
     
     <para>
         This chapter discusses the CSV input adapter. CSV is an abbreviation for comma-separated values. CSV files are simple text files in which each line
-        is a comma-separated list of values. CSV-formatted text can be read from many different input sources via <literal>net.esper.adapter.AdapterInputSource</literal>.
+        is a comma-separated list of values. CSV-formatted text can be read from many different input sources via <literal>com.espertech.esper.adapter.AdapterInputSource</literal>.
         Please consult the JavaDoc for additional information on <literal>AdapterInputSource</literal> and the CSV adapter.
     </para>
     
@@ -85,7 +85,7 @@
         <title>Playback of CSV-formatted Events</title>
 
         <para>
-				The adapter reads events from a CSV input source and sends events to an engine using the class <literal>net.esper.adapter.csv.CSVInputAdapter</literal>.
+				The adapter reads events from a CSV input source and sends events to an engine using the class <literal>com.espertech.esper.adapter.csv.CSVInputAdapter</literal>.
         </para>
 		
         <para>

@@ -14,11 +14,11 @@
    <!-- 
    		Modify to DEBUG for more output, or INFO for less output 
    	-->  
-   <logger name="net.esper.example">
+   <logger name="com.espertech.esper.example">
       <level value="DEBUG"/>
    </logger>
 
-   <logger name="net.esper">
+   <logger name="com.espertech.esper">
       <level value="WARN"/>
    </logger>
 

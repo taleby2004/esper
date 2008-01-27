@@ -414,13 +414,13 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
                         <literal>etc</literal>
                         . The required libraries are Esper (any compatible version, we have tested started with Esper
                         1.7.0)
-                        and its dependencies as in the sample below (with Esper 1.10) :
+                        and its dependencies as in the sample below (with Esper 2.0) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-1.10.0.jar:lib/commons-logging-1.0.3.jar:lib/cglib-full-2.0.2.jar
-   :lib/antlr-2.7.5.jar:lib/log4j-1.2.8.jar
+etc:build:lib/esper-2.0.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.1_3.jar
+   :lib/antlr-runtime-3.0.1.jar:lib/log4j-1.2.15.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-1.10.0.jar;lib\commons-logging-1.0.3.jar;lib\cglib-full-2.0.2.jar
-   ;lib\antlr-2.7.5.jar;lib\log4j-1.2.8.jar]]></programlisting>
+etc;build;lib\esper-2.0.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.1_3.jar
+   ;lib\antlr-runtime-3.0.1.jar;lib\log4j-1.2.15.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in
                         <literal>-Xms1g -Xmx1g</literal>

@@ -13,7 +13,7 @@ Simply use the Ant <project>/build.xml to run the example
 // and output complex composite events
 
 Look at the code, especially start with
-net.esper.example.terminal.jse.simulate.TerminalEventSimulator 
+com.espertech.esper.example.terminal.jse.simulate.TerminalEventSimulator 
 
 
 

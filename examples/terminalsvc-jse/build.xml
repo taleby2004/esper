@@ -24,7 +24,7 @@
     </target>
 
     <target name="run" depends="build">
-        <java classpathref="lib.classpath" classname="net.esper.example.terminal.jse.simulate.TerminalEventSimulator"
+        <java classpathref="lib.classpath" classname="com.espertech.esper.example.terminal.jse.simulate.TerminalEventSimulator"
             fork="true">
             <classpath location="etc"/><!-- for log4j.xml discovery -->
         </java>

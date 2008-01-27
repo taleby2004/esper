@@ -1,32 +1,36 @@
 Required runtime libraries
 ==========================
 
-antlr-2.7.5.jar
-- ANTLR parser generator
-- runtime, required
+antlr-runtime-3.0.1
+- runtime for ANTLR parser generator
+- required for runtime
 
-commons-logging-1.0.4.jar (1.0.4)
-- Commons Logging
-- runtime, required
+commons-logging-1.1.1.jar
+- Apache Commons Logging, for logging
+- required for runtime
 
-cglib-full-2.0.2jar (2.0.2)
+cglib-nodep-2.1_3.jar
 - CGLIB bytecode generator
-- runtime, required
+- required for runtime
 
 
 Optional runtime libraries
 ==========================
 
-log4j-1.2.8.jar (1.2.8)
-- Log4j Library
+log4j-1.2.15.jar
+- Log4j Library for logging
 - runtime, optional
 
 
 Compile and Build-time libraries
 ================================
 
-junit-3.8.1.jar (3.8.1)
+junit-4.4.jar
 - JUnit test framework
+- buildtime, not required for runtime
+
+antlr-3.0.1.jar
+- ANTLR parser generator, for compile-time generation of parser and tree walker from grammars
 - buildtime, not required for runtime
 
 mysql-connector-java-3.1.14-bin.jar

@@ -63,12 +63,12 @@ mvn javadoc:javadoc
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.8</version>
+			<version>1.2.15</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>1.0.3</version>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
@@ -77,13 +77,13 @@ mvn javadoc:javadoc
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
-			<artifactId>cglib-full</artifactId>
-			<version>2.0.2</version>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.1_3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.4</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -113,8 +113,8 @@ mvn javadoc:javadoc
 				</executions>
 				<configuration>
 					<sourceDirectory>grammar</sourceDirectory>
-					<outputDirectory>target/generated-sources/antlr/net/esper/eql/generated</outputDirectory>
-					<libDirectory>target/generated-sources/antlr/net/esper/eql/generated</libDirectory>
+					<outputDirectory>target/generated-sources/antlr/com/espertech/esper/eql/generated</outputDirectory>
+					<libDirectory>target/generated-sources/antlr/com/espertech/esper/eql/generated</libDirectory>
 				</configuration>
 			</plugin>
 			<plugin>

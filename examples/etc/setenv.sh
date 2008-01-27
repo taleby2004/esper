@@ -23,10 +23,10 @@ IOLIB=../../esperio/lib
 CLASSPATH=.
 CLASSPATH=$CLASSPATH:../target/classes
 CLASSPATH=$CLASSPATH:../../esper-2.0.0.jar
-CLASSPATH=$CLASSPATH:$LIB/cglib-full-2.0.2.jar
-CLASSPATH=$CLASSPATH:$LIB/commons-logging-1.0.3.jar
-CLASSPATH=$CLASSPATH:$LIB/log4j-1.2.8.jar
-CLASSPATH=$CLASSPATH:$LIB/antlr-2.7.5.jar
+CLASSPATH=$CLASSPATH:$LIB/cglib-nodep-2.1_3.jar
+CLASSPATH=$CLASSPATH:$LIB/commons-logging-1.1.1.jar
+CLASSPATH=$CLASSPATH:$LIB/log4j-1.2.15.jar
+CLASSPATH=$CLASSPATH:$LIB/antlr-runtime-3.0.1.jar
 CLASSPATH=$CLASSPATH:$EXLIB/jms.jar
 CLASSPATH=$CLASSPATH:$IOLIB/apache-activemq-4.1.0-incubator.jar
 

@@ -45,7 +45,7 @@
          <arg value="esper/doc/grammar"/>
          <arg value="esper/grammar/eql.g"/>
          <classpath>
-           <pathelement location="esper/lib/antlr-2.7.5.jar"/>
+           <pathelement location="esper/lib/antlr-3.0.1.jar"/>
          </classpath>
        </java>
     </target>
