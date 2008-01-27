@@ -1259,8 +1259,8 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		</para>
 <programlisting><![CDATA[select fraud.accountNumber as accntNum, fraud.warning as warn, withdraw.amount as amount,
        max(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraud' as desc
-  from net.esper.example.atm.FraudWarningEvent.win:time(30 min) as fraud,
-       net.esper.example.atm.WithdrawalEvent.win:time(30 sec) as withdraw
+  from com.espertech.esper.example.atm.FraudWarningEvent.win:time(30 min) as fraud,
+       com.espertech.esper.example.atm.WithdrawalEvent.win:time(30 sec) as withdraw
  where fraud.accountNumber = withdraw.accountNumber]]></programlisting>
 
 		<para>

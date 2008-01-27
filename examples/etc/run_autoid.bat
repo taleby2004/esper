@@ -7,4 +7,4 @@ call setenv.bat
 
 set MEMORY_OPTIONS=-Xms256m -Xmx256m -XX:+UseParNewGC
 
-"%JAVA_HOME%"\bin\java %MEMORY_OPTIONS% -Dlog4j.configuration=log4j.xml net.esper.example.autoid.AutoIdSimMain %1 %2
+"%JAVA_HOME%"\bin\java %MEMORY_OPTIONS% -Dlog4j.configuration=log4j.xml com.espertech.esper.example.autoid.AutoIdSimMain %1 %2

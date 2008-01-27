@@ -18,4 +18,4 @@ set OPT=-Xms1024m -Xmx1024m
 @rem # we default to synchronous control flow
 set QUEUE=-queue -1
 
-%JAVA_HOME%\bin\java %OPT% -classpath %CP% -Desper.benchmark.symbol=1000 net.esper.example.benchmark.server.Server %QUEUE% -stat 10 -mode STP %SIM% > out.log
+%JAVA_HOME%\bin\java %OPT% -classpath %CP% -Desper.benchmark.symbol=1000 com.espertech.esper.example.benchmark.server.Server %QUEUE% -stat 10 -mode STP %SIM% > out.log

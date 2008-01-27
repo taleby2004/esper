@@ -14,18 +14,18 @@
    <!-- 
    		Modify to DEBUG for more output, or INFO for less output 
    	-->  
-   <logger name="net.esper.example">
+   <logger name="com.espertech.esper.example">
       <level value="DEBUG"/>
    </logger>
 
    <!-- 
    		Disable output for specific listeners via this statement
-   <logger name="net.esper.example.transaction.RealtimeSummaryGroupListener">
+   <logger name="com.espertech.esper.example.transaction.RealtimeSummaryGroupListener">
       <level value="INFO"/>
    </logger>
    	-->
 
-   <logger name="net.esper">
+   <logger name="com.espertech.esper">
       <level value="WARN"/>
    </logger>
 

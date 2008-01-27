@@ -35,29 +35,29 @@
     </target>
 
     <target name="run" depends="build">
-        <java classpathref="lib.classpath" classname="net.esper.example.benchmark.server.Server" fork="true">
+        <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.server.Server" fork="true">
             <arg line="-rate 4x10000 -mode STP"/>
             <classpath location="etc"/><!-- for etc/log4j.xml and statement discovery -->
         </java>
     </target>
 
     <target name="runbea" depends="buildbea">
-        <java classpathref="lib.classpath" classname="net.esper.example.benchmark.server.Server" fork="true">
-            <jvmarg line="-Desper.benchmark.provider=net.esper.example.benchmark.server.BEACEPProvider"/>
+        <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.server.Server" fork="true">
+            <jvmarg line="-Desper.benchmark.provider=com.espertech.esper.example.benchmark.server.BEACEPProvider"/>
             <arg line="-rate 4x10000 -mode BEA_STP"/>
             <classpath location="etc"/><!-- for etc/log4j.xml and statement discovery -->
         </java>
     </target>
 
     <target name="runServer" depends="build">
-        <java classpathref="lib.classpath" classname="net.esper.example.benchmark.server.Server" fork="true">
+        <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.server.Server" fork="true">
             <arg line="-mode STP"/>
             <classpath location="etc"/><!-- for etc/log4j.xml and statement discovery -->
         </java>
     </target>
 
     <target name="runClient" depends="build">
-        <java classpathref="lib.classpath" classname="net.esper.example.benchmark.client.Client" fork="true">
+        <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.client.Client" fork="true">
             <arg line="-rate 5000"/>
         </java>
     </target>

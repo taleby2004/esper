@@ -227,7 +227,7 @@ epService.getEPRuntime().sendEvent(event);
 
 * Running the Example 
 	
-	The complete example code can be found in the "examples" folder of the distribution in package net.esper.example.transaction. 
+	The complete example code can be found in the "examples" folder of the distribution in package com.espertech.esper.example.transaction. 
 	The example contains a transaction simulator that can be invoked from the command line.	
 	The readme file in the "examples/etc" folder contains build instructions and command line parameters
 	to run the transaction simulator from the command line. You do not need to perform a build of the Esper engine to

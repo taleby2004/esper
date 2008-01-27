@@ -55,7 +55,7 @@
 		</orderedlist>
 
         <para>
-			The example view factory and view class that are used in this chapter can be found in the test source folder in the package <literal>net.esper.regression.client</literal> by the name <literal>MyTrendSpotterViewFactory</literal> and <literal>MyTrendSpotterView</literal>.
+			The example view factory and view class that are used in this chapter can be found in the test source folder in the package <literal>com.espertech.esper.regression.client</literal> by the name <literal>MyTrendSpotterViewFactory</literal> and <literal>MyTrendSpotterView</literal>.
         </para>
 
         <para>
@@ -114,7 +114,7 @@
 			</itemizedlist>
 
 			<para>
-				View factory classes simply subclass <literal>net.esper.view.ViewFactorySupport</literal>:
+				View factory classes simply subclass <literal>com.espertech.esper.view.ViewFactorySupport</literal>:
 			</para>
 			<programlisting><![CDATA[public class MyTrendSpotterViewFactory extends ViewFactorySupport { ...]]></programlisting>
 
@@ -202,7 +202,7 @@
 			</itemizedlist>
 
 			<para>
-				View classes simply subclass <literal>net.esper.view.ViewSupport</literal>:
+				View classes simply subclass <literal>com.espertech.esper.view.ViewSupport</literal>:
 			</para>
 			<programlisting><![CDATA[public class MyTrendSpotterView extends ViewSupport { ...]]></programlisting>
 
@@ -260,7 +260,7 @@
 			</itemizedlist>
 
 			<para>
-				The engine can provide a callback to the view indicating when a statement using the view is stopped. The callback is available to the view via the <literal>net.esper.view.StatementStopCallback</literal> interface. Your
+				The engine can provide a callback to the view indicating when a statement using the view is stopped. The callback is available to the view via the <literal>com.espertech.esper.view.StatementStopCallback</literal> interface. Your
 				view code must subscribe to the stop callback in order for the engine to invoke the callback:
 			</para>
 			
@@ -281,7 +281,7 @@
 		
 			<programlisting><![CDATA[<esper-configuration
   <plugin-view namespace="custom" name="trendspotter" 
-      factory-class="net.esper.regression.view.MyTrendSpotterViewFactory" /> 
+      factory-class="com.espertech.esper.regression.view.MyTrendSpotterViewFactory" /> 
 </esper-configuration>]]></programlisting>
 
 			<para>
@@ -327,7 +327,7 @@
 		</orderedlist>
 
         <para>
-			The code for the example aggregation function as shown in this chapter can be found in the test source folder in the package <literal>net.esper.regression.client</literal> by the name <literal>MyConcatAggregationFunction</literal>. The sample function simply concatenates string-type values.
+			The code for the example aggregation function as shown in this chapter can be found in the test source folder in the package <literal>com.espertech.esper.regression.client</literal> by the name <literal>MyConcatAggregationFunction</literal>. The sample function simply concatenates string-type values.
         </para>
 
 		<sect2 id="custom-aggregation-implementing" revision="1">
@@ -365,7 +365,7 @@
 			</itemizedlist>
 
 			<para>
-				Aggregation function classes simply subclass <literal>net.esper.eql.agg.AggregationSupport</literal>:
+				Aggregation function classes simply subclass <literal>com.espertech.esper.eql.agg.AggregationSupport</literal>:
 			</para>
 			<programlisting><![CDATA[public class MyConcatAggregationFunction extends AggregationSupport { ...]]></programlisting>
 
@@ -439,7 +439,7 @@
 		
 			<programlisting><![CDATA[<esper-configuration
   <plugin-aggregation-function name="concat" 
-    function-class="net.esper.regression.client.MyConcatAggregationFunction" />
+    function-class="com.espertech.esper.regression.client.MyConcatAggregationFunction" />
 </esper-configuration>]]></programlisting>
 
 			<para>
@@ -481,7 +481,7 @@
 		</orderedlist>
 
         <para>
-			The code for the example guard object as shown in this chapter can be found in the test source folder in the package <literal>net.esper.regression.client</literal> by the name <literal>MyCountToPatternGuardFactory</literal>. The sample guard discussed here counts the number of events occurring up to a maximum number of events, and end the sub-expression when that maximum is reached.
+			The code for the example guard object as shown in this chapter can be found in the test source folder in the package <literal>com.espertech.esper.regression.client</literal> by the name <literal>MyCountToPatternGuardFactory</literal>. The sample guard discussed here counts the number of events occurring up to a maximum number of events, and end the sub-expression when that maximum is reached.
         </para>
 
 		<sect2 id="custom-pattern-guard-factory-implementing" revision="1">
@@ -504,7 +504,7 @@
 			</itemizedlist>
 
 			<para>
-				Guard factory classes subclass <literal>net.esper.pattern.guard.GuardFactorySupport</literal>:
+				Guard factory classes subclass <literal>com.espertech.esper.pattern.guard.GuardFactorySupport</literal>:
 			</para>
 			<programlisting><![CDATA[public class MyCountToPatternGuardFactory extends GuardFactorySupport { ...]]></programlisting>
 
@@ -560,7 +560,7 @@
 			</itemizedlist>
 
 			<para>
-				Guard classes subclass <literal>net.esper.pattern.guard.GuardSupport</literal> as shown here:
+				Guard classes subclass <literal>com.espertech.esper.pattern.guard.GuardSupport</literal> as shown here:
 			</para>
 			<programlisting><![CDATA[public abstract class GuardSupport implements Guard { ...]]></programlisting>
 
@@ -602,7 +602,7 @@
 		
 			<programlisting><![CDATA[<esper-configuration
   <plugin-pattern-guard namespace="myplugin" name="count_to" 
-      factory-class="net.esper.regression.client.MyCountToPatternGuardFactory"/>
+      factory-class="com.espertech.esper.regression.client.MyCountToPatternGuardFactory"/>
 </esper-configuration>]]></programlisting>
 
 			<para>
@@ -661,7 +661,7 @@
 		</orderedlist>
 
         <para>
-			The code for the example observer object as shown in this chapter can be found in the test source folder in package <literal>net.esper.regression.client</literal> by the name <literal>MyFileExistsObserver</literal>. The sample observer discussed here very simply checks if a file exists, using the filename supplied by the pattern statement, and via the <literal>java.io.File</literal> class.
+			The code for the example observer object as shown in this chapter can be found in the test source folder in package <literal>com.espertech.esper.regression.client</literal> by the name <literal>MyFileExistsObserver</literal>. The sample observer discussed here very simply checks if a file exists, using the filename supplied by the pattern statement, and via the <literal>java.io.File</literal> class.
         </para>
 
 		<sect2 id="custom-pattern-observer-factory-implementing" revision="1">
@@ -684,7 +684,7 @@
 			</itemizedlist>
 
 			<para>
-				Observer factory classes subclass <literal>net.esper.pattern.observer.ObserverFactorySupport</literal>:
+				Observer factory classes subclass <literal>com.espertech.esper.pattern.observer.ObserverFactorySupport</literal>:
 			</para>
 			<programlisting><![CDATA[public class MyFileExistsObserverFactory extends ObserverFactorySupport { ...]]></programlisting>
 
@@ -753,7 +753,7 @@
 			</itemizedlist>
 
 			<para>
-				Observer classes subclass <literal>net.esper.pattern.observer.ObserverSupport</literal> as shown here:
+				Observer classes subclass <literal>com.espertech.esper.pattern.observer.ObserverSupport</literal> as shown here:
 			</para>
 			<programlisting><![CDATA[public class MyFileExistsObserver implements EventObserver { ...]]></programlisting>
 
@@ -789,7 +789,7 @@
 		
 			<programlisting><![CDATA[<esper-configuration
   <plugin-pattern-observer namespace="myplugin" name="file_exists" 
-    factory-class="net.esper.regression.client.MyFileExistsObserverFactory" />
+    factory-class="com.espertech.esper.regression.client.MyFileExistsObserverFactory" />
 </esper-configuration>]]></programlisting>
 
 			<para>

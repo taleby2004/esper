@@ -105,11 +105,11 @@ EPStatement myTrigger = admin.createEQL("select * from pattern [" +
            
 			<para>			
 				When a pattern fires it publishes one or more events to any listeners to the pattern statement. 
-				The listener interface is the <literal>net.esper.client.UpdateListener</literal> interface.
+				The listener interface is the <literal>com.espertech.esper.client.UpdateListener</literal> interface.
 			</para>
 			
 			<para>            
-				The example below shows an anonymous implementation of the <literal>net.esper.client.UpdateListener</literal> interface.
+				The example below shows an anonymous implementation of the <literal>com.espertech.esper.client.UpdateListener</literal> interface.
 				We add the anonymous listener implementation to the <literal>myPattern</literal> statement created earlier. 
 				The listener code simply extracts the underlying event class.
 			</para>

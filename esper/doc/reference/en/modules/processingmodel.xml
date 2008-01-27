@@ -10,7 +10,7 @@
         </para>
 			
         <para>
-			As outlined in <xref linkend="api"/> the interface for listeners is <literal>net.esper.client.UpdateListener</literal>. Implementations must provide a single <literal>update</literal> method that the engine invokes when results become available:
+			As outlined in <xref linkend="api"/> the interface for listeners is <literal>com.espertech.esper.client.UpdateListener</literal>. Implementations must provide a single <literal>update</literal> method that the engine invokes when results become available:
         </para>
         
 		<mediaobject>
@@ -24,7 +24,7 @@
 
 		<indexterm><primary>EventBean interface</primary></indexterm>
         <para>
-			The engine provides statement results to update listeners by placing results in <literal>net.esper.event.EventBean</literal> instances. A typical listener implementation queries the <literal>EventBean</literal> instances via getter methods to obtain the statement-generated results. 
+			The engine provides statement results to update listeners by placing results in <literal>com.espertech.esper.event.EventBean</literal> instances. A typical listener implementation queries the <literal>EventBean</literal> instances via getter methods to obtain the statement-generated results. 
         </para>
 
 		<mediaobject>
@@ -481,7 +481,7 @@ group by account]]></programlisting>
         
 		<indexterm><primary>EventBean interface</primary></indexterm>
         <para>
-			The engine posts events to <literal>UpdateListener</literal> implementations as <literal>net.esper.event.EventBean</literal> instances. The <literal>EventBean</literal> represents a row (event) in your continuous query's result set.  
+			The engine posts events to <literal>UpdateListener</literal> implementations as <literal>com.espertech.esper.event.EventBean</literal> instances. The <literal>EventBean</literal> represents a row (event) in your continuous query's result set.  
         </para>
 			
         <para>

@@ -137,7 +137,7 @@
           individual classes and components. Tests are very detailed in asserting the expected results allowing us
           to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
           tests that assert performance of statements and configurability of the engine.
-          See the package "net.esper.regression" in the test source folder as the entry point for
+          See the package "com.espertech.esper.regression" in the test source folder as the entry point for
 		  end-to-end testing against the client API.
         </p>
         <p>          

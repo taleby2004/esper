@@ -14,4 +14,4 @@ OPT="-Xms1024m -Xmx1024m"
 # we default to synchronous control flow
 QUEUE="-queue -1"
 
-$JAVA_HOME/bin/java $OPT -classpath $CP -Desper.benchmark.symbol=1000 net.esper.example.benchmark.server.Server $QUEUE -stat 10 -mode STP $SIM 2>&1 > out.log
+$JAVA_HOME/bin/java $OPT -classpath $CP -Desper.benchmark.symbol=1000 com.espertech.esper.example.benchmark.server.Server $QUEUE -stat 10 -mode STP $SIM 2>&1 > out.log

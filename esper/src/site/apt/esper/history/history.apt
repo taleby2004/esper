@@ -456,7 +456,7 @@ Version 1.0.5 (update)
 		
 * API changes
 
-    * Added methods to net.esper.client.Configuration and EPRuntime to configure and process XML DOM and Map events
+    * Added methods to com.espertech.esper.client.Configuration and EPRuntime to configure and process XML DOM and Map events
     
 * Major changes
 

@@ -11,4 +11,4 @@
 
 MEMORY_OPTIONS="-Xms256m -Xmx256m -XX:+UseParNewGC"
 
-$JAVA_HOME/bin/java $MEMORY_OPTIONS -Dlog4j.configuration=log4j.xml -cp ${CLASSPATH} net.esper.example.transaction.sim.TxnGenMain $1 $2
+$JAVA_HOME/bin/java $MEMORY_OPTIONS -Dlog4j.configuration=log4j.xml -cp ${CLASSPATH} com.espertech.esper.example.transaction.sim.TxnGenMain $1 $2

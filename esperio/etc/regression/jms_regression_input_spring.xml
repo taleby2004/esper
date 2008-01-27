@@ -45,10 +45,10 @@
   </bean>
 
   <!-- Default unmarshaller -->
-  <bean id="jmsMessageUnmarshaller" class="net.esper.adapter.jms.JMSDefaultAnyMessageUnmarshaller"/>
+  <bean id="jmsMessageUnmarshaller" class="com.espertech.esper.adapter.jms.JMSDefaultAnyMessageUnmarshaller"/>
 
   <!-- Input adapter -->
-  <bean id="jmsInputAdapter" class="net.esper.adapter.jms.SpringJMSTemplateInputAdapter">
+  <bean id="jmsInputAdapter" class="com.espertech.esper.adapter.jms.SpringJMSTemplateInputAdapter">
     <property name="jmsTemplate">
       <ref bean="jmsActiveMQTemplate"/>
     </property>

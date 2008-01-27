@@ -480,7 +480,7 @@ We generally recommended that listener implementations do not block. By implemen
         
 		<indexterm><primary>EPStatementObjectModel interface</primary></indexterm>
         <para>
-			The statement object model is a set of classes that provide an object-oriented representation of an EQL or pattern statement. The object model classes are found in package <literal>net.esper.client.soda</literal>. An instance of <literal>EPStatementObjectModel</literal> represents a statement's object model.
+			The statement object model is a set of classes that provide an object-oriented representation of an EQL or pattern statement. The object model classes are found in package <literal>com.espertech.esper.client.soda</literal>. An instance of <literal>EPStatementObjectModel</literal> represents a statement's object model.
         </para>
 
         <para>

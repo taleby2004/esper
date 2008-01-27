@@ -18,4 +18,4 @@ set RATE=-rate 10000
 @rem # remote host, we default to localhost and default port
 set HOST=-host 127.0.0.1
 
-%JAVA_HOME%\bin\java %OPT% -classpath %CP% -Desper.benchmark.symbol=1000 net.esper.example.benchmark.client.Client %RATE% %HOST% 
+%JAVA_HOME%\bin\java %OPT% -classpath %CP% -Desper.benchmark.symbol=1000 com.espertech.esper.example.benchmark.client.Client %RATE% %HOST% 

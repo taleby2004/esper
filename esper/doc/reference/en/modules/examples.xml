@@ -5,7 +5,7 @@
         <title>Examples Overview</title>
         
 		<para>
-			This chapter outlines the examples that come with Esper in the <literal>examples/src</literal> folder of the distribution. The code for examples can be found in the <literal>net.esper.example</literal> packages.
+			This chapter outlines the examples that come with Esper in the <literal>examples/src</literal> folder of the distribution. The code for examples can be found in the <literal>com.espertech.esper.example</literal> packages.
 		</para>
     	
 		<para>
@@ -62,7 +62,7 @@
 		</para>
 
 		<para>
-			The classes for this example live in package <literal>net.esper.example.marketdatafeed</literal>. 
+			The classes for this example live in package <literal>com.espertech.esper.example.marketdatafeed</literal>. 
 			Run "run_mktdatafeed.bat" (Windows) or "run_mktdatafeed.sh" (Unix) in the <literal>examples/etc</literal> folder 
 			to start the market data feed simulator. 			
 		</para>
@@ -160,7 +160,7 @@ having cnt < avg(cnt) * 0.75
 			</para>
 	
 			<para>
-				The server shell classes for this example live in package <literal>net.esper.example.servershell</literal>. 
+				The server shell classes for this example live in package <literal>com.espertech.esper.example.servershell</literal>. 
 				Configure the server to point to your JMS provider by changing the properties in the file <literal>servershell_config.properties</literal> in the <literal>etc</literal> folder.
 				Make sure your JMS provider (ActiveMQ or Tibco EMS) is running, then run "run_servershell.bat" (Windows) or "run_servershell.sh" (Unix) to start the JMS server. 
 			</para>
@@ -170,7 +170,7 @@ having cnt < avg(cnt) * 0.75
 			</para>
 	
 			<para>		
-				The client classes to the server shell can be found in package <literal>net.esper.example.servershellclient</literal>. 
+				The client classes to the server shell can be found in package <literal>com.espertech.esper.example.servershellclient</literal>. 
 				The client shares the same configuration file as the server shell.
 				Run "run_servershellclient.bat" (Windows) or "run_servershellclient.sh" (Unix) to start the JMS producer client  that includes a JMX client as well. 
 			</para>
@@ -215,7 +215,7 @@ having cnt < avg(cnt) * 0.75
         <title>Transaction 3-Event Challenge</title>
 
 		<para>
-			The classes for this example live in package <literal>net.esper.example.transaction</literal>. 
+			The classes for this example live in package <literal>com.espertech.esper.example.transaction</literal>. 
 			Run "run_txnsim.bat" (Windows) or "run_txnsim.sh" (Unix) to start the transaction simulator. 
 			Please see the readme file in the same folder for build instructions and command line parameters.
 		</para>
@@ -505,7 +505,7 @@ output all every 1 minutes]]></programlisting>
 			</para>
 
 			<para>
-				The complete example code can be found in the "examples/terminalsvc" folder of the distribution. The Java package name is net.esper.example.terminalsvc.
+				The complete example code can be found in the "examples/terminalsvc" folder of the distribution. The Java package name is com.espertech.esper.example.terminalsvc.
 			</para>
 			
 			<sect3 id="examples-terminalsvc-j2ee-running">
@@ -572,7 +572,7 @@ select Part.zone from pattern [
     (timer:interval(10 sec)  and not CountZone_G1(zone=Part.zone, cnt in (0,3)))]]]></programlisting>
 
 		<para>
-			The classes for this example can be found in package <literal>net.esper.example.rfid</literal>.
+			The classes for this example can be found in package <literal>com.espertech.esper.example.rfid</literal>.
 		</para>
 
 		<para>
@@ -610,7 +610,7 @@ select Part.zone from pattern [
 		</para>
 
 		<para>
-			The classes for this example can be found in package <literal>net.esper.example.autoid</literal>.
+			The classes for this example can be found in package <literal>com.espertech.esper.example.autoid</literal>.
 			As events are XML documents with no Java object representation, the example does not have event classes.
 		</para>
 
@@ -624,7 +624,7 @@ select Part.zone from pattern [
 
 		<para>
 			The code snippet below shows the simple statement to compute the total number of tags per sensor. The statement is created by class 
-			<literal>net.esper.example.autoid.RFIDTagsPerSensorStmt</literal>.
+			<literal>com.espertech.esper.example.autoid.RFIDTagsPerSensorStmt</literal>.
 		</para>
 
 <programlisting><![CDATA[select ID as sensorId, sum(countTags) as numTagsPerSensor
@@ -644,7 +644,7 @@ group by ID]]></programlisting>
 		</para>
     	
 		<para>
-			The classes <literal>net.esper.example.stockticker.event.StockTick</literal> and <literal>PriceLimit</literal> represent our events. The event patterns are created by the class <literal>net.esper.example.stockticker.monitor.StockTickerMonitor</literal>. 
+			The classes <literal>com.espertech.esper.example.stockticker.event.StockTick</literal> and <literal>PriceLimit</literal> represent our events. The event patterns are created by the class <literal>com.espertech.esper.example.stockticker.monitor.StockTickerMonitor</literal>. 
 		</para>
 
 		<para>
@@ -678,7 +678,7 @@ group by ID]]></programlisting>
 		</para>
 		
 		<para>
-			The event class representing mobile users is <literal>net.esper.example.matchmaker.event.MobileUserBean</literal>. The <literal>net.esper.example.matchmaker.monitor.MatchMakingMonitor</literal> class contains the patterns for detecing matches.
+			The event class representing mobile users is <literal>com.espertech.esper.example.matchmaker.event.MobileUserBean</literal>. The <literal>com.espertech.esper.example.matchmaker.monitor.MatchMakingMonitor</literal> class contains the patterns for detecing matches.
 		</para>
     	
 		<para>
@@ -732,11 +732,11 @@ group by ID]]></programlisting>
 		</itemizedlist>
 		
 		<para>
-			The <literal>net.esper.example.qos_sla.events.OperationMeasurement</literal> event class with its latency and status properties is the main event used for the SLA analysis. The other event <literal>LatencyLimit</literal> serves to set latency limits on the fly.
+			The <literal>com.espertech.esper.example.qos_sla.events.OperationMeasurement</literal> event class with its latency and status properties is the main event used for the SLA analysis. The other event <literal>LatencyLimit</literal> serves to set latency limits on the fly.
 		</para>
 
 		<para>
-			The <literal>net.esper.example.qos_sla.monitor.AverageLatencyMonitor</literal> creates an EQL statement that computes latency statistics per customer and operation for the
+			The <literal>com.espertech.esper.example.qos_sla.monitor.AverageLatencyMonitor</literal> creates an EQL statement that computes latency statistics per customer and operation for the
 			last 100 events. The <literal>DynaLatencySpikeMonitor</literal> uses an event pattern to listen to spikes in latency with dynamically set limits. The <literal>ErrorRateMonitor</literal> uses the timer <literal>'at'</literal> operator in an event pattern that wakes up periodically and polls the error rate within the last 10 minutes. The <literal>ServiceHealthMonitor</literal> simply alerts when 3 errors occur, and the <literal>SpikeAndErrorMonitor</literal> alerts when a fixed latency is overstepped or an error status is reported.
 		</para>
 
@@ -777,7 +777,7 @@ group by ID]]></programlisting>
 
         <para>
 			Linear Road simulates a toll system for the motor vehicle expressways of a large metropolitan area. The main event in this example is a car location report which the class
-			<literal>net.esper.example.linearroad.CarLocEvent</literal> represents. Currently the event stream joins are performed by JUnit test classes in the <literal>examples/test</literal> folder. See the <literal>net.esper.example.linearroad.TestAccidentNotify</literal> and the <literal>TestCarSegmentCount</literal> classes. Please consider this a work in progress.
+			<literal>com.espertech.esper.example.linearroad.CarLocEvent</literal> represents. Currently the event stream joins are performed by JUnit test classes in the <literal>examples/test</literal> folder. See the <literal>com.espertech.esper.example.linearroad.TestAccidentNotify</literal> and the <literal>TestCarSegmentCount</literal> classes. Please consider this a work in progress.
         </para>
         
 		<para>

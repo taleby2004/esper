@@ -19,7 +19,7 @@
 
 	<indexterm><primary>configuration</primary><secondary>programmatic</secondary></indexterm>
         <para>
-            An instance of <literal>net.esper.client.Configuration</literal> represents all configuration parameters. The <literal>Configuration</literal> is used to build an <literal>EPServiceProvider</literal>, which provides the administrative and runtime interfaces for an Esper engine instance.
+            An instance of <literal>com.espertech.esper.client.Configuration</literal> represents all configuration parameters. The <literal>Configuration</literal> is used to build an <literal>EPServiceProvider</literal>, which provides the administrative and runtime interfaces for an Esper engine instance.
         </para>
 
         <para>
@@ -77,8 +77,8 @@ configuration.configure("myengine.esper.cfg.xml");
 		<programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
 <esper-configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
            xsi:noNamespaceSchemaLocation="esper-configuration-1-0.xsd">
-  <event-type alias="StockTick" class="net.esper.example.stockticker.event.StockTick"/>
-  <event-type alias="PriceLimit" class="net.esper.example.stockticker.event.PriceLimit"/>
+  <event-type alias="StockTick" class="com.espertech.esper.example.stockticker.event.StockTick"/>
+  <event-type alias="PriceLimit" class="com.espertech.esper.example.stockticker.event.PriceLimit"/>
   <auto-import import-name="org.mycompany.mypackage.MyUtility"/>
   <auto-import import-name="org.mycompany.util.*"/>
 </esper-configuration>		
@@ -138,12 +138,12 @@ config.addEventTypeAutoAlias(MyEvent.getPackage().getName());]]></programlisting
 				</para>
 
 				<programlisting><![CDATA[every StockTick(symbol='IBM')"]]></programlisting>
-				<programlisting><![CDATA[every net.esper.example.stockticker.event.StockTick(symbol='IBM')]]></programlisting>
+				<programlisting><![CDATA[every com.espertech.esper.example.stockticker.event.StockTick(symbol='IBM')]]></programlisting>
 
 				<para>
 					The event type alias can be listed in the XML configuration file as shown below. The <literal>Configuration</literal> API can also be used to programatically specify an event type alias, as shown in an earlier code snippet.
 				</para>
-				<programlisting><![CDATA[<event-type alias="StockTick" class="net.esper.example.stockticker.event.StockTick"/>]]></programlisting>
+				<programlisting><![CDATA[<event-type alias="StockTick" class="com.espertech.esper.example.stockticker.event.StockTick"/>]]></programlisting>
 				
 			</sect3>
 			
@@ -232,7 +232,7 @@ EPServiceProvider epService = EPServiceProviderManager.getProvider("sample", con
 					We can configure properties of events via <literal>method-property</literal> and <literal>field-property</literal> elements, as the next example shows.
 				</para>
 
-				<programlisting><![CDATA[<event-type alias="StockTick" class="net.esper.example.stockticker.event.StockTickEvent">
+				<programlisting><![CDATA[<event-type alias="StockTick" class="com.espertech.esper.example.stockticker.event.StockTickEvent">
 	<legacy-type accessor-style="javabean" code-generation="enabled">
 		<method-property name="price" accessor-method="getCurrentPrice" />
 		<field-property name="volume" accessor-field="volumeField" />
