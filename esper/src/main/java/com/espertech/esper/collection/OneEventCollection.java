@@ -2,17 +2,15 @@ package com.espertech.esper.collection;
 
 import com.espertech.esper.event.EventBean;
 
-import java.util.LinkedList;
-
 /**
  * Simple collection that exposes a limited add-and-get interface and that is optimized towards holding
  * a single event, but can hold multiple events. If more then one event is added, the
  * class allocates a linked list for additional events.
  */
-public class OneEventLinkedList
+public class OneEventCollection
 {
     private EventBean firstEvent;
-    private LinkedList<EventBean> additionalEvents;
+    private ArrayDequeJDK6Backport<EventBean> additionalEvents;
 
     /**
      * Add an event to the collection.
@@ -33,7 +31,7 @@ public class OneEventLinkedList
         
         if (additionalEvents == null)
         {
-            additionalEvents = new LinkedList<EventBean>();
+            additionalEvents = new ArrayDequeJDK6Backport<EventBean>();
         }
         additionalEvents.add(event);
     }

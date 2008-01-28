@@ -1,6 +1,6 @@
 package com.espertech.esper.view.std;
 
-import com.espertech.esper.collection.OneEventLinkedList;
+import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.event.EventBean;
@@ -51,13 +51,13 @@ public class LastElementView extends ViewSupport implements CloneableView
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        OneEventLinkedList oldDataToPost = null;
+        OneEventCollection oldDataToPost = null;
 
         if ((newData != null) && (newData.length != 0))
         {
             if (lastEvent != null)
             {
-                oldDataToPost = new OneEventLinkedList();
+                oldDataToPost = new OneEventCollection();
                 oldDataToPost.add(lastEvent);
             }
             if (newData.length > 1)
@@ -66,7 +66,7 @@ public class LastElementView extends ViewSupport implements CloneableView
                 {
                     if (oldDataToPost == null)
                     {
-                        oldDataToPost = new OneEventLinkedList();
+                        oldDataToPost = new OneEventCollection();
                     }
                     oldDataToPost.add(newData[i]);
                 }
@@ -82,7 +82,7 @@ public class LastElementView extends ViewSupport implements CloneableView
                 {
                     if (oldDataToPost == null)
                     {
-                        oldDataToPost = new OneEventLinkedList();
+                        oldDataToPost = new OneEventCollection();
                     }
                     oldDataToPost.add(oldData[i]);
                     lastEvent = null;

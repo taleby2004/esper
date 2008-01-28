@@ -1,6 +1,6 @@
 package com.espertech.esper.view.std;
 
-import com.espertech.esper.collection.OneEventLinkedList;
+import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.event.EventBean;
@@ -93,11 +93,11 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
             dumpUpdateParams("UniqueByPropertyView", newData, oldData);
         }
 
-        OneEventLinkedList postOldData = null;
+        OneEventCollection postOldData = null;
 
         if (this.hasViews())
         {
-            postOldData = new OneEventLinkedList();
+            postOldData = new OneEventCollection();
         }
 
         if (newData != null)

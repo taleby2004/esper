@@ -45,6 +45,10 @@ public class TestInvalidView extends TestCase
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".dummy:dummy(10)");
         assertEquals("Error starting view: View name 'dummy:dummy' is not a known view name [select * from com.espertech.esper.support.bean.SupportBean_N.dummy:dummy(10)]", exceptionText);
 
+        // keyword used
+        exceptionText = getSyntaxExceptionView("select order from " + SupportBean.class.getName());
+        assertEquals("Incorrect syntax near 'order' (a reserved keyword) at line 1 column 7, please check the select clause [select order from com.espertech.esper.support.bean.SupportBean]", exceptionText);
+
         // invalid view parameter
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".win:length('s')");
         assertEquals("Error starting view: Error in view 'win:length', Length window view requires a single integer-type parameter [select * from com.espertech.esper.support.bean.SupportBean_N.win:length('s')]", exceptionText);

@@ -5,6 +5,7 @@ import java.util.*;
 import junit.framework.TestCase;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
@@ -44,7 +45,7 @@ public class TestEventBeanUtility extends TestCase
     {
         // test many arrays
         EventBean[] testEvents = makeEventArray(new String[] {"a1", "a2", "b1", "b2", "b3", "c1", "c2"});
-        LinkedList<EventBean[]> eventVector = new LinkedList<EventBean[]>();
+        ArrayDequeJDK6Backport<EventBean[]> eventVector = new ArrayDequeJDK6Backport<EventBean[]>();
         eventVector.add(new EventBean[] {testEvents[0], testEvents[1]});
         eventVector.add(new EventBean[] {testEvents[2]});
         eventVector.add(new EventBean[] {testEvents[3], testEvents[4], testEvents[5]});

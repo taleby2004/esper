@@ -3,6 +3,7 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.TimeWindow;
 import com.espertech.esper.collection.ViewUpdatedCollection;
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.core.ExtensionServicesContext;
 import com.espertech.esper.core.StatementContext;
@@ -154,7 +155,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
 
         // Remove from the timeWindow any events that have an older or timestamp then the given timestamp
         // The window extends from X to (X - millisecondsBeforeExpiry + 1)
-        List<EventBean> expired = timeWindow.expireEvents(expireBeforeTimestamp);
+        ArrayDequeJDK6Backport<EventBean> expired = timeWindow.expireEvents(expireBeforeTimestamp);
 
         // If there are child views, fireStatementStopped update method
         if (this.hasViews())

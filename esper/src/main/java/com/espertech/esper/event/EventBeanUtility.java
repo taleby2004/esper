@@ -1,9 +1,6 @@
 package com.espertech.esper.event;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.collection.Pair;
+import com.espertech.esper.collection.*;
 
 import java.util.*;
 import java.io.PrintWriter;
@@ -94,7 +91,7 @@ public class EventBeanUtility
      * @param eventVector vector
      * @return array with all events
      */
-    public static EventBean[] flatten(List<EventBean[]> eventVector)
+    public static EventBean[] flatten(ArrayDequeJDK6Backport<EventBean[]> eventVector)
     {
         if (eventVector.isEmpty())
         {
@@ -103,7 +100,7 @@ public class EventBeanUtility
 
         if (eventVector.size() == 1)
         {
-            return eventVector.get(0);
+            return eventVector.getFirst();
         }
 
         int totalElements = 0;

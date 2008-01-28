@@ -5,14 +5,14 @@ import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.event.EventBean;
 
-public class TestOneEventLinkedList extends TestCase
+public class TestOneEventCollection extends TestCase
 {
-    private OneEventLinkedList list;
+    private OneEventCollection list;
     private EventBean[] events;
 
     public void setUp()
     {
-        list = new OneEventLinkedList();
+        list = new OneEventCollection();
         events = SupportEventBeanFactory.makeEvents(new String[] {"1", "2", "3", "4"});
     }
 

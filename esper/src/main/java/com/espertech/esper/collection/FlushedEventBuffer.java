@@ -10,14 +10,12 @@ package com.espertech.esper.collection;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventBeanUtility;
 
-import java.util.LinkedList;
-
 /**
  * Buffer for events - accumulates events until flushed.
  */
 public class FlushedEventBuffer
 {
-    private LinkedList<EventBean[]> remainEvents = new LinkedList<EventBean[]>();
+    private ArrayDequeJDK6Backport<EventBean[]> remainEvents = new ArrayDequeJDK6Backport<EventBean[]>();
 
     /**
      * Add an event array to buffer.

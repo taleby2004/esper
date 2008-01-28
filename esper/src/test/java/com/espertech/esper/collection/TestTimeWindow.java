@@ -1,16 +1,15 @@
 package com.espertech.esper.collection;
 
-import junit.framework.TestCase;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.List;
 
 public class TestTimeWindow extends TestCase
 {
@@ -43,30 +42,30 @@ public class TestTimeWindow extends TestCase
         window.add(22, beans[5]);
         assertTrue(window.getOldestTimestamp() == 19L);
 
-        List<EventBean> beanList = window.expireEvents(19);
+        ArrayDequeJDK6Backport<EventBean> beanList = window.expireEvents(19);
         assertTrue(beanList == null);
 
         beanList = window.expireEvents(20);
         assertTrue(beanList.size() == 2);
-        assertTrue(beanList.get(0) == beans[0]);
-        assertTrue(beanList.get(1) == beans[1]);
+        assertTrue(beanList.poll() == beans[0]);
+        assertTrue(beanList.poll() == beans[1]);
 
         beanList = window.expireEvents(21);
         assertTrue(beanList.size() == 2);
-        assertTrue(beanList.get(0) == beans[2]);
-        assertTrue(beanList.get(1) == beans[3]);
+        assertTrue(beanList.poll() == beans[2]);
+        assertTrue(beanList.poll() == beans[3]);
         assertFalse(window.isEmpty());
         assertTrue(window.getOldestTimestamp() == 21);
 
         beanList = window.expireEvents(22);
         assertTrue(beanList.size() == 1);
-        assertTrue(beanList.get(0) == beans[4]);
+        assertTrue(beanList.poll() == beans[4]);
         assertFalse(window.isEmpty());
         assertTrue(window.getOldestTimestamp() == 22);
 
         beanList = window.expireEvents(23);
         assertTrue(beanList.size() == 1);
-        assertTrue(beanList.get(0) == beans[5]);
+        assertTrue(beanList.poll() == beans[5]);
         assertTrue(window.isEmpty());
         assertTrue(window.getOldestTimestamp() == null);
 
@@ -97,16 +96,16 @@ public class TestTimeWindow extends TestCase
         windowRemovable.remove(beans[0]);
         windowRemovable.remove(beans[3]);
 
-        List<EventBean> beanList = windowRemovable.expireEvents(19);
+        ArrayDequeJDK6Backport<EventBean> beanList = windowRemovable.expireEvents(19);
         assertTrue(beanList == null);
 
         beanList = windowRemovable.expireEvents(20);
         assertTrue(beanList.size() == 1);
-        assertTrue(beanList.get(0) == beans[1]);
+        assertTrue(beanList.getFirst() == beans[1]);
 
         beanList = windowRemovable.expireEvents(21);
         assertTrue(beanList.size() == 1);
-        assertTrue(beanList.get(0) == beans[2]);
+        assertTrue(beanList.getFirst() == beans[2]);
         assertFalse(windowRemovable.isEmpty());
         assertTrue(windowRemovable.getOldestTimestamp() == 21);
 
@@ -115,7 +114,7 @@ public class TestTimeWindow extends TestCase
 
         beanList = windowRemovable.expireEvents(23);
         assertTrue(beanList.size() == 1);
-        assertTrue(beanList.get(0) == beans[5]);
+        assertTrue(beanList.getFirst() == beans[5]);
         assertTrue(windowRemovable.isEmpty());
         assertTrue(windowRemovable.getOldestTimestamp() == null);
 

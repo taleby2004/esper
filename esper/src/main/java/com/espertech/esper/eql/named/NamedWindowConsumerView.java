@@ -1,7 +1,6 @@
 package com.espertech.esper.eql.named;
 
-import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.collection.OneEventLinkedList;
+import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.eql.expression.ExprNode;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
@@ -14,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Represents a consumer of a named window that selects from a named window via a from-clause.
@@ -82,7 +80,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
             return null;
         }
         
-        OneEventLinkedList filtered = null;
+        OneEventCollection filtered = null;
         for (EventBean event : eventData)
         {
             eventPerStream[0] = event;
@@ -101,7 +99,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
             {
                 if (filtered == null)
                 {
-                    filtered = new OneEventLinkedList();
+                    filtered = new OneEventCollection();
                 }
                 filtered.add(event);
             }

@@ -7,19 +7,17 @@
  **************************************************************************************/
 package com.espertech.esper.collection;
 
-import java.util.LinkedList;
-
 /**
  * Simple queue implementation based on a Linked List per thread.
  * Objects can be added to the queue tail or queue head.
  */
 public class ThreadWorkQueue
 {
-    private static final ThreadLocal<LinkedList<Object>> threadQueue = new ThreadLocal<LinkedList<Object>>()
+    private static final ThreadLocal<ArrayDequeJDK6Backport<Object>> threadQueue = new ThreadLocal<ArrayDequeJDK6Backport<Object>>()
     {
-        protected synchronized LinkedList<Object> initialValue()
+        protected synchronized ArrayDequeJDK6Backport<Object> initialValue()
         {
-            return new LinkedList<Object>();
+            return new ArrayDequeJDK6Backport<Object>();
         }
     };
 
@@ -29,7 +27,7 @@ public class ThreadWorkQueue
      */
     public static void add(Object event)
     {
-        LinkedList<Object> queue = threadQueue.get();
+        ArrayDequeJDK6Backport<Object> queue = threadQueue.get();
         queue.addLast(event);
     }
 
@@ -39,7 +37,7 @@ public class ThreadWorkQueue
      */
     protected static void addFront(Object event)
     {
-        LinkedList<Object> queue = threadQueue.get();
+        ArrayDequeJDK6Backport<Object> queue = threadQueue.get();
         queue.addFirst(event);
     }
 
@@ -49,7 +47,7 @@ public class ThreadWorkQueue
      */
     public static Object next()
     {
-        LinkedList<Object> queue = threadQueue.get();
+        ArrayDequeJDK6Backport<Object> queue = threadQueue.get();
         return queue.poll();
     }
 
@@ -59,7 +57,7 @@ public class ThreadWorkQueue
      */
     public static boolean isEmpty()
     {
-        LinkedList<Object> queue = threadQueue.get();
+        ArrayDequeJDK6Backport<Object> queue = threadQueue.get();
         return queue.isEmpty();
     }
 }

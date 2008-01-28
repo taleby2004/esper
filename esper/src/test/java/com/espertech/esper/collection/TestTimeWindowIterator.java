@@ -17,15 +17,15 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmpty()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
         Iterator<EventBean> it = new TimeWindowIterator(testWindow);
         ArrayAssertionUtil.assertEqualsExactOrder(it, null);
     }
 
     public void testOneElement()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
-        LinkedList<EventBean> list = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
+        ArrayDequeJDK6Backport<EventBean> list = new ArrayDequeJDK6Backport<EventBean>();
         list.add(events.get("avalue"));
         addToWindow(testWindow, 10L, list);
 
@@ -35,8 +35,8 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoInOneEntryElement()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
-        LinkedList<EventBean> list = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
+        ArrayDequeJDK6Backport<EventBean> list = new ArrayDequeJDK6Backport<EventBean>();
         list.add(events.get("a"));
         list.add(events.get("b"));
         addToWindow(testWindow, 10L, list);
@@ -47,11 +47,11 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoSeparateEntryElement()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         list2.add(events.get("b"));
         addToWindow(testWindow, 5L, list2); // Actually before list1
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         list1.add(events.get("a"));
         addToWindow(testWindow, 10L, list1);
 
@@ -61,12 +61,12 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoByTwoEntryElement()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         list1.add(events.get("a"));
         list1.add(events.get("b"));
         addToWindow(testWindow, 10L, list1);
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         list2.add(events.get("c"));
         list2.add(events.get("d"));
         addToWindow(testWindow, 15L, list2);
@@ -77,15 +77,15 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testMixedEntryElement()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         list1.add(events.get("a"));
         addToWindow(testWindow, 10L, list1);
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         list2.add(events.get("c"));
         list2.add(events.get("d"));
         addToWindow(testWindow, 15L, list2);
-        LinkedList<EventBean> list3 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list3 = new ArrayDequeJDK6Backport<EventBean>();
         list3.add(events.get("e"));
         list3.add(events.get("f"));
         list3.add(events.get("g"));
@@ -98,9 +98,9 @@ public class TestTimeWindowIterator extends TestCase
     
     public void testEmptyList()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
 
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 10L, list1);
 
         Iterator it = new TimeWindowIterator(testWindow);
@@ -109,11 +109,11 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoEmptyList()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
 
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 10L, list1);
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 20L, list2);
 
         Iterator it = new TimeWindowIterator(testWindow);
@@ -122,13 +122,13 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testThreeEmptyList()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
 
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 10L, list1);
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 20L, list2);
-        LinkedList<EventBean> list3 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list3 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 30L, list3);
 
         Iterator it = new TimeWindowIterator(testWindow);
@@ -137,17 +137,17 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmptyListFrontTail()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
 
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 10L, list1);
 
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         list2.add(events.get("c"));
         list2.add(events.get("d"));
         addToWindow(testWindow, 15L, list2);
 
-        LinkedList<EventBean> list3 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list3 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 20L, list3);
 
         Iterator it = new TimeWindowIterator(testWindow);
@@ -156,21 +156,21 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmptyListSprinkle()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
 
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         list1.add(events.get("a"));
         addToWindow(testWindow, 10L, list1);
 
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 15L, list2);
 
-        LinkedList<EventBean> list3 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list3 = new ArrayDequeJDK6Backport<EventBean>();
         list3.add(events.get("c"));
         list3.add(events.get("d"));
         addToWindow(testWindow, 20L, list3);
 
-        LinkedList<EventBean> list4 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list4 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 40L, list4);
 
         Iterator it = new TimeWindowIterator(testWindow);
@@ -179,21 +179,21 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmptyListFront()
     {
-        LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow = new LinkedList<Pair<Long, LinkedList<EventBean>>>();
+        ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
 
-        LinkedList<EventBean> list1 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list1 = new ArrayDequeJDK6Backport<EventBean>();
         addToWindow(testWindow, 10L, list1);
 
-        LinkedList<EventBean> list2 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list2 = new ArrayDequeJDK6Backport<EventBean>();
         list2.add(events.get("a"));
         addToWindow(testWindow, 15L, list2);
 
-        LinkedList<EventBean> list3 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list3 = new ArrayDequeJDK6Backport<EventBean>();
         list3.add(events.get("c"));
         list3.add(events.get("d"));
         addToWindow(testWindow, 20L, list3);
 
-        LinkedList<EventBean> list4 = new LinkedList<EventBean>();
+        ArrayDequeJDK6Backport<EventBean> list4 = new ArrayDequeJDK6Backport<EventBean>();
         list4.add(events.get("e"));
         addToWindow(testWindow, 40L, list4);
 
@@ -201,10 +201,10 @@ public class TestTimeWindowIterator extends TestCase
         ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a"), events.get("c"), events.get("d"), events.get("e")} );
     }
 
-    private void addToWindow(LinkedList<Pair<Long, LinkedList<EventBean>>> testWindow,
+    private void addToWindow(ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow,
                              long key, 
-                             LinkedList<EventBean> value)
+                             ArrayDequeJDK6Backport<EventBean> value)
     {
-        testWindow.add(new Pair<Long, LinkedList<EventBean>> (key, value));
+        testWindow.add(new Pair<Long, ArrayDequeJDK6Backport<EventBean>> (key, value));
     }
 }

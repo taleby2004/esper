@@ -6,14 +6,41 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 // TODO: remove me
 public class TestPerfCompareDispatch extends TestCase
 {
     private EPServiceProvider epService;
+
+    public void testPerfDequeLinkedList()
+    {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10000000; i++)
+        {
+            LinkedList<Object> col = new LinkedList<Object>();
+            col.add(new Object());
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("delta=" + (end - start));
+
+    }
+
+    public void testPerfDequeArray()
+    {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10000000; i++)
+        {
+            ArrayDequeJDK6Backport<Object> col = new ArrayDequeJDK6Backport<Object>();
+            col.add(new Object());
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("delta=" + (end - start));
+    }
 
     public void setUp()
     {
