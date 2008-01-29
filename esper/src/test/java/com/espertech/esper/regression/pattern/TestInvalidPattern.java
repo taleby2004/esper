@@ -1,12 +1,12 @@
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.bean.SupportBean_N;
-import com.espertech.esper.support.bean.SupportBeanComplexProps;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.eql.parse.EPStatementSyntaxException;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.bean.SupportBean_N;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +30,7 @@ public class TestInvalidPattern extends TestCase
     public void testInvalid()
     {
         String exceptionText = getSyntaxExceptionPattern(EVENT_NUM + "(doublePrimitive='ss'");
-        assertEquals("Incorrect syntax near ''ss'' expecting a closing parenthesis ')' but found end of input at line 1 column 53, please check the filter specification within the pattern expression [com.espertech.esper.support.bean.SupportBean_N(doublePrimitive='ss']", exceptionText);
+        assertEquals("Incorrect syntax near ''ss'' expecting a closing parenthesis ')' but found end of input at line 1 column 63, please check the filter specification within the pattern expression [com.espertech.esper.support.bean.SupportBean_N(doublePrimitive='ss']", exceptionText);
     }
 
     public void testStatementException() throws Exception

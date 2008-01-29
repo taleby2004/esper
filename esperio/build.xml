@@ -44,7 +44,7 @@
 				]]>
 			</footer>
 			<packageset dir="${src.dir}" defaultexcludes="yes">
-				<include name="net/esper/**"/>
+				<include name="com/espertech/esper/**"/>
 			</packageset>
 
 			<group title="Esper Adapter API"

@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Backport of the JDK6 ArrayDeque class as from the Sun source distribution of JDK 1.6.0_3. 
+ * Backport of the JDK6 ArrayDeque class as from the Sun source distribution of JDK 1.6.0_3.
  *
  * Resizable-array implementation of the JDK6 Deque interface.  Array
  * deques have no capacity restrictions; they grow as necessary to support
@@ -240,7 +240,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
-     * @throws NoSuchElementException {@inheritDoc}
+     * @throws NoSuchElementException no more elements
      */
     public E removeFirst() {
         E x = pollFirst();
@@ -250,7 +250,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
-     * @throws NoSuchElementException {@inheritDoc}
+     * @throws NoSuchElementException no more elements
      */
     public E removeLast() {
         E x = pollLast();
@@ -280,7 +280,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
-     * @throws NoSuchElementException {@inheritDoc}
+     * @throws NoSuchElementException no more elements
      */
     public E getFirst() {
         E x = elements[head];
@@ -290,7 +290,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
-     * @throws java.util.NoSuchElementException {@inheritDoc}
+     * @throws java.util.NoSuchElementException no more elements
      */
     public E getLast() {
         E x = elements[(tail - 1) & (elements.length - 1)];
@@ -401,7 +401,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
      * <p>This method is equivalent to {@link #removeFirst}.
      *
      * @return the head of the queue represented by this deque
-     * @throws NoSuchElementException {@inheritDoc}
+     * @throws NoSuchElementException no more elements
      */
     public E remove() {
         return removeFirst();
@@ -429,7 +429,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
      * <p>This method is equivalent to {@link #getFirst}.
      *
      * @return the head of the queue represented by this deque
-     * @throws NoSuchElementException {@inheritDoc}
+     * @throws NoSuchElementException no more elements
      */
     public E element() {
         return getFirst();
@@ -471,7 +471,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
      *
      * @return the element at the front of this deque (which is the top
      *         of the stack represented by this deque)
-     * @throws NoSuchElementException {@inheritDoc}
+     * @throws NoSuchElementException no more elements
      */
     public E pop() {
         return removeFirst();
@@ -818,4 +818,5 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
             elements[i] = (E)s.readObject();
     }
 }
+
 

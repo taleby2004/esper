@@ -7,6 +7,7 @@ import com.espertech.esper.eql.expression.ExprValidationException;
 import com.espertech.esper.eql.spec.OutputLimitSpec;
 import com.espertech.esper.eql.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.eql.spec.StatementSpecCompiled;
+import com.espertech.esper.eql.spec.OutputLimitLimitType;
 
 /**
  * Factory for output processing views.
@@ -58,7 +59,14 @@ public class OutputProcessViewFactory
         {
             if (outputLimitSpec != null)
             {
-                return new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext);
+                if (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.SNAPSHOT)
+                {
+                    return new OutputProcessViewSnapshot(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext);
+                }
+                else
+                {
+                    return new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext);
+                }
             }
             return new OutputProcessViewDirect(resultSetProcessor, outputStrategy, isRouted, statementContext.getStatementResultService());
         }

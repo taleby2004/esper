@@ -22,7 +22,7 @@ log4j-1.2.15.jar
 - runtime, optional
 
 
-Compile and Build-time libraries
+Compile and Build-time libraries - Not part of the binary distribution and not required for runtime
 ================================
 
 junit-4.4.jar

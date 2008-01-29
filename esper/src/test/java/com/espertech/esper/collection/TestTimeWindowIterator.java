@@ -12,7 +12,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void setUp()
     {
-        events = EventFactoryHelper.makeEventMap(new String[] {"a", "b", "c", "d", "f", "g"});
+        events = EventFactoryHelper.makeEventMap(new String[] {"a", "b", "c", "d", "e", "f", "g"});
     }
 
     public void testEmpty()
@@ -26,11 +26,11 @@ public class TestTimeWindowIterator extends TestCase
     {
         ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>> testWindow = new ArrayDequeJDK6Backport<Pair<Long, ArrayDequeJDK6Backport<EventBean>>>();
         ArrayDequeJDK6Backport<EventBean> list = new ArrayDequeJDK6Backport<EventBean>();
-        list.add(events.get("avalue"));
+        list.add(events.get("a"));
         addToWindow(testWindow, 10L, list);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("avalue")} );
+        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a")} );
     }
 
     public void testTwoInOneEntryElement()

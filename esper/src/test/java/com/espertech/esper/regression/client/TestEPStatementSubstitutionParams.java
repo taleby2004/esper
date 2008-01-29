@@ -350,7 +350,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         }
         catch (EPException ex)
         {
-            assertEquals("Incorrect syntax near '?' expecting a closing parenthesis ')' but found a questionmark '?' at line 1 column 60, please check the view specifications within the from clause [select * from com.espertech.esper.support.bean.SupportBean.win:length(?)]", ex.getMessage());
+            assertEquals("Incorrect syntax near '?' expecting a closing parenthesis ')' but found a questionmark '?' at line 1 column 70, please check the view specifications within the from clause [select * from com.espertech.esper.support.bean.SupportBean.win:length(?)]", ex.getMessage());
         }
     }
 }

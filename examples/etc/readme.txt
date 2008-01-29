@@ -11,6 +11,7 @@ In order to compile and run the samples please follow the below instructions:
 3. Run "setenv.bat" (Windows) or "setenv.sh" (Unix) to verify your environment settings
 
 4. Run "compile.bat" (Windows) or "compile.sh" (Unix) to compile the examples
+   On Unix systems, make sure the PATH variable contains the current directory.
 
 5. Now you are ready to run the examples. Some examples require mandatory parameters.
 

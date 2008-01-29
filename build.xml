@@ -27,12 +27,16 @@
 	    examples/terminalsvc/**,
         examples/terminalsvc-jse/**,
         examples/src/**, examples/etc/**, examples/lib/**"/>
+	<property name="dist_includes_exceptions" value="examples/terminalsvc/**/target/*.jar"/>
     <!-- examples has specific excludes -->
     <!-- doc is handled separately for folder remapping (remove of build/en) -->
     <property name="dist_excludes" value="
-        **/target/**, **/intellij/**, **/_classes/**
+        **/target/**, **/intellij/**, **/_classes/**,
         examples/benchmark/lib/*.jar,
-        examples/terminalsvc-jse/lib/*.jar"/>
+        examples/terminalsvc-jse/lib/*.jar,
+        **/antlr-3.0.1.jar,
+        **/junit-4.4.jar, **/junit.license,
+        **/mysql-connector-java-*.jar"/>
 
 	<target name="info" description="The master build is done my Maven">
 		<echo message="Please use Maven 2 to build Esper and related components. Maven build instructions are available on the website." />
@@ -78,6 +82,7 @@
 		<property name="zip-file" value="${dist.dir}/${fullname}.zip"/>
 		<zip zipfile="${zip-file}">
 			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
+			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
             <zipfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
             <zipfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
             <zipfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
@@ -96,6 +101,7 @@
 		       includes="**/*.sh"/>
 		<tar longfile="gnu" tarfile="${tar-file}">
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
 			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="examples/etc/*.sh"/>
             <tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
             <tarfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
