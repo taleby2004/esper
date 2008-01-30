@@ -17,7 +17,7 @@ public class TestEventBeanUtility extends TestCase
     {
         // test many arrays
         EventBean[] testEvents = makeEventArray(new String[] {"a1", "a2", "b1", "b2", "b3", "c1", "c2"});
-        LinkedList<Pair<EventBean[], EventBean[]>> eventVector = new LinkedList<Pair<EventBean[], EventBean[]>>();
+        ArrayDequeJDK6Backport<Pair<EventBean[], EventBean[]>> eventVector = new ArrayDequeJDK6Backport<Pair<EventBean[], EventBean[]>>();
 
         eventVector.add(new Pair<EventBean[], EventBean[]>(null, new EventBean[] {testEvents[0], testEvents[1]}));
         eventVector.add(new Pair<EventBean[], EventBean[]>(new EventBean[] {testEvents[2]}, null));

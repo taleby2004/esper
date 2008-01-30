@@ -7,22 +7,21 @@
  **************************************************************************************/
 package com.espertech.esper.dispatch;
 
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-import java.util.LinkedList;
-
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.util.ExecutionPathDebugLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Implements dispatch service using a thread-local linked list of Dispatchable instances.
  */
 public class DispatchServiceImpl implements DispatchService
 {
-    private static final ThreadLocal<LinkedList<Dispatchable>> threadDispatchQueue = new ThreadLocal<LinkedList<Dispatchable>>()
+    private static final ThreadLocal<ArrayDequeJDK6Backport<Dispatchable>> threadDispatchQueue = new ThreadLocal<ArrayDequeJDK6Backport<Dispatchable>>()
     {
-        protected synchronized LinkedList<Dispatchable> initialValue()
+        protected synchronized ArrayDequeJDK6Backport<Dispatchable> initialValue()
         {
-            return new LinkedList<Dispatchable>();
+            return new ArrayDequeJDK6Backport<Dispatchable>();
         }
     };
 
@@ -33,16 +32,16 @@ public class DispatchServiceImpl implements DispatchService
 
     public void addExternal(Dispatchable dispatchable)
     {
-        LinkedList<Dispatchable> dispatchQueue = threadDispatchQueue.get();
+        ArrayDequeJDK6Backport<Dispatchable> dispatchQueue = threadDispatchQueue.get();
         addToQueue(dispatchable, dispatchQueue);
     }
 
-    private static void addToQueue(Dispatchable dispatchable, LinkedList<Dispatchable> dispatchQueue)
+    private static void addToQueue(Dispatchable dispatchable, ArrayDequeJDK6Backport<Dispatchable> dispatchQueue)
     {
         dispatchQueue.add(dispatchable);
     }
 
-    private static void dispatchFromQueue(LinkedList<Dispatchable> dispatchQueue)
+    private static void dispatchFromQueue(ArrayDequeJDK6Backport<Dispatchable> dispatchQueue)
     {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {

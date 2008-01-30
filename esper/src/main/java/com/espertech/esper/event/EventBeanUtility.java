@@ -17,7 +17,7 @@ public class EventBeanUtility
      * @param eventVector vector
      * @return array with all events
      */
-    public static Pair<EventBean[], EventBean[]> flattenList(List<Pair<EventBean[], EventBean[]>> eventVector)
+    public static Pair<EventBean[], EventBean[]> flattenList(ArrayDequeJDK6Backport<Pair<EventBean[], EventBean[]>> eventVector)
     {
         if (eventVector.isEmpty())
         {
@@ -26,7 +26,7 @@ public class EventBeanUtility
 
         if (eventVector.size() == 1)
         {
-            return eventVector.get(0);
+            return eventVector.getFirst();
         }
 
         int totalNew = 0;

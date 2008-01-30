@@ -3,7 +3,14 @@ package com.espertech.esper.regression.pattern;
 import junit.framework.*;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBeanConstants;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.soda.*;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.util.SerializableObjectCopier;
 
 public class TestNotOperator extends TestCase implements SupportBeanConstants
@@ -123,5 +130,47 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
 
         PatternTestHarness util = new PatternTestHarness(events, results);
         util.runTest();
+    }
+
+    public void testNotTimeInterval()
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.addEventTypeAlias("BBB", SupportBean.class);
+        config.addEventTypeAlias("AAA", SupportMarketDataBean.class);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        String text = "select A.string as string from pattern " +
+                    "[every A=BBB(intPrimitive=123) -> (timer:interval(30 seconds) and not AAA(volume=123, symbol=A.string))]";
+        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        sendTimer(0, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 123));
+
+        sendTimer(10000, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 123));
+
+        sendTimer(20000, epService);
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("E1", 0, 123L, ""));
+
+        sendTimer(30000, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 123));
+        assertFalse(listener.isInvoked());
+
+        sendTimer(40000, epService);
+        String fields[] = new String[] {"string"};
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 123});
+
+        statement.stop();
+    }
+
+    private void sendTimer(long timeInMSec, EPServiceProvider epService)
+    {
+        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        EPRuntime runtime = epService.getEPRuntime();
+        runtime.sendEvent(event);
     }
 }

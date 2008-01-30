@@ -316,7 +316,7 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 			<title>Performance, JVM, OS and hardware</title>
 
 			<para>
-				Performance will also depends on your JVM (Sun HotSpot, BEA JRockit, IBM J9), your operating system and your hardware.
+				Performance will also depend on your JVM (Sun HotSpot, BEA JRockit, IBM J9), your operating system and your hardware.
 				A JVM performance index such as specJBB at <ulink url="http://www.spec.org">spec.org</ulink> can be used. For memory intensive statement, you may want
 				to consider 64bit architecture that can address more than 2GB or 3GB of memory, although a 64bit JVM usually comes with a slow performance penalty due to
 				more complex pointer address management.
@@ -325,7 +325,7 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 				The choice of JVM, OS and hardware depends on a number of factors and therefore a definite suggestion is hard to make.
 				The choice depends on the number of statements, and number of threads.
 				A larger number of threads would benefit of more CPU and cores. If you have very low latency requirements, you should consider
-				getting more GHz per core, and possibly soft realtime JVM to enforce GC determinism at the JVM level, or even consider dedicated hardware such as Azul.
+				getting more GHz per core, and possibly soft real-time JVM to enforce GC determinism at the JVM level, or even consider dedicated hardware such as Azul.
 				If your statements utilize large data windows, more RAM and heap space will be utilized hence you should clearly plan and account for that and possibly consider 64bit architectures or consider
 				<ulink url="http://www.espertech.com/products/">EsperHA</ulink>.
 			</para>

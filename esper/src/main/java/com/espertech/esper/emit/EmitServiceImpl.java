@@ -8,21 +8,20 @@
 package com.espertech.esper.emit;
 
 import com.espertech.esper.client.EmittedListener;
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 
-import java.util.Map;
-import java.util.List;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Implementation of the event emit service.
  */
 public final class EmitServiceImpl implements EmitService
 {
-    private final HashMap<String, List<EmittedListener>> channelEmitListeners = new HashMap<String, List<EmittedListener>>();
+    private final HashMap<String, ArrayDequeJDK6Backport<EmittedListener>> channelEmitListeners = new HashMap<String, ArrayDequeJDK6Backport<EmittedListener>>();
     private final ReadWriteLock channelEmitListenersRWLock = new ReentrantReadWriteLock();
     private final AtomicInteger numEventsEmitted = new AtomicInteger();
 
@@ -41,7 +40,7 @@ public final class EmitServiceImpl implements EmitService
         {
             // Check if the listener already exists, to make sure the same listener
             // doesn't subscribe twice to the same or the default channel
-            for (Map.Entry<String, List<EmittedListener>> entry : channelEmitListeners.entrySet())
+            for (Map.Entry<String, ArrayDequeJDK6Backport<EmittedListener>> entry : channelEmitListeners.entrySet())
             {
                 if (entry.getValue().contains(listener))
                 {
@@ -62,10 +61,10 @@ public final class EmitServiceImpl implements EmitService
             }
 
             // Add listener, its a new listener or new channel for an existing listener
-            List<EmittedListener> listeners = channelEmitListeners.get(channel);
+            ArrayDequeJDK6Backport<EmittedListener> listeners = channelEmitListeners.get(channel);
             if (listeners == null)
             {
-                listeners = new LinkedList<EmittedListener>();
+                listeners = new ArrayDequeJDK6Backport<EmittedListener>();
                 channelEmitListeners.put(channel, listeners);
             }
 
@@ -99,7 +98,7 @@ public final class EmitServiceImpl implements EmitService
             // Emit to specific channel first
             if (channel != null)
             {
-                List<EmittedListener> listeners = channelEmitListeners.get(channel);
+                ArrayDequeJDK6Backport<EmittedListener> listeners = channelEmitListeners.get(channel);
                 if (listeners != null)
                 {
                     for (EmittedListener listener : listeners)
@@ -110,7 +109,7 @@ public final class EmitServiceImpl implements EmitService
             }
 
             // Emit to default channel if there are any listeners
-            List<EmittedListener> listeners = channelEmitListeners.get(null);
+            ArrayDequeJDK6Backport<EmittedListener> listeners = channelEmitListeners.get(null);
             if (listeners != null)
             {
                 for (EmittedListener listener : listeners)

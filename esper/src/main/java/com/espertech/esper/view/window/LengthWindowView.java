@@ -1,16 +1,16 @@
 package com.espertech.esper.view.window;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
+import com.espertech.esper.collection.ViewUpdatedCollection;
+import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
-import com.espertech.esper.view.ViewSupport;
 import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
 import com.espertech.esper.view.DataWindowView;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.collection.ViewUpdatedCollection;
+import com.espertech.esper.view.View;
+import com.espertech.esper.view.ViewSupport;
+
+import java.util.Iterator;
 
 /**
  * This view is a moving window extending the specified number of elements into the past.
@@ -20,7 +20,7 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
     private final LengthWindowViewFactory lengthWindowViewFactory;
     private final int size;
     private final ViewUpdatedCollection viewUpdatedCollection;
-    private final LinkedList<EventBean> events = new LinkedList<EventBean>();
+    private final ArrayDequeJDK6Backport<EventBean> events = new ArrayDequeJDK6Backport<EventBean>();
 
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.

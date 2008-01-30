@@ -65,6 +65,12 @@ public class ExprNodeAdapter
         }
         EventBean[] eventsPerStream = arrayPerThread.get();
         eventsPerStream[0] = event;
-        return (Boolean) exprNode.evaluate(eventsPerStream, true);
+
+        Boolean result = (Boolean) exprNode.evaluate(eventsPerStream, true);
+        if (result == null)
+        {
+            return false;
+        }
+        return true;
     }
 }

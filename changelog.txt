@@ -6,11 +6,8 @@ Changes in version 2.0.0
 
 * TODO Fixed issue ESPER-178 Problem selecting "sum" as a property of event posted by stat:uni view
 * TODO Fixed issue ESPER-138 Allow Map event type to contain nested Map values
-* TODO Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
 * TODO Fixed issue ESPER-145 Ignore start or stop commands on already started or stopped EPStatements.
-* TODO Fixed issue ESPER-183 Replace LinkedLists with ArrayDeque where possible
 * TODO docs for subscriber objects + some perf testing and MT testing
-* TODO Fixed issue ESPER-184 NPE when using regexp or like on null pojo properties
 * TODO result processing for output rate limiting clause computes aggregation more granular and considers having-clause per unit
 * TODO Support for Axiom XML events
 
@@ -31,6 +28,9 @@ Changes in version 2.0.0
 * Fixed issue ESPER-185 Remove limitation whereas grouped-by properties cannot also occur within aggregation functions  
 * Fixed issue ESPER-180 Null aggregation results outer joining a named window on filled named window
 * Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
+* Fixed issue ESPER-184 NPE when using regexp or like on null pojo properties
+* Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
+* Fixed issue ESPER-183 Replace LinkedLists with ArrayDeque where possible
 
 
 Changes in version 1.12.0

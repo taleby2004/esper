@@ -23,6 +23,19 @@ public class TestFilterExpressions extends TestCase
         epService.initialize();
     }
 
+    public void testNullBooleanExpr()
+    {
+        String stmtOneText = "every event1=SupportEvent(userId like '123%')";
+        EPStatement statement = epService.getEPAdministrator().createPattern(stmtOneText);
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportTradeEvent(1, null, 1001));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportTradeEvent(2, "1234", 1001));
+        assertEquals(2, listener.assertOneGetNewAndReset().get("event1.id"));
+    }
+
     public void testFilterOverInClause()
     {
         // Test for Esper-159

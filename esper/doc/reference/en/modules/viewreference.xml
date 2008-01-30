@@ -462,7 +462,7 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<para>
 					The next example creates a view that retains the last event per symbol and feed.
 				</para>
-				<programlisting><![CDATA[select * from StockTickEvent.std:unique('symbol', 'feed')]]></programlisting>
+				<programlisting><![CDATA[select * from StockTickEvent.std:unique(symbol, feed)]]></programlisting>
 			</sect2>
 
 			<sect2 id="view-std-groupby" >

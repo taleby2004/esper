@@ -5,6 +5,10 @@ import java.util.*;
 
 /**
  * Backport of the JDK6 ArrayDeque class as from the Sun source distribution of JDK 1.6.0_3.
+ * <p>
+ * Faster for adding, removing and iterating over elements when compared to LinkedList.
+ * More expensive for toArray() then LinkedList.
+ * Slightly more expensive for construction then LinkedList. 
  *
  * Resizable-array implementation of the JDK6 Deque interface.  Array
  * deques have no capacity restrictions; they grow as necessary to support

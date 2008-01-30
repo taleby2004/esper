@@ -96,6 +96,67 @@ countStmt.start();]]></programlisting>
 	  </sect2>
 
 	  <sect2 id="api-admin-listeners">		
+			<title>Receiving Statement Results</title>
+
+			<indexterm><primary>subscriber</primary></indexterm>
+			<indexterm><primary>statement</primary><secondary>subscriber</secondary></indexterm>
+			<para>
+				Esper provides three choices for your application to receive statement results. Your application can use all three mechanisms alone or in any combination for each statement. The choices are:
+			</para>
+
+			<table frame="topbot" id="api-admin-receive-results" revision="2">
+				<title>Choices For Receiving Statement Results</title>
+				<tgroup cols="3">
+					<colspec colwidth="1*"/>
+					<colspec colwidth="1.0*"/>
+					<colspec colwidth="2.0*"/>
+					<thead>
+						<row>
+							<entry>Name</entry>
+							<entry>Methods on <literal>EPStatement</literal></entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>Pull API</entry>
+							<entry><literal>safeIterator</literal> and <literal>iterator</literal></entry>
+							<entry>
+								<para>Your application asks a statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.</para>
+								<para>Useful if your application does not need an indication of new results in real-time, and has query-only requirements for a statement.</para>
+							 </entry>
+						</row>
+						<row>
+							<entry>Listener Callback</entry>
+							<entry><literal>addListener</literal> and <literal>removeListener</literal></entry>
+							<entry>
+								<para> 
+									Your application provide implementations of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement. 
+									Listeners receive <literal>EventBean</literal> instances containing statement results.
+								</para>
+							</entry>							
+						</row>
+						<row>
+							<entry>Subscriber Object</entry>
+							<entry><literal>setSubscriber</literal></entry>
+							<entry>
+								<para> 
+									Your application provides a POJO that exposes method to receive statement results, as described in more detail below.
+								</para>
+								<para> 
+									This is the fastest method to receive statement results, as the engine delivers strongly-typed results directly to your application objects. 
+								</para>
+							</entry>							
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+			<para>
+				Your application asks a statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.			
+			</para>
+	  </sect2>
+
+	  <sect2 id="api-admin-listeners">		
 			<title>Adding Listeners</title>
 
 			<indexterm><primary>UpdateListener interface</primary></indexterm>
