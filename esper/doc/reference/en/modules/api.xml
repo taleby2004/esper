@@ -95,11 +95,10 @@ countStmt.start();]]></programlisting>
 	
 	  </sect2>
 
-	  <sect2 id="api-admin-listeners">		
+	  <sect2 id="api-receive-results">		
 			<title>Receiving Statement Results</title>
 
-			<indexterm><primary>subscriber</primary></indexterm>
-			<indexterm><primary>statement</primary><secondary>subscriber</secondary></indexterm>
+			<indexterm><primary>statement</primary><secondary>receiving results</secondary></indexterm>
 			<para>
 				Esper provides three choices for your application to receive statement results. Your application can use all three mechanisms alone or in any combination for each statement. The choices are:
 			</para>
@@ -107,7 +106,7 @@ countStmt.start();]]></programlisting>
 			<table frame="topbot" id="api-admin-receive-results" revision="2">
 				<title>Choices For Receiving Statement Results</title>
 				<tgroup cols="3">
-					<colspec colwidth="1*"/>
+					<colspec colwidth="0.75*"/>
 					<colspec colwidth="1.0*"/>
 					<colspec colwidth="2.0*"/>
 					<thead>
@@ -122,38 +121,293 @@ countStmt.start();]]></programlisting>
 							<entry>Pull API</entry>
 							<entry><literal>safeIterator</literal> and <literal>iterator</literal></entry>
 							<entry>
-								<para>Your application asks a statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.</para>
-								<para>Useful if your application does not need an indication of new results in real-time, and has query-only requirements for a statement.</para>
+								<para>Your application asks the statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.</para>
+								<para>This is useful if your application does not need continuous indication of new results in real-time.</para>
 							 </entry>
-						</row>
-						<row>
-							<entry>Listener Callback</entry>
-							<entry><literal>addListener</literal> and <literal>removeListener</literal></entry>
-							<entry>
-								<para> 
-									Your application provide implementations of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement. 
-									Listeners receive <literal>EventBean</literal> instances containing statement results.
-								</para>
-							</entry>							
 						</row>
 						<row>
 							<entry>Subscriber Object</entry>
 							<entry><literal>setSubscriber</literal></entry>
 							<entry>
 								<para> 
-									Your application provides a POJO that exposes method to receive statement results, as described in more detail below.
+									Your application provides a POJO (plain Java object) that exposes methods to receive statement results.
 								</para>
+								<para>The engine continuously indicates results to the single subscriber as soon they occur, and following output rate limiting clauses if specified.</para>
 								<para> 
-									This is the fastest method to receive statement results, as the engine delivers strongly-typed results directly to your application objects. 
+									This is the fastest method to receive statement results, as the engine delivers strongly-typed results directly to your application objects without the need for
+									building an <literal>EventBean</literal> result set.
 								</para>
+							</entry>							
+						</row>
+						<row>
+							<entry>Listener Callbacks</entry>
+							<entry><literal>addListener</literal> and <literal>removeListener</literal></entry>
+							<entry>
+								<para> 
+									Your application provides implementations of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement. 
+									Listeners receive <literal>EventBean</literal> instances containing statement results.
+								</para>
+								<para>The engine continuously indicates results to all listeners as soon they occur, and following output rate limiting clauses if specified.</para>
 							</entry>							
 						</row>
 					</tbody>
 				</tgroup>
 			</table>
+			
 			<para>
-				Your application asks a statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.			
+				Your application may attach one or more listeners, a single subscriber and in addition use the Pull API on the same statement. There are no limitations to the use of iterator, subscriber or listener
+				alone or in combination to receive statement results.
 			</para>
+			<para>
+				A side note on performance: The engine is aware of the listeners and subscriber attached to a statement. The engine uses this information internally to reduce statement overhead. For example, if your statement does not have listeners or a subscriber attached, the engine does not need to continuously generate results for delivery. The best delivery performance can generally be achieved by attaching a subscriber and by not attaching listeners.
+			</para>
+	  </sect2>
+
+	  <sect2 id="api-admin-subscriber">		
+			<title>Setting a Subscriber Object</title>
+
+			<indexterm><primary>subscriber object</primary></indexterm>
+			<indexterm><primary>statement</primary><secondary>subscriber object</secondary></indexterm>
+			<para>
+				A subscriber object is a direct binding of query results to a Java object. The object, a POJO, receives statement results via method invocation. The subscriber class need not implement an interface or extend a superclass.
+			</para>
+			
+			<para>
+			  Subscriber objects have several advantages over listeners. First, they offer a substantial performance benefit: Query results are delivered directly to your method(s) through Java virtual machine method calls, and there is no intermediate representation (<literal>EventBean</literal>). Second, as subscribers receive strongly-typed parameters, the subscriber code tends to be simpler.
+			</para>
+
+			<para>
+			  This chapter describes the requirements towards the methods provided by your subscriber class.
+			</para>
+			
+			<para>
+			  The engine can deliver results to your subscriber in two ways:			 
+			</para>
+			<orderedlist>
+				<listitem>
+					<para>
+						Each evert in the insert stream results in a method invocation, and each event in the remove stream results in further method invocations. This is termed <emphasis>row-by-row delivery</emphasis>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						A single method invocation that delivers all rows of the insert and remove stream. This is termed <emphasis>multi-row</emphasis> delivery.
+					</para>
+				</listitem>
+			</orderedlist>
+
+		    <sect3 id="api-admin-subscriber-rowbyrow">		
+				<title>Row-By-Row Delivery</title>
+	
+				<indexterm><primary>subscriber object</primary><secondary>row-by-row</secondary></indexterm>
+				<para>
+					Your subscriber class must provide a method by name <literal>update</literal> to receive insert stream events row-by-row. The number and types of parameters declared by the <literal>update</literal> method must match the number and types of columns as specified in the <literal>select</literal> clause, in the same order as in the <literal>select</literal> clause.
+				</para>
+
+				<para>
+					For example, if your statement is:
+				</para>
+			<programlisting><![CDATA[select orderId, price, count(*) from OrderEvent]]></programlisting>
+
+				<para>
+					Then your subscriber <literal>update</literal> method looks as follows:
+				</para>
+			<programlisting><![CDATA[public class MySubscriber {
+  ...
+  public void update(String orderId, double price, long count) {...}
+  ...
+}]]></programlisting>
+
+				<para>
+					Each method parameter declared by the <literal>update</literal> method must be assignable from the respective column type as listed in the <literal>select</literal>-clause, in the order selected. The assignability rules are:
+				</para>
+
+				<itemizedlist spacing="compact">
+					<listitem>
+						<para>
+							Widening of types follows Java standards. For example, if your <literal>select</literal> clause selects an integer value, the method parameter for the same column can be typed int, long, float or double (or any equivalent boxed type).
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Auto-boxing and unboxing follows Java standards. For example, if your <literal>select</literal> clause selects an <literal>java.lang.Integer</literal> value, the method parameter for the same column can be typed <literal>int</literal>. Note that if your <literal>select</literal> clause column may generate <literal>null</literal> values, an exception may occur at runtime unboxing the <literal>null</literal> value.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Interfaces and super-classes are honored in the test for assignability. Therefore <literal>java.lang.Object</literal> can be used to accept any <literal>select</literal> clause column type
+						</para>
+					</listitem>
+				</itemizedlist>
+
+				<sect4 id="api-admin-subscriber-rowbyrow-wildcard">		
+					<title>Wildcards</title>
+	
+					<para>
+						If your <literal>select</literal> clause contains one or more wildcards (*), then the equivalent parameter type is the underlying event type of the stream selected from.
+					</para>
+
+					<para>
+						For example, your statement may be:
+					</para>
+					<programlisting><![CDATA[select *, count(*) from OrderEvent]]></programlisting>
+		
+					<para>
+						Then your subscriber <literal>update</literal> method looks as follows:
+					</para>
+					<programlisting><![CDATA[public void update(OrderEvent orderEvent, long count) {...}]]></programlisting>
+
+					<para>
+						In a join, the wildcard expands to the underlying event type of each stream in the join in the order the streams occur in the <literal>from</literal> clause. An example statement for a join is:
+					</para>
+					<programlisting><![CDATA[select *, count(*) from OrderEvent order, OrderHistory hist]]></programlisting>
+		
+					<para>
+						Then your subscriber <literal>update</literal> method should be:
+					</para>
+					<programlisting><![CDATA[public void update(OrderEvent orderEvent, OrderHistory orderHistory, long count) {...}]]></programlisting>
+
+					<para>
+						The stream wildcard syntax and the stream name itself can also be used:
+					</para>
+					<programlisting><![CDATA[select hist.*, order from OrderEvent order, OrderHistory hist]]></programlisting>
+		
+					<para>
+						The matching <literal>update</literal> method is:
+					</para>
+					<programlisting><![CDATA[public void update(OrderHistory orderHistory, OrderEvent orderEvent) {...}]]></programlisting>
+				</sect4>
+
+				<sect4 id="api-admin-subscriber-rowbyrow-generic">		
+					<title>Row Delivery as Map and Object Array </title>
+	
+					<para>
+						Alternatively, your <literal>update</literal> method may simply choose to accept <literal>java.util.Map</literal> as a representation for each row. Each column in the <literal>select</literal> clause is 
+						then made an entry in the resulting <literal>Map</literal>. The <literal>Map</literal> keys are the column alias name if supplied, or the expression string itself for columns without an alias.
+					</para>
+					<para>
+						The <literal>update</literal> method for <literal>Map</literal> delivery is:
+					</para>
+					<programlisting><![CDATA[public void update(Map row) {...}]]></programlisting>
+
+					<para>
+						The engine also supports delivery of <literal>select</literal> clause columns as an object array. Each item in the object array represents a column in the <literal>select</literal> clause. The <literal>update</literal> method then looks as follows:
+					</para>
+					<programlisting><![CDATA[public void update(Object[] row) {...}]]></programlisting>
+				</sect4>
+
+				<sect4 id="api-admin-subscriber-rowbyrow-rstream">		
+					<title>Delivery of Remove Stream Events</title>
+	
+					<para>
+						Your subscriber receives remove stream events if it provides a method named <literal>updateRStream</literal>. The method must accept the same number and types of parameters as the <literal>update</literal> method.
+					</para>
+					
+					<para>
+						An example statement:
+					</para>
+					<programlisting><![CDATA[select orderId, count(*) from OrderEvent.win:time(20 sec) group by orderId]]></programlisting>
+		
+					<para>
+						Then your subscriber <literal>update</literal> and <literal>updateRStream</literal> methods should be:
+					</para>
+					<programlisting><![CDATA[public void update(String, long count) {...}
+public void updateRStream(String orderId, long count) {...}]]></programlisting>
+				</sect4>
+				
+				<sect4 id="api-admin-subscriber-rowbyrow-beginend">		
+					<title>Delivery of Begin and End Indications</title>
+	
+					<para>
+						If your subscriber requires a notification for begin and end of event delivery, it can expose methods by name <literal>start</literal> and <literal>end</literal>. 
+					</para>
+					
+					<para>
+						The <literal>start</literal> method must take two integer parameters that indicate the number of events of the insert stream and remove stream to be delivered. The engine invokes the <literal>start</literal> method immediately prior to delivering events to the <literal>update</literal> and <literal>updateRStream</literal> methods.
+					</para>
+
+					<para>
+						The <literal>end</literal> method must take no parameters. The engine invokes the <literal>end</literal> method immediately after delivering events to the <literal>update</literal> and <literal>updateRStream</literal> methods.
+					</para>
+
+					<para>
+						An example set of delivery methods:
+					</para>
+					<programlisting><![CDATA[// Called by the engine before delivering events to update methods
+public void start(int insertStreamLength, int removeStreamLength)
+
+// To deliver insert stream events
+public void update(String orderId, long count) {...}
+
+// To deliver remove stream events
+public void updateRStream(String orderId, long count) {...}
+
+// Called by the engine after delivering events
+public void end() {...}]]></programlisting>
+				</sect4>
+				
+		   </sect3>
+
+		    <sect3 id="api-admin-subscriber-multirow">		
+				<title>Multi-Row Delivery</title>
+	
+				<indexterm><primary>subscriber object</primary><secondary>multi-row</secondary></indexterm>
+				<para>
+					In place of row-by-row delivery, your subscriber can receive all events in the insert and remove stream via a single method invocation. 
+				</para>
+
+				<para>
+					The event delivery follow the scheme as described earlier in <xref linkend="api-admin-subscriber-rowbyrow-generic"/>. The subscriber class must provide one of the following methods:
+				</para>
+	
+				<table frame="topbot" id="api-admin-subscriber-multirow-underlying" revision="2">
+					<title>Update Method for Multi-Row Delivery of Underlying Events</title>
+					<tgroup cols="2">
+						<colspec colwidth="2.0*"/>
+						<colspec colwidth="2.0*"/>
+						<thead>
+							<row>
+								<entry>Method</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry><literal>update(Object[][] insertStream, Object[][] removeStream)</literal></entry>
+								<entry>
+									<para>The first dimension of each Object array is the event row, and the second dimension is the column matching the column order of the statement <literal>select</literal> clause</para>
+								 </entry>
+							</row>
+							<row>
+								<entry><literal>update(Map[] insertStream, Map[] removeStream)</literal></entry>
+								<entry>
+									<para> Each map represents one event, and Map entries represent columns of the statement <literal>select</literal> clause</para>
+								</entry>							
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+
+				<sect4 id="api-admin-subscriber-multirow-wildcard">		
+					<title>Wildcards</title>
+	
+					<para>
+						If your <literal>select</literal> clause contains a single wildcard (*) or wildcard stream selector, the subscriber object may also directly receive arrays of the underlying events. In this case, the subscriber class should provide a method <literal>update(</literal><emphasis>Underlying</emphasis><literal>[] insertStream, </literal><emphasis>Underlying</emphasis>[] <emphasis>removeStream</emphasis><literal>)</literal> , such that <emphasis>Underlying</emphasis> represents the class of the underlying event.
+					</para>
+
+					<para>
+						For example, your statement may be:
+					</para>
+					<programlisting><![CDATA[select * from OrderEvent.win:time(30 sec)]]></programlisting>
+
+					<para>
+						Your subscriber class exposes the method:
+					</para>
+					<programlisting><![CDATA[public void update(OrderEvent[] insertStream, OrderEvent[] removeStream) {...}]]></programlisting>
+				</sect4>
+		
+		   </sect3>
+		   
 	  </sect2>
 
 	  <sect2 id="api-admin-listeners">		
@@ -162,7 +416,7 @@ countStmt.start();]]></programlisting>
 			<indexterm><primary>UpdateListener interface</primary></indexterm>
 			<indexterm><primary>StatementAwareUpdateListener interface</primary></indexterm>
 			<para>
-				We can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods on <literal>EPStatement</literal> . We need to provide an implementation of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement:
+				Your application can subscribe to updates posted by a statement via the <literal>addListener</literal> and <literal>removeListener</literal> methods on <literal>EPStatement</literal> . Your application must to provide an implementation of the <literal>UpdateListener</literal> or the <literal>StatementAwareUpdateListener</literal> interface to the statement:
 			</para>
 			<programlisting><![CDATA[UpdateListener myListener = new MyUpdateListener();
 countStmt.addListener(myListener);]]></programlisting>
@@ -838,7 +1092,7 @@ EPStatement stmtSet = epService.getEPAdministrator().create(model);]]></programl
 			<programlisting><![CDATA[create window OrdersTimeWindow.win:time(30 sec) as select symbol as sym, volume as vol, price from OrderEvent]]></programlisting>
 
 			<para>
-				The is the code that builds the create-window statement as above::
+				The is the code that builds the create-window statement as above:
 			</para>			
 			<programlisting><![CDATA[EPStatementObjectModel model = new EPStatementObjectModel();
 model.setCreateWindow(CreateWindowClause.create("OrdersTimeWindow").addView("win", "time", 30));

@@ -7,9 +7,12 @@ Changes in version 2.0.0
 * TODO Fixed issue ESPER-178 Problem selecting "sum" as a property of event posted by stat:uni view
 * TODO Fixed issue ESPER-138 Allow Map event type to contain nested Map values
 * TODO Fixed issue ESPER-145 Ignore start or stop commands on already started or stopped EPStatements.
-* TODO docs for subscriber objects + some perf testing and MT testing
+* TODO some perf testing and MT testing
 * TODO result processing for output rate limiting clause computes aggregation more granular and considers having-clause per unit
 * TODO Support for Axiom XML events
+* TODO Cache config
+* TODO *Java* methods
+* TODO Google doc comments
 
 * New strongly-typed and fast output event delivery to subscriber objects via method call
 * Performance improvement: statements without listeners or subscriber (iterator or output snapshot statements) now compute much faster
