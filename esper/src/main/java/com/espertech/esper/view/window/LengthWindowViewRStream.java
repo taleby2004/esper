@@ -120,7 +120,7 @@ public final class LengthWindowViewRStream extends ViewSupport implements DataWi
                 {
                     oldDataSet.add(old);
                 }
-                expiredArr = oldDataSet.toArray(new EventBean[0]);
+                expiredArr = oldDataSet.toArray(new EventBean[oldDataSet.size()]);
             }
         }
 

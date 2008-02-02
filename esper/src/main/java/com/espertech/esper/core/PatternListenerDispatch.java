@@ -53,7 +53,7 @@ public class PatternListenerDispatch implements Dispatchable
 
         if (eventList != null)
         {
-            eventArray = eventList.toArray(new EventBean[0]);
+            eventArray = eventList.toArray(new EventBean[eventList.size()]);
             eventList = null;
             singleEvent = null;
         }

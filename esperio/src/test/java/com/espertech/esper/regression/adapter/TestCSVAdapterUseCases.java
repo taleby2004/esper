@@ -3,12 +3,12 @@ package com.espertech.esper.regression.adapter;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.adapter.AdapterInputSource;
-import com.espertech.esper.adapter.InputAdapter;
-import com.espertech.esper.adapter.AdapterCoordinatorImpl;
-import com.espertech.esper.adapter.AdapterCoordinator;
-import com.espertech.esper.adapter.csv.CSVInputAdapter;
-import com.espertech.esper.adapter.csv.CSVInputAdapterSpec;
+import com.espertech.esper.plugin.AdapterInputSource;
+import com.espertech.esper.plugin.InputAdapter;
+import com.espertech.esper.plugin.AdapterCoordinatorImpl;
+import com.espertech.esper.plugin.AdapterCoordinator;
+import com.espertech.esper.plugin.csv.CSVInputAdapter;
+import com.espertech.esper.plugin.csv.CSVInputAdapterSpec;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 

@@ -228,7 +228,7 @@ public class EventBeanUtility
         {
             return null;
         }
-        return eventList.toArray(new EventBean[0]);
+        return eventList.toArray(new EventBean[eventList.size()]);
     }
 
     /**

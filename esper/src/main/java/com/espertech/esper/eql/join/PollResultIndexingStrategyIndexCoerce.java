@@ -41,7 +41,7 @@ public class PollResultIndexingStrategyIndexCoerce implements PollResultIndexing
             return new UnindexedEventTableList(pollResult);
         }
         PropertyIndTableCoerceAll table = new PropertyIndTableCoerceAll(streamNum, eventType, propertyNames, coercionTypes);
-        table.add(pollResult.toArray(new EventBean[0]));
+        table.add(pollResult.toArray(new EventBean[pollResult.size()]));
         return table;
     }
 }

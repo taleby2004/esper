@@ -1,8 +1,8 @@
 package com.espertech.esper.regression.adapter;
 
 import junit.framework.TestCase;
-import com.espertech.esper.adapter.SpringContext;
-import com.espertech.esper.adapter.SpringContextLoader;
+import com.espertech.esper.plugin.SpringContext;
+import com.espertech.esper.plugin.SpringContextLoader;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;

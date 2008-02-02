@@ -272,7 +272,7 @@ public class EngineImportServiceImpl implements EngineImportService
      */
     protected String[] getImports()
 	{
-		return imports.toArray(new String[0]);
+		return imports.toArray(new String[imports.size()]);
 	}
 
     private static boolean isFunctionName(String functionName)

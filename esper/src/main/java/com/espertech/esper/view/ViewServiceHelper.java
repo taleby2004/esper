@@ -144,7 +144,7 @@ public class ViewServiceHelper
             return removedViews;
         }
 
-        View[] viewPathArray = viewPath.toArray(new View[0]);
+        View[] viewPathArray = viewPath.toArray(new View[viewPath.size()]);
         View currentView = (View) viewToRemove;
 
         // Remove child from parent views until a parent view has more children,

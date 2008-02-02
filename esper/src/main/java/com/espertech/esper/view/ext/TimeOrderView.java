@@ -230,7 +230,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
 
             if (postOldEvents != null)
             {
-                postOldEventsArray = postOldEvents.toArray(new EventBean[0]);
+                postOldEventsArray = postOldEvents.toArray(new EventBean[postOldEvents.size()]);
             }
 
             if (optionalSortedRandomAccess != null)
@@ -265,7 +265,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                 {
                     oldDataSet.add(old);
                 }
-                postOldEventsArray = oldDataSet.toArray(new EventBean[0]);
+                postOldEventsArray = oldDataSet.toArray(new EventBean[oldDataSet.size()]);
             }
         }
 
@@ -360,7 +360,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         {
             if ((releaseEvents != null) && (!releaseEvents.isEmpty()))
             {
-                EventBean[] oldEvents = releaseEvents.toArray(new EventBean[0]);
+                EventBean[] oldEvents = releaseEvents.toArray(new EventBean[releaseEvents.size()]);
                 updateChildren(null, oldEvents);
             }
         }

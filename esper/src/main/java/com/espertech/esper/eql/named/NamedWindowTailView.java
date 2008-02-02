@@ -139,7 +139,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
             {
                 list.add(it.next());
             }
-            return new ArrayEventIterator(list.toArray(new EventBean[0]));
+            return new ArrayEventIterator(list.toArray(new EventBean[list.size()]));
         }
         finally
         {

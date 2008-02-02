@@ -411,7 +411,7 @@ public class BeanEventType implements EventType
             }
         }
 
-        return superTypes.toArray(new EventType[0]);
+        return superTypes.toArray(new EventType[superTypes.size()]);
     }
 
     /**

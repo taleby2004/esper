@@ -110,9 +110,9 @@ public class BindProcessor
             }
         }
 
-        expressionNodes = expressions.toArray(new ExprEvaluator[0]);
-        expressionTypes = types.toArray(new Class[0]);
-        columnNamesAssigned = columnNames.toArray(new String[0]);
+        expressionNodes = expressions.toArray(new ExprEvaluator[expressions.size()]);
+        expressionTypes = types.toArray(new Class[types.size()]);
+        columnNamesAssigned = columnNames.toArray(new String[columnNames.size()]);
     }
 
     public Object[] process(EventBean[] eventsPerStream, boolean isNewData)

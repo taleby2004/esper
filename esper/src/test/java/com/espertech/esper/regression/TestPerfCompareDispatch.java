@@ -24,10 +24,18 @@ public class TestPerfCompareDispatch extends TestCase
         {
             LinkedList<Object> col = new LinkedList<Object>();
             col.add(new Object());
+            col.add(new Object());
+
+            for (Object o : col)
+            {
+                if (o == "")
+                {
+                    System.out.println("a");
+                }
+            }
         }
         long end = System.currentTimeMillis();
         System.out.println("delta=" + (end - start));
-
     }
 
     public void testPerfDequeArray()
@@ -37,6 +45,36 @@ public class TestPerfCompareDispatch extends TestCase
         {
             ArrayDequeJDK6Backport<Object> col = new ArrayDequeJDK6Backport<Object>();
             col.add(new Object());
+            col.add(new Object());
+
+            for (Object o : col)
+            {
+                if (o == "")
+                {
+                    System.out.println("a");
+                }
+            }
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("delta=" + (end - start));
+    }
+
+    public void testPerfArrayList()
+    {
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10000000; i++)
+        {
+            ArrayList<Object> col = new ArrayList<Object>();
+            col.add(new Object());
+            col.add(new Object());
+
+            for (Object o : col)
+            {
+                if (o == "")
+                {
+                    System.out.println("a");
+                }
+            }
         }
         long end = System.currentTimeMillis();
         System.out.println("delta=" + (end - start));

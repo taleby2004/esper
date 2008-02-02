@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import com.espertech.esper.adapter.AdapterCoordinator;
-import com.espertech.esper.adapter.AdapterCoordinatorImpl;
-import com.espertech.esper.adapter.AdapterInputSource;
-import com.espertech.esper.adapter.csv.CSVInputAdapter;
-import com.espertech.esper.adapter.csv.CSVInputAdapterSpec;
+import com.espertech.esper.plugin.AdapterCoordinator;
+import com.espertech.esper.plugin.AdapterCoordinatorImpl;
+import com.espertech.esper.plugin.AdapterInputSource;
+import com.espertech.esper.plugin.csv.CSVInputAdapter;
+import com.espertech.esper.plugin.csv.CSVInputAdapterSpec;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPServiceProvider;

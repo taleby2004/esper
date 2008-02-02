@@ -18,7 +18,7 @@ public class MapNestedPropertyGetter implements EventPropertyGetter
      */
     public MapNestedPropertyGetter(List<EventPropertyGetter> getterChain)
     {
-        this.getterChain = getterChain.toArray(new EventPropertyGetter[0]);
+        this.getterChain = getterChain.toArray(new EventPropertyGetter[getterChain.size()]);
     }
 
     public Object get(EventBean eventBean) throws PropertyAccessException

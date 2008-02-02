@@ -162,7 +162,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         {
             if ((expired != null) && (!expired.isEmpty()))
             {
-                EventBean[] oldEvents = expired.toArray(new EventBean[0]);
+                EventBean[] oldEvents = expired.toArray(new EventBean[expired.size()]);
                 if (viewUpdatedCollection != null)
                 {
                     viewUpdatedCollection.update(null, oldEvents);

@@ -28,6 +28,6 @@ public class LookupStrategyAllRows implements LookupStrategy
         {
             events.add(it.next());
         }
-        return events.toArray(new EventBean[0]);
+        return events.toArray(new EventBean[events.size()]);
     }
 }

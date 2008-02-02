@@ -18,7 +18,7 @@ public class NestedPropertyGetter implements EventPropertyGetter
      */
     public NestedPropertyGetter(List<EventPropertyGetter> getterChain, BeanEventTypeFactory beanEventTypeFactory)
     {
-        this.getterChain = getterChain.toArray(new EventPropertyGetter[0]);
+        this.getterChain = getterChain.toArray(new EventPropertyGetter[getterChain.size()]);
         this.beanEventTypeFactory = beanEventTypeFactory;
     }
 

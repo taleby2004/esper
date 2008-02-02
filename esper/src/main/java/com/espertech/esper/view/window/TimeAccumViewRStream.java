@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * A data window view that holds events in a stream and only removes events from a stream (rstream) if
@@ -165,7 +166,8 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
                 // reschedule if the last event was removed
                 if (removedLastEvent)
                 {
-                    EventBean[] events = currentBatch.keySet().toArray(new EventBean[0]);
+                    Set<EventBean> keyset = currentBatch.keySet();
+                    EventBean[] events = keyset.toArray(new EventBean[keyset.size()]);
                     lastEvent = events[events.length - 1];
                     long lastTimestamp = currentBatch.get(lastEvent);
 
@@ -210,7 +212,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
             EventBean[] oldData = null;
             if (!currentBatch.isEmpty())
             {
-                oldData = currentBatch.keySet().toArray(new EventBean[0]);
+                oldData = currentBatch.keySet().toArray(new EventBean[currentBatch.size()]);
             }
 
             if (oldData != null)

@@ -625,7 +625,7 @@ public class EPStatementStartMethod
                 }
                 if (!eventsInWindow.isEmpty())
                 {
-                    EventBean[] newEvents = eventsInWindow.toArray(new EventBean[0]);
+                    EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
                     view.update(newEvents, null);
                 }
 
@@ -1022,7 +1022,7 @@ public class EPStatementStartMethod
                 {
                     eventsInWindow.add(it.next());
                 }
-                EventBean[] newEvents = eventsInWindow.toArray(new EventBean[0]);
+                EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
                 ((View)viewableRoot).update(newEvents, null); // fill view
                 eventIndex.add(newEvents);  // fill index
             }
@@ -1037,7 +1037,7 @@ public class EPStatementStartMethod
                     {
                         preloadEvents.add(it.next());
                     }
-                    eventIndex.add(preloadEvents.toArray(new EventBean[0]));
+                    eventIndex.add(preloadEvents.toArray(new EventBean[preloadEvents.size()]));
                 }
             }
 

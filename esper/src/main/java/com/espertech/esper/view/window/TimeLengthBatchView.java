@@ -214,11 +214,11 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
             EventBean[] oldData = null;
             if (!currentBatch.isEmpty())
             {
-                newData = currentBatch.toArray(new EventBean[0]);
+                newData = currentBatch.toArray(new EventBean[currentBatch.size()]);
             }
             if ((lastBatch != null) && (!lastBatch.isEmpty()))
             {
-                oldData = lastBatch.toArray(new EventBean[0]);
+                oldData = lastBatch.toArray(new EventBean[lastBatch.size()]);
             }
 
             // Post new data (current batch) and old data (prior batch)

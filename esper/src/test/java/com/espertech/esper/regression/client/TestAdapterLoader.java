@@ -3,7 +3,7 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.support.adapter.SupportAdapterLoader;
+import com.espertech.esper.support.adapter.SupportPluginLoader;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
 import java.util.Properties;
@@ -19,11 +19,11 @@ public class TestAdapterLoader extends TestCase
 
         Properties props = new Properties();
         props.put("name", "val");
-        config.addAdapterLoader("MyLoader", SupportAdapterLoader.class.getName(), props);
+        config.addAdapterLoader("MyLoader", SupportPluginLoader.class.getName(), props);
 
         EPServiceProvider service = EPServiceProviderManager.getProvider("TestAdapterLoader", config);
-        assertEquals("MyLoader", SupportAdapterLoader.getNames().get(0));
-        assertEquals("val", SupportAdapterLoader.getProps().get(0).get("name"));
+        assertEquals("MyLoader", SupportPluginLoader.getNames().get(0));
+        assertEquals("val", SupportPluginLoader.getProps().get(0).get("name"));
     }
 
     

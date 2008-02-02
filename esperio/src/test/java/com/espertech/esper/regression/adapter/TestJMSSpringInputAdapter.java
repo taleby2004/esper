@@ -1,10 +1,10 @@
 package com.espertech.esper.regression.adapter;
 
 import junit.framework.TestCase;
-import com.espertech.esper.adapter.SpringContext;
-import com.espertech.esper.adapter.SpringContextLoader;
-import com.espertech.esper.adapter.InputAdapter;
-import com.espertech.esper.adapter.AdapterLoader;
+import com.espertech.esper.plugin.SpringContext;
+import com.espertech.esper.plugin.SpringContextLoader;
+import com.espertech.esper.plugin.InputAdapter;
+import com.espertech.esper.plugin.PluginLoader;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -56,7 +56,7 @@ public class TestJMSSpringInputAdapter extends TestCase
         assertEquals("x2", listener.assertOneGetNewAndReset().get("string"));
 
         EPServiceProviderSPI spi = (EPServiceProviderSPI) service;
-        AdapterLoader loader = (AdapterLoader) spi.getContext().lookup("adapter-loader/MyLoader");
+        PluginLoader loader = (PluginLoader) spi.getContext().lookup("adapter-loader/MyLoader");
         loader.destroy();
     }
 

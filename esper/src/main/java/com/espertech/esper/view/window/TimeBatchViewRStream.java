@@ -167,11 +167,11 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
             EventBean[] oldData = null;
             if (!currentBatch.isEmpty())
             {
-                newData = currentBatch.toArray(new EventBean[0]);
+                newData = currentBatch.toArray(new EventBean[currentBatch.size()]);
             }
             if ((lastBatch != null) && (!lastBatch.isEmpty()))
             {
-                oldData = lastBatch.toArray(new EventBean[0]);
+                oldData = lastBatch.toArray(new EventBean[lastBatch.size()]);
             }
 
             if ((newData != null) || (oldData != null))

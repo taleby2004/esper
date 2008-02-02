@@ -13,6 +13,7 @@ Changes in version 2.0.0
 * TODO Cache config
 * TODO *Java* methods
 * TODO Google doc comments
+* TODO rename EQL to EPL
 
 * New strongly-typed and fast output event delivery to subscriber objects via method call
 * Performance improvement: statements without listeners or subscriber (iterator or output snapshot statements) now compute much faster

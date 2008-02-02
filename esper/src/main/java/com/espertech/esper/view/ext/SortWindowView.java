@@ -200,7 +200,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
             EventBean[] expiredArr = null;
             if (!removedEvents.isEmpty())
             {
-                expiredArr = removedEvents.toArray(new EventBean[0]);
+                expiredArr = removedEvents.toArray(new EventBean[removedEvents.size()]);
             }
 
             updateChildren(newData, expiredArr);

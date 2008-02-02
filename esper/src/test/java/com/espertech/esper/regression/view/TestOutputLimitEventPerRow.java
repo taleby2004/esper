@@ -35,28 +35,6 @@ public class TestOutputLimitEventPerRow extends TestCase
         epService.initialize();
     }
 
-    public void testHavingOutputAll()
-    {
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
-        sendTimer(0);
-
-        String viewExpr = "select symbol, volume, sum(price) as sumprice" +
-                          " from " + SupportMarketDataBean.class.getName() + ".win:keepall() " +
-                          "group by symbol " +
-                          "having sum(price) >= 10 " +
-                          "output every 3 events";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
-        stmt.addListener(listener);
-
-        sendEvent("S1", 1, 5);
-        sendEvent("S1", 2, 6);
-        assertFalse(listener.isInvoked());
-
-        sendEvent("S1", 3, -3);
-        String fields[] = "symbol,volume,sumprice".split(",");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"S1", 2, 11});
-    }
-
     public void testJoinSortWindow()
     {
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));

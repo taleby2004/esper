@@ -147,8 +147,8 @@ public class OutputProcessViewPolicy extends OutputProcessView
 		log.debug(".continueOutputProcessingView");
 
 		// Get the arrays of new and old events, or null if none
-		EventBean[] newEvents = !newEventsList.isEmpty() ? newEventsList.toArray(new EventBean[0]) : null;
-		EventBean[] oldEvents = !oldEventsList.isEmpty() ? oldEventsList.toArray(new EventBean[0]) : null;
+		EventBean[] newEvents = !newEventsList.isEmpty() ? newEventsList.toArray(new EventBean[newEventsList.size()]) : null;
+		EventBean[] oldEvents = !oldEventsList.isEmpty() ? oldEventsList.toArray(new EventBean[oldEventsList.size()]) : null;
 
         boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
         boolean isGenerateNatural = statementResultService.isMakeNatural();
@@ -171,7 +171,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
                 {
                     snapshot.add(bean);
                 }
-                newEvents = snapshot.toArray(new EventBean[0]);
+                newEvents = snapshot.toArray(new EventBean[snapshot.size()]);
                 oldEvents = null;
             }
             else

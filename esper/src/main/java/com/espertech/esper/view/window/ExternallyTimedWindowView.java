@@ -128,7 +128,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
         EventBean[] oldDataUpdate = null;
         if ((expired != null) && (!expired.isEmpty()))
         {
-            oldDataUpdate = expired.toArray(new EventBean[0]);
+            oldDataUpdate = expired.toArray(new EventBean[expired.size()]);
         }
 
         if ((oldData != null) && (isRemoveStreamHandling))
@@ -153,7 +153,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
                 {
                     oldDataPost.add(old);
                 }
-                oldDataUpdate = oldDataPost.toArray(new EventBean[0]);
+                oldDataUpdate = oldDataPost.toArray(new EventBean[oldDataPost.size()]);
             }
         }
 

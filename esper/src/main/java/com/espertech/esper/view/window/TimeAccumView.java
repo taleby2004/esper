@@ -183,7 +183,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
             EventBean[] oldData = null;
             if (!currentBatch.isEmpty())
             {
-                oldData = currentBatch.toArray(new EventBean[0]);
+                oldData = currentBatch.toArray(new EventBean[currentBatch.size()]);
             }
 
             // Post old data

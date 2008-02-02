@@ -40,6 +40,45 @@ public class TestMapEvent extends TestCase
         epService = EPServiceProviderManager.getProvider("myProvider", configuration);
     }
 
+    public void testNestedMaps()
+    {
+        Properties propertiesNestedNested = new Properties();
+        propertiesNestedNested.put("n1n1", String.class);
+
+        Properties propertiesNested = new Properties();
+        propertiesNested.put("n1", String.class);
+        propertiesNested.put("n2", propertiesNestedNested);
+
+        properties = new Properties();
+        properties.put("nested", propertiesNested);
+
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("NestedMap", properties);
+
+        String statementText = "select nested as a, " +
+                    "nested.n1 as b," +
+                    "nested.n2 as c," +
+                    "nested.n2.n1n1 as d " +
+                    "from NestedMap.win:length(5)";
+        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        Map nestedNested = new HashMap<String, Object>();
+        nestedNested.put("n1n1", "abc");
+        Map nested = new HashMap<String, Object>();
+        nested.put("n1n1", "abc");
+
+        map = new HashMap<String, Object>();
+        map.put("nested", nested);
+
+        epService.getEPRuntime().sendEvent(map, "NestedMap");
+        assertSame(nested, listener.getLastNewData()[0].get("a"));
+        assertSame(nested.get("n1"), listener.getLastNewData()[0].get("b"));
+        assertSame(nestedNested, listener.getLastNewData()[0].get("c"));
+        assertSame("n1n1", listener.getLastNewData()[0].get("d"));
+        statement.stop();
+    }
+
     public void testNestedObjects()
     {
         String statementText = "select beanA.simpleProperty as simple," +

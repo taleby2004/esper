@@ -201,8 +201,8 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         }
 
         // sort
-        EventBean[] outgoingEventsArr = outgoingEvents.toArray(new EventBean[0]);
-        MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[0]);
+        EventBean[] outgoingEventsArr = outgoingEvents.toArray(new EventBean[outgoingEvents.size()]);
+        MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[orderKeys.size()]);
         EventBean[] orderedEvents = orderByProcessor.sort(outgoingEventsArr, orderKeysArr);
 
         return new ArrayEventIterator(orderedEvents);

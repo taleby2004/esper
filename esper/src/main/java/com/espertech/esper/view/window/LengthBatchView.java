@@ -128,11 +128,11 @@ public final class LengthBatchView extends ViewSupport implements CloneableView,
             EventBean[] oldData = null;
             if (!currentBatch.isEmpty())
             {
-                newData = currentBatch.toArray(new EventBean[0]);
+                newData = currentBatch.toArray(new EventBean[currentBatch.size()]);
             }
             if ((lastBatch != null) && (!lastBatch.isEmpty()))
             {
-                oldData = lastBatch.toArray(new EventBean[0]);
+                oldData = lastBatch.toArray(new EventBean[lastBatch.size()]);
             }
 
             // update view buffer to serve expressions require access to events held

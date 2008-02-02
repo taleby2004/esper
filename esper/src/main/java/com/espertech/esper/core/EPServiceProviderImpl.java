@@ -7,7 +7,7 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.adapter.AdapterLoader;
+import com.espertech.esper.plugin.PluginLoader;
 import com.espertech.esper.client.*;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.SchedulingService;
@@ -272,13 +272,13 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 throw new ConfigurationException("Illegal access to instantiate adapter loader class '" + className + "' via default constructor", ex);
             }
 
-            AdapterLoader adapterLoader = (AdapterLoader) adapterLoaderObj;
-            adapterLoader.init(config.getLoaderName(), config.getConfigProperties(), this);
+            PluginLoader pluginLoader = (PluginLoader) adapterLoaderObj;
+            pluginLoader.init(config.getLoaderName(), config.getConfigProperties(), this);
 
             // register adapter loader in JNDI context tree
             try
             {
-                services.getEngineEnvContext().bind("adapter-loader/" + config.getLoaderName(), adapterLoader);
+                services.getEngineEnvContext().bind("adapter-loader/" + config.getLoaderName(), pluginLoader);
             }
             catch (NamingException e)
             {

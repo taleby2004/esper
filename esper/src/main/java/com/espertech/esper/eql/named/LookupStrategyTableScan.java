@@ -61,6 +61,6 @@ public class LookupStrategyTableScan implements LookupStrategy
             return null;
         }
 
-        return removeEvents.toArray(new EventBean[0]);
+        return removeEvents.toArray(new EventBean[removeEvents.size()]);
     }
 }
