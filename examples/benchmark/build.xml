@@ -35,6 +35,10 @@
     </target>
 
     <target name="run" depends="build">
+        <echo message="***"/>
+        <echo message="* Warning: running in simulation mode with no remote process to send messages"/>
+        <echo message="* This is not the recommanded mode to perform real benchmarks"/>
+        <echo message="***"/>
         <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.server.Server" fork="true">
             <arg line="-rate 4x10000 -mode STP"/>
             <classpath location="etc"/><!-- for etc/log4j.xml and statement discovery -->
