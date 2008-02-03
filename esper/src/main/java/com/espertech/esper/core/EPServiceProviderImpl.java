@@ -14,6 +14,7 @@ import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
+import com.espertech.esper.timer.TimerService;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -79,6 +80,14 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     public FilterService getFilterService()
     {
         return engine.getServices().getFilterService();
+    }
+
+    public TimerService getTimerService() {
+        return engine.getServices().getTimerService();
+    }
+
+    public ConfigurationInformation getConfigurationInformation() {
+        return configSnapshot;
     }
 
     public ExtensionServicesContext getExtensionServicesContext()

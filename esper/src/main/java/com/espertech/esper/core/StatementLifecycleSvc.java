@@ -22,6 +22,9 @@ public interface StatementLifecycleSvc
      */
     public void addObserver(StatementLifecycleObserver observer);
 
+    //TODO ALEX DOC
+    public void dispatchStatementLifecycleEvent(StatementLifecycleEvent event);
+
     /**
      * Create and start the statement.
      * @param statementSpec is the statement definition in bean object form, raw unvalidated and unoptimized.
@@ -84,13 +87,13 @@ public interface StatementLifecycleSvc
      */
     public void destroyAllStatements() throws EPException;
 
-    /**
-     * Statements indicate that listeners have been added through this method.
-     * @param statementId is the statement id for which listeners were added
-     * @param statementName is the statement name
-     * @param listeners is the set of listeners after adding the new listener
-     */
-    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners);
+//    /** TODO ALEX REMOVE
+//     * Statements indicate that listeners have been added through this method.
+//     * @param statementId is the statement id for which listeners were added
+//     * @param statementName is the statement name
+//     * @param listeners is the set of listeners after adding the new listener
+//     */
+//    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners);
 
     /**
      * Destroy the service.

@@ -7,10 +7,12 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.filter.FilterService;
+import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.timer.TimerService;
 
 import javax.naming.Context;
 
@@ -42,6 +44,18 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      * @return filter service
      */
     public FilterService getFilterService();
+
+    /**
+     * Returns the timer service.
+     * @return timer service
+     */
+    public TimerService getTimerService();
+
+    /**
+     * Returns the current configuration.
+     * @return configuration information 
+     */
+    public ConfigurationInformation getConfigurationInformation();
 
     /**
      * Returns the engine environment context for engine-external resources such as adapters.

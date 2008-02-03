@@ -9,7 +9,6 @@ import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.eql.variable.VariableService;
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
 import com.espertech.esper.view.Viewable;
 
 import java.util.Iterator;
@@ -31,7 +30,7 @@ public class EPStatementImpl implements EPStatementSPI
     private long timeLastStateChange;
     private Viewable parentView;
     private EPStatementState currentState;
-    private EventType eventType;
+    private com.espertech.esper.event.EventType eventType;
     private EPStatementHandle epStatementHandle;
     private StatementResultService statementResultService;
 
@@ -215,7 +214,7 @@ public class EPStatementImpl implements EPStatementSPI
         }
     }
 
-    public EventType getEventType()
+    public com.espertech.esper.event.EventType getEventType()
     {
         return eventType;
     }
@@ -248,7 +247,8 @@ public class EPStatementImpl implements EPStatementSPI
 
         statementListenerSet.addListener(listener);
         statementResultService.setUpdateListeners(statementListenerSet);
-        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
+        statementLifecycleSvc.dispatchStatementLifecycleEvent(
+                new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_ADD, listener));
     }
 
     /**
@@ -263,8 +263,10 @@ public class EPStatementImpl implements EPStatementSPI
         }
 
         statementListenerSet.removeListener(listener);
-        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
+        //TODO ALEX why before next method call? statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
         statementResultService.setUpdateListeners(statementListenerSet);
+        statementLifecycleSvc.dispatchStatementLifecycleEvent(
+                new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_REMOVE, listener));
     }
 
     /**
@@ -274,7 +276,8 @@ public class EPStatementImpl implements EPStatementSPI
     {
         statementListenerSet.removeAllListeners();
         statementResultService.setUpdateListeners(statementListenerSet);
-        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
+        statementLifecycleSvc.dispatchStatementLifecycleEvent(
+                new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_REMOVE_ALL));
     }
 
     public void addListener(StatementAwareUpdateListener listener)
@@ -286,7 +289,9 @@ public class EPStatementImpl implements EPStatementSPI
 
         statementListenerSet.addListener(listener);
         statementResultService.setUpdateListeners(statementListenerSet);
-        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
+        //statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
+        statementLifecycleSvc.dispatchStatementLifecycleEvent(
+                new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_ADD, listener));
     }
 
     public void removeListener(StatementAwareUpdateListener listener)
@@ -298,7 +303,8 @@ public class EPStatementImpl implements EPStatementSPI
 
         statementListenerSet.removeListener(listener);
         statementResultService.setUpdateListeners(statementListenerSet);
-        statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
+        statementLifecycleSvc.dispatchStatementLifecycleEvent(
+                new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_REMOVE, listener));
     }
 
     public Iterator<StatementAwareUpdateListener> getStatementAwareListeners()

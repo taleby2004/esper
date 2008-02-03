@@ -215,6 +215,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             stmtIdToDescMap.put(statementId, statementDesc);
             stmtNameToStmtMap.put(statementName, statement);
             stmtNameToIdMap.put(statementName, statementId);
+
+            dispatchStatementLifecycleEvent(new StatementLifecycleEvent(statement, StatementLifecycleEvent.LifecycleEventType.CREATE));
         }
         catch (RuntimeException ex)
         {
@@ -413,6 +415,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         statement.setParentView(parentView);
         long timeLastStateChange = services.getSchedulingService().getTime();
         statement.setCurrentState(EPStatementState.STARTED, timeLastStateChange);
+
+        dispatchStatementLifecycleEvent(new StatementLifecycleEvent(statement, StatementLifecycleEvent.LifecycleEventType.STATECHANGE));
     }
 
     public synchronized void stop(String statementId)
@@ -447,7 +451,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             long timeLastStateChange = services.getSchedulingService().getTime();
             statement.setCurrentState(EPStatementState.STOPPED, timeLastStateChange);
 
-            sendObserverEvent(new StatementLifecycleEvent(statementId, desc.getEpStatement().getName()));
+            dispatchStatementLifecycleEvent(new StatementLifecycleEvent(statement, StatementLifecycleEvent.LifecycleEventType.STATECHANGE));
         }
         catch (RuntimeException ex)
         {
@@ -486,6 +490,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             stmtNameToStmtMap.remove(statement.getName());
             stmtNameToIdMap.remove(statement.getName());
             stmtIdToDescMap.remove(statementId);
+
+            dispatchStatementLifecycleEvent(new StatementLifecycleEvent(statement, StatementLifecycleEvent.LifecycleEventType.STATECHANGE));
         }
         catch (RuntimeException ex)
         {
@@ -599,10 +605,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return finalStatementName;
     }
 
-    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners)
-    {
-        log.debug(".updatedListeners No action for base implementation");
-    }
+    //TODO ALEX REMOVE
+//    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners)
+//    {
+//        log.debug(".updatedListeners No action for base implementation");
+//    }
 
     /**
      * Statement information.
@@ -893,7 +900,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return selectProps;
     }
 
-    private void sendObserverEvent(StatementLifecycleEvent event)
+    public void dispatchStatementLifecycleEvent(StatementLifecycleEvent event)
     {
         for (StatementLifecycleObserver observer : observers)
         {

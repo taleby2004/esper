@@ -7,10 +7,11 @@
  **************************************************************************************/
 package com.espertech.esper.timer;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Implementation of the internal clocking service interface.
@@ -21,6 +22,8 @@ public final class TimerServiceImpl implements TimerService
     private TimerCallback timerCallback;
     private Timer timer;
     private EQLTimerTask timerTask;
+    private static AtomicInteger NEXT_ID = new AtomicInteger(0);
+    private final int id;
 
     /**
      * Constructor.
@@ -30,6 +33,7 @@ public final class TimerServiceImpl implements TimerService
     public TimerServiceImpl(long msecTimerResolution)
     {
         this.msecTimerResolution = msecTimerResolution;
+        id = NEXT_ID.getAndIncrement();
     }
 
     /**
@@ -65,7 +69,7 @@ public final class TimerServiceImpl implements TimerService
             throw new IllegalStateException("Timer callback not set");
         }
 
-        timer = new Timer(true);        // Timer started as a deamon thread
+        timer = new Timer("com.espertech.esper.Timer-" + id, true);        // Timer started as a deamon thread
         timerTask = new EQLTimerTask(timerCallback);
 
         // With no delay start every internal
