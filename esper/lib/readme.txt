@@ -17,7 +17,7 @@ cglib-nodep-2.1_3.jar
 Optional runtime libraries
 ==========================
 
-log4j-1.2.15.jar
+log4j-1.2.14.jar
 - Log4j Library for logging
 - runtime, optional
 
