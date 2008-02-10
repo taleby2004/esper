@@ -1,11 +1,11 @@
 package com.espertech.esper.plugin.csv;
 
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.plugin.AdapterInputSource;
+import junit.framework.TestCase;
+
 import java.io.EOFException;
 import java.util.Arrays;
-
-import junit.framework.TestCase;
-import com.espertech.esper.plugin.AdapterInputSource;
-import com.espertech.esper.client.EPException;
 
 public class TestCSVReader extends TestCase
 {

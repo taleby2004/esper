@@ -1,27 +1,25 @@
 package com.espertech.esper.regression.adapter;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import junit.framework.TestCase;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.time.TimerControlEvent;
+import com.espertech.esper.event.EventBean;
 import com.espertech.esper.plugin.AdapterInputSource;
 import com.espertech.esper.plugin.AdapterState;
 import com.espertech.esper.plugin.InputAdapter;
 import com.espertech.esper.plugin.csv.CSVInputAdapter;
 import com.espertech.esper.plugin.csv.CSVInputAdapterSpec;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPAdministrator;
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.plugin.csv.CSVReader;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
+
+import java.io.EOFException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestCSVAdapter extends TestCase
 {
@@ -742,4 +740,26 @@ public class TestCSVAdapter extends TestCase
 		}
 	}
 
+    public void testAutoTyped() throws EOFException {
+        Configuration config = new Configuration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        CSVInputAdapter adapter = new CSVInputAdapter(
+                epService,
+                new AdapterInputSource(new StringReader("sym,price\nGOOG,22\nGOOG,33")),
+                "MarketData"
+        );
+        try {
+            epService.getEPAdministrator().createEQL("select sum(price) from MarketData.win:length(2)");
+            fail("should fail due to type conversion");
+        } catch (EPStatementException e) {
+            assertTrue(e.getMessage().contains("Implicit conversion"));
+        }
+
+        CSVInputAdapter adapter2 = new CSVInputAdapter(
+                epService,
+                new AdapterInputSource(new StringReader("sym,long price\nGOOG,22\nGOOG,33")),
+                "MarketData2"
+        );
+        epService.getEPAdministrator().createEQL("select sum(price) from MarketData2.win:length(2)");
+    }
 }

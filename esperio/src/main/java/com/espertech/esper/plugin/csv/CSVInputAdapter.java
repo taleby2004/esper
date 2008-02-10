@@ -1,31 +1,21 @@
 
 package com.espertech.esper.plugin.csv;
 
-import java.io.EOFException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import com.espertech.esper.plugin.AbstractCoordinatedAdapter;
-import com.espertech.esper.plugin.AdapterInputSource;
-import com.espertech.esper.plugin.AdapterState;
-import com.espertech.esper.plugin.InputAdapter;
-import com.espertech.esper.plugin.SendableEvent;
-import com.espertech.esper.plugin.SendableMapEvent;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.plugin.*;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.EOFException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  * An event Adapter that uses a CSV file for a source.
@@ -46,7 +36,7 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 	boolean atEOF = false;
 	String[] firstRow;
 
-	/**
+    /**
 	 * Ctor.
 	 * @param epService - provides the engine runtime and services
 	 * @param spec - the parameters for this adapter
@@ -230,8 +220,8 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 	{
 		Map<String, FastConstructor> constructors = new HashMap<String, FastConstructor>();
 
-		Class[] parameterTypes = new Class[] { String.class };
-		for(String property : propertyTypes.keySet())
+        Class[] parameterTypes = new Class[] { String.class };
+        for(String property : propertyTypes.keySet())
 		{
 			log.debug(".createPropertyConstructors property==" + property + ", type==" + propertyTypes.get(property	));
 			FastClass fastClass = FastClass.create(JavaClassHelper.getBoxedType(propertyTypes.get(property)));
@@ -385,10 +375,22 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		}
 
 		Map<String, Class> result = new HashMap<String, Class>();
-		for(String property : propertyOrder)
+		for(int i = 0; i < propertyOrder.length; i++)
 		{
-			result.put(property, String.class);
-		}
+            String name = propertyOrder[i];
+            Class type = String.class;
+            if (name.contains(" ")) {
+                String[] typeAndName = name.split("\\s");
+                try {
+                    name = typeAndName[1];
+                    type = JavaClassHelper.getClassForName(JavaClassHelper.getBoxedClassName(typeAndName[0]));
+                    propertyOrder[i] = name;
+                } catch (Throwable e) {
+                    log.warn("Unable to use given type for property, will default to String: " + propertyOrder[i], e);
+                }
+            }
+            result.put(name, type);
+        }
 		return result;
 	}
 

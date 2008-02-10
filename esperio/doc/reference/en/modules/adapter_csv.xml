@@ -73,6 +73,11 @@
 					A column header is required unless a property order is defined explicitly
 				</para>
 			</listitem>
+            <listitem>
+                <para>
+                    If a column header is used, properties are assumed to be of type String unless otherwise configured
+                </para>
+            </listitem>
 			<listitem>
 				<para>
 					The value of the timestamp column, if one is given, must be in ascending order
@@ -146,6 +151,24 @@ IBM,55.5,1000]]></programlisting>
 StringReader reader = new StringReader(myCSV);
 (new CSVInputAdapter(epService, new AdapterInputSource(reader), "PriceEvent")).start();]]></programlisting>		
 
+        <para>
+            In the previous code samples, the <literal>PriceEvent</literal> properties were defined programmatically with their correct types. It is possible to
+            skip this step and use only a column header record. In such a case you must define property types in the header otherwise a type of String is assumed.
+        </para>
+
+        <para>Consider the following:</para>
+
+        <programlisting><![CDATA[symbol,double price, int volume
+IBM,55.5,1000
+
+symbol,price,volume
+IBM,55.5,1000]]></programlisting>
+
+        <para>
+            The first CSV file defines explicit types in the column header while the second file does not. With the second file a statement like
+            <literal>select sum(volume) from PriceEvent.win:time(1 min)</literal> will be rejected as in the second file <literal>volume</literal> is defaulted
+            to type String - unless otherwise programmatically configured.
+        </para>
     </sect1>
     
     <sect1 id="csv-step-2">
