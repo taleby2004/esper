@@ -30,4 +30,16 @@ public interface TimerService
      * and expect the clock to be not started.
      */
     public void stopInternalClock(boolean warnIfNotStarted);
+
+    void enableStats();
+
+    void disableStats();
+
+    long getMaxDrift();
+
+    long getLastDrift();
+
+    long getTotalDrift();
+
+    long getInvocationCount();
 }

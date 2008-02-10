@@ -163,5 +163,20 @@ public final class SchedulingServiceImpl implements SchedulingService
         handleSetMap.put(handle, handleSet);
     }
 
+    public int getTimeHandleCount()
+    {
+        return timeHandleMap.size();
+    }
+
+    public long getFurthestTimeHandle()
+    {
+        return timeHandleMap.lastKey();
+    }
+
+    public int getScheduleHandleCount()
+    {
+        return handleSetMap.size();
+    }
+
     private static final Log log = LogFactory.getLog(SchedulingServiceImpl.class);
 }

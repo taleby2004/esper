@@ -77,5 +77,11 @@ public interface SchedulingService extends TimeProvider
      * Destroy the service.
      */
     public void destroy();
+
+    int getTimeHandleCount();
+
+    long getFurthestTimeHandle();
+
+    int getScheduleHandleCount();
 }
 

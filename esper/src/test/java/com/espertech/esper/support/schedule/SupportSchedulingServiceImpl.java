@@ -92,7 +92,19 @@ public class SupportSchedulingServiceImpl implements SchedulingService
 
     public void destroy()
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        ;
+    }
+
+    public int getTimeHandleCount() {
+        throw new RuntimeException("not implemented");
+    }
+
+    public long getFurthestTimeHandle() {
+        throw new RuntimeException("not implemented");
+    }
+
+    public int getScheduleHandleCount() {
+        throw new RuntimeException("not implemented");
     }
 
     private static final Log log = LogFactory.getLog(SupportSchedulingServiceImpl.class);
