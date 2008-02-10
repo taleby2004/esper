@@ -477,14 +477,27 @@ public class ArrayAssertionUtil
 
     public static void assertPropsPerRow(EventBean[] received, String[] propertyNames, Object[][] propertiesListPerRow)
     {
+        assertPropsPerRow(received, propertyNames, propertiesListPerRow, "");
+    }
+
+    public static void assertPropsPerRow(EventBean[] received, String[] propertyNames, Object[][] propertiesListPerRow, String streamName)
+    {
         if (propertiesListPerRow == null)
         {
             if ((received == null) || (received.length == 0))
             {
                 return;
             }
+            else
+            {
+                Assert.fail("No events expected by received one or more for stream " + streamName);
+            }
         }
-        Assert.assertEquals(propertiesListPerRow.length, received.length);
+        if (received == null)
+        {
+            Assert.fail("No events received, however some were expected for stream " + streamName);
+        }
+        Assert.assertEquals("Mismatch in the number of rows received", propertiesListPerRow.length, received.length);
 
         for (int i = 0; i < propertiesListPerRow.length; i++)
         {
@@ -494,7 +507,7 @@ public class ArrayAssertionUtil
                 String name = propertyNames[j];
                 Object value = propertiesThisRow[j];
                 Object eventProp = received[i].get(name);
-                Assert.assertEquals("Error asserting property named " + name,value,eventProp);
+                Assert.assertEquals("Error asserting property named " + name + " for row " + i + " for " + streamName,value,eventProp);
             }
         }
     }

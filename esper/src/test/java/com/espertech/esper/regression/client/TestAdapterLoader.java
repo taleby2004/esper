@@ -3,6 +3,7 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.soda.StreamSelector;
 import com.espertech.esper.support.adapter.SupportPluginLoader;
 import com.espertech.esper.support.client.SupportConfigFactory;
 

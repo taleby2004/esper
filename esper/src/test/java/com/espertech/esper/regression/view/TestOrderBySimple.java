@@ -1,10 +1,7 @@
 package com.espertech.esper.regression.view;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
@@ -32,13 +29,15 @@ public class TestOrderBySimple extends TestCase {
 	private List<Long> volumes;
 
     public void setUp()
-	{
-	    epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
-	    epService.initialize();
-	    symbols = new LinkedList<String>();
-	    prices = new LinkedList<Double>();
-	    volumes = new LinkedList<Long>();
-	}
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+        symbols = new LinkedList<String>();
+        prices = new LinkedList<Double>();
+        volumes = new LinkedList<Long>();
+    }
 
     public void testIterator()
 	{
@@ -243,19 +242,51 @@ public class TestOrderBySimple extends TestCase {
 	 	assertValues(symbols, "symbol");
 	   	assertOnlyProperties(Arrays.asList(new String[] {"symbol"}));
 	 	clearValues();
-
-	 	epService.initialize();
-
-		statementString = "select symbol, sum(price) from " +
-	 	SupportMarketDataBean.class.getName() + ".win:length(10) " +
-	 	"output every 6 events "  +
-	 	"order by volume*sum(price), symbol";
-	 	createAndSend(statementString);
-	 	orderValuesBySymbol();
-	 	assertValues(symbols, "symbol");
-	   	assertOnlyProperties(Arrays.asList(new String[] {"symbol", "sum(price)"}));
-	 	clearValues();
 	}
+
+    public void testAliasesSimple()
+    {
+        String statementString = "select symbol as mySymbol from " +
+        SupportMarketDataBean.class.getName() + ".win:length(5) " +
+        "output every 6 events "  +
+        "order by mySymbol";
+        createAndSend(statementString);
+        orderValuesBySymbol();
+        assertValues(symbols, "mySymbol");
+           assertOnlyProperties(Arrays.asList(new String[] {"mySymbol"}));
+        clearValues();
+
+        statementString = "select symbol as mySymbol, price as myPrice from " +
+        SupportMarketDataBean.class.getName() + ".win:length(5) " +
+        "output every 6 events "  +
+        "order by myPrice";
+        createAndSend(statementString);
+        orderValuesByPrice();
+        assertValues(symbols, "mySymbol");
+        assertValues(prices, "myPrice");
+           assertOnlyProperties(Arrays.asList(new String[] {"mySymbol", "myPrice"}));
+        clearValues();
+
+        statementString = "select symbol, price as myPrice from " +
+         SupportMarketDataBean.class.getName() + ".win:length(10) " +
+         "output every 6 events "  +
+         "order by (myPrice * 6) + 5, price";
+         createAndSend(statementString);
+         orderValuesByPrice();
+         assertValues(symbols, "symbol");
+           assertOnlyProperties(Arrays.asList(new String[] {"symbol", "myPrice"}));
+         clearValues();
+
+        statementString = "select symbol, 1+volume*23 as myVol from " +
+         SupportMarketDataBean.class.getName() + ".win:length(10) " +
+         "output every 6 events "  +
+         "order by (price * 6) + 5, price, myVol";
+         createAndSend(statementString);
+         orderValuesByPrice();
+         assertValues(symbols, "symbol");
+           assertOnlyProperties(Arrays.asList(new String[] {"symbol", "myVol"}));
+         clearValues();
+    }
 
     public void testExpressionsJoin()
     {
@@ -315,21 +346,6 @@ public class TestOrderBySimple extends TestCase {
      	orderValuesBySymbol();
      	assertValues(symbols, "symbol");
        	assertOnlyProperties(Arrays.asList(new String[] {"symbol"}));
-     	clearValues();
-
-     	epService.initialize();
-
-    	statementString = "select symbol, sum(price) from " +
-    	SupportMarketDataBean.class.getName() + ".win:length(10) as one, " +
-    	SupportBeanString.class.getName() + ".win:length(100) as two " +
-    	"where one.symbol = two.string " +
-     	"output every 6 events "  +
-     	"order by volume*sum(price), symbol";
-     	createAndSend(statementString);
-     	sendJoinEvents();
-     	orderValuesBySymbol();
-     	assertValues(symbols, "symbol");
-       	assertOnlyProperties(Arrays.asList(new String[] {"symbol", "sum(price)"}));
      	clearValues();
     }
 

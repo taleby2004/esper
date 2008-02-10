@@ -29,7 +29,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchRowForAllNoJoin()
     {
         sendTimer(0);
-        String stmtText = "select sum(price) as sumPrice from MarketData.win:time_batch(1 sec)";
+        String stmtText = "select irstream sum(price) as sumPrice from MarketData.win:time_batch(1 sec)";
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
 
@@ -59,7 +59,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchRowForAllJoin()
     {
         sendTimer(0);
-        String stmtText = "select sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1 where S0.symbol = S1.string";
+        String stmtText = "select irstream sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1 where S0.symbol = S1.string";
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
 
@@ -92,7 +92,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchAggregateAllNoJoin()
     {
         sendTimer(0);
-        String stmtText = "select symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec)";
+        String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec)";
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
 
@@ -118,15 +118,15 @@ public class TestGroupByTimeBatch extends TestCase
 
         EventBean[] oldEvents = listener.getLastOldData();
         assertEquals(3, oldEvents.length);
-        assertEvent(oldEvents[0], "DELL", 45d);
-        assertEvent(oldEvents[1], "IBM", 45d);
-        assertEvent(oldEvents[2], "DELL", 45d);
+        assertEvent(oldEvents[0], "DELL", 20d);
+        assertEvent(oldEvents[1], "IBM", 20d);
+        assertEvent(oldEvents[2], "DELL", 20d);
     }
 
     public void testTimeBatchAggregateAllJoin()
     {
         sendTimer(0);
-        String stmtText = "select symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1 where S0.symbol = S1.string";
+        String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1 where S0.symbol = S1.string";
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
 
@@ -155,15 +155,15 @@ public class TestGroupByTimeBatch extends TestCase
 
         EventBean[] oldEvents = listener.getLastOldData();
         assertEquals(3, oldEvents.length);
-        assertEvent(oldEvents[0], "DELL", 45d);
-        assertEvent(oldEvents[1], "IBM", 45d);
-        assertEvent(oldEvents[2], "DELL", 45d);
+        assertEvent(oldEvents[0], "DELL", 20d);
+        assertEvent(oldEvents[1], "IBM", 20d);
+        assertEvent(oldEvents[2], "DELL", 20d);
     }
 
     public void testTimeBatchRowPerGroupNoJoin()
     {
         sendTimer(0);
-        String stmtText = "select symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) group by symbol";
+        String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) group by symbol";
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
 
@@ -196,7 +196,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchRowPerGroupJoin()
     {
         sendTimer(0);
-        String stmtText = "select symbol, sum(price) as sumPrice " +
+        String stmtText = "select irstream symbol, sum(price) as sumPrice " +
                          " from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1" +
                          " where S0.symbol = S1.string " +
                          " group by symbol";
@@ -235,7 +235,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchAggrGroupedNoJoin()
     {
         sendTimer(0);
-        String stmtText = "select symbol, sum(price) as sumPrice, volume from MarketData.win:time_batch(1 sec) group by symbol";
+        String stmtText = "select irstream symbol, sum(price) as sumPrice, volume from MarketData.win:time_batch(1 sec) group by symbol";
         EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
         stmt.addListener(listener);
 
@@ -257,15 +257,15 @@ public class TestGroupByTimeBatch extends TestCase
         assertEvent(newEvents[0], "IBM", 20d, 600L);
         EventBean[] oldEvents = listener.getLastOldData();
         assertEquals(3, oldEvents.length);
-        assertEvent(oldEvents[0], "DELL", 30d, 200L);
-        assertEvent(oldEvents[1], "IBM", 15d, 500L);
-        assertEvent(oldEvents[2], "DELL", 30d, 250L);
+        assertEvent(oldEvents[0], "DELL", null, 200L);
+        assertEvent(oldEvents[1], "IBM", 20d, 500L);
+        assertEvent(oldEvents[2], "DELL", null, 250L);
     }
 
     public void testTimeBatchAggrGroupedJoin()
     {
         sendTimer(0);
-        String stmtText = "select symbol, sum(price) as sumPrice, volume " +
+        String stmtText = "select irstream symbol, sum(price) as sumPrice, volume " +
                           "from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1" +
                           " where S0.symbol = S1.string " +
                           " group by symbol";
@@ -293,9 +293,9 @@ public class TestGroupByTimeBatch extends TestCase
         assertEvent(newEvents[0], "IBM", 20d, 600L);
         EventBean[] oldEvents = listener.getLastOldData();
         assertEquals(3, oldEvents.length);
-        assertEvent(oldEvents[0], "DELL", 30d, 200L);
-        assertEvent(oldEvents[1], "IBM", 15d, 500L);
-        assertEvent(oldEvents[2], "DELL", 30d, 250L);
+        assertEvent(oldEvents[0], "DELL", null, 200L);
+        assertEvent(oldEvents[1], "IBM", 20d, 500L);
+        assertEvent(oldEvents[2], "DELL", null, 250L);
     }
 
     private void sendSupportEvent(String string)

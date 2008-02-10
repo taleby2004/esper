@@ -1,16 +1,15 @@
 package com.espertech.esper.regression.pattern;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -212,6 +211,40 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         sendTimer(10*60*1000, epService);
         sendEvent(epService);
         assertFalse(testListener.isInvoked());
+    }
+
+    public void testAndWithin()
+    {
+        /**
+         * TODO - this test is reported for investigation
+         */
+        /*
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.addEventTypeAlias("A", SupportBean_A.class);
+        config.addEventTypeAlias("B", SupportBean_B.class);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        // External clocking
+        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+        sendTimer(0, epService);
+
+        // Set up a timer:within
+        EPStatement statement = epService.getEPAdministrator().createEQL(
+                "select * from pattern [every ((A and B) where timer:within(2))]");
+
+        SupportUpdateListener testListener = new SupportUpdateListener();
+        statement.addListener(testListener);
+
+        sendTimer(15000, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+        assertFalse(testListener.isInvoked());
+
+        sendTimer(16000, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
+        assertTrue(testListener.isInvoked());
+        */
     }
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)

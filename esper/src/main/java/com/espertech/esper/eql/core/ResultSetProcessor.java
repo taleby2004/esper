@@ -1,12 +1,14 @@
 package com.espertech.esper.eql.core;
 
 import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.collection.Pair;
+import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.view.Viewable;
+import com.espertech.esper.eql.spec.OutputLimitLimitType;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -31,7 +33,7 @@ public interface ResultSetProcessor
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return pair of new events and old events
      */
-    public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize);
+    public UniformPair<EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize);
 
     /**
      * For use by joins posting their result, process the event rows that are entered and removed (new and old events).
@@ -42,7 +44,7 @@ public interface ResultSetProcessor
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return pair of new events and old events
      */
-    public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize);
+    public UniformPair<EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize);
 
     /**
      * Returns the iterator implementing the group-by and aggregation and order-by logic
@@ -63,4 +65,8 @@ public interface ResultSetProcessor
      * Clear out current state.
      */
     public void clear();
+
+    public UniformPair<EventBean[]> processOutputLimitedJoin(List<UniformPair<Set<MultiKey<EventBean>>>> joinEventsSet, boolean generateSynthetic, OutputLimitLimitType outputLimitLimitType);
+
+    public UniformPair<EventBean[]> processOutputLimitedView(List<UniformPair<EventBean[]>> viewEventsList, boolean generateSynthetic, OutputLimitLimitType outputLimitLimitType);
 }

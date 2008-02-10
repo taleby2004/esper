@@ -15,6 +15,7 @@
 	<!ENTITY processingmodel SYSTEM "modules/processingmodel.xml">
 	<!ENTITY extension SYSTEM "modules/extension.xml">
     <!ENTITY performance SYSTEM "modules/performance.xml">
+    <!ENTITY appendix_outputspec SYSTEM "modules/appendix_outputspec.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -126,5 +127,7 @@
     
     &references;
     
+    &appendix_outputspec;
+
     <index/>
 </book>

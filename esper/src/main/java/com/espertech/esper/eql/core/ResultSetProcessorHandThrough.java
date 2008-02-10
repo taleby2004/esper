@@ -1,6 +1,9 @@
 package com.espertech.esper.eql.core;
 
-import com.espertech.esper.collection.*;
+import com.espertech.esper.collection.ArrayEventIterator;
+import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.TransformEventIterator;
+import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.view.Viewable;
@@ -15,10 +18,11 @@ import java.util.Set;
  * Result set processor for the hand-through case:
  * no aggregation functions used in the select clause, and no group-by, no having and ordering.
  */
-public class ResultSetProcessorHandThrough implements ResultSetProcessor
+public class ResultSetProcessorHandThrough extends ResultSetProcessorBaseSimple
 {
     private static final Log log = LogFactory.getLog(ResultSetProcessorHandThrough.class);
 
+    private final boolean isSelectRStream;
     private final SelectExprProcessor selectExprProcessor;
     private final Set<MultiKey<EventBean>> emptyRowSet = new HashSet<MultiKey<EventBean>>();
 
@@ -27,9 +31,10 @@ public class ResultSetProcessorHandThrough implements ResultSetProcessor
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * a row per group even if groups didn't change
      */
-    public ResultSetProcessorHandThrough(SelectExprProcessor selectExprProcessor)
+    public ResultSetProcessorHandThrough(SelectExprProcessor selectExprProcessor, boolean isSelectRStream)
     {
         this.selectExprProcessor = selectExprProcessor;
+        this.isSelectRStream = isSelectRStream;
     }
 
     public EventType getResultEventType()
@@ -37,23 +42,31 @@ public class ResultSetProcessorHandThrough implements ResultSetProcessor
         return selectExprProcessor.getResultEventType();
     }
 
-    public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize)
+    public UniformPair<EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize)
     {
-        EventBean[] selectOldEvents;
+        EventBean[] selectOldEvents = null;
         EventBean[] selectNewEvents;
 
-        selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, oldEvents, false, isSynthesize);
+        if (isSelectRStream)
+        {
+            selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, oldEvents, false, isSynthesize);
+        }
         selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, newEvents, true, isSynthesize);
 
-        return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
+        return new UniformPair<EventBean[]>(selectNewEvents, selectOldEvents);
     }
 
-    public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize)
+    public UniformPair<EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize)
     {
-        EventBean[] selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, oldData, false, isSynthesize);
+        EventBean[] selectOldEvents = null;
+        
+        if (isSelectRStream)
+        {
+            selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, oldData, false, isSynthesize);
+        }
         EventBean[] selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, newData, true, isSynthesize);
 
-        return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
+        return new UniformPair<EventBean[]>(selectNewEvents, selectOldEvents);
     }
 
     /**
@@ -122,46 +135,22 @@ public class ResultSetProcessorHandThrough implements ResultSetProcessor
         return result;
     }
 
-    public Iterator<EventBean> getIterator(Viewable parent)
-    {
-        // Return an iterator that gives row-by-row a result
-        return new TransformEventIterator(parent.iterator(), new ResultSetProcessorHandThrough.ResultSetSimpleTransform(this));
-    }
-
-    public Iterator<EventBean> getIterator(Set<MultiKey<EventBean>> joinSet)
-    {
-        // Process join results set as a regular join, includes sorting and having-clause filter
-        Pair<EventBean[], EventBean[]> result = processJoinResult(joinSet, emptyRowSet, true);
-        return new ArrayEventIterator(result.getFirst());
-    }
 
     public void clear()
     {
         // No need to clear state, there is no state held
     }
 
-    /**
-     * Method to transform an event based on the select expression.
-     */
-    public static class ResultSetSimpleTransform implements TransformEventMethod
+    public Iterator<EventBean> getIterator(Viewable parent)
     {
-        private final ResultSetProcessorHandThrough resultSetProcessor;
-        private final EventBean[] newData;
-
-        /**
-         * Ctor.
-         * @param resultSetProcessor is applying the select expressions to the events for the transformation
-         */
-        public ResultSetSimpleTransform(ResultSetProcessorHandThrough resultSetProcessor) {
-            this.resultSetProcessor = resultSetProcessor;
-            newData = new EventBean[1];
-        }
-
-        public EventBean transform(EventBean event)
-        {
-            newData[0] = event;
-            Pair<EventBean[], EventBean[]> pair = resultSetProcessor.processViewResult(newData, null, true);
-            return pair.getFirst()[0];
-        }
+        // Return an iterator that gives row-by-row a result
+        return new TransformEventIterator(parent.iterator(), new ResultSetProcessorSimpleTransform(this));
     }
+
+    public Iterator<EventBean> getIterator(Set<MultiKey<EventBean>> joinSet)
+    {
+        // Process join results set as a regular join, includes sorting and having-clause filter
+        UniformPair<EventBean[]> result = processJoinResult(joinSet, emptyRowSet, true);
+        return new ArrayEventIterator(result.getFirst());
+    }    
 }

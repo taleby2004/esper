@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
+import com.espertech.esper.client.soda.StreamSelector;
+
 public class TestConfigurationParser extends TestCase
 {
     private Configuration config;
@@ -44,6 +46,8 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
 
         assertEquals(15000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
+
+        assertEquals(StreamSelector.ISTREAM_ONLY, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
     }
 
     protected static void assertFileConfig(Configuration config)
@@ -115,13 +119,13 @@ public class TestConfigurationParser extends TestCase
         assertNull(configDBRef.getConnectionSettings().getCatalog());
         assertNull(configDBRef.getConnectionSettings().getReadOnly());
         assertNull(configDBRef.getConnectionSettings().getTransactionIsolation());
-        ConfigurationDBRef.LRUCacheDesc lruCache = (ConfigurationDBRef.LRUCacheDesc) configDBRef.getDataCacheDesc();
+        ConfigurationLRUCache lruCache = (ConfigurationLRUCache) configDBRef.getDataCacheDesc();
         assertEquals(10, lruCache.getSize());
         assertEquals(ConfigurationDBRef.ColumnChangeCaseEnum.LOWERCASE, configDBRef.getColumnChangeCase());
         assertEquals(ConfigurationDBRef.MetadataOriginEnum.SAMPLE, configDBRef.getMetadataRetrievalEnum());
-        assertEquals(2, configDBRef.getJavaSqlTypesMapping().size());
-        assertEquals("int", configDBRef.getJavaSqlTypesMapping().get(2));
-        assertEquals("float", configDBRef.getJavaSqlTypesMapping().get(6));
+        assertEquals(2, configDBRef.getSqlTypesMapping().size());
+        assertEquals("int", configDBRef.getSqlTypesMapping().get(2));
+        assertEquals("float", configDBRef.getSqlTypesMapping().get(6));
 
         // assert database reference - driver manager config
         configDBRef = config.getDatabaseReferences().get("mydb2");
@@ -136,14 +140,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals("test", configDBRef.getConnectionSettings().getCatalog());
         assertEquals(Boolean.TRUE, configDBRef.getConnectionSettings().getReadOnly());
         assertEquals(new Integer(3), configDBRef.getConnectionSettings().getTransactionIsolation());
-        ConfigurationDBRef.ExpiryTimeCacheDesc expCache = (ConfigurationDBRef.ExpiryTimeCacheDesc) configDBRef.getDataCacheDesc();
+        ConfigurationExpiryTimeCache expCache = (ConfigurationExpiryTimeCache) configDBRef.getDataCacheDesc();
         assertEquals(60.5, expCache.getMaxAgeSeconds());
         assertEquals(120.1, expCache.getPurgeIntervalSeconds());
-        assertEquals(ConfigurationDBRef.CacheReferenceType.HARD, expCache.getCacheReferenceType());
+        assertEquals(ConfigurationCacheReferenceType.HARD, expCache.getCacheReferenceType());
         assertEquals(ConfigurationDBRef.ColumnChangeCaseEnum.UPPERCASE, configDBRef.getColumnChangeCase());
         assertEquals(ConfigurationDBRef.MetadataOriginEnum.METADATA, configDBRef.getMetadataRetrievalEnum());
-        assertEquals(1, configDBRef.getJavaSqlTypesMapping().size());
-        assertEquals("java.lang.String", configDBRef.getJavaSqlTypesMapping().get(99));
+        assertEquals(1, configDBRef.getSqlTypesMapping().size());
+        assertEquals("java.lang.String", configDBRef.getSqlTypesMapping().get(99));
 
         // assert custom view implementations
         List<ConfigurationPlugInView> configViews = config.getPlugInViews();
@@ -218,6 +222,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertTrue(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
         assertEquals(30000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
+        assertEquals(StreamSelector.RSTREAM_ISTREAM_BOTH, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
 
         // variables
         assertEquals(2, config.getVariables().size());
@@ -231,13 +236,13 @@ public class TestConfigurationParser extends TestCase
         // method references
         assertEquals(2, config.getMethodInvocationReferences().size());
         ConfigurationMethodRef ref = config.getMethodInvocationReferences().get("abc");
-        expCache = (ConfigurationDBRef.ExpiryTimeCacheDesc) ref.getDataCacheDesc();
+        expCache = (ConfigurationExpiryTimeCache) ref.getDataCacheDesc();
         assertEquals(91.0, expCache.getMaxAgeSeconds());
         assertEquals(92.2, expCache.getPurgeIntervalSeconds());
-        assertEquals(ConfigurationDBRef.CacheReferenceType.WEAK, expCache.getCacheReferenceType());
+        assertEquals(ConfigurationCacheReferenceType.WEAK, expCache.getCacheReferenceType());
 
         ref = config.getMethodInvocationReferences().get("def");
-        lruCache = (ConfigurationDBRef.LRUCacheDesc) ref.getDataCacheDesc();
+        lruCache = (ConfigurationLRUCache) ref.getDataCacheDesc();
         assertEquals(20, lruCache.getSize());
     }
 }

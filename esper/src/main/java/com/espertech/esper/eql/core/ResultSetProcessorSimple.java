@@ -15,13 +15,12 @@ import java.util.*;
  * <p>
  * The processor generates one row for each event entering (new event) and one row for each event leaving (old event).
  */
-public class ResultSetProcessorSimple implements ResultSetProcessor
+public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
 {
     private static final Log log = LogFactory.getLog(ResultSetProcessorSimple.class);
 
+    private final boolean isSelectRStream;
     private final SelectExprProcessor selectExprProcessor;
-    private final boolean isOutputLimiting;
-    private final boolean isOutputLimitLastOnly;
     private final OrderByProcessor orderByProcessor;
     private final ExprNode optionalHavingExpr;
     private final Set<MultiKey<EventBean>> emptyRowSet = new HashSet<MultiKey<EventBean>>();
@@ -31,21 +30,16 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * @param orderByProcessor - for sorting the outgoing events according to the order-by clause
      * @param optionalHavingNode - having clause expression node
-     * @param isOutputLimiting - true to indicate we are output limiting and must keep producing
-     * a row per group even if groups didn't change
-     * @param isOutputLimitLastOnly - true if output limiting and interested in last event only
      */
     public ResultSetProcessorSimple(SelectExprProcessor selectExprProcessor,
                                     OrderByProcessor orderByProcessor,
                                     ExprNode optionalHavingNode,
-                                    boolean isOutputLimiting,
-                                    boolean isOutputLimitLastOnly)
+                                    boolean isSelectRStream)
     {
         this.selectExprProcessor = selectExprProcessor;
         this.orderByProcessor = orderByProcessor;
         this.optionalHavingExpr = optionalHavingNode;
-        this.isOutputLimiting = isOutputLimiting;
-        this.isOutputLimitLastOnly = isOutputLimitLastOnly;
+        this.isSelectRStream = isSelectRStream;
     }
 
     public EventType getResultEventType()
@@ -53,31 +47,53 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         return selectExprProcessor.getResultEventType();
     }
 
-    public Pair<EventBean[], EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize)
+    public UniformPair<EventBean[]> processJoinResult(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, boolean isSynthesize)
     {
-        EventBean[] selectOldEvents;
+        EventBean[] selectOldEvents = null;
         EventBean[] selectNewEvents;
 
         if (optionalHavingExpr == null)
         {
-            selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldEvents, isOutputLimiting, isOutputLimitLastOnly, false, isSynthesize);
-            selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newEvents, isOutputLimiting, isOutputLimitLastOnly, true, isSynthesize);
+            if (isSelectRStream)
+            {
+                selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldEvents, false, isSynthesize);
+            }
+            selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newEvents, true, isSynthesize);
         }
         else
         {
-            selectOldEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, oldEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly, false, isSynthesize);
-            selectNewEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, newEvents, optionalHavingExpr, isOutputLimiting, isOutputLimitLastOnly, true, isSynthesize);
+            if (isSelectRStream)
+            {
+                selectOldEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, oldEvents, optionalHavingExpr, false, isSynthesize);
+            }
+            selectNewEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, newEvents, optionalHavingExpr, true, isSynthesize);
         }
 
-        return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
+        return new UniformPair<EventBean[]>(selectNewEvents, selectOldEvents);
     }
 
-    public Pair<EventBean[], EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize)
+    public UniformPair<EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize)
     {
-        EventBean[] selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldData, isOutputLimiting, isOutputLimitLastOnly, false, isSynthesize);
-        EventBean[] selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newData, isOutputLimiting, isOutputLimitLastOnly, true, isSynthesize);
+        EventBean[] selectOldEvents = null;
+        EventBean[] selectNewEvents;
+        if (optionalHavingExpr == null)
+        {
+            if (isSelectRStream)
+            {
+                selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, oldData, false, isSynthesize);
+            }
+            selectNewEvents = getSelectEventsNoHaving(selectExprProcessor, orderByProcessor, newData, true, isSynthesize);
+        }
+        else
+        {
+            if (isSelectRStream)
+            {
+                selectOldEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, oldData, optionalHavingExpr, false, isSynthesize);
+            }
+            selectNewEvents = getSelectEventsHaving(selectExprProcessor, orderByProcessor, newData, optionalHavingExpr, true, isSynthesize);
+        }
 
-        return new Pair<EventBean[], EventBean[]>(selectNewEvents, selectOldEvents);
+        return new UniformPair<EventBean[]>(selectNewEvents, selectOldEvents);
     }
 
     /**
@@ -86,19 +102,12 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param exprProcessor - processes each input event and returns output event
      * @param orderByProcessor - orders the outgoing events according to the order-by clause
      * @param events - input events
-     * @param isOutputLimiting - true to indicate that we limit output
-     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData, boolean isSynthesize)
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isNewData, boolean isSynthesize)
     {
-        if (isOutputLimiting)
-        {
-            events = applyOutputLimit(events, isOutputLimitLastOnly);
-        }
-
         if (events == null)
         {
             return null;
@@ -143,68 +152,22 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
     }
 
     /**
-     * Applies the last/all event output limit clause.
-     * @param events to output
-     * @param isOutputLimitLastOnly - flag to indicate output all versus output last
-     * @return events to output
-     */
-    protected static EventBean[] applyOutputLimit(EventBean[] events, boolean isOutputLimitLastOnly)
-    {
-        if(isOutputLimitLastOnly && events != null && events.length > 0)
-        {
-            return new EventBean[] {events[events.length - 1]};
-        }
-        else
-        {
-            return events;
-        }
-    }
-
-    /**
-     * Applies the last/all event output limit clause.
-     * @param eventSet to output
-     * @param isOutputLimitLastOnly - flag to indicate output all versus output last
-     * @return events to output
-     */
-    protected static Set<MultiKey<EventBean>> applyOutputLimit(Set<MultiKey<EventBean>> eventSet, boolean isOutputLimitLastOnly)
-    {
-        if(isOutputLimitLastOnly && eventSet != null && !eventSet.isEmpty())
-        {
-            Object[] events = eventSet.toArray();
-            Set<MultiKey<EventBean>> resultSet = new LinkedHashSet<MultiKey<EventBean>>();
-            resultSet.add((MultiKey<EventBean>)events[events.length - 1]);
-            return resultSet;
-        }
-        else
-        {
-            return eventSet;
-        }
-    }
-
-    /**
      * Applies the select-clause to the given events returning the selected events. The number of events stays the
      * same, i.e. this method does not filter it just transforms the result set.
      * @param exprProcessor - processes each input event and returns output event
      * @param orderByProcessor - for sorting output events according to the order-by clause
      * @param events - input events
-     * @param isOutputLimiting - true to indicate that we limit output
-     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData, boolean isSynthesize)
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isNewData, boolean isSynthesize)
     {
-        if (isOutputLimiting)
-        {
-            events = applyOutputLimit(events, isOutputLimitLastOnly);
-        }
-
-        int length = events.size();
-        if (length == 0)
+        if ((events == null) || (events.isEmpty()))
         {
             return null;
         }
+        int length = events.size();
 
         EventBean[] result = new EventBean[length];
         EventBean[][] eventGenerators = null;
@@ -244,19 +207,12 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param orderByProcessor - for sorting output events according to the order-by clause
      * @param events - input events
      * @param optionalHavingNode - supplies the having-clause expression
-     * @param isOutputLimiting - true to indicate that we limit output
-     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData, boolean isSynthesize)
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize)
     {
-        if (isOutputLimiting)
-        {
-            events = ResultSetProcessorSimple.applyOutputLimit(events, isOutputLimitLastOnly);
-        }
-
         if (events == null)
         {
             return null;
@@ -270,20 +226,20 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         }
 
         EventBean[] eventsPerStream = new EventBean[1];
-        for (int i = 0; i < events.length; i++)
+        for (EventBean event : events)
         {
-            eventsPerStream[0] = events[i];
+            eventsPerStream[0] = event;
 
             Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
-            if (!passesHaving)
+            if ((passesHaving == null) || (!passesHaving))
             {
                 continue;
             }
 
             result.add(exprProcessor.process(eventsPerStream, isNewData, isSynthesize));
-            if(orderByProcessor != null)
+            if (orderByProcessor != null)
             {
-                eventGenerators.add(new EventBean[] { events[i] });
+                eventGenerators.add(new EventBean[]{event});
             }
         }
 
@@ -291,11 +247,11 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         {
             if(orderByProcessor != null)
             {
-                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]), isNewData);
+                return orderByProcessor.sort(result.toArray(new EventBean[result.size()]), eventGenerators.toArray(new EventBean[eventGenerators.size()][]), isNewData);
             }
             else
             {
-                return result.toArray(new EventBean[0]);
+                return result.toArray(new EventBean[result.size()]);
             }
         }
         else
@@ -313,17 +269,15 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
      * @param orderByProcessor - for sorting output events according to the order-by clause
      * @param events - input events
      * @param optionalHavingNode - supplies the having-clause expression
-     * @param isOutputLimiting - true to indicate that we limit output
-     * @param isOutputLimitLastOnly - true to indicate that we limit output to the last event
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
      * @return output events, one for each input event
      */
-    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isOutputLimiting, boolean isOutputLimitLastOnly, boolean isNewData, boolean isSynthesize)
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize)
     {
-        if (isOutputLimiting)
+        if ((events == null) || (events.isEmpty()))
         {
-            events = ResultSetProcessorSimple.applyOutputLimit(events, isOutputLimitLastOnly);
+            return null;
         }
 
         LinkedList<EventBean> result = new LinkedList<EventBean>();
@@ -338,7 +292,7 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
             EventBean[] eventsPerStream = key.getArray();
 
             Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
-            if (!passesHaving)
+            if ((passesHaving == null) || (!passesHaving))
             {
                 continue;
             }
@@ -355,11 +309,11 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
         {
             if(orderByProcessor != null)
             {
-                return orderByProcessor.sort(result.toArray(new EventBean[0]), eventGenerators.toArray(new EventBean[0][]), isNewData);
+                return orderByProcessor.sort(result.toArray(new EventBean[result.size()]), eventGenerators.toArray(new EventBean[eventGenerators.size()][]), isNewData);
             }
             else
             {
-                return result.toArray(new EventBean[0]);
+                return result.toArray(new EventBean[result.size()]);
             }
         }
         else
@@ -376,30 +330,30 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
             EventBean[] eventsPerStream = new EventBean[1];
             List<EventBean> events = new ArrayList<EventBean>();
             List<MultiKeyUntyped> orderKeys = new ArrayList<MultiKeyUntyped>();
-            for (Iterator<EventBean> it = parent.iterator(); it.hasNext();)
+            for (EventBean aParent : parent)
             {
-                eventsPerStream[0] = it.next();
+                eventsPerStream[0] = aParent;
                 MultiKeyUntyped orderKey = orderByProcessor.getSortKey(eventsPerStream, true);
-                Pair<EventBean[], EventBean[]> pair = processViewResult(eventsPerStream, null, true);
+                UniformPair<EventBean[]> pair = processViewResult(eventsPerStream, null, true);
                 events.add(pair.getFirst()[0]);
                 orderKeys.add(orderKey);
             }
 
             // sort
-            EventBean[] outgoingEvents = events.toArray(new EventBean[0]);
-            MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[0]);
+            EventBean[] outgoingEvents = events.toArray(new EventBean[events.size()]);
+            MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[orderKeys.size()]);
             EventBean[] orderedEvents = orderByProcessor.sort(outgoingEvents, orderKeysArr);
 
             return new ArrayEventIterator(orderedEvents);
         }
         // Return an iterator that gives row-by-row a result
-        return new TransformEventIterator(parent.iterator(), new ResultSetSimpleTransform(this));
+        return new TransformEventIterator(parent.iterator(), new ResultSetProcessorSimpleTransform(this));
     }
 
     public Iterator<EventBean> getIterator(Set<MultiKey<EventBean>> joinSet)
     {
         // Process join results set as a regular join, includes sorting and having-clause filter
-        Pair<EventBean[], EventBean[]> result = processJoinResult(joinSet, emptyRowSet, true);
+        UniformPair<EventBean[]> result = processJoinResult(joinSet, emptyRowSet, true);
         return new ArrayEventIterator(result.getFirst());
     }
 
@@ -409,27 +363,272 @@ public class ResultSetProcessorSimple implements ResultSetProcessor
     }
 
     /**
-     * Method to transform an event based on the select expression.
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param events - input events
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @return output events, one for each input event
      */
-    public static class ResultSetSimpleTransform implements TransformEventMethod
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, EventBean[] events, boolean isNewData, boolean isSynthesize)
     {
-        private final ResultSetProcessorSimple resultSetProcessor;
-        private final EventBean[] newData;
-
-        /**
-         * Ctor.
-         * @param resultSetProcessor is applying the select expressions to the events for the transformation
-         */
-        public ResultSetSimpleTransform(ResultSetProcessorSimple resultSetProcessor) {
-            this.resultSetProcessor = resultSetProcessor;
-            newData = new EventBean[1];
+        if (events == null)
+        {
+            return null;
         }
 
-        public EventBean transform(EventBean event)
+        EventBean[] result = new EventBean[events.length];
+        EventBean[] eventsPerStream = new EventBean[1];
+        for (int i = 0; i < events.length; i++)
         {
-            newData[0] = event;
-            Pair<EventBean[], EventBean[]> pair = resultSetProcessor.processViewResult(newData, null, true);
-            return pair.getFirst()[0];
+            eventsPerStream[0] = events[i];
+            result[i] = exprProcessor.process(eventsPerStream, isNewData, isSynthesize);
+        }
+
+        return result;
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param events - input events
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @return output events, one for each input event
+     */
+    protected static EventBean[] getSelectEventsNoHaving(SelectExprProcessor exprProcessor, Set<MultiKey<EventBean>> events, boolean isNewData, boolean isSynthesize)
+    {
+        if ((events == null) || (events.isEmpty()))
+        {
+            return null;
+        }
+        int length = events.size();
+
+        EventBean[] result = new EventBean[length];
+
+        int count = 0;
+        for (MultiKey<EventBean> key : events)
+        {
+            EventBean[] eventsPerStream = key.getArray();
+            result[count] = exprProcessor.process(eventsPerStream, isNewData, isSynthesize);
+            count++;
+        }
+
+        return result;
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * <p>
+     * Also applies a having clause.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param events - input events
+     * @param optionalHavingNode - supplies the having-clause expression
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @return output events, one for each input event
+     */
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize)
+    {
+        if (events == null)
+        {
+            return null;
+        }
+
+        LinkedList<EventBean> result = new LinkedList<EventBean>();
+
+        EventBean[] eventsPerStream = new EventBean[1];
+        for (EventBean event : events)
+        {
+            eventsPerStream[0] = event;
+
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
+            if ((passesHaving == null) || (!passesHaving))
+            {
+                continue;
+            }
+
+            result.add(exprProcessor.process(eventsPerStream, isNewData, isSynthesize));
+        }
+
+        if (!result.isEmpty())
+        {
+            return result.toArray(new EventBean[result.size()]);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * <p>
+     * Also applies a having clause.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param events - input events
+     * @param optionalHavingNode - supplies the having-clause expression
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @return output events, one for each input event
+     */
+    protected static EventBean[] getSelectEventsHaving(SelectExprProcessor exprProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize)
+    {
+        LinkedList<EventBean> result = new LinkedList<EventBean>();
+
+        for (MultiKey<EventBean> key : events)
+        {
+            EventBean[] eventsPerStream = key.getArray();
+
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
+            if ((passesHaving == null) || (!passesHaving))
+            {
+                continue;
+            }
+
+            EventBean resultEvent = exprProcessor.process(eventsPerStream, isNewData, isSynthesize);
+            result.add(resultEvent);
+        }
+
+        if (!result.isEmpty())
+        {
+            return result.toArray(new EventBean[result.size()]);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param orderByProcessor - orders the outgoing events according to the order-by clause
+     * @param events - input events
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     */
+    protected static void getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
+    {
+        if (events == null)
+        {
+            return;
+        }
+
+        EventBean[] eventsPerStream = new EventBean[1];
+        for (EventBean event : events)
+        {
+            eventsPerStream[0] = event;
+
+            result.add(exprProcessor.process(eventsPerStream, isNewData, isSynthesize));
+            if (orderByProcessor != null)
+            {
+                optSortKeys.add(orderByProcessor.getSortKey(eventsPerStream, isNewData));
+            }
+        }
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param orderByProcessor - for sorting output events according to the order-by clause
+     * @param events - input events
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     */
+    protected static void getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
+    {
+        int length = events.size();
+        if (length == 0)
+        {
+            return;
+        }
+
+        for (MultiKey<EventBean> key : events)
+        {
+            EventBean[] eventsPerStream = key.getArray();
+            result.add(exprProcessor.process(eventsPerStream, isNewData, isSynthesize));
+            if(orderByProcessor != null)
+            {
+                optSortKeys.add(orderByProcessor.getSortKey(eventsPerStream, isNewData));
+            }
+        }
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * <p>
+     * Also applies a having clause.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param orderByProcessor - for sorting output events according to the order-by clause
+     * @param events - input events
+     * @param optionalHavingNode - supplies the having-clause expression
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     */
+    protected static void getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
+    {
+        if (events == null)
+        {
+            return;
+        }
+
+        EventBean[] eventsPerStream = new EventBean[1];
+        for (EventBean event : events)
+        {
+            eventsPerStream[0] = event;
+
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
+            if ((passesHaving == null) || (!passesHaving))
+            {
+                continue;
+            }
+
+            result.add(exprProcessor.process(eventsPerStream, isNewData, isSynthesize));
+            if (orderByProcessor != null)
+            {
+                optSortKeys.add(orderByProcessor.getSortKey(eventsPerStream, isNewData));
+            }
+        }
+    }
+
+    /**
+     * Applies the select-clause to the given events returning the selected events. The number of events stays the
+     * same, i.e. this method does not filter it just transforms the result set.
+     * <p>
+     * Also applies a having clause.
+     * @param exprProcessor - processes each input event and returns output event
+     * @param orderByProcessor - for sorting output events according to the order-by clause
+     * @param events - input events
+     * @param optionalHavingNode - supplies the having-clause expression
+     * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
+     * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     */
+    protected static void getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
+    {
+        for (MultiKey<EventBean> key : events)
+        {
+            EventBean[] eventsPerStream = key.getArray();
+
+            Boolean passesHaving = (Boolean) optionalHavingNode.evaluate(eventsPerStream, isNewData);
+            if ((passesHaving == null) || (!passesHaving))
+            {
+                continue;
+            }
+
+            EventBean resultEvent = exprProcessor.process(eventsPerStream, isNewData, isSynthesize);
+            result.add(resultEvent);
+            if(orderByProcessor != null)
+            {
+                optSortKeys.add(orderByProcessor.getSortKey(eventsPerStream, isNewData));
+            }
         }
     }
 }
