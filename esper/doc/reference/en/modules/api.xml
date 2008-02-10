@@ -118,28 +118,6 @@ countStmt.start();]]></programlisting>
 					</thead>
 					<tbody>
 						<row>
-							<entry>Pull API</entry>
-							<entry><literal>safeIterator</literal> and <literal>iterator</literal></entry>
-							<entry>
-								<para>Your application asks the statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.</para>
-								<para>This is useful if your application does not need continuous indication of new results in real-time.</para>
-							 </entry>
-						</row>
-						<row>
-							<entry>Subscriber Object</entry>
-							<entry><literal>setSubscriber</literal></entry>
-							<entry>
-								<para> 
-									Your application provides a POJO (plain Java object) that exposes methods to receive statement results.
-								</para>
-								<para>The engine continuously indicates results to the single subscriber as soon they occur, and following output rate limiting clauses if specified.</para>
-								<para> 
-									This is the fastest method to receive statement results, as the engine delivers strongly-typed results directly to your application objects without the need for
-									building an <literal>EventBean</literal> result set.
-								</para>
-							</entry>							
-						</row>
-						<row>
 							<entry>Listener Callbacks</entry>
 							<entry><literal>addListener</literal> and <literal>removeListener</literal></entry>
 							<entry>
@@ -148,18 +126,47 @@ countStmt.start();]]></programlisting>
 									Listeners receive <literal>EventBean</literal> instances containing statement results.
 								</para>
 								<para>The engine continuously indicates results to all listeners as soon they occur, and following output rate limiting clauses if specified.</para>
-							</entry>							
+                                <para>Since Esper 2.0 it is advised to use the Subscriber Object when possible.</para>
+                            </entry>
 						</row>
+                        <row>
+                            <entry>Subscriber Object</entry>
+                            <entry><literal>setSubscriber</literal></entry>
+                            <entry>
+                                <para>
+                                    Your application provides a POJO (plain Java object) that exposes methods to receive statement results.
+                                </para>
+                                <para>The engine continuously indicates results to the single subscriber as soon they occur, and following output rate limiting clauses if specified.</para>
+                                <para>
+                                    This is the fastest method to receive statement results, as the engine delivers strongly-typed results directly to your application objects without the need for
+                                    building an <literal>EventBean</literal> result set as in the Listener Callback choice.
+                                </para>
+                                <para>
+                                    There can be at most 1 Subscriber Object registered per statement. If you require more than one listener, use the Listener Callback instead (or in addition).
+                                    The Subscriber Object is bound to the statement with a strongly typed support which ensure direct delivery of new events without type conversion. This optimization
+                                    is made possible because there can only be 0 or 1 Subscriber Object per statement.
+                                </para>
+                            </entry>
+                        </row>
+                        <row>
+                            <entry>Pull API</entry>
+                            <entry><literal>safeIterator</literal> and <literal>iterator</literal></entry>
+                            <entry>
+                                <para>Your application asks the statement for results and receives a set of events via <literal>java.util.Iterator&lt;EventBean&gt;</literal>.</para>
+                                <para>This is useful if your application does not need continuous indication of new results in real-time.</para>
+                             </entry>
+                        </row>
 					</tbody>
 				</tgroup>
 			</table>
 			
 			<para>
-				Your application may attach one or more listeners, a single subscriber and in addition use the Pull API on the same statement. There are no limitations to the use of iterator, subscriber or listener
+				Your application may attach one or more listeners, zero or one single subscriber and in addition use the Pull API on the same statement. There are no limitations to the use of iterator, subscriber or listener
 				alone or in combination to receive statement results.
 			</para>
 			<para>
-				A side note on performance: The engine is aware of the listeners and subscriber attached to a statement. The engine uses this information internally to reduce statement overhead. For example, if your statement does not have listeners or a subscriber attached, the engine does not need to continuously generate results for delivery. The best delivery performance can generally be achieved by attaching a subscriber and by not attaching listeners.
+				The best delivery performance can generally be achieved by attaching a subscriber and by not attaching listeners.
+                The engine is aware of the listeners and subscriber attached to a statement. The engine uses this information internally to reduce statement overhead. For example, if your statement does not have listeners or a subscriber attached, the engine does not need to continuously generate results for delivery.
 			</para>
 	  </sect2>
 
