@@ -7,6 +7,7 @@ import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.eql.core.ResultSetProcessor;
 import com.espertech.esper.eql.spec.OutputLimitSpec;
 import com.espertech.esper.event.EventBean;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,7 +59,7 @@ public class OutputProcessViewSnapshot extends OutputProcessView
      */
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".update Received update, " +
                     "  newData.length==" + ((newData == null) ? 0 : newData.length) +
@@ -89,7 +90,7 @@ public class OutputProcessViewSnapshot extends OutputProcessView
      */
     public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".process Received update, " +
                     "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
@@ -123,7 +124,10 @@ public class OutputProcessViewSnapshot extends OutputProcessView
 	 * */
 	protected void continueOutputProcessingView(boolean doOutput, boolean forceUpdate)
 	{
-		log.debug(".continueOutputProcessingView");
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".continueOutputProcessingView");
+        }
 
         EventBean[] newEvents = null;
         EventBean[] oldEvents = null;
@@ -166,7 +170,10 @@ public class OutputProcessViewSnapshot extends OutputProcessView
 	 */
 	protected void continueOutputProcessingJoin(boolean doOutput, boolean forceUpdate)
 	{
-		log.debug(".continueOutputProcessingJoin");
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".continueOutputProcessingJoin");
+        }
         continueOutputProcessingView(doOutput, forceUpdate);
 	}
 

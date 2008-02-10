@@ -99,7 +99,10 @@ public final class OutputConditionCount implements OutputCondition
 
         if (isSatisfied())
         {
-        	log.debug(".updateOutputCondition() condition satisfied");
+        	if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+            {
+                log.debug(".updateOutputCondition() condition satisfied");
+            }
             this.newEventsCount = 0;
             this.oldEventsCount = 0;
             outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);

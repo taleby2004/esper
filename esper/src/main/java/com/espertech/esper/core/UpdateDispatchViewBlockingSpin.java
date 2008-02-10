@@ -1,9 +1,9 @@
 package com.espertech.esper.core;
 
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.event.EventBean;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +36,7 @@ public class UpdateDispatchViewBlockingSpin extends UpdateDispatchViewBase
 
     public void newResult(UniformPair<EventBean[]> result)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             ViewSupport.dumpUpdateParams(".update for view " + this, result);
         }

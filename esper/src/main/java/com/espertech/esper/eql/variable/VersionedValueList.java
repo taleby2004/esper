@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 
+import com.espertech.esper.util.ExecutionPathDebugLog;
+
 /**
  * A self-cleaning list of versioned-values.
  * <p>
@@ -80,7 +82,7 @@ public class VersionedValueList<T>
      */
     public T getVersion(int versionAndOlder)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".getVersion Thread " + Thread.currentThread().getId() + " for '" + name + "' retrieving version " + versionAndOlder + " or older");
         }
@@ -153,7 +155,7 @@ public class VersionedValueList<T>
             }
         }
 
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".getVersion Thread " + Thread.currentThread().getId() +  " for '" + name + " version " + versionAndOlder + " or older result is " + resultValue);
         }
@@ -170,7 +172,7 @@ public class VersionedValueList<T>
      */
     public Object addValue(int version, T value, long timestamp)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".addValue Thread " + Thread.currentThread().getId() + " for '" + name + "' adding version " + version + " at value " + value);
         }

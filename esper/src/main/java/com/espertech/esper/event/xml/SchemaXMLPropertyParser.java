@@ -19,6 +19,7 @@ import com.espertech.esper.event.PropertyAccessException;
 import com.espertech.esper.event.TypedEventPropertyGetter;
 import com.espertech.esper.type.IntValue;
 import com.espertech.esper.type.StringValue;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.antlr.runtime.tree.Tree;
@@ -116,7 +117,7 @@ public class SchemaXMLPropertyParser
         }
 
         String xPath = xPathBuf.toString();
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".parse XPath for property '" + propertyName + "' is expression=" + xPath);
         }

@@ -7,6 +7,7 @@ import com.espertech.esper.eql.core.ResultSetProcessor;
 import com.espertech.esper.eql.spec.OutputLimitSpec;
 import com.espertech.esper.eql.spec.OutputLimitLimitType;
 import com.espertech.esper.event.EventBean;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -69,7 +70,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
      */
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".update Received update, " +
                     "  newData.length==" + ((newData == null) ? 0 : newData.length) +
@@ -100,7 +101,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
      */
     public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
     {
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".process Received update, " +
                     "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
@@ -136,7 +137,10 @@ public class OutputProcessViewPolicy extends OutputProcessView
 	 * */
 	protected void continueOutputProcessingView(boolean doOutput, boolean forceUpdate)
 	{
-		log.debug(".continueOutputProcessingView");
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".continueOutputProcessingView");
+        }
 
         boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
         boolean isGenerateNatural = statementResultService.isMakeNatural();
@@ -180,7 +184,10 @@ public class OutputProcessViewPolicy extends OutputProcessView
 	 */
 	protected void continueOutputProcessingJoin(boolean doOutput, boolean forceUpdate)
 	{
-		log.debug(".continueOutputProcessingJoin");
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".continueOutputProcessingJoin");
+        }
 
         boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
         boolean isGenerateNatural = statementResultService.isMakeNatural();

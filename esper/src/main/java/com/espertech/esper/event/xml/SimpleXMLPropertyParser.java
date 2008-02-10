@@ -6,6 +6,7 @@ import com.espertech.esper.eql.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.event.PropertyAccessException;
 import com.espertech.esper.type.IntValue;
 import com.espertech.esper.type.StringValue;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
@@ -62,7 +63,7 @@ public class SimpleXMLPropertyParser
         }
 
         String xPath = xPathBuf.toString();
-        if (log.isDebugEnabled())
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".parse For property '" + propertyName + "' the xpath is '" + xPath + '\'');
         }

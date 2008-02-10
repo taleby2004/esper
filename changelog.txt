@@ -37,6 +37,7 @@ Changes in version 2.0.0
 * Fixed issue ESPER-184 NPE when using regexp or like on null pojo properties
 * Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
 * Fixed issue ESPER-183 Replace LinkedLists with ArrayDeque where possible
+* Fixed issue ESPER-194 Nullpointer when using Jcl104-over-slf4j
 * Fixed issue ESPER-195 Not considering having-clause in un-aggregated and un-grouped query (no-join only)
 
 * Minor API Changes:
