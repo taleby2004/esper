@@ -197,10 +197,16 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			<synopsis>select <emphasis>event_property</emphasis> [, <emphasis>event_property</emphasis>] [, ...] from <emphasis>stream_def</emphasis></synopsis>
 
 			<para>
-				The following statement selects the count and standard deviation properties for the last 100 events of IBM stock ticks for volume.
+				The following statement simply selects the symbol and price properties of stock ticks, and the total volume for stock tick events in a 60-second time window. 
 			</para>
-			<programlisting><![CDATA[select count, stdev from StockTick(symbol='IBM').win:length(100).stat:uni(volume)
+			<programlisting><![CDATA[select symbol, price, sum(volume) from StockTick(symbol='IBM').win:time(60 sec)
 ]]></programlisting>
+
+			<para>
+				The following statement declares a further view onto the event stream of stock ticks: the univariate statistics view (<literal>stat:uni</literal>). The statement selects the properties that this view derives from the stream, for the last 100 events of IBM stock ticks in the length window.
+			</para>
+			<programlisting><![CDATA[select datapoints, total, average, variance, stdev, stdevpa 
+from StockTick(symbol='IBM').win:length(100).stat:uni(volume)]]></programlisting>
 		</sect2>
 
         <sect2 id="epl-select-expressions" >
@@ -213,8 +219,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			<para>
 				The following statement selects the volume multiplied by price for a time batch of the last 30 seconds of stock tick events. 
 			</para>
-			<programlisting><![CDATA[select volume * price from StockTick.win:time_batch(30 sec)
-]]></programlisting>
+			<programlisting><![CDATA[select volume * price from StockTick.win:time_batch(30 sec)]]></programlisting>
 		</sect2>
 
         <sect2 id="epl-select-renaming" >

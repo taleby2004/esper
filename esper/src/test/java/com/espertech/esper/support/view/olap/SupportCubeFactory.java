@@ -92,7 +92,7 @@ public class SupportCubeFactory
 
     private static Cube deriveCube(MultidimCube<BaseStatisticsBean> cube)
     {
-        CubeImpl cubeImpl = new CubeImpl(cube, new String[] {"count", "sum", "stddev"});
+        CubeImpl cubeImpl = new CubeImpl(cube, new String[] {"datapoints", "total", "stddev"});
         return cubeImpl;
     }
 

@@ -87,9 +87,9 @@ public class TestMTStmtSharedView extends TestCase
             EventBean[] newDataLast = listener.getNewDataList().get(listener.getNewDataList().size() - 1);
             assertEquals(1, newDataLast.length);
             EventBean result = newDataLast[0];
-            assertEquals(numRepeats * numThreads, ((Long) result.get("count")).longValue());
+            assertEquals(numRepeats * numThreads, ((Long) result.get("datapoints")).longValue());
             assertTrue(Arrays.asList(SYMBOLS).contains(result.get("symbol")));
-            assertEquals(sumToN(numRepeats) * numThreads, result.get("sum"));
+            assertEquals(sumToN(numRepeats) * numThreads, result.get("total"));
             listener.reset();
         }
 

@@ -11,12 +11,12 @@ public enum ViewFieldEnum
     /**
      * Count.
      */
-    UNIVARIATE_STATISTICS__COUNT ("count"),
+    UNIVARIATE_STATISTICS__DATAPOINTS("datapoints"),
 
     /**
      * Sum.
      */
-    UNIVARIATE_STATISTICS__SUM ("sum"),
+    UNIVARIATE_STATISTICS__TOTAL("total"),
 
     /**
      * Average.
@@ -72,8 +72,8 @@ public enum ViewFieldEnum
      * Measures in an OLAP cube.
      */
     public static final String[] MULTIDIM_OLAP__MEASURES = {
-            ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.name,
-            ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.name,
+            ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.name,
             ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.name,
             ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.name,
             ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.name,

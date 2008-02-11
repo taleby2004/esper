@@ -615,11 +615,11 @@ following conditions occurs, whichever occurs first: the data window has collect
 						</thead>
 						<tbody>
 							<row>
-								<entry><literal>count</literal></entry>
-								<entry>Number of values</entry>
+								<entry><literal>datapoints</literal></entry>
+								<entry>Number of values, equivalent to <literal>count(*)</literal> for the stream</entry>
 							</row>
 							<row>
-								<entry><literal>sum</literal></entry>
+								<entry><literal>total</literal></entry>
 								<entry>Sum of values</entry>
 							</row>
 							<row>
@@ -814,7 +814,7 @@ from StockTickEvent(symbol='IBM').win:time(3 seconds).stat:weighted_avg(price, v
 				<para>
 					The example below derives the count, average and standard deviation latency of service measurement events per customer.
 				</para>	
-				<programlisting><![CDATA[select cube from ServiceMeasurement.stat:cube({‘count’, ‘average’, ‘stdev’}, 
+				<programlisting><![CDATA[select cube from ServiceMeasurement.stat:cube({‘datapoints’, ‘average’, ‘stdev’}, 
     latency, customer)]]></programlisting>            
 
 				<para>

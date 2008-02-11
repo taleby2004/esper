@@ -9,7 +9,7 @@ public class TestCubeImpl extends TestCase
 
     protected void setUp()
     {
-        String[] measureList = {"count"};
+        String[] measureList = {"datapoints"};
         testCube = new CubeImpl(SupportCubeFactory.make2DimSchema(), measureList);
     }
 

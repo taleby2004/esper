@@ -20,7 +20,7 @@ import com.espertech.esper.util.ExecutionPathDebugLog;
  * The dimensions of the fact cube are specified as parameters to the view. The fact cube can be one-dimensional,
  * two-dimensional (tabular) or 3-dimenstional (tabular with pages).
  * Parameters are:
- *   A mandatory array of derived measure names, such as "count", "stddev" etc., (see ViewFieldEnum)
+ *   A mandatory array of derived measure names, such as "datapoints", "stddev" etc., (see ViewFieldEnum)
  *   A mandatory measure field name. This field supplies the fact values in the cells of the cube.
  *   A mandatory column field name. This field supplies the members of dimension zero (column, 1-dim).
  *   An optional row field name. This field supplies the members of dimension one (row, 2-dim).

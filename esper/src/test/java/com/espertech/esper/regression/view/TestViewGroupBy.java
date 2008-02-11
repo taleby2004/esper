@@ -1,11 +1,11 @@
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.EventPropertyAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 import java.util.*;
 
@@ -81,26 +81,26 @@ public class TestViewGroupBy extends TestCase
         sendEvent(SYMBOL_IBM, 10.5, 8200);
         sendEvent(SYMBOL_GE, 88, 1000);
 
-        EventPropertyAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 88));
-        EventPropertyAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, 88));
-        EventPropertyAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1000) );
-        EventPropertyAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1000) );
+        ArrayAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 88));
+        ArrayAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, 88));
+        ArrayAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1000) );
+        ArrayAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1000) );
 
         sendEvent(SYMBOL_CISCO, 27, 70000);
         sendEvent(SYMBOL_CISCO, 28, 80000);
 
-        EventPropertyAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 26.5d) );
-        EventPropertyAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 65000d) );
-        EventPropertyAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 27d) );
-        EventPropertyAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 70000d) );
+        ArrayAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 26.5d) );
+        ArrayAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 65000d) );
+        ArrayAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 27d) );
+        ArrayAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_CISCO, 70000d) );
 
         sendEvent(SYMBOL_IBM, 11, 8700);
         sendEvent(SYMBOL_IBM, 12, 8900);
 
-        EventPropertyAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 10.875d) );
-        EventPropertyAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 8450d) );
-        EventPropertyAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 11d + 1/6d) );
-        EventPropertyAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 8600d) );
+        ArrayAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 10.875d) );
+        ArrayAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 8450d) );
+        ArrayAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 11d + 1/6d) );
+        ArrayAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_IBM, 8600d) );
 
         sendEvent(SYMBOL_GE, 85.5, 950);
         sendEvent(SYMBOL_GE, 85.75, 900);
@@ -109,10 +109,10 @@ public class TestViewGroupBy extends TestCase
         sendEvent(SYMBOL_GE, 85, 1150);
 
         double averageGE = (88d + 85.5d + 85.75d + 89d + 86d + 85d) / 6d;
-        EventPropertyAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, averageGE) );
-        EventPropertyAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1075d) );
-        EventPropertyAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 86d + 2d/3d) );
-        EventPropertyAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1200d) );
+        ArrayAssertionUtil.compare(priceAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, averageGE) );
+        ArrayAssertionUtil.compare(volumeAllStatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1075d) );
+        ArrayAssertionUtil.compare(priceLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 86d + 2d/3d) );
+        ArrayAssertionUtil.compare(volumeLast3StatsListener.getLastNewData(), makeMap(SYMBOL_GE, 1200d) );
 
         // Check iterator results
         expectedList.get(0).put("symbol", SYMBOL_CISCO);
@@ -121,7 +121,7 @@ public class TestViewGroupBy extends TestCase
         expectedList.get(1).put("average", 10.875d);
         expectedList.get(2).put("symbol", SYMBOL_GE);
         expectedList.get(2).put("average", averageGE);
-        EventPropertyAssertionUtil.compare(priceAllStats.iterator(), expectedList);
+        ArrayAssertionUtil.compare(priceAllStats.iterator(), expectedList);
 
         expectedList.get(0).put("symbol", SYMBOL_CISCO);
         expectedList.get(0).put("average", 27d);
@@ -129,7 +129,7 @@ public class TestViewGroupBy extends TestCase
         expectedList.get(1).put("average", 11d + 1/6d);
         expectedList.get(2).put("symbol", SYMBOL_GE);
         expectedList.get(2).put("average", 86d + 2d/3d);
-        EventPropertyAssertionUtil.compare(priceLast3Stats.iterator(), expectedList);
+        ArrayAssertionUtil.compare(priceLast3Stats.iterator(), expectedList);
     }
 
     public void testLengthWindowGrouped()

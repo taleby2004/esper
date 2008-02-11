@@ -63,12 +63,12 @@ public class TestUnivariateStatisticsView extends TestCase
 
     public void testGetSchema()
     {
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName()) == long.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName()) == long.class);
         assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName()) == double.class);
         assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName()) == double.class);
         assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName()) == double.class);
         assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName()) == double.class);
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName()) == double.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName()) == double.class);
     }
 
     public void testCopyView() throws Exception
@@ -97,8 +97,8 @@ public class TestUnivariateStatisticsView extends TestCase
 
     private void checkValues(EventBean values, long countE, double sumE, double avgE, double stdevpaE, double stdevE, double varianceE)
     {
-        long count = getLongValue(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT, values);
-        double sum = getDoubleValue(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM, values);
+        long count = getLongValue(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS, values);
+        double sum = getDoubleValue(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL, values);
         double avg = getDoubleValue(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE, values);
         double stdevpa = getDoubleValue(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA, values);
         double stdev = getDoubleValue(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV, values);

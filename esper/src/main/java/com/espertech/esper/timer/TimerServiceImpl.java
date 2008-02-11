@@ -109,30 +109,35 @@ public final class TimerServiceImpl implements TimerService
         timer = null;
     }
 
+
     public void enableStats() {
-        timerTask._enableStats = true;
+        //timerTask._enableStats = true;
     }
 
     public void disableStats() {
-        timerTask._enableStats = false;
+        //timerTask._enableStats = false;
         //now it is safe to reset stats without any synchronization
-        timerTask.resetStats();
+        //timerTask.resetStats();
     }
 
     public long getMaxDrift() {
-        return timerTask._maxDrift;
+        //return timerTask._maxDrift;
+        return 0;
     }
 
     public long getLastDrift() {
-        return timerTask._lastDrift;
+        //return timerTask._lastDrift;
+        return 0;
     }
 
     public long getTotalDrift() {
-        return timerTask._totalDrift;
+        //return timerTask._totalDrift;
+        return 0;
     }
 
     public long getInvocationCount() {
-        return timerTask._invocationCount;
+        //return timerTask._invocationCount;
+        return 0;
     }
 
     private static final Log log = LogFactory.getLog(TimerServiceImpl.class);

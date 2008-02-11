@@ -16,7 +16,7 @@ public class AverageLatencyListener implements UpdateListener
 
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        long count = (Long) newEvents[0].get("count");
+        long count = (Long) newEvents[0].get("datapoints");
         double avg = (Double) newEvents[0].get("average");
 
         if ((count < 100) || (avg < alertThreshold))

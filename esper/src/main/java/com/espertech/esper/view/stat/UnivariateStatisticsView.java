@@ -132,8 +132,8 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
                                          EventType eventType)
     {
         Map<String, Object> result = new HashMap<String, Object>();
-        result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), baseStatisticsBean.getN());
-        result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), baseStatisticsBean.getXSum());
+        result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName(), baseStatisticsBean.getN());
+        result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName(), baseStatisticsBean.getXSum());
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), baseStatisticsBean.getXStandardDeviationSample());
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), baseStatisticsBean.getXStandardDeviationPop());
         result.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), baseStatisticsBean.getXVariance());
@@ -149,8 +149,8 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
     protected static EventType createEventType(StatementContext statementContext)
     {
         Map<String, Class> eventTypeMap = new HashMap<String, Class>();
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(), long.class);
-        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(), double.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName(), long.class);
+        eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName(), double.class);
         eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);
         eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(), double.class);
         eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName(), double.class);

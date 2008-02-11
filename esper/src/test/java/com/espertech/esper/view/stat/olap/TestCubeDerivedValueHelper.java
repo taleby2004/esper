@@ -15,8 +15,8 @@ public class TestCubeDerivedValueHelper extends TestCase
         MultidimCube<BaseStatisticsBean> testCube = SupportCubeFactory.make2DimSchema();
 
         String[] measureList = {
-            ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName(),
-            ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName(),
+            ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName(),
+            ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName(),
             ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName(),
             ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName(),
             ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(),

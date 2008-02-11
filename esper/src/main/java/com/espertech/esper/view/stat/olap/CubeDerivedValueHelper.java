@@ -92,7 +92,7 @@ public final class CubeDerivedValueHelper
         {
             return statBean.getXAverage();
         }
-        if (measureName.equals(ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName()))
+        if (measureName.equals(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName()))
         {
             return statBean.getN();
         }
@@ -104,7 +104,7 @@ public final class CubeDerivedValueHelper
         {
             return statBean.getXStandardDeviationPop();
         }
-        if (measureName.equals(ViewFieldEnum.UNIVARIATE_STATISTICS__SUM.getName()))
+        if (measureName.equals(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName()))
         {
             return statBean.getXSum();
         }

@@ -25,7 +25,7 @@ public class TestMultiDimStatsView extends TestCase
     {
         parentStream = new SupportStreamImpl(SupportBean.class, 3);
         childView = new SupportSchemaNeutralView();
-        derivedFields = new String[] {ViewFieldEnum.UNIVARIATE_STATISTICS__COUNT.getName()};
+        derivedFields = new String[] {ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName()};
     }
 
     public void testOneDim()
