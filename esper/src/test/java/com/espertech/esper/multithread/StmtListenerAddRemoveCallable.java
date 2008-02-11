@@ -19,14 +19,14 @@ public class StmtListenerAddRemoveCallable implements Callable
 {
     private final EPServiceProvider engine;
     private final EPStatement stmt;
-    private final boolean isEQL;
+    private final boolean isEPL;
     private final int numRepeats;
 
-    public StmtListenerAddRemoveCallable(EPServiceProvider engine, EPStatement stmt, boolean isEQL, int numRepeats)
+    public StmtListenerAddRemoveCallable(EPServiceProvider engine, EPStatement stmt, boolean isEPL, int numRepeats)
     {
         this.engine = engine;
         this.stmt = stmt;
-        this.isEQL = isEQL;
+        this.isEPL = isEPL;
         this.numRepeats = numRepeats;
     }
 
@@ -39,7 +39,7 @@ public class StmtListenerAddRemoveCallable implements Callable
                 // Add assertListener
                 SupportMTUpdateListener assertListener = new SupportMTUpdateListener();
                 LogUpdateListener logListener;
-                if (isEQL)
+                if (isEPL)
                 {
                     logListener = new LogUpdateListener(null);
                 }
@@ -64,7 +64,7 @@ public class StmtListenerAddRemoveCallable implements Callable
                 for (int i = 0; i < newEvents.length; i++)
                 {
                     Object underlying = newEvents[i].getUnderlying();
-                    if (!isEQL)
+                    if (!isEPL)
                     {
                         underlying = newEvents[i].get("a");
                     }
@@ -92,7 +92,7 @@ public class StmtListenerAddRemoveCallable implements Callable
                 for (int i = 0; i < newEvents.length; i++)
                 {
                     Object underlying = newEvents[i].getUnderlying();
-                    if (!isEQL)
+                    if (!isEPL)
                     {
                         underlying = newEvents[i].get("a");
                     }

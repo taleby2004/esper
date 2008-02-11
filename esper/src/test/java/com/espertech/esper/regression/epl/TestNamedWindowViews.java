@@ -1452,11 +1452,11 @@ public class TestNamedWindowViews extends TestCase
         }
     }
 
-    private String tryInvalid(String eql)
+    private String tryInvalid(String expression)
     {
         try
         {
-            epService.getEPAdministrator().createEPL(eql);
+            epService.getEPAdministrator().createEPL(expression);
             fail();
         }
         catch (EPException ex)

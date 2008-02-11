@@ -52,7 +52,7 @@
 
 		<indexterm><primary>insert stream</primary></indexterm>
         <para>
-			In this section we look at the output of a very simple EQL statement. The statement selects an event stream without using a data window and without applying any filtering, as follows:
+			In this section we look at the output of a very simple EPL statement. The statement selects an event stream without using a data window and without applying any filtering, as follows:
         </para>
         
         <programlisting><![CDATA[select * from Withdrawal]]></programlisting>
@@ -129,7 +129,7 @@
         </para>
 
         <para>
-			Note: By default the engine only delivers the insert stream to listeners and observers. EQL supports optional <literal>istream</literal>, <literal>irstream</literal> and <literal>rstream</literal> keywords on select-clauses and on insert-into clauses to control which stream to deliver, see <xref linkend="eql-select-using-istream-rstream"/>. There is also a related, engine-wide configuration setting described in <xref linkend="config-engine-stream-selection"/>.		
+			Note: By default the engine only delivers the insert stream to listeners and observers. EPL supports optional <literal>istream</literal>, <literal>irstream</literal> and <literal>rstream</literal> keywords on select-clauses and on insert-into clauses to control which stream to deliver, see <xref linkend="epl-select-using-istream-rstream"/>. There is also a related, engine-wide configuration setting described in <xref linkend="config-engine-stream-selection"/>.		
         </para>
 
     </sect1>
@@ -143,7 +143,7 @@
         <programlisting><![CDATA[select * from Withdrawal(amount>=200).win:length(5)]]></programlisting>
 
         <para>
-			With the filter, any Withdrawal events that have an amount of less then 200 do not enter the length window and are therefore not passed to update listeners. Filters are discussed in more detail in <xref linkend="eql-from-clause-filter"/> and <xref linkend="pattern-filter"/>.
+			With the filter, any Withdrawal events that have an amount of less then 200 do not enter the length window and are therefore not passed to update listeners. Filters are discussed in more detail in <xref linkend="epl-from-clause-filter"/> and <xref linkend="pattern-filter"/>.
         </para>
 
         <figure id="processingmodel_filter_flow">
@@ -163,7 +163,7 @@
         </para>
 
         <para>
-			The next statement applies a where-clause to Withdrawal events. Where-clauses are discussed in more detail in <xref linkend="eql-where-clause"/>.
+			The next statement applies a where-clause to Withdrawal events. Where-clauses are discussed in more detail in <xref linkend="epl-where-clause"/>.
         </para>
 
         <programlisting><![CDATA[select * from Withdrawal.win:length(5) where amount >= 200]]></programlisting>

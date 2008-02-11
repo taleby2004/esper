@@ -24,7 +24,7 @@ public class TestMTEmitListener extends TestCase
         engine = EPServiceProviderManager.getDefaultProvider(configuration);
     }
 
-    public void testEQL() throws Exception
+    public void testEPL() throws Exception
     {
         tryEmitAndListen(10, 1000);
         tryEmitAndListen(4, 1000);

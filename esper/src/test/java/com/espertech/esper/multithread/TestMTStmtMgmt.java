@@ -19,7 +19,7 @@ public class TestMTStmtMgmt extends TestCase
 
     private final static String EVENT_NAME = SupportMarketDataBean.class.getName();
     private final static Object[][] STMT = new Object[][] {
-            // true for EQL, false for Pattern; Statement text
+            // true for EPL, false for Pattern; Statement text
             {true, "select * from " + EVENT_NAME + " where symbol = 'IBM'"},
             {true, "select * from " + EVENT_NAME + " (symbol = 'IBM')"},
             {true, "select * from " + EVENT_NAME + " (price>1)"},

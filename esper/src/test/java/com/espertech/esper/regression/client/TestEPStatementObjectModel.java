@@ -70,7 +70,7 @@ public class TestEPStatementObjectModel extends TestCase
         assertNotNull(model);
     }
     
-    public void testEQLtoOMtoStmt() throws Exception
+    public void testEPLtoOMtoStmt() throws Exception
     {
         String stmtText = "select * from " + SupportBean.class.getName();
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);

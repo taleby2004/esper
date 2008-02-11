@@ -90,7 +90,7 @@ double askPrice;
 			</para>
 
 			<para>
-				We can use an EQL statement that specifies a view onto the market data event stream that batches together 1 second of events. 
+				We can use an EPL statement that specifies a view onto the market data event stream that batches together 1 second of events. 
 				We specify the feed and a count of events per feed as output values. To make this data available for further processing, we
 				insert output events into the TicksPerSecond event stream:
 			</para>
@@ -189,7 +189,7 @@ having cnt < avg(cnt) * 0.75
 			</para>
 				
 			<para>
-				At startup time, the server creates a single EQL statement with the Esper engine that prints out the average duration per IP address for the last 10 seconds of events, and that specifies an output rate of 2 seconds. By running the server and then the client, you can see the output of the averages every 2 seconds.
+				At startup time, the server creates a single EPL statement with the Esper engine that prints out the average duration per IP address for the last 10 seconds of events, and that specifies an output rate of 2 seconds. By running the server and then the client, you can see the output of the averages every 2 seconds.
 			</para>
 
 			<para>
@@ -479,7 +479,7 @@ output first every 5 minutes]]></programlisting>
 
 		</sect2>
 
-        <sect2 id="examples-terminalsvc-eql1">
+        <sect2 id="examples-terminalsvc-epl1">
 			<title>Activity Summary Data</title>
 
 			<para>
@@ -497,7 +497,7 @@ output all every 1 minutes]]></programlisting>
 			<title>Sample Application for J2EE Application Server</title>
 
 			<para>
-				The example code in the distribution package implements a message-driven enterprise java bean (MDB EJB). We used an MDB as a convenient place for processing incoming events via a JMS message queue or topic. The example uses 2 JMS queues: One queue to receive events published by terminals, and a second queue to indicate situations detected via EQL statement and listener back to a receiving process.
+				The example code in the distribution package implements a message-driven enterprise java bean (MDB EJB). We used an MDB as a convenient place for processing incoming events via a JMS message queue or topic. The example uses 2 JMS queues: One queue to receive events published by terminals, and a second queue to indicate situations detected via EPL statement and listener back to a receiving process.
 			</para>
 
 			<para>
@@ -512,7 +512,7 @@ output all every 1 minutes]]></programlisting>
 				<title>Running the Example</title>
 			
 				<para>
-					The pre-build EAR file contains the MDB for deployment to a JBoss application server with default deployment options. The JBoss default configuration provides 2 queues that this example utilizes: queue/A and queue/B. The queue/B is used to send events into the MDB, while queue/A is used to indicate back the any data received by listeners to EQL statements.
+					The pre-build EAR file contains the MDB for deployment to a JBoss application server with default deployment options. The JBoss default configuration provides 2 queues that this example utilizes: queue/A and queue/B. The queue/B is used to send events into the MDB, while queue/A is used to indicate back the any data received by listeners to EPL statements.
 				</para>
 
 				<para>
@@ -736,7 +736,7 @@ group by ID]]></programlisting>
 		</para>
 
 		<para>
-			The <literal>com.espertech.esper.example.qos_sla.monitor.AverageLatencyMonitor</literal> creates an EQL statement that computes latency statistics per customer and operation for the
+			The <literal>com.espertech.esper.example.qos_sla.monitor.AverageLatencyMonitor</literal> creates an EPL statement that computes latency statistics per customer and operation for the
 			last 100 events. The <literal>DynaLatencySpikeMonitor</literal> uses an event pattern to listen to spikes in latency with dynamically set limits. The <literal>ErrorRateMonitor</literal> uses the timer <literal>'at'</literal> operator in an event pattern that wakes up periodically and polls the error rate within the last 10 minutes. The <literal>ServiceHealthMonitor</literal> simply alerts when 3 errors occur, and the <literal>SpikeAndErrorMonitor</literal> alerts when a fixed latency is overstepped or an error status is reported.
 		</para>
 
@@ -747,7 +747,7 @@ group by ID]]></programlisting>
 		<itemizedlist spacing="compact">
 			<listitem>
 				<para>
-                    This example combines event patterns with EQL statements for event stream analysis.
+                    This example combines event patterns with EPL statements for event stream analysis.
                 </para>
 			</listitem>
 			<listitem>
@@ -757,12 +757,12 @@ group by ID]]></programlisting>
 			</listitem>
 			<listitem>
 				<para>
-                    Outlines basic EQL statements
+                    Outlines basic EPL statements
                 </para>
 			</listitem>
 			<listitem>
 				<para>
-                    Shows how to pull data out of EQL statements rather then subscribing to events a statement publishes
+                    Shows how to pull data out of EPL statements rather then subscribing to events a statement publishes
                 </para>
 			</listitem>
 		</itemizedlist>

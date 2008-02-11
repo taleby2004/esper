@@ -71,7 +71,7 @@ public class ServerShellClientMain
 
         // Create statement via JMX
         log.info("Creating a statement via Java Management Extensions (JMX) MBean Proxy");
-        proxy.createEQL("select * from SampleEvent where duration > 9.9", "filterStatement", new ClientSideUpdateListener());
+        proxy.createEPL("select * from SampleEvent where duration > 9.9", "filterStatement", new ClientSideUpdateListener());
 
         // Get producer
         jmsCtx.getConnection().start();

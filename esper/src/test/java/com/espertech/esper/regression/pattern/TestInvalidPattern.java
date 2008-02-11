@@ -117,11 +117,11 @@ public class TestInvalidPattern extends TestCase
         tryInvalid("na=" + EVENT + "() -> nb=" + EVENT + "(doublePrimitive in [na.boolBoxed:na.intPrimitive])");
     }
 
-    private void tryInvalid(String eqlInvalidPattern)
+    private void tryInvalid(String eplInvalidPattern)
     {
         try
         {
-            epService.getEPAdministrator().createPattern(eqlInvalidPattern);
+            epService.getEPAdministrator().createPattern(eplInvalidPattern);
             fail();
         }
         catch (EPException ex)
@@ -178,9 +178,9 @@ public class TestInvalidPattern extends TestCase
         return exceptionText;
     }
 
-    private void tryValid(String eqlInvalidPattern)
+    private void tryValid(String eplInvalidPattern)
     {
-        epService.getEPAdministrator().createPattern(eqlInvalidPattern);
+        epService.getEPAdministrator().createPattern(eplInvalidPattern);
     }
 
     private static Log log = LogFactory.getLog(TestInvalidPattern.class);

@@ -38,10 +38,10 @@ public class TestMTInsertIntoTimerConcurrency extends TestCase
 
         epAdministrator.startAllStatements();
 
-        String EPL = "insert into Stream1 select count(*) as cnt from SupportBean.win:time(7 sec)";
-        createEQL(eql, noActionUpdateListener);
-        EPL = EPL + " output every 10 seconds";
-        createEQL(eql, noActionUpdateListener);
+        String epl = "insert into Stream1 select count(*) as cnt from SupportBean.win:time(7 sec)";
+        createEPL(epl, noActionUpdateListener);
+        epl = epl + " output every 10 seconds";
+        createEPL(epl, noActionUpdateListener);
 
         SendEventRunnable sendTickEventRunnable = new SendEventRunnable(10000);
         start(sendTickEventRunnable, 4);
@@ -53,9 +53,9 @@ public class TestMTInsertIntoTimerConcurrency extends TestCase
         executorService.awaitTermination(1, TimeUnit.SECONDS);
     }
 
-    private EPStatement createEQL(String eql, UpdateListener updateListener)
+    private EPStatement createEPL(String epl, UpdateListener updateListener)
     {
-        EPStatement statement = epAdministrator.createEPL(eql);
+        EPStatement statement = epAdministrator.createEPL(epl);
         statement.addListener(updateListener);
         return statement;
     }

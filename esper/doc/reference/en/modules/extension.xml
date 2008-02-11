@@ -12,7 +12,7 @@
 		<itemizedlist spacing="compact">
 			<listitem>
 				<para>
-					User-defined functions - these can be used anywhere where expressions are allowed, please see <xref linkend="eql-function-user-defined"/>
+					User-defined functions - these can be used anywhere where expressions are allowed, please see <xref linkend="epl-function-user-defined"/>
 				</para>
 			</listitem>
 			<listitem>
@@ -365,7 +365,7 @@
 			</itemizedlist>
 
 			<para>
-				Aggregation function classes simply subclass <literal>com.espertech.esper.eql.agg.AggregationSupport</literal>:
+				Aggregation function classes simply subclass <literal>com.espertech.esper.epl.agg.AggregationSupport</literal>:
 			</para>
 			<programlisting><![CDATA[public class MyConcatAggregationFunction extends AggregationSupport { ...]]></programlisting>
 

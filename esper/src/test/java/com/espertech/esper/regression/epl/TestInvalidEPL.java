@@ -10,7 +10,7 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class TestInvalidEQL extends TestCase
+public class TestInvalidEPL extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
@@ -23,7 +23,7 @@ public class TestInvalidEQL extends TestCase
 
     public void testInvalidSyntax()
     {
-        String exceptionText = getSyntaxExceptionEQL("select * from *");
+        String exceptionText = getSyntaxExceptionEPL("select * from *");
         assertEquals("Incorrect syntax near '*' at line 1 column 14, please check the from clause [select * from *]", exceptionText);
     }
 
@@ -122,11 +122,11 @@ public class TestInvalidEQL extends TestCase
         tryValid(outerJoinDef + "on sb.intPrimitive = sa.intBoxed");
     }
 
-    private void tryInvalid(String eqlInvalidEQL)
+    private void tryInvalid(String eplInvalidEPL)
     {
         try
         {
-            epService.getEPAdministrator().createEPL(eqlInvalidEQL);
+            epService.getEPAdministrator().createEPL(eplInvalidEPL);
             fail();
         }
         catch (EPException ex)
@@ -135,12 +135,12 @@ public class TestInvalidEQL extends TestCase
         }
     }
 
-    private void tryValid(String eqlInvalidEQL)
+    private void tryValid(String invalidEPL)
     {
-        epService.getEPAdministrator().createEPL(eqlInvalidEQL);
+        epService.getEPAdministrator().createEPL(invalidEPL);
     }
 
-    private String getSyntaxExceptionEQL(String expression)
+    private String getSyntaxExceptionEPL(String expression)
     {
         String exceptionText = null;
         try
@@ -151,12 +151,12 @@ public class TestInvalidEQL extends TestCase
         catch (EPStatementSyntaxException ex)
         {
             exceptionText = ex.getMessage();
-            log.debug(".getSyntaxExceptionEQL eql=" + expression, ex);
+            log.debug(".getSyntaxExceptionEPL epl=" + expression, ex);
             // Expected exception
         }
 
         return exceptionText;
     }
 
-    private static Log log = LogFactory.getLog(TestInvalidEQL.class);
+    private static Log log = LogFactory.getLog(TestInvalidEPL.class);
 }

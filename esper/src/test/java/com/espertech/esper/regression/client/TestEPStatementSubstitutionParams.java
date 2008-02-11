@@ -302,7 +302,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         }
     }
 
-    public void testInvalidCreateEQL()
+    public void testInvalidCreateEPL()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
         try

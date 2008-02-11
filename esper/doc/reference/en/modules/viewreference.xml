@@ -1,5 +1,5 @@
-<chapter id="eql-views">
-    <title>EQL Reference: Views</title>
+<chapter id="epl-views">
+    <title>EPL Reference: Views</title>
         
         <para>
             This chapter outlines the views that are built into Esper. All views can be arbitrarily combined as many of the examples below show. 
@@ -232,7 +232,7 @@ select * from StockTickEvent.stat:groupby('feed').win:length(10)]]></programlist
 
 				<para>
 					This view is a moving (sliding) time window extending the specified time interval into the past based on the system time.
-					This view takes a time period (see <xref linkend="eql-syntax-time-periods"/>) or a number of seconds as a parameter:
+					This view takes a time period (see <xref linkend="epl-syntax-time-periods"/>) or a number of seconds as a parameter:
 				</para>
 
 				<synopsis>win:time(<emphasis>time period</emphasis>)</synopsis>
@@ -548,7 +548,7 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<programlisting><![CDATA[select size from StockTickEvent.win:time(1 min).std:size()]]></programlisting>
 
 				<para>
-					The size view is also useful in conjunction with a group-by view to count the number of events per group. The EQL below returns the number of events per symbol.
+					The size view is also useful in conjunction with a group-by view to count the number of events per group. The EPL below returns the number of events per symbol.
 				</para>
 				<programlisting><![CDATA[select size from StockTickEvent.std:groupby(symbol).std:size()]]></programlisting>
 
@@ -558,7 +558,7 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<programlisting><![CDATA[select size from StockTickEvent.std:size()]]></programlisting>
 
 				<para>
-					All views can be used with pattern statements as well. The next EQL snippet shows a pattern where we look for tick events followed by trade events for the same symbol. The size view counts the number of occurances of the pattern.
+					All views can be used with pattern statements as well. The next EPL snippet shows a pattern where we look for tick events followed by trade events for the same symbol. The size view counts the number of occurances of the pattern.
 				</para>
 				<programlisting><![CDATA[select size from pattern[every s=StockTickEvent -> TradeEvent(symbol=s.symbol)].std:size()]]></programlisting>
 			</sect2>

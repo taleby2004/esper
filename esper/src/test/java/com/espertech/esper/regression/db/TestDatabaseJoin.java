@@ -43,7 +43,7 @@ public class TestDatabaseJoin extends TestCase
         epService.initialize();
     }
 
-    public void testTimeBatchEQL()
+    public void testTimeBatchEPL()
     {
         String stmtText = "select " + ALL_FIELDS + " from " +
                 " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s0," +

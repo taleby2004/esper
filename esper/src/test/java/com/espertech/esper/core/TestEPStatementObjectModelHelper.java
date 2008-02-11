@@ -8,7 +8,7 @@ import com.espertech.esper.core.EPStatementObjectModelHelper;
 
 public class TestEPStatementObjectModelHelper extends TestCase
 {
-    public void testRenderEQL()
+    public void testRenderEPL()
     {
         assertEquals("null", tryConstant(null));
         assertEquals("\"\"", tryConstant(""));

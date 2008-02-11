@@ -99,7 +99,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     /**
      * Creates and starts statement.
      * @param statementSpec defines the statement
-     * @param expression is the EQL
+     * @param expression is the EPL
      * @param isPattern is true for patterns
      * @param optStatementName is the optional statement name
      * @param statementId is the statement id

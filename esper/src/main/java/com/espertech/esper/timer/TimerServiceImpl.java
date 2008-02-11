@@ -21,7 +21,7 @@ public final class TimerServiceImpl implements TimerService
     private final long msecTimerResolution;
     private TimerCallback timerCallback;
     private Timer timer;
-    private EQLTimerTask timerTask;
+    private EPLTimerTask timerTask;
     private static AtomicInteger NEXT_ID = new AtomicInteger(0);
     private final int id;
 
@@ -70,7 +70,7 @@ public final class TimerServiceImpl implements TimerService
         }
 
         timer = new Timer("com.espertech.esper.Timer-" + id, true);        // Timer started as a deamon thread
-        timerTask = new EQLTimerTask(timerCallback);
+        timerTask = new EPLTimerTask(timerCallback);
 
         // With no delay start every internal
         timer.scheduleAtFixedRate(timerTask, 0, msecTimerResolution);

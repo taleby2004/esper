@@ -50,7 +50,7 @@ public class TestStaticFunctions extends TestCase
 		catch(EPException e)
 		{
             // Expected
-            assertEquals("com.espertech.esper.client.EPException: Method 'throwException' of class 'com.espertech.esper.support.eql.SupportStaticMethodLib' reported an exception: java.lang.Exception: throwException text here", e.getMessage());
+            assertEquals("com.espertech.esper.client.EPException: Method 'throwException' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib' reported an exception: java.lang.Exception: throwException text here", e.getMessage());
 		}
 	}
 

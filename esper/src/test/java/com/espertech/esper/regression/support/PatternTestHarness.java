@@ -51,9 +51,9 @@ public class PatternTestHarness implements SupportBeanConstants
     public void runTest() throws Exception
     {
         runTest(PatternTestStyle.USE_PATTERN_LANGUAGE);
-        runTest(PatternTestStyle.USE_EQL);
+        runTest(PatternTestStyle.USE_EPL);
         runTest(PatternTestStyle.COMPILE_TO_MODEL);
-        runTest(PatternTestStyle.COMPILE_TO_EQL);
+        runTest(PatternTestStyle.COMPILE_TO_EPL);
     }
 
     private void runTest(PatternTestStyle testStyle) throws Exception
@@ -94,7 +94,7 @@ public class PatternTestHarness implements SupportBeanConstants
                     {
                         statement = serviceProvider.getEPAdministrator().createPattern(expressionText);
                     }
-                    else if (testStyle == PatternTestStyle.USE_EQL)
+                    else if (testStyle == PatternTestStyle.USE_EPL)
                     {
                         String text = "select * from pattern [" + expressionText + "]";
                         statement = serviceProvider.getEPAdministrator().createEPL(text);
@@ -107,7 +107,7 @@ public class PatternTestHarness implements SupportBeanConstants
                         statement = serviceProvider.getEPAdministrator().create(mymodel);
                         expressionText = text;
                     }
-                    else if (testStyle == PatternTestStyle.COMPILE_TO_EQL)
+                    else if (testStyle == PatternTestStyle.COMPILE_TO_EPL)
                     {
                         String text = "select * from pattern [" + expressionText + "]";
                         EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEPL(text);
@@ -429,9 +429,9 @@ public class PatternTestHarness implements SupportBeanConstants
     private enum PatternTestStyle
     {
         USE_PATTERN_LANGUAGE,
-        USE_EQL,
+        USE_EPL,
         COMPILE_TO_MODEL,
-        COMPILE_TO_EQL;
+        COMPILE_TO_EPL;
     }
 
     private static final Log log = LogFactory.getLog(PatternTestHarness.class);

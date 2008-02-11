@@ -6,7 +6,7 @@
 	<indexterm><primary>Configuration class</primary></indexterm>
     <para>
         Esper engine configuration is entirely optional. Esper has a very small number of configuration parameters that can be used to simplify event 
-        pattern and EQL statements, and to tune the engine behavior to specific requirements. The Esper engine works out-of-the-box without configuration.
+        pattern and EPL statements, and to tune the engine behavior to specific requirements. The Esper engine works out-of-the-box without configuration.
     </para>
 
     <para>
@@ -130,7 +130,7 @@ config.addEventTypeAutoAlias(MyEvent.getPackage().getName());]]></programlisting
 				<title>Event type alias to Java class mapping</title>
 				
 				<para>
-					This configuration item can be used to allow event pattern statements and EQL statements to use an event type alias rather then the fully qualified Java class name. Note that Java Interface classes and abstract classes are also supported as event types via the fully qualified Java class name, and an event type alias can also be defined for such classes.
+					This configuration item can be used to allow event pattern statements and EPL statements to use an event type alias rather then the fully qualified Java class name. Note that Java Interface classes and abstract classes are also supported as event types via the fully qualified Java class name, and an event type alias can also be defined for such classes.
 				</para>
 				
 				<para>
@@ -225,7 +225,7 @@ EPServiceProvider epService = EPServiceProviderManager.getProvider("sample", con
 				<title>Specifying Event Properties for Java Classes</title>
 				
 				<para>
-					Sometimes it may be convenient to use event property names in pattern and EQL statements that are backed up by a given public method or member variable (field) in a Java class. And it can be useful to declare multiple event properties that each map to the same method or member variable.
+					Sometimes it may be convenient to use event property names in pattern and EPL statements that are backed up by a given public method or member variable (field) in a Java class. And it can be useful to declare multiple event properties that each map to the same method or member variable.
 				</para>
 
 				<para>
@@ -337,7 +337,7 @@ config.addEventTypeAlias("MyLegacyEvent", MyLegacyEventClass.class.getName(), le
 			<title>Events represented by <literal>java.util.Map</literal></title>
 			
 			<para>
-				The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names in pattern or EQL statements. Values can be of any type. JavaBean-style objects as values in a <literal>Map</literal> can also be processed by the engine. Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.
+				The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names in pattern or EPL statements. Values can be of any type. JavaBean-style objects as values in a <literal>Map</literal> can also be processed by the engine. Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.
 			</para>
 			
 			<para>
@@ -430,7 +430,7 @@ Configuration configuration = new Configuration();
 configuration.addEventTypeAlias("MyMapEvent", properties);]]></programlisting>
 
 			<para>
-				Finally, here is a sample EQL statement that uses the configured <literal>MyMapEvent</literal> map event. This statement uses the <literal>chassisTag</literal> and <literal>numParts</literal> properties of <literal>Assembly</literal> objects in each map.
+				Finally, here is a sample EPL statement that uses the configured <literal>MyMapEvent</literal> map event. This statement uses the <literal>chassisTag</literal> and <literal>numParts</literal> properties of <literal>Assembly</literal> objects in each map.
 			</para>
 			<programlisting>select carType, assembly.chassisTag, count(assembly.numParts) from MyMapEvent.win:time(60 sec)</programlisting>
 
@@ -498,7 +498,7 @@ configuration.addEventTypeAlias("MyXMLNodeEvent", desc);]]></programlisting>
 			</para>
 			
 			<para>
-				 Here is an example EQL statement using the configured event type named <literal>AutoIdRFIDEvent</literal>.
+				 Here is an example EPL statement using the configured event type named <literal>AutoIdRFIDEvent</literal>.
 			</para>
 
 			<programlisting><![CDATA[select ID, countTags from AutoIdRFIDEvent.win:time(30 sec)]]></programlisting>
@@ -617,7 +617,7 @@ configuration.addEventTypeAlias("GetQuote", desc);]]></programlisting>
 			<title>Class and package imports</title>
 			
 			<para>
-				Esper allows invocations of static Java library functions in expressions, as outlined in <xref linkend="eql-single-row-function-ref"/>. This configuration 
+				Esper allows invocations of static Java library functions in expressions, as outlined in <xref linkend="epl-single-row-function-ref"/>. This configuration 
 				item can be set to allow a partial rather than a fully qualified class name in such invocations. The imports work in the same way as in Java files, so both packages and classes can be imported.
 			</para>
 			
@@ -673,7 +673,7 @@ config.addImport("com.mycompany.mypackage.MyLib");   // class import]]></program
 			<title>Cache Settings for Method Invocations</title>
 			
 			<para>
-				Method invocations are allowed in the <literal>from</literal> clause in EQL, such that your application may join event streams to the data returned by a web service, or to data read from a distributed cache or object-oriented database, or obtain data by other means. A local cache may be placed in front of such method invocations through the configuration settings described herein.
+				Method invocations are allowed in the <literal>from</literal> clause in EPL, such that your application may join event streams to the data returned by a web service, or to data read from a distributed cache or object-oriented database, or obtain data by other means. A local cache may be placed in front of such method invocations through the configuration settings described herein.
 			</para>
 			
 			<para>
@@ -695,7 +695,7 @@ config.addImport("com.mycompany.mypackage.MyLib");   // class import]]></program
 			<title>Variables</title>
 			
 			<para>
-				Variables can be created dynamically in EQL via the <literal>create variable</literal> syntax but can also be configured at runtime and at configuration time.
+				Variables can be created dynamically in EPL via the <literal>create variable</literal> syntax but can also be configured at runtime and at configuration time.
 			</para>
 			
 			<para>
@@ -715,11 +715,11 @@ config.addImport("com.mycompany.mypackage.MyLib");   // class import]]></program
 			<title>Relational Database Access</title>
 			
 			<para>
-				Esper has the capability to join event streams against historical data sources, such as a relational database. This section describes the configuration entries that the engine requires to access data stored in your database. Please see <xref linkend="histdata_overview"/> for information on the use of EQL queries that include historical data sources.
+				Esper has the capability to join event streams against historical data sources, such as a relational database. This section describes the configuration entries that the engine requires to access data stored in your database. Please see <xref linkend="histdata_overview"/> for information on the use of EPL queries that include historical data sources.
 			</para>
 			
 			<para>
-					EQL queries that poll data from a relational database specify the name of the database as part of the EQL statement. The engine uses the configuration information described here to resolve the database name in the statement to database settings. The required and optional database settings are summarized below. 
+					EPL queries that poll data from a relational database specify the name of the database as part of the EPL statement. The engine uses the configuration information described here to resolve the database name in the statement to database settings. The required and optional database settings are summarized below. 
 			</para>
 
 			<itemizedlist spacing="compact">
@@ -829,7 +829,7 @@ Connection connection = dataSource.getConnection();]]></programlisting>
 				<title>Connections lifecycle settings</title>
 
 				<para>
-					By default the engine retains a separate database connection for each started EQL statement. However, it is possible to override this behavior and require the engine to obtain a new database connection for each lookup, and to close that database connection after the lookup is completed. This often makes sense when you have a large number of EQL statements and require pooling of connections via a connection pool. If your runtime environment includes an application server, the connection pool may be exposed as a <literal>DataSource</literal>.
+					By default the engine retains a separate database connection for each started EPL statement. However, it is possible to override this behavior and require the engine to obtain a new database connection for each lookup, and to close that database connection after the lookup is completed. This often makes sense when you have a large number of EPL statements and require pooling of connections via a connection pool. If your runtime environment includes an application server, the connection pool may be exposed as a <literal>DataSource</literal>.
 				</para>
 
 				<para>
@@ -846,7 +846,7 @@ Connection connection = dataSource.getConnection();]]></programlisting>
 				<title>Cache settings</title>
 
 				<para>
-					Cache settings can dramatically reduce the number of database queries that the engine executes for EQL statements. If no cache setting is specified, the engine does not cache query results and executes a separate database query for every event.
+					Cache settings can dramatically reduce the number of database queries that the engine executes for EPL statements. If no cache setting is specified, the engine does not cache query results and executes a separate database query for every event.
 				</para>
 	
 				<para>
@@ -945,7 +945,7 @@ Connection connection = dataSource.getConnection();]]></programlisting>
 					This setting controls how the engine retrieves SQL statement metadata from JDBC prepared statements.
 				</para>
 				
-				<table frame="topbot" id="eql-grouping-aggregate-func" revision="2">
+				<table frame="topbot" id="epl-grouping-aggregate-func" revision="2">
 					<title>Syntax and results of aggregate functions</title>
 					<tgroup cols="2">
 						<colspec colwidth="0.5*"/>

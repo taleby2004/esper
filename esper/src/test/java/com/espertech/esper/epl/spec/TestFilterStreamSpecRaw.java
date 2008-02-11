@@ -9,7 +9,7 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.parse.EPLTreeWalker;
 import com.espertech.esper.filter.*;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.epl.parse.SupportEQLTreeWalkerFactory;
+import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
 import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 
@@ -256,10 +256,10 @@ public class TestFilterStreamSpecRaw extends TestCase
 
     private static FilterStreamSpecRaw makeSpec(String expression) throws Exception
     {
-        Tree ast = SupportParserHelper.parseEQL(expression);
+        Tree ast = SupportParserHelper.parseEPL(expression);
         SupportParserHelper.displayAST(ast);
 
-        EPLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
+        EPLTreeWalker walker = SupportEPLTreeWalkerFactory.makeWalker(ast);
         walker.startEPLExpressionRule();
 
         return (FilterStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);

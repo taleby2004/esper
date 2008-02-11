@@ -1,21 +1,21 @@
-<chapter id="eql_clauses">
-    <title>EQL Reference: Clauses</title>
+<chapter id="epl_clauses">
+    <title>EPL Reference: Clauses</title>
         
-    <sect1 id="eql-intro">
-        <title>EQL Introduction</title>
+    <sect1 id="epl-intro">
+        <title>EPL Introduction</title>
 
         <para>
-			The Event Query Language (EQL) is a SQL-like language with <literal>SELECT</literal>, <literal>FROM</literal>, <literal>WHERE</literal>, <literal>GROUP BY</literal>, <literal>HAVING</literal> and <literal>ORDER BY</literal> clauses. Streams replace tables as the source of data with events replacing rows as the basic unit of data. Since events are composed of data, the SQL concepts of correlation through joins, filtering and aggregation through grouping can be effectively leveraged. The <literal>INSERT INTO</literal> clause is recast as a means of forwarding events to other streams for further downstream processing. External data accessible through JDBC may be queried and joined with the stream data. Additional clauses such as the <literal>PATTERN</literal> and <literal>OUTPUT</literal> clauses are also available to provide the missing SQL language constructs specific to event processing.
+			The Event Processing Language (EPL) is a SQL-like language with <literal>SELECT</literal>, <literal>FROM</literal>, <literal>WHERE</literal>, <literal>GROUP BY</literal>, <literal>HAVING</literal> and <literal>ORDER BY</literal> clauses. Streams replace tables as the source of data with events replacing rows as the basic unit of data. Since events are composed of data, the SQL concepts of correlation through joins, filtering and aggregation through grouping can be effectively leveraged. The <literal>INSERT INTO</literal> clause is recast as a means of forwarding events to other streams for further downstream processing. External data accessible through JDBC may be queried and joined with the stream data. Additional clauses such as the <literal>PATTERN</literal> and <literal>OUTPUT</literal> clauses are also available to provide the missing SQL language constructs specific to event processing.
         </para>
 
         <para>
-			EQL statements are used to derive and aggregate information from one or more streams of events, and to join or merge event streams. This section outlines EQL syntax. It also outlines the built-in views, which are the building blocks for deriving and aggregating information from event streams. 
+			EPL statements are used to derive and aggregate information from one or more streams of events, and to join or merge event streams. This section outlines EPL syntax. It also outlines the built-in views, which are the building blocks for deriving and aggregating information from event streams. 
         </para>
         
         <para>
-			EQL statements contain definitions of one or more views. Similar to tables in a SQL statement, views define the data available for querying and filtering. 
+			EPL statements contain definitions of one or more views. Similar to tables in a SQL statement, views define the data available for querying and filtering. 
 			Some views represent windows over a stream of events. Other views derive statistics from event properties, group events or handle unique event property values.
-            Views can be staggered onto each other to build a chain of views. The Esper engine makes sure that views are reused among EQL statements for efficiency.
+            Views can be staggered onto each other to build a chain of views. The Esper engine makes sure that views are reused among EPL statements for efficiency.
         </para>
         
         <para>
@@ -36,7 +36,7 @@
 		</orderedlist>
 
         <para>
-			EQL provides the concept of <emphasis>named window</emphasis>. Named windows are data windows that can be inserted-into and deleted-from by one or more statements, and that can queried by one or more statements. Named windows have a global character, being visible and shared across an engine instance beyond a single statement. Use the <literal>CREATE WINDOW</literal> clause to create named windows. Use the <literal>INSERT INTO</literal> clause to insert data into a named window, the <literal>ON DELETE</literal> clause to remove events from a named window, and the <literal>ON SELECT</literal> clause to perform a non-continuous fire-once query on a named window. Finally, the name of the named window can occur in a statement's <literal>FROM</literal> clause to query a named window or include the named window in a join or subquery.
+			EPL provides the concept of <emphasis>named window</emphasis>. Named windows are data windows that can be inserted-into and deleted-from by one or more statements, and that can queried by one or more statements. Named windows have a global character, being visible and shared across an engine instance beyond a single statement. Use the <literal>CREATE WINDOW</literal> clause to create named windows. Use the <literal>INSERT INTO</literal> clause to insert data into a named window, the <literal>ON DELETE</literal> clause to remove events from a named window, and the <literal>ON SELECT</literal> clause to perform a non-continuous fire-once query on a named window. Finally, the name of the named window can occur in a statement's <literal>FROM</literal> clause to query a named window or include the named window in a join or subquery.
         </para>
 
         <para>
@@ -49,21 +49,21 @@
 
     </sect1>
 
-    <sect1 id="eql-select-syntax">
-        <title>EQL Syntax</title>
+    <sect1 id="epl-select-syntax">
+        <title>EPL Syntax</title>
         
 		<para>
-			EQL queries are created and stored in the engine, and publish results to listeners as events are received by the engine or timer events occur that match the criteria specified in the query. Events can also be obtained from running EQL queries via the <literal>safeIterator</literal> and <literal>iterator</literal> methods that provide a pull-data API.
+			EPL queries are created and stored in the engine, and publish results to listeners as events are received by the engine or timer events occur that match the criteria specified in the query. Events can also be obtained from running EPL queries via the <literal>safeIterator</literal> and <literal>iterator</literal> methods that provide a pull-data API.
 		</para>
 
 		<para>
-			The <literal>select</literal> clause in an EQL query specifies the event properties or events to retrieve. The <literal>from</literal> clause in an EQL query specifies the event stream definitions and stream names to use. The <literal>where</literal> clause in an EQL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds.
+			The <literal>select</literal> clause in an EPL query specifies the event properties or events to retrieve. The <literal>from</literal> clause in an EPL query specifies the event stream definitions and stream names to use. The <literal>where</literal> clause in an EPL query specifies search conditions that specify which event or event combination to search for. For example, the following statement returns the average price for IBM stock ticks in the last 30 seconds.
 		</para>
 
 			<programlisting><![CDATA[select avg(price) from StockTick.win:time(30 sec) where symbol='IBM']]></programlisting>
 
 		<para>
-			EQL queries follow the below syntax. EQL queries can be simple queries or more complex queries. A simple select contains only a <literal>select</literal> clause and a single stream definition. Complex EQL queries can be build that feature a more elaborate select list utilizing expressions, may join multiple streams, may contain a <literal>where</literal> clause with search conditions and so on.
+			EPL queries follow the below syntax. EPL queries can be simple queries or more complex queries. A simple select contains only a <literal>select</literal> clause and a single stream definition. Complex EPL queries can be build that feature a more elaborate select list utilizing expressions, may join multiple streams, may contain a <literal>where</literal> clause with search conditions and so on.
 		</para>
 
 <synopsis>[insert into <emphasis>insert_into_def</emphasis>]
@@ -76,7 +76,7 @@ from <emphasis>stream_def</emphasis> [as name] [, <emphasis>stream_def</emphasis
 [order by <emphasis>order_by_expression_list</emphasis>]
 </synopsis>
 
-		<sect2 id="eql-syntax-time-periods">
+		<sect2 id="epl-syntax-time-periods">
 			<title>Specifying Time Periods</title>
 			
 			<para>
@@ -101,10 +101,10 @@ milliseconds-part : <emphasis>number</emphasis> ("milliseconds" | "millisecond" 
 0.5 minutes</programlisting>
 		</sect2>
 		
-		<sect2 id="eql-syntax-comments">
+		<sect2 id="epl-syntax-comments">
 			<title>Using Comments</title>
 			<para>
-				Comments can appear anywhere in the EQL or pattern statement text where whitespace is allowed. Comments can be written in two ways: slash-slash (<literal>// ...</literal>) comments and slash-star (<literal>/* ... */</literal>) comments.
+				Comments can appear anywhere in the EPL or pattern statement text where whitespace is allowed. Comments can be written in two ways: slash-slash (<literal>// ...</literal>) comments and slash-star (<literal>/* ... */</literal>) comments.
 			</para>
 	
 			<para>
@@ -136,13 +136,13 @@ select * from MyEvent  /* this also works */]]></programlisting>
   from MyEvent]]></programlisting>
     </sect1>
 
-    <sect1 id="eql-select-list">
+    <sect1 id="epl-select-list">
         <title>Choosing Event Properties And Events: the <emphasis>Select</emphasis> Clause</title>
         
 		<indexterm><primary>select clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>select clause</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>select clause</secondary></indexterm>
 		<para>
-			The <literal>select</literal> clause is required in all EQL statements. The <literal>select</literal> clause can be used to select all properties via the wildcard <literal>*</literal>, or to specify a list of event properties and expressions. The <literal>select</literal> clause defines the event type (event property names and types) of the resulting events published by the statement, or pulled from the statement via the iterator methods.
+			The <literal>select</literal> clause is required in all EPL statements. The <literal>select</literal> clause can be used to select all properties via the wildcard <literal>*</literal>, or to specify a list of event properties and expressions. The <literal>select</literal> clause defines the event type (event property names and types) of the resulting events published by the statement, or pulled from the statement via the iterator methods.
 		</para>
 
 		<para>
@@ -159,7 +159,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			The <literal>istream</literal> keyword is the default, and indicates that the engine only delivers insert stream events to listeners and observers. The <literal>irstream</literal> keyword indicates that the engine delivers both insert and remove stream. Finally, the <literal>rstream</literal> keyword tells the engine to deliver only the remove stream.
 		</para>
 
-        <sect2 id="eql-select-all-props" >
+        <sect2 id="epl-select-all-props" >
            <title>Choosing all event properties: select *</title>
 
 			<para>
@@ -189,7 +189,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			</para>
 		</sect2>
 
-        <sect2 id="eql-select-event-props" >
+        <sect2 id="epl-select-event-props" >
            <title>Choosing specific event properties</title>
 			<para>
 				To choose the particular event properties to return:
@@ -203,7 +203,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
 ]]></programlisting>
 		</sect2>
 
-        <sect2 id="eql-select-expressions" >
+        <sect2 id="epl-select-expressions" >
            <title>Expressions</title>
 			<para>
 				The <literal>select</literal> clause can contain one or more expressions.
@@ -217,7 +217,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
 ]]></programlisting>
 		</sect2>
 
-        <sect2 id="eql-select-renaming" >
+        <sect2 id="epl-select-renaming" >
             <title>Renaming event properties</title>
 			<para>
 				Event properties and expressions can be renamed using below syntax.
@@ -231,7 +231,7 @@ select * from MyEvent  /* this also works */]]></programlisting>
 ]]></programlisting>
 		</sect2>
 		
-        <sect2 id="eql-select-all-join">
+        <sect2 id="epl-select-all-join">
            <title>Choosing event properties and events in a join</title>
            
 			<para>
@@ -275,7 +275,7 @@ where stock.symbol = news.symbol]]></programlisting>
 			</para>
 		</sect2>
 
-        <sect2 id="eql-select-pattern" >
+        <sect2 id="epl-select-pattern" >
            <title>Choosing event properties and events from a pattern</title>
            
 			<para>
@@ -299,7 +299,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 			<programlisting><![CDATA[select tick.* from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting>
 		</sect2>
 
-        <sect2 id="eql-select-using-istream-rstream" >
+        <sect2 id="epl-select-using-istream-rstream" >
             <title>Selecting <literal>insert</literal> and <literal>remove</literal> stream events</title>
 
 			<para>
@@ -346,14 +346,14 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 
     </sect1>
 
-    <sect1 id="eql-from-clause">
+    <sect1 id="epl-from-clause">
         <title>Specifying Event Streams: the <emphasis>From</emphasis> Clause</title>
 
 		<indexterm><primary>join</primary><secondary>from clause</secondary></indexterm>
 		<indexterm><primary>from clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>from clause</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>from clause</secondary></indexterm>
 		<para>
-			The <literal>from</literal> clause is required in all EQL statements. It specifies one or more event streams or named windows. Each event stream or named window can optionally be given a name by means of the <literal>as</literal> syntax.
+			The <literal>from</literal> clause is required in all EPL statements. It specifies one or more event streams or named windows. Each event stream or named window can optionally be given a name by means of the <literal>as</literal> syntax.
 		</para>
 		<synopsis>from <emphasis>stream_def</emphasis> [as <emphasis>name</emphasis>] [, <emphasis>stream_def</emphasis> [as <emphasis>stream_name</emphasis>]] [, ...]</synopsis>
 
@@ -362,7 +362,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 		</para>
 
 		<para>
-			For joins and outer joins, specify two or more event streams. Joins between pattern-based and filter-based event streams are also supported. Joins are described in more detail in <xref linkend="eql-join"/>.
+			For joins and outer joins, specify two or more event streams. Joins between pattern-based and filter-based event streams are also supported. Joins are described in more detail in <xref linkend="epl-join"/>.
 		</para>
 
 		<para>
@@ -373,7 +373,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 			The <emphasis>stream_name</emphasis> is an optional identifier assigned to the stream. The stream name can itself occur in any expression and provides access to the event itself from the named stream. Also, a stream name may be combined with a method name to invoke instance methods on events of that stream.
 		</para>
 
-        <sect2 id="eql-from-clause-filter" >
+        <sect2 id="epl-from-clause-filter" >
            <title>Filter-based Event Streams</title>
 
 			<para>
@@ -383,7 +383,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 			<synopsis><emphasis>event_type</emphasis> ( [<emphasis>filter_criteria</emphasis>] ) [.<emphasis>view_spec</emphasis>] [.<emphasis>view_spec</emphasis>] [...]</synopsis>
 	
 			<para>
-				The following EQL statement shows event type, filter criteria and views combined in one statement. It selects all event properties for the last 100 events of IBM stock ticks for volume. In the example, the event type is the fully qualified Java class name <literal>org.esper.example.StockTick</literal>. The expression filters for events where the property <literal>symbol</literal> has a value of "IBM". The optional view specifications for deriving data from the StockTick events are a length window and a view for computing statistics on volume. The name for the event stream is "volumeStats".
+				The following EPL statement shows event type, filter criteria and views combined in one statement. It selects all event properties for the last 100 events of IBM stock ticks for volume. In the example, the event type is the fully qualified Java class name <literal>org.esper.example.StockTick</literal>. The expression filters for events where the property <literal>symbol</literal> has a value of "IBM". The optional view specifications for deriving data from the StockTick events are a length window and a view for computing statistics on volume. The name for the event stream is "volumeStats".
 			</para>
 			<programlisting><![CDATA[select * from 
   org.esper.example.StockTick(symbol='IBM').win:length(100).stat:uni(volume) as volumeStats]]></programlisting>
@@ -392,7 +392,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 				Esper filters out events in an event stream as defined by filter criteria before it sends events to subsequent views. Thus, compared to search conditions in a <literal>where</literal> clause, filter criteria remove unneeded events early. In the above example, events with a symbol other then IBM do not enter the time window.
 			</para>
 
-			<sect3 id="eql-filter-event-type" >
+			<sect3 id="epl-filter-event-type" >
 			   <title>Specifying an event type</title>
 
 				<para>
@@ -411,7 +411,7 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 				 <programlisting><![CDATA[select * from org.myorg.rfid.IRfidReadable]]></programlisting>
 			</sect3>
 		
-			<sect3 id="eql-filter-criteria" >
+			<sect3 id="epl-filter-criteria" >
 			   <title>Specifying filter criteria</title>
 				<para>
 					The filtering criteria to filter for events with certain event property values are placed within parenthesis after the event type name:
@@ -484,7 +484,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 				</para>
 			</sect3>
 			
-			<sect3 id="eql-filter-ranges" >
+			<sect3 id="epl-filter-ranges" >
 				<title>Filtering Ranges</title>
 				<para>
 					Ranges come in the following 4 varieties. The use of round <literal>()</literal> 
@@ -535,7 +535,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 				<programlisting><![CDATA[mypackage.RfidEvent(x not between 0 and 100)]]></programlisting>
 			</sect3>
 			
-			<sect3 id="eql-filter-in" >
+			<sect3 id="epl-filter-in" >
 				<title>Filtering Sets of Values</title>
 				<para>
 					The <literal>in</literal> keyword for filter criteria determines if a given value matches any value in a list of values.
@@ -552,7 +552,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 				<programlisting><![CDATA[mypackage.RfidEvent(category not in ('Household', 'Electrical'))]]></programlisting>
 			</sect3>
 			
-			<sect3 id="eql-filter-limitations" >
+			<sect3 id="epl-filter-limitations" >
 				<title>Filter Limitations</title>
 				<para>
 					The following restrictions apply to filter criteria:
@@ -578,10 +578,10 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 
 		</sect2>
 		
-        <sect2 id="eql-from-clause-patterns" >
+        <sect2 id="epl-from-clause-patterns" >
            <title>Pattern-based Event Streams</title>
 			<para>
-				Event pattern expressions can also be used to specify one or more event streams in an EQL statement.
+				Event pattern expressions can also be used to specify one or more event streams in an EPL statement.
 				For pattern-based event streams, the event stream definition <emphasis>stream_def</emphasis> consists of the keyword <literal>pattern</literal> and a pattern expression in brackets <literal>[]</literal>. The syntax for an event stream definition using a pattern expression is below. As in filter-based event streams, an optional list of views that derive data from the stream can be supplied.
 			</para>
 			
@@ -608,10 +608,10 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 			</para>			
 		</sect2>
 
-        <sect2 id="eql-from-clause-view-spec" >
+        <sect2 id="epl-from-clause-view-spec" >
            <title>Specifying Views</title>
 			<para>
-				Views are used to derive or aggregate data. Views can be staggered onto each other. See the section <xref linkend="eql-views"/> on the views available.
+				Views are used to derive or aggregate data. Views can be staggered onto each other. See the section <xref linkend="epl-views"/> on the views available.
 			</para>
 						
 			<para>
@@ -630,7 +630,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
   std:groupby(expressway, direction, segment).std:size()]]></programlisting>
 		</sect2>
 		
-        <sect2 id="eql-from-clause-stream-name" >
+        <sect2 id="epl-from-clause-stream-name" >
            <title>Using the Stream Name</title>
 			<para>
 				Your <literal>from</literal> clause may assign a name to each stream. This assigned stream name can serve any of the following purposes.
@@ -669,17 +669,17 @@ from ProductEvent as prod, OrderEvent as ord]]></programlisting>
 
     </sect1>
     
-    <sect1 id="eql-where-clause">
+    <sect1 id="epl-where-clause">
         <title>Specifying Search Conditions: the <emphasis>Where</emphasis> Clause</title>
 
 		<indexterm><primary>where clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>where clause</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>where clause</secondary></indexterm>
 		<para>
-			The <literal>where</literal> clause is an optional clause in EQL statements. Via the <literal>where</literal> clause event streams can be joined and events can be filtered. 
+			The <literal>where</literal> clause is an optional clause in EPL statements. Via the <literal>where</literal> clause event streams can be joined and events can be filtered. 
 		</para>
 		
 		<para>
-			Comparison operators <literal>=, &lt; , &gt; , &gt;=, &lt;=, !=, &lt;&gt;, is null, is not null</literal> and logical combinations via <literal>and</literal> and <literal>or</literal> are supported in the <literal>where</literal> clause. The <literal>where</literal> clause can also introduce join conditions as outlined in <xref linkend="eql-join"/>. <literal>where</literal> clauses can also contain expressions. Some examples are listed below.
+			Comparison operators <literal>=, &lt; , &gt; , &gt;=, &lt;=, !=, &lt;&gt;, is null, is not null</literal> and logical combinations via <literal>and</literal> and <literal>or</literal> are supported in the <literal>where</literal> clause. The <literal>where</literal> clause can also introduce join conditions as outlined in <xref linkend="epl-join"/>. <literal>where</literal> clauses can also contain expressions. Some examples are listed below.
 		</para>
 		<programlisting>...where fraud.severity = 5 and amount > 500
 ...where (orderItem.orderId is null) or (orderItem.class != 10)		 
@@ -688,10 +688,10 @@ from ProductEvent as prod, OrderEvent as ord]]></programlisting>
 
     </sect1>
 
-    <sect1 id="eql-grouping-aggregating">
+    <sect1 id="epl-grouping-aggregating">
         <title>Aggregates and grouping: the <emphasis>Group-by</emphasis> Clause and the <emphasis>Having</emphasis> Clause</title>
 
-        <sect2 id="eql-grouping-aggregate-functions" >
+        <sect2 id="epl-grouping-aggregate-functions" >
 				<title>Using aggregate functions</title>
 			
 				<para>
@@ -757,14 +757,14 @@ where symbol='IBM'</programlisting>
 				</para>
 		</sect2>
 
-        <sect2 id="eql-grouping-group-by" >
+        <sect2 id="epl-grouping-group-by" >
 				 <title>Organizing statement results into groups: the <emphasis>Group-by</emphasis> clause</title>
 
 				<indexterm><primary>group by clause</primary></indexterm>
-				<indexterm><primary>EQL</primary><secondary>group by clause</secondary></indexterm>
+				<indexterm><primary>EPL</primary><secondary>group by clause</secondary></indexterm>
 
 				<para>
-					The <literal>group by</literal> clause is optional in all EQL statements. The <literal>group by</literal> clause divides the output of an EQL statement into groups. You can group by one or more event property names, or by the result of computed expressions. When used with aggregate functions, <literal>group by</literal> retrieves the calculations in each subgroup. You can use <literal>group by</literal> without aggregate functions, but generally that can produce confusing results.
+					The <literal>group by</literal> clause is optional in all EPL statements. The <literal>group by</literal> clause divides the output of an EPL statement into groups. You can group by one or more event property names, or by the result of computed expressions. When used with aggregate functions, <literal>group by</literal> retrieves the calculations in each subgroup. You can use <literal>group by</literal> without aggregate functions, but generally that can produce confusing results.
 				</para>
 	
 				<para>
@@ -843,11 +843,11 @@ group by symbol, tickDataFeed</programlisting>
 				<programlisting>select symbol, count(*) from StockTickEvent.win:time(30 sec) where volume &gt; 100 group by symbol</programlisting>
 		</sect2>
 
-        <sect2 id="eql-grouping-having" >
+        <sect2 id="epl-grouping-having" >
 			 <title>Selecting groups of events: the <emphasis>Having</emphasis> clause</title>
 
 				<indexterm><primary>having clause</primary></indexterm>
-				<indexterm><primary>EQL</primary><secondary>having clause</secondary></indexterm>
+				<indexterm><primary>EPL</primary><secondary>having clause</secondary></indexterm>
 				<para>
 					Use the <literal>having</literal> clause to pass or reject events defined by the <literal>group-by</literal> clause. The <literal>having</literal> clause sets conditions for the <literal>group by</literal> clause in the same way <literal>where</literal> sets conditions for the <literal>select</literal> clause, except <literal>where</literal> cannot include aggregate functions, while <literal>having</literal> often does.
 				</para>
@@ -895,10 +895,10 @@ having price &lt; avg(price)</programlisting>
 
 		</sect2>
 
-        <sect2 id="eql-filter-where-grouping-having-interactions" >
+        <sect2 id="epl-filter-where-grouping-having-interactions" >
 			 <title>How the stream filter, <emphasis>Where</emphasis>, <emphasis>Group By</emphasis> and <emphasis>Having</emphasis> clauses interact</title>
 				<para>
-					When you include filters, the <literal>where</literal> condition, the <literal>group by</literal> clause and the <literal>having</literal> condition in an EQL statement
+					When you include filters, the <literal>where</literal> condition, the <literal>group by</literal> clause and the <literal>having</literal> condition in an EPL statement
 					the sequence in which each clause affects events determines the final result:
 				</para>
 
@@ -942,7 +942,7 @@ having stddev(price) &gt; 0.8</programlisting>
 
 		</sect2>
 
-        <sect2 id="eql-group-by-versus-view" >
+        <sect2 id="epl-group-by-versus-view" >
 			 <title>Comparing the <emphasis>Group By</emphasis> clause and the <emphasis>std:groupby</emphasis> view</title>
 
 			<para>
@@ -981,13 +981,13 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 
     </sect1>
 
-    <sect1 id="eql-output-rate">
+    <sect1 id="epl-output-rate">
         <title>Stabilizing and Limiting Output: the <emphasis>Output</emphasis> Clause</title>
 
 		<indexterm><primary>output limiting and stabilizing clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>output limiting and stabilizing</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>output limiting and stabilizing</secondary></indexterm>
 
-        <sect2 id="eql-output-options" >
+        <sect2 id="epl-output-options" >
 				<title>Output Clause Options</title>
 			
 				<para>
@@ -1051,7 +1051,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 
 		</sect2>
 
-        <sect2 id="eql-output-groupby" >
+        <sect2 id="epl-output-groupby" >
 				<title>Aggregation, Group By, Having and Output clause interaction</title>
 			
 				<para>
@@ -1098,7 +1098,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 
 		</sect2>
 
-        <sect2 id="eql-output-runtime" >
+        <sect2 id="epl-output-runtime" >
 				<title>Runtime Considerations</title>
 			
 				<para>
@@ -1114,13 +1114,13 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 
     </sect1>
 
-    <sect1 id="eql-order-by">
+    <sect1 id="epl-order-by">
         <title>Sorting Output: the <emphasis>Order By</emphasis> Clause</title>
 
 		<indexterm><primary>ordering output</primary></indexterm>
 		<indexterm><primary>output ordering</primary></indexterm>
 		<indexterm><primary>order by clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>order by clause</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>order by clause</secondary></indexterm>
 
 		<para>
 			The <literal>order by</literal> clause is optional. It is used for ordering output events by their properties, or by expressions involving those properties. .				
@@ -1172,11 +1172,11 @@ order by price, volume</programlisting>
 		</para>		
 	</sect1>
 
-    <sect1 id="eql-insert-into">
+    <sect1 id="epl-insert-into">
         <title>Merging Streams and Continuous Insertion: the <emphasis>Insert Into</emphasis> Clause</title>
 
 		<indexterm><primary>insert into clause</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>insert into clause</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>insert into clause</secondary></indexterm>
 
 		<para>
 			The <literal>insert into</literal> clause is optional in Esper. The clause can be specified to make the results of a statement available as an event stream for use
@@ -1203,7 +1203,7 @@ order by price, volume</programlisting>
 		</para>
 
 		<para>
-			To merge event streams, simply use the same <literal>event_stream_name</literal> identifier in all EQL statements that merge their result event streams. Make sure to use the
+			To merge event streams, simply use the same <literal>event_stream_name</literal> identifier in all EPL statements that merge their result event streams. Make sure to use the
 			same number and names of event properties and event property types match up.
 		</para>
 
@@ -1305,11 +1305,11 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 		</sect4>
 	</sect1>
 
-    <sect1 id="eql-join">
+    <sect1 id="epl-join">
         <title>Joining Event Streams</title>
 
 		<indexterm><primary>join</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>join</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>join</secondary></indexterm>
 
 		<para>
 			Two or more event streams can be part of the <literal>from</literal> clause and thus both (all) streams determine the resulting events. The <literal>where</literal> clause lists the join conditions that Esper uses to relate events in the two or more streams. Reference and historical data such as stored in your relational database, and data returned by a method invocation, can also be included in joins. Please see <xref linkend="histdata_overview"/> and <xref linkend="joining_method"/> for details.
@@ -1350,11 +1350,11 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
  where fraud.accountNumber = pin.accountNumber]]></programlisting>
     </sect1>
 
-    <sect1 id="eql-outerjoin">
+    <sect1 id="epl-outerjoin">
         <title>Outer Joins</title>
 
 		<indexterm><primary>outer join</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>outer join</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>outer join</secondary></indexterm>
 
 		<para>
 			Esper supports left outer joins, right outer joins and full outer joins between an unlimited number of event streams. Outer joins can also join reference and historical data as explained in <xref linkend="histdata_overview"/>, as well as join data returned by a method invocation as outlined in <xref linkend="joining_method"/>.
@@ -1412,12 +1412,12 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
         on rfid.location = refdesc.locId]]></programlisting>
     </sect1>
 
-    <sect1 id="eql-unidirectional">
+    <sect1 id="epl-unidirectional">
         <title>Unidirectional Joins and Outer Joins</title>
 
 		<indexterm><primary>unidirectional joins</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>join, unidirectional</secondary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>outer join, unidirectional</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>join, unidirectional</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>outer join, unidirectional</secondary></indexterm>
 
 		<para>
 			In a join or outer join your statement lists multiple event streams, views and/or patterns in the <literal>from</literal> clause. As events arrive into the engine, each of the streams (views, patterns) provides insert and remove stream events. The engine evaluates each insert and remove stream event provided by each stream, and joins or outer joins each event against data window contents of each stream, and thus generates insert and remove stream join results.
@@ -1461,14 +1461,14 @@ where tick.symbol = news.symbol]]></programlisting>
 		</orderedlist>
     </sect1>
 
-    <sect1 id="eql-subqueries">
+    <sect1 id="epl-subqueries">
         <title>Subqueries</title>
 
 		<indexterm><primary>subqueries</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>subqueries</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>subqueries</secondary></indexterm>
 
 		<para>
-			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the <literal>select</literal> clause and in the <literal>where</literal> clause of EQL statements. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins. 
+			A subquery is a <literal>select</literal> within another statement. Esper supports subqueries in the <literal>select</literal> clause and in the <literal>where</literal> clause of EPL statements. Subqueries provide an alternative way to perform operations that would otherwise require complex joins. Subqueries can also make statements more readable then complex joins. 
 	    </para>
 
 		<para>
@@ -1536,7 +1536,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			Performance of your statement containing one or more subqueries principally depends on two parameters. First, if your subquery correlates one or more columns in the subquery stream with the enclosing statement's streams via equals '=', the engine automatically builds the appropriate indexes for fast row retrieval based on the key values correlated (joined). The second parameter is the number of rows found in the subquery stream and the complexity of the filter criteria (<literal>where</literal> clause), as each row in the subquery stream must evaluate against the <literal>where</literal> clause filter.
 		</para>
 
-		<sect2 id="eql-subqueries-exists">
+		<sect2 id="epl-subqueries-exists">
 			<title>The '<literal>exists</literal>' keyword</title>
 
 			<para>
@@ -1544,7 +1544,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			</para>
 			
 			<para>
-				Let's take a look at a simple example. The following is an EQL statement that uses the <literal>exists</literal> condition:
+				Let's take a look at a simple example. The following is an EPL statement that uses the <literal>exists</literal> condition:
 			</para>
 
 			<programlisting><![CDATA[select assetId from RFIDEvent as RFID 
@@ -1555,7 +1555,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			</para>
 		</sect2>
 
-		<sect2 id="eql-subqueries-in">
+		<sect2 id="epl-subqueries-in">
 			<title>The '<literal>in</literal>' keyword</title>
 			
 			<para>
@@ -1582,10 +1582,10 @@ where tick.symbol = news.symbol]]></programlisting>
 		<indexterm><primary>SQL</primary></indexterm>
 		<indexterm><primary>join</primary><secondary>relational data via SQL</secondary></indexterm>
 		<indexterm><primary>relational databases</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>joining relational data via SQL</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>joining relational data via SQL</secondary></indexterm>
 
 		<para>
-			This chapter outlines how reference data and historical data that are stored in a relational database can be queried via SQL within EQL statements. 
+			This chapter outlines how reference data and historical data that are stored in a relational database can be queried via SQL within EPL statements. 
 		</para>
 			
 		<para>
@@ -1601,8 +1601,8 @@ where tick.symbol = news.symbol]]></programlisting>
 		</para>
 			
 		<para>
-			Also if you have enabled query result caching in your Esper database configuration and provide EQL <literal>where</literal> clause and/or <literal>on</literal> clause (outer join) expressions, then 
-			Esper builds indexes on the SQL query results to enable fast lookup. This is especially useful if your queries return a large number of rows. For building the proper indexes, Esper inspects the expression found in your EQL query <literal>where</literal> clause, if present. For outer joins, Esper also inspects your EQL query <literal>on</literal> clause. Esper analyzes the EQL <literal>on</literal> clause and <literal>where</literal> clause expressions, if present, looking for property comparison with or without logical AND-relationships between properties. When a SQL query returns rows for caching, Esper builds the appropriate index and lookup strategies for fast row matching against indexes.
+			Also if you have enabled query result caching in your Esper database configuration and provide EPL <literal>where</literal> clause and/or <literal>on</literal> clause (outer join) expressions, then 
+			Esper builds indexes on the SQL query results to enable fast lookup. This is especially useful if your queries return a large number of rows. For building the proper indexes, Esper inspects the expression found in your EPL query <literal>where</literal> clause, if present. For outer joins, Esper also inspects your EPL query <literal>on</literal> clause. Esper analyzes the EPL <literal>on</literal> clause and <literal>where</literal> clause expressions, if present, looking for property comparison with or without logical AND-relationships between properties. When a SQL query returns rows for caching, Esper builds the appropriate index and lookup strategies for fast row matching against indexes.
 		</para>
 
 		<para>
@@ -1640,7 +1640,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			<title>Joining SQL Query Results</title>
 			
 			<para>
-				To join an event stream against stored data, specify the <literal>sql</literal> keyword followed by the name of the database and a parameterized SQL query. The syntax to use in the <literal>from</literal> clause of an EQL statement is:
+				To join an event stream against stored data, specify the <literal>sql</literal> keyword followed by the name of the database and a parameterized SQL query. The syntax to use in the <literal>from</literal> clause of an EPL statement is:
 			</para>
 	
 			<synopsis>sql:<emphasis>database_name</emphasis> [" <emphasis>parameterized_sql_query</emphasis> "]</synopsis>
@@ -1663,7 +1663,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			</para>
 
 			<para>
-				The sample EQL statement below joins an event stream consisting of <literal>CustomerCallEvent</literal> events with the results of an SQL query against the database named <literal>MyCustomerDB</literal> and table <literal>Customer</literal>: 
+				The sample EPL statement below joins an event stream consisting of <literal>CustomerCallEvent</literal> events with the results of an SQL query against the database named <literal>MyCustomerDB</literal> and table <literal>Customer</literal>: 
 			</para>
 			
 			<programlisting><![CDATA[select custId, cust_name from CustomerCallEvent,
@@ -1678,7 +1678,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			</para>
 
 			<para>
-				The next example adds a time window of 30 seconds to the event stream <literal>CustomerCallEvent</literal>. It also renames the selected properties to customerName and customerId to demonstrate how the naming of columns in an SQL query can be used in the <literal>select</literal> clause in the EQL query. And the example uses explicit stream names via the <literal>as</literal> keyword.
+				The next example adds a time window of 30 seconds to the event stream <literal>CustomerCallEvent</literal>. It also renames the selected properties to customerName and customerId to demonstrate how the naming of columns in an SQL query can be used in the <literal>select</literal> clause in the EPL query. And the example uses explicit stream names via the <literal>as</literal> keyword.
 			</para>
 
 			<programlisting><![CDATA[select customerId, customerName from
@@ -1693,18 +1693,18 @@ where tick.symbol = news.symbol]]></programlisting>
 		</sect2>
 
 		<sect2 id="histdata_join_where" revision="1">
-			<title>SQL Query and the EQL <literal>Where</literal> Clause</title>
+			<title>SQL Query and the EPL <literal>Where</literal> Clause</title>
 			
 			<para>
-				Consider using the EQL <literal>where</literal> clause to join the SQL query result to your event stream. Similar to EQL joins and outer-joins that join event streams or patterns, the EQL <literal>where</literal> clause provides join criteria between the SQL query results and the event stream (as a side note, an SQL <literal>where</literal> clause is a filter of rows executed by your database on your database server before returning SQL query results).
+				Consider using the EPL <literal>where</literal> clause to join the SQL query result to your event stream. Similar to EPL joins and outer-joins that join event streams or patterns, the EPL <literal>where</literal> clause provides join criteria between the SQL query results and the event stream (as a side note, an SQL <literal>where</literal> clause is a filter of rows executed by your database on your database server before returning SQL query results).
 			</para>
 
 			<para>
-				Esper analyzes the expression in the EQL <literal>where</literal> clause, if present, and builds the appropriate indexes from that information at runtime, to ensure fast matching of event stream events to SQL query results, even if your SQL query returns a large number of rows. Your applications must ensure to configure a cache for your database using Esper configuration, as such indexes are held with regular data in a cache. If you application does not enable caching of SQL query results, the engine does not build indexes on cached data.
+				Esper analyzes the expression in the EPL <literal>where</literal> clause, if present, and builds the appropriate indexes from that information at runtime, to ensure fast matching of event stream events to SQL query results, even if your SQL query returns a large number of rows. Your applications must ensure to configure a cache for your database using Esper configuration, as such indexes are held with regular data in a cache. If you application does not enable caching of SQL query results, the engine does not build indexes on cached data.
 			</para>
 
 			<para>
-				The sample EQL statement below joins an event stream consisting of <literal>OrderEvent</literal> events with the results of an SQL query against the database named <literal>MyRefDB</literal> and table <literal>SymbolReference</literal>: 
+				The sample EPL statement below joins an event stream consisting of <literal>OrderEvent</literal> events with the results of an SQL query against the database named <literal>MyRefDB</literal> and table <literal>SymbolReference</literal>: 
 			</para>
 			
 			<programlisting><![CDATA[select symbol, symbolDesc from OrderEvent as orders,
@@ -1712,7 +1712,7 @@ where tick.symbol = news.symbol]]></programlisting>
   where reference.symbol = orders.symbol]]></programlisting>
 
 			<para>
-				Notice how the EQL <literal>where</literal> clause joins the <literal>OrderEvent</literal> stream to the <literal>SymbolReference</literal> table. In this example, the SQL query itself does not have a SQL <literal>where</literal> clause 
+				Notice how the EPL <literal>where</literal> clause joins the <literal>OrderEvent</literal> stream to the <literal>SymbolReference</literal> table. In this example, the SQL query itself does not have a SQL <literal>where</literal> clause 
 				and therefore returns all rows from table <literal>SymbolReference</literal>.
 			</para>
 
@@ -1721,7 +1721,7 @@ where tick.symbol = news.symbol]]></programlisting>
 			</para>
 			
 			<para>
-				If SQL result caching is enabled and your EQL <literal>where</literal> clause, as show in the above example, provides the properties to join, then the engine indexes the SQL query results in cache and retains the index together with the query result in cache. Thus your application can benefit from high performance index-based lookups as long as the SQL query results are found in cache. 
+				If SQL result caching is enabled and your EPL <literal>where</literal> clause, as show in the above example, provides the properties to join, then the engine indexes the SQL query results in cache and retains the index together with the query result in cache. Thus your application can benefit from high performance index-based lookups as long as the SQL query results are found in cache. 
 			</para>
 
 		</sect2>
@@ -1763,7 +1763,7 @@ select orderId, orderAmount from
 			<title>JDBC Implementation Overview</title>
 
 			<para>
-				The engine translates SQL queries into JDBC <literal>java.sql.PreparedStatement</literal> statements by replacing ${name} parameters with '?' placeholders. It obtains name and type of result columns from the compiled <literal>PreparedStatement</literal> meta data when the EQL statement is created.
+				The engine translates SQL queries into JDBC <literal>java.sql.PreparedStatement</literal> statements by replacing ${name} parameters with '?' placeholders. It obtains name and type of result columns from the compiled <literal>PreparedStatement</literal> meta data when the EPL statement is created.
 			</para>
 
 			<para>
@@ -1775,7 +1775,7 @@ select orderId, orderAmount from
 			<title>Oracle Drivers and No-Metadata Workaround</title>
 
 			<para>
-			   Certain JDBC database drivers are known to not return metadata for precompiled prepared SQL statements. This can be a problem as metadata is required by Esper. Esper obtains SQL result set metadata to validate an EQL statement and to provide column types for output events. JDBC drivers that do not provide metadata for precompiled SQL statements require a workaround. Such drivers do generally provide metadata for executed SQL statements, however do not provide the metadata for precompiled SQL statements.
+			   Certain JDBC database drivers are known to not return metadata for precompiled prepared SQL statements. This can be a problem as metadata is required by Esper. Esper obtains SQL result set metadata to validate an EPL statement and to provide column types for output events. JDBC drivers that do not provide metadata for precompiled SQL statements require a workaround. Such drivers do generally provide metadata for executed SQL statements, however do not provide the metadata for precompiled SQL statements.
 			</para>
 			
 			<para>
@@ -1797,7 +1797,7 @@ select orderId, orderAmount from
 			</para>
 
 			<para>
-				Alternatively, applications can choose not to provide an explicit sample SQL statement. If the EQL statement does not use the <literal>metadatasql</literal> syntax, the engine applies lexical analysis to the SQL statement. From the lexical analysis Esper generates a sample SQL statement adding a restrictive clause "where 1=0"  to the SQL statement.
+				Alternatively, applications can choose not to provide an explicit sample SQL statement. If the EPL statement does not use the <literal>metadatasql</literal> syntax, the engine applies lexical analysis to the SQL statement. From the lexical analysis Esper generates a sample SQL statement adding a restrictive clause "where 1=0"  to the SQL statement.
 			</para>
 
 			<para>
@@ -1814,7 +1814,7 @@ select orderId, orderAmount from
 		<title>Joining Non-Relational Data via Method Invocation</title>
 		
 		<indexterm><primary>join</primary><secondary>non-relational data via method invocation</secondary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>joining non-relational data via method invocation</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>joining non-relational data via method invocation</secondary></indexterm>
 
 		<para>
 			Your application may need to join data that originates from a web service, a distributed cache, an object-oriented database or simply data held in memory by your application. Esper accommodates this need by allowing
@@ -1845,7 +1845,7 @@ select orderId, orderAmount from
 		<sect2 id="joining_method_syntax" revision="1">
 			<title>Joining Method Invocation Results</title>
 			<para>
-				The syntax for a method invocation in the <literal>from</literal> clause of an EQL statement is:
+				The syntax for a method invocation in the <literal>from</literal> clause of an EPL statement is:
 			</para>
 			<synopsis>method:<emphasis>class_name</emphasis>.<emphasis>method_name</emphasis>[(<emphasis>parameter_expressions</emphasis>)]</synopsis>
 	
@@ -1934,7 +1934,7 @@ select orderId, orderAmount from
   }]]></programlisting>
 
 			<para>
-				The example above specifies the full Java class name of the class 'MyLookupLib' class in the EQL statement. The package name does not need to be part of the EQL if your application imports the package using the auto-import configuration through the API or XML, as outlined in <xref linkend="config-class--package-imports"/>.
+				The example above specifies the full Java class name of the class 'MyLookupLib' class in the EPL statement. The package name does not need to be part of the EPL if your application imports the package using the auto-import configuration through the API or XML, as outlined in <xref linkend="config-class--package-imports"/>.
 			</para>
 			
 		</sect2>
@@ -2022,7 +2022,7 @@ select orderId, orderAmount from
 		<title>Creating and Using Named Windows</title>
 		
 		<indexterm><primary>named window</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>named window</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>named window</secondary></indexterm>
 
 		<para>
 			A <emphasis>named window</emphasis> is a global data window that can take part in many statement queries, and that can be inserted-into and deleted-from by multiple statements.
@@ -2103,7 +2103,7 @@ select orderId, orderAmount from
 			
 			<indexterm><primary>on-delete</primary></indexterm>
 			<indexterm><primary>named window</primary><secondary>deleting from</secondary></indexterm>
-			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>deleting from</tertiary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>deleting from</tertiary></indexterm>
 
 			<para>
 				An <literal>on delete</literal> clause removes events from a named window. The clause can be used to remove all events, or only events that match certain criteria, or events that correlate with an arriving event or a pattern of arriving events.
@@ -2199,7 +2199,7 @@ where ord.id = win.id or flush.id = win.id]]></programlisting>
 			<title>Inserting Into Named Windows</title>
 			
 			<indexterm><primary>named window</primary><secondary>inserting into</secondary></indexterm>
-			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>inserting into</tertiary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>inserting into</tertiary></indexterm>
 
 			<para>
 				The <literal>insert into</literal> clause inserts events into named windows. Your application must ensure that the column names and types match the declared column names and types of the named window to be inserted into.
@@ -2222,7 +2222,7 @@ insert into OrdersWindow select name as symbol, vol as volume, price from FXOrde
 			</para>
 
 			<para>
-				The following EQL creates a named window for an event type backed by a Java class, and inserts into the window any 'OrderEvent' where the symbol value is IBM:
+				The following EPL creates a named window for an event type backed by a Java class, and inserts into the window any 'OrderEvent' where the symbol value is IBM:
 			</para>
 			<programlisting><![CDATA[create window OrdersWindow as com.mycompany.OrderEvent
 insert into OrdersWindow select * from com.mycompany.OrderEvent(symbol='IBM')]]></programlisting>
@@ -2264,7 +2264,7 @@ insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
 			<title>Selecting From Named Windows</title>
 			
 			<indexterm><primary>named window</primary><secondary>selecting from</secondary></indexterm>
-			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>selecting from</tertiary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>selecting from</tertiary></indexterm>
 
 			<para>
 				A named window can be referred to by any statement in the <literal>from</literal> clause of the statement. Filter criteria can also be specified. Additional views may be used onto named windows however such views cannot include data window views.
@@ -2319,7 +2319,7 @@ select * from AllOrdersNamedWindow.win:time(30 sec)]]></programlisting>
 			
 			<indexterm><primary>on-select</primary></indexterm>
 			<indexterm><primary>named window</primary><secondary>triggered select using On Select</secondary></indexterm>
-			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>triggered select using On Select</tertiary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>triggered select using On Select</tertiary></indexterm>
 
 			<para>
 				The <literal>on select</literal> clause performs a one-time, non-continuous query on a named window every time a triggering event arrives or a triggering pattern matches. The query can consider all events in the named window, or only events that match certain criteria, or events that correlate with an arriving event or a pattern of arriving events.
@@ -2343,7 +2343,7 @@ from <emphasis>window_name</emphasis> [as <emphasis>alias_name</emphasis>]
 			</para>
 				
 			<para>
-				The <emphasis>insert into</emphasis> clause works as described in <xref linkend="eql-insert-into"/>. The <emphasis>select</emphasis> clause is described in <xref linkend="eql-select-list"/>. For all clauses the semantics are equivalent to a join operation: The properties of the triggering event or events are available in the <literal>select</literal> clause and all other clauses.
+				The <emphasis>insert into</emphasis> clause works as described in <xref linkend="epl-insert-into"/>. The <emphasis>select</emphasis> clause is described in <xref linkend="epl-select-list"/>. For all clauses the semantics are equivalent to a join operation: The properties of the triggering event or events are available in the <literal>select</literal> clause and all other clauses.
 			</para>
 
 			<para>
@@ -2421,7 +2421,7 @@ order by symbol]]></programlisting>
 			
 			<indexterm><primary>on-insert</primary></indexterm>
 			<indexterm><primary>named window</primary><secondary>triggered playback using On Insert</secondary></indexterm>
-			<indexterm><primary>EQL</primary><secondary>named window</secondary><tertiary>triggered playback using On Insert</tertiary></indexterm>
+			<indexterm><primary>EPL</primary><secondary>named window</secondary><tertiary>triggered playback using On Insert</tertiary></indexterm>
 
 			<para>
 				The <literal>on insert</literal> clause is an <literal>on select</literal> clause as described in the prior chapter with the addition of an <literal>insert into</literal> clause. 
@@ -2450,7 +2450,7 @@ select win.* from OrdersNamedWindow as win]]></programlisting>
 		<title>Variables</title>
 		
 		<indexterm><primary>variable</primary></indexterm>
-		<indexterm><primary>EQL</primary><secondary>variable</secondary></indexterm>
+		<indexterm><primary>EPL</primary><secondary>variable</secondary></indexterm>
 
 		<para>
 			A <emphasis>variable</emphasis> is a scalar value that is available for use in all statements including patterns. Variables can be used in an expression anywhere in a statement as well as in the <literal>output</literal> clause for output rate limiting.

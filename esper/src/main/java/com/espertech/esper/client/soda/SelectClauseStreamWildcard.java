@@ -1,6 +1,5 @@
 package com.espertech.esper.client.soda;
 
-import java.io.Serializable;
 import java.io.StringWriter;
 
 /**
@@ -54,7 +53,7 @@ public class SelectClauseStreamWildcard implements SelectClauseElement
      * Renders the element in textual representation.
      * @param writer to output to
      */
-    public void toEQLElement(StringWriter writer)
+    public void toEPLElement(StringWriter writer)
     {
         writer.write(streamAliasName);
         writer.write(".*");

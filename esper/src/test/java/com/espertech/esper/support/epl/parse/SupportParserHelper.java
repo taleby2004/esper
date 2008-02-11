@@ -40,7 +40,7 @@ public class SupportParserHelper
         return parse(startRuleSelector, text);
     }
 
-    public static Tree parseEQL(String text) throws Exception
+    public static Tree parseEPL(String text) throws Exception
     {
         ParseRuleSelector startRuleSelector = new ParseRuleSelector()
         {

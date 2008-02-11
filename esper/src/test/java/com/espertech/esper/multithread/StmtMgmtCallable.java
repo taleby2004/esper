@@ -36,13 +36,13 @@ public class StmtMgmtCallable implements Callable
             {
                 for (Object[] statement : statements)
                 {
-                    boolean isEQL = (Boolean) statement[0];
+                    boolean isEPL = (Boolean) statement[0];
                     String statementText = (String) statement[1];
 
                     // Create EPL or pattern statement
                     EPStatement stmt;
                     ThreadLogUtil.trace("stmt create,", statementText);
-                    if (isEQL)
+                    if (isEPL)
                     {
                         stmt = engine.getEPAdministrator().createEPL(statementText);
                     }
@@ -55,7 +55,7 @@ public class StmtMgmtCallable implements Callable
                     // Add listener
                     SupportMTUpdateListener listener = new SupportMTUpdateListener();
                     LogUpdateListener logListener;
-                    if (isEQL)
+                    if (isEPL)
                     {
                         logListener = new LogUpdateListener(null);
                     }
@@ -79,7 +79,7 @@ public class StmtMgmtCallable implements Callable
                     for (int i = 0; i < newEvents.length; i++)
                     {
                         Object underlying = newEvents[i].getUnderlying();
-                        if (!isEQL)
+                        if (!isEPL)
                         {
                             underlying = newEvents[i].get("a");
                         }
@@ -104,7 +104,7 @@ public class StmtMgmtCallable implements Callable
                     for (int i = 0; i < newEvents.length; i++)
                     {
                         Object underlying = newEvents[i].getUnderlying();
-                        if (!isEQL)
+                        if (!isEPL)
                         {
                             underlying = newEvents[i].get("a");
                         }

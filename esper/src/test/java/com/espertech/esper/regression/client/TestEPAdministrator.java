@@ -83,7 +83,7 @@ public class TestEPAdministrator extends TestCase
         ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"s1", "s1--0", "s2"} , epService.getEPAdministrator().getStatementNames());
     }
 
-    public void testCreateEQLByName()
+    public void testCreateEPLByName()
     {
         String stmt = "select * from " + SupportBean.class.getName();
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmt, "s1");

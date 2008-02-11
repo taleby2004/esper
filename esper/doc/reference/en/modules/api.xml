@@ -9,7 +9,7 @@
         </para>
 
         <para>
-			Use Esper's administrative interface to create and manage EQL and pattern statements, and set runtime configurations, as discussed in <xref linkend="eql-intro"/> and <xref linkend="event-pattern-intro"/>. 
+			Use Esper's administrative interface to create and manage EPL  and pattern statements, and set runtime configurations, as discussed in <xref linkend="epl-intro"/> and <xref linkend="event-pattern-intro"/>. 
         </para>
         
         <para>
@@ -62,11 +62,11 @@
 		<sect2 id="api-admin-creating">
         <title>Creating Statements</title>
 			<para>
-				Create event pattern expression and EQL statements via the administrative interface <literal>EPAdministrator</literal>.
+				Create event pattern expression and EPL  statements via the administrative interface <literal>EPAdministrator</literal>.
 			</para>
 	
 			<para>
-				This code snippet gets an Esper engine then creates an event pattern and an EQL statement.
+				This code snippet gets an Esper engine then creates an event pattern and an EPL  statement.
 			</para>
 			<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
 EPAdministrator admin = epService.getEPAdministrator();
@@ -74,12 +74,12 @@ EPAdministrator admin = epService.getEPAdministrator();
 EPStatement 10secRecurTrigger = admin.createPattern(
   "every timer:at(*, *, *, *, *, */10)");
 
-EPStatement countStmt = admin.createEQL(
+EPStatement countStmt = admin.createEPL(
   "select count(*) from MarketDataBean.win:time(60 sec)");
 ]]></programlisting>
 
 			<para>
-				Note that event pattern expressions can also occur within EQL statements. This is outlined in more detail in <xref linkend="eql-from-clause-patterns"/>.
+				Note that event pattern expressions can also occur within EPL  statements. This is outlined in more detail in <xref linkend="epl-from-clause-patterns"/>.
 			</para>
 	
 			<para>
@@ -88,7 +88,7 @@ EPStatement countStmt = admin.createEQL(
 			</para>
 
 			<para>
-				The <literal>createPattern</literal> and <literal>createEQL</literal> methods return <literal>EPStatement</literal> instances. Statements are automatically started and active when created. A statement can also be stopped and started again via the <literal>stop</literal> and <literal>start</literal> methods shown in the code snippet below.
+				The <literal>createPattern</literal> and <literal>createEPL</literal> methods return <literal>EPStatement</literal> instances. Statements are automatically started and active when created. A statement can also be stopped and started again via the <literal>stop</literal> and <literal>start</literal> methods shown in the code snippet below.
 			</para>
 			<programlisting><![CDATA[countStmt.stop();
 countStmt.start();]]></programlisting>
@@ -429,7 +429,7 @@ public void end() {...}]]></programlisting>
 countStmt.addListener(myListener);]]></programlisting>
 
 			<para>			
-				EQL statements and event patterns publish old data and new data to registered <literal>UpdateListener</literal> listeners. 
+				EPL statements and event patterns publish old data and new data to registered <literal>UpdateListener</literal> listeners. 
 				New data published by statements is the events representing the new values of derived data held by the statement.
 				Old data published by statements constists of the events representing the prior values of derived data held by the statement.
 			</para>		
@@ -471,7 +471,7 @@ statement.addListener(myListener);]]></programlisting>
 			<para>
 				The next code snippet shows a short example of use of safe iterators:
 			</para>
-			<programlisting><![CDATA[EPStatement statement = epAdmin.createEQL("select avg(price) as avgPrice from MyTick");
+			<programlisting><![CDATA[EPStatement statement = epAdmin.createEPL("select avg(price) as avgPrice from MyTick");
 // .. send events into the engine
 // then use the pull API...
 SafeIterator<EventBean> safeIter = statement.safeIterator();
@@ -489,7 +489,7 @@ finally {
 			<para>
 				This is a short example of use of the regular iterator that is not safe for concurrent event processing:
 			</para>
-			<programlisting><![CDATA[double averagePrice = (Double) eqlStatement.iterator().next().get("average");]]></programlisting>
+			<programlisting><![CDATA[double averagePrice = (Double) eplStatement.iterator().next().get("average");]]></programlisting>
 			
 			<para>
 				The <literal>safeIterator</literal> and <literal>iterator</literal> methods can be used to pull results out of all statements, including statements that join streams, contain aggregation functions, pattern statements, and statements that contain a <literal>where</literal> clause, <literal>group by</literal> clause, <literal>having</literal> clause or <literal>order by</literal> clause.
@@ -626,7 +626,7 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
 				 Events that can be unmatched are all events that your application sends into the runtime via one of the <literal>sendEvent</literal> or <literal>route</literal> methods, or that have been generated via an <literal>insert into</literal> clause.
 			</para>
 			<para>
-				For an event to become unmatched by any statement, the event must not match any statement's event stream filter criteria. Note that the EQL <literal>where</literal> clause or <literal>having</literal> clause are not considered part of the filter criteria for a stream, as explained by example below.
+				For an event to become unmatched by any statement, the event must not match any statement's event stream filter criteria. Note that the EPL  <literal>where</literal> clause or <literal>having</literal> clause are not considered part of the filter criteria for a stream, as explained by example below.
 			</para>
 			<para>
 				In the next statement all MyEvent events match the statement's event stream filter criteria, regardless of the value of the 'quantity' property. As long as the below statement remains started, the engine would not deliver MyEvent events to your registered <literal>UnmatchedListener</literal> instance:
@@ -646,7 +646,7 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
 			<title>Emit Facility for Publish-Subscribe</title>
 			<para>
 				The <literal>emit</literal> and <literal>addEmittedListener</literal> methods can be used to emit events from a runtime to a registered set of one or more emitted event listeners. 
-				This mechanism is available as a service to enable channel-based publish-subscribe of events emitted from an engine instance via the <literal>emit</literal> method. Emitting events is not integrated with EQL and is available only via the <literal>EPRuntime</literal> interface.
+				This mechanism is available as a service to enable channel-based publish-subscribe of events emitted from an engine instance via the <literal>emit</literal> method. Emitting events is not integrated with EPL  and is available only via the <literal>EPRuntime</literal> interface.
 			</para>
 	
 			<para>
@@ -701,7 +701,7 @@ runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
         </para>
 		<programlisting><![CDATA[// Derive univariate statistics on price for the last 100 market data events
 String stmt = "select * from MarketDataBean(symbol='IBM').win:length(100).stat:uni(price)";
-EPStatement priceStatsView = epService.getEPAdministrator().createEQL(stmt);
+EPStatement priceStatsView = epService.getEPAdministrator().createEPL(stmt);
 priceStatsView.addListener(testListener);
 ]]></programlisting>
 		<programlisting><![CDATA[// Example listener code
@@ -802,23 +802,23 @@ We generally recommended that listener implementations do not block. By implemen
         
 		<indexterm><primary>EPStatementObjectModel interface</primary></indexterm>
         <para>
-			The statement object model is a set of classes that provide an object-oriented representation of an EQL or pattern statement. The object model classes are found in package <literal>com.espertech.esper.client.soda</literal>. An instance of <literal>EPStatementObjectModel</literal> represents a statement's object model.
+			The statement object model is a set of classes that provide an object-oriented representation of an EPL  or pattern statement. The object model classes are found in package <literal>com.espertech.esper.client.soda</literal>. An instance of <literal>EPStatementObjectModel</literal> represents a statement's object model.
         </para>
 
         <para>
-			The statement object model classes are a full and complete specification of a statement. All EQL and pattern constructs including expressions and sub-queries are available via the statement object model. 
+			The statement object model classes are a full and complete specification of a statement. All EPL  and pattern constructs including expressions and sub-queries are available via the statement object model. 
         </para>
         
         <para>
-			In conjunction with the administrative API, the statement object model provides the means to build, change or interrogate statements beyond the EQL or pattern syntax string representation. The object graph of the statement object model is fully navigable for easy querying by code, and is also serializable allowing applications to persist or transport statements in object form, when required.
+			In conjunction with the administrative API, the statement object model provides the means to build, change or interrogate statements beyond the EPL  or pattern syntax string representation. The object graph of the statement object model is fully navigable for easy querying by code, and is also serializable allowing applications to persist or transport statements in object form, when required.
         </para>
 
         <para>
-			The statement object model supports full round-trip from object model to EQL statement string and back to object model: A statement object model can be rendered into an EQL string representation via the <literal>toEQL</literal> method on <literal>EPStatementObjectModel</literal>. Further, the administrative API allows to compile a statement string into an object model representation via the <literal>compileEQL</literal> method on <literal>EPAdministrator</literal>.
+			The statement object model supports full round-trip from object model to EPL  statement string and back to object model: A statement object model can be rendered into an EPL  string representation via the <literal>toEPL</literal> method on <literal>EPStatementObjectModel</literal>. Further, the administrative API allows to compile a statement string into an object model representation via the <literal>compileEPL</literal> method on <literal>EPAdministrator</literal>.
         </para>
 
 		<para>
-			The <literal>create</literal> method on <literal>EPAdministrator</literal> creates and starts a statement as represented by an object model. In order to obtain an object model from an existing statement, obtain the statement expression text of the statement via the <literal>getText</literal> method on <literal>EPStatement</literal> and use the <literal>compileEQL</literal> method to obtain the object model.
+			The <literal>create</literal> method on <literal>EPAdministrator</literal> creates and starts a statement as represented by an object model. In order to obtain an object model from an existing statement, obtain the statement expression text of the statement via the <literal>getText</literal> method on <literal>EPStatement</literal> and use the <literal>compileEPL</literal> method to obtain the object model.
 		</para>
 
 		<para>
@@ -843,7 +843,7 @@ We generally recommended that listener implementations do not block. By implemen
 			<title>Building an Object Model</title>
 
 			<para>
-				A <literal>EPStatementObjectModel</literal> consists of an object graph representing all possible clauses that can be part of an EQL statement. 
+				A <literal>EPStatementObjectModel</literal> consists of an object graph representing all possible clauses that can be part of an EPL  statement. 
 			</para>
 				
 			<para>
@@ -895,7 +895,7 @@ model.setSelectClause(SelectClause.createWildcard());
 model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEvent")));]]></programlisting>
 
 			<para>
-				The model as above is equivalent to the EQL:
+				The model as above is equivalent to the EPL :
 			</para>
 
 			<programlisting><![CDATA[select * from com.chipmaker.ReadyEvent]]></programlisting>
@@ -922,7 +922,7 @@ model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEv
 				<listitem>
 					<para>
 						To compile an arbitrary sub-expression text into an <literal>Expression</literal> object representation, simply add the expression text to a <literal>where</literal> clause,
-						compile the EQL string into an object model via the <literal>compileEQL</literal> on <literal>EPAdministrator</literal>, and obtain the compiled <literal>where</literal>
+						compile the EPL  string into an object model via the <literal>compileEPL</literal> on <literal>EPAdministrator</literal>, and obtain the compiled <literal>where</literal>
 						from the <literal>EPStatementObjectModel</literal> via the <literal>getWhereClause</literal> method.
 					</para>
 				</listitem>
@@ -945,7 +945,7 @@ model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEv
 				<listitem>
 					<para>
 						To compile an arbitrary sub-expression text into an <literal>Expression</literal> object representation, simply add the expression text to a <literal>where</literal> clause,
-						compile the EQL string into an object model via the <literal>compileEQL</literal> method on <literal>EPAdministrator</literal>, and obtain the compiled <literal>where</literal> clause expression 
+						compile the EPL  string into an object model via the <literal>compileEPL</literal> method on <literal>EPAdministrator</literal>, and obtain the compiled <literal>where</literal> clause expression 
 						object from the <literal>EPStatementObjectModel</literal> via the <literal>getWhereClause</literal> method.
 					</para>
 				</listitem>
@@ -969,7 +969,7 @@ model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEv
 			</para>
 
 			<para>
-				In the next example we add a simple where-clause to the EQL as shown earlier:
+				In the next example we add a simple where-clause to the EPL  as shown earlier:
 			</para>
 			<programlisting><![CDATA[select * from com.chipmaker.ReadyEvent where line=8]]></programlisting>
 
@@ -1004,7 +1004,7 @@ where (line=8) or (line=10 and age<5)]]></programlisting>
 			</para>
 
 			<para>
-				Patterns in EQL are seen as a stream of events that consist of patterns matches. The <literal>PatternStream</literal> class represents a stream of pattern matches and contains a pattern expression within. 
+				Patterns in EPL  are seen as a stream of events that consist of patterns matches. The <literal>PatternStream</literal> class represents a stream of pattern matches and contains a pattern expression within. 
 			</para>
 
 			<para>
@@ -1027,7 +1027,7 @@ model.setFromClause(FromClause.create(PatternStream.create(pattern)));]]></progr
 			<title>Building a Select Statement</title>
 			
 			<para>
-				In this section we build a complete example statement and include all optional clauses in one EQL statement, to demonstrate the object model API.
+				In this section we build a complete example statement and include all optional clauses in one EPL  statement, to demonstrate the object model API.
 			</para>
 
 			<para>
@@ -1149,16 +1149,16 @@ EPStatement stmtOnSelect = epService.getEPAdministrator().create(model);]]></pro
         <title>Prepared Statement and Substitution Parameters</title>
         
         <para>
-			The <literal>prepare</literal> method that is part of the administrative API pre-compiles an EQL statement and stores the precompiled statement in an <literal>EPPreparedStatement</literal> object. This 
+			The <literal>prepare</literal> method that is part of the administrative API pre-compiles an EPL  statement and stores the precompiled statement in an <literal>EPPreparedStatement</literal> object. This 
 			object can then be used to efficiently start the parameterized statement multiple times.
         </para>
 
         <para>
-			Substitution parameters are inserted into an EQL statement as a single question mark character <literal>'?'</literal>. The engine assigns the first substitution parameter an index of 1 and subsequent parameters increment the index by one.
+			Substitution parameters are inserted into an EPL  statement as a single question mark character <literal>'?'</literal>. The engine assigns the first substitution parameter an index of 1 and subsequent parameters increment the index by one.
         </para>
 
         <para>
-			Substitution parameters can be inserted into any EQL construct that takes an expression. They are therefore valid in any clauses such as the select-clause, from-clause filters, where-clause, group-by-clause, having-clause or order-by-clause. 
+			Substitution parameters can be inserted into any EPL  construct that takes an expression. They are therefore valid in any clauses such as the select-clause, from-clause filters, where-clause, group-by-clause, having-clause or order-by-clause. 
 			Substitution parameters cannot be used as parameters to views, pattern observers and guards. They also cannot be used where a numeric constant is required rather then an expression.
         </para>
 
@@ -1175,7 +1175,7 @@ EPStatement stmtOnSelect = epService.getEPAdministrator().create(model);]]></pro
         </para>
 
 		<programlisting><![CDATA[String stmt = "select * from com.chipmaker.ReadyEvent(line=?)";
-EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 prepared.setObject(1, 8);
 EPStatement statement = epService.getEPAdministrator().create(prepared);]]></programlisting>
 	

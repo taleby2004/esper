@@ -46,15 +46,15 @@ public class TestInsertInto extends TestCase
 
         EPStatement stmt = epService.getEPAdministrator().create(model, "s1");
 
-        String EPL = "insert rstream into Event_1 " +
+        String epl = "insert rstream into Event_1 " +
                       "select intPrimitive, intBoxed " +
                       "from " + SupportBean.class.getName();
-        assertEquals(eql, model.toEPL());
-        assertEquals(eql, stmt.getText());
+        assertEquals(epl, model.toEPL());
+        assertEquals(epl, stmt.getText());
 
         EPStatementObjectModel modelTwo = epService.getEPAdministrator().compileEPL(model.toEPL());
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(eql, modelTwo.toEPL());
+        assertEquals(epl, modelTwo.toEPL());
     }
 
     public void testVariantOneOMToStmt() throws Exception
@@ -68,25 +68,25 @@ public class TestInsertInto extends TestCase
 
         EPStatement stmt = runAsserts(null, model);
 
-        String EPL = "insert into Event_1(delta, product) " +
+        String epl = "insert into Event_1(delta, product) " +
                       "select (intPrimitive - intBoxed) as deltaTag, (intPrimitive * intBoxed) as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100)";
-        assertEquals(eql, model.toEPL());
-        assertEquals(eql, stmt.getText());
+        assertEquals(epl, model.toEPL());
+        assertEquals(epl, stmt.getText());
     }
 
-    public void testVariantOneEQLToOMStmt() throws Exception
+    public void testVariantOneEPLToOMStmt() throws Exception
     {
-        String EPL = "insert into Event_1(delta, product) " +
+        String epl = "insert into Event_1(delta, product) " +
                       "select (intPrimitive - intBoxed) as deltaTag, (intPrimitive * intBoxed) as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(eql);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(eql, model.toEPL());
+        assertEquals(epl, model.toEPL());
 
         EPStatement stmt = runAsserts(null, model);
-        assertEquals(eql, stmt.getText());
+        assertEquals(epl, stmt.getText());
     }
 
     public void testVariantOne()

@@ -9,7 +9,7 @@ import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 
-public class SupportEQLTreeWalkerFactory
+public class SupportEPLTreeWalkerFactory
 {
     public static EPLTreeWalker makeWalker(Tree tree, EngineImportService engineImportService, VariableService variableService)
     {

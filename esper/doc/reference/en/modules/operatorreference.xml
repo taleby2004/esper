@@ -1,11 +1,11 @@
-<chapter id="eql-operator">
-    <title>EQL Reference: Operators</title>
+<chapter id="epl-operator">
+    <title>EPL Reference: Operators</title>
         		
 		<para>
 			Esper arithmetic and logical operator precedence follows Java standard arithmetic and logical operator precedence.
 		</para>
 
-		<sect1 id="eql-operator-ref-arithmetic">
+		<sect1 id="epl-operator-ref-arithmetic">
 			<title>Arithmetic Operators</title>
 
 			<indexterm><primary>arithmetic operators</primary></indexterm>
@@ -14,7 +14,7 @@
 				The below table outlines the arithmetic operators available.
 			</para>
 	
-			<table frame="topbot" id="eql-arith-operators" revision="2">
+			<table frame="topbot" id="epl-arith-operators" revision="2">
 				<title>Syntax and results of arithmetic operators</title>
 				<tgroup cols="2">
 					<colspec colwidth="2.0*"/>
@@ -49,7 +49,7 @@
 			</table>
 		</sect1>		
 		
-		<sect1 id="eql-operator-ref-logical">
+		<sect1 id="epl-operator-ref-logical">
 			<title>Logical And Comparsion Operators</title>
 
 			<indexterm><primary>logical and comparison operators</primary></indexterm>
@@ -58,7 +58,7 @@
 				The below table outlines the logical and comparison operators available.
 			</para>
 	
-			<table frame="topbot" id="eql-log-operators" revision="2">
+			<table frame="topbot" id="epl-log-operators" revision="2">
 				<title>Syntax and results of logical and comparison operators</title>
 				<tgroup cols="2">
 					<colspec colwidth="2.0*"/>
@@ -99,7 +99,7 @@
 			</table>
 		</sect1>		
 		
-		<sect1 id="eql-operator-ref-string">
+		<sect1 id="epl-operator-ref-string">
 			<title>Concatenation Operators</title>
 
 			<indexterm><primary>concatenation operators</primary></indexterm>
@@ -108,7 +108,7 @@
 				The below table outlines the concatenation operators available.
 			</para>
 	
-			<table frame="topbot" id="eql-concat-operators" revision="2">
+			<table frame="topbot" id="epl-concat-operators" revision="2">
 				<title>Syntax and results of concatenation operators</title>
 				<tgroup cols="2">
 					<colspec colwidth="2.0*"/>
@@ -131,7 +131,7 @@
 			</table>
 		</sect1>		
 
-		<sect1 id="eql-operator-ref-binary">
+		<sect1 id="epl-operator-ref-binary">
 			<title>Binary Operators</title>
 
 			<indexterm><primary>binary operators</primary></indexterm>
@@ -140,7 +140,7 @@
 				The below table outlines the binary operators available.
 			</para>
 	
-			<table frame="topbot" id="eql-binary-operators" revision="2">
+			<table frame="topbot" id="epl-binary-operators" revision="2">
 				<title>Syntax and results of binary operators</title>
 				<tgroup cols="2">
 					<colspec colwidth="2.0*"/>
@@ -175,7 +175,7 @@
 			</table>
 		</sect1>		
 
-		<sect1 id="eql-operator-ref-array">
+		<sect1 id="epl-operator-ref-array">
 			<title>Array Definition Operator</title>
 
 			<indexterm><primary>array definition operator</primary></indexterm>
@@ -205,7 +205,7 @@
 			<programlisting><![CDATA[select * from RFIDEvent where Filter.myFilter(zone, {1,2,3})]]></programlisting>
 		</sect1>
 
-		<sect1 id="eql-operator-ref-keyword-in">
+		<sect1 id="epl-operator-ref-keyword-in">
 			<title>The '<literal>in</literal>' Keyword</title>
 
 			<indexterm><primary><literal>in</literal> set operator</primary></indexterm>
@@ -234,7 +234,7 @@
 			<programlisting><![CDATA[select * from RFIDEvent where command = 'OBSERVATION' or command = 'SIGNAL']]></programlisting>
 		</sect1>		
 
-		<sect1 id="eql-operator-ref-keyword-between">
+		<sect1 id="epl-operator-ref-keyword-between">
 			<title>The '<literal>between</literal>' Keyword</title>
 
 			<indexterm><primary><literal>between</literal> operator</primary></indexterm>
@@ -267,7 +267,7 @@
 			<programlisting><![CDATA[]]>select * from StockTickEvent where price between 60 and 55</programlisting>
 		</sect1>		
 
-		<sect1 id="eql-operator-ref-keyword-like">
+		<sect1 id="epl-operator-ref-keyword-like">
 			<title>The '<literal>like</literal>' Keyword</title>
 
 			<indexterm><primary><literal>like</literal> operator</primary></indexterm>
@@ -297,7 +297,7 @@
 			<programlisting><![CDATA[select * from PersonLocationEvent where suffix like '!_' escape '!']]></programlisting>
 		</sect1>		
 
-		<sect1 id="eql-operator-ref-keyword-regexp">
+		<sect1 id="epl-operator-ref-keyword-regexp">
 			<title>The '<literal>regexp</literal>' Keyword</title>
 
 			<indexterm><primary><literal>regexp</literal> operator</primary></indexterm>

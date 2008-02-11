@@ -47,9 +47,9 @@ public class ResultAssertExecution
 
         // Second execution is for IRSTREAM, asserting both the insert and remove stream
         stmt.stop();
-        String EPL = stmt.getText();
-        String irStreamEQL = eql.replace("select ", "select irstream ");
-        stmt = engine.getEPAdministrator().createEPL(irStreamEQL);
+        String epl = stmt.getText();
+        String irStreamEPL = epl.replace("select ", "select irstream ");
+        stmt = engine.getEPAdministrator().createEPL(irStreamEPL);
         stmt.addListener(listener);
         execute(isAssert, false);
     }

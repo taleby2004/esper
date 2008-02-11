@@ -12,7 +12,7 @@ import com.espertech.esper.pattern.EvalNode;
 import com.espertech.esper.pattern.EvalNodeAnalysisResult;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.parse.SupportParserHelper;
-import com.espertech.esper.support.epl.parse.SupportEQLTreeWalkerFactory;
+import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 
 import java.util.List;
@@ -208,10 +208,10 @@ public class TestPatternStreamSpecRaw extends TestCase
 
     private static PatternStreamSpecRaw makeSpec(String expression) throws Exception
     {
-        Tree ast = SupportParserHelper.parseEQL(expression);
+        Tree ast = SupportParserHelper.parseEPL(expression);
         SupportParserHelper.displayAST(ast);
 
-        EPLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
+        EPLTreeWalker walker = SupportEPLTreeWalkerFactory.makeWalker(ast);
         walker.startEPLExpressionRule();
 
         PatternStreamSpecRaw spec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);

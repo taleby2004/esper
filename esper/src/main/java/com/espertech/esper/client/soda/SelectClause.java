@@ -263,7 +263,7 @@ public class SelectClause implements Serializable
         for (SelectClauseElement element : selectList)
         {
             writer.write(delimiter);
-            element.toEQLElement(writer);
+            element.toEPLElement(writer);
             delimiter = ", ";
         }
         writer.write(' ');

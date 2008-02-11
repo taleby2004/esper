@@ -221,7 +221,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 		</para>
 
 		<para>
-			Esper supports JavaBeans-style event classes that extend a superclass or implement one or more interfaces. Also, Esper event pattern and EQL statements can refer to Java interface classes and abstract classes. 
+			Esper supports JavaBeans-style event classes that extend a superclass or implement one or more interfaces. Also, Esper event pattern and EPL statements can refer to Java interface classes and abstract classes. 
 		</para>
 
 		<para>
@@ -282,19 +282,19 @@ select detail?.direction? from OrderEvent]]></programlisting>
 			</para>
 	
 			<para>
-				<emphasis>Indexed</emphasis> event properties require either one of the following getter-methods. A method that takes an integer-type key value and returns the property value, such as the <literal>getSubordinate</literal> method. Or a method that returns an array-type such as the <literal>getSubordinates</literal> getter method, which returns an array of Employee. In an EQL or event pattern statement, indexed properties are accessed via the <literal>property[index]</literal> syntax.
+				<emphasis>Indexed</emphasis> event properties require either one of the following getter-methods. A method that takes an integer-type key value and returns the property value, such as the <literal>getSubordinate</literal> method. Or a method that returns an array-type such as the <literal>getSubordinates</literal> getter method, which returns an array of Employee. In an EPL or event pattern statement, indexed properties are accessed via the <literal>property[index]</literal> syntax.
 			</para>
 	
 			<para>
-				<emphasis>Mapped</emphasis> event properties require a getter-method that takes a String-typed key value and returns the property value, such as the <literal>getAddress</literal> method. In an EQL or event pattern statement, mapped properties are accessed via the <literal>property('key')</literal> syntax.
+				<emphasis>Mapped</emphasis> event properties require a getter-method that takes a String-typed key value and returns the property value, such as the <literal>getAddress</literal> method. In an EPL or event pattern statement, mapped properties are accessed via the <literal>property('key')</literal> syntax.
 			</para>
 	
 			<para>
-				<emphasis>Nested</emphasis> event properties require a getter-method that returns the nesting object. The <literal>getAddress</literal> and <literal>getSubordinate</literal> methods are mapped and indexed properties that return a nesting object. In an EQL or event pattern statement, nested properties are accessed via the <literal>property.nestedProperty</literal> syntax.
+				<emphasis>Nested</emphasis> event properties require a getter-method that returns the nesting object. The <literal>getAddress</literal> and <literal>getSubordinate</literal> methods are mapped and indexed properties that return a nesting object. In an EPL or event pattern statement, nested properties are accessed via the <literal>property.nestedProperty</literal> syntax.
 			</para>
 
 			<para>
-				All event pattern and EQL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions:
+				All event pattern and EPL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions:
 			</para>
 
 <programlisting><![CDATA[every EmployeeEvent(firstName='myName')
@@ -305,7 +305,7 @@ every EmployeeEvent(subordinate[0].address('home').streetName='Water Street')
 ]]></programlisting>
 
 			<para>
-				Similarly, the syntax can be used in EQL statements in all places where an event property name is expected, such as in select lists, where-clauses or join criteria.
+				Similarly, the syntax can be used in EPL statements in all places where an event property name is expected, such as in select lists, where-clauses or join criteria.
 			</para>
 
 <programlisting><![CDATA[select firstName, address('work'), subordinate[0].name, subordinate[1].name
@@ -409,7 +409,7 @@ where address('work').streetName = 'Park Ave'
 		</para>
 
 		<para>
-			The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names specified by pattern or EQL statements. 
+			The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names specified by pattern or EPL statements. 
 		</para>
 			
 		<para>

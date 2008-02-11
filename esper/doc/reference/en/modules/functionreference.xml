@@ -1,7 +1,7 @@
 <chapter id="functionreference">
-    <title>EQL Reference: Functions</title>
+    <title>EPL Reference: Functions</title>
         
-	<sect1 id="eql-single-row-function-ref">
+	<sect1 id="epl-single-row-function-ref">
 		<title>Single-row Function Reference</title>
 		
 		<para>
@@ -58,7 +58,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			The below table outlines the built-in single-row functions available.
 		</para>
 
-		<table frame="topbot" id="eql-single-row-func" revision="2">
+		<table frame="topbot" id="epl-single-row-func" revision="2">
 			<title>Syntax and results of single-row functions</title>
 			<tgroup cols="2">
 				<colspec colwidth="2.0*"/>
@@ -170,7 +170,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			</tgroup>
 		</table>
 
-		<sect2 id="eql-single-row-function-ref-case">
+		<sect2 id="epl-single-row-function-ref-case">
 			<title>The <literal>Case</literal> Control Flow Function</title>
 
 			<indexterm><primary>case control flow function</primary></indexterm>
@@ -195,7 +195,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 		</sect2>
 		
 
-		<sect2 id="eql-single-row-function-cast">
+		<sect2 id="epl-single-row-function-cast">
 			<title>The <literal>Cast</literal> Function</title>
 
 			<indexterm><primary>cast function</primary></indexterm>
@@ -260,7 +260,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			</itemizedlist>
 		</sect2>
 
-		<sect2 id="eql-single-row-function-ref-coalesce">
+		<sect2 id="epl-single-row-function-ref-coalesce">
 			<title>The <literal>Coalesce</literal> Function</title>
 
 			<indexterm><primary>coalesce function</primary></indexterm>
@@ -275,7 +275,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			<programlisting>select coalesce(null, 'foo') from ...</programlisting>			
 		</sect2>
 
-		<sect2 id="eql-single-row-function-ref-currenttime">
+		<sect2 id="epl-single-row-function-ref-currenttime">
 			<title>The <literal>Current_Timestamp</literal> Function</title>
 
 			<indexterm><primary>current_timestamp function</primary></indexterm>
@@ -296,7 +296,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 select current_timestamp from MyEvent]]></programlisting>
 		</sect2>
 
-		<sect2 id="eql-single-row-function-exists">
+		<sect2 id="epl-single-row-function-exists">
 			<title>The <literal>Exists</literal> Function</title>
 
 			<indexterm><primary>exists function</primary></indexterm>
@@ -317,7 +317,7 @@ select current_timestamp from MyEvent]]></programlisting>
 			<programlisting><![CDATA[select exists(item.serviceName?) from OrderEvent]]></programlisting> 
 		</sect2>
 
-		<sect2 id="eql-single-row-function-instanceof">
+		<sect2 id="epl-single-row-function-instanceof">
 			<title>The <literal>Instance-Of</literal> Function</title>
 
 			<indexterm><primary>instance-of function</primary></indexterm>
@@ -370,7 +370,7 @@ select current_timestamp from MyEvent]]></programlisting>
 			</para>
 		</sect2>
 
-		<sect2 id="eql-single-row-function-ref-minmax">
+		<sect2 id="epl-single-row-function-ref-minmax">
 			<title>The <literal>Min</literal> and <literal>Max</literal> Functions</title>
 
 			<indexterm><primary>min function</primary></indexterm>
@@ -396,7 +396,7 @@ select current_timestamp from MyEvent]]></programlisting>
 	where ticks.symbol = news.symbol</programlisting>
 		</sect2>
 
-		<sect2 id="eql-single-row-function-ref-previous">
+		<sect2 id="epl-single-row-function-ref-previous">
 			<title>The <literal>Previous</literal> Function</title>
 
 			<indexterm><primary>previous function</primary></indexterm>
@@ -434,7 +434,7 @@ select current_timestamp from MyEvent]]></programlisting>
 			</para>
 			<programlisting>select prev(1, symbol) from Trade.win:time_batch(1 min)</programlisting>			
 
-			<sect3 id="eql-single-row-function-ref-prev-group">
+			<sect3 id="epl-single-row-function-ref-prev-group">
 				<title>Previous Event per Group</title>
 
 				<para>
@@ -457,7 +457,7 @@ select current_timestamp from MyEvent]]></programlisting>
 from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 			</sect3>
 			
-			<sect3 id="eql-single-row-function-ref-prev-restrictions">
+			<sect3 id="epl-single-row-function-ref-prev-restrictions">
 				<title>Restrictions</title>
 				<para>
 						The following restrictions apply to the <literal>prev</literal> functions and its results:
@@ -477,7 +477,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 				</itemizedlist>
 			</sect3>
 
-			<sect3 id="eql-single-row-function-ref-prev-prior">
+			<sect3 id="epl-single-row-function-ref-prev-prior">
 				<title>Comparison to the <literal>prior</literal> Function</title>
 				<para>
 					The <literal>prev</literal> function is similar to the <literal>prior</literal> function. The key differences between the two functions are as follows:				 
@@ -510,7 +510,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 			
 		</sect2>
 
-		<sect2 id="eql-single-row-function-ref-prior">
+		<sect2 id="epl-single-row-function-ref-prior">
 			<title>The <literal>Prior</literal> Function</title>
 
 			<indexterm><primary>prior function</primary></indexterm>
@@ -539,7 +539,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 		</sect2>
 	</sect1>		
 	
-	<sect1 id="eql-function-aggregation">
+	<sect1 id="epl-function-aggregation">
 		<title>Aggregate Functions</title>
 
 		<indexterm><primary>aggregation functions</primary><secondary>overview</secondary></indexterm>
@@ -547,7 +547,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 			The syntax of the aggregation functions and the results they produce are shown in below table.
 		</para>
 
-		<table frame="topbot" id="eql-grouping-aggregate-func-table" revision="2">
+		<table frame="topbot" id="epl-grouping-aggregate-func-table" revision="2">
 			<title>Syntax and results of aggregate functions</title>
 			<tgroup cols="2">
 				<colspec colwidth="1*"/>
@@ -636,7 +636,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 		</table>
 	</sect1>		
 
-	<sect1 id="eql-function-user-defined">
+	<sect1 id="epl-function-user-defined">
 		<title>User-Defined Functions</title>
 		
 		<indexterm><primary>user-defined function</primary></indexterm>
@@ -648,7 +648,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 		 </para>
 
 		 <para>
-			 User-defined functions can be also be invoked on instances of an event: Please see <xref linkend="eql-from-clause-stream-name"/> to invoke event instance methods on a named stream.
+			 User-defined functions can be also be invoked on instances of an event: Please see <xref linkend="epl-from-clause-stream-name"/> to invoke event instance methods on a named stream.
 		 </para>
 
 		 <para>
@@ -660,7 +660,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 from StockTick.win:time(30 sec)]]></programlisting>
 
 		 <para>
-			 User-defined functions also take array parameters as this example shows. The section on <xref linkend="eql-operator-ref-array"/> outlines in more detail the types of arrays produced.
+			 User-defined functions also take array parameters as this example shows. The section on <xref linkend="epl-operator-ref-array"/> outlines in more detail the types of arrays produced.
 		 </para>		
 		<programlisting><![CDATA[select * from RFIDEvent where com.mycompany.rfid.MyChecker.isInZone(zone, {10, 20, 30})]]></programlisting>
 

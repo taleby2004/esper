@@ -2,13 +2,13 @@ package com.espertech.esper.epl.parse;
 
 import junit.framework.TestCase;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.epl.parse.SupportEQLTreeWalkerFactory;
+import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
 import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class TestEQLParser extends TestCase
+public class TestEPLParser extends TestCase
 {
     public void testDisplayAST() throws Exception
     {
@@ -20,7 +20,7 @@ public class TestEQLParser extends TestCase
         SupportParserHelper.displayAST(ast);
 
         log.debug(".testDisplayAST walking...");
-        EPLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
+        EPLTreeWalker walker = SupportEPLTreeWalkerFactory.makeWalker(ast);
         walker.startEPLExpressionRule();
     }
 
@@ -342,7 +342,7 @@ public class TestEQLParser extends TestCase
         assertIsValid("insert istream into MyEvent select 1 from b.win:length(1)");
         assertIsValid("insert rstream into MyEvent select 1 from b.win:length(1)");
 
-        // pattern inside EQL
+        // pattern inside
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "]");
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "] as xyz");
         assertIsValid("select * from pattern [a=" + SupportBean.class.getName() + "].win:length(100) as xyz");
@@ -587,31 +587,31 @@ public class TestEQLParser extends TestCase
     public void testBitWiseCases() throws Exception
     {
         String className = SupportBean.class.getName();
-        String eqlSmt = "select (intPrimitive & intBoxed) from " + className;
-        assertIsValid(eqlSmt + ".win:lenght()");
-        eqlSmt = "select boolPrimitive|boolBoxed from " + className;
-        assertIsValid(eqlSmt + "().std:win(20)");
-        eqlSmt = "select bytePrimitive^byteBoxed from " + className;
-        assertIsValid(eqlSmt + "().win:some_view({})");
+        String eplSmt = "select (intPrimitive & intBoxed) from " + className;
+        assertIsValid(eplSmt + ".win:lenght()");
+        eplSmt = "select boolPrimitive|boolBoxed from " + className;
+        assertIsValid(eplSmt + "().std:win(20)");
+        eplSmt = "select bytePrimitive^byteBoxed from " + className;
+        assertIsValid(eplSmt + "().win:some_view({})");
     }
 
     public void testIfThenElseCase() throws Exception
      {
          String className = SupportBean.class.getName();
-         String eqlSmt = "select case when 1 then (a + 1) when 2 then (a*2) end from " + className;
-         assertIsValid(eqlSmt + ".win:lenght()");
-         eqlSmt = "select case a when 1 then (a + 1) end from " + className;
-         assertIsValid(eqlSmt + ".win:lenght()");
-         eqlSmt = "select case count(*) when 10 then sum(a) when 20 then max(a*b) end from " +  className;
-         assertIsValid(eqlSmt + ".win:lenght()");
-         eqlSmt = "select case (a>b) when true then a when false then b end from " +  className;
-         assertIsValid(eqlSmt + ".win:lenght()");
-         eqlSmt = "select case a when true then a when false then b end from " +  className;
-         assertIsValid(eqlSmt + ".win:lenght()");
-         eqlSmt = "select case when (a=b) then (a+b) when false then b end as p1 from " +  className;
-         assertIsValid(eqlSmt + ".win:lenght()");
-         eqlSmt = "select case (a+b) when (a*b) then count(a+b) when false then a ^ b end as p1 from " +  className;
-         assertIsValid(eqlSmt + ".win:lenght()");
+         String eplSmt = "select case when 1 then (a + 1) when 2 then (a*2) end from " + className;
+         assertIsValid(eplSmt + ".win:lenght()");
+         eplSmt = "select case a when 1 then (a + 1) end from " + className;
+         assertIsValid(eplSmt + ".win:lenght()");
+         eplSmt = "select case count(*) when 10 then sum(a) when 20 then max(a*b) end from " +  className;
+         assertIsValid(eplSmt + ".win:lenght()");
+         eplSmt = "select case (a>b) when true then a when false then b end from " +  className;
+         assertIsValid(eplSmt + ".win:lenght()");
+         eplSmt = "select case a when true then a when false then b end from " +  className;
+         assertIsValid(eplSmt + ".win:lenght()");
+         eplSmt = "select case when (a=b) then (a+b) when false then b end as p1 from " +  className;
+         assertIsValid(eplSmt + ".win:lenght()");
+         eplSmt = "select case (a+b) when (a*b) then count(a+b) when false then a ^ b end as p1 from " +  className;
+         assertIsValid(eplSmt + ".win:lenght()");
      }
 
     private void tryJoin(String joinType) throws Exception
@@ -662,8 +662,8 @@ public class TestEQLParser extends TestCase
 
     private Tree parse(String expression) throws Exception
     {
-        return SupportParserHelper.parseEQL(expression);
+        return SupportParserHelper.parseEPL(expression);
     }
 
-    static Log log = LogFactory.getLog(TestEQLParser.class);
+    static Log log = LogFactory.getLog(TestEPLParser.class);
 }

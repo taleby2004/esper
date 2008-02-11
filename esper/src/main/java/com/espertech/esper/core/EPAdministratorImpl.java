@@ -117,7 +117,7 @@ public class EPAdministratorImpl implements EPAdministrator
 
     private EPStatement createEPLStmt(String eplStatement, String statementName) throws EPException
     {
-        StatementSpecRaw statementSpec = compileEQL(eplStatement, statementName, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEPL(eplStatement, statementName, services, defaultStreamSelector);
         EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName);
 
         log.debug(".createEPLStmt Statement created and started");
@@ -147,10 +147,10 @@ public class EPAdministratorImpl implements EPAdministrator
         return statement;
     }
 
-    public EPPreparedStatement prepareEPL(String eqlExpression) throws EPException
+    public EPPreparedStatement prepareEPL(String eplExpression) throws EPException
     {
         // compile to specification
-        StatementSpecRaw statementSpec = compileEQL(eqlExpression, null, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEPL(eplExpression, null, services, defaultStreamSelector);
 
         // map to object model thus finding all substitution parameters and their indexes
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
@@ -189,7 +189,7 @@ public class EPAdministratorImpl implements EPAdministrator
 
     public EPStatementObjectModel compileEPL(String eplStatement) throws EPException
     {
-        StatementSpecRaw statementSpec = compileEQL(eplStatement, null, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEPL(eplStatement, null, services, defaultStreamSelector);
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
         if (unmapped.getIndexedParams().size() != 0)
         {
@@ -244,7 +244,7 @@ public class EPAdministratorImpl implements EPAdministrator
      * @param services is the context
      * @return statement specification
      */
-    protected static StatementSpecRaw compileEQL(String eplStatement, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
+    protected static StatementSpecRaw compileEPL(String eplStatement, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
         if (log.isDebugEnabled())
         {

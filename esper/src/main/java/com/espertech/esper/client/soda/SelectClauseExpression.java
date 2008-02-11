@@ -79,7 +79,7 @@ public class SelectClauseExpression implements SelectClauseElement
      * Renders the element in textual representation.
      * @param writer to output to
      */
-    public void toEQLElement(StringWriter writer)
+    public void toEPLElement(StringWriter writer)
     {
         expression.toEPL(writer);
         if (asName != null)

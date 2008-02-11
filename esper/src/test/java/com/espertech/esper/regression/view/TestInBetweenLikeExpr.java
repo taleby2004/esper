@@ -354,14 +354,14 @@ public class TestInBetweenLikeExpr extends TestCase
         selectTestCase.stop();
     }
 
-    private void tryString(EPStatementObjectModel model, String eql, String[] input, boolean[] result) throws Exception
+    private void tryString(EPStatementObjectModel model, String epl, String[] input, boolean[] result) throws Exception
     {
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
-        assertEquals(eql, model.toEPL());
+        assertEquals(epl, model.toEPL());
 
-        EPStatementObjectModel compiled = epService.getEPAdministrator().compileEPL(eql);
+        EPStatementObjectModel compiled = epService.getEPAdministrator().compileEPL(epl);
         compiled = (EPStatementObjectModel) SerializableObjectCopier.copy(compiled);
-        assertEquals(eql, compiled.toEPL());
+        assertEquals(epl, compiled.toEPL());
 
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));

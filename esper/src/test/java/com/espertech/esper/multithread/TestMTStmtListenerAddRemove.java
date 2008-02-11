@@ -37,20 +37,20 @@ public class TestMTStmtListenerAddRemove extends TestCase
         tryStatementListenerAddRemove(numThreads, stmt, false, 10000);
     }
 
-    public void testEQL() throws Exception
+    public void testEPL() throws Exception
     {
         EPStatement stmt = engine.getEPAdministrator().createEPL("select * from " + EVENT_NAME + " (symbol='IBM', feed='RT')");
         int numThreads = 2;
         tryStatementListenerAddRemove(numThreads, stmt, true, 10000);
     }
 
-    private void tryStatementListenerAddRemove(int numThreads, EPStatement statement, boolean isEQL, int numRepeats) throws Exception
+    private void tryStatementListenerAddRemove(int numThreads, EPStatement statement, boolean isEPL, int numRepeats) throws Exception
     {
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
         Future future[] = new Future[numThreads];
         for (int i = 0; i < numThreads; i++)
         {
-            Callable callable = new StmtListenerAddRemoveCallable(engine, statement, isEQL, numRepeats);
+            Callable callable = new StmtListenerAddRemoveCallable(engine, statement, isEPL, numRepeats);
             future[i] = threadPool.submit(callable);
         }
 

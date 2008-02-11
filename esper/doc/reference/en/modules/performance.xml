@@ -209,7 +209,7 @@ select * from MarketData(price+10>50) ]]></programlisting>
 				After compiling the statement, obtain the EventType and pass the type to the listener:
 			</para>
 	
-<programlisting><![CDATA[EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+<programlisting><![CDATA[EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
 MyGetterUpdateListener listener = new MyGetterUpdateListener(stmt.getEventType());]]></programlisting>
 
 			<para>
