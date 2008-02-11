@@ -72,7 +72,7 @@ public class CEPProvider {
         }
 
         public void registerStatement(String statement, String statementID) {
-            EPStatement stmt = epAdministrator.createEQL(statement, statementID);
+            EPStatement stmt = epAdministrator.createEPL(statement, statementID);
             stmt.addListener(updateListener);
         }
 

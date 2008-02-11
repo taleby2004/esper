@@ -107,9 +107,9 @@
           It is a derivative port of the Esper mainline that has been ported to the CLR.
 		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, NEsper works as 
 		  real time engine that triggers actions when event conditions occur among event streams.
-		  A tailored Event Query Language (EQL) allows registering queries in the engine, using objects to represent events. 
-		  A listener delegate - will then be called by the engine when the EQL condition is matched as 
-		  events come in. The EQL allows expressing complex matching conditions that include temporal windows, 
+		  A tailored Event Processing Language (EPL) allows registering queries in the engine, using objects to represent events. 
+		  A listener delegate - will then be called by the engine when the EPL condition is matched as 
+		  events come in. The EPL allows expressing complex matching conditions that include temporal windows, 
 		  and join different event streams, as well as filter and sort them.
         </p>
         <p>
@@ -119,7 +119,7 @@
         </p>
         <p>
 		  A simple example could be to compute the average stock price of the BEA tick on a sliding window of 30 seconds. 
-		  Given a StockTick event bean with a price and symbol property and the EQL 
+		  Given a StockTick event bean with a price and symbol property and the EPL 
 		  "select avg(price) from StockTick.win:time(30 sec) where symbol='BEA'", 
 		  a delegate would get notified as tick come in - and in real world millions of ticks can come in - 
 		  so there's no way to store them all to later query them using a classical database architecture.
@@ -214,7 +214,7 @@
         	Nesper is the only CLR-based open source Event Stream Processing out there - and this is not to be confused with 
         	classical rules engines. Compared to commercial ESP engines implementations, 
         	Nesper may lack high availability options in the 1.3 release, but its open source nature is a driver to get the 
-        	Event query language right, and get the CLR community up to speed on those concepts - 
+        	Event processing language right, and get the CLR community up to speed on those concepts - 
         	before tackling enterprise grade requirements in upcoming versions.			
 		</p>
 		<p>

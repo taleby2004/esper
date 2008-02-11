@@ -9,7 +9,7 @@ Tutorial
 	It is designed for high-volume event correlation where millions of events coming in would make it impossible to store 
 	them all to later query them using classical database architecture. 
 	
-	A tailored Event Query Language (EQL) allows expressing rich event conditions, correlation, possibly spanning time windows, 
+	A tailored Event Processing Language (EPL) allows expressing rich event conditions, correlation, possibly spanning time windows, 
 	thus minimizing the development effort required to set up a system that can react to complex situations.
 
 	Esper is a lightweight kernel written in Java which is fully embeddable into any Java process, JEE application server or 
@@ -40,15 +40,15 @@ Tutorial
 	Such concepts are a key foundation of EDA, and have been under active research in more than the last 10 years. 
 	Awareness of the importance of such systems in real-world architectures has started to emerge only recently.
 
-	In Esper, a tailored EQL allows registering queries in the engine. A listener class--which is basically a POJO--will then be called by the 
-	engine when the EQL condition is matched as events flow in. The EQL enables to express complex matching conditions that include temporal 
+	In Esper, a tailored EPL allows registering queries in the engine. A listener class--which is basically a POJO--will then be called by the 
+	engine when the EPL condition is matched as events flow in. The EPL enables to express complex matching conditions that include temporal 
 	windows, joining of different event streams, as well as filtering, aggregation, and sorting. Esper statements can also be combined 
 	together with "followed by" conditions thus deriving complex events from more simple events. Events can be represented as JavaBean 
 	classes, legacy Java classes, XML document or java.util.Map, which promotes reuse of existing systems acting as messages publishers.
 
 	A trivial yet meaningful example is as follow: assume a trader wants to buy Google stock as soon as the price goes below some 
 	floor value-- not when looking at each tick but when the computation is done over a sliding time window--say of 30 seconds. 
-	Given a StockTick event bean with a price and symbol property and the EQL "select avg(price) from StockTick.win:time(30 sec) where symbol='GOOG'", a listener POJO would get notified as ticks come in to trigger the buy order.
+	Given a StockTick event bean with a price and symbol property and the EPL "select avg(price) from StockTick.win:time(30 sec) where symbol='GOOG'", a listener POJO would get notified as ticks come in to trigger the buy order.
 
 
 * Developing event-driven applications
@@ -69,7 +69,7 @@ Tutorial
 	
 	[[7]] Design how you want to represent events: as Java classes, as Maps, or as XML events
 	
-	[[8]] Define EQL statements for patterns and stream processing 
+	[[8]] Define EPL statements for patterns and stream processing 
 	
 	[[9]] Use the CSV adapter as an event simulation tool, to test situations to be detected, or to generate to load
 	
@@ -85,21 +85,21 @@ Tutorial
       
 * Event Stream Analysis
 	
-	EQL statements derive and aggregate information from one or more streams of events, to join or merge event streams,
+	EPL statements derive and aggregate information from one or more streams of events, to join or merge event streams,
 	and to feed results from one event stream to subsequent statements.  
 	
-	EQL is similar to SQL in it's use of the <select> clause and the <where> clause. However EQL statements instead of tables use event streams
+	EPL is similar to SQL in it's use of the <select> clause and the <where> clause. However EPL statements instead of tables use event streams
 	and a concept called <views>. Similar to tables in an SQL statement, views define the data available for querying and filtering. 
 	Views can represent windows over a stream of events. Views can also sort events, derive statistics from event properties, 
 	group events or handle unique event property values.
 	
-	This is a sample EQL statement that computes the average price for the last 30 seconds of stock tick events:
+	This is a sample EPL statement that computes the average price for the last 30 seconds of stock tick events:
 	
 ----------------------------------------
   select avg(price) from StockTickEvent.win:time(30 sec) 
 ----------------------------------------	
 
-	A sample EQL that returns the average price per symbol for the last 100 stock ticks.
+	A sample EPL that returns the average price per symbol for the last 100 stock ticks.
 		
 ----------------------------------------
   select symbol, avg(price) as averagePrice

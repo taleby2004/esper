@@ -132,7 +132,7 @@ configuration.addEventTypeAlias("PriceEvent", eventProperties);
 
 epService = EPServiceProviderManager.getDefaultProvider(configuration);
 
-EPStatement stmt = epService.getEPAdministrator().createEQL(
+EPStatement stmt = epService.getEPAdministrator().createEPL(
    "select symbol, price, volume from PriceEvent.win:length(100)");
 
 (new CSVInputAdapter(epService, new AdapterInputSource(filename), "PriceEvent")).start();]]></programlisting>		

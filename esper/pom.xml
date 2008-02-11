@@ -114,8 +114,8 @@ mvn javadoc:javadoc
 				</executions>
 				<configuration>
 					<sourceDirectory>grammar</sourceDirectory>
-					<outputDirectory>target/generated-sources/antlr/com/espertech/esper/eql/generated</outputDirectory>
-					<libDirectory>target/generated-sources/antlr/com/espertech/esper/eql/generated</libDirectory>
+					<outputDirectory>target/generated-sources/antlr/com/espertech/esper/epl/generated</outputDirectory>
+					<libDirectory>target/generated-sources/antlr/com/espertech/esper/epl/generated</libDirectory>
 				</configuration>
 			</plugin>
 			<plugin>

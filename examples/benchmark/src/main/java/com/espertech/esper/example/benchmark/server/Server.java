@@ -20,7 +20,7 @@ import java.util.concurrent.*;
 
 /**
  * The main Esper Server thread listens on the given port.
- * It bootstrap an ESP/CEP engine (defaults to Esper) and registers EQL statement(s) into it based
+ * It bootstrap an ESP/CEP engine (defaults to Esper) and registers EPL statement(s) into it based
  * on the given -mode argument.
  * Statements are read from an statements.properties file in the classpath
  * If statements contains '$' the '$' is replaced by a symbol string, so as to register one statement per symbol.

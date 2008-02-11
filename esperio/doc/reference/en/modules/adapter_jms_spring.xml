@@ -35,7 +35,7 @@
 					</listitem>
 					<listitem>
 						<para>
-							Create EQL statements using the event type alias matching the event objects or the Map-event type aliases received.
+							Create EPL statements using the event type alias matching the event objects or the Map-event type aliases received.
 						</para>
 					</listitem>
 				</orderedlist>
@@ -93,7 +93,7 @@
 			</listitem>
 			<listitem>
 				<para>
-					Act as a listener to one or more named streams populated via <literal>insert-into</literal> syntax by EQL statements
+					Act as a listener to one or more named streams populated via <literal>insert-into</literal> syntax by EPL statements
 				</para>
 			</listitem>
 			<listitem>
@@ -337,7 +337,7 @@ mapMessage.setObject(InputAdapter.ESPERIO_MAP_EVENT_TYPE, "MyInputEvent");]]></p
 			</para>
 
 			<para>
-				To connect the Spring JMS output adapter and the EQL statements producing events, use the <literal>insert-into</literal> syntax to direct events for output.  Here is a sample statement that sends events into <literal>MyOutputStream</literal>:
+				To connect the Spring JMS output adapter and the EPL statements producing events, use the <literal>insert-into</literal> syntax to direct events for output.  Here is a sample statement that sends events into <literal>MyOutputStream</literal>:
 			</para>
 			<programlisting><![CDATA[insert into MyOutputStream select assetId, zone from RFIDEvent]]></programlisting>		
 

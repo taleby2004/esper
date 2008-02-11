@@ -120,7 +120,7 @@ Version 1.11.0 Update
 	
   		* allows to build, change or interrogate an object-oriented representation of a statement
   		
-  		* round-trip between EQL and object model
+  		* round-trip between EPL and object model
   		
   		[]
   		
@@ -376,7 +376,7 @@ Version 1.3.0 (update)
     
 * Major changes
 
-    * Added support for SQL queries within EQL (Enhancement request ESPER-30)
+    * Added support for SQL queries within EPL (Enhancement request ESPER-30)
 
     * Added support for regular expressions (regexp) and SQL 'like' (Enhancement request ESPER-65)
 	
@@ -391,7 +391,7 @@ Version 1.2.0 (update)
 		
 * API changes
 
-	* None  (Please NOTE any EQL changes as below)
+	* None  (Please NOTE any EPL changes as below)
     
 * Major changes
 
@@ -410,7 +410,7 @@ Version 1.2.0 (update)
 	
 * Minor changes	
 
-    * Fixed issue ESPER-52 "EQL windows take seconds parameter while patterns take milliseconds parameter"
+    * Fixed issue ESPER-52 "EPL windows take seconds parameter while patterns take milliseconds parameter"
     
     * Fixed issue ESPER-58 "IllegalMonitorStateException logged by engine"
     
@@ -429,7 +429,7 @@ Version 1.1.0 (update)
     
 * Major changes
 
-    * Added support for pattern expressions in EQL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EQL)
+    * Added support for pattern expressions in EPL statements (Enhancement request ESPER-53 Consuming pattern-generated events in EPL)
 	
     * Added 'case' control flow function
     
@@ -510,7 +510,7 @@ Version 0.9.5 (Beta enhancements release)
 
 * Major changes
 
-	* Support for "insert into" clause allowing chains of EQL statements and merging of event streams
+	* Support for "insert into" clause allowing chains of EPL statements and merging of event streams
 	
 	* Capability added to sort output using an "order-by" clause
 	
@@ -535,14 +535,14 @@ Version 0.9.1 (Beta bug fix release)
 	
 * Minor changes	
 
-	* New EQL example 'Transaction 3-event challenge' which shows EQL in use for detecting missing events and
+	* New EPL example 'Transaction 3-event challenge' which shows EPL in use for detecting missing events and
 computing latency totals overall and grouped. Added scripts for compiling and executing the example.
 	
-	* Bug fix in EQL for statements that contain only aggregation functions in the select clause such as 
+	* Bug fix in EPL for statements that contain only aggregation functions in the select clause such as 
 "select sum(volume) from StockTick". The engine was incorrectly posting an event per event posted 
 by the stream's window, rather then a single aggregate event.
 
-	* Bug fix in EQL group-statements by without output rate limiting. This problem occured using a group-by clause
+	* Bug fix in EPL group-statements by without output rate limiting. This problem occured using a group-by clause
 without output rate limit and resulted in multiple events posted that include prior groups for each event posted 
 by the window.
 
@@ -625,15 +625,15 @@ Version 0.7.5 (Alpha Release)
 
 * Major changes
 
-	* EQL supports outer joins: left, right and full join on 2 streams
+	* EPL supports outer joins: left, right and full join on 2 streams
 	
-	* EQL supports IS NULL, = NULL, IS NOT NULL, <> and !=
+	* EPL supports IS NULL, = NULL, IS NOT NULL, <> and !=
 	
-	* EQL allows new built-in function MAX(a, b,...) and MIN(a, b,...)
+	* EPL allows new built-in function MAX(a, b,...) and MIN(a, b,...)
 	
 	* Event Pattern use of results in filters, such as "every a=EventX -> every b=EventY(objectID=a.objectID)"
 	
-	* EQL and Event Pattern: Removed requirement that event names have () postfix, e.g. 'every a=X' is now equivalent to 'every a=X()'
+	* EPL and Event Pattern: Removed requirement that event names have () postfix, e.g. 'every a=X' is now equivalent to 'every a=X()'
 	
 * Minor changes
 

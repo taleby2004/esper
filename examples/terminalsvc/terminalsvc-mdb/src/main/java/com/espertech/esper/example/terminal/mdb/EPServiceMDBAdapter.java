@@ -30,15 +30,15 @@ public class EPServiceMDBAdapter
 
         stmt = "select a.term.id as terminal from pattern [ every a=Checkin -> " +
                 "      ( OutOfOrder(term.id=a.term.id) and not (Cancelled(term.id=a.term.id) or Completed(term.id=a.term.id)) )]";
-        statement = epService.getEPAdministrator().createEQL(stmt);
+        statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(new CheckinProblemListener(outboundSender));
 
         stmt = "select * from BaseTerminalEvent where type = 'LowPaper' or type = 'OutOfOrder'";
-        statement = epService.getEPAdministrator().createEQL(stmt);
+        statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(new TerminalEventListener(outboundSender));
 
         stmt = "select '1' as terminal, 'terminal is offline' as text from pattern [ every timer:interval(60 seconds) -> (timer:interval(65 seconds) and not Status(term.id = 'T1')) ] output first every 5 minutes";
-        statement = epService.getEPAdministrator().createEQL(stmt);
+        statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(new TerminalStatusListener(outboundSender));
 
         stmt = "insert into CountPerType " +
@@ -46,7 +46,7 @@ public class EPServiceMDBAdapter
                 "from BaseTerminalEvent.win:time(10 min) " +
                 "group by type " +
                 "output all every 1 minutes";
-        statement = epService.getEPAdministrator().createEQL(stmt);
+        statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(new CountPerTypeListener(outboundSender));
     }
 

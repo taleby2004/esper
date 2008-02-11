@@ -10,14 +10,14 @@
           Esper is an event stream processing (ESP) and event correlation engine (CEP) written in Java.
 		  Basically instead of working as a database where you put stuff in to later poll it using SQL queries, Esper works as 
 		  real time engine that triggers actions when event conditions occur among event streams.
-		  A tailored Event Query Language (EQL) allows registering queries in the engine, using Java objects (POJO, JavaBean) to represent events. 
-		  A listener class - which is basically also a POJO - will then be called by the engine when the EQL condition is matched as 
-		  events come in. The EQL allows expressing complex matching conditions that include temporal windows, 
+		  A tailored Event Processing Language (EPL) allows registering queries in the engine, using Java objects (POJO, JavaBean) to represent events. 
+		  A listener class - which is basically also a POJO - will then be called by the engine when the EPL condition is matched as 
+		  events come in. The EPL allows expressing complex matching conditions that include temporal windows, 
 		  and join different event streams, as well as filter and sort them.
         </p>
         <p>
 		  A simple example could be to compute the average stock price of the BEA tick on a sliding window of 30 seconds. 
-		  Given a StockTick event bean with a price and symbol property and the EQL 
+		  Given a StockTick event bean with a price and symbol property and the EPL 
 		  "select avg(price) from StockTick.win:time(30 sec) where symbol='BEA'", 
 		  a POJO would get notified as tick come in - and in real world millions of ticks can come in - 
 		  so there's no way to store them all to later query them using a classical database architecture.
@@ -42,7 +42,7 @@
       <question>How many events are held in the system? If we get say 5 events within 30 seconds, how long are the events kept around? What are the eviction policies?</question>
       <answer>
         <p>
-        	Esper offers built-in data windows as part of the event query language that instruct the engine how many or how long events must be considered. For example, a time window with an interval length of 10 seconds instructs the engine to retain the last 10 seconds of events as a moving data window. 
+        	Esper offers built-in data windows as part of the event processing language that instruct the engine how many or how long events must be considered. For example, a time window with an interval length of 10 seconds instructs the engine to retain the last 10 seconds of events as a moving data window. 
         </p>
         <p>
         	Eviction policies are usually row-count based or time-based. A sort-based eviction policy is also possible, as is combining different data windows. And the engine can process events without any data windows as well.
@@ -312,7 +312,7 @@
         	Esper is the only open source Event Stream Processing out there - and this is not to be confused with 
         	classical rules engines. Compared to commercial ESP engines implementations, 
         	Esper may lack high availability options in the 1.0 release, but its open source nature is a driver to get the 
-        	Event query language right, and get the Java community up to speed on those concepts - 
+        	Event processing language right, and get the Java community up to speed on those concepts - 
         	before tackling enterprise grade requirements in upcoming versions.			
 		</p>
 		<p>
@@ -350,11 +350,11 @@
         </p>
       </answer>
     </faq>
-    <faq id="advantages_eql">
+    <faq id="advantages_epl">
       <question>What are the advantages of Esper's Query Language?</question>
       <answer>
         <p>
-		  The Esper event processing language (EQL) converges event stream processing (filtering, joins, aggregation) 
+		  The Esper event processing language (EPL) converges event stream processing (filtering, joins, aggregation) 
 		  and complex event processing (causality) into one single language. 
 		  The core language is SQL-like ensuring rapid learning, but is also highly oriented toward support of modern technologies 
 		  so it is for example object oriented (more than table oriented), enabling for simple extension. The language, of course, 
@@ -368,7 +368,7 @@
       <answer>
         <p>
 			Esper allows plug-in of aggregation functions, views, pattern objects and user functions as described in the documentation.
-			Extending the language is thus easy and custom extensions directly surface in the EQL.
+			Extending the language is thus easy and custom extensions directly surface in the EPL.
         </p>
         <p>
 			For even more flexibility, it is also possible to contribute your own extensions to the project in other areas if you comply 

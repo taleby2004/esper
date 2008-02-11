@@ -58,7 +58,7 @@ public class OrderEvent {
 -------
 EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
 String expression = "select avg(price) from org.myapp.event.OrderEvent.win:time(30 sec)";
-EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+EPStatement statement = epService.getEPAdministrator().createEPL(expression);
 -------	
 
 	
@@ -116,5 +116,5 @@ EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config
 	
 -------
 String statement = "select avg(price) from OrderEvent.win:time(30 sec)";
-EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
 -------	

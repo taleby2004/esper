@@ -110,7 +110,7 @@ public class TxnEventA extends TxnEventBase {
 	
 ** Detecting Combined Events
 
-	Now that we have defined the event classes, we can compose an EQL statement to detect combined events in which
+	Now that we have defined the event classes, we can compose an EPL statement to detect combined events in which
 	each component of the transaction is present. We restrict the event matching to the events that arrived within 
 	the last 30 minutes.
 	
@@ -132,7 +132,7 @@ select C.transactionId, customerId, supplierId,
 	We can now use the CombinedEvent stream to derive realtime summary data.
 	
 	To derive the minimum, maximum and average total latency from the events 
-	(difference in time between A and C) over the past 30 minutes we can use the EQL below.
+	(difference in time between A and C) over the past 30 minutes we can use the EPL below.
 	
 ----------------------------------------
 select min(latencyAC) as minLatencyAC, max(latencyAC) as maxLatencyAC, avg(latencyAC) as avgLatencyAC
@@ -169,8 +169,8 @@ select *
 ** Setting up the Engine
 
 	The Java code snippet below shows how an engine instance can be obtained. The <Configuration> is used to
-	make the event classes known to the engine. This is optional and makes the EQL statements easier to read. Esper
-	also supports fully-qualified Java class names in EQL statements.	
+	make the event classes known to the engine. This is optional and makes the EPL statements easier to read. Esper
+	also supports fully-qualified Java class names in EPL statements.	
 	
 ----------------------------------------
 Configuration configuration = new Configuration();
@@ -191,7 +191,7 @@ String stmtSupplier =
   "from CombinedEvent.win:time(30 minutes) " +
   "group by supplierId";
 
-EPStatement bySupplierStatement = epService.getEPAdministrator().createEQL(stmtSupplier);
+EPStatement bySupplierStatement = epService.getEPAdministrator().createEPL(stmtSupplier);
 bySupplierStatement.addListener(myListener);
 ----------------------------------------
 

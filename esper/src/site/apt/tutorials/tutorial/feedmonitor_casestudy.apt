@@ -21,7 +21,7 @@ double askPrice;
 
 	For the throughput statistics and to detect rapid fall-off we calculate a ticks per second rate for each market data feed. 
 
-	We can use an EQL statement that specifies a view onto the market data event stream that batches together 1 second of events. 
+	We can use an EPL statement that specifies a view onto the market data event stream that batches together 1 second of events. 
 	We specify the feed and a count of events per feed as output values. To make this data available for further processing, we
 	insert output events into the TicksPerSecond event stream:
 
