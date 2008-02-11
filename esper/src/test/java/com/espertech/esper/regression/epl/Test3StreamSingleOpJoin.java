@@ -81,7 +81,7 @@ public class Test3StreamSingleOpJoin extends TestCase
 
         joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
 
         runJoinUniquePerId();
     }
@@ -100,7 +100,7 @@ public class Test3StreamSingleOpJoin extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
 
         runJoinUniquePerId();
     }

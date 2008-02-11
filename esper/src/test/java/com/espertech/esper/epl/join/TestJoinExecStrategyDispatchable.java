@@ -2,7 +2,7 @@ package com.espertech.esper.epl.join;
 
 import com.espertech.esper.view.internal.BufferView;
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.support.eql.SupportJoinExecutionStrategy;
+import com.espertech.esper.support.epl.SupportJoinExecutionStrategy;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import junit.framework.TestCase;
 

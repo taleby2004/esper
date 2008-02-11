@@ -7,7 +7,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.eql.SupportStaticMethodLib;
+import com.espertech.esper.support.epl.SupportStaticMethodLib;
 
 public class TestFromClauseMethod extends TestCase
 {
@@ -92,7 +92,7 @@ public class TestFromClauseMethod extends TestCase
         tryArrayNoArg(stmt);
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(joinStatement);
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
         stmt = epService.getEPAdministrator().create(model);
         tryArrayNoArg(stmt);
 
@@ -102,7 +102,7 @@ public class TestFromClauseMethod extends TestCase
             .add(FilterStream.create(SupportBean.class.getName(), "s1").addView("win", "length", 3))
             .add(MethodInvocationStream.create(SupportStaticMethodLib.class.getName(), "fetchArrayNoArg")));
         stmt = epService.getEPAdministrator().create(model);
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
 
         tryArrayNoArg(stmt);
     }
@@ -136,7 +136,7 @@ public class TestFromClauseMethod extends TestCase
         tryArrayWithArg(stmt);
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(joinStatement);
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
         stmt = epService.getEPAdministrator().create(model);
         tryArrayWithArg(stmt);
 
@@ -148,7 +148,7 @@ public class TestFromClauseMethod extends TestCase
                 .add(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 3))
             );
         stmt = epService.getEPAdministrator().create(model);
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
 
         tryArrayWithArg(stmt);
     }

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Encapsulates the parsed select expressions in a select-clause in an EQL statement.
+ * Encapsulates the parsed select expressions in a select-clause in an EPL statement.
  */
 public class SelectClauseSpecRaw implements MetaDefItem
 {

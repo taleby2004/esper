@@ -1,8 +1,8 @@
 package com.espertech.esper.epl.expression;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportAggregateExprNode;
-import com.espertech.esper.support.eql.SupportExprNode;
+import com.espertech.esper.support.epl.SupportAggregateExprNode;
+import com.espertech.esper.support.epl.SupportExprNode;
 
 import java.util.List;
 import java.util.LinkedList;

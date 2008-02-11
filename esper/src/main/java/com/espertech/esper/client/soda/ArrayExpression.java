@@ -10,7 +10,7 @@ package com.espertech.esper.client.soda;
 import java.io.StringWriter;
 
 /**
- * Array expression forms array results, similar to the EQL syntax of "{element 1, element 2, ... element n}".
+ * Array expression forms array results, similar to the syntax of "{element 1, element 2, ... element n}".
  */
 public class ArrayExpression extends ExpressionBase
 {
@@ -47,7 +47,7 @@ public class ArrayExpression extends ExpressionBase
         return this;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("{");
         boolean isFirst = true;
@@ -57,7 +57,7 @@ public class ArrayExpression extends ExpressionBase
             {
                 writer.write(", ");
             }
-            child.toEQL(writer);
+            child.toEPL(writer);
             isFirst = false;
         }
         writer.write("}");

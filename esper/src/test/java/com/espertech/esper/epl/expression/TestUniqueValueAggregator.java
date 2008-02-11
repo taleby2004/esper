@@ -1,6 +1,6 @@
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.support.eql.SupportAggregator;
+import com.espertech.esper.support.epl.SupportAggregator;
 import com.espertech.esper.epl.agg.DistinctValueAggregator;
 import junit.framework.TestCase;
 

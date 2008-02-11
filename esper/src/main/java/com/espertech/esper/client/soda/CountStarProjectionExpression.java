@@ -21,7 +21,7 @@ public class CountStarProjectionExpression extends ExpressionBase
     {
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("count(*)");
     }

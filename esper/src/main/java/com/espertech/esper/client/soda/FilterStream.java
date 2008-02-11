@@ -134,8 +134,8 @@ public class FilterStream extends ProjectedStream
         this.filter = filter;
     }
 
-    public void toEQLProjectedStream(StringWriter writer)
+    public void toEPLProjectedStream(StringWriter writer)
     {
-        filter.toEQL(writer);
+        filter.toEPL(writer);
     }
 }

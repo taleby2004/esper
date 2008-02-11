@@ -58,7 +58,7 @@ public class TestTimestampExpr extends TestCase
         model.setSelectClause(SelectClause.create().add(Expressions.currentTimestamp(), "t0"));
         model.setFromClause(FromClause.create().add(FilterStream.create(SupportBean.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);
@@ -78,7 +78,7 @@ public class TestTimestampExpr extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);

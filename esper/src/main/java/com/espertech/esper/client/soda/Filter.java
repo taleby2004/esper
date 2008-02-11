@@ -102,13 +102,13 @@ public class Filter implements Serializable
      * Returns a textual representation of the filter.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(eventTypeAlias);
         if (filter != null)
         {
             writer.write('(');
-            filter.toEQL(writer);
+            filter.toEPL(writer);
             writer.write(')');
         }
     }

@@ -39,7 +39,7 @@ public class TestOrderByEventPerRow extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(statementString);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(statementString, model.toEQL());
+        assertEquals(statementString, model.toEPL());
 
         testListener = new SupportUpdateListener();
         EPStatement statement = epService.getEPAdministrator().create(model);
@@ -64,7 +64,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output every 6 events " +
                                 "order by sum(price), symbol";
 
-        assertEquals(statementString, model.toEQL());
+        assertEquals(statementString, model.toEPL());
 
         testListener = new SupportUpdateListener();
         EPStatement statement = epService.getEPAdministrator().create(model);

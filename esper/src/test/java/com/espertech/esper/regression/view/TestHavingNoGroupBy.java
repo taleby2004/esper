@@ -43,7 +43,7 @@ public class TestHavingNoGroupBy extends TestCase
         String viewExpr = "select irstream symbol, price, avg(price) as avgPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "having (price < avg(price))";
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);

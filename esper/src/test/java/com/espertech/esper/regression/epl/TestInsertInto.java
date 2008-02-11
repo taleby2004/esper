@@ -46,15 +46,15 @@ public class TestInsertInto extends TestCase
 
         EPStatement stmt = epService.getEPAdministrator().create(model, "s1");
 
-        String eql = "insert rstream into Event_1 " +
+        String EPL = "insert rstream into Event_1 " +
                       "select intPrimitive, intBoxed " +
                       "from " + SupportBean.class.getName();
-        assertEquals(eql, model.toEQL());
+        assertEquals(eql, model.toEPL());
         assertEquals(eql, stmt.getText());
 
-        EPStatementObjectModel modelTwo = epService.getEPAdministrator().compileEPL(model.toEQL());
+        EPStatementObjectModel modelTwo = epService.getEPAdministrator().compileEPL(model.toEPL());
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(eql, modelTwo.toEQL());
+        assertEquals(eql, modelTwo.toEPL());
     }
 
     public void testVariantOneOMToStmt() throws Exception
@@ -68,22 +68,22 @@ public class TestInsertInto extends TestCase
 
         EPStatement stmt = runAsserts(null, model);
 
-        String eql = "insert into Event_1(delta, product) " +
+        String EPL = "insert into Event_1(delta, product) " +
                       "select (intPrimitive - intBoxed) as deltaTag, (intPrimitive * intBoxed) as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100)";
-        assertEquals(eql, model.toEQL());
+        assertEquals(eql, model.toEPL());
         assertEquals(eql, stmt.getText());
     }
 
     public void testVariantOneEQLToOMStmt() throws Exception
     {
-        String eql = "insert into Event_1(delta, product) " +
+        String EPL = "insert into Event_1(delta, product) " +
                       "select (intPrimitive - intBoxed) as deltaTag, (intPrimitive * intBoxed) as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100)";
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(eql);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(eql, model.toEQL());
+        assertEquals(eql, model.toEPL());
 
         EPStatement stmt = runAsserts(null, model);
         assertEquals(eql, stmt.getText());

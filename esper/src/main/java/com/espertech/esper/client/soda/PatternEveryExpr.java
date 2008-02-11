@@ -30,10 +30,10 @@ public class PatternEveryExpr extends PatternExprBase
         addChild(inner);
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("every (");
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         writer.write(')');
     }
 }

@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.ConfigurationDBRef;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
-import com.espertech.esper.support.eql.SupportDatabaseService;
+import com.espertech.esper.support.epl.SupportDatabaseService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

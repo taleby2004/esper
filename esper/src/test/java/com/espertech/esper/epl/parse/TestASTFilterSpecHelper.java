@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.parse;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.parse.SupportParserHelper;
+import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.antlr.ASTUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

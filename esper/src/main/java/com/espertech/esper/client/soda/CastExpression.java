@@ -33,10 +33,10 @@ public class CastExpression extends ExpressionBase
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("cast(");
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         writer.write(", ");
         writer.write(typeName);
         writer.write(")");

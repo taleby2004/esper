@@ -25,10 +25,10 @@ public class SubqueryExistsExpression extends ExpressionBase
         this.model = model;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("exists (");
-        writer.write(model.toEQL());
+        writer.write(model.toEPL());
         writer.write(')');
     }
 

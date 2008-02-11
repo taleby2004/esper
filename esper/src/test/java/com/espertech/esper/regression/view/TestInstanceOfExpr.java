@@ -69,7 +69,7 @@ public class TestInstanceOfExpr extends TestCase
                 .add(Expressions.instanceOf(Expressions.property("string"), "float", "string", "int"), "t1"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(listener);
@@ -92,7 +92,7 @@ public class TestInstanceOfExpr extends TestCase
                           "from " + SupportBean.class.getName();
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(listener);

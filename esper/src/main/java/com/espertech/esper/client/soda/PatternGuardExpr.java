@@ -64,11 +64,11 @@ public class PatternGuardExpr extends EPBaseNamedObject implements PatternExpr
         return guarded;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write('(');
-        guarded.get(0).toEQL(writer);
+        guarded.get(0).toEPL(writer);
         writer.write(") where ");
-        super.toEQL(writer);
+        super.toEPL(writer);
     }
 }

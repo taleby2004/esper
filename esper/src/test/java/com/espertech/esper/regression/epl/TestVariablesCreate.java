@@ -39,12 +39,12 @@ public class TestVariablesCreate extends TestCase
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setCreateVariable(CreateVariableClause.create("long", "var1", null));
         epService.getEPAdministrator().create(model);
-        assertEquals("create variable long var1", model.toEQL());
+        assertEquals("create variable long var1", model.toEPL());
 
         model = new EPStatementObjectModel();
         model.setCreateVariable(CreateVariableClause.create("string", "var2", Expressions.constant("abc")));
         epService.getEPAdministrator().create(model);
-        assertEquals("create variable string var2 = \"abc\"", model.toEQL());
+        assertEquals("create variable string var2 = \"abc\"", model.toEPL());
 
         String stmtTextSelect = "select var1, var2 from " + SupportBean.class.getName();
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
@@ -60,12 +60,12 @@ public class TestVariablesCreate extends TestCase
         String text = "create variable long var1";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
         epService.getEPAdministrator().create(model);
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
 
         text = "create variable string var2 = \"abc\"";
         model = epService.getEPAdministrator().compileEPL(text);
         epService.getEPAdministrator().create(model);
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
 
         String stmtTextSelect = "select var1, var2 from " + SupportBean.class.getName();
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);

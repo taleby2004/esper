@@ -9,7 +9,6 @@ import com.espertech.esper.plugin.AdapterState;
 import com.espertech.esper.plugin.InputAdapter;
 import com.espertech.esper.plugin.csv.CSVInputAdapter;
 import com.espertech.esper.plugin.csv.CSVInputAdapterSpec;
-import com.espertech.esper.plugin.csv.CSVReader;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
@@ -749,7 +748,7 @@ public class TestCSVAdapter extends TestCase
                 "MarketData"
         );
         try {
-            epService.getEPAdministrator().createEQL("select sum(price) from MarketData.win:length(2)");
+            epService.getEPAdministrator().createEPL("select sum(price) from MarketData.win:length(2)");
             fail("should fail due to type conversion");
         } catch (EPStatementException e) {
             assertTrue(e.getMessage().contains("Implicit conversion"));
@@ -760,6 +759,6 @@ public class TestCSVAdapter extends TestCase
                 new AdapterInputSource(new StringReader("sym,long price\nGOOG,22\nGOOG,33")),
                 "MarketData2"
         );
-        epService.getEPAdministrator().createEQL("select sum(price) from MarketData2.win:length(2)");
+        epService.getEPAdministrator().createEPL("select sum(price) from MarketData2.win:length(2)");
     }
 }

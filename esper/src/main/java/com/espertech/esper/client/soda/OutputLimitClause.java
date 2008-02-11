@@ -186,7 +186,7 @@ public class OutputLimitClause implements Serializable
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         if (selector != OutputLimitSelector.DEFAULT)
         {

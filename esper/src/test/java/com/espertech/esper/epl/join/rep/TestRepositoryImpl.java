@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.join.rep;
 
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.support.eql.join.SupportJoinResultNodeFactory;
+import com.espertech.esper.support.epl.join.SupportJoinResultNodeFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 
 import java.util.*;

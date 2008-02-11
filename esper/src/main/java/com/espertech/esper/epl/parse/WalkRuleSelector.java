@@ -19,7 +19,7 @@ public interface WalkRuleSelector
      * @param walker - to invoke walk rule on
      * @throws org.antlr.runtime.RecognitionException - throw on walk errors
      */
-    public void invokeWalkRule(EQLTreeWalker walker) throws RecognitionException;
+    public void invokeWalkRule(EPLTreeWalker walker) throws RecognitionException;
 }
 
 

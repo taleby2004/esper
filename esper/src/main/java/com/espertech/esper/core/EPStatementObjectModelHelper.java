@@ -8,11 +8,11 @@ import java.io.StringWriter;
 public class EPStatementObjectModelHelper
 {
     /**
-     * Renders a constant as an EQL.
+     * Renders a constant as an EPL.
      * @param writer to output to
      * @param constant to render
      */
-    public static void renderEQL(StringWriter writer, Object constant)
+    public static void renderEPL(StringWriter writer, Object constant)
     {
         if (constant == null)
         {

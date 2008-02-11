@@ -47,13 +47,13 @@ public class ConcatExpression extends ExpressionBase
         return this;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEQL(writer);
+            child.toEPL(writer);
             delimiter = " || ";
         }
     }

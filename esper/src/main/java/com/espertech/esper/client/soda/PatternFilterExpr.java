@@ -73,13 +73,13 @@ public class PatternFilterExpr extends PatternExprBase
         this.filter = filter;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         if (tagName != null)
         {
             writer.write(tagName);
             writer.write('=');
         }
-        filter.toEQL(writer);
+        filter.toEPL(writer);
     }
 }

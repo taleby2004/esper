@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.join.assemble;
 
-import com.espertech.esper.support.eql.join.SupportJoinProcNode;
-import com.espertech.esper.support.eql.join.SupportJoinResultNodeFactory;
+import com.espertech.esper.support.epl.join.SupportJoinProcNode;
+import com.espertech.esper.support.epl.join.SupportJoinResultNodeFactory;
 import com.espertech.esper.epl.join.rep.Node;
 
 import java.util.List;

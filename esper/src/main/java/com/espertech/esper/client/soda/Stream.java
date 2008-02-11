@@ -26,7 +26,7 @@ public abstract class Stream implements Serializable
      * Renders the stream in textual representation.
      * @param writer to output to
      */
-    public abstract void toEQLStream(StringWriter writer);
+    public abstract void toEPLStream(StringWriter writer);
 
     /**
      * Ctor.
@@ -59,9 +59,9 @@ public abstract class Stream implements Serializable
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
-        toEQLStream(writer);
+        toEPLStream(writer);
 
         if (streamName != null)
         {

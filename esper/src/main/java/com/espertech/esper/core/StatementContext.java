@@ -47,7 +47,7 @@ public final class StatementContext
      * @param engineInstanceId is the name of the engine instance
      * @param statementId is the statement is assigned for the statement for which this context exists
      * @param statementName is the statement name
-     * @param expression is the EQL or pattern expression used
+     * @param expression is the EPL or pattern expression used
      * @param schedulingService implementation for schedule registration
      * @param scheduleBucket is for ordering scheduled callbacks within the view statements
      * @param eventAdapterService service for generating events and handling event types

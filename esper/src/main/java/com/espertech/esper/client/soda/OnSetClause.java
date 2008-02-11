@@ -67,10 +67,10 @@ public class OnSetClause extends OnClause
     }
 
     /**
-     * Renders the clause in EQL.
+     * Renders the clause in EPL.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(" set ");
         String delimiter = "";
@@ -79,7 +79,7 @@ public class OnSetClause extends OnClause
             writer.write(delimiter);
             writer.write(pair.getFirst());
             writer.write(" = ");
-            pair.getSecond().toEQL(writer);
+            pair.getSecond().toEPL(writer);
             delimiter = ", ";
         }        
     }

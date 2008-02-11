@@ -114,7 +114,7 @@ public class TestOrderBySimple extends TestCase {
         model.setOutputLimitClause(OutputLimitClause.create(6, OutputLimitUnit.EVENTS));
         model.setOrderByClause(OrderByClause.create().add("price", true));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         testListener = new SupportUpdateListener();
         EPStatement statement = epService.getEPAdministrator().create(model);

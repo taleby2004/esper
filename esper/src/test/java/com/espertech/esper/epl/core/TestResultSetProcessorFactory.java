@@ -8,10 +8,10 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventAdapterServiceImpl;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
-import com.espertech.esper.support.eql.SupportSelectExprFactory;
-import com.espertech.esper.support.eql.SupportStreamTypeSvc1Stream;
-import com.espertech.esper.support.eql.SupportStreamTypeSvc3Stream;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportSelectExprFactory;
+import com.espertech.esper.support.epl.SupportStreamTypeSvc1Stream;
+import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 
 import java.util.LinkedList;

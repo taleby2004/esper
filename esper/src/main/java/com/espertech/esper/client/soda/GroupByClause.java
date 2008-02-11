@@ -105,13 +105,13 @@ public class GroupByClause implements Serializable
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         String delimiter = "";
         for (Expression child : groupByExpressions)
         {
             writer.write(delimiter);
-            child.toEQL(writer);
+            child.toEPL(writer);
             delimiter = ", ";
         }
     }

@@ -42,7 +42,7 @@ public class TestArrayExpression extends TestCase
                 );
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         
         EPStatement stmt = epService.getEPAdministrator().create(model);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -66,7 +66,7 @@ public class TestArrayExpression extends TestCase
                               "{1, 2, 3} as intArray " +
                 "from " + SupportBean.class.getName();
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         
         EPStatement stmt = epService.getEPAdministrator().create(model);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -154,7 +154,7 @@ public class TestArrayExpression extends TestCase
         assertSame(bean.getNested(), arr[1]);
     }
 
-    // for testing EQL static method call
+    // for testing EPL static method call
     public static String[] doIt(String[] strings, Integer[] ints, Object[] objects)
     {
         callbackInts = ints;

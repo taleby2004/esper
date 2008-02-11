@@ -33,7 +33,7 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
                 .add(Patterns.notFilter(EVENT_G_CLASS, "g"));
         model.setFromClause(FromClause.create(PatternStream.create(pattern)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
         testCase = new EventExpressionCase(model);
         testCase.add("B1", "b", events.getEvent("B1"));
         testCase.add("B2", "b", events.getEvent("B2"));

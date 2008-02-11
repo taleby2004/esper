@@ -14,7 +14,7 @@ import java.io.StringWriter;
 /**
  * Parameter for views that accept time period information such as "5 sec 100 msec".
  */
-public class TimePeriodParameter implements MetaDefItem, EQLParameterType
+public class TimePeriodParameter implements MetaDefItem, EPLParameterType
 {
     private double numSeconds;
 
@@ -52,7 +52,7 @@ public class TimePeriodParameter implements MetaDefItem, EQLParameterType
         return (int) (temp ^ (temp >>> 32));
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(Double.toString(numSeconds));
         writer.write(" sec");

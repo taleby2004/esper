@@ -54,7 +54,7 @@ public class TestLikeRegexpExpr extends TestCase
                 );
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean_S0.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);        
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);
@@ -71,7 +71,7 @@ public class TestLikeRegexpExpr extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);

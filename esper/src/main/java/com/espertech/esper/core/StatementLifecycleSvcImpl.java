@@ -694,7 +694,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
     }
 
-    private static StatementSpecCompiled compile(StatementSpecRaw spec, String eqlStatement, StatementContext statementContext) throws EPStatementException
+    private static StatementSpecCompiled compile(StatementSpecRaw spec, String eplStatement, StatementContext statementContext) throws EPStatementException
     {
         List<StreamSpecCompiled> compiledStreams;
 
@@ -709,13 +709,13 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
         catch (ExprValidationException ex)
         {
-            throw new EPStatementException(ex.getMessage(), eqlStatement);
+            throw new EPStatementException(ex.getMessage(), eplStatement);
         }
         catch (RuntimeException ex)
         {
             String text = "Unexpected error compiling statement";
             log.error(".compile " + text, ex);
-            throw new EPStatementException(text + ":" + ex.getClass().getName() + ":" + ex.getMessage(), eqlStatement);
+            throw new EPStatementException(text + ":" + ex.getClass().getName() + ":" + ex.getMessage(), eplStatement);
         }
 
         // for create window statements, we switch the filter to a new event type
@@ -725,7 +725,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             {
                 FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) compiledStreams.get(0);
                 EventType selectFromType = filterStreamSpec.getFilterSpec().getEventType();
-                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, spec, eqlStatement, statementContext);
+                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, spec, eplStatement, statementContext);
                 filterStreamSpec.setFilterSpec(newFilter.getFirst());
                 spec.setSelectClauseSpec(newFilter.getSecond());
 
@@ -738,7 +738,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
             catch (ExprValidationException e)
             {
-                throw new EPStatementException(e.getMessage(), eqlStatement);
+                throw new EPStatementException(e.getMessage(), eplStatement);
             }
         }
 
@@ -777,7 +777,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         for (ExprSubselectNode subselect : visitor.getSubselects())
         {
             StatementSpecRaw raw = subselect.getStatementSpecRaw();
-            StatementSpecCompiled compiled = compile(raw, eqlStatement, statementContext);
+            StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext);
             subselect.setStatementSpecCompiled(compiled);
         }
 
@@ -807,7 +807,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     // It creates a new event type representing the window type and a sets the type selected on the filter stream spec.
     private static Pair<FilterSpecCompiled, SelectClauseSpecRaw> handleCreateWindow(EventType selectFromType,
                                            StatementSpecRaw spec,
-                                           String eqlStatement,
+                                           String eplStatement,
                                            StatementContext statementContext)
             throws ExprValidationException
     {
@@ -815,7 +815,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EventType targetType = null;
 
         // Validate the select expressions which consists of properties only
-        List<SelectClauseExprCompiledSpec> select = compileLimitedSelect(spec.getSelectClauseSpec(), eqlStatement, selectFromType);
+        List<SelectClauseExprCompiledSpec> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType);
 
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
@@ -864,7 +864,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return new Pair<FilterSpecCompiled, SelectClauseSpecRaw>(filter, newSelectClauseSpecRaw);
     }
 
-    private static List<SelectClauseExprCompiledSpec> compileLimitedSelect(SelectClauseSpecRaw spec, String eqlStatement, EventType singleType)
+    private static List<SelectClauseExprCompiledSpec> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType)
     {
         List<SelectClauseExprCompiledSpec> selectProps = new LinkedList<SelectClauseExprCompiledSpec>();
         StreamTypeService streams = new StreamTypeServiceImpl(new EventType[] {singleType}, new String[] {"stream_0"});
@@ -883,7 +883,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
             catch (ExprValidationException e)
             {
-                throw new EPStatementException(e.getMessage(), eqlStatement);
+                throw new EPStatementException(e.getMessage(), eplStatement);
             }
 
             // determine an element name if none assigned

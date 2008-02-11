@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.core;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportPluginAggregationMethodOne;
+import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
 
 import java.lang.reflect.Method;
 

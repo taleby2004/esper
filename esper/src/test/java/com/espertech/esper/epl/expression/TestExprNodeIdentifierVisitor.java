@@ -1,6 +1,6 @@
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import junit.framework.TestCase;
 
 public class TestExprNodeIdentifierVisitor extends TestCase

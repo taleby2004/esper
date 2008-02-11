@@ -9,8 +9,8 @@ import com.espertech.esper.epl.spec.SelectClauseElementCompiled;
 import com.espertech.esper.epl.spec.SelectClauseElementWildcard;
 import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
-import com.espertech.esper.support.eql.SupportStreamTypeSvc3Stream;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 
 import java.util.ArrayList;

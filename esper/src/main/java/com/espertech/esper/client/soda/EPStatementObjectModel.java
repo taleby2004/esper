@@ -15,20 +15,20 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * Object model of an EQL statement.
+ * Object model of an EPL statement.
  * <p>
  * Applications can create an object model by instantiating this class and then setting the various clauses.
  * When done, use {@link com.espertech.esper.client.EPAdministrator} to create a statement from the model.
  * <p>
- * Alternativly, a given textual EQL can be compiled into an object model representation via the compile method on
+ * Alternativly, a given textual EPL can be compiled into an object model representation via the compile method on
  * {@link com.espertech.esper.client.EPAdministrator}.
  * <p>
- * Use the toEQL method to generate a textual EQL from an object model.
+ * Use the toEPL method to generate a textual EPL from an object model.
  * <p>
- * Minimally, and EQL statement consists of the select-clause and the where-clause. These are represented by {@link SelectClause}
+ * Minimally, and EPL statement consists of the select-clause and the where-clause. These are represented by {@link SelectClause}
  * and {@link FromClause} respectively.
  * <p>
- * Here is a short example that create a simple EQL statement such as "select page, responseTime from PageLoad" :
+ * Here is a short example that create a simple EPL statement such as "select page, responseTime from PageLoad" :
  * <pre>
  * EPStatementObjectModel model = new EPStatementObjectModel();
  * model.setSelectClause(SelectClause.create("page", "responseTime"));
@@ -226,54 +226,54 @@ public class EPStatementObjectModel implements Serializable
     }
 
     /**
-     * Renders the object model in it's EQL syntax textual representation.
-     * @return EQL representing the statement object model
+     * Renders the object model in it's EPL syntax textual representation.
+     * @return EPL representing the statement object model
      * @throws IllegalStateException if required clauses do not exist
      */
-    public String toEQL()
+    public String toEPL()
     {
         StringWriter writer = new StringWriter();
 
         if (createWindow != null)
         {
-            createWindow.toEQL(writer);
+            createWindow.toEPL(writer);
             writer.write(" as ");
-            selectClause.toEQL(writer);
-            fromClause.toEQL(writer);
+            selectClause.toEPL(writer);
+            fromClause.toEPL(writer);
             return writer.toString();
         }
 
         if (createVariable != null)
         {
-            createVariable.toEQL(writer);
+            createVariable.toEPL(writer);
             return writer.toString();
         }
 
         if (onExpr != null)
         {
             writer.write("on ");
-            fromClause.getStreams().get(0).toEQL(writer);
+            fromClause.getStreams().get(0).toEPL(writer);
 
             if (onExpr instanceof OnDeleteClause)
             {
                 writer.write(" delete from ");
-                ((OnDeleteClause)onExpr).toEQL(writer);
+                ((OnDeleteClause)onExpr).toEPL(writer);
             }
             else if (onExpr instanceof OnSelectClause)
             {
                 writer.write(" ");
                 if (insertInto != null)
                 {
-                    insertInto.toEQL(writer);
+                    insertInto.toEPL(writer);
                 }
-                selectClause.toEQL(writer);
+                selectClause.toEPL(writer);
                 writer.write(" from ");
-                ((OnSelectClause)onExpr).toEQL(writer);
+                ((OnSelectClause)onExpr).toEPL(writer);
             }
             else
             {
                 OnSetClause onSet = (OnSetClause) onExpr;
-                onSet.toEQL(writer);
+                onSet.toEPL(writer);
             }
         }
         else
@@ -289,36 +289,36 @@ public class EPStatementObjectModel implements Serializable
 
             if (insertInto != null)
             {
-                insertInto.toEQL(writer);
+                insertInto.toEPL(writer);
             }
-            selectClause.toEQL(writer);
-            fromClause.toEQL(writer);
+            selectClause.toEPL(writer);
+            fromClause.toEPL(writer);
         }
 
         if (whereClause != null)
         {
             writer.write(" where ");
-            whereClause.toEQL(writer);
+            whereClause.toEPL(writer);
         }
         if (groupByClause != null)
         {
             writer.write(" group by ");
-            groupByClause.toEQL(writer);
+            groupByClause.toEPL(writer);
         }
         if (havingClause != null)
         {
             writer.write(" having ");
-            havingClause.toEQL(writer);
+            havingClause.toEPL(writer);
         }
         if (outputLimitClause != null)
         {
             writer.write(" output ");
-            outputLimitClause.toEQL(writer);
+            outputLimitClause.toEPL(writer);
         }
         if (orderByClause != null)
         {
             writer.write(" order by ");
-            orderByClause.toEQL(writer);
+            orderByClause.toEPL(writer);
         }
 
         return writer.toString();

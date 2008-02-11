@@ -23,7 +23,7 @@ public abstract class ProjectedStream extends Stream
      * Represent as textual.
      * @param writer to output to
      */
-    public abstract void toEQLProjectedStream(StringWriter writer);
+    public abstract void toEPLProjectedStream(StringWriter writer);
 
     /**
      * Ctor.
@@ -107,10 +107,10 @@ public abstract class ProjectedStream extends Stream
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQLStream(StringWriter writer)
+    public void toEPLStream(StringWriter writer)
     {
-        toEQLProjectedStream(writer);
-        toEQLViews(writer, views);
+        toEPLProjectedStream(writer);
+        toEPLViews(writer, views);
         if (isUnidirectional)
         {
             writer.write(" unidirectional");
@@ -142,7 +142,7 @@ public abstract class ProjectedStream extends Stream
      * @param writer to render to
      * @param views to render
      */
-    protected static void toEQLViews(StringWriter writer, List<View> views)
+    protected static void toEPLViews(StringWriter writer, List<View> views)
     {
         if ((views != null) && (views.size() != 0))
         {
@@ -151,7 +151,7 @@ public abstract class ProjectedStream extends Stream
             for (View view : views)
             {
                 writer.write(delimiter);
-                view.toEQL(writer);
+                view.toEPL(writer);
                 delimiter = ".";
             }
         }

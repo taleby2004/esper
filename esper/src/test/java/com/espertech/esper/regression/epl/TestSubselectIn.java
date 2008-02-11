@@ -56,7 +56,7 @@ public class TestSubselectIn extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String stmtText = "select id in (select id from S1.win:length(1000)) as value from S0";
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);
@@ -69,7 +69,7 @@ public class TestSubselectIn extends TestCase
         String stmtText = "select id in (select id from S1.win:length(1000)) as value from S0";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);

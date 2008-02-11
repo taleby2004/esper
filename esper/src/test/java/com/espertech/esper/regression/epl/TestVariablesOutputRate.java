@@ -48,7 +48,7 @@ public class TestVariablesOutputRate extends TestCase
         String stmtTextSelect = "select count(*) as cnt from " + SupportBean.class.getName() + " output last every var_output_limit events";
         EPStatement stmtSelect = epService.getEPAdministrator().create(model);
         stmtSelect.addListener(listener);
-        assertEquals(stmtTextSelect, model.toEQL());
+        assertEquals(stmtTextSelect, model.toEPL());
 
         runAssertionOutputRateEventsAll();
     }
@@ -61,7 +61,7 @@ public class TestVariablesOutputRate extends TestCase
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtTextSelect);
         EPStatement stmtSelect = epService.getEPAdministrator().create(model);
         stmtSelect.addListener(listener);
-        assertEquals(stmtTextSelect, model.toEQL());
+        assertEquals(stmtTextSelect, model.toEPL());
 
         runAssertionOutputRateEventsAll();
     }

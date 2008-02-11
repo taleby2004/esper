@@ -207,14 +207,14 @@ public class Test2StreamOuterJoin extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String stmtText = "select s0.id, s0.p00, s0.p01, s1.id, s1.p10, s1.p11 from com.espertech.esper.support.bean.SupportBean_S0 as s0 left outer join com.espertech.esper.support.bean.SupportBean_S1 as s1 on s0.p00 = s1.p10 and s1.p11 = s0.p01";
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         outerJoinView = epService.getEPAdministrator().create(model);
         outerJoinView.addListener(updateListener);
 
         assertMultiColumnLeft();
 
         EPStatementObjectModel modelReverse = epService.getEPAdministrator().compileEPL(stmtText);
-        assertEquals(stmtText, modelReverse.toEQL());
+        assertEquals(stmtText, modelReverse.toEPL());
     }
 
     public void testMultiColumnLeft()

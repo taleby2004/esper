@@ -38,7 +38,7 @@ public class OnDeleteClause extends OnClause
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(windowName);
         if (optionalAsName != null)

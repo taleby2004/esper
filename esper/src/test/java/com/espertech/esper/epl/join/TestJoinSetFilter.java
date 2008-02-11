@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.join;
 
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.event.EventBean;

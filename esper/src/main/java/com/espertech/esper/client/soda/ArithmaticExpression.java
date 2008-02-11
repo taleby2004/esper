@@ -80,14 +80,14 @@ public class ArithmaticExpression extends ExpressionBase
         return this;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("(");
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEQL(writer);
+            child.toEPL(writer);
             delimiter = " " + operator + " ";
         }
         writer.write(")");

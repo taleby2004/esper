@@ -33,7 +33,7 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
         PatternExpr pattern = Patterns.timerInterval(1.999);
         model.setFromClause(FromClause.create(PatternStream.create(pattern)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
         testCase = new EventExpressionCase(model);
         testCase.add("B1");
         testCaseList.addTest(testCase);

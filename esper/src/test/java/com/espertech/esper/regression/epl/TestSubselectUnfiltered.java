@@ -7,7 +7,7 @@ import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.eql.SupportStaticMethodLib;
+import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.SerializableObjectCopier;
 
@@ -213,7 +213,7 @@ public class TestSubselectUnfiltered extends TestCase {
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String stmtText = "select (select prior(0, id) from S1.win:length(1000)) as idS1 from S0";
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runUnfilteredStreamPrior(stmt);
     }
@@ -223,7 +223,7 @@ public class TestSubselectUnfiltered extends TestCase {
         String stmtText = "select (select prior(0, id) from S1.win:length(1000)) as idS1 from S0";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runUnfilteredStreamPrior(stmt);
     }

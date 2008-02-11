@@ -43,7 +43,7 @@ public class PropertyValueExpression extends ExpressionBase
         this.propertyName = propertyName;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(propertyName);
     }

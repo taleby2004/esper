@@ -13,7 +13,7 @@ import java.util.List;
 public interface ViewFactory
 {
     /**
-     * Indicates user EQL query view parameters to the view factory.
+     * Indicates user EPL query view parameters to the view factory.
      * @param viewFactoryContext supplied context information for the view factory
      * @param viewParameters is the objects representing the view parameters
      * @throws ViewParameterException if the parameters don't match view parameter needs

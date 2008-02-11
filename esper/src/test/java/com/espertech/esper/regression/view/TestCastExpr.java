@@ -71,7 +71,7 @@ public class TestCastExpr extends TestCase
         model.setSelectClause(SelectClause.create().add(Expressions.cast("inner?", "double"), "t0"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportMarkerInterface.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(listener);
@@ -105,7 +105,7 @@ public class TestCastExpr extends TestCase
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         selectTestCase.addListener(listener);
 
         assertEquals(String.class, selectTestCase.getEventType().getPropertyType("t0"));

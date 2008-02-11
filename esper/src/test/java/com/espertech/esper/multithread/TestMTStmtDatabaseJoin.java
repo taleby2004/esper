@@ -3,7 +3,7 @@ package com.espertech.esper.multithread;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.eql.SupportDatabaseService;
+import com.espertech.esper.support.epl.SupportDatabaseService;
 
 import java.util.concurrent.*;
 import java.util.Properties;

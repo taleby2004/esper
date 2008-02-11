@@ -32,9 +32,9 @@ public class NotExpression extends ExpressionBase
     {        
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("not ");
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
     }
 }

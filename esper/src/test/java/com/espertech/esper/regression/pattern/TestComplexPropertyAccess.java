@@ -135,7 +135,7 @@ public class TestComplexPropertyAccess extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String patternText = "select * from pattern [(every (a=" + type + ")) -> (b=" + type + "((indexed[0] = a.indexed[0])))]";
-        assertEquals(patternText, model.toEQL());
+        assertEquals(patternText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runIndexedValueProp(epService, stmt);
@@ -150,7 +150,7 @@ public class TestComplexPropertyAccess extends TestCase
         String patternText = "select * from pattern [(every (a=" + type + ")) -> (b=" + type + "((indexed[0] = a.indexed[0])))]";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(patternText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(patternText, model.toEQL());
+        assertEquals(patternText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runIndexedValueProp(epService, stmt);

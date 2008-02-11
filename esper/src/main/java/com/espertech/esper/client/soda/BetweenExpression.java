@@ -66,22 +66,22 @@ public class BetweenExpression extends ExpressionBase
         isNotBetween = notBetween;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         if ((isLowEndpointIncluded) && (isHighEndpointIncluded))
         {
             writer.write('(');
-            this.getChildren().get(0).toEQL(writer);
+            this.getChildren().get(0).toEPL(writer);
             writer.write(" between ");
-            this.getChildren().get(1).toEQL(writer);
+            this.getChildren().get(1).toEPL(writer);
             writer.write(" and ");
-            this.getChildren().get(2).toEQL(writer);
+            this.getChildren().get(2).toEPL(writer);
             writer.write(')');
         }
         else
         {
             writer.write('(');
-            this.getChildren().get(0).toEQL(writer);
+            this.getChildren().get(0).toEPL(writer);
             writer.write(" in ");
             if (isLowEndpointIncluded)
             {
@@ -91,9 +91,9 @@ public class BetweenExpression extends ExpressionBase
             {
                 writer.write('(');
             }
-            this.getChildren().get(1).toEQL(writer);
+            this.getChildren().get(1).toEPL(writer);
             writer.write(':');
-            this.getChildren().get(2).toEQL(writer);
+            this.getChildren().get(2).toEPL(writer);
             if (isHighEndpointIncluded)
             {
                 writer.write(']');

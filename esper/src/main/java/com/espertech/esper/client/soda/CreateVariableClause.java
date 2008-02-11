@@ -2,8 +2,6 @@ package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Represents a create-variable syntax for creating a new variable.
@@ -108,10 +106,10 @@ public class CreateVariableClause implements Serializable
     }
 
     /**
-     * Render as EQL.
+     * Render as EPL.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.append("create variable ");
         writer.append(variableType);
@@ -120,7 +118,7 @@ public class CreateVariableClause implements Serializable
         if (optionalAssignment != null)
         {
             writer.append(" = ");
-            optionalAssignment.toEQL(writer);
+            optionalAssignment.toEPL(writer);
         }
     }
 }

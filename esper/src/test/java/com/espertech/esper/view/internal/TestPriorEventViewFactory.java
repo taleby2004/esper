@@ -1,7 +1,7 @@
 package com.espertech.esper.view.internal;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportViewResourceCallback;
+import com.espertech.esper.support.epl.SupportViewResourceCallback;
 import com.espertech.esper.view.ViewCapPriorEventAccess;
 import com.espertech.esper.view.ViewParameterException;
 

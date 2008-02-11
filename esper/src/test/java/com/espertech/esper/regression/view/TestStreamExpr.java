@@ -9,7 +9,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.eql.SupportStaticMethodLib;
+import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 
@@ -120,7 +120,7 @@ public class TestStreamExpr extends TestCase
         // Attach listener to feed
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtOne.getText());
-        assertEquals(textOne, model.toEQL());
+        assertEquals(textOne, model.toEPL());
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 

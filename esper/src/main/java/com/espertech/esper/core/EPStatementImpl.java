@@ -14,7 +14,7 @@ import com.espertech.esper.view.Viewable;
 import java.util.Iterator;
 
 /**
- * Statement implementation for EQL statements.
+ * Statement implementation for EPL statements.
  */
 public class EPStatementImpl implements EPStatementSPI
 {
@@ -38,7 +38,7 @@ public class EPStatementImpl implements EPStatementSPI
      * Ctor.
      * @param statementId is a unique ID assigned by the engine for the statement
      * @param statementName is the statement name assigned during creation, or the statement id if none was assigned
-     * @param expressionText is the EQL and/or pattern expression
+     * @param expressionText is the EPL and/or pattern expression
      * @param isPattern is true to indicate this is a pure pattern expression
      * @param dispatchService for dispatching events to listeners to the statement
      * @param statementLifecycleSvc handles lifecycle transitions for the statement

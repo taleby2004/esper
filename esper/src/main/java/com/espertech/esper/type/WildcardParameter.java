@@ -31,7 +31,7 @@ public class WildcardParameter implements NumberSetParameter
         return result;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write('*');
     }

@@ -24,7 +24,7 @@ public class SubstitutionParameterExpression extends ExpressionBase
         this.index = index;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         if (!isSatisfied)
         {
@@ -32,7 +32,7 @@ public class SubstitutionParameterExpression extends ExpressionBase
         }
         else
         {
-            EPStatementObjectModelHelper.renderEQL(writer, constant);
+            EPStatementObjectModelHelper.renderEPL(writer, constant);
         }
     }
 

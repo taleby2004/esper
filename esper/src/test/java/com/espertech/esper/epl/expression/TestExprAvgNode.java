@@ -1,8 +1,8 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.epl.agg.AvgAggregator;
-import com.espertech.esper.support.eql.SupportExprNode;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportExprNode;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 
 public class TestExprAvgNode extends TestExprAggregateNodeAdapter
 {

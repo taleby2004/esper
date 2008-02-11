@@ -108,11 +108,11 @@ public class CreateWindowClause implements Serializable
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("create window ");
         writer.write(windowName);
-        ProjectedStream.toEQLViews(writer, views);
+        ProjectedStream.toEPLViews(writer, views);
     }
 
     /**

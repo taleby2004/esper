@@ -39,7 +39,7 @@ public class StmtMgmtCallable implements Callable
                     boolean isEQL = (Boolean) statement[0];
                     String statementText = (String) statement[1];
 
-                    // Create EQL or pattern statement
+                    // Create EPL or pattern statement
                     EPStatement stmt;
                     ThreadLogUtil.trace("stmt create,", statementText);
                     if (isEQL)

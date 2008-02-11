@@ -42,7 +42,7 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         PatternExpr pattern = Patterns.timerAt(10, 8, null, null, null, null);
         model.setFromClause(FromClause.create(PatternStream.create(pattern)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
         testCase = new EventExpressionCase(model);
         testCase.add("A1");
         testCaseList.addTest(testCase);

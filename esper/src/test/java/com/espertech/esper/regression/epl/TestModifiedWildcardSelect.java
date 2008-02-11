@@ -47,7 +47,7 @@ public class TestModifiedWildcardSelect extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String text = "select *, myString || myString as concat from " + eventName + ".win:length(5)";
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
 
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(listener);

@@ -124,7 +124,7 @@ public class SQLStream extends Stream
         this.optionalMetadataSQL = optionalMetadataSQL;
     }
 
-    public void toEQLStream(StringWriter writer)
+    public void toEPLStream(StringWriter writer)
     {
         writer.write("sql:");
         writer.write(databaseName);

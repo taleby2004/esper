@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.eql.SupportResultSetProcessor;
+import com.espertech.esper.support.epl.SupportResultSetProcessor;
 import com.espertech.esper.support.view.SupportSchemaNeutralView;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;

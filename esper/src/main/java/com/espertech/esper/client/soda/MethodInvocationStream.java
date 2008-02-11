@@ -115,7 +115,7 @@ public class MethodInvocationStream extends Stream
         return this;
     }
 
-    public void toEQLStream(StringWriter writer)
+    public void toEPLStream(StringWriter writer)
     {
         writer.write("method:");
         writer.write(className);
@@ -124,7 +124,7 @@ public class MethodInvocationStream extends Stream
         writer.write("(");
         for (Expression expr : parameterExpressions)
         {
-            expr.toEQL(writer);
+            expr.toEPL(writer);
         }
         writer.write(")");
     }

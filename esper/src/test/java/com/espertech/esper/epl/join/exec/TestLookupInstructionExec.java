@@ -2,8 +2,8 @@ package com.espertech.esper.epl.join.exec;
 
 import com.espertech.esper.epl.join.exec.TableLookupStrategy;
 import com.espertech.esper.epl.join.exec.LookupInstructionExec;
-import com.espertech.esper.support.eql.join.SupportTableLookupStrategy;
-import com.espertech.esper.support.eql.join.SupportRepositoryImpl;
+import com.espertech.esper.support.epl.join.SupportTableLookupStrategy;
+import com.espertech.esper.support.epl.join.SupportRepositoryImpl;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 

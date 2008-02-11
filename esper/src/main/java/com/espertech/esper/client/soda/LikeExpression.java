@@ -49,17 +49,17 @@ public class LikeExpression extends ExpressionBase
         }
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("(");
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         writer.write(" like ");
-        this.getChildren().get(1).toEQL(writer);
+        this.getChildren().get(1).toEPL(writer);
 
         if (this.getChildren().size() > 2)
         {
             writer.write(" escape ");
-            this.getChildren().get(2).toEQL(writer);
+            this.getChildren().get(2).toEPL(writer);
         }
         writer.write(")");
     }

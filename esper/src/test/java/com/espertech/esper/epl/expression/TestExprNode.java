@@ -1,9 +1,9 @@
 package com.espertech.esper.epl.expression;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportExprNode;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
-import com.espertech.esper.support.eql.SupportStreamTypeSvc1Stream;
+import com.espertech.esper.support.epl.SupportExprNode;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportStreamTypeSvc1Stream;
 import com.espertech.esper.epl.core.*;
 
 public class TestExprNode extends TestCase

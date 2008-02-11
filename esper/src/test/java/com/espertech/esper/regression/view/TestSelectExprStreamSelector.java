@@ -79,9 +79,9 @@ public class TestSelectExprStreamSelector extends TestCase
 
         String viewExpr = "select s0.*, s1.* as s1stream, string as sym from " + SupportBean.class.getName() + " as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        assertEquals(viewExpr, model.toEQL());
-        EPStatementObjectModel modelReverse = epService.getEPAdministrator().compileEPL(model.toEQL());
-        assertEquals(viewExpr, modelReverse.toEQL());
+        assertEquals(viewExpr, model.toEPL());
+        EPStatementObjectModel modelReverse = epService.getEPAdministrator().compileEPL(model.toEPL());
+        assertEquals(viewExpr, modelReverse.toEPL());
 
         EventType type = selectTestView.getEventType();
         assertEquals(SupportMarketDataBean.class, type.getPropertyType("s1stream"));

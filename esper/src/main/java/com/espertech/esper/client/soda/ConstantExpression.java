@@ -27,9 +27,9 @@ public class ConstantExpression extends ExpressionBase
         this.constant = constant;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
-        EPStatementObjectModelHelper.renderEQL(writer, constant);
+        EPStatementObjectModelHelper.renderEPL(writer, constant);
     }
 
     /**

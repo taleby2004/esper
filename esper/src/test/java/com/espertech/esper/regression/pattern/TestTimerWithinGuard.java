@@ -37,7 +37,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         Expression filter = Expressions.eq("id", "B3");
         PatternExpr pattern = Patterns.timerWithin(10.001, Patterns.filter(Filter.create(EVENT_B_CLASS, filter), "b"));
         model.setFromClause(FromClause.create(PatternStream.create(pattern)));
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
         testCase = new EventExpressionCase(model);
         testCase.add("B3", "b", events.getEvent("B3"));
         testCaseList.addTest(testCase);

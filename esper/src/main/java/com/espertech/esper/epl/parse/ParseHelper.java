@@ -33,7 +33,7 @@ public class ParseHelper
      * @param walkRuleSelector - walk rule
      * @param expression - the expression we are walking in string form
      */
-    public static void walk(Tree ast, EQLTreeWalker walker, WalkRuleSelector walkRuleSelector, String expression)
+    public static void walk(Tree ast, EPLTreeWalker walker, WalkRuleSelector walkRuleSelector, String expression)
     {
         // Walk tree
         try

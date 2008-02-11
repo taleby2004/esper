@@ -68,7 +68,7 @@ public class TestSubselectFiltered extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String stmtText = "select (select * from S1.win:length(1000)) as events1 from S1";
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);
@@ -181,7 +181,7 @@ public class TestSubselectFiltered extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String stmtText = "select (select prev(1, id) from S1.win:length(1000) where (id = s0.id)) as value from S0 as s0";
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);
@@ -192,7 +192,7 @@ public class TestSubselectFiltered extends TestCase
     {
         String stmtText = "select (select prev(1, id) from S1.win:length(1000) where (id = s0.id)) as value from S0 as s0";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);

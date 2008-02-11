@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.antlr.runtime.tree.Tree;
-import com.espertech.esper.support.eql.parse.SupportParserHelper;
+import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 

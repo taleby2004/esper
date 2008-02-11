@@ -34,7 +34,7 @@ public class CronParameter implements NumberSetParameter {
          */
         lw }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(operator.toString());
     }

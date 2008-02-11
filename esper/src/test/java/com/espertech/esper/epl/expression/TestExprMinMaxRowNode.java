@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.expression;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportExprNode;
+import com.espertech.esper.support.epl.SupportExprNode;
 import com.espertech.esper.type.MinMaxTypeEnum;
 
 public class TestExprMinMaxRowNode extends TestCase

@@ -71,9 +71,9 @@ public class OrderByElement implements Serializable
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
-        expression.toEQL(writer);
+        expression.toEPL(writer);
         if (isDescending)
         {
             writer.write(" desc");

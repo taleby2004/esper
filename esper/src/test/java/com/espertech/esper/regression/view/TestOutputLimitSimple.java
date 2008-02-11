@@ -915,7 +915,7 @@ public class TestOutputLimitSimple extends TestCase
     	currentTime = 0;
     	sendTimeEvent(0);
 
-    	// create the eql statement and add a listener
+    	// create the EPL statement and add a listener
     	EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
     	SupportUpdateListener updateListener = new SupportUpdateListener();
     	statement.addListener(updateListener);

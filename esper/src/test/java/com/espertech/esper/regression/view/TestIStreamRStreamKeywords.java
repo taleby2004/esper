@@ -79,7 +79,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         model.setFromClause(fromClause);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(testListener);
 
@@ -104,7 +104,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(testListener);
 

@@ -52,7 +52,7 @@ public class StaticMethodExpression extends ExpressionBase
         this.method = method;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(className);
         writer.write('.');
@@ -63,7 +63,7 @@ public class StaticMethodExpression extends ExpressionBase
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEQL(writer);
+            child.toEPL(writer);
             delimiter = ", ";
         }
 

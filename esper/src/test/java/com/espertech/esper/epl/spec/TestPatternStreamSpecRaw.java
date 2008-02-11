@@ -4,15 +4,15 @@ import junit.framework.TestCase;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
 import com.espertech.esper.epl.named.NamedWindowServiceImpl;
-import com.espertech.esper.epl.parse.EQLTreeWalker;
+import com.espertech.esper.epl.parse.EPLTreeWalker;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.filter.*;
 import com.espertech.esper.pattern.EvalFilterNode;
 import com.espertech.esper.pattern.EvalNode;
 import com.espertech.esper.pattern.EvalNodeAnalysisResult;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.eql.parse.SupportParserHelper;
-import com.espertech.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
+import com.espertech.esper.support.epl.parse.SupportParserHelper;
+import com.espertech.esper.support.epl.parse.SupportEQLTreeWalkerFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 
 import java.util.List;
@@ -211,7 +211,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         Tree ast = SupportParserHelper.parseEQL(expression);
         SupportParserHelper.displayAST(ast);
 
-        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
+        EPLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
         walker.startEPLExpressionRule();
 
         PatternStreamSpecRaw spec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);

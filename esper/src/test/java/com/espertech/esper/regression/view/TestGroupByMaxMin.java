@@ -73,7 +73,7 @@ public class TestGroupByMaxMin extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
                           "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
                           "group by symbol";
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
@@ -92,7 +92,7 @@ public class TestGroupByMaxMin extends TestCase
                           "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
                           "group by symbol";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);

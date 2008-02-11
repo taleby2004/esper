@@ -103,9 +103,9 @@ public class InExpression extends ExpressionBase
         return this;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         if (isNotIn)
         {
             writer.write(" not in (");
@@ -119,7 +119,7 @@ public class InExpression extends ExpressionBase
         for (int i = 1; i < this.getChildren().size(); i++)
         {
             writer.write(delimiter);
-            this.getChildren().get(i).toEQL(writer);
+            this.getChildren().get(i).toEPL(writer);
             delimiter = ", ";
         }
         writer.write(')');

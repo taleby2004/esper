@@ -10,7 +10,7 @@ package com.espertech.esper.client;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 
 /**
- * Administrative interface to the event stream processing engine. Includes methods to create patterns and EQL statements.
+ * Administrative interface to the event stream processing engine. Includes methods to create patterns and EPL statements.
  */
 public interface EPAdministrator
 {
@@ -25,14 +25,14 @@ public interface EPAdministrator
     public EPStatement createPattern(String onExpression) throws EPException;
 
     /**
-     * Creates and starts an EQL statement.
+     * Creates and starts an EPL statement.
      * <p>
      * The engine assigns a unique name to the statement. The returned statement is in started state.
-     * @param eqlStatement is the query language statement
+     * @param eplStatement is the query language statement
      * @return EPStatement to poll data from or to add listeners to
      * @throws EPException when the expression was not valid
      */
-    public EPStatement createEPL(String eqlStatement) throws EPException;
+    public EPStatement createEPL(String eplStatement) throws EPException;
 
     /**
      * Create and starts an event pattern statement for the expressing string passed and assign the name passed.
@@ -47,19 +47,19 @@ public interface EPAdministrator
     public EPStatement createPattern(String onExpression, String statementName) throws EPException;
 
     /**
-     * Create and starts an EQL statement.
+     * Create and starts an EPL statement.
      * <p>
      * The statement name is optimally a unique name. If a statement of the same name
      * has already been created, the engine assigns a postfix to create a unique statement name.
-     * @param eqlStatement is the query language statement
+     * @param eplStatement is the query language statement
      * @param statementName is the name to assign to the statement for use in manageing the statement
      * @return EPStatement to poll data from or to add listeners to
      * @throws EPException when the expression was not valid
      */
-    public EPStatement createEPL(String eqlStatement, String statementName) throws EPException;
+    public EPStatement createEPL(String eplStatement, String statementName) throws EPException;
 
     /**
-     * Creates and starts an EQL statement.
+     * Creates and starts an EPL statement.
      * <p>
      * The statement name is optimally a unique name. If a statement of the same name
      * has already been created, the engine assigns a postfix to create a unique statement name.
@@ -71,7 +71,7 @@ public interface EPAdministrator
     public EPStatement create(EPStatementObjectModel sodaStatement, String statementName) throws EPException;
 
     /**
-     * Creates and starts an EQL statement.
+     * Creates and starts an EPL statement.
      * @param sodaStatement is the statement object model
      * @return EPStatement to poll data from or to add listeners to
      * @throws EPException when the expression was not valid
@@ -79,20 +79,20 @@ public interface EPAdministrator
     public EPStatement create(EPStatementObjectModel sodaStatement) throws EPException;
 
     /**
-     * Compiles a given EQL into an object model representation of the query.
-     * @param eqlExpression is the statement text to compile
+     * Compiles a given EPL into an object model representation of the query.
+     * @param eplExpression is the statement text to compile
      * @return object model of statement
      * @throws EPException indicates compilation errors.
      */
-    public EPStatementObjectModel compileEPL(String eqlExpression) throws EPException;
+    public EPStatementObjectModel compileEPL(String eplExpression) throws EPException;
 
     /**
-     * Prepares a statement for the given EQL, which can include substitution parameters marked via question mark '?'.
-     * @param eqlExpression is the statement text to prepare
+     * Prepares a statement for the given EPL, which can include substitution parameters marked via question mark '?'.
+     * @param eplExpression is the statement text to prepare
      * @return prepared statement
      * @throws EPException indicates compilation errors.
      */
-    public EPPreparedStatement prepareEPL(String eqlExpression) throws EPException;
+    public EPPreparedStatement prepareEPL(String eplExpression) throws EPException;
 
     /**
      * Prepares a statement for the given pattern, which can include substitution parameters marked via question mark '?'.

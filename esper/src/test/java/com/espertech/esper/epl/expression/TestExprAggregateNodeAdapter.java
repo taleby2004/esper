@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.expression;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportAggregationResultFuture;
+import com.espertech.esper.support.epl.SupportAggregationResultFuture;
 
 public abstract class TestExprAggregateNodeAdapter extends TestCase
 {

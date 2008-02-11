@@ -7,8 +7,7 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.type.NumberSetParameter;
-import com.espertech.esper.type.EQLParameterType;
+import com.espertech.esper.type.EPLParameterType;
 import com.espertech.esper.core.EPStatementObjectModelHelper;
 
 import java.util.List;
@@ -94,10 +93,10 @@ public abstract class EPBaseNamedObject implements Serializable
     }
 
     /**
-     * Writes the object in EQL-syntax in the format "namespace:name(parameter, parameter, ..., parameter)"
+     * Writes the object in EPL-syntax in the format "namespace:name(parameter, parameter, ..., parameter)"
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write(namespace);
         writer.write(':');
@@ -112,14 +111,14 @@ public abstract class EPBaseNamedObject implements Serializable
             {
                 writer.write("null");
             }
-            else if (param instanceof EQLParameterType)
+            else if (param instanceof EPLParameterType)
             {
-                EQLParameterType numSet = (EQLParameterType) param;
-                numSet.toEQL(writer);
+                EPLParameterType numSet = (EPLParameterType) param;
+                numSet.toEPL(writer);
             }
             else
             {
-                EPStatementObjectModelHelper.renderEQL(writer, param);
+                EPStatementObjectModelHelper.renderEPL(writer, param);
             }
             delimiter = ", ";
         }

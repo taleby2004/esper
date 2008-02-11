@@ -59,9 +59,9 @@ public class SubqueryInExpression extends ExpressionBase
         isNotIn = notIn;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         if (isNotIn)
         {
             writer.write(" not in (");
@@ -70,7 +70,7 @@ public class SubqueryInExpression extends ExpressionBase
         {
             writer.write(" in (");
         }
-        writer.write(model.toEQL());
+        writer.write(model.toEPL());
         writer.write(')');
     }
 

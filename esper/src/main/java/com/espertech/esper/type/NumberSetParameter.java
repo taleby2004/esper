@@ -15,7 +15,7 @@ import java.io.StringWriter;
 /**
  * Interface to generate a set of integers from parameters that include ranges, lists and frequencies.
  */
-public interface NumberSetParameter extends MetaDefItem, EQLParameterType
+public interface NumberSetParameter extends MetaDefItem, EPLParameterType
 {
     /**
      * Returns true if all values between and including min and max are supplied by the parameter.
@@ -33,5 +33,5 @@ public interface NumberSetParameter extends MetaDefItem, EQLParameterType
      */
     public Set<Integer> getValuesInRange(int min, int max);
 
-    public void toEQL(StringWriter writer);
+    public void toEPL(StringWriter writer);
 }

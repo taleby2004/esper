@@ -82,7 +82,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "where (((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\"))) " +
                           "and ((one.string = two.symbol)) " +
                           "group by symbol";
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);

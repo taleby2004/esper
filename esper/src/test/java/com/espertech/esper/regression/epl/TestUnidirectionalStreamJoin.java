@@ -270,7 +270,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
                       " on string = symbol";
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         EPStatement stmt = epService.getEPAdministrator().create(model);
 
         tryFullOuterPassive2Stream(stmt);
@@ -289,7 +289,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
                       "full outer join " +
                       SupportBean.class.getName() +
                       " on string = symbol";
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
 

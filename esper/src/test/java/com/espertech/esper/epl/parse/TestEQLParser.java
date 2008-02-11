@@ -2,8 +2,8 @@ package com.espertech.esper.epl.parse;
 
 import junit.framework.TestCase;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.eql.parse.SupportEQLTreeWalkerFactory;
-import com.espertech.esper.support.eql.parse.SupportParserHelper;
+import com.espertech.esper.support.epl.parse.SupportEQLTreeWalkerFactory;
+import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +20,7 @@ public class TestEQLParser extends TestCase
         SupportParserHelper.displayAST(ast);
 
         log.debug(".testDisplayAST walking...");
-        EQLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
+        EPLTreeWalker walker = SupportEQLTreeWalkerFactory.makeWalker(ast);
         walker.startEPLExpressionRule();
     }
 
@@ -484,7 +484,7 @@ public class TestEQLParser extends TestCase
         assertIsValid("select b.c[0]?.mapped('a')? from E");
         assertIsValid("select b?.c[0].mapped('a') from E");
 
-        // Allow comments in EQL and patterns
+        // Allow comments in EPL and patterns
         assertIsValid("select b.c.d /* some comment */ from E");
         assertIsValid("select b /* ajajaj */ .c.d /* some comment */ from E");
         assertIsValid("select * from pattern [ /* filter */ every A() -> B() /* for B */]");

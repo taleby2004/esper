@@ -81,7 +81,7 @@ public class SelectClauseExpression implements SelectClauseElement
      */
     public void toEQLElement(StringWriter writer)
     {
-        expression.toEQL(writer);
+        expression.toEPL(writer);
         if (asName != null)
         {
             writer.write(" as ");

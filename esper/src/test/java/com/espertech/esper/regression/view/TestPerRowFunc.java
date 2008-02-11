@@ -86,7 +86,7 @@ public class TestPerRowFunc extends TestCase
                 "longBoxed", "intBoxed", "shortBoxed"), "result"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 1000)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         epService.initialize();
         selectTestView = epService.getEPAdministrator().create(model);
@@ -102,7 +102,7 @@ public class TestPerRowFunc extends TestCase
                           " from " + SupportBean.class.getName() + ".win:length(1000)";
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         epService.initialize();
         selectTestView = epService.getEPAdministrator().create(model);
@@ -230,7 +230,7 @@ public class TestPerRowFunc extends TestCase
                 );
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 3)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
@@ -249,7 +249,7 @@ public class TestPerRowFunc extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);

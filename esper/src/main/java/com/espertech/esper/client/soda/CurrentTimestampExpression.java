@@ -21,7 +21,7 @@ public class CurrentTimestampExpression extends ExpressionBase
     {
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("current_timestamp()");
     }

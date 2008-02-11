@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Specification object representing a complete EQL statement including all EQL constructs.
+ * Specification object representing a complete EPL statement including all EPL constructs.
  */
 public class StatementSpecRaw implements MetaDefItem
 {

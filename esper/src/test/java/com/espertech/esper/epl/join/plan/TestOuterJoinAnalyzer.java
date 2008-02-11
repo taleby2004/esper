@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.epl.spec.OuterJoinDesc;
-import com.espertech.esper.support.eql.SupportOuterJoinDescFactory;
+import com.espertech.esper.support.epl.SupportOuterJoinDescFactory;
 import com.espertech.esper.type.OuterJoinType;
 import junit.framework.TestCase;
 

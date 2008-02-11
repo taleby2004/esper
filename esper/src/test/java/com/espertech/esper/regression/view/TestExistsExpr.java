@@ -105,7 +105,7 @@ public class TestExistsExpr extends TestCase
         model.setSelectClause(SelectClause.create().add(Expressions.existsProperty("inner?.intBoxed"), "t0"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportMarkerInterface.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(listener);
@@ -129,7 +129,7 @@ public class TestExistsExpr extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(listener);

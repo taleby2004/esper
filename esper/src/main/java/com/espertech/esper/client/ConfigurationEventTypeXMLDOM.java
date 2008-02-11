@@ -21,7 +21,7 @@ import java.io.Serializable;
  * and contain all the data for event properties used by statements.
  * <p>
  * Minimally required is the root element name which allows the engine to map the document
- * to the event type that has been named in an EQL or pattern statement.
+ * to the event type that has been named in an EPL or pattern statement.
  * <p>
  * Event properties that are results of XPath expressions can be made known to the engine via this class.
  * For XPath expressions that must refer to namespace prefixes those prefixes and their

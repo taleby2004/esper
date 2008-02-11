@@ -131,7 +131,7 @@ public class FromClause implements Serializable
      * Renders the from-clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         String delimiter = "";
         writer.write("from ");
@@ -141,7 +141,7 @@ public class FromClause implements Serializable
             for (Stream stream : streams)
             {
                 writer.write(delimiter);
-                stream.toEQL(writer);
+                stream.toEPL(writer);
                 delimiter = ", ";
             }
         }
@@ -154,24 +154,24 @@ public class FromClause implements Serializable
             for (int i = 0; i < streams.size(); i++)
             {
                 Stream stream = streams.get(i);
-                stream.toEQL(writer);
+                stream.toEPL(writer);
 
                 if (i > 0)
                 {
                     OuterJoinQualifier qualCond = outerJoinQualifiers.get(i - 1);
                     writer.write(" on ");
-                    qualCond.getLeft().toEQL(writer);
+                    qualCond.getLeft().toEPL(writer);
                     writer.write(" = ");
-                    qualCond.getRight().toEQL(writer);
+                    qualCond.getRight().toEPL(writer);
 
                     if (qualCond.getAdditionalProperties().size() > 0)
                     {
                         for (Pair<PropertyValueExpression, PropertyValueExpression> pair : qualCond.getAdditionalProperties())
                         {
                             writer.write(" and ");
-                            pair.getFirst().toEQL(writer);
+                            pair.getFirst().toEPL(writer);
                             writer.write(" = ");
-                            pair.getSecond().toEQL(writer);                            
+                            pair.getSecond().toEPL(writer);
                         }
                     }
                 }

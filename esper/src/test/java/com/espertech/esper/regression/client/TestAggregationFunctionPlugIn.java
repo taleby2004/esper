@@ -5,8 +5,8 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.eql.SupportPluginAggregationMethodTwo;
-import com.espertech.esper.support.eql.SupportPluginAggregationMethodOne;
+import com.espertech.esper.support.epl.SupportPluginAggregationMethodTwo;
+import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -41,7 +41,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
                 .add(Expressions.plugInAggregation("concatstring", Expressions.property("string")), "val"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 10)));
         model.setGroupByClause(GroupByClause.create("intPrimitive"));
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
         SerializableObjectCopier.copy(model);
 
         tryGrouped(null, model);
@@ -53,7 +53,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
         SerializableObjectCopier.copy(model);
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
 
         tryGrouped(null, model);
     }

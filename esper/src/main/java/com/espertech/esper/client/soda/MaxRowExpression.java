@@ -88,7 +88,7 @@ public class MaxRowExpression extends ExpressionBase
         return this;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("max(");
 
@@ -96,7 +96,7 @@ public class MaxRowExpression extends ExpressionBase
         for (Expression expr : this.getChildren())
         {
             writer.write(delimiter);
-            expr.toEQL(writer);
+            expr.toEPL(writer);
             delimiter = ", ";
         }
         writer.write(')');

@@ -8,7 +8,7 @@ import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.eql.SupportDatabaseService;
+import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
@@ -67,12 +67,12 @@ public class TestDatabaseJoin extends TestCase
         SerializableObjectCopier.copy(model);
 
         assertEquals("select mybigint, myint, myvarchar, mychar, mybool, mynumeric, mydecimal, mydouble, myreal from sql:MyDB[\"select mybigint, myint, myvarchar, mychar, mybool, mynumeric, mydecimal, mydouble, myreal from mytesttable where ${intPrimitive} = mytesttable.mybigint\"] as s0, com.espertech.esper.support.bean.SupportBean.win:time_batch(10) as s1",
-                model.toEQL());
+                model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runtestTimeBatch(stmt);
 
-        stmt = epService.getEPAdministrator().createEPL(model.toEQL());
+        stmt = epService.getEPAdministrator().createEPL(model.toEPL());
     }
 
     public void testTimeBatchCompile() throws Exception

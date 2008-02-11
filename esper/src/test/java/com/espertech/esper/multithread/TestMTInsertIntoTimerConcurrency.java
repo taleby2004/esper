@@ -38,9 +38,9 @@ public class TestMTInsertIntoTimerConcurrency extends TestCase
 
         epAdministrator.startAllStatements();
 
-        String eql = "insert into Stream1 select count(*) as cnt from SupportBean.win:time(7 sec)";
+        String EPL = "insert into Stream1 select count(*) as cnt from SupportBean.win:time(7 sec)";
         createEQL(eql, noActionUpdateListener);
-        eql = eql + " output every 10 seconds";
+        EPL = EPL + " output every 10 seconds";
         createEQL(eql, noActionUpdateListener);
 
         SendEventRunnable sendTickEventRunnable = new SendEventRunnable(10000);

@@ -62,7 +62,7 @@ public class TestBitWiseOperators extends TestCase
                 );
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 3)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(viewExpr, model.toEQL());
+        assertEquals(viewExpr, model.toEPL());
 
         _selectTestView = _epService.getEPAdministrator().createEPL(viewExpr);
         _selectTestView.addListener(_testListener);

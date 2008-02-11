@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.join.plan;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.epl.expression.ExprEqualsNode;
 import com.espertech.esper.epl.expression.ExprAndNode;

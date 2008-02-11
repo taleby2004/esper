@@ -47,7 +47,7 @@ public class TestPatternQueries extends TestCase
                     ));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        String reverse = model.toEQL();
+        String reverse = model.toEPL();
         String stmtText = "select s0.id as idS0, s1.id as idS1 " +
                 "from pattern [(every (s0=" + SupportBean_S0.class.getName() +
                 ")) or (every (s1=" + SupportBean_S1.class.getName() + "))] " +
@@ -79,7 +79,7 @@ public class TestPatternQueries extends TestCase
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        String reverse = model.toEQL();
+        String reverse = model.toEPL();
         assertEquals(stmtText, reverse);
 
         EPStatement statement = epService.getEPAdministrator().create(model);

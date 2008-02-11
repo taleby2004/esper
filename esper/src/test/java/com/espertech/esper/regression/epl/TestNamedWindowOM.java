@@ -39,7 +39,7 @@ public class TestNamedWindowOM extends TestCase
         EPStatementObjectModel modelCreate = epService.getEPAdministrator().compileEPL(stmtTextCreate);
         EPStatement stmtCreate = epService.getEPAdministrator().create(modelCreate);
         stmtCreate.addListener(listenerWindow);
-        assertEquals("create window MyWindow.win:keepall() as select string as key, longBoxed as value from com.espertech.esper.support.bean.SupportBean", modelCreate.toEQL());
+        assertEquals("create window MyWindow.win:keepall() as select string as key, longBoxed as value from com.espertech.esper.support.bean.SupportBean", modelCreate.toEPL());
 
         String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " select mywin.* from MyWindow as mywin";
         EPStatementObjectModel modelOnSelect = epService.getEPAdministrator().compileEPL(stmtTextOnSelect);
@@ -54,7 +54,7 @@ public class TestNamedWindowOM extends TestCase
         EPStatementObjectModel modelSelect = epService.getEPAdministrator().compileEPL(stmtTextSelectOne);
         EPStatement stmtSelectOne = epService.getEPAdministrator().create(modelSelect);
         stmtSelectOne.addListener(listenerStmtOne);
-        assertEquals("select irstream key, (value * 2) as value from MyWindow((key != null))", modelSelect.toEQL());
+        assertEquals("select irstream key, (value * 2) as value from MyWindow((key != null))", modelSelect.toEPL());
 
         // send events
         sendSupportBean("E1", 10L);
@@ -69,7 +69,7 @@ public class TestNamedWindowOM extends TestCase
         String stmtTextDelete = "on " + SupportMarketDataBean.class.getName() + " as s0 delete from MyWindow as s1 where s0.symbol = s1.key";
         EPStatementObjectModel modelDelete = epService.getEPAdministrator().compileEPL(stmtTextDelete);
         epService.getEPAdministrator().create(modelDelete);
-        assertEquals("on com.espertech.esper.support.bean.SupportMarketDataBean as s0 delete from MyWindow as s1 where (s0.symbol = s1.key)", modelDelete.toEQL());
+        assertEquals("on com.espertech.esper.support.bean.SupportMarketDataBean as s0 delete from MyWindow as s1 where (s0.symbol = s1.key)", modelDelete.toEPL());
 
         // send delete event
         sendMarketBean("E1");
@@ -120,7 +120,7 @@ public class TestNamedWindowOM extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, longBoxed as value from " + SupportBean.class.getName();
-        assertEquals(stmtTextCreate, model.toEQL());
+        assertEquals(stmtTextCreate, model.toEPL());
 
         String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatementObjectModel modelInsert = epService.getEPAdministrator().compileEPL(stmtTextInsert);
@@ -137,7 +137,7 @@ public class TestNamedWindowOM extends TestCase
         EPStatement stmtSelectOne = epService.getEPAdministrator().create(model);
         stmtSelectOne.addListener(listenerStmtOne);
         String stmtTextSelectOne = "select irstream key, (value * 2) as value from MyWindow((value != null))";
-        assertEquals(stmtTextSelectOne, model.toEQL());
+        assertEquals(stmtTextSelectOne, model.toEPL());
 
         // send events
         sendSupportBean("E1", 10L);
@@ -155,7 +155,7 @@ public class TestNamedWindowOM extends TestCase
         model.setWhereClause(Expressions.eqProperty("s0.symbol", "s1.key"));
         epService.getEPAdministrator().create(model);
         String stmtTextDelete = "on " + SupportMarketDataBean.class.getName() + " as s0 delete from MyWindow as s1 where (s0.symbol = s1.key)";
-        assertEquals(stmtTextDelete, model.toEQL());
+        assertEquals(stmtTextDelete, model.toEPL());
 
         // send delete event
         sendMarketBean("E1");
@@ -181,7 +181,7 @@ public class TestNamedWindowOM extends TestCase
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(listenerOnSelect);
         String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " as s0 select s1.*  from MyWindow as s1 where (s0.id = s1.key)";
-        assertEquals(stmtTextOnSelect, model.toEQL());
+        assertEquals(stmtTextOnSelect, model.toEPL());
 
         // send some more events
         sendSupportBean("E3", 30L);

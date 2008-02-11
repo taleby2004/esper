@@ -62,7 +62,7 @@ public class BitwiseOpExpression extends ExpressionBase
         return this;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         boolean isFirst = true;
         for (Expression child : this.getChildren())
@@ -73,7 +73,7 @@ public class BitwiseOpExpression extends ExpressionBase
                 writer.write(binaryOp.getExpressionText());
                 writer.write(' ');
             }
-            child.toEQL(writer);
+            child.toEPL(writer);
             isFirst = false;
         }
     }

@@ -16,7 +16,7 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportTemperatureBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.eql.SupportStaticMethodLib;
+import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -132,7 +132,7 @@ public class TestStaticFunctions extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         statementText = "select Integer.toBinaryString(7) as value" + stream;
 
-        assertEquals(statementText.trim(), model.toEQL());
+        assertEquals(statementText.trim(), model.toEPL());
         statement = epService.getEPAdministrator().create(model);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -147,7 +147,7 @@ public class TestStaticFunctions extends TestCase
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(statementText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        assertEquals(statementText.trim(), model.toEQL());
+        assertEquals(statementText.trim(), model.toEPL());
         statement = epService.getEPAdministrator().create(model);
         listener = new SupportUpdateListener();
         statement.addListener(listener);

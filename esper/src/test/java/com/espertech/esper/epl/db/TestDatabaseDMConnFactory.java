@@ -1,7 +1,7 @@
 package com.espertech.esper.epl.db;
 
 import junit.framework.TestCase;
-import com.espertech.esper.support.eql.SupportDatabaseService;
+import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.client.ConfigurationDBRef;
 
 import java.sql.Connection;

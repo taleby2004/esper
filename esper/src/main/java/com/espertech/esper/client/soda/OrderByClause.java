@@ -130,13 +130,13 @@ public class OrderByClause implements Serializable
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         String delimiter = "";
         for (OrderByElement element : orderByExpressions)
         {
             writer.write(delimiter);
-            element.toEQL(writer);
+            element.toEPL(writer);
             delimiter = ", ";
         }
     }

@@ -138,7 +138,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
         model.setFromClause(fromClause);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        assertEquals("select * from com.espertech.esper.support.bean.SupportBean_S0 as s0 left outer join com.espertech.esper.support.bean.SupportBean_S1 as s1 on s0.p00 = s1.p10 left outer join com.espertech.esper.support.bean.SupportBean_S2 as s2 on s0.p00 = s2.p20", model.toEQL());
+        assertEquals("select * from com.espertech.esper.support.bean.SupportBean_S0 as s0 left outer join com.espertech.esper.support.bean.SupportBean_S1 as s1 on s0.p00 = s1.p10 left outer join com.espertech.esper.support.bean.SupportBean_S2 as s2 on s0.p00 = s2.p20", model.toEPL());
         joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
 
@@ -157,7 +157,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
         joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
 
-        assertEquals(joinStatement, model.toEQL());
+        assertEquals(joinStatement, model.toEPL());
 
         runAsserts();
     }

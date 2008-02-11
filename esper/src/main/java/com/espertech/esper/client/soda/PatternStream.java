@@ -8,7 +8,6 @@
 package com.espertech.esper.client.soda;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.io.StringWriter;
 
 /**
@@ -80,10 +79,10 @@ public class PatternStream extends ProjectedStream
         this.expression = expression;
     }
 
-    public void toEQLProjectedStream(StringWriter writer)
+    public void toEPLProjectedStream(StringWriter writer)
     {
         writer.write("pattern [");
-        expression.toEQL(writer);
+        expression.toEPL(writer);
         writer.write(']');
     }
 }

@@ -25,9 +25,9 @@ import org.apache.commons.logging.LogFactory;
 public class EPAdministratorImpl implements EPAdministrator
 {
     private static ParseRuleSelector patternParseRule;
-    private static ParseRuleSelector eqlParseRule;
+    private static ParseRuleSelector eplParseRule;
     private static WalkRuleSelector patternWalkRule;
-    private static WalkRuleSelector eqlWalkRule;
+    private static WalkRuleSelector eplWalkRule;
 
     private EPServicesContext services;
     private ConfigurationOperations configurationOperations;
@@ -45,13 +45,13 @@ public class EPAdministratorImpl implements EPAdministrator
         };
         patternWalkRule = new WalkRuleSelector()
         {
-            public void invokeWalkRule(EQLTreeWalker walker) throws RecognitionException
+            public void invokeWalkRule(EPLTreeWalker walker) throws RecognitionException
             {
                 walker.startPatternExpressionRule();
             }
         };
 
-        eqlParseRule = new ParseRuleSelector()
+        eplParseRule = new ParseRuleSelector()
         {
             public Tree invokeParseRule(EsperEPL2GrammarParser parser) throws RecognitionException
             {
@@ -59,9 +59,9 @@ public class EPAdministratorImpl implements EPAdministrator
                 return (Tree) r.getTree();
             }
         };
-        eqlWalkRule = new WalkRuleSelector()
+        eplWalkRule = new WalkRuleSelector()
         {
-            public void invokeWalkRule(EQLTreeWalker walker) throws RecognitionException
+            public void invokeWalkRule(EPLTreeWalker walker) throws RecognitionException
             {
                 walker.startEPLExpressionRule();
             }
@@ -87,9 +87,9 @@ public class EPAdministratorImpl implements EPAdministrator
         return createPatternStmt(onExpression, null);
     }
 
-    public EPStatement createEPL(String eqlStatement) throws EPException
+    public EPStatement createEPL(String eplStatement) throws EPException
     {
-        return createEQLStmt(eqlStatement, null);
+        return createEPLStmt(eplStatement, null);
     }
 
     public EPStatement createPattern(String expression, String statementName) throws EPException
@@ -97,9 +97,9 @@ public class EPAdministratorImpl implements EPAdministrator
         return createPatternStmt(expression, statementName);
     }
 
-    public EPStatement createEPL(String eqlStatement, String statementName) throws EPException
+    public EPStatement createEPL(String eplStatement, String statementName) throws EPException
     {
-        return createEQLStmt(eqlStatement, statementName);
+        return createEPLStmt(eplStatement, statementName);
     }
 
     private EPStatement createPatternStmt(String expression, String statementName) throws EPException
@@ -115,17 +115,17 @@ public class EPAdministratorImpl implements EPAdministrator
          */
     }
 
-    private EPStatement createEQLStmt(String eqlStatement, String statementName) throws EPException
+    private EPStatement createEPLStmt(String eplStatement, String statementName) throws EPException
     {
-        StatementSpecRaw statementSpec = compileEQL(eqlStatement, statementName, services, defaultStreamSelector);
-        EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eqlStatement, false, statementName);
+        StatementSpecRaw statementSpec = compileEQL(eplStatement, statementName, services, defaultStreamSelector);
+        EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName);
 
-        log.debug(".createEQLStmt Statement created and started");
+        log.debug(".createEPLStmt Statement created and started");
         return statement;
 
         /**
          * For round-trip testing of all statements, of a statement to SODA and creation from SODA, use below lines:
-        EPStatementObjectModel model = compile(eqlStatement);
+        EPStatementObjectModel model = compile(eplStatement);
         return create(model, statementName);
          */
     }
@@ -139,11 +139,11 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         // Specifies the statement
         StatementSpecRaw statementSpec = StatementSpecMapper.map(sodaStatement, services.getEngineImportService(), services.getVariableService());
-        String eqlStatement = sodaStatement.toEQL();
+        String eplStatement = sodaStatement.toEPL();
 
-        EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eqlStatement, false, statementName);
+        EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName);
 
-        log.debug(".createEQLStmt Statement created and started");
+        log.debug(".createEPLStmt Statement created and started");
         return statement;
     }
 
@@ -177,9 +177,9 @@ public class EPAdministratorImpl implements EPAdministrator
         EPPreparedStatementImpl impl = (EPPreparedStatementImpl) prepared;
 
         StatementSpecRaw statementSpec = StatementSpecMapper.map(impl.getModel(), services.getEngineImportService(), services.getVariableService());
-        String eqlStatement = impl.getModel().toEQL();
+        String eplStatement = impl.getModel().toEPL();
 
-        return services.getStatementLifecycleSvc().createAndStart(statementSpec, eqlStatement, false, statementName);
+        return services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName);
     }
 
     public EPStatement create(EPPreparedStatement prepared) throws EPException
@@ -187,9 +187,9 @@ public class EPAdministratorImpl implements EPAdministrator
         return create(prepared, null);
     }
 
-    public EPStatementObjectModel compileEPL(String eqlStatement) throws EPException
+    public EPStatementObjectModel compileEPL(String eplStatement) throws EPException
     {
-        StatementSpecRaw statementSpec = compileEQL(eqlStatement, null, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEQL(eplStatement, null, services, defaultStreamSelector);
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
         if (unmapped.getIndexedParams().size() != 0)
         {
@@ -238,32 +238,32 @@ public class EPAdministratorImpl implements EPAdministrator
     }
 
     /**
-     * Compile the EQL.
-     * @param eqlStatement expression to compile
+     * Compile the EPL.
+     * @param eplStatement expression to compile
      * @param statementName is the name of the statement
      * @param services is the context
      * @return statement specification
      */
-    protected static StatementSpecRaw compileEQL(String eqlStatement, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
+    protected static StatementSpecRaw compileEQL(String eplStatement, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
         if (log.isDebugEnabled())
         {
-            log.debug(".createEQLStmt statementName=" + statementName + " eqlStatement=" + eqlStatement);
+            log.debug(".createEPLStmt statementName=" + statementName + " eplStatement=" + eplStatement);
         }
 
-        Tree ast = ParseHelper.parse(eqlStatement, eqlParseRule);
+        Tree ast = ParseHelper.parse(eplStatement, eplParseRule);
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
 
-        EQLTreeWalker walker = new EQLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService().getTime(), defaultStreamSelector);
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService().getTime(), defaultStreamSelector);
 
         try
         {
-            ParseHelper.walk(ast, walker, eqlWalkRule, eqlStatement);
+            ParseHelper.walk(ast, walker, eplWalkRule, eplStatement);
         }
         catch (ASTWalkException ex)
         {
             log.error(".createEPL Error validating expression", ex);
-            throw new EPStatementException(ex.getMessage(), eqlStatement);
+            throw new EPStatementException(ex.getMessage(), eplStatement);
         }
         catch (EPStatementSyntaxException ex)
         {
@@ -272,7 +272,7 @@ public class EPAdministratorImpl implements EPAdministrator
         catch (RuntimeException ex)
         {
             log.error(".createEPL Error validating expression", ex);
-            throw new EPStatementException(ex.getMessage(), eqlStatement);
+            throw new EPStatementException(ex.getMessage(), eplStatement);
         }
 
         if (log.isDebugEnabled())
@@ -289,7 +289,7 @@ public class EPAdministratorImpl implements EPAdministrator
         // Parse and walk
         Tree ast = ParseHelper.parse(expression, patternParseRule);
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
-        EQLTreeWalker walker = new EQLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService().getTime(), defaultStreamSelector);
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService().getTime(), defaultStreamSelector);
 
         try
         {

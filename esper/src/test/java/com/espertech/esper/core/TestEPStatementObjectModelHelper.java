@@ -19,7 +19,7 @@ public class TestEPStatementObjectModelHelper extends TestCase
     private String tryConstant(Object value)
     {
         StringWriter writer = new StringWriter();
-        EPStatementObjectModelHelper.renderEQL(writer, value);
+        EPStatementObjectModelHelper.renderEPL(writer, value);
         return writer.toString();
     }
 }

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.sql.Types;
 
-import com.espertech.esper.support.eql.SupportDatabaseService;
+import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;

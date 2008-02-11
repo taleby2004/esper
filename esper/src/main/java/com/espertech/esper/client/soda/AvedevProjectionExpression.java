@@ -36,14 +36,14 @@ public class AvedevProjectionExpression extends ExpressionBase
         this.getChildren().add(expression);
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("avedev(");
         if (isDistinct)
         {
             writer.write("distinct ");
         }
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         writer.write(")");
     }
 

@@ -34,5 +34,5 @@ public interface Expression extends Serializable
      * language syntax.
      * @param writer is the output to use
      */
-    public void toEQL(StringWriter writer);
+    public void toEPL(StringWriter writer);
 }

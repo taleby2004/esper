@@ -33,7 +33,7 @@ public class TestOperators extends TestCase implements SupportBeanConstants
         model.setFromClause(FromClause.create(PatternStream.create(pattern)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         String text = "select * from pattern [(b=" + EVENT_B_CLASS + ") -> ((d=" + EVENT_D_CLASS + ") or (a=" + EVENT_A_CLASS + "))]";
-        assertEquals(text, model.toEQL());
+        assertEquals(text, model.toEPL());
         testCase = new EventExpressionCase(model);
         testCase.add("A2", "b", events.getEvent("B1"), "a", events.getEvent("A2"));
         testCaseList.addTest(testCase);

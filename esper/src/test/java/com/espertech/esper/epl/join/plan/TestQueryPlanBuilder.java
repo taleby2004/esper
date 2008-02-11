@@ -5,8 +5,8 @@ import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
-import com.espertech.esper.support.eql.SupportOuterJoinDescFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportOuterJoinDescFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.type.OuterJoinType;
 

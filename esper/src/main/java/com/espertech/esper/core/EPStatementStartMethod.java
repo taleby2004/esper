@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.*;
 
 /**
- * Starts and provides the stop method for EQL statements.
+ * Starts and provides the stop method for EPL statements.
  */
 public class EPStatementStartMethod
 {
@@ -65,7 +65,7 @@ public class EPStatementStartMethod
     }
 
     /**
-     * Starts the EQL statement.
+     * Starts the EPL statement.
      * @return a viewable to attach to for listening to events, and a stop method to invoke to clean up
      * @param isNewStatement indicator whether the statement is new or a stop-restart statement
      * @throws ExprValidationException when the expression validation fails

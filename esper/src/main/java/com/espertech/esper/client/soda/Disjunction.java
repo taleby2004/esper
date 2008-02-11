@@ -40,14 +40,14 @@ public class Disjunction extends Junction
         }        
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
             writer.write('(');
-            child.toEQL(writer);
+            child.toEPL(writer);
             writer.write(')');
             delimiter = " or ";
         }

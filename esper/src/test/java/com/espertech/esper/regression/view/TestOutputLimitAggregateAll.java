@@ -618,7 +618,7 @@ public class TestOutputLimitAggregateAll extends TestCase
         currentTime = 0;
         sendTimeEvent(0);
 
-        // Create the eql statement and add a listener
+        // Create the EPL statement and add a listener
         String statementText = "select symbol, sum(volume) from " + EVENT_NAME + ".win:length(5) output first every 3 seconds";
         EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener updateListener = new SupportUpdateListener();
@@ -670,7 +670,7 @@ public class TestOutputLimitAggregateAll extends TestCase
 
     public void testCount()
     {
-        // Create the eql statement and add a listener
+        // Create the EPL statement and add a listener
         String statementText = "select symbol, sum(volume) from " + EVENT_NAME + ".win:length(5) output first every 3 events";
         EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener updateListener = new SupportUpdateListener();

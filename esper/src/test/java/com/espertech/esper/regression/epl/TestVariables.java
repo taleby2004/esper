@@ -318,7 +318,7 @@ public class TestVariables extends TestCase
 
         EPStatement stmtSelect = epService.getEPAdministrator().create(model);
         String stmtText = "select var1, var2, id from " + SupportBean_A.class.getName();
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         stmtSelect.addListener(listener);
 
         String[] fieldsSelect = new String[] {"var1", "var2", "id"};
@@ -331,7 +331,7 @@ public class TestVariables extends TestCase
         String stmtTextSet = "on " + SupportBean.class.getName() + " set var1 = intPrimitive, var2 = intBoxed";
         EPStatement stmtSet = epService.getEPAdministrator().create(model);
         stmtSet.addListener(listenerSet);
-        assertEquals(stmtTextSet, model.toEQL());
+        assertEquals(stmtTextSet, model.toEPL());
 
         EventType typeSet = stmtSet.getEventType();
         assertEquals(Double.class, typeSet.getPropertyType("var1"));
@@ -360,7 +360,7 @@ public class TestVariables extends TestCase
         String stmtText = "select var1, var2, id from " + SupportBean_A.class.getName();
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         EPStatement stmtSelect = epService.getEPAdministrator().create(model);
-        assertEquals(stmtText, model.toEQL());
+        assertEquals(stmtText, model.toEPL());
         stmtSelect.addListener(listener);
 
         String[] fieldsSelect = new String[] {"var1", "var2", "id"};
@@ -371,7 +371,7 @@ public class TestVariables extends TestCase
         model = epService.getEPAdministrator().compileEPL(stmtTextSet);
         EPStatement stmtSet = epService.getEPAdministrator().create(model);
         stmtSet.addListener(listenerSet);
-        assertEquals(stmtTextSet, model.toEQL());
+        assertEquals(stmtTextSet, model.toEPL());
 
         EventType typeSet = stmtSet.getEventType();
         assertEquals(Double.class, typeSet.getPropertyType("var1"));

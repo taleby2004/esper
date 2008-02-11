@@ -60,7 +60,7 @@ public class TestCaseExpr extends TestCase
               " when (symbol = \"DELL\") then sum(price) " +
               "end as p1 from " +   SupportMarketDataBean.class.getName() + ".win:length(10)";
 
-        assertEquals(caseExpr, model.toEQL());
+        assertEquals(caseExpr, model.toEPL());
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
@@ -76,7 +76,7 @@ public class TestCaseExpr extends TestCase
               "end as p1 from " +   SupportMarketDataBean.class.getName() + ".win:length(10)";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
 
-        assertEquals(caseExpr, model.toEQL());
+        assertEquals(caseExpr, model.toEPL());
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
@@ -105,7 +105,7 @@ public class TestCaseExpr extends TestCase
 
     public void testCaseSyntax1WithElse()
     {
-        // Adding to the EQL statement an else expression
+        // Adding to the EPL statement an else expression
         // when a CSCO ticker is sent the property for the else expression is selected
         String caseExpr = "select case " +
               " when symbol='DELL' then 3 * volume " +
@@ -132,7 +132,7 @@ public class TestCaseExpr extends TestCase
               "when (symbol = \"DELL\") then (volume * 3) " +
               "else volume " +
               "end as p1 from " + SupportMarketDataBean.class.getName() + ".win:length(10)";
-        assertEquals(caseExpr, model.toEQL());
+        assertEquals(caseExpr, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);
@@ -148,7 +148,7 @@ public class TestCaseExpr extends TestCase
               "else volume " +
               "end as p1 from " + SupportMarketDataBean.class.getName() + ".win:length(10)";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
-        assertEquals(caseExpr, model.toEQL());
+        assertEquals(caseExpr, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);
@@ -396,7 +396,7 @@ public class TestCaseExpr extends TestCase
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 100)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        assertEquals(caseExpr, model.toEQL());
+        assertEquals(caseExpr, model.toEPL());
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
@@ -415,7 +415,7 @@ public class TestCaseExpr extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(caseExpr, model.toEQL());
+        assertEquals(caseExpr, model.toEPL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         selectTestCase.addListener(testListener);

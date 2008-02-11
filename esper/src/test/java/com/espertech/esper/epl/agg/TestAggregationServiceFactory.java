@@ -5,7 +5,7 @@ import com.espertech.esper.epl.expression.ExprAggregateNode;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 
 import java.util.LinkedList;
 import java.util.List;

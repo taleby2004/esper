@@ -2,7 +2,7 @@ package com.espertech.esper.epl.core;
 
 import java.util.List;
 
-import com.espertech.esper.support.eql.SupportExprNodeFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.epl.core.AliasNodeSwapper;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprIdentNode;

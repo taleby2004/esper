@@ -4,7 +4,7 @@ import com.espertech.esper.epl.spec.DBStatementStreamSpec;
 import com.espertech.esper.epl.spec.ViewSpec;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.support.eql.SupportDatabaseService;
+import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.view.EventCollection;
 

@@ -70,14 +70,14 @@ public class ListParameter implements NumberSetParameter
         return result;
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         String delimiter = "";
         writer.write('[');
         for (NumberSetParameter param : parameters)
         {
             writer.write(delimiter);
-            param.toEQL(writer);
+            param.toEPL(writer);
             delimiter = ", ";
         }
         writer.write(']');

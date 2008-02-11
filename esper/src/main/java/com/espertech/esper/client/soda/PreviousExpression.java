@@ -43,12 +43,12 @@ public class PreviousExpression extends ExpressionBase
         this.addChild(new PropertyValueExpression(propertyName));
     }
 
-    public void toEQL(StringWriter writer)
+    public void toEPL(StringWriter writer)
     {
         writer.write("prev(");
-        this.getChildren().get(0).toEQL(writer);
+        this.getChildren().get(0).toEPL(writer);
         writer.write(", ");
-        this.getChildren().get(1).toEQL(writer);
+        this.getChildren().get(1).toEPL(writer);
         writer.write(')');
     }
 }

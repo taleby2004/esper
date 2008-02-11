@@ -22,8 +22,8 @@ public class TestEPStatementObjectModel extends TestCase
         epService.initialize();
     }
 
-    // This is a simple EQL only.
-    // Each OM/SODA Api is tested in it's respective unit test (i.e. TestInsertInto), including toEQL()
+    // This is a simple EPL only.
+    // Each OM/SODA Api is tested in it's respective unit test (i.e. TestInsertInto), including toEPL()
     // 
     public void testCreateFromOM() throws Exception
     {
@@ -40,8 +40,8 @@ public class TestEPStatementObjectModel extends TestCase
         assertEquals(event, listener.assertOneGetNewAndReset().getUnderlying());
     }
 
-    // This is a simple EQL only.
-    // Each OM/SODA Api is tested in it's respective unit test (i.e. TestInsertInto), including toEQL()
+    // This is a simple EPL only.
+    // Each OM/SODA Api is tested in it's respective unit test (i.e. TestInsertInto), including toEPL()
     //
     public void testCreateFromOMComplete() throws Exception
     {
@@ -58,7 +58,7 @@ public class TestEPStatementObjectModel extends TestCase
         model.setOutputLimitClause(OutputLimitClause.create(10, OutputLimitUnit.SECONDS));
         model.setOrderByClause(OrderByClause.create("line"));                
 
-        assertEquals("insert into ReadyStreamAvg(line, avgAge) select line, avg(age) as avgAge from com.espertech.esper.support.bean.SupportBean(line in (1, 8, 10)).win:time(10) as RS where (waverId != null) group by line having (avg(age) < 0) output every 10.0 seconds order by line", model.toEQL());
+        assertEquals("insert into ReadyStreamAvg(line, avgAge) select line, avg(age) as avgAge from com.espertech.esper.support.bean.SupportBean(line in (1, 8, 10)).win:time(10) as RS where (waverId != null) group by line having (avg(age) < 0) output every 10.0 seconds order by line", model.toEPL());
         SerializableObjectCopier.copy(model);
     }
 
