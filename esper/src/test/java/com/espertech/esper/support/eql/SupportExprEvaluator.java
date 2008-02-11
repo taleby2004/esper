@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.event.EventBean;
 
 public class SupportExprEvaluator implements ExprEvaluator

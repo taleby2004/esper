@@ -13,11 +13,11 @@ import com.espertech.esper.client.ConfigurationOperations;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.eql.core.EngineImportService;
-import com.espertech.esper.eql.core.EngineImportException;
-import com.espertech.esper.eql.variable.VariableService;
-import com.espertech.esper.eql.variable.VariableExistsException;
-import com.espertech.esper.eql.variable.VariableTypeException;
+import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.core.EngineImportException;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableExistsException;
+import com.espertech.esper.epl.variable.VariableTypeException;
 
 import java.util.HashMap;
 import java.util.Map;

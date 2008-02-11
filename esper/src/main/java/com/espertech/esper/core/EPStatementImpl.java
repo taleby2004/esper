@@ -7,7 +7,7 @@ import com.espertech.esper.client.UpdateListener;
 import com.espertech.esper.collection.SafeIteratorImpl;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.dispatch.DispatchService;
-import com.espertech.esper.eql.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.view.Viewable;
 

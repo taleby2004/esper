@@ -1,6 +1,6 @@
 package com.espertech.esper.type;
 
-import com.espertech.esper.eql.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.client.EPException;
 
 import java.io.StringWriter;

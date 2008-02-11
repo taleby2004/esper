@@ -1,12 +1,11 @@
 package com.espertech.esper.support.eql.parse;
 
-import com.espertech.esper.eql.parse.EQLTreeWalker;
-import com.espertech.esper.eql.core.EngineImportServiceImpl;
-import com.espertech.esper.eql.core.EngineImportService;
-import com.espertech.esper.eql.variable.VariableService;
-import com.espertech.esper.eql.variable.VariableServiceImpl;
-import com.espertech.esper.eql.spec.SelectClauseStreamSelectorEnum;
-import com.espertech.esper.pattern.PatternObjectResolutionServiceImpl;
+import com.espertech.esper.epl.parse.EQLTreeWalker;
+import com.espertech.esper.epl.core.EngineImportServiceImpl;
+import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableServiceImpl;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 

@@ -10,7 +10,7 @@ import com.espertech.esper.view.std.SizeView;
 import com.espertech.esper.view.window.LengthWindowView;
 import com.espertech.esper.view.window.TimeWindowView;
 import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.eql.spec.ViewSpec;
+import com.espertech.esper.epl.spec.ViewSpec;
 
 import java.util.List;
 

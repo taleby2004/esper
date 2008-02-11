@@ -1,6 +1,6 @@
 package com.espertech.esper.regression.client;
 
-import com.espertech.esper.eql.agg.AggregationSupport;
+import com.espertech.esper.epl.agg.AggregationSupport;
 
 import java.io.Serializable;
 

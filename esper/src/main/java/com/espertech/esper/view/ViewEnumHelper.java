@@ -1,7 +1,7 @@
 package com.espertech.esper.view;
 
-import com.espertech.esper.eql.spec.PluggableObjectCollection;
-import com.espertech.esper.eql.spec.PluggableObjectType;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.spec.PluggableObjectType;
 
 /**
  * Helper producing a repository of built-in views.

@@ -1,7 +1,7 @@
 package com.espertech.esper.support.eql;
 
 import com.espertech.esper.client.ConfigurationDBRef;
-import com.espertech.esper.eql.db.DatabaseConfigServiceImpl;
+import com.espertech.esper.epl.db.DatabaseConfigServiceImpl;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 
 import java.util.Map;

@@ -8,7 +8,7 @@ import java.util.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.eql.spec.ViewSpec;
+import com.espertech.esper.epl.spec.ViewSpec;
 
 /**
  * Implementation of the view evaluation service business interface.

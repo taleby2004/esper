@@ -5,7 +5,7 @@ import com.espertech.esper.view.ViewParameterException;
 import com.espertech.esper.view.ViewAttachException;
 import com.espertech.esper.view.*;
 import com.espertech.esper.event.EventType;
-import com.espertech.esper.eql.core.ViewResourceCallback;
+import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.core.StatementContext;
 
 import java.util.List;

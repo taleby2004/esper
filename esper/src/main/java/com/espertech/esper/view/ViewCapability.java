@@ -1,7 +1,7 @@
 package com.espertech.esper.view;
 
 import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.eql.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprValidationException;
 
 import java.util.List;
 

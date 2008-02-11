@@ -8,7 +8,7 @@
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.filter.FilterSpecCompiled;
-import com.espertech.esper.eql.spec.FilterSpecRaw;
+import com.espertech.esper.epl.spec.FilterSpecRaw;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

@@ -1,9 +1,9 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.expression.*;
-import com.espertech.esper.eql.spec.SelectClauseExprRawSpec;
-import com.espertech.esper.eql.spec.SelectClauseExprCompiledSpec;
-import com.espertech.esper.eql.spec.SelectClauseElementCompiled;
+import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.spec.SelectClauseExprRawSpec;
+import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
+import com.espertech.esper.epl.spec.SelectClauseElementCompiled;
 import com.espertech.esper.type.MathArithTypeEnum;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.join.exec.ExecNode;
-import com.espertech.esper.eql.join.plan.QueryPlanNode;
-import com.espertech.esper.eql.join.table.EventTable;
+import com.espertech.esper.epl.join.exec.ExecNode;
+import com.espertech.esper.epl.join.plan.QueryPlanNode;
+import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.util.IndentWriter;
 

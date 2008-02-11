@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.espertech.esper.type.PrimitiveValue;
 import com.espertech.esper.type.PrimitiveValueFactory;
-import com.espertech.esper.eql.spec.ViewSpec;
+import com.espertech.esper.epl.spec.ViewSpec;
 import com.espertech.esper.view.ViewServiceImpl;
 import com.espertech.esper.view.ViewFactoryChain;
 import com.espertech.esper.view.ViewFactory;

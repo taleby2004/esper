@@ -7,7 +7,7 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.eql.spec.SubstitutionParameterExpression;
+import com.espertech.esper.epl.spec.SubstitutionParameterExpression;
 
 import java.io.Serializable;
 import java.io.StringWriter;

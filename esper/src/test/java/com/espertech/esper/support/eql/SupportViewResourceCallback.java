@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.core.ViewResourceCallback;
+import com.espertech.esper.epl.core.ViewResourceCallback;
 
 import java.util.List;
 import java.util.LinkedList;

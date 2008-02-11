@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.agg.AggregationService;
+import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.MultiKeyUntyped;

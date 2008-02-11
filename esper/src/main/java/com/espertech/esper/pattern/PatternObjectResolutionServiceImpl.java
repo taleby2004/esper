@@ -1,7 +1,7 @@
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.eql.spec.*;
+import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.pattern.guard.GuardFactory;
 import com.espertech.esper.pattern.observer.ObserverFactory;
 import org.apache.commons.logging.Log;

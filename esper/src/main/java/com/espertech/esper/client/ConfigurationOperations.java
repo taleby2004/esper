@@ -31,7 +31,7 @@ public interface ConfigurationOperations
     /**
      * Adds a plug-in aggregation function given a function name and an aggregation class name.
      * <p>
-     * The aggregation class must extends the base class {@link com.espertech.esper.eql.agg.AggregationSupport}.
+     * The aggregation class must extends the base class {@link com.espertech.esper.epl.agg.AggregationSupport}.
      * <p>
      * The same function name cannot be added twice.
      * @param functionName is the new aggregation function name

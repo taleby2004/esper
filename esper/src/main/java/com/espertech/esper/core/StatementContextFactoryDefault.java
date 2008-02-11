@@ -1,12 +1,12 @@
 package com.espertech.esper.core;
 
-import com.espertech.esper.eql.core.MethodResolutionService;
-import com.espertech.esper.eql.core.MethodResolutionServiceImpl;
-import com.espertech.esper.eql.join.JoinSetComposerFactoryImpl;
-import com.espertech.esper.eql.spec.PluggableObjectCollection;
-import com.espertech.esper.eql.spec.OnTriggerDesc;
-import com.espertech.esper.eql.spec.CreateWindowDesc;
-import com.espertech.esper.eql.spec.OnTriggerWindowDesc;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
+import com.espertech.esper.epl.join.JoinSetComposerFactoryImpl;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.spec.OnTriggerDesc;
+import com.espertech.esper.epl.spec.CreateWindowDesc;
+import com.espertech.esper.epl.spec.OnTriggerWindowDesc;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.pattern.PatternObjectHelper;
 import com.espertech.esper.schedule.ScheduleBucket;

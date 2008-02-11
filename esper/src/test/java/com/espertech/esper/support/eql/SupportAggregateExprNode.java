@@ -1,10 +1,10 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.agg.AggregationMethod;
-import com.espertech.esper.eql.core.MethodResolutionService;
-import com.espertech.esper.eql.core.StreamTypeService;
-import com.espertech.esper.eql.expression.ExprAggregateNode;
-import com.espertech.esper.eql.expression.ExprValidationException;
+import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.expression.ExprAggregateNode;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.EventBean;
 
 public class SupportAggregateExprNode extends ExprAggregateNode

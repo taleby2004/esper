@@ -1,7 +1,7 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.expression.*;
-import com.espertech.esper.eql.spec.OuterJoinDesc;
+import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.type.OuterJoinType;
 
 public class SupportOuterJoinDescFactory

@@ -22,7 +22,7 @@ import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.util.ThreadLogUtil;
-import com.espertech.esper.eql.variable.VariableReader;
+import com.espertech.esper.epl.variable.VariableReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

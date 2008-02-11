@@ -1,7 +1,7 @@
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.eql.spec.PatternGuardSpec;
-import com.espertech.esper.eql.spec.PatternObserverSpec;
+import com.espertech.esper.epl.spec.PatternGuardSpec;
+import com.espertech.esper.epl.spec.PatternObserverSpec;
 import com.espertech.esper.pattern.guard.GuardFactory;
 import com.espertech.esper.pattern.observer.ObserverFactory;
 

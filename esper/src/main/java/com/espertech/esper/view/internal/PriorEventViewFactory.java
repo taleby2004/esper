@@ -2,7 +2,7 @@ package com.espertech.esper.view.internal;
 
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.eql.core.ViewResourceCallback;
+import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.view.*;
 import com.espertech.esper.view.window.RelativeAccessByEventNIndex;
 import com.espertech.esper.collection.*;

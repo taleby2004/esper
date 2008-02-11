@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.join.JoinSetProcessor;
+import com.espertech.esper.epl.join.JoinSetProcessor;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.collection.MultiKey;
 

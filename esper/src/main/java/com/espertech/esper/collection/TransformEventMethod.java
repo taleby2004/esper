@@ -8,9 +8,6 @@
 package com.espertech.esper.collection;
 
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.eql.core.ResultSetProcessor;
-
-import java.util.Iterator;
 
 /**
  * Interface that transforms one event into another event, for use with {@link TransformEventIterator}.

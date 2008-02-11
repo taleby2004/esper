@@ -7,7 +7,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.eql.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.*;
 

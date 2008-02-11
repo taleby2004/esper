@@ -1,8 +1,8 @@
 package com.espertech.esper.support.eql.join;
 
-import com.espertech.esper.eql.join.rep.Repository;
-import com.espertech.esper.eql.join.rep.Cursor;
-import com.espertech.esper.eql.join.rep.SingleCursorIterator;
+import com.espertech.esper.epl.join.rep.Repository;
+import com.espertech.esper.epl.join.rep.Cursor;
+import com.espertech.esper.epl.join.rep.SingleCursorIterator;
 import com.espertech.esper.event.EventBean;
 
 import java.util.Iterator;

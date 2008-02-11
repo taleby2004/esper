@@ -8,7 +8,7 @@
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.pattern.guard.GuardFactory;
-import com.espertech.esper.eql.spec.PatternGuardSpec;
+import com.espertech.esper.epl.spec.PatternGuardSpec;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

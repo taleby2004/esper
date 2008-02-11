@@ -1,11 +1,11 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.core.MethodResolutionService;
-import com.espertech.esper.eql.core.StreamTypeService;
-import com.espertech.esper.eql.core.ViewResourceDelegate;
-import com.espertech.esper.eql.expression.ExprNode;
-import com.espertech.esper.eql.expression.ExprValidationException;
-import com.espertech.esper.eql.variable.VariableService;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.core.ViewResourceDelegate;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 

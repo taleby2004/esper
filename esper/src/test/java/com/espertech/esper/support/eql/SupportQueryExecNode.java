@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.join.exec.ExecNode;
+import com.espertech.esper.epl.join.exec.ExecNode;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.IndentWriter;
 

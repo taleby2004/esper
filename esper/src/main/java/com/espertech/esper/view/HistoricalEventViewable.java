@@ -2,8 +2,8 @@ package com.espertech.esper.view;
 
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.eql.join.table.EventTable;
-import com.espertech.esper.eql.join.PollResultIndexingStrategy;
+import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 
 /**
  * Interface for views that poll data based on information from other streams.

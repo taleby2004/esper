@@ -1,7 +1,7 @@
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.eql.spec.PluggableObjectCollection;
-import com.espertech.esper.eql.spec.PluggableObjectType;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.spec.PluggableObjectType;
 import com.espertech.esper.pattern.guard.GuardEnum;
 import com.espertech.esper.pattern.observer.ObserverEnum;
 

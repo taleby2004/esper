@@ -8,7 +8,7 @@
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.pattern.observer.ObserverFactory;
-import com.espertech.esper.eql.spec.PatternObserverSpec;
+import com.espertech.esper.epl.spec.PatternObserverSpec;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

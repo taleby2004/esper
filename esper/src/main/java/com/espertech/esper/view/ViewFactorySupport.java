@@ -1,6 +1,6 @@
 package com.espertech.esper.view;
 
-import com.espertech.esper.eql.core.ViewResourceCallback;
+import com.espertech.esper.epl.core.ViewResourceCallback;
 
 /**
  * Abstract base class for view factories that do not make re-useable views and that do

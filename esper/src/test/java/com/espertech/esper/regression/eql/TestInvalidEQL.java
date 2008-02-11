@@ -2,9 +2,8 @@ package com.espertech.esper.regression.eql;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.eql.parse.EPStatementSyntaxException;
+import com.espertech.esper.epl.parse.EPStatementSyntaxException;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_N;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;

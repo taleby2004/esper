@@ -6,7 +6,7 @@ import com.espertech.esper.client.ConfigurationPlugInView;
 import com.espertech.esper.support.view.SupportViewFactoryOne;
 import com.espertech.esper.support.view.SupportViewFactoryTwo;
 import com.espertech.esper.view.stat.UnivariateStatisticsViewFactory;
-import com.espertech.esper.eql.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

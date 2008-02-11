@@ -4,21 +4,15 @@ Esper Changelog
 Changes in version 2.0.0
 ------------------------
 
-* new DEFAULT keyword for output rate limiting
-* refactored select clause API in SODA slightly
-
-
-
 * TODO Fixed issue ESPER-178 Problem selecting "sum" as a property of event posted by stat:uni view
 * TODO Fixed issue ESPER-138 Allow Map event type to contain nested Map values
 * TODO Fixed issue ESPER-145 Ignore start or stop commands on already started or stopped EPStatements.
-* TODO result processing for output rate limiting clause computes aggregation more granular and considers having-clause per unit
 * TODO Support for Axiom XML events
 * TODO rename EQL to EPL
 * TODO Move XSD to version 2
 
 * New strongly-typed and fast output event delivery to subscriber objects via method call
-* Performance improvement: statements without listeners or subscriber (iterator or output snapshot statements) now compute much faster
+* Performance improvement: statements without listeners or subscriber (iterator or output-snapshot statements that use insert-into) now compute much faster
 * All package names have change from "net.esper" to "com.espertech.esper"
 * We have upgraded to ANTLR Version 3 to gain excellent error handling, incremental parsing, easy-to-read grammar and a smaller runtime jar
 * Changed view parameter syntax such that event properties don't need to appear in quotes
@@ -39,6 +33,7 @@ Changes in version 2.0.0
 * Fixed issue ESPER-183 Replace LinkedLists with ArrayDeque where possible
 * Fixed issue ESPER-194 Nullpointer when using Jcl104-over-slf4j
 * Fixed issue ESPER-195 Not considering having-clause in un-aggregated and un-grouped query (no-join only)
+* Fixed issue ESPER-192 Support non-String type auto-discovery in EsperIO
 
 * Minor API Changes:
   - Moved ExpiryTimeCacheDesc, LRUCacheDesc, DataCacheDesc, CacheReferenceType out inner classes of ConfigurationDBRef to 

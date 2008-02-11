@@ -2,11 +2,11 @@ package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.eql.core.StreamTypeService;
-import com.espertech.esper.eql.core.StreamTypeServiceImpl;
-import com.espertech.esper.eql.expression.*;
-import com.espertech.esper.eql.named.NamedWindowService;
-import com.espertech.esper.eql.spec.*;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.core.StreamTypeServiceImpl;
+import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.named.NamedWindowService;
+import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.event.MapEventType;
 import com.espertech.esper.filter.FilterSpecCompiled;

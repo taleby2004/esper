@@ -1,7 +1,7 @@
 package com.espertech.esper.core;
 
-import com.espertech.esper.eql.spec.OnTriggerDesc;
-import com.espertech.esper.eql.spec.CreateWindowDesc;
+import com.espertech.esper.epl.spec.OnTriggerDesc;
+import com.espertech.esper.epl.spec.CreateWindowDesc;
 
 import java.util.Map;
 

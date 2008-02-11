@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql.join;
 
-import com.espertech.esper.eql.join.exec.TableLookupStrategy;
+import com.espertech.esper.epl.join.exec.TableLookupStrategy;
 import com.espertech.esper.event.EventBean;
 
 import java.util.Set;

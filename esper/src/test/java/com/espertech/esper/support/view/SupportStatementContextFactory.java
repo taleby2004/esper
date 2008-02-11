@@ -8,10 +8,9 @@ import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 import com.espertech.esper.view.ViewResolutionServiceImpl;
 import com.espertech.esper.view.ViewEnumHelper;
 import com.espertech.esper.pattern.PatternObjectResolutionServiceImpl;
-import com.espertech.esper.eql.view.OutputConditionFactory;
-import com.espertech.esper.eql.view.OutputConditionFactoryDefault;
-import com.espertech.esper.eql.core.MethodResolutionServiceImpl;
-import com.espertech.esper.eql.core.EngineImportServiceImpl;
+import com.espertech.esper.epl.view.OutputConditionFactoryDefault;
+import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
+import com.espertech.esper.epl.core.EngineImportServiceImpl;
 
 public class SupportStatementContextFactory
 {

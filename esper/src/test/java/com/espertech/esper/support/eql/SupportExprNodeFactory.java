@@ -1,11 +1,11 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.expression.*;
-import com.espertech.esper.eql.core.ViewResourceDelegateImpl;
-import com.espertech.esper.eql.core.MethodResolutionServiceImpl;
-import com.espertech.esper.eql.core.EngineImportServiceImpl;
-import com.espertech.esper.eql.variable.VariableService;
-import com.espertech.esper.eql.variable.VariableServiceImpl;
+import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.core.ViewResourceDelegateImpl;
+import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
+import com.espertech.esper.epl.core.EngineImportServiceImpl;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableServiceImpl;
 import com.espertech.esper.type.MathArithTypeEnum;
 import com.espertech.esper.type.RelationalOpEnum;
 import com.espertech.esper.view.ViewFactoryChain;

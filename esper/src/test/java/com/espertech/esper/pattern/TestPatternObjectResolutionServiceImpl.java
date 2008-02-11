@@ -2,9 +2,9 @@ package com.espertech.esper.pattern;
 
 import com.espertech.esper.client.ConfigurationPlugInPatternObject;
 import com.espertech.esper.client.ConfigurationException;
-import com.espertech.esper.eql.spec.PatternGuardSpec;
-import com.espertech.esper.eql.spec.PatternObserverSpec;
-import com.espertech.esper.eql.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.spec.PatternGuardSpec;
+import com.espertech.esper.epl.spec.PatternObserverSpec;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import com.espertech.esper.support.pattern.SupportObserverFactory;
 import com.espertech.esper.support.pattern.SupportGuardFactory;
 import com.espertech.esper.pattern.guard.TimerWithinGuardFactory;

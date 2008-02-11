@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql.join;
 
-import com.espertech.esper.eql.join.rep.Node;
+import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 

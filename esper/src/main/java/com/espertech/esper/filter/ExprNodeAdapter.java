@@ -7,8 +7,8 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.eql.expression.ExprNode;
-import com.espertech.esper.eql.variable.VariableService;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventBean;
 
 /**

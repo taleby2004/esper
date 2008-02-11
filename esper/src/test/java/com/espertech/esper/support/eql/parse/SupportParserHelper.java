@@ -2,9 +2,9 @@ package com.espertech.esper.support.eql.parse;
 
 import com.espertech.esper.antlr.NoCaseSensitiveStream;
 import com.espertech.esper.antlr.ASTUtil;
-import com.espertech.esper.eql.generated.EsperEPL2GrammarLexer;
-import com.espertech.esper.eql.generated.EsperEPL2GrammarParser;
-import com.espertech.esper.eql.parse.ParseRuleSelector;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.epl.parse.ParseRuleSelector;
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;

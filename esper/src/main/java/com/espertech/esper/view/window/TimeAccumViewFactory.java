@@ -5,8 +5,8 @@ import com.espertech.esper.event.EventType;
 import com.espertech.esper.type.TimePeriodParameter;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.eql.core.ViewResourceCallback;
-import com.espertech.esper.eql.named.RemoveStreamViewCapability;
+import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.epl.named.RemoveStreamViewCapability;
 
 import java.util.List;
 

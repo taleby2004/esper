@@ -3,7 +3,7 @@ package com.espertech.esper.regression.client;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.eql.parse.EPStatementSyntaxException;
+import com.espertech.esper.epl.parse.EPStatementSyntaxException;
 import com.espertech.esper.support.bean.SupportBeanReservedKeyword;
 import com.espertech.esper.support.client.SupportConfigFactory;
 

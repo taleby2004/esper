@@ -9,9 +9,9 @@ package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.eql.generated.EsperEPL2GrammarParser;
-import com.espertech.esper.eql.parse.*;
-import com.espertech.esper.eql.spec.*;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.epl.parse.*;
+import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.antlr.ASTUtil;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;

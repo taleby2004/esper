@@ -14,7 +14,7 @@ import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
-import com.espertech.esper.eql.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.timer.TimerService;
 
 import javax.naming.Context;

@@ -2,7 +2,7 @@ package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.eql.spec.StatementSpecRaw;
+import com.espertech.esper.epl.spec.StatementSpecRaw;
 
 /**
  * Handles statement management.

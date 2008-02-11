@@ -1,6 +1,6 @@
 package com.espertech.esper.core;
 
-import com.espertech.esper.eql.expression.ExprSubselectNode;
+import com.espertech.esper.epl.expression.ExprSubselectNode;
 import com.espertech.esper.view.Viewable;
 import com.espertech.esper.view.ViewFactoryChain;
 

@@ -1,10 +1,10 @@
 package com.espertech.esper.core;
 
-import com.espertech.esper.eql.core.MethodResolutionService;
-import com.espertech.esper.eql.join.JoinSetComposerFactory;
-import com.espertech.esper.eql.named.NamedWindowService;
-import com.espertech.esper.eql.variable.VariableService;
-import com.espertech.esper.eql.view.OutputConditionFactory;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.join.JoinSetComposerFactory;
+import com.espertech.esper.epl.named.NamedWindowService;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.pattern.PatternContextFactory;

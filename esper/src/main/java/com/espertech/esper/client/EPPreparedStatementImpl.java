@@ -8,7 +8,7 @@
 package com.espertech.esper.client;
 
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.eql.spec.SubstitutionParameterExpression;
+import com.espertech.esper.epl.spec.SubstitutionParameterExpression;
 
 import java.util.Map;
 

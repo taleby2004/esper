@@ -1,6 +1,6 @@
 package com.espertech.esper.support.eql;
 
-import com.espertech.esper.eql.agg.AggregationResultFuture;
+import com.espertech.esper.epl.agg.AggregationResultFuture;
 
 public class SupportAggregationResultFuture implements AggregationResultFuture
 {
