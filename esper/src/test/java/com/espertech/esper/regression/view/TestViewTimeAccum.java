@@ -35,7 +35,7 @@ public class TestViewTimeAccum extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportMarketDataBean.class.getName() +
                 ".win:time_accum(10 sec)");
         stmt.addListener(listener);
@@ -116,7 +116,7 @@ public class TestViewTimeAccum extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select rstream * from " + SupportMarketDataBean.class.getName() +
                 ".win:time_accum(10 sec)");
         stmt.addListener(listener);
@@ -142,7 +142,7 @@ public class TestViewTimeAccum extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream price, prev(1, price) as prevPrice, prior(1, price) as priorPrice from " + SupportMarketDataBean.class.getName() +
                 ".win:time_accum(10 sec)");
         stmt.addListener(listener);
@@ -180,7 +180,7 @@ public class TestViewTimeAccum extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream sum(price) as sumPrice from " + SupportMarketDataBean.class.getName() +
                 ".win:time_accum(10 sec)");
         stmt.addListener(listener);
@@ -213,7 +213,7 @@ public class TestViewTimeAccum extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportMarketDataBean.class.getName() +
                 ".std:groupby(symbol).win:time_accum(10 sec)");
         stmt.addListener(listener);

@@ -19,7 +19,7 @@ public class TestViewGroupByTypes extends TestCase
     {
         String viewStmt = "select * from " + SupportBean.class.getName() +
                 ".std:groupby(intPrimitive).win:length(4).std:groupby(longBoxed).std:size()";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewStmt);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewStmt);
 
         assertEquals(int.class, stmt.getEventType().getPropertyType("intPrimitive"));
         assertEquals(Long.class, stmt.getEventType().getPropertyType("longBoxed"));

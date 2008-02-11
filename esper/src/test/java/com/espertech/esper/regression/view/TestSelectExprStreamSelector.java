@@ -18,10 +18,8 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.eql.SupportStaticMethodLib;
 
 import java.util.Map;
-import java.util.HashMap;
 
 public class TestSelectExprStreamSelector extends TestCase
 {
@@ -41,12 +39,12 @@ public class TestSelectExprStreamSelector extends TestCase
     {
     	String stmtOneText = "insert into streamA select a.* from pattern [every a=" + SupportBean.class.getName() + "]";
     	SupportUpdateListener listenerOne = new SupportUpdateListener();
-    	EPStatement stmtOne = epService.getEPAdministrator().createEQL(stmtOneText);
+    	EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtOneText);
         stmtOne.addListener(listenerOne);
 
         String stmtTwoText = "insert into streamA select a.* from pattern [every a=" + SupportBean.class.getName() + " where timer:within(30 sec)]";
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
-        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(stmtTwoText);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(stmtTwoText);
         stmtTwo.addListener(listenerTwo);
 
         EventType eventType = stmtOne.getEventType();
@@ -59,7 +57,7 @@ public class TestSelectExprStreamSelector extends TestCase
         assertSame(event, listenerTwo.assertOneGetNewAndReset().getUnderlying());
 
         String stmtThreeText = "insert into streamB select a.*, 'abc' as abc from pattern [every a=" + SupportBean.class.getName() + " where timer:within(30 sec)]";
-        EPStatement stmtThree = epService.getEPAdministrator().createEQL(stmtThreeText);
+        EPStatement stmtThree = epService.getEPAdministrator().createEPL(stmtThreeText);
         assertEquals(Pair.class, stmtThree.getEventType().getUnderlyingType());
         assertEquals(String.class, stmtThree.getEventType().getPropertyType("abc"));
         assertEquals(String.class, stmtThree.getEventType().getPropertyType("string"));
@@ -82,7 +80,7 @@ public class TestSelectExprStreamSelector extends TestCase
         String viewExpr = "select s0.*, s1.* as s1stream, string as sym from " + SupportBean.class.getName() + " as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
         assertEquals(viewExpr, model.toEQL());
-        EPStatementObjectModel modelReverse = epService.getEPAdministrator().compileEQL(model.toEQL());
+        EPStatementObjectModel modelReverse = epService.getEPAdministrator().compileEPL(model.toEQL());
         assertEquals(viewExpr, modelReverse.toEQL());
 
         EventType type = selectTestView.getEventType();
@@ -99,7 +97,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinWildcardNoAlias()
     {
         String viewExpr = "select *, win.* from " + SupportBean.class.getName() + ".win:length(3) as win";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -114,7 +112,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select *, s1.* from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -136,7 +134,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinWildcardWithAlias()
     {
         String viewExpr = "select *, win.* as s0 from " + SupportBean.class.getName() + ".win:length(3) as win";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -153,7 +151,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select *, s1.* as s1stream, s0.* as s0stream from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -176,7 +174,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinWithAliasWithProperties()
     {
         String viewExpr = "select string.* as s0, intPrimitive as a, string.* as s1, intPrimitive as b from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -196,7 +194,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select intPrimitive, s1.* as s1stream, string, symbol as sym, s0.* as s0stream from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -221,7 +219,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinNoAliasWithProperties()
     {
         String viewExpr = "select intPrimitive as a, string.*, intPrimitive as b from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -240,7 +238,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select intPrimitive, s1.*, symbol as sym from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -261,7 +259,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testAloneNoJoinNoAlias()
     {
         String viewExpr = "select string.* from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -275,7 +273,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testAloneNoJoinAlias()
     {
         String viewExpr = "select string.* as s0 from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -291,7 +289,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select s1.* as s1 from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -309,7 +307,7 @@ public class TestSelectExprStreamSelector extends TestCase
         // reverse streams
         viewExpr = "select s0.* as szero from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         type = selectTestView.getEventType();
@@ -327,7 +325,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select s1.* from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -345,7 +343,7 @@ public class TestSelectExprStreamSelector extends TestCase
         // reverse streams
         viewExpr = "select s0.* from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + " as s1";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         type = selectTestView.getEventType();
@@ -378,7 +376,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(clause);
+            epService.getEPAdministrator().createEPL(clause);
             fail();
         }
         catch (EPStatementException ex)

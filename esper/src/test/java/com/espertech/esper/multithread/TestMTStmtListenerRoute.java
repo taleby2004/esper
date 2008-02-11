@@ -38,10 +38,10 @@ public class TestMTStmtListenerRoute extends TestCase
 
     private void tryListener(int numThreads, int numRoutes) throws Exception
     {
-        EPStatement stmtTrigger = engine.getEPAdministrator().createEQL(
+        EPStatement stmtTrigger = engine.getEPAdministrator().createEPL(
                 " select * from " + SupportBean.class.getName());
 
-        EPStatement stmtListen = engine.getEPAdministrator().createEQL(
+        EPStatement stmtListen = engine.getEPAdministrator().createEPL(
                 " select * from " + SupportMarketDataBean.class.getName());
         SupportMTUpdateListener listener = new SupportMTUpdateListener();
         stmtListen.addListener(listener);

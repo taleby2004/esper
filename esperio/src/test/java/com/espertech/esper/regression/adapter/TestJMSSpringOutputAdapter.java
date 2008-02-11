@@ -45,7 +45,7 @@ public class TestJMSSpringOutputAdapter extends TestCase
         config.addAdapterLoader("MyLoader", SpringContextLoader.class.getName(), props);
         EPServiceProvider service = EPServiceProviderManager.getProvider(this.getClass().getName() + "_testOutputAdapter", config);
 
-        service.getEPAdministrator().createEQL(
+        service.getEPAdministrator().createEPL(
                 "insert into MyOutputStream " +
                 "select string as prop1, '>' || string || '<' as prop2 from " + SupportSerializableBean.class.getName());
 

@@ -134,7 +134,7 @@ public class TestOrOperator extends TestCase implements SupportBeanConstants
             "select * " +
             "from pattern [" + pattern + "]";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
         statement.addListener(new PrintUpdateListener());

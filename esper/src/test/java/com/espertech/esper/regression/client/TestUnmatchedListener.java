@@ -2,7 +2,6 @@ package com.espertech.esper.regression.client;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
@@ -37,7 +36,7 @@ public class TestUnmatchedListener extends TestCase
         assertEquals(0, listener.getReceived().size());
 
         // create statement and re-register unmatched listener
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from " + SupportBean.class.getName());
         epService.getEPRuntime().setUnmatchedListener(listener);
         sendEvent();
         assertEquals(0, listener.getReceived().size());
@@ -68,7 +67,7 @@ public class TestUnmatchedListener extends TestCase
         epService.getEPRuntime().setUnmatchedListener(listener);
 
         // create insert into
-        EPStatement insertInto = epService.getEPAdministrator().createEQL("insert into MyEvent select string from " + SupportBean.class.getName());
+        EPStatement insertInto = epService.getEPAdministrator().createEPL("insert into MyEvent select string from " + SupportBean.class.getName());
 
         // no statement, should be unmatched
         sendEvent("E1");

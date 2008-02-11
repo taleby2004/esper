@@ -41,7 +41,7 @@ public class TestMTStmtFilter extends TestCase
     public void tryCount(int numThreads, int numMessages) throws Exception
     {
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
-        EPStatement stmt = engine.getEPAdministrator().createEQL("select count(*) as mycount from " + SupportBean.class.getName());
+        EPStatement stmt = engine.getEPAdministrator().createEPL("select count(*) as mycount from " + SupportBean.class.getName());
         MTListener listener = new MTListener("mycount");
         stmt.addListener(listener);
 

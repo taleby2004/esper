@@ -32,7 +32,7 @@ public interface EPAdministrator
      * @return EPStatement to poll data from or to add listeners to
      * @throws EPException when the expression was not valid
      */
-    public EPStatement createEQL(String eqlStatement) throws EPException;
+    public EPStatement createEPL(String eqlStatement) throws EPException;
 
     /**
      * Create and starts an event pattern statement for the expressing string passed and assign the name passed.
@@ -56,7 +56,7 @@ public interface EPAdministrator
      * @return EPStatement to poll data from or to add listeners to
      * @throws EPException when the expression was not valid
      */
-    public EPStatement createEQL(String eqlStatement, String statementName) throws EPException;
+    public EPStatement createEPL(String eqlStatement, String statementName) throws EPException;
 
     /**
      * Creates and starts an EQL statement.
@@ -84,7 +84,7 @@ public interface EPAdministrator
      * @return object model of statement
      * @throws EPException indicates compilation errors.
      */
-    public EPStatementObjectModel compileEQL(String eqlExpression) throws EPException;
+    public EPStatementObjectModel compileEPL(String eqlExpression) throws EPException;
 
     /**
      * Prepares a statement for the given EQL, which can include substitution parameters marked via question mark '?'.
@@ -92,7 +92,7 @@ public interface EPAdministrator
      * @return prepared statement
      * @throws EPException indicates compilation errors.
      */
-    public EPPreparedStatement prepareEQL(String eqlExpression) throws EPException;
+    public EPPreparedStatement prepareEPL(String eqlExpression) throws EPException;
 
     /**
      * Prepares a statement for the given pattern, which can include substitution parameters marked via question mark '?'.

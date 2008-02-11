@@ -39,7 +39,7 @@ public class TestViewTimeInterval extends TestCase
     public void testTimeBatchNoRefPoint()
     {
         // Set up a time window with a unique view attached
-        EPStatement view = epService.getEPAdministrator().createEQL(
+        EPStatement view = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportBean.class.getName() +
                 ".win:time_batch(10 minutes)");
         testListener = new SupportUpdateListener();
@@ -57,7 +57,7 @@ public class TestViewTimeInterval extends TestCase
     public void testTimeBatchRefPoint()
     {
         // Set up a time window with a unique view attached
-        EPStatement view = epService.getEPAdministrator().createEQL(
+        EPStatement view = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportBean.class.getName() +
                 ".win:time_batch(10 minutes, 10L)");
         testListener = new SupportUpdateListener();
@@ -75,7 +75,7 @@ public class TestViewTimeInterval extends TestCase
     public void testExternallyTimed()
     {
         // Set up a time window with a unique view attached
-        EPStatement view = epService.getEPAdministrator().createEQL(
+        EPStatement view = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBean.class.getName() +
                 ".win:ext_timed(longPrimitive, 10 minutes)");
         testListener = new SupportUpdateListener();
@@ -95,7 +95,7 @@ public class TestViewTimeInterval extends TestCase
     private void tryTimeWindow(String intervalSpec)
     {
         // Set up a time window with a unique view attached
-        EPStatement view = epService.getEPAdministrator().createEQL(
+        EPStatement view = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBean.class.getName() +
                 ".win:time(" + intervalSpec + ")");
         testListener = new SupportUpdateListener();

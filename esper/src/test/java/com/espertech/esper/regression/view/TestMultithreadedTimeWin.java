@@ -80,7 +80,7 @@ public class TestMultithreadedTimeWin extends TestCase {
             String viewExpr = "select symbol, sum(volume) as sumVol " +
                               "from " + SupportMarketDataBean.class.getName() +
                               "(symbol='" + symbols[i] + "').win:time(" + timeWindowSize + ")";
-            EPStatement testStmt = epService.getEPAdministrator().createEQL(viewExpr);
+            EPStatement testStmt = epService.getEPAdministrator().createEPL(viewExpr);
             listeners[i] = new ResultUpdateListener();
             testStmt.addListener(listeners[i]);
         }

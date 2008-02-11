@@ -34,7 +34,7 @@ public class FindMissingEventStmt
                         "TxnEventB.win:time(30 min) B on B.transactionId = C.transactionId " +
                       "where C.transactionId is null";
 
-        statement = admin.createEQL(stmt);
+        statement = admin.createEPL(stmt);
     }
 
     public void addListener(UpdateListener listener)

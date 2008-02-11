@@ -86,7 +86,7 @@ public class TestStaticFunctions extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(text);
+            epService.getEPAdministrator().createEPL(text);
             fail();
         }
         catch (EPStatementException ex)
@@ -95,7 +95,7 @@ public class TestStaticFunctions extends TestCase
         }
 
         epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class.getName());
-        epService.getEPAdministrator().createEQL(text);
+        epService.getEPAdministrator().createEPL(text);
     }
 
 	public void testNoParameters()
@@ -144,7 +144,7 @@ public class TestStaticFunctions extends TestCase
     public void testSingleParameterCompile() throws Exception
     {
         statementText = "select Integer.toBinaryString(7) as value" + stream;
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(statementText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(statementText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         assertEquals(statementText.trim(), model.toEQL());
@@ -264,7 +264,7 @@ public class TestStaticFunctions extends TestCase
         String text = "select " +
                 "SupportStaticMethodLib.appendPipe(SupportStaticMethodLib.delimitPipe('POLYGON ((100 100, \", 100 100, 400 400))'),temp.geom) as val" +
                 " from Temperature as temp";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -283,7 +283,7 @@ public class TestStaticFunctions extends TestCase
         String text = "select " +
                 "SupportStaticMethodLib.passthru(id) as val" +
                 " from " + SupportBean_S0.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -305,7 +305,7 @@ public class TestStaticFunctions extends TestCase
         String text = "select " +
                 "SupportStaticMethodLib.sleep(100) as val" +
                 " from Temperature as temp";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -331,7 +331,7 @@ public class TestStaticFunctions extends TestCase
         String text = "select " +
                 "SupportStaticMethodLib.sleep(SupportStaticMethodLib.passthru(100)) as val" +
                 " from Temperature as temp";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -348,7 +348,7 @@ public class TestStaticFunctions extends TestCase
 
     private Object createStatementAndGet(String propertyName)
 	{
-		statement = epService.getEPAdministrator().createEQL(statementText);
+		statement = epService.getEPAdministrator().createEPL(statementText);
 		listener = new SupportUpdateListener();
 		statement.addListener(listener);
 		epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 10d, 4l, ""));
@@ -370,7 +370,7 @@ public class TestStaticFunctions extends TestCase
 
 	private Object[] createStatementAndGetProperty(boolean expectResult, String... propertyNames)
 	{
-		statement = epService.getEPAdministrator().createEQL(statementText);
+		statement = epService.getEPAdministrator().createEPL(statementText);
 		listener = new SupportUpdateListener();
 		statement.addListener(listener);
 		sendEvent("IBM", 10d, 4l);

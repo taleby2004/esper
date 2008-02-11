@@ -44,7 +44,7 @@ public class StmtMgmtCallable implements Callable
                     ThreadLogUtil.trace("stmt create,", statementText);
                     if (isEQL)
                     {
-                        stmt = engine.getEPAdministrator().createEQL(statementText);
+                        stmt = engine.getEPAdministrator().createEPL(statementText);
                     }
                     else
                     {

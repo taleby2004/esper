@@ -8,7 +8,6 @@ import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.eql.SupportDatabaseService;
 import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 import java.util.Properties;
@@ -68,7 +67,7 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
                 SupportBean_S0.class.getName() + ".win:length(1000) as s0," +
                 " sql:MyDB ['select myvarchar from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -100,7 +99,7 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
                 SupportBean_S0.class.getName() + ".win:time(1 sec) as s0," +
                 " sql:MyDB ['select myvarchar from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -128,7 +127,7 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
                 SupportBean_S0.class.getName() + ".win:keepall() as s0," +
                 " sql:MyDB ['select mycol3, mycol2 from mytesttable_large'] as s1 where s0.id = s1.mycol3";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -148,7 +147,7 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
                 SupportBean_S0.class.getName() + " as s0," +
                 " sql:MyDB ['select myint from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = engine.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = engine.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

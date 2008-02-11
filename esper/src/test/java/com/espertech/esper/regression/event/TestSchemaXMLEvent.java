@@ -68,7 +68,7 @@ public class TestSchemaXMLEvent extends TestCase
                         "nested3.nested4[2].id as attrTwoProp" +
                 " from TestXMLSchemaType.win:length(100)";
 
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
     }
 
@@ -82,7 +82,7 @@ public class TestSchemaXMLEvent extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL("select element1 from TestXMLSchemaType.win:length(100)");
+            epService.getEPAdministrator().createEPL("select element1 from TestXMLSchemaType.win:length(100)");
             fail();
         }
         catch (EPStatementException ex)

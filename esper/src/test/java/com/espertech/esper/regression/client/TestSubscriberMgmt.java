@@ -30,7 +30,7 @@ public class TestSubscriberMgmt extends TestCase
     public void testStartStopStatement()
     {
         SubscriberInterface subscriber = new SubscriberInterface();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from SupportMarkerInterface");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportMarkerInterface");
         stmt.setSubscriber(subscriber);
 
         SupportBean_A a1 = new SupportBean_A("A1");
@@ -59,12 +59,12 @@ public class TestSubscriberMgmt extends TestCase
         String fields[] = "myvar".split(",");
         SubscriberMap subscriberCreateVariable = new SubscriberMap();
         String stmtTextCreate = "create variable string myvar = 'abc'";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtTextCreate);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmt.setSubscriber(subscriberCreateVariable);
 
         SubscriberMap subscriberSetVariable = new SubscriberMap();
         String stmtTextSet = "on SupportBean set myvar = string";
-        stmt = epService.getEPAdministrator().createEQL(stmtTextSet);
+        stmt = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmt.setSubscriber(subscriberSetVariable);
 
         epService.getEPRuntime().sendEvent(new SupportBean("def", 1));
@@ -77,12 +77,12 @@ public class TestSubscriberMgmt extends TestCase
         String fields[] = "key,value".split(",");
         SubscriberMap subscriberNamedWindow = new SubscriberMap();
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, intPrimitive as value from SupportBean";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtTextCreate);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmt.setSubscriber(subscriberNamedWindow);
 
         SubscriberFields subscriberInsertInto = new SubscriberFields();
         String stmtTextInsertInto = "insert into MyWindow select string as key, intPrimitive as value from SupportBean";
-        stmt = epService.getEPAdministrator().createEQL(stmtTextInsertInto);
+        stmt = epService.getEPAdministrator().createEPL(stmtTextInsertInto);
         stmt.setSubscriber(subscriberInsertInto);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -92,7 +92,7 @@ public class TestSubscriberMgmt extends TestCase
         // test on-delete
         SubscriberMap subscriberDelete = new SubscriberMap();
         String stmtTextDelete = "on SupportMarketDataBean s0 delete from MyWindow s1 where s0.symbol = s1.key";
-        stmt = epService.getEPAdministrator().createEQL(stmtTextDelete);
+        stmt = epService.getEPAdministrator().createEPL(stmtTextDelete);
         stmt.setSubscriber(subscriberDelete);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("E1", 0, 1L, ""));
@@ -101,7 +101,7 @@ public class TestSubscriberMgmt extends TestCase
         // test on-select
         SubscriberMap subscriberSelect = new SubscriberMap();
         String stmtTextSelect = "on SupportMarketDataBean s0 select key, value from MyWindow s1";
-        stmt = epService.getEPAdministrator().createEQL(stmtTextSelect);
+        stmt = epService.getEPAdministrator().createEPL(stmtTextSelect);
         stmt.setSubscriber(subscriberSelect);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
@@ -112,7 +112,7 @@ public class TestSubscriberMgmt extends TestCase
     public void testSimpleSelectUpdateOnly()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from " + SupportBean.class.getName());
         stmt.setSubscriber(subscriber);
 
         // get statement, attach listener

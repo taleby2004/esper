@@ -5,7 +5,6 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.NoActionUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
@@ -31,7 +30,7 @@ public class TestPerfCompareDispatch extends TestCase
     public void testPerfRemoveStream()
     {
         String text = "select count(*) from SupportBean.win:length(10)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         NoActionUpdateListener listener = new NoActionUpdateListener();
         stmt.addListener(listener);
 
@@ -128,7 +127,7 @@ public class TestPerfCompareDispatch extends TestCase
     public void testPerformanceSyntheticUndelivered()
     {
         final int NUM_LOOP = 100000;
-        epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
+        epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < NUM_LOOP; i++)
@@ -142,7 +141,7 @@ public class TestPerfCompareDispatch extends TestCase
     public void testPerformanceSyntheticDelivered()
     {
         final int NUM_LOOP = 100000;
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
         final List<Object[]> results = new ArrayList<Object[]>();
 
         UpdateListener listener = new UpdateListener() {

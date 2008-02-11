@@ -31,7 +31,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService.initialize();
 
         String stmtText = "select * from " + SupportBean.class.getName() + ".win:length(3)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         statement.addListener(testListener);
 
         Object event = sendEvent("a");
@@ -53,7 +53,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService.initialize();
 
         String stmtText = "select * from " + SupportBean.class.getName() + ".win:length(3)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         statement.addListener(testListener);
 
         Object eventOld = sendEvent("a");
@@ -101,7 +101,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService.initialize();
 
         String stmtText = "select rstream * from " + SupportBean.class.getName() + ".win:length(3)";
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         assertEquals(stmtText, model.toEQL());
@@ -125,7 +125,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select rstream * from " + SupportBean.class.getName() + ".win:length(3)");
         statement.addListener(testListener);
 
@@ -146,12 +146,12 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "insert into NextStream " +
                 "select rstream s0.string as string from " + SupportBean.class.getName() + ".win:length(3) as s0");
         statement.addListener(testListener);
 
-        statement = epService.getEPAdministrator().createEQL("select * from NextStream");
+        statement = epService.getEPAdministrator().createEPL("select * from NextStream");
         statement.addListener(testListenerInsertInto);
 
         sendEvent("a");
@@ -176,12 +176,12 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "insert rstream into NextStream " +
                 "select rstream s0.string as string from " + SupportBean.class.getName() + ".win:length(3) as s0");
         statement.addListener(testListener);
 
-        statement = epService.getEPAdministrator().createEQL("select * from NextStream");
+        statement = epService.getEPAdministrator().createEPL("select * from NextStream");
         statement.addListener(testListenerInsertInto);
 
         sendEvent("a");
@@ -205,7 +205,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select rstream s1.intPrimitive as aID, s2.intPrimitive as bID " +
                 "from " + SupportBean.class.getName() + "(string='a').win:length(2) as s1, "
                         + SupportBean.class.getName() + "(string='b') as s2" +
@@ -231,7 +231,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select istream * from " + SupportBean.class.getName() + ".win:length(1)");
         statement.addListener(testListener);
 
@@ -249,12 +249,12 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "insert rstream into NextStream " +
                 "select istream a.string as string from " + SupportBean.class.getName() + ".win:length(1) as a");
         statement.addListener(testListener);
 
-        statement = epService.getEPAdministrator().createEQL("select * from NextStream");
+        statement = epService.getEPAdministrator().createEPL("select * from NextStream");
         statement.addListener(testListenerInsertInto);
 
         sendEvent("a");
@@ -273,7 +273,7 @@ public class TestIStreamRStreamKeywords extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select istream s1.intPrimitive as aID, s2.intPrimitive as bID " +
                 "from " + SupportBean.class.getName() + "(string='a').win:length(2) as s1, "
                         + SupportBean.class.getName() + "(string='b') as s2" +

@@ -22,7 +22,7 @@ public class TestViewSimpleFilter extends TestCase
 
     public void testNotEqualsOp()
     {
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportBean.class.getName() +
                 "(string != 'a')");
         statement.addListener(testListener);
@@ -42,7 +42,7 @@ public class TestViewSimpleFilter extends TestCase
 
     public void testCombinationEqualsOp()
     {
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportBean.class.getName() +
                 "(string != 'a', intPrimitive=0)");
         statement.addListener(testListener);

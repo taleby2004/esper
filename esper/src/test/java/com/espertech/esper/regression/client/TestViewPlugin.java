@@ -33,7 +33,7 @@ public class TestViewPlugin extends TestCase
     public void testPlugInViewFlushed()
     {
         String text = "select * from A.mynamespace:flushedsimple(price)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(testListener);
 
         sendEvent(1);
@@ -47,7 +47,7 @@ public class TestViewPlugin extends TestCase
     public void testPlugInViewTrend()
     {
         String text = "select irstream * from A.mynamespace:trendspotter(price)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(testListener);
 
         sendEvent(10);
@@ -105,7 +105,7 @@ public class TestViewPlugin extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)

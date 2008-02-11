@@ -2,7 +2,6 @@ package com.espertech.esper.regression.db;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.eql.SupportDatabaseService;
@@ -47,7 +46,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
                 SupportBean_S0.class.getName() + ".win:keepall() as s0," +
                 " sql:MyDB ['select mycol3, mycol2 from mytesttable_large'] as s1 where s0.id = s1.mycol3";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -74,7 +73,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
                 " sql:MyDB ['select mycol3, mycol4 from mytesttable_large'] as s0, " +
                 SupportBean.class.getName() + ".win:keepall() as s1 where s1.doubleBoxed = s0.mycol3 and s1.byteBoxed = s0.mycol4";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -101,7 +100,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
                 " sql:MyDB ['select mycol1, mycol3 from mytesttable_large'] as s1 right outer join " +
                 SupportBean.class.getName() + " as s0 on string = mycol1";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -132,7 +131,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
                 " sql:MyDB ['select mycol1, mycol3 from mytesttable_large'] as s1 right outer join " +
                 SupportBean.class.getName() + " as s0 on string = mycol1 where s1.mycol3 = s0.intPrimitive";
 
-        EPStatement statement = epServiceRetained.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

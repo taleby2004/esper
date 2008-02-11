@@ -30,7 +30,7 @@ public class TestPreviousFunction extends TestCase
     {
         String text = "select irstream count(*) as total, " +
                       "prev(" + TestPreviousFunction.class.getName() + ".intToLong(count(*)) - 1, price) as firstPrice from " + SupportMarketDataBean.class.getName() + ".win:time(60)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(testListener);
 
         assertPrevCount();
@@ -40,7 +40,7 @@ public class TestPreviousFunction extends TestCase
     {
         String text = "select irstream count(*) as total, " +
                       "prev(count(*) - 1, price) as firstPrice from " + SupportMarketDataBean.class.getName() + ".win:time(60)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(testListener);
 
         assertPrevCount();
@@ -112,7 +112,7 @@ public class TestPreviousFunction extends TestCase
         String viewExpr = "select symbol, prev(1, price) as prevPrice, prev(2, price) as prevPrevPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).ext:sort(price, false, 10) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -150,7 +150,7 @@ public class TestPreviousFunction extends TestCase
         String viewExpr = "select symbol, prev(1, price) as prevPrice, prev(2, price) as prevPrevPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).win:time_batch(1 sec) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -209,7 +209,7 @@ public class TestPreviousFunction extends TestCase
         String viewExpr = "select irstream symbol, prev(1, price) as prevPrice, prev(2, price) as prevPrevPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).win:length_batch(3) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -296,7 +296,7 @@ public class TestPreviousFunction extends TestCase
                           " prev(2, price) as prevPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:time(1 min) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -362,7 +362,7 @@ public class TestPreviousFunction extends TestCase
                           " prev(2, price) as prevPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:ext_timed(volume, 1 min) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -405,7 +405,7 @@ public class TestPreviousFunction extends TestCase
                           " prev(2, price) as prevPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:time_batch(1 min) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -458,7 +458,7 @@ public class TestPreviousFunction extends TestCase
                           "from " + SupportBean.class.getName() + ", " +
                           SupportMarketDataBean.class.getName() + ".win:time_batch(1 min)";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -503,7 +503,7 @@ public class TestPreviousFunction extends TestCase
                             "prev(2, price) as prev2Price " +
                             "from " + SupportMarketDataBean.class.getName() + ".win:length(3) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -534,7 +534,7 @@ public class TestPreviousFunction extends TestCase
                             "prev(2, price) as prev2Price " +
                             "from " + SupportMarketDataBean.class.getName() + ".win:length_batch(3) ";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type
@@ -576,7 +576,7 @@ public class TestPreviousFunction extends TestCase
                             "from " + SupportMarketDataBean.class.getName() + ".win:length(100) " +
                             "where prev(2, price) > 100";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         sendMarketEvent("A", 1);
@@ -592,7 +592,7 @@ public class TestPreviousFunction extends TestCase
         String viewExpr =   "select prev(intPrimitive, string) as sPrev " +
                             "from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         sendBeanEvent("A", 1);
@@ -627,7 +627,7 @@ public class TestPreviousFunction extends TestCase
                           " prev(2, price) as prev2Price " +
                           "from " + SupportMarketDataBean.class.getName() + ".ext:sort(symbol, false, 100)";
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("prev0Symbol"));
@@ -666,7 +666,7 @@ public class TestPreviousFunction extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(statement);
+            epService.getEPAdministrator().createEPL(statement);
             fail();
         }
         catch (EPException ex)
@@ -791,7 +791,7 @@ public class TestPreviousFunction extends TestCase
 
     private void assertPerGroup(String statement)
     {
-        EPStatement selectTestView = epService.getEPAdministrator().createEQL(statement);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(statement);
         selectTestView.addListener(testListener);
 
         // assert select result type

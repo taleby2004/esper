@@ -2,7 +2,6 @@ package com.espertech.esper.regression.db;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.eql.SupportDatabaseService;
 import com.espertech.esper.support.bean.SupportBean;
@@ -87,7 +86,7 @@ public class TestDatabaseOuterJoin extends TestCase
                 " sql:MyDB ['select " + TestDatabaseOuterJoin.ALL_FIELDS + " from mytesttable where ${s0.intPrimitive} = mytesttable.mybigint'] as s1 right outer join " +
                 SupportBean.class.getName() + " as s0 on string = myvarchar";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -109,7 +108,7 @@ public class TestDatabaseOuterJoin extends TestCase
 
     public void tryOuterJoinNoResult(String statementText)
     {
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -124,7 +123,7 @@ public class TestDatabaseOuterJoin extends TestCase
 
     public void tryOuterJoinResult(String statementText)
     {
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

@@ -5,7 +5,6 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.util.SupportMTUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -35,20 +34,20 @@ public class TestMTStmtNamedWindowDelete extends TestCase
 
     public void testNamedWindow() throws Exception
     {
-        EPStatement stmtWindow = engine.getEPAdministrator().createEQL(
+        EPStatement stmtWindow = engine.getEPAdministrator().createEPL(
                 "create window MyWindow.win:keepall() as select string, longPrimitive from " + SupportBean.class.getName());
         listenerWindow = new SupportMTUpdateListener();
         stmtWindow.addListener(listenerWindow);
 
-        engine.getEPAdministrator().createEQL(
+        engine.getEPAdministrator().createEPL(
                 "insert into MyWindow(string, longPrimitive) " +
                 " select symbol, volume \n" +
                 " from " + SupportMarketDataBean.class.getName());
 
         String stmtTextDelete = "on " + SupportBean_A.class.getName() + " as s0 delete from MyWindow as win where win.string = s0.id";
-        engine.getEPAdministrator().createEQL(stmtTextDelete);
+        engine.getEPAdministrator().createEPL(stmtTextDelete);
 
-        EPStatement stmtConsumer = engine.getEPAdministrator().createEQL("select irstream string, longPrimitive from MyWindow");
+        EPStatement stmtConsumer = engine.getEPAdministrator().createEPL("select irstream string, longPrimitive from MyWindow");
         listenerConsumer = new SupportMTUpdateListener();
         stmtConsumer.addListener(listenerConsumer);
 

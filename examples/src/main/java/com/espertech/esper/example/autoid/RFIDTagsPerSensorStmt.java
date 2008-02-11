@@ -15,7 +15,7 @@ public class RFIDTagsPerSensorStmt
                       "where Observation[0].Command = 'READ_PALLET_TAGS_ONLY' " +
                       "group by ID";
 
-        statement = admin.createEQL(stmt);
+        statement = admin.createEPL(stmt);
     }
 
     public void addListener(UpdateListener listener)

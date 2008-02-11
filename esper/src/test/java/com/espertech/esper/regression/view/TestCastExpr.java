@@ -35,7 +35,7 @@ public class TestCastExpr extends TestCase
                           " cast(floatBoxed, long) as t7 " +
                           " from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         assertEquals(String.class, selectTestCase.getEventType().getPropertyType("t0"));
@@ -102,7 +102,7 @@ public class TestCastExpr extends TestCase
         String stmtText = "select cast(inner?, java.lang.String) as t0 " +
                           "from " + SupportMarkerInterface.class.getName();
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         assertEquals(stmtText, model.toEQL());
@@ -141,7 +141,7 @@ public class TestCastExpr extends TestCase
                           " cast(inner?, " + ISupportAImplSuperGImplPlus.class.getName() + ") as t7 " +
                           " from " + SupportMarkerInterface.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(listener);
 
         assertEquals(SupportMarkerInterface.class, selectTestCase.getEventType().getPropertyType("t0"));
@@ -186,7 +186,7 @@ public class TestCastExpr extends TestCase
                           " cast(boolBoxed, string) as t2 " +
                           " from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("t0"));

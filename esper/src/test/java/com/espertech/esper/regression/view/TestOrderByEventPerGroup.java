@@ -34,7 +34,7 @@ public class TestOrderByEventPerGroup extends TestCase {
                                 "group by symbol " +
                                 "output every 6 events " +
                                 "order by sum(price), symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
 
         runAssertionNoHaving(statement);
     }
@@ -47,7 +47,7 @@ public class TestOrderByEventPerGroup extends TestCase {
                                     "having sum(price) > 0 " +
                                     "output every 6 events " +
                                     "order by sum(price), symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         runAssertionHaving(statement);
 	}
 
@@ -60,7 +60,7 @@ public class TestOrderByEventPerGroup extends TestCase {
                             "group by symbol " +
                             "output every 6 events " +
                             "order by sum(price), symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("IBM"));
@@ -82,7 +82,7 @@ public class TestOrderByEventPerGroup extends TestCase {
             "output every 6 events " +
             "order by sum(price), symbol";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("IBM"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("CMU"));
@@ -103,7 +103,7 @@ public class TestOrderByEventPerGroup extends TestCase {
             "output every 6 events " +
             "order by mysum, symbol";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("IBM"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("CMU"));
@@ -120,7 +120,7 @@ public class TestOrderByEventPerGroup extends TestCase {
                                     "group by symbol " +
                                     "output last every 6 events " +
                                     "order by sum(price), symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         runAssertionLast(statement);
     }
 
@@ -134,7 +134,7 @@ public class TestOrderByEventPerGroup extends TestCase {
                                 "output last every 6 events " +
                                 "order by sum(price), symbol";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("IBM"));
@@ -154,7 +154,7 @@ public class TestOrderByEventPerGroup extends TestCase {
                     "where one.symbol = two.string " +
                     "group by symbol " +
                     "order by symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("IBM"));

@@ -3,7 +3,6 @@ package com.espertech.esper.regression.db;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.eql.SupportDatabaseService;
@@ -43,7 +42,7 @@ public class TestDatabaseJoinInsertInto extends TestCase
         sb.append("select istream 'type_1' as type, C.myvarchar as cid, C.myint as elapsed, C.mychar as series ");
         sb.append("from pattern [every timer:interval(20 sec)], ");
         sb.append("sql:MyDB [' select myvarchar, myint, mychar from mytesttable '] as C ");
-        epService.getEPAdministrator().createEQL(sb.toString());
+        epService.getEPAdministrator().createEPL(sb.toString());
 
         // Reservation Events status change, aggregation, sla definition and DB cache update
         sb = new StringBuilder();
@@ -56,7 +55,7 @@ public class TestDatabaseJoinInsertInto extends TestCase
         sb.append("from ReservationEvents.win:time_batch(10 sec) ");
         sb.append("group by cid, type, series order by series asc");
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(sb.toString());
+        EPStatement stmt = epService.getEPAdministrator().createEPL(sb.toString());
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

@@ -7,13 +7,8 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
-
-import java.util.Properties;
-import java.util.Map;
-import java.util.HashMap;
 
 public class TestEventPropertyDynamicBean extends TestCase
 {
@@ -30,7 +25,7 @@ public class TestEventPropertyDynamicBean extends TestCase
     public void testGetValue() throws Exception
     {
         String stmtText = "select inner.id? as myid from " + SupportBeanDynRoot.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // check type
@@ -64,7 +59,7 @@ public class TestEventPropertyDynamicBean extends TestCase
                           " inner.nested?.nestedNested.nestedNestedValue? as n5, " +
                           " inner.nested?.nestedNested?.nestedNestedValue? as n6 " +
                           " from " + SupportBeanDynRoot.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // check type
@@ -103,7 +98,7 @@ public class TestEventPropertyDynamicBean extends TestCase
     public void testGetValueTop() throws Exception
     {
         String stmtText = "select id? as myid from " + SupportMarkerInterface.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // check type
@@ -125,7 +120,7 @@ public class TestEventPropertyDynamicBean extends TestCase
                           " nested?.nestedValue as nested, " +
                           " nested?.nestedNested.nestedNestedValue as nestedNested " +
                           "from " + SupportMarkerInterface.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // check type
@@ -149,7 +144,7 @@ public class TestEventPropertyDynamicBean extends TestCase
                           "inner?.mapped('keyTwo')? as mapped2,  " +
                           "inner?.mapProperty('xOne')? as map " +
                           "from " + SupportBeanDynRoot.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         assertEquals(Object.class, stmt.getEventType().getPropertyType("indexed1"));
@@ -176,7 +171,7 @@ public class TestEventPropertyDynamicBean extends TestCase
                           "mapped('keyOne')? as mapped1, " +
                           "mapped('keyTwo')? as mapped2  " +
                           "from " + SupportBeanComplexProps.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         assertEquals(Object.class, stmt.getEventType().getPropertyType("indexed1"));
@@ -199,7 +194,7 @@ public class TestEventPropertyDynamicBean extends TestCase
                           "indexed[1]? as indexed, " +
                           "mapped('keyOne')? as mapped " +
                           "from " + SupportBeanComplexProps.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         EventType type = stmt.getEventType();

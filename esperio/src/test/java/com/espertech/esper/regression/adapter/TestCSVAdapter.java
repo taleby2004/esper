@@ -49,7 +49,7 @@ public class TestCSVAdapter extends TestCase
 		EPAdministrator administrator = epService.getEPAdministrator();
 
 		String statementText = "select * from mapEvent.win:length(5)";
-		EPStatement statement = administrator.createEQL(statementText);
+		EPStatement statement = administrator.createEPL(statementText);
 
 		listener = new SupportUpdateListener();
 		statement.addListener(listener);
@@ -121,7 +121,7 @@ public class TestCSVAdapter extends TestCase
 		adapter = new CSVInputAdapter(epService, adapterSpec);
 
 		String statementText = "select * from intsTitleRowEvent.win:length(5)";
-		EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+		EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
 		statement.addListener(listener);
 
 		adapter.start();
@@ -170,7 +170,7 @@ public class TestCSVAdapter extends TestCase
 		adapter = new CSVInputAdapter(epService, adapterSpec);
 
 		String statementText = "select * from allStringEvent.win:length(5)";
-		EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+		EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
 		statement.addListener(listener);
 
 		adapter.start();
@@ -195,7 +195,7 @@ public class TestCSVAdapter extends TestCase
 		adapter = new CSVInputAdapter(epService, adapterSpec);
 
 		String statementText = "select * from propertyTypeEvent.win:length(5)";
-		EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+		EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
 		statement.addListener(listener);
 
 		adapter.start();

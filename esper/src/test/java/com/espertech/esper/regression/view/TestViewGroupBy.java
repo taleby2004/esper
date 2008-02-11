@@ -6,7 +6,6 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.util.EventPropertyAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 
 import java.util.*;
 
@@ -45,7 +44,7 @@ public class TestViewGroupBy extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
         }
         catch (EPStatementException ex)
         {
@@ -58,16 +57,16 @@ public class TestViewGroupBy extends TestCase
         EPAdministrator epAdmin = epService.getEPAdministrator();
         String filter = "select * from " + SupportMarketDataBean.class.getName();
 
-        priceLast3Stats = epAdmin.createEQL(filter + ".std:groupby(symbol).win:length(3).stat:uni(price)");
+        priceLast3Stats = epAdmin.createEPL(filter + ".std:groupby(symbol).win:length(3).stat:uni(price)");
         priceLast3Stats.addListener(priceLast3StatsListener);
 
-        volumeLast3Stats = epAdmin.createEQL(filter + ".std:groupby(symbol).win:length(3).stat:uni(volume)");
+        volumeLast3Stats = epAdmin.createEPL(filter + ".std:groupby(symbol).win:length(3).stat:uni(volume)");
         volumeLast3Stats.addListener(volumeLast3StatsListener);
 
-        priceAllStats = epAdmin.createEQL(filter + ".std:groupby(symbol).stat:uni(price)");
+        priceAllStats = epAdmin.createEPL(filter + ".std:groupby(symbol).stat:uni(price)");
         priceAllStats.addListener(priceAllStatsListener);
 
-        volumeAllStats = epAdmin.createEQL(filter + ".std:groupby(symbol).stat:uni(volume)");
+        volumeAllStats = epAdmin.createEPL(filter + ".std:groupby(symbol).stat:uni(volume)");
         volumeAllStats.addListener(volumeAllStatsListener);
 
         Vector<Map<String, Object>> expectedList = new Vector<Map<String, Object>>();
@@ -136,7 +135,7 @@ public class TestViewGroupBy extends TestCase
     public void testLengthWindowGrouped()
     {
         String stmtText = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).win:length(2)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

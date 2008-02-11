@@ -143,7 +143,7 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
 
         String text = "select A.string as string from pattern " +
                     "[every A=BBB(intPrimitive=123) -> (timer:interval(30 seconds) and not AAA(volume=123, symbol=A.string))]";
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

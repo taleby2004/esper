@@ -49,7 +49,7 @@ public class ResultAssertExecution
         stmt.stop();
         String eql = stmt.getText();
         String irStreamEQL = eql.replace("select ", "select irstream ");
-        stmt = engine.getEPAdministrator().createEQL(irStreamEQL);
+        stmt = engine.getEPAdministrator().createEPL(irStreamEQL);
         stmt.addListener(listener);
         execute(isAssert, false);
     }

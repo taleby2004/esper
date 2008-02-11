@@ -37,7 +37,7 @@ public class TestCSVAdapterUseCases extends TestCase
         epService = EPServiceProviderManager.getProvider("testExistingTypeNoOptions", makeConfig("TypeA"));
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, price, volume from TypeA.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select symbol, price, volume from TypeA.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -74,7 +74,7 @@ public class TestCSVAdapterUseCases extends TestCase
         epService = EPServiceProviderManager.getProvider("testExistingTypeNoOptions", makeConfig("TypeA"));
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, price, volume from TypeA.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select symbol, price, volume from TypeA.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -97,7 +97,7 @@ public class TestCSVAdapterUseCases extends TestCase
         epService = EPServiceProviderManager.getProvider("testExistingTypeNoOptions", makeConfig("TypeA"));
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, price, volume from TypeA.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select symbol, price, volume from TypeA.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -126,7 +126,7 @@ public class TestCSVAdapterUseCases extends TestCase
         epService = EPServiceProviderManager.getProvider("testExistingTypeNoOptions", makeConfig("TypeA"));
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, price, volume from TypeA.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select symbol, price, volume from TypeA.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -153,7 +153,7 @@ public class TestCSVAdapterUseCases extends TestCase
 
         InputAdapter feed = new CSVInputAdapter(epService, spec);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select symbol, price, volume from TypeB.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select symbol, price, volume from TypeB.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -198,10 +198,10 @@ public class TestCSVAdapterUseCases extends TestCase
         inputTradesSpec.setPropertyTypes(tradeProps);
         CSVInputAdapter inputTrades = new CSVInputAdapter(inputTradesSpec);
 
-        EPStatement stmtPrices = epService.getEPAdministrator().createEQL("select symbol, price from PriceEvent.win:length(100)");
+        EPStatement stmtPrices = epService.getEPAdministrator().createEPL("select symbol, price from PriceEvent.win:length(100)");
         SupportUpdateListener listenerPrice = new SupportUpdateListener();
         stmtPrices.addListener(listenerPrice);
-        EPStatement stmtTrade = epService.getEPAdministrator().createEQL("select symbol, notional from TradeEvent.win:length(100)");
+        EPStatement stmtTrade = epService.getEPAdministrator().createEPL("select symbol, notional from TradeEvent.win:length(100)");
         SupportUpdateListener listenerTrade = new SupportUpdateListener();
         stmtTrade.addListener(listenerTrade);
 
@@ -254,7 +254,7 @@ public class TestCSVAdapterUseCases extends TestCase
         epService.initialize();
         InputAdapter feed = new CSVInputAdapter(epService, spec);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from TypeC.win:length(100)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from TypeC.win:length(100)");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

@@ -3,20 +3,13 @@ package com.espertech.esper.multithread;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.support.util.SupportMTUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 
 import java.util.concurrent.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Test for multithread-safety of insert-into and aggregation per group.
@@ -33,10 +26,10 @@ public class TestMTStmtNamedWindowIterate extends TestCase
         engine.initialize();
         engine.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
-        engine.getEPAdministrator().createEQL(
+        engine.getEPAdministrator().createEPL(
                 "create window MyWindow.std:groupby(string).win:keepall() as select string, longPrimitive from " + SupportBean.class.getName());
 
-        engine.getEPAdministrator().createEQL(
+        engine.getEPAdministrator().createEPL(
                 "insert into MyWindow(string, longPrimitive) " +
                 " select symbol, volume \n" +
                 " from " + SupportMarketDataBean.class.getName());

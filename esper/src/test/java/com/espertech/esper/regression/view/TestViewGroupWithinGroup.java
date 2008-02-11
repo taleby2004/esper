@@ -31,7 +31,7 @@ public class TestViewGroupWithinGroup extends TestCase
         epService.initialize();
 
         // Listen to all ticks
-        viewGrouped = epService.getEPAdministrator().createEQL(
+        viewGrouped = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportMarketDataBean.class.getName() +
                 ".std:groupby(symbol).std:groupby(feed).std:groupby(volume).std:size()");
 

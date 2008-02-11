@@ -25,7 +25,7 @@ public class TestPatternGuardPlugIn extends TestCase
     public void testGuard()
     {
         String stmtText = "select * from pattern [(every Bean) where myplugin:count_to(10)]";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         statement.addListener(listener);
 
         for (int i = 0; i < 10; i++)
@@ -49,7 +49,7 @@ public class TestPatternGuardPlugIn extends TestCase
             epService.initialize();
             String stmtText = "select * from pattern [every " + SupportBean.class.getName() +
                                " where namespace:name(10)]";
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)

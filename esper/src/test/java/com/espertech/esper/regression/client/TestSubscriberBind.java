@@ -30,7 +30,7 @@ public class TestSubscriberBind extends TestCase
     public void testOutputLimitNoJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean output every 2 events");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean output every 2 events");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -42,7 +42,7 @@ public class TestSubscriberBind extends TestCase
     public void testOutputLimitJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean, SupportMarketDataBean where symbol = string output every 2 events");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean, SupportMarketDataBean where symbol = string output every 2 events");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("E1", 0, 1L, ""));
@@ -55,7 +55,7 @@ public class TestSubscriberBind extends TestCase
     public void testSimpleSelectStatic()
     {
         MySubscriberRowByRowSpecificStatic subscriber = new MySubscriberRowByRowSpecificStatic();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from " + SupportBean.class.getName());
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -66,7 +66,7 @@ public class TestSubscriberBind extends TestCase
     public void testRStreamSelect()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select rstream s0 from SupportBean.std:unique(string) as s0");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select rstream s0 from SupportBean.std:unique(string) as s0");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -86,7 +86,7 @@ public class TestSubscriberBind extends TestCase
     public void testStreamSelectJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select null, s1, s0 from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select null, s1, s0 from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -100,7 +100,7 @@ public class TestSubscriberBind extends TestCase
     public void testStreamWildcardJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string || '<', s1.* as s1, s0.* as s0 from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string || '<', s1.* as s1, s0.* as s0 from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -114,7 +114,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindWildcardJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -128,7 +128,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindWildcardPlusProperties()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select *, intPrimitive + 2, 'x'||string||'x' from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select *, intPrimitive + 2, 'x'||string||'x' from " + SupportBean.class.getName());
         stmt.setSubscriber(subscriber);
 
         SupportBean s0 = new SupportBean("E1", 100);
@@ -139,7 +139,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindWildcardIRStream()
     {
         MySubscriberMultirowUnderlying subscriber = new MySubscriberMultirowUnderlying();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select irstream * from SupportBean.win:length_batch(2)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:length_batch(2)");
         stmt.setSubscriber(subscriber);
 
         SupportBean s0 = new SupportBean("E1", 100);
@@ -168,7 +168,7 @@ public class TestSubscriberBind extends TestCase
     {
         MySubscriberRowByRowFull subscriber = new MySubscriberRowByRowFull();
         String stmtText = "select irstream string, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -198,7 +198,7 @@ public class TestSubscriberBind extends TestCase
     {
         MySubscriberMultirowObjectArr subscriber = new MySubscriberMultirowObjectArr();
         String stmtText = "select irstream string, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -225,7 +225,7 @@ public class TestSubscriberBind extends TestCase
     {
         MySubscriberMultirowMap subscriber = new MySubscriberMultirowMap();
         String stmtText = "select irstream string, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -251,7 +251,7 @@ public class TestSubscriberBind extends TestCase
     public void testWidening()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select bytePrimitive, intPrimitive, longPrimitive, floatPrimitive from SupportBean(string='E1')");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select bytePrimitive, intPrimitive, longPrimitive, floatPrimitive from SupportBean(string='E1')");
         stmt.setSubscriber(subscriber);
 
         SupportBean bean = new SupportBean();
@@ -267,7 +267,7 @@ public class TestSubscriberBind extends TestCase
     public void testWildcard()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from SupportBean(string='E2')");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(string='E2')");
         stmt.setSubscriber(subscriber);
 
         SupportBean event = new SupportBean("E2", 1);
@@ -278,7 +278,7 @@ public class TestSubscriberBind extends TestCase
     public void testNested()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select nested, nested.nestedNested from SupportBeanComplexProps");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select nested, nested.nestedNested from SupportBeanComplexProps");
         stmt.setSubscriber(subscriber);
 
         SupportBeanComplexProps event = SupportBeanComplexProps.makeDefaultBean();
@@ -289,7 +289,7 @@ public class TestSubscriberBind extends TestCase
     public void testEnum()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, supportEnum from SupportBeanWithEnum");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, supportEnum from SupportBeanWithEnum");
         stmt.setSubscriber(subscriber);
 
         SupportBeanWithEnum event = new SupportBeanWithEnum("abc", SupportEnum.ENUM_VALUE_1);
@@ -300,7 +300,7 @@ public class TestSubscriberBind extends TestCase
     public void testNullType()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select null, longBoxed from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select null, longBoxed from SupportBean");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
@@ -310,7 +310,7 @@ public class TestSubscriberBind extends TestCase
     public void testObjectArrayDelivery()
     {
         MySubscriberRowByRowObjectArr subscriber = new MySubscriberRowByRowObjectArr();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean.std:unique(string)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean.std:unique(string)");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -323,7 +323,7 @@ public class TestSubscriberBind extends TestCase
     public void testRowMapDelivery()
     {
         MySubscriberRowByRowMap subscriber = new MySubscriberRowByRowMap();
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select irstream string, intPrimitive from SupportBean.std:unique(string)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string, intPrimitive from SupportBean.std:unique(string)");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));

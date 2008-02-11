@@ -35,7 +35,7 @@ public class TestSelectExpr extends TestCase
         String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) " +
                           " where boolBoxed = true";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -52,7 +52,7 @@ public class TestSelectExpr extends TestCase
         String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) " +
                           " where boolBoxed = true";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         testListener.reset();

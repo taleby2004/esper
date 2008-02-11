@@ -51,7 +51,7 @@ public class TestMTStmtSharedView extends TestCase
         SupportMTUpdateListener listeners[] = new SupportMTUpdateListener[stmt.length];
         for (int i = 0; i < stmt.length; i++)
         {
-            stmt[i] = engine.getEPAdministrator().createEQL(
+            stmt[i] = engine.getEPAdministrator().createEPL(
                 " select * " +
                 " from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).stat:uni(price)");
             listeners[i] = new SupportMTUpdateListener();

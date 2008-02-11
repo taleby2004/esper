@@ -175,13 +175,13 @@ public class LRMovingSimMain
                     " select " + i + " as groupId, zone, count(*) as cnt " +
                     "from LocationReport(assetId in (" + assetIdList + ")).std:unique(assetId) " +
                     "group by zone";
-            EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+            EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
             // stmtOne.addListener(new AssetGroupCountListener());  for debugging
 
             String textTwo = "select * from pattern [" +
                     "  every a=" + streamName + "(cnt in [1:2]) ->" +
                     "  (timer:interval(10 sec) and not " + streamName + "(cnt in (0, 3)))]";
-            EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
+            EPStatement stmtTwo = epService.getEPAdministrator().createEPL(textTwo);
             listeners[i] = new AssetZoneSplitListener();
             stmtTwo.addListener(listeners[i]);
         }

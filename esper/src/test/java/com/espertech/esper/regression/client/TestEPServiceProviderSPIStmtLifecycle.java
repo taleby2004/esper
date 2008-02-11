@@ -23,7 +23,7 @@ public class TestEPServiceProviderSPIStmtLifecycle extends TestCase
 
         SupportLifecycleObserver observer = new SupportLifecycleObserver();
         spi.getStatementLifecycleSvc().addObserver(observer);
-        EPStatement stmt = service.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName());
+        EPStatement stmt = service.getEPAdministrator().createEPL("select * from " + SupportBean.class.getName());
         assertEquals("CREATE;STATECHANGE;", observer.getEventsAsString());
 
         observer.flush();

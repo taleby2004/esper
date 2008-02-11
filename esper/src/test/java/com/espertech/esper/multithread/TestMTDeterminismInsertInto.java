@@ -56,9 +56,9 @@ public class TestMTDeterminismInsertInto extends TestCase
         EPStatement[] insertIntoStmts = new EPStatement[numStatements];
         for (int i = 0; i < numStatements; i++)
         {
-            insertIntoStmts[i] = engine.getEPAdministrator().createEQL("insert into MyStream select " + i + " as ident,count(*) as cnt from " + SupportBean.class.getName());
+            insertIntoStmts[i] = engine.getEPAdministrator().createEPL("insert into MyStream select " + i + " as ident,count(*) as cnt from " + SupportBean.class.getName());
         }
-        EPStatement stmtInsertTwo = engine.getEPAdministrator().createEQL("select ident, sum(cnt) as mysum from MyStream group by ident");
+        EPStatement stmtInsertTwo = engine.getEPAdministrator().createEPL("select ident, sum(cnt) as mysum from MyStream group by ident");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmtInsertTwo.addListener(listener);
 
@@ -124,9 +124,9 @@ public class TestMTDeterminismInsertInto extends TestCase
         engine.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
         // setup statements
-        EPStatement stmtInsertOne = engine.getEPAdministrator().createEQL("insert into MyStreamOne select count(*) as cnt from " + SupportBean.class.getName());
-        EPStatement stmtInsertTwo = engine.getEPAdministrator().createEQL("insert into MyStreamTwo select sum(cnt) as mysum from MyStreamOne");
-        EPStatement stmtInsertThree = engine.getEPAdministrator().createEQL("select * from MyStreamTwo");
+        EPStatement stmtInsertOne = engine.getEPAdministrator().createEPL("insert into MyStreamOne select count(*) as cnt from " + SupportBean.class.getName());
+        EPStatement stmtInsertTwo = engine.getEPAdministrator().createEPL("insert into MyStreamTwo select sum(cnt) as mysum from MyStreamOne");
+        EPStatement stmtInsertThree = engine.getEPAdministrator().createEPL("select * from MyStreamTwo");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmtInsertThree.addListener(listener);
 
@@ -185,7 +185,7 @@ public class TestMTDeterminismInsertInto extends TestCase
         engine.initialize();
 
         // setup statements
-        EPStatement stmtInsert = engine.getEPAdministrator().createEQL("insert into MyStream select count(*) as cnt from " + SupportBean.class.getName());
+        EPStatement stmtInsert = engine.getEPAdministrator().createEPL("insert into MyStream select count(*) as cnt from " + SupportBean.class.getName());
         stmtInsert.addListener(new UpdateListener() {
 
             public void update(EventBean[] newEvents, EventBean[] oldEvents)
@@ -198,7 +198,7 @@ public class TestMTDeterminismInsertInto extends TestCase
         for (int i = 0; i < numEvents; i++)
         {
             String text = "select * from pattern [MyStream(cnt=" + (i + 1) + ") -> MyStream(cnt=" + (i + 2) + ")]";
-            EPStatement stmt = engine.getEPAdministrator().createEQL(text);
+            EPStatement stmt = engine.getEPAdministrator().createEPL(text);
             listeners[i] = new SupportUpdateListener();
             stmt.addListener(listeners[i]);
         }

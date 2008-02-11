@@ -25,7 +25,7 @@ public class TestViewInheritAndInterface extends TestCase
         String viewExpr = "select val as value from " +
                 SupportOverrideOne.class.getName() + ".win:length(10)";
 
-        EPStatement testView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement testView = epService.getEPAdministrator().createEPL(viewExpr);
         testListener = new SupportUpdateListener();
         testView.addListener(testListener);
 
@@ -69,7 +69,7 @@ public class TestViewInheritAndInterface extends TestCase
         SupportUpdateListener listeners[] = new SupportUpdateListener[viewExpr.length];
         for (int i = 0; i < viewExpr.length; i++)
         {
-            testViews[i] = epService.getEPAdministrator().createEQL(viewExpr[i]);
+            testViews[i] = epService.getEPAdministrator().createEPL(viewExpr[i]);
             listeners[i] = new SupportUpdateListener();
             testViews[i].addListener(listeners[i]);
         }

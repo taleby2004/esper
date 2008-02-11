@@ -51,7 +51,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
            "select symbol from " + SupportMarketDataBean.class.getName() + "(symbol=?).std:lastevent()) as mysymbol from " +
                 SupportBean.class.getName();
 
-        EPPreparedStatement preparedStmt = epService.getEPAdministrator().prepareEQL(stmtText);
+        EPPreparedStatement preparedStmt = epService.getEPAdministrator().prepareEPL(stmtText);
 
         preparedStmt.setObject(1, "S1");
         EPStatement stmtS1 = epService.getEPAdministrator().create(preparedStmt);
@@ -88,7 +88,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
     public void testSimpleOneParameter()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         prepared.setObject(1, "e1");
         EPStatement statement = epService.getEPAdministrator().create(prepared);
@@ -129,7 +129,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     private void runSimpleTwoParameter(String stmtText, String statementName, boolean compareText)
     {
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmtText);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmtText);
 
         prepared.setObject(1, "e1");
         prepared.setObject(2, 1);
@@ -180,7 +180,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
     public void testSimpleNoParameter()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string=\"e1\")";
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         EPStatement statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerOne);
@@ -202,7 +202,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
     public void testInvalidParameterNotSet()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
         {
@@ -215,7 +215,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         }
 
         stmt = "select * from " + SupportBean.class.getName() + "(string in (?, ?))";
-        prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
         {
@@ -246,7 +246,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
     public void testInvalidParameterType()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
         {
@@ -263,7 +263,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
     public void testInvalidNoParameters()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string='ABC')";
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
         {
@@ -279,7 +279,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
     public void testInvalidSetObject()
     {
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
-        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEQL(stmt);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
         {
@@ -307,7 +307,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
         try
         {
-            epService.getEPAdministrator().createEQL(stmt);
+            epService.getEPAdministrator().createEPL(stmt);
         }
         catch (EPException ex)
         {
@@ -333,7 +333,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
         try
         {
-            epService.getEPAdministrator().compileEQL(stmt);
+            epService.getEPAdministrator().compileEPL(stmt);
         }
         catch (EPException ex)
         {
@@ -346,7 +346,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         String stmt = "select * from " + SupportBean.class.getName() + ".win:length(?)";
         try
         {
-            epService.getEPAdministrator().prepareEQL(stmt);
+            epService.getEPAdministrator().prepareEPL(stmt);
         }
         catch (EPException ex)
         {

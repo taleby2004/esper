@@ -1,11 +1,9 @@
 package com.espertech.esper.regression.view;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -33,7 +31,7 @@ public class TestMemoryMinAllHaving extends TestCase
                 "from " + SupportMarketDataBean.class.getName() + ".win:time(30)" +
                 "having price >= min(price) * (1.02)";
 
-        EPStatement testView = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement testView = epService.getEPAdministrator().createEPL(statementText);
         testView.addListener(listener);
 
         sendClockingInternal();

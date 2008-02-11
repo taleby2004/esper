@@ -71,7 +71,7 @@ public class TestGroupByCount extends TestCase
                           " from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
                           "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
                           "group by symbol";
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(viewExpr);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(viewExpr, model.toEQL());
 
@@ -91,7 +91,7 @@ public class TestGroupByCount extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();
@@ -109,7 +109,7 @@ public class TestGroupByCount extends TestCase
                           "  and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));

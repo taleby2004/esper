@@ -5,7 +5,6 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.util.SupportMTUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
@@ -36,7 +35,7 @@ public class TestMTStmtTimeWindow extends TestCase
 
     public void testTimeWin() throws Exception
     {
-        EPStatement stmt = engine.getEPAdministrator().createEQL(
+        EPStatement stmt = engine.getEPAdministrator().createEPL(
                 " select irstream intPrimitive, string as key " +
                 " from " + SupportBean.class.getName() + ".win:time(1 sec)");
 

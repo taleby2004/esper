@@ -36,7 +36,7 @@ public class TestSumWinTime extends TestCase
         String sumTimeExpr = "select symbol, volume, sum(price) as mySum " +
                              "from " + SupportMarketDataBean.class.getName() + ".win:time(30)";
 
-        selectTestView = epService.getEPAdministrator().createEQL(sumTimeExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(sumTimeExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
@@ -51,7 +51,7 @@ public class TestSumWinTime extends TestCase
                              "from " + SupportMarketDataBean.class.getName() +
                              ".win:time(30) group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(sumTimeUniExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(sumTimeUniExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
@@ -66,7 +66,7 @@ public class TestSumWinTime extends TestCase
                              "from " + SupportMarketDataBean.class.getName() +
                              "(symbol = 'IBM').win:time(30)";
 
-        selectTestView = epService.getEPAdministrator().createEQL(sumTimeUniExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(sumTimeUniExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));

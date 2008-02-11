@@ -22,13 +22,13 @@ public class TestViewStartStop extends TestCase
 
         String viewExpr = "select * from " + SupportBean.class.getName() + ".std:size()";
 
-        sizeView = epService.getEPAdministrator().createEQL(viewExpr);
+        sizeView = epService.getEPAdministrator().createEPL(viewExpr);
     }
 
     public void testSameWindowReuse()
     {
         String viewExpr = "select * from " + SupportBean.class.getName() + ".win:length(3)";
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(viewExpr);
         stmtOne.addListener(testListener);
 
         // send a couple of events
@@ -39,7 +39,7 @@ public class TestViewStartStop extends TestCase
 
         // create same statement again
         SupportUpdateListener testListenerTwo = new SupportUpdateListener();
-        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(viewExpr);
         stmtTwo.addListener(testListenerTwo);
 
         // Send event, no old data should be received

@@ -73,7 +73,7 @@ public class StmtListenerRouteCallable implements Callable
             isCalled = true;
 
             // create statement for thread - this can be called multiple times as other threads send SupportBean
-            EPStatement stmt = engine.getEPAdministrator().createEQL(
+            EPStatement stmt = engine.getEPAdministrator().createEPL(
                     "select * from " + SupportMarketDataBean.class.getName() + " where volume=" + numThread);
             SupportMTUpdateListener listener = new SupportMTUpdateListener();
             stmt.addListener(listener);

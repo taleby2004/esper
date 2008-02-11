@@ -8,8 +8,6 @@ import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -194,7 +192,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         sendTimer(0, epService);
 
         // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from pattern [(every " + SupportBean.class.getName() +
                 ") where timer:within(10 min)]");
 
@@ -231,7 +229,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         sendTimer(0, epService);
 
         // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from pattern [every ((A and B) where timer:within(2))]");
 
         SupportUpdateListener testListener = new SupportUpdateListener();

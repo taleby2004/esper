@@ -29,7 +29,7 @@ public class TestIterator extends TestCase
 									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
 									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ] " +
 									"where addressInfo.intBoxed = txnWD.intBoxed";
-		EPStatement epStatement = epService.getEPAdministrator().createEQL(cepStatementString);
+		EPStatement epStatement = epService.getEPAdministrator().createEPL(cepStatementString);
 
 		SupportBean myEventBean1 = new SupportBean();
 		myEventBean1.setString("address");
@@ -55,7 +55,7 @@ public class TestIterator extends TestCase
 									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
 									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ].std:lastevent() " +
 									"where addressInfo.intBoxed = txnWD.intBoxed";
-		EPStatement epStatement = epService.getEPAdministrator().createEQL(cepStatementString);
+		EPStatement epStatement = epService.getEPAdministrator().createEPL(cepStatementString);
 
 		SupportBean myEventBean1 = new SupportBean();
 		myEventBean1.setString("address");
@@ -76,7 +76,7 @@ public class TestIterator extends TestCase
     public void testOrderByWildcard()
     {
         String stmtText = "select * from " + SupportMarketDataBean.class.getName() + ".win:length(5) order by symbol, volume";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         Object eventOne = sendEvent("SYM", 1);
@@ -102,7 +102,7 @@ public class TestIterator extends TestCase
     {
         String[] fields = new String[] {"symbol", "volume"};
         String stmtText = "select symbol, volume from " + SupportMarketDataBean.class.getName() + ".win:length(3) order by symbol, volume";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 1);
@@ -123,7 +123,7 @@ public class TestIterator extends TestCase
         String[] fields = new String[] {"symbol", "vol"};
         String stmtText = "select symbol, volume * 10 as vol from " + SupportMarketDataBean.class.getName() + ".win:length(5)" +
                       " where volume < 0";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -164,7 +164,7 @@ public class TestIterator extends TestCase
                           "group by symbol " +
                           "order by symbol";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -193,7 +193,7 @@ public class TestIterator extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -228,7 +228,7 @@ public class TestIterator extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol having sum(volume) > 10";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -263,7 +263,7 @@ public class TestIterator extends TestCase
                           "select symbol, (String.valueOf(count(*)) || 'x1000.0') as msg " +
                           "from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).win:length(1) " +
                           "where price - volume >= 1000.0 group by symbol having count(*) = 1";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("SYM", -1, -1L, null));
@@ -284,7 +284,7 @@ public class TestIterator extends TestCase
                           "group by symbol " +
                           "order by symbol";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", -1, 100);
@@ -318,7 +318,7 @@ public class TestIterator extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", -1, 100);
@@ -352,7 +352,7 @@ public class TestIterator extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol having sum(volume) > 20";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", -1, 100);
@@ -385,7 +385,7 @@ public class TestIterator extends TestCase
         String stmtText = "select symbol, sum(volume) as sumVol " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) ";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -408,7 +408,7 @@ public class TestIterator extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
                           " order by symbol asc";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -430,7 +430,7 @@ public class TestIterator extends TestCase
         String stmtText = "select symbol, sum(volume) as sumVol " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) having sum(volume) > 100";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
@@ -452,7 +452,7 @@ public class TestIterator extends TestCase
         String stmtText = "select sum(volume) as sumVol " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) ";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {null}});
 
         sendEvent(100);
@@ -474,7 +474,7 @@ public class TestIterator extends TestCase
         String stmtText = "select sum(volume) as sumVol " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) having sum(volume) > 100";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent(100);

@@ -26,7 +26,7 @@ public class TestViewTimeOrder extends TestCase
     public void testTimeOrder()
     {
         sendTimer(1000);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBeanTimestamp.class.getName() +
                 ".ext:time_order(timestamp, 10 sec)");
         stmt.addListener(listener);
@@ -188,7 +188,7 @@ public class TestViewTimeOrder extends TestCase
     public void testGroupedWindow()
     {
         sendTimer(20000);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBeanTimestamp.class.getName() +
                 ".std:groupby(groupId).ext:time_order(timestamp, 10 sec)");
         stmt.addListener(listener);
@@ -266,7 +266,7 @@ public class TestViewTimeOrder extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -279,7 +279,7 @@ public class TestViewTimeOrder extends TestCase
     public void testPreviousAndPrior()
     {
         sendTimer(1000);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream id, " +
                 " prev(0, id) as prevIdZero, " +
                 " prev(1, id) as prevIdOne, " +

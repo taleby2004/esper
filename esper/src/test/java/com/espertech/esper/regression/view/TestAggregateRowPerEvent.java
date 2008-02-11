@@ -36,7 +36,7 @@ public class TestAggregateRowPerEvent extends TestCase
     {
         String viewExpr = "select irstream longPrimitive, sum(longBoxed) as mySum " +
                           "from " + SupportBean.class.getName() + ".win:length(3)";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssert();
@@ -49,7 +49,7 @@ public class TestAggregateRowPerEvent extends TestCase
                                     SupportBean.class.getName() + ".win:length(3) as two " +
                           "where one.string = two.string";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(JOIN_KEY));
@@ -62,7 +62,7 @@ public class TestAggregateRowPerEvent extends TestCase
         String viewExpr = "select 'IBM stats' as title, volume, avg(volume) as myAvg, sum(volume) as mySum " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3)" +
                           "where symbol='IBM'";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         sendMarketDataEvent("GE", 10L);

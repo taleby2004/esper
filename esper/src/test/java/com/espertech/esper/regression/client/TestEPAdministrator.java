@@ -26,7 +26,7 @@ public class TestEPAdministrator extends TestCase
         for (int i = 0; i < 1000; i++)
         {
             String text = "select * from " + SupportBean.class.getName();
-            EPStatement stmt = epService.getEPAdministrator().createEQL(text, "s1");
+            EPStatement stmt = epService.getEPAdministrator().createEPL(text, "s1");
             assertEquals("s1", stmt.getName());
             stmt.stop();
             stmt.start();
@@ -46,7 +46,7 @@ public class TestEPAdministrator extends TestCase
             try
             {
                 String text = "select xxx from " + SupportBean.class.getName();
-                epService.getEPAdministrator().createEQL(text, "s1");
+                epService.getEPAdministrator().createEPL(text, "s1");
             }
             catch (Exception ex)
             {
@@ -86,7 +86,7 @@ public class TestEPAdministrator extends TestCase
     public void testCreateEQLByName()
     {
         String stmt = "select * from " + SupportBean.class.getName();
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(stmt, "s1");
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmt, "s1");
         stmtOne.addListener(testListener);
         assertEquals("s1", stmtOne.getName());
         assertEquals(stmt, stmtOne.getText());
@@ -97,7 +97,7 @@ public class TestEPAdministrator extends TestCase
 
         // create a second with the same name
         stmt = "select intPrimitive from " + SupportBean.class.getName();
-        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(stmt, "s1");
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(stmt, "s1");
         assertEquals("s1--0", stmtTwo.getName());
         assertEquals(stmt, stmtTwo.getText());
 
@@ -105,7 +105,7 @@ public class TestEPAdministrator extends TestCase
         stmt = "select xxx from " + SupportBean.class.getName();
         try
         {
-            epService.getEPAdministrator().createEQL(stmt, "s1");
+            epService.getEPAdministrator().createEPL(stmt, "s1");
             fail();
         }
         catch (RuntimeException ex)
@@ -115,7 +115,7 @@ public class TestEPAdministrator extends TestCase
 
         // create a forth statement with the same name
         stmt = "select string from " + SupportBean.class.getName();
-        EPStatement stmtFour = epService.getEPAdministrator().createEQL(stmt, "s1");
+        EPStatement stmtFour = epService.getEPAdministrator().createEPL(stmt, "s1");
         assertEquals("s1--1", stmtFour.getName());
         assertEquals(stmt, stmtFour.getText());
 
@@ -167,7 +167,7 @@ public class TestEPAdministrator extends TestCase
 
         // create a fifth pattern statement with the same name
         stmt = "select * from " + SupportBean.class.getName();
-        EPStatement stmtFive = epService.getEPAdministrator().createEQL(stmt, "s1");
+        EPStatement stmtFive = epService.getEPAdministrator().createEPL(stmt, "s1");
         assertEquals("s1--2", stmtFive.getName());
         assertEquals(stmt, stmtFive.getText());
 
@@ -275,7 +275,7 @@ public class TestEPAdministrator extends TestCase
         EPStatement statements[] = new EPStatement[statementNames.length];
         for (int i = 0; i < statementNames.length; i++)
         {
-            statements[i] = epService.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName(), statementNames[i]);
+            statements[i] = epService.getEPAdministrator().createEPL("select * from " + SupportBean.class.getName(), statementNames[i]);
         }
         return statements;
     }

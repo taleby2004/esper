@@ -30,7 +30,7 @@ public class TestViewPropertyAccess extends TestCase
                       " indexed[1] = 2 and " +
                       " nested.nestedNested.nestedNestedValue = 'nestedNestedValue'";
 
-        EPStatement testView = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement testView = epService.getEPAdministrator().createEPL(viewExpr);
         testListener = new SupportUpdateListener();
         testView.addListener(testListener);
 

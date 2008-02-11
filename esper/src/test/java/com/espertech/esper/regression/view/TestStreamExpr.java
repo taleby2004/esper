@@ -35,7 +35,7 @@ public class TestStreamExpr extends TestCase
                             "left outer join " +
                             SupportBean.class.getName() + " as s1 on s0.symbol=s1.string";
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
@@ -51,7 +51,7 @@ public class TestStreamExpr extends TestCase
                             "left outer join " +
                             SupportBeanComplexProps.class.getName() + " as s1 on s0.symbol=s1.simpleProperty";
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
@@ -74,7 +74,7 @@ public class TestStreamExpr extends TestCase
         String textOne = "select s0.getVolume() as volume, s0.getSymbol() as symbol, s0.getPriceTimesVolume(2) as pvf from " +
                             SupportMarketDataBean.class.getName() + " as s0 ";
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
@@ -95,7 +95,7 @@ public class TestStreamExpr extends TestCase
         String textOne = "select s0.getVolume(), s0.getPriceTimesVolume(3) from " +
                             SupportMarketDataBean.class.getName() + " as s0 ";
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
@@ -118,8 +118,8 @@ public class TestStreamExpr extends TestCase
                             SupportBean.class.getName() + " as s1";
 
         // Attach listener to feed
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtOne.getText());
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtOne.getText());
         assertEquals(textOne, model.toEQL());
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
@@ -145,7 +145,7 @@ public class TestStreamExpr extends TestCase
                             SupportBean.class.getName() + " as s1";
 
         // Attach listener to feed
-        stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        stmtOne = epService.getEPAdministrator().createEPL(textOne);
         stmtOne.addListener(listenerOne);
 
         type = stmtOne.getEventType();
@@ -166,7 +166,7 @@ public class TestStreamExpr extends TestCase
                             SupportBean.class.getName() + "(" + SupportStaticMethodLib.class.getName() + ".compareEvents(e1, e2))]";
 
         // Attach listener to feed
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
@@ -186,13 +186,13 @@ public class TestStreamExpr extends TestCase
         String textTwo = "insert into EventStream select " + SupportStaticMethodLib.class.getName() + ".convertEvent(s0) from " + SupportMarketDataBean.class.getName() + ".win:length(100) as s0";
 
         // Attach listener to feed
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
         EventType type = stmtOne.getEventType();
         assertEquals(SupportBean.class, type.getUnderlyingType());
 
-        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(textTwo);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
         type = stmtTwo.getEventType();
@@ -219,13 +219,13 @@ public class TestStreamExpr extends TestCase
         String textTwo = "insert into Stream0 select " + SupportStaticMethodLib.class.getName() + ".convertEventMap(s0) from MapTwo as s0";
 
         // Attach listener to feed
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
         EventType type = stmtOne.getEventType();
         assertEquals(Map.class, type.getUnderlyingType());
 
-        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(textTwo);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
         type = stmtTwo.getEventType();
@@ -254,7 +254,7 @@ public class TestStreamExpr extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(clause);
+            epService.getEPAdministrator().createEPL(clause);
             fail();
         }
         catch (EPStatementException ex)

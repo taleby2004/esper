@@ -4,7 +4,6 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.time.TimerControlEvent;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,7 +46,7 @@ public class TestAccidentNotify extends TestCase
                         " and curCarSeg.segment < accSeg.segment + 5)" +
                     ")";
 
-        joinView = epService.getEPAdministrator().createEQL(joinStatement);
+        joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(new AccidentNotifyListener());
     }
 

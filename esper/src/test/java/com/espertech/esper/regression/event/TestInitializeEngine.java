@@ -18,8 +18,8 @@ public class TestInitializeEngine extends TestCase
         String eqlTwo = "insert into A(a, b) select 1,2 from " + SupportBean.class.getName() + ".win:length(100)";
 
         // Asserting that the engine allows to use the new event stream A with more properties then the old A
-        epService.getEPAdministrator().createEQL(eqlOne);
+        epService.getEPAdministrator().createEPL(eqlOne);
         epService.initialize();
-        epService.getEPAdministrator().createEQL(eqlTwo);
+        epService.getEPAdministrator().createEPL(eqlTwo);
     }
 }

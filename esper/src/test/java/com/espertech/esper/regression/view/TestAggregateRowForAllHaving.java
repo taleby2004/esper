@@ -36,7 +36,7 @@ public class TestAggregateRowForAllHaving extends TestCase
         String viewExpr = "select irstream sum(longBoxed) as mySum " +
                           "from " + SupportBean.class.getName() + ".win:time(10 seconds) " +
                           "having sum(longBoxed) > 10";
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         runAssert();
@@ -50,7 +50,7 @@ public class TestAggregateRowForAllHaving extends TestCase
                           "where one.string = two.string " +
                           "having sum(longBoxed) > 10";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(JOIN_KEY));
@@ -87,7 +87,7 @@ public class TestAggregateRowForAllHaving extends TestCase
         //        +".std:groupby(symbol).win:length(1) having avg(price) <= 0";
         String stmtText = "select istream avg(price) as aprice from "+ SupportMarketDataBean.class.getName()
                 +".std:unique(symbol) having avg(price) <= 0";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         statement.addListener(listener);
 
         sendEvent("A", -1);

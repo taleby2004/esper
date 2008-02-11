@@ -7,7 +7,6 @@ import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
-import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -43,7 +42,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();
@@ -108,7 +107,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "       and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));

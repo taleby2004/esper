@@ -189,7 +189,7 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
         sendTimer(0, epService);
 
         // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEQL(
+        EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from pattern [timer:interval(1 minute 2 seconds)]");
 
         SupportUpdateListener testListener = new SupportUpdateListener();

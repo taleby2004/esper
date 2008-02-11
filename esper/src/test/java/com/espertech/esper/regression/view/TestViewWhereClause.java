@@ -22,7 +22,7 @@ public class TestViewWhereClause extends TestCase
         epService.initialize();
 
         String viewExpr = "select * from " + SupportMarketDataBean.class.getName() + ".win:length(3) where symbol='CSCO'";
-        testView = epService.getEPAdministrator().createEQL(viewExpr);
+        testView = epService.getEPAdministrator().createEPL(viewExpr);
         testListener = new SupportUpdateListener();
         testView.addListener(testListener);
     }
@@ -51,7 +51,7 @@ public class TestViewWhereClause extends TestCase
                 " from " + SupportBean.class.getName() + ".win:length(3) where " +
                 "intPrimitive=longPrimitive and intPrimitive=doublePrimitive and floatPrimitive=doublePrimitive";
 
-        testView = epService.getEPAdministrator().createEQL(viewExpr);
+        testView = epService.getEPAdministrator().createEPL(viewExpr);
         testListener = new SupportUpdateListener();
         testView.addListener(testListener);
 

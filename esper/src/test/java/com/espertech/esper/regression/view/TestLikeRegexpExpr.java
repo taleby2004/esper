@@ -33,7 +33,7 @@ public class TestLikeRegexpExpr extends TestCase
                                 " p02 regexp p03 as r3 " +
                           " from " + SupportBean_S0.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
 
         runLikeRegexStringAndNull();
@@ -69,7 +69,7 @@ public class TestLikeRegexpExpr extends TestCase
                                 "(p02 regexp p03) as r3 " +
                           "from " + SupportBean_S0.class.getName();
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(stmtText, model.toEQL());
 
@@ -125,7 +125,7 @@ public class TestLikeRegexpExpr extends TestCase
                                 " doubleBoxed regexp '[0-9][0-9].[0-9]' as r2 " +
                           " from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
 
         sendSupportBeanEvent(101, 1.1);
@@ -143,7 +143,7 @@ public class TestLikeRegexpExpr extends TestCase
         try
         {
             String statement = "select " + expr + " from " + SupportBean.class.getName();
-            epService.getEPAdministrator().createEQL(statement);
+            epService.getEPAdministrator().createEPL(statement);
             fail();
         }
         catch (EPException ex)

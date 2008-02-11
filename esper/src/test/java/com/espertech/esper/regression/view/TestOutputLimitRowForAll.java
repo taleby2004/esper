@@ -192,7 +192,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion12(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -217,7 +217,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion34(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -233,7 +233,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion13_14(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -253,7 +253,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion15_16(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -273,7 +273,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion78(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -293,7 +293,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion56(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -313,7 +313,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion17(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -333,7 +333,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void runAssertion18(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"sum(price)"};
@@ -357,7 +357,7 @@ public class TestOutputLimitRowForAll extends TestCase
                             "having sum(volume) > 0 " +
                             "output every 5 events";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
         String fields[] = new String[] {"result"};
 
@@ -382,7 +382,7 @@ public class TestOutputLimitRowForAll extends TestCase
                             "having sum(volume) > 0 " +
                             "output every 5 events";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
         String fields[] = new String[] {"result"};
         epService.getEPRuntime().sendEvent(new SupportBean("S0", 0));
@@ -408,7 +408,7 @@ public class TestOutputLimitRowForAll extends TestCase
                           " from " + SupportMarketDataBean.class.getName() + ".ext:sort(volume, true, 1) as s0," +
                           SupportBean.class.getName() + " as s1 where s1.string = s0.symbol " +
                           "output every 1 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
         epService.getEPRuntime().sendEvent(new SupportBean("JOIN_KEY", -1));
 
@@ -435,7 +435,7 @@ public class TestOutputLimitRowForAll extends TestCase
         String viewExpr = "select irstream max(price) as maxVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".win:time(1.1 sec) " +
                           "output every 1 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
 
         sendEvent("SYM1", 1d);
@@ -458,7 +458,7 @@ public class TestOutputLimitRowForAll extends TestCase
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
         String stmtText = "select count(*) as cnt from " + SupportBean.class.getName() + ".win:time(10 seconds) output every 10 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -491,7 +491,7 @@ public class TestOutputLimitRowForAll extends TestCase
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
         String stmtText = "select count(*) as cnt from " + SupportBean.class.getName() + ".win:time_batch(10 seconds) output every 10 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -531,7 +531,7 @@ public class TestOutputLimitRowForAll extends TestCase
         sendTimer(0);
         String selectStmt = "select count(*) as cnt from " + SupportBean.class.getName() + ".win:time(10 seconds) where intPrimitive > 0 output snapshot every 1 seconds";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(selectStmt);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
         sendEvent("s0", 1);
 
@@ -586,7 +586,7 @@ public class TestOutputLimitRowForAll extends TestCase
                 SupportBean.class.getName() + ".win:time(10 seconds) as s, " +
                 SupportMarketDataBean.class.getName() + " as m where m.symbol = s.string and intPrimitive > 0 output snapshot every 1 seconds";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(selectStmt);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("s0", 0, 0L, ""));

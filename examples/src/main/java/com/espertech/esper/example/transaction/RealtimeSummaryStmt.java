@@ -25,7 +25,7 @@ public class RealtimeSummaryStmt
                                   "avg(latencyBC) as avgLatencyBC " +
                            "from CombinedEvent.win:time(30 min)";
 
-        totalsStatement = admin.createEQL(stmtTotal);
+        totalsStatement = admin.createEPL(stmtTotal);
 
         //
         // Min,Max,Average latency grouped by (a) customer ID and (b) supplier ID.
@@ -38,7 +38,7 @@ public class RealtimeSummaryStmt
                               "from CombinedEvent.win:time(30 min) " +
                               "group by customerId";
 
-        byCustomerStatement = admin.createEQL(stmtCustomer);
+        byCustomerStatement = admin.createEPL(stmtCustomer);
 
         String stmtSupplier = "select supplierId," +
                                      "min(latencyAC) as minLatency," +
@@ -47,7 +47,7 @@ public class RealtimeSummaryStmt
                               "from CombinedEvent.win:time(30 min) " +
                               "group by supplierId";
 
-        bySupplierStatement = admin.createEQL(stmtSupplier);
+        bySupplierStatement = admin.createEPL(stmtSupplier);
     }
 
     public void addTotalsListener(UpdateListener listener)

@@ -17,7 +17,7 @@ public class LRMovingZoneStmt
                          "where assetId in ('A1', 'A2', 'A3') " +
                          "group by zone";
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEQL(textOne);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         stmtOne.addListener(new UpdateListener()
         {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)
@@ -34,7 +34,7 @@ public class LRMovingZoneStmt
                          "  every Part=CountZone(cnt in (1,2)) ->" +
                          "  (timer:interval(" + secTimeout + " sec) " +
                          "    and not CountZone(zone=Part.zone, cnt in (0,3)))]";
-        EPStatement stmtTwo = epService.getEPAdministrator().createEQL(textTwo);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(textTwo);
         stmtTwo.addListener(listener);        
     }
 }

@@ -41,7 +41,7 @@ public class TestMTStmtDatabaseJoin extends TestCase
 
     public void testJoin() throws Exception
     {
-        EPStatement stmt = engine.getEPAdministrator().createEQL("select * \n" +
+        EPStatement stmt = engine.getEPAdministrator().createEPL("select * \n" +
                 "  from " + EVENT_NAME + ".win:length(1000) as s0,\n" +
                 "      sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s1"
                 );

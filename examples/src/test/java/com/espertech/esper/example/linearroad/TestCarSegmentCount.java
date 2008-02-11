@@ -5,7 +5,6 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.example.support.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -44,7 +43,7 @@ public class TestCarSegmentCount extends TestCase
             "   and segAvgSpeed.direction = segVolView.direction" +
             "   and segAvgSpeed.segment = segVolView.segment";
 
-        joinView = epService.getEPAdministrator().createEQL(joinStatement);
+        joinView = epService.getEPAdministrator().createEPL(joinStatement);
         listener = new CarSegmentCountListener();
         joinView.addListener(listener);
     }

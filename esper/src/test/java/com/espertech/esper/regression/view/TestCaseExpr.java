@@ -39,7 +39,7 @@ public class TestCaseExpr extends TestCase
               " when symbol='DELL' then sum(price) " +
               "end as p1 from " +   SupportMarketDataBean.class.getName() + ".win:length(10)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -74,7 +74,7 @@ public class TestCaseExpr extends TestCase
               " when (symbol = \"GE\") then volume" +
               " when (symbol = \"DELL\") then sum(price) " +
               "end as p1 from " +   SupportMarketDataBean.class.getName() + ".win:length(10)";
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(caseExpr);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
 
         assertEquals(caseExpr, model.toEQL());
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
@@ -112,7 +112,7 @@ public class TestCaseExpr extends TestCase
               " else volume " +
               "end as p1 from " + SupportMarketDataBean.class.getName() + ".win:length(3)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -147,7 +147,7 @@ public class TestCaseExpr extends TestCase
               "when (symbol = \"DELL\") then (volume * 3) " +
               "else volume " +
               "end as p1 from " + SupportMarketDataBean.class.getName() + ".win:length(10)";
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(caseExpr);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
         assertEquals(caseExpr, model.toEQL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
@@ -177,7 +177,7 @@ public class TestCaseExpr extends TestCase
             " when (symbol='MSFT') then volume / 3.0 " +
             " end as p1 from " +   SupportMarketDataBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -203,7 +203,7 @@ public class TestCaseExpr extends TestCase
                 " else (intPrimitive + longPrimitive + floatPrimitive + doublePrimitive) end as p1 " +
                 " from " + SupportBean.class.getName() + ".win:length(10)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -253,7 +253,7 @@ public class TestCaseExpr extends TestCase
                 " else 'x' end as p1 " +
                 " from " + SupportBean.class.getName() + ".win:length(1)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(String.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -337,7 +337,7 @@ public class TestCaseExpr extends TestCase
                  " when '' then false end as p1" +
                  " from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -361,7 +361,7 @@ public class TestCaseExpr extends TestCase
                  " when string = '' then false end as p1" +
                  " from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -413,7 +413,7 @@ public class TestCaseExpr extends TestCase
                  "else 2 " +
                  "end as p1 from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(caseExpr);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(caseExpr, model.toEQL());
 
@@ -433,7 +433,7 @@ public class TestCaseExpr extends TestCase
                  " else 2 " +
                  " end as p1 from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -460,7 +460,7 @@ public class TestCaseExpr extends TestCase
                  " when false then 3 " +
                  " end as p1 from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -479,7 +479,7 @@ public class TestCaseExpr extends TestCase
                  " when 4/2.0 then 'x'" +
                  " end as p1 from " + SupportBean.class.getName() + ".win:length(100)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(String.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -499,7 +499,7 @@ public class TestCaseExpr extends TestCase
                  " else 10 end) as p1 " +
                  " from " + SupportBean.class.getName() + ".win:length(1)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -523,7 +523,7 @@ public class TestCaseExpr extends TestCase
                  " else sum(intPrimitive) end as p1 " +
                  " from " + SupportBean.class.getName() + ".win:length(10)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Float.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -560,7 +560,7 @@ public class TestCaseExpr extends TestCase
                  " end as p1 " +
                  " from " + SupportBeanWithEnum.class.getName() + ".win:length(10)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -586,7 +586,7 @@ public class TestCaseExpr extends TestCase
                  " end as p1 " +
                  " from " + SupportBean.class.getName() + ".win:length(10)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(SupportEnum.class, selectTestCase.getEventType().getPropertyType("p1"));
 
@@ -609,7 +609,7 @@ public class TestCaseExpr extends TestCase
         String caseExpr = "select " + caseSubExpr +
                  " from " + SupportBean.class.getName() + ".win:length(10)";
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType(caseSubExpr));
 

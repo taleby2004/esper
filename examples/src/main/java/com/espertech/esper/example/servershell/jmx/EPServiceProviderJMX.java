@@ -23,13 +23,13 @@ public class EPServiceProviderJMX implements EPServiceProviderJMXMBean
     public void createEQL(String expression, String statementName)
     {
         log.info("Via Java Management JMX proxy: Creating statement '" + expression + "' named '" + statementName + "'");
-        engine.getEPAdministrator().createEQL(expression, statementName);
+        engine.getEPAdministrator().createEPL(expression, statementName);
     }
 
     public void createEQL(String expression, String statementName, UpdateListener listener)
     {
         log.info("Via Java Management JMX proxy: Creating statement '" + expression + "' named '" + statementName + "'");
-        EPStatement stmt = engine.getEPAdministrator().createEQL(expression, statementName);
+        EPStatement stmt = engine.getEPAdministrator().createEPL(expression, statementName);
         stmt.addListener(listener);
     }
 

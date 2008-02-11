@@ -35,7 +35,7 @@ public class TestInstanceOfExpr extends TestCase
                           " instanceof(floatBoxed, long, float) as t7 " +
                           " from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         for (int i = 0; i < 7; i++)
@@ -91,7 +91,7 @@ public class TestInstanceOfExpr extends TestCase
                           "instanceof(string, float, string, int) as t1 " +
                           "from " + SupportBean.class.getName();
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         assertEquals(stmtText, model.toEQL());
 
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
@@ -120,7 +120,7 @@ public class TestInstanceOfExpr extends TestCase
                           " instanceof(inner?, long, float) as t7 " +
                           " from " + SupportMarkerInterface.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot("abc"));
@@ -152,7 +152,7 @@ public class TestInstanceOfExpr extends TestCase
 
                           " from " + SupportMarkerInterface.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBeanDynRoot("abc")));

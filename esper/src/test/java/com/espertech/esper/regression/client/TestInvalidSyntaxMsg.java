@@ -60,7 +60,7 @@ public class TestInvalidSyntaxMsg extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(expression);
+            epService.getEPAdministrator().createEPL(expression);
             fail();
         }
         catch (EPStatementSyntaxException ex)

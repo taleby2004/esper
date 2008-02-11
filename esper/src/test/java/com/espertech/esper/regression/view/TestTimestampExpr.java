@@ -32,7 +32,7 @@ public class TestTimestampExpr extends TestCase
                           " current_timestamp + 1 as t2 " +
                           " from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("t0"));
@@ -76,7 +76,7 @@ public class TestTimestampExpr extends TestCase
         sendTimer(0);
         String stmtText = "select current_timestamp() as t0 from " + SupportBean.class.getName();
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(stmtText, model.toEQL());
 

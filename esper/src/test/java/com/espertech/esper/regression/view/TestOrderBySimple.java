@@ -46,7 +46,7 @@ public class TestOrderBySimple extends TestCase {
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
                     "where one.symbol = two.string " +
                     "order by price";
-        statement = epService.getEPAdministrator().createEQL(statementString);
+        statement = epService.getEPAdministrator().createEPL(statementString);
         sendJoinEvents();
         sendEvent("CAT", 50);
         sendEvent("IBM", 49);
@@ -906,7 +906,7 @@ public class TestOrderBySimple extends TestCase {
 
 	private void createAndSend(String statementString) {
 		testListener = new SupportUpdateListener();
-		statement = epService.getEPAdministrator().createEQL(statementString);
+		statement = epService.getEPAdministrator().createEPL(statementString);
     	statement.addListener(testListener);
     	sendEvent("IBM", 2);
     	sendEvent("KGB", 1);

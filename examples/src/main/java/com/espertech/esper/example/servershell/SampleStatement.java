@@ -13,7 +13,7 @@ public class SampleStatement
 
     public static void createStatement(EPAdministrator admin)
     {
-        EPStatement statement = admin.createEQL("select istream ipAddress, avg(duration) from SampleEvent.win:time(10 sec) group by ipAddress output every 2 seconds");
+        EPStatement statement = admin.createEPL("select istream ipAddress, avg(duration) from SampleEvent.win:time(10 sec) group by ipAddress output every 2 seconds");
         statement.addListener(new UpdateListener()
         {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)

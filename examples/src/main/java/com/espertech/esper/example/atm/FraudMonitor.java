@@ -21,7 +21,7 @@ public class FraudMonitor
                                     "Withdrawal.win:time(30 sec) as withdraw" +
                 " where fraud.accountNumber = withdraw.accountNumber";
 
-        joinView = epService.getEPAdministrator().createEQL(joinStatement);
+        joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
     }
 }

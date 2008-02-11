@@ -8,7 +8,6 @@ import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +38,7 @@ public class TestGroupByEventPerRowHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 50";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();
@@ -56,7 +55,7 @@ public class TestGroupByEventPerRowHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 50";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));

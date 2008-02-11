@@ -7,11 +7,8 @@ import java.util.Properties;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -63,7 +60,7 @@ public class TestMapEvent extends TestCase
                     "nested.n2 as c," +
                     "nested.n2.n1n1 as d " +
                     "from NestedMap.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -91,7 +88,7 @@ public class TestMapEvent extends TestCase
                     "beanA.indexed[1] as indexed," +
                     "beanA.nested.nestedNested.nestedNestedValue as nestednested " +
                     "from myMapEvent.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -105,7 +102,7 @@ public class TestMapEvent extends TestCase
     public void testQueryFields()
     {
         String statementText = "select myInt + 2 as intVal, 'x' || myString || 'x' as stringVal from myMapEvent.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -174,7 +171,7 @@ public class TestMapEvent extends TestCase
     public void testSendMapNative()
     {
         String statementText = "select * from myMapEvent.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -213,7 +210,7 @@ public class TestMapEvent extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(statementText);
+            epService.getEPAdministrator().createEPL(statementText);
             fail();
         }
         catch (EPException ex)

@@ -170,7 +170,7 @@ public class TestInvalidView extends TestCase
         assertEquals("Unknown method named 'gogglex' could not be resolved [select gogglex(1) from com.espertech.esper.support.bean.SupportBean_N.win:length(1)]", exceptionText);
 
         // insert into column name incorrect
-        epService.getEPAdministrator().createEQL("insert into Xyz select 1 as dodi from java.lang.String");
+        epService.getEPAdministrator().createEPL("insert into Xyz select 1 as dodi from java.lang.String");
         exceptionText = getStatementExceptionView("select pox from pattern[Xyz(yodo=4)]");
         assertEquals("Property named 'yodo' is not valid in any stream [select pox from pattern[Xyz(yodo=4)]]", exceptionText);
     }
@@ -198,7 +198,7 @@ public class TestInvalidView extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(viewStmt);
+            epService.getEPAdministrator().createEPL(viewStmt);
             fail();
         }
         catch (ASTFilterSpecValidationException ex)
@@ -216,7 +216,7 @@ public class TestInvalidView extends TestCase
         String exceptionText = null;
         try
         {
-            epService.getEPAdministrator().createEQL(expression);
+            epService.getEPAdministrator().createEPL(expression);
             fail();
         }
         catch (EPStatementSyntaxException ex)
@@ -239,7 +239,7 @@ public class TestInvalidView extends TestCase
         String exceptionText = null;
         try
         {
-            epService.getEPAdministrator().createEQL(expression);
+            epService.getEPAdministrator().createEPL(expression);
             fail();
         }
         catch (EPStatementSyntaxException es)
@@ -261,7 +261,7 @@ public class TestInvalidView extends TestCase
 
     private void tryValid(String viewStmt)
     {
-        epService.getEPAdministrator().createEQL(viewStmt);
+        epService.getEPAdministrator().createEPL(viewStmt);
     }
 
     private static Log log = LogFactory.getLog(TestInvalidView.class);

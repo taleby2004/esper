@@ -46,7 +46,7 @@ public class TestManualDatabaseJoinOracle
                 " sql:MyDB ['" + sql + "] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -75,7 +75,7 @@ public class TestManualDatabaseJoinOracle
                 " sql:MyDB ['" + sql + "] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -105,7 +105,7 @@ public class TestManualDatabaseJoinOracle
                 " sql:MyDB ['" + sql + "] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -163,7 +163,7 @@ public class TestManualDatabaseJoinOracle
                 " sql:MyDB ['" + sql + "'] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

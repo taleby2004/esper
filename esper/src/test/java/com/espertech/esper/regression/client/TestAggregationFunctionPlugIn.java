@@ -51,7 +51,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
     {
         String text = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(text);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
         SerializableObjectCopier.copy(model);
         assertEquals(text, model.toEQL());
 
@@ -79,7 +79,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         else
         {
-            statement = epService.getEPAdministrator().createEQL(text);
+            statement = epService.getEPAdministrator().createEPL(text);
         }
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -108,7 +108,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
     public void testWindow()
     {
         String text = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(2)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -128,7 +128,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
     public void testDistinct()
     {
         String text = "select irstream concatstring(distinct string) as val from " + SupportBean.class.getName();
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -153,7 +153,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         epService.getEPAdministrator().getConfiguration().addPlugInAggregationFunction("countback", SupportPluginAggregationMethodOne.class.getName());
 
         String text = "select irstream countback({1,2,intPrimitive}) as val from " + SupportBean.class.getName();
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -166,7 +166,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         epService.getEPAdministrator().getConfiguration().addPlugInAggregationFunction("countback", SupportPluginAggregationMethodOne.class.getName());
 
         String text = "select irstream countback() as val from " + SupportBean.class.getName();
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -180,7 +180,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
     public void testMappedPropertyLookAlike()
     {
         String text = "select irstream concatstring('a') as val from " + SupportBean.class.getName();
-        EPStatement statement = epService.getEPAdministrator().createEQL(text);
+        EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
         assertEquals(String.class, statement.getEventType().getPropertyType("val"));
@@ -205,7 +205,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         try
         {
             String text = "select * from " + SupportBean.class.getName() + " group by concat(1)";
-            epService.getEPAdministrator().createEQL(text);
+            epService.getEPAdministrator().createEPL(text);
         }
         catch (EPStatementException ex)
         {
@@ -215,7 +215,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         try
         {
             String text = "select * from " + SupportBean.class.getName() + " group by concat(1, 1)";
-            epService.getEPAdministrator().createEQL(text);
+            epService.getEPAdministrator().createEPL(text);
         }
         catch (EPStatementException ex)
         {
@@ -234,7 +234,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         try
         {
             String text = "select * from " + SupportBean.class.getName() + " group by xxx(1)";
-            epService.getEPAdministrator().createEQL(text);
+            epService.getEPAdministrator().createEPL(text);
         }
         catch (EPStatementException ex)
         {
@@ -244,7 +244,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         try
         {
             String text = "select * from " + SupportBean.class.getName() + " group by yyy(1)";
-            epService.getEPAdministrator().createEQL(text);
+            epService.getEPAdministrator().createEPL(text);
         }
         catch (EPStatementException ex)
         {
@@ -308,7 +308,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)

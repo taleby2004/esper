@@ -9,7 +9,6 @@ import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 
 public class TestViewLengthBatch extends TestCase
 {
@@ -32,7 +31,7 @@ public class TestViewLengthBatch extends TestCase
 
     public void testLengthBatchSize2()
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBean.class.getName() + ".win:length_batch(2)");
         stmt.addListener(listener);
 
@@ -63,7 +62,7 @@ public class TestViewLengthBatch extends TestCase
 
     public void testLengthBatchSize1()
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBean.class.getName() + ".win:length_batch(1)");
         stmt.addListener(listener);
 
@@ -82,7 +81,7 @@ public class TestViewLengthBatch extends TestCase
 
     public void testLengthBatchSize3()
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBean.class.getName() + ".win:length_batch(3)");
         stmt.addListener(listener);
 
@@ -113,7 +112,7 @@ public class TestViewLengthBatch extends TestCase
 
     public void testLengthBatchSize3And2Staggered()
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportBean.class.getName() + ".win:length_batch(3).win:length_batch(2)");
         stmt.addListener(listener);
 
@@ -146,7 +145,7 @@ public class TestViewLengthBatch extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(
+            epService.getEPAdministrator().createEPL(
                 "select * from " + SupportMarketDataBean.class.getName() + ".win:length_batch(0)");
             fail();
         }

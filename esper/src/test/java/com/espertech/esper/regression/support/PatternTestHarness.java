@@ -97,22 +97,22 @@ public class PatternTestHarness implements SupportBeanConstants
                     else if (testStyle == PatternTestStyle.USE_EQL)
                     {
                         String text = "select * from pattern [" + expressionText + "]";
-                        statement = serviceProvider.getEPAdministrator().createEQL(text);
+                        statement = serviceProvider.getEPAdministrator().createEPL(text);
                         expressionText = text;
                     }
                     else if (testStyle == PatternTestStyle.COMPILE_TO_MODEL)
                     {
                         String text = "select * from pattern [" + expressionText + "]";
-                        EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEQL(text);
+                        EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEPL(text);
                         statement = serviceProvider.getEPAdministrator().create(mymodel);
                         expressionText = text;
                     }
                     else if (testStyle == PatternTestStyle.COMPILE_TO_EQL)
                     {
                         String text = "select * from pattern [" + expressionText + "]";
-                        EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEQL(text);
+                        EPStatementObjectModel mymodel = serviceProvider.getEPAdministrator().compileEPL(text);
                         String reverse = mymodel.toEQL();
-                        statement = serviceProvider.getEPAdministrator().createEQL(reverse);
+                        statement = serviceProvider.getEPAdministrator().createEPL(reverse);
                         expressionText = reverse;
                     }
                     else

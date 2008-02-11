@@ -35,7 +35,7 @@ public class TestConfigurationOperations extends TestCase
     {
         configOps.addEventTypeAutoAlias(this.getClass().getPackage().getName());
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from " + MyAutoAliasEventType.class.getSimpleName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from " + MyAutoAliasEventType.class.getSimpleName());
         stmt.addListener(testListener);
 
         MyAutoAliasEventType eventOne = new MyAutoAliasEventType(10);
@@ -52,7 +52,7 @@ public class TestConfigurationOperations extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL("select * from " + SupportAmbigousEventType.class.getSimpleName());
+            epService.getEPAdministrator().createEPL("select * from " + SupportAmbigousEventType.class.getSimpleName());
             fail();
         }
         catch (Exception ex)
@@ -62,7 +62,7 @@ public class TestConfigurationOperations extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL("select * from XXXX");
+            epService.getEPAdministrator().createEPL("select * from XXXX");
             fail();
         }
         catch (Exception ex)
@@ -80,7 +80,7 @@ public class TestConfigurationOperations extends TestCase
         domConfig.setRootElementName("RootAddedDOMOne");
         configOps.addEventTypeAlias("AddedDOMOne", domConfig);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from AddedDOMOne");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from AddedDOMOne");
         stmt.addListener(testListener);
 
         Document eventOne = makeDOMEvent("RootAddedDOMOne");
@@ -96,7 +96,7 @@ public class TestConfigurationOperations extends TestCase
 
         configOps.addEventTypeAlias("AddedMapNameSecond", domConfig);
         SupportUpdateListener testListenerTwo = new SupportUpdateListener();
-        stmt = epService.getEPAdministrator().createEQL("select * from AddedMapNameSecond");
+        stmt = epService.getEPAdministrator().createEPL("select * from AddedMapNameSecond");
         stmt.addListener(testListenerTwo);
 
         Document eventTwo = makeDOMEvent("RootAddedDOMOne");
@@ -132,7 +132,7 @@ public class TestConfigurationOperations extends TestCase
         mapProps.put("prop1", int.class);
         configOps.addEventTypeAlias("AddedMapOne", mapProps);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from AddedMapOne");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from AddedMapOne");
         stmt.addListener(testListener);
 
         Map<String, Object> eventOne = new HashMap<String, Object>();
@@ -145,7 +145,7 @@ public class TestConfigurationOperations extends TestCase
         // Second statement using a new alias to the same type, should only one receive
         configOps.addEventTypeAlias("AddedMapNameSecond", mapProps);
         SupportUpdateListener testListenerTwo = new SupportUpdateListener();
-        stmt = epService.getEPAdministrator().createEQL("select * from AddedMapNameSecond");
+        stmt = epService.getEPAdministrator().createEPL("select * from AddedMapNameSecond");
         stmt.addListener(testListenerTwo);
 
         Map<String, Object> eventTwo = new HashMap<String, Object>();
@@ -181,7 +181,7 @@ public class TestConfigurationOperations extends TestCase
         mapProps.put("prop1", int.class.getName());
         configOps.addEventTypeAlias("AddedMapOne", mapProps);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from AddedMapOne");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from AddedMapOne");
         stmt.addListener(testListener);
 
         Map<String, Object> eventOne = new HashMap<String, Object>();
@@ -194,7 +194,7 @@ public class TestConfigurationOperations extends TestCase
         // Second statement using a new alias to the same type, should only one receive
         configOps.addEventTypeAlias("AddedMapNameSecond", mapProps);
         SupportUpdateListener testListenerTwo = new SupportUpdateListener();
-        stmt = epService.getEPAdministrator().createEQL("select * from AddedMapNameSecond");
+        stmt = epService.getEPAdministrator().createEPL("select * from AddedMapNameSecond");
         stmt.addListener(testListenerTwo);
 
         Map<String, Object> eventTwo = new HashMap<String, Object>();
@@ -227,7 +227,7 @@ public class TestConfigurationOperations extends TestCase
 
         // First statement with new name
         configOps.addEventTypeAlias("AddedName", SupportBean.class.getName());
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from AddedName");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from AddedName");
         stmt.addListener(testListener);
 
         SupportBean eventOne = new SupportBean("a", 1);
@@ -239,7 +239,7 @@ public class TestConfigurationOperations extends TestCase
         // Second statement using a new alias to the same type, should both receive
         configOps.addEventTypeAlias("AddedNameSecond", SupportBean.class.getName());
         SupportUpdateListener testListenerTwo = new SupportUpdateListener();
-        stmt = epService.getEPAdministrator().createEQL("select * from AddedNameSecond");
+        stmt = epService.getEPAdministrator().createEPL("select * from AddedNameSecond");
         stmt.addListener(testListenerTwo);
 
         SupportBean eventTwo = new SupportBean("b", 2);
@@ -268,7 +268,7 @@ public class TestConfigurationOperations extends TestCase
 
         // First statement with new name
         configOps.addEventTypeAlias("AddedName", SupportBean.class);
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from AddedName");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from AddedName");
         stmt.addListener(testListener);
 
         SupportBean eventOne = new SupportBean("a", 1);
@@ -280,7 +280,7 @@ public class TestConfigurationOperations extends TestCase
         // Second statement using a new alias to the same type, should both receive
         configOps.addEventTypeAlias("AddedNameSecond", SupportBean.class);
         SupportUpdateListener testListenerTwo = new SupportUpdateListener();
-        stmt = epService.getEPAdministrator().createEQL("select * from AddedNameSecond");
+        stmt = epService.getEPAdministrator().createEPL("select * from AddedNameSecond");
         stmt.addListener(testListenerTwo);
 
         SupportBean eventTwo = new SupportBean("b", 2);
@@ -307,7 +307,7 @@ public class TestConfigurationOperations extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL("select * from " + alias);
+            epService.getEPAdministrator().createEPL("select * from " + alias);
             fail();
         }
         catch (EPStatementException ex)

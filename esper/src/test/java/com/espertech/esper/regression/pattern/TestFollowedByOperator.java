@@ -117,7 +117,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
           "] ";
 
         SupportUpdateListener listener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
 
         SupportBean_A eventA = null;
@@ -167,7 +167,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         String expression = "select * from pattern " +
           "[every A=CallEvent -> every B=CallEvent(dest=A.dest, startTime in [A.startTime:A.endTime]) where timer:within (7200000)]" +
           "where B.source != A.source";
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -204,7 +204,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
                 "every tagMayBeBroken=LR -> (timer:interval(10 sec) and not LR(mac=tagMayBeBroken.mac))" +
             "]";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -244,7 +244,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
                 "every a=LR(zoneID='1') -> (b=LR(mac=a.mac,zoneID!='1') and not LR(mac=a.mac,zoneID='1'))" +
             "]";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -289,7 +289,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
                 "every a=LR(zoneID!='1') -> (b=LR(mac=a.mac,zoneID='1') and not LR(mac=a.mac,zoneID=a.zoneID))" +
             "]";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -324,7 +324,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -352,7 +352,7 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(expression);
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

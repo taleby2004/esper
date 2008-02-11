@@ -41,7 +41,7 @@ public class TestOrderByAggregateAll extends TestCase
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
                     "where one.symbol = two.string " +
                     "order by symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
         epService.getEPRuntime().sendEvent(new SupportBeanString("IBM"));
@@ -78,7 +78,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by mySymbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -103,7 +103,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by volume*sum(price), symbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
         sendEvent("IBM", 2);
         sendEvent("KGB", 1);
@@ -131,7 +131,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by volume*sum(price), symbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 2);
@@ -154,7 +154,7 @@ public class TestOrderByAggregateAll extends TestCase
                             "order by symbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -177,7 +177,7 @@ public class TestOrderByAggregateAll extends TestCase
                             "order by symbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -201,7 +201,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by symbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -224,7 +224,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by symbol, sum(price)";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -249,7 +249,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by symbol, sum(price)";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -278,7 +278,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "order by symbol";
 
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -307,7 +307,7 @@ public class TestOrderByAggregateAll extends TestCase
                                 "output every 6 events " +
                                 "order by symbol";
         testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
 
         sendEvent("IBM", 3);
@@ -355,7 +355,7 @@ public class TestOrderByAggregateAll extends TestCase
 
 	private void createAndSend(String statementString) {
 		testListener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         statement.addListener(testListener);
     	sendEvent("IBM", 2);
     	sendEvent("KGB", 1);

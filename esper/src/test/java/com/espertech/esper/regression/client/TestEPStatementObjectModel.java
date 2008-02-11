@@ -65,7 +65,7 @@ public class TestEPStatementObjectModel extends TestCase
     public void testCompileToOM() throws Exception
     {
         String stmtText = "select * from " + SupportBean.class.getName();
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         SerializableObjectCopier.copy(model);
         assertNotNull(model);
     }
@@ -73,7 +73,7 @@ public class TestEPStatementObjectModel extends TestCase
     public void testEQLtoOMtoStmt() throws Exception
     {
         String stmtText = "select * from " + SupportBean.class.getName();
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         SerializableObjectCopier.copy(model);
 
         EPStatement stmt = epService.getEPAdministrator().create(model, "s1");

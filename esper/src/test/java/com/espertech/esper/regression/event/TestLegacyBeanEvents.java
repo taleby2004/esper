@@ -115,7 +115,7 @@ public class TestLegacyBeanEvents extends TestCase
                     "explicitMMapped('key2')" +
                     " from MyLegacyEvent.win:length(5)";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -198,7 +198,7 @@ public class TestLegacyBeanEvents extends TestCase
                     "explicitMNested.readNestedClassValue as mnested" +
                     " from MyLegacyEvent.win:length(5)";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -215,7 +215,7 @@ public class TestLegacyBeanEvents extends TestCase
         {
             // invalid statement, JavaBean-style getters not exposed
             statementText = "select intPrimitive from MySupportBean.win:length(5)";
-            epService.getEPAdministrator().createEQL(statementText);
+            epService.getEPAdministrator().createEPL(statementText);
         }
         catch (EPStatementException ex)
         {
@@ -242,7 +242,7 @@ public class TestLegacyBeanEvents extends TestCase
         String statementText = "select intPrimitive, explicitFInt, explicitMGetInt, explicitMReadInt " +
                     " from MyLegacyEvent.win:length(5)";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
         EventType eventType = statement.getEventType();
@@ -272,7 +272,7 @@ public class TestLegacyBeanEvents extends TestCase
         String statementText = "select intPrimitive " +
                     "from " + SupportBeanFinal.class.getName() + ".win:length(5)";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

@@ -6,7 +6,6 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.SupportMTUpdateListener;
 
 import java.util.concurrent.*;
 
@@ -40,7 +39,7 @@ public class TestMTStmtListenerAddRemove extends TestCase
 
     public void testEQL() throws Exception
     {
-        EPStatement stmt = engine.getEPAdministrator().createEQL("select * from " + EVENT_NAME + " (symbol='IBM', feed='RT')");
+        EPStatement stmt = engine.getEPAdministrator().createEPL("select * from " + EVENT_NAME + " (symbol='IBM', feed='RT')");
         int numThreads = 2;
         tryStatementListenerAddRemove(numThreads, stmt, true, 10000);
     }

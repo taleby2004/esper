@@ -148,7 +148,7 @@ public class TestComplexPropertyAccess extends TestCase
         String type = SupportBeanComplexProps.class.getName();
 
         String patternText = "select * from pattern [(every (a=" + type + ")) -> (b=" + type + "((indexed[0] = a.indexed[0])))]";
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(patternText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(patternText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(patternText, model.toEQL());
 

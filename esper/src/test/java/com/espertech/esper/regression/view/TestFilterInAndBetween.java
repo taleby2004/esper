@@ -27,7 +27,7 @@ public class TestFilterInAndBetween extends TestCase
     {
         String expr = "select * from pattern [a=" + SupportBeanNumeric.class.getName() + " -> every b=" + SupportBean.class.getName()
                 + "(intPrimitive in (a.intOne, a.intTwo))]";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(expr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expr);
         stmt.addListener(testListener);
 
         sendBeanNumeric(10, 20);
@@ -41,7 +41,7 @@ public class TestFilterInAndBetween extends TestCase
 
         expr = "select * from pattern [a=" + SupportBean_S0.class.getName() + " -> every b=" + SupportBean.class.getName()
                 + "(string in (a.p00, a.p01, a.p02))]";
-        stmt = epService.getEPAdministrator().createEQL(expr);
+        stmt = epService.getEPAdministrator().createEPL(expr);
         stmt.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "a", "b", "c", "d"));
@@ -60,7 +60,7 @@ public class TestFilterInAndBetween extends TestCase
     public void testSimpleInt()
     {
         String expr = "select * from " + SupportBean.class.getName() + "(intPrimitive in (1, 10))";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(expr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expr);
         stmt.addListener(testListener);
 
         sendBeanInt(10);
@@ -187,7 +187,7 @@ public class TestFilterInAndBetween extends TestCase
         for (int i = 0; i < statements.length; i++)
         {
             testListener[i] = new SupportUpdateListener();
-            stmt[i] = epService.getEPAdministrator().createEQL(statements[i]);
+            stmt[i] = epService.getEPAdministrator().createEPL(statements[i]);
             stmt[i].addListener(testListener[i]);
         }
 
@@ -229,7 +229,7 @@ public class TestFilterInAndBetween extends TestCase
     private void tryExpr(String filterExpr, String fieldName, Object[] values, boolean[] isInvoked)
     {
         String expr = "select * from " + SupportBean.class.getName() + filterExpr;
-        EPStatement stmt = epService.getEPAdministrator().createEQL(expr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expr);
         stmt.addListener(testListener);
 
         for (int i = 0; i < values.length; i++)
@@ -288,7 +288,7 @@ public class TestFilterInAndBetween extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(expr);
+            epService.getEPAdministrator().createEPL(expr);
             fail();
         }
         catch (EPException ex)

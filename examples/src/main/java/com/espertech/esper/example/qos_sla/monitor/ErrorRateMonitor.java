@@ -13,7 +13,7 @@ public class ErrorRateMonitor
         EPAdministrator admin = EPServiceProviderManager.getDefaultProvider().getEPAdministrator();
 
         EPStatement pattern = admin.createPattern("every timer:at(*, *, *, *, *, */10)");
-        final EPStatement view = admin.createEQL("select * from " + OperationMeasurement.class.getName() +
+        final EPStatement view = admin.createEPL("select * from " + OperationMeasurement.class.getName() +
                 "(success=false).win:time(10 min).std:size()");
 
         pattern.addListener(new UpdateListener()

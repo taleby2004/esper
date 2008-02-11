@@ -57,7 +57,7 @@ public class TestHavingNoGroupBy extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "having price < avg(price)";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();
@@ -71,7 +71,7 @@ public class TestHavingNoGroupBy extends TestCase
                           "where one.string = two.symbol " +
                           "having price < avg(price)";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -85,7 +85,7 @@ public class TestHavingNoGroupBy extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "having volume < avg(price)";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
     }
 
@@ -106,7 +106,7 @@ public class TestHavingNoGroupBy extends TestCase
                                     SupportMarketDataBean.class.getName() + "(symbol='SYM2').win:length(1) as b " +
                           filterClause + " Math.max(a.price, b.price) - Math.min(a.price, b.price) >= 1.4";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         sendPriceEvent("SYM1", 20);
@@ -227,7 +227,7 @@ public class TestHavingNoGroupBy extends TestCase
     {
         String stmt = "select irstream sum(myEvent.intPrimitive) as mysum from pattern [every myEvent=" + SupportBean.class.getName() +
                 "] having sum(myEvent.intPrimitive) = 2";
-        selectTestView = epService.getEPAdministrator().createEQL(stmt);
+        selectTestView = epService.getEPAdministrator().createEPL(stmt);
         selectTestView.addListener(testListener);
 
         sendEvent(1);
@@ -244,7 +244,7 @@ public class TestHavingNoGroupBy extends TestCase
     {
         String stmt = "select istream sum(myEvent.intPrimitive) as mysum from pattern [every myEvent=" + SupportBean.class.getName() +
                 "] having sum(myEvent.intPrimitive) = 2";
-        selectTestView = epService.getEPAdministrator().createEQL(stmt);
+        selectTestView = epService.getEPAdministrator().createEPL(stmt);
         selectTestView.addListener(testListener);
 
         sendEvent(1);

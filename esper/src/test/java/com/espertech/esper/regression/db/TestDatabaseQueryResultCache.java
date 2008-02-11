@@ -77,7 +77,7 @@ public class TestDatabaseQueryResultCache extends TestCase
                 SupportBean_S0.class.getName() + " as s0," +
                 " sql:MyDB ['select myint from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = engine.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = engine.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

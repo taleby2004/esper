@@ -30,7 +30,7 @@ public class TestGroupByTimeBatch extends TestCase
     {
         sendTimer(0);
         String stmtText = "select irstream sum(price) as sumPrice from MarketData.win:time_batch(1 sec)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // send first batch
@@ -60,7 +60,7 @@ public class TestGroupByTimeBatch extends TestCase
     {
         sendTimer(0);
         String stmtText = "select irstream sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1 where S0.symbol = S1.string";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         sendSupportEvent("DELL");
@@ -93,7 +93,7 @@ public class TestGroupByTimeBatch extends TestCase
     {
         sendTimer(0);
         String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // send first batch
@@ -127,7 +127,7 @@ public class TestGroupByTimeBatch extends TestCase
     {
         sendTimer(0);
         String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1 where S0.symbol = S1.string";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         sendSupportEvent("DELL");
@@ -164,7 +164,7 @@ public class TestGroupByTimeBatch extends TestCase
     {
         sendTimer(0);
         String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) group by symbol";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         // send first batch
@@ -200,7 +200,7 @@ public class TestGroupByTimeBatch extends TestCase
                          " from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1" +
                          " where S0.symbol = S1.string " +
                          " group by symbol";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         sendSupportEvent("DELL");
@@ -236,7 +236,7 @@ public class TestGroupByTimeBatch extends TestCase
     {
         sendTimer(0);
         String stmtText = "select irstream symbol, sum(price) as sumPrice, volume from MarketData.win:time_batch(1 sec) group by symbol";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         sendMDEvent("DELL", 10, 200L);
@@ -269,7 +269,7 @@ public class TestGroupByTimeBatch extends TestCase
                           "from MarketData.win:time_batch(1 sec) as S0, SupportBean as S1" +
                           " where S0.symbol = S1.string " +
                           " group by symbol";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         sendSupportEvent("DELL");

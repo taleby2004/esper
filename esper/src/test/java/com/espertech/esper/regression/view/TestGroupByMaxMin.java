@@ -41,7 +41,7 @@ public class TestGroupByMaxMin extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();
@@ -91,7 +91,7 @@ public class TestGroupByMaxMin extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
                           "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
                           "group by symbol";
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(viewExpr);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
         assertEquals(viewExpr, model.toEQL());
 
         selectTestView = epService.getEPAdministrator().create(model);
@@ -113,7 +113,7 @@ public class TestGroupByMaxMin extends TestCase
                           "  and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -127,7 +127,7 @@ public class TestGroupByMaxMin extends TestCase
         String stmtText = "select symbol from " + SupportMarketDataBean.class.getName() + ".win:time(5 sec) " +
                           "having volume > min(volume) * 1.3";
 
-        selectTestView = epService.getEPAdministrator().createEQL(stmtText);
+        selectTestView = epService.getEPAdministrator().createEPL(stmtText);
         selectTestView.addListener(testListener);
 
         sendEvent("DELL", 100L);
@@ -150,7 +150,7 @@ public class TestGroupByMaxMin extends TestCase
         String stmtText = "select symbol, min(volume) as mymin from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "having volume > min(volume) * 1.3";
 
-        selectTestView = epService.getEPAdministrator().createEQL(stmtText);
+        selectTestView = epService.getEPAdministrator().createEPL(stmtText);
         selectTestView.addListener(testListener);
 
         sendEvent("DELL", 100L);

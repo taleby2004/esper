@@ -56,7 +56,7 @@ public class TestMTDeterminismListener extends TestCase
         engine.initialize();
 
         // setup statements
-        EPStatement stmtInsert = engine.getEPAdministrator().createEQL("select count(*) as cnt from " + SupportBean.class.getName());
+        EPStatement stmtInsert = engine.getEPAdministrator().createEPL("select count(*) as cnt from " + SupportBean.class.getName());
         SupportMTUpdateListener listener = new SupportMTUpdateListener();       
         stmtInsert.addListener(listener);
 

@@ -43,7 +43,7 @@ public class TestJMSSpringInputAdapter extends TestCase
         config.addAdapterLoader("MyLoader", SpringContextLoader.class.getName(), props);
         EPServiceProvider service = EPServiceProviderManager.getProvider(this.getClass().getName() + "_testSerializable", config);
 
-        EPStatement statement = service.getEPAdministrator().createEQL("select * from " + SupportSerializableBean.class.getName());
+        EPStatement statement = service.getEPAdministrator().createEPL("select * from " + SupportSerializableBean.class.getName());
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -78,7 +78,7 @@ public class TestJMSSpringInputAdapter extends TestCase
 
         EPServiceProvider service = EPServiceProviderManager.getProvider(this.getClass().getName() + "_testMap", config);
 
-        EPStatement statement = service.getEPAdministrator().createEQL("select * from MyMapType");
+        EPStatement statement = service.getEPAdministrator().createEPL("select * from MyMapType");
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

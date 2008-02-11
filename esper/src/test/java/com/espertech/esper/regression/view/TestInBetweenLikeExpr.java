@@ -171,7 +171,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select intPrimitive in (shortBoxed, intBoxed, longBoxed) as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -190,7 +190,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select intBoxed in (floatBoxed, doublePrimitive, longBoxed) as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -209,7 +209,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select intPrimitive between shortBoxed and longBoxed as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -229,7 +229,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select intBoxed between floatBoxed and doublePrimitive as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -307,7 +307,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select " + expr + " as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -324,7 +324,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select " + expr + " as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -341,7 +341,7 @@ public class TestInBetweenLikeExpr extends TestCase
     {
         String caseExpr = "select " + expression + " as result from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(caseExpr);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
         assertEquals(Boolean.class, selectTestCase.getEventType().getPropertyType("result"));
 
@@ -359,7 +359,7 @@ public class TestInBetweenLikeExpr extends TestCase
         EPStatement selectTestCase = epService.getEPAdministrator().create(model);
         assertEquals(eql, model.toEQL());
 
-        EPStatementObjectModel compiled = epService.getEPAdministrator().compileEQL(eql);
+        EPStatementObjectModel compiled = epService.getEPAdministrator().compileEPL(eql);
         compiled = (EPStatementObjectModel) SerializableObjectCopier.copy(compiled);
         assertEquals(eql, compiled.toEQL());
 

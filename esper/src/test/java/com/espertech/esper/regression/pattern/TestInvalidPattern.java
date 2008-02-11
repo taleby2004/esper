@@ -24,7 +24,7 @@ public class TestInvalidPattern extends TestCase
 
     public void testNullStatementName()
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from " + SupportBean.class.getName(), null);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from " + SupportBean.class.getName(), null);
     }
 
     public void testInvalid()

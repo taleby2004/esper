@@ -55,7 +55,7 @@ public class TestMTInsertIntoTimerConcurrency extends TestCase
 
     private EPStatement createEQL(String eql, UpdateListener updateListener)
     {
-        EPStatement statement = epAdministrator.createEQL(eql);
+        EPStatement statement = epAdministrator.createEPL(eql);
         statement.addListener(updateListener);
         return statement;
     }

@@ -39,7 +39,7 @@ public class TestGroupByEventPerGroupHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 100";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -57,7 +57,7 @@ public class TestGroupByEventPerGroupHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 100";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();

@@ -3,14 +3,11 @@ package com.espertech.esper.multithread;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.SafeIterator;
-import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.event.EventBean;
 
 import java.util.concurrent.Callable;
-import java.util.List;
-import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +26,7 @@ public class StmtNamedWindowIterateCallable implements Callable
         this.numRepeats = numRepeats;
         this.threadKey = threadKey;
 
-        statement = engine.getEPAdministrator().createEQL("select string, sum(longPrimitive) as sumLong from MyWindow group by string");
+        statement = engine.getEPAdministrator().createEPL("select string, sum(longPrimitive) as sumLong from MyWindow group by string");
     }
 
     public Object call() throws Exception

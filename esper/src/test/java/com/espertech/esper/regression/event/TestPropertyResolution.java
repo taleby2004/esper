@@ -19,7 +19,7 @@ public class TestPropertyResolution extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select * from " + SupportBeanWriteOnly.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from " + SupportBeanWriteOnly.class.getName());
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -33,7 +33,7 @@ public class TestPropertyResolution extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select MYPROPERTY, myproperty, myProperty from " + SupportBeanDupProperty.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select MYPROPERTY, myproperty, myProperty from " + SupportBeanDupProperty.class.getName());
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -45,7 +45,7 @@ public class TestPropertyResolution extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL("select MyProperty from " + SupportBeanDupProperty.class.getName());
+            epService.getEPAdministrator().createEPL("select MyProperty from " + SupportBeanDupProperty.class.getName());
             fail();
         }
         catch (EPException ex)
@@ -61,7 +61,7 @@ public class TestPropertyResolution extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select MYPROPERTY, myproperty, myProperty, MyProperty from " + SupportBeanDupProperty.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select MYPROPERTY, myproperty, myProperty, MyProperty from " + SupportBeanDupProperty.class.getName());
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -72,7 +72,7 @@ public class TestPropertyResolution extends TestCase
         assertEquals("uppercamel", result.get("myProperty"));
         assertEquals("upper", result.get("MyProperty"));
 
-        stmt = epService.getEPAdministrator().createEQL("select " +
+        stmt = epService.getEPAdministrator().createEPL("select " +
                 "NESTED.NESTEDVALUE as val1, " +
                 "ARRAYPROPERTY[0] as val2, " +
                 "MAPPED('keyOne') as val3, " +
@@ -94,7 +94,7 @@ public class TestPropertyResolution extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select MYPROPERTY, myproperty, myProperty from " + SupportBeanDupProperty.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select MYPROPERTY, myproperty, myProperty from " + SupportBeanDupProperty.class.getName());
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -106,7 +106,7 @@ public class TestPropertyResolution extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL("select MyProperty from " + SupportBeanDupProperty.class.getName());
+            epService.getEPAdministrator().createEPL("select MyProperty from " + SupportBeanDupProperty.class.getName());
             fail();
         }
         catch (EPException ex)
@@ -142,7 +142,7 @@ public class TestPropertyResolution extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

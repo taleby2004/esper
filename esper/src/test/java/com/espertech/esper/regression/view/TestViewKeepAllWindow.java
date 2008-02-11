@@ -5,12 +5,10 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.DoubleValueAssertionUtil;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.view.ViewFieldEnum;
 
 import java.util.Iterator;
 
@@ -30,7 +28,7 @@ public class TestViewKeepAllWindow extends TestCase
     public void testIterator()
     {
         String viewExpr = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".win:keepall()";
-        statement = epService.getEPAdministrator().createEQL(viewExpr);
+        statement = epService.getEPAdministrator().createEPL(viewExpr);
         statement.addListener(listener);
 
         sendEvent("ABC", 20);
@@ -68,7 +66,7 @@ public class TestViewKeepAllWindow extends TestCase
     {
         String viewExpr = "select irstream symbol, count(*) as cnt, sum(price) as mysum from " + SupportMarketDataBean.class.getName() +
                 ".win:keepall() group by symbol";
-        statement = epService.getEPAdministrator().createEQL(viewExpr);
+        statement = epService.getEPAdministrator().createEPL(viewExpr);
         statement.addListener(listener);
         listener.reset();
 

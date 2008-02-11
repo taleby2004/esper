@@ -65,7 +65,7 @@ public class TestArrayExpression extends TestCase
                               "{1} as oneEleArray, " +
                               "{1, 2, 3} as intArray " +
                 "from " + SupportBean.class.getName();
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         assertEquals(stmtText, model.toEQL());
         
         EPStatement stmt = epService.getEPAdministrator().create(model);
@@ -103,7 +103,7 @@ public class TestArrayExpression extends TestCase
                               "{longBoxed, doubleBoxed * 2, string || 'a'} as dynCalcArrNulls" +
                               " from " + SupportBean.class.getName();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -141,7 +141,7 @@ public class TestArrayExpression extends TestCase
         String stmtText = "select {arrayProperty, nested} as field" +
                               " from " + SupportBeanComplexProps.class.getName();
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

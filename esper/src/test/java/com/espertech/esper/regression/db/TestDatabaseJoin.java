@@ -3,7 +3,6 @@ package com.espertech.esper.regression.db;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean;
@@ -49,7 +48,7 @@ public class TestDatabaseJoin extends TestCase
         String stmtText = "select " + ALL_FIELDS + " from " +
                 " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s0," +
                 SupportBean.class.getName() + ".win:time_batch(10 sec) as s1";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         runtestTimeBatch(stmt);
     }
 
@@ -73,7 +72,7 @@ public class TestDatabaseJoin extends TestCase
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runtestTimeBatch(stmt);
 
-        stmt = epService.getEPAdministrator().createEQL(model.toEQL());
+        stmt = epService.getEPAdministrator().createEPL(model.toEQL());
     }
 
     public void testTimeBatchCompile() throws Exception
@@ -82,7 +81,7 @@ public class TestDatabaseJoin extends TestCase
                 " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s0," +
                 SupportBean.class.getName() + ".win:time_batch(10 sec) as s1";
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         SerializableObjectCopier.copy(model);
         EPStatement stmt = epService.getEPAdministrator().create(model);
         runtestTimeBatch(stmt);
@@ -115,7 +114,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -133,7 +132,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -150,7 +149,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -167,7 +166,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -184,7 +183,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -200,7 +199,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -217,7 +216,7 @@ public class TestDatabaseJoin extends TestCase
 
         try
         {
-            epService.getEPAdministrator().createEQL(stmtText);
+            epService.getEPAdministrator().createEPL(stmtText);
             fail();
         }
         catch (EPStatementException ex)
@@ -249,7 +248,7 @@ public class TestDatabaseJoin extends TestCase
                 " myreal as i " +
                 "from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -265,7 +264,7 @@ public class TestDatabaseJoin extends TestCase
                 " sql:MyDB ['select mychar from mytesttable where mytesttable.mybigint = 2'] as s0," +
                 " pattern [every timer:interval(5 sec) ]";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -288,7 +287,7 @@ public class TestDatabaseJoin extends TestCase
                 SupportBeanComplexProps.class.getName() + " as s1";
         // s1.arrayProperty[0] returns 10 for that bean
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -302,7 +301,7 @@ public class TestDatabaseJoin extends TestCase
                 SupportBean_S0.class.getName() + " as s0," +
                 " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -316,7 +315,7 @@ public class TestDatabaseJoin extends TestCase
                 SupportBean_S0.class.getName() + " as s0," +
                 " sql:MyDB ['select mychar from mytesttable where ${id} = mytesttable.mybigint'] as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -340,7 +339,7 @@ public class TestDatabaseJoin extends TestCase
                 " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable where ${id} = mytesttable.mybigint'] as s0," +
                 SupportBean_S0.class.getName() + " as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

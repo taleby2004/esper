@@ -31,7 +31,7 @@ public class TestStatementAwareListener extends TestCase
     public void testStmtAware()
     {
         String stmtText = "select * from Bean";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
@@ -45,7 +45,7 @@ public class TestStatementAwareListener extends TestCase
     public void testInvalid()
     {
         String stmtText = "select * from Bean";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         StatementAwareUpdateListener listener = null;
         try
         {
@@ -61,7 +61,7 @@ public class TestStatementAwareListener extends TestCase
     public void testBothListeners()
     {
         String stmtText = "select * from Bean";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
 
         SupportStmtAwareUpdateListener awareListeners[] = new SupportStmtAwareUpdateListener[3];
         SupportUpdateListener updateListeners[] = new SupportUpdateListener[awareListeners.length];
@@ -135,8 +135,8 @@ public class TestStatementAwareListener extends TestCase
     
     public void testUseOnMultipleStmts()
     {
-        EPStatement statementOne = epService.getEPAdministrator().createEQL("select * from Bean(string='A' or string='C')");
-        EPStatement statementTwo = epService.getEPAdministrator().createEQL("select * from Bean(string='B' or string='C')");
+        EPStatement statementOne = epService.getEPAdministrator().createEPL("select * from Bean(string='A' or string='C')");
+        EPStatement statementTwo = epService.getEPAdministrator().createEPL("select * from Bean(string='B' or string='C')");
 
         SupportStmtAwareUpdateListener awareListener = new SupportStmtAwareUpdateListener();
         statementOne.addListener(awareListener);
@@ -159,7 +159,7 @@ public class TestStatementAwareListener extends TestCase
     public void testOrderOfInvocation()
     {
         String stmtText = "select * from Bean";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
 
         MyStmtAwareUpdateListener awareListeners[] = new MyStmtAwareUpdateListener[2];
         MyUpdateListener updateListeners[] = new MyUpdateListener[awareListeners.length];

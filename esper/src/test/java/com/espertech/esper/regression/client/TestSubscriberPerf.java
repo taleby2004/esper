@@ -2,13 +2,11 @@ package com.espertech.esper.regression.client;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.event.EventBean;
 
-import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -30,7 +28,7 @@ public class TestSubscriberPerf extends TestCase
     public void testPerformanceSyntheticUndelivered()
     {
         final int NUM_LOOP = 100000;
-        epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
+        epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < NUM_LOOP; i++)
@@ -66,7 +64,7 @@ public class TestSubscriberPerf extends TestCase
     public void testPerformanceSynthetic()
     {
         final int NUM_LOOP = 100000;
-        EPStatement stmt = epService.getEPAdministrator().createEQL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
         final List<Object[]> results = new ArrayList<Object[]>();
 
         UpdateListener listener = new UpdateListener() {

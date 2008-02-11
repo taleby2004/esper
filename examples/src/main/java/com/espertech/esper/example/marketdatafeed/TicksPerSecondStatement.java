@@ -13,7 +13,7 @@ public class TicksPerSecondStatement
         String stmt = "insert into TicksPerSecond " +
                       "select feed, count(*) as cnt from MarketDataEvent.win:time_batch(1 sec) group by feed";
 
-        statement = admin.createEQL(stmt);
+        statement = admin.createEPL(stmt);
     }
 
     public void addListener(UpdateListener listener)

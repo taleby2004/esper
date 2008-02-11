@@ -38,7 +38,7 @@ public class TestGroupByEventPerRow extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol, price";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent(SYMBOL_DELL, 1000, 10);
@@ -88,7 +88,7 @@ public class TestGroupByEventPerRow extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         runAssertion();
@@ -104,7 +104,7 @@ public class TestGroupByEventPerRow extends TestCase
                           "  and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -118,7 +118,7 @@ public class TestGroupByEventPerRow extends TestCase
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         String eventType = SupportMarketDataBean.class.getName();
         String stmt = " select symbol as symbol, avg(price) as average, sum(volume) as sumation from " + eventType + ".win:length(3000)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listenerOne);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 10D, 20000L, null));
@@ -130,12 +130,12 @@ public class TestGroupByEventPerRow extends TestCase
         // create insert into statements
         stmt =  "insert into StockAverages select symbol as symbol, avg(price) as average, sum(volume) as sumation " +
                     "from " + eventType + ".win:length(3000)";
-        statement = epService.getEPAdministrator().createEQL(stmt);
+        statement = epService.getEPAdministrator().createEPL(stmt);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         statement.addListener(listenerTwo);
 
         stmt = " select * from StockAverages";
-        statement = epService.getEPAdministrator().createEQL(stmt);
+        statement = epService.getEPAdministrator().createEPL(stmt);
         SupportUpdateListener listenerThree = new SupportUpdateListener();
         statement.addListener(listenerThree);
 

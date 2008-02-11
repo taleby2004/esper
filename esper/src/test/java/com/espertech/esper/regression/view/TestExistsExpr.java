@@ -32,7 +32,7 @@ public class TestExistsExpr extends TestCase
                           " exists(intPrimitive) as t4 " +
                           " from " + SupportBean.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         for (int i = 0; i < 5; i++)
@@ -63,7 +63,7 @@ public class TestExistsExpr extends TestCase
                           " exists(inner?.nested.nestedNested.dummy?) as t10 " +
                           " from " + SupportMarkerInterface.class.getName();
 
-        EPStatement selectTestCase = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
         for (int i = 0; i < 11; i++)
@@ -127,7 +127,7 @@ public class TestExistsExpr extends TestCase
         String stmtText = "select exists(inner?.intBoxed) as t0 " +
                           "from " + SupportMarkerInterface.class.getName();
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(stmtText);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(stmtText, model.toEQL());
 

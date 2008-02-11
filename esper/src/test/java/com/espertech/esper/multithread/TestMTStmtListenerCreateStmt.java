@@ -33,7 +33,7 @@ public class TestMTStmtListenerCreateStmt extends TestCase
 
     public void testListenerCreateStmt() throws Exception
     {
-        EPStatement stmt = engine.getEPAdministrator().createEQL(
+        EPStatement stmt = engine.getEPAdministrator().createEPL(
                 " select * from " + SupportBean.class.getName());
 
         tryListener(2, 100, stmt);

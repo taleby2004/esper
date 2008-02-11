@@ -25,7 +25,7 @@ public class TestCountAll extends TestCase
     public void testSize()
     {
         String statementText = "select irstream size from " + SupportMarketDataBean.class.getName() + ".std:size()";
-        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
 
         sendEvent("DELL", 1L);
@@ -39,7 +39,7 @@ public class TestCountAll extends TestCase
     {
         // Test for ESPER-118
         String statementText = "select *, count(*) as cnt from " + SupportMarketDataBean.class.getName();
-        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
 
         sendEvent("S0", 1L);
@@ -64,7 +64,7 @@ public class TestCountAll extends TestCase
     public void testCount()
     {
     	String statementText = "select count(*) as cnt from " + SupportMarketDataBean.class.getName() + ".win:time(1)";
-        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
        
         sendEvent("DELL", 1L);
@@ -87,7 +87,7 @@ public class TestCountAll extends TestCase
     {
         String event = SupportBean.class.getName();
         String statementText = "select irstream sum(intPrimitive) as mysum from " + event + " having sum(intPrimitive) = 2";
-        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
 
         sendEvent();
@@ -102,7 +102,7 @@ public class TestCountAll extends TestCase
     {
         String event = SupportBean.class.getName();
         String statementText = "select irstream count(*) as mysum from " + event + " having count(*) = 2";
-        selectTestView = epService.getEPAdministrator().createEQL(statementText);
+        selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
 
         sendEvent();

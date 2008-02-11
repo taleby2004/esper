@@ -9,7 +9,7 @@ public class AverageLatencyMonitor
     {
         EPAdministrator admin = EPServiceProviderManager.getDefaultProvider().getEPAdministrator();
 
-        EPStatement statView = admin.createEQL(
+        EPStatement statView = admin.createEPL(
                 "select * from " + OperationMeasurement.class.getName() +
                 ".std:groupby(customerId).std:groupby(operationName)" +
                 ".win:length(100).stat:uni(latency)");

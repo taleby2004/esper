@@ -64,7 +64,7 @@ public class TestBitWiseOperators extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(viewExpr, model.toEQL());
 
-        _selectTestView = _epService.getEPAdministrator().createEQL(viewExpr);
+        _selectTestView = _epService.getEPAdministrator().createEPL(viewExpr);
         _selectTestView.addListener(_testListener);
 
         runBitWiseOperators();
@@ -107,7 +107,7 @@ public class TestBitWiseOperators extends TestCase
                 "(longPrimitive ^ longBoxed) as myFourthProperty, " +
                 "(boolPrimitive & boolBoxed) as myFifthProperty " +
                 " from " + SupportBean.class.getName() + ".win:length(3) ";
-        _selectTestView = _epService.getEPAdministrator().createEQL(viewExpr);
+        _selectTestView = _epService.getEPAdministrator().createEPL(viewExpr);
         _selectTestView.addListener(_testListener);
     }
 

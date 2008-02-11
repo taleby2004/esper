@@ -30,7 +30,7 @@ public class TestMTStmtIterate extends TestCase
 
     public void testIteratorSingleStmt() throws Exception
     {
-        EPStatement stmt[] = new EPStatement[] {engine.getEPAdministrator().createEQL(
+        EPStatement stmt[] = new EPStatement[] {engine.getEPAdministrator().createEPL(
                 " select string from " + SupportBean.class.getName() + ".win:time(5 min)")};
 
         trySend(2, 10, stmt);
@@ -42,7 +42,7 @@ public class TestMTStmtIterate extends TestCase
         for (int i = 0; i < stmt.length; i++)
         {
             String stmtText = " select string from " + SupportBean.class.getName() + ".win:time(5 min)";
-            stmt[i] = engine.getEPAdministrator().createEQL(stmtText);
+            stmt[i] = engine.getEPAdministrator().createEPL(stmtText);
         }
 
         trySend(2, 10, stmt);

@@ -35,20 +35,20 @@ public class TestMTStmtInsertInto extends TestCase
 
     public void testInsertInto() throws Exception
     {
-        engine.getEPAdministrator().createEQL(
+        engine.getEPAdministrator().createEPL(
                 "insert into XStream " +
                 " select string as key, count(*) as mycount\n" +
                 " from " + SupportBean.class.getName() + ".win:time(5 min)" +
                 " group by string"
                 );
-        engine.getEPAdministrator().createEQL(
+        engine.getEPAdministrator().createEPL(
                 "insert into XStream " +
                 " select symbol as key, count(*) as mycount\n" +
                 " from " + SupportMarketDataBean.class.getName() + ".win:time(5 min)" +
                 " group by symbol"
                 );
         
-        EPStatement stmtConsolidated = engine.getEPAdministrator().createEQL("select key, mycount from XStream");
+        EPStatement stmtConsolidated = engine.getEPAdministrator().createEPL("select key, mycount from XStream");
         listener = new SupportMTUpdateListener();
         stmtConsolidated.addListener(listener);
 

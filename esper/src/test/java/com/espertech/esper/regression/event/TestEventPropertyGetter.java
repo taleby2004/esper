@@ -5,8 +5,6 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportBeanDynRoot;
-import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
@@ -25,7 +23,7 @@ public class TestEventPropertyGetter extends TestCase
     public void testGetter() throws Exception
     {
         String stmtText = "select * from " + SupportMarketDataBean.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         MyGetterUpdateListener listener = new MyGetterUpdateListener(stmt.getEventType());
         stmt.addListener(listener);
 

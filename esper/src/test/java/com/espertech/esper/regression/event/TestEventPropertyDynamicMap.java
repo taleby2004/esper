@@ -42,7 +42,7 @@ public class TestEventPropertyDynamicMap extends TestCase
                                "inner.indexedTwo[0]? as t7, " +
                                "inner.mappedTwo('keyTwo')? as t8 " +
                     "from MyLevel2.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         statement.addListener(listener);
 
         HashMap map = new HashMap<String, Object>();
@@ -96,7 +96,7 @@ public class TestEventPropertyDynamicMap extends TestCase
                                "exists(inner.indexedTwo[0]?) as t7, " +
                                "exists(inner.mappedTwo('keyTwo')?) as t8 " +
                     "from MyLevel2.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         statement.addListener(listener);
 
         HashMap map = new HashMap<String, Object>();
@@ -142,7 +142,7 @@ public class TestEventPropertyDynamicMap extends TestCase
         String statementText = "select inner.int as t0 from MyLevel2.win:length(5)";
         try
         {
-            epService.getEPAdministrator().createEQL(statementText);
+            epService.getEPAdministrator().createEPL(statementText);
             fail();
         }
         catch (EPException ex)
@@ -153,7 +153,7 @@ public class TestEventPropertyDynamicMap extends TestCase
         statementText = "select inner.int.inner2? as t0 from MyLevel2.win:length(5)";
         try
         {
-            epService.getEPAdministrator().createEQL(statementText);
+            epService.getEPAdministrator().createEPL(statementText);
             fail();
         }
         catch (EPException ex)
@@ -164,7 +164,7 @@ public class TestEventPropertyDynamicMap extends TestCase
         statementText = "select inner.int.inner2? as t0 from MyLevel2.win:length(5)";
         try
         {
-            epService.getEPAdministrator().createEQL(statementText);
+            epService.getEPAdministrator().createEPL(statementText);
             fail();
         }
         catch (EPException ex)

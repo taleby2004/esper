@@ -87,7 +87,7 @@ public class EPAdministratorImpl implements EPAdministrator
         return createPatternStmt(onExpression, null);
     }
 
-    public EPStatement createEQL(String eqlStatement) throws EPException
+    public EPStatement createEPL(String eqlStatement) throws EPException
     {
         return createEQLStmt(eqlStatement, null);
     }
@@ -97,7 +97,7 @@ public class EPAdministratorImpl implements EPAdministrator
         return createPatternStmt(expression, statementName);
     }
 
-    public EPStatement createEQL(String eqlStatement, String statementName) throws EPException
+    public EPStatement createEPL(String eqlStatement, String statementName) throws EPException
     {
         return createEQLStmt(eqlStatement, statementName);
     }
@@ -110,7 +110,7 @@ public class EPAdministratorImpl implements EPAdministrator
         /**
          * For round-trip testing of all statements, of a statement to SODA and creation from SODA, use below lines:
         String pattern = "select * from pattern[" + expression + "]";
-        EPStatementObjectModel model = compileEQL(pattern);
+        EPStatementObjectModel model = compileEPL(pattern);
         return create(model, statementName);
          */
     }
@@ -147,7 +147,7 @@ public class EPAdministratorImpl implements EPAdministrator
         return statement;
     }
 
-    public EPPreparedStatement prepareEQL(String eqlExpression) throws EPException
+    public EPPreparedStatement prepareEPL(String eqlExpression) throws EPException
     {
         // compile to specification
         StatementSpecRaw statementSpec = compileEQL(eqlExpression, null, services, defaultStreamSelector);
@@ -187,7 +187,7 @@ public class EPAdministratorImpl implements EPAdministrator
         return create(prepared, null);
     }
 
-    public EPStatementObjectModel compileEQL(String eqlStatement) throws EPException
+    public EPStatementObjectModel compileEPL(String eqlStatement) throws EPException
     {
         StatementSpecRaw statementSpec = compileEQL(eqlStatement, null, services, defaultStreamSelector);
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
@@ -262,7 +262,7 @@ public class EPAdministratorImpl implements EPAdministrator
         }
         catch (ASTWalkException ex)
         {
-            log.error(".createEQL Error validating expression", ex);
+            log.error(".createEPL Error validating expression", ex);
             throw new EPStatementException(ex.getMessage(), eqlStatement);
         }
         catch (EPStatementSyntaxException ex)
@@ -271,7 +271,7 @@ public class EPAdministratorImpl implements EPAdministrator
         }
         catch (RuntimeException ex)
         {
-            log.error(".createEQL Error validating expression", ex);
+            log.error(".createEPL Error validating expression", ex);
             throw new EPStatementException(ex.getMessage(), eqlStatement);
         }
 

@@ -1,7 +1,6 @@
 package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.support.emit.SupportMTEmittedListener;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
@@ -30,7 +29,7 @@ public class VariableReadWriteCallable implements Callable
 
         selectListener = new SupportUpdateListener();
         String stmtText = "select var1, var2, var3 from " + SupportBean_A.class.getName() + "(id='" + threadNum + "')";
-        engine.getEPAdministrator().createEQL(stmtText).addListener(selectListener);
+        engine.getEPAdministrator().createEPL(stmtText).addListener(selectListener);
     }
 
     public Object call() throws Exception

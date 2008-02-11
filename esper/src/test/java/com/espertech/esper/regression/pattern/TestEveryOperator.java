@@ -7,12 +7,10 @@ import com.espertech.esper.regression.support.EventCollectionFactory;
 import com.espertech.esper.regression.support.EventExpressionCase;
 import com.espertech.esper.regression.support.PatternTestHarness;
 import com.espertech.esper.support.bean.SupportBeanConstants;
-import com.espertech.esper.support.bean.SupportRFIDEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 
 public class TestEveryOperator extends TestCase implements SupportBeanConstants
@@ -83,7 +81,7 @@ public class TestEveryOperator extends TestCase implements SupportBeanConstants
             "select 'No event within 6 seconds' as alert\n" +
                     "from pattern [ every (timer:interval(6) and not " + SupportBean.class.getName() + ") ]";
 
-        EPStatement statement = engine.getEPAdministrator().createEQL(expression);
+        EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

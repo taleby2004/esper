@@ -5,7 +5,6 @@ import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 
@@ -35,7 +34,7 @@ public class TestAggregateRowPerEventDistinct extends TestCase
         String viewExpr = "select irstream symbol, sum(distinct volume) as volSum " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) ";
 
-        selectTestView = epService.getEPAdministrator().createEQL(viewExpr);
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type

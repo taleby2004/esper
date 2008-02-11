@@ -21,7 +21,7 @@ public class CombinedEventStmt
                              "TxnEventC.win:time(30 min) C " +
                         "where A.transactionId = B.transactionId and B.transactionId = C.transactionId";
 
-        statement = admin.createEQL(stmt);
+        statement = admin.createEPL(stmt);
     }
 
     public void addListener(UpdateListener listener)

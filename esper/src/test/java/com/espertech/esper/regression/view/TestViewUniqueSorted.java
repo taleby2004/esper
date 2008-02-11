@@ -35,7 +35,7 @@ public class TestViewUniqueSorted extends TestCase
         epService.initialize();
 
         // Get the top 3 volumes for each symbol
-        top3Prices = epService.getEPAdministrator().createEQL(
+        top3Prices = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportMarketDataBean.class.getName() +
                 ".std:unique(symbol).ext:sort(price, true, 3)");
         top3Prices.addListener(testListener);
@@ -91,7 +91,7 @@ public class TestViewUniqueSorted extends TestCase
               "FROM\n " +
               SupportSensorEvent.class.getName() + ".std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(measurement,true,1) as high ";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtString);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtString);
         stmt.addListener(testListener);
 
         EPRuntime runtime = epService.getEPRuntime();

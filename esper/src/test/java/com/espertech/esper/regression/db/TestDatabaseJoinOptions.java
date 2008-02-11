@@ -8,7 +8,6 @@ import com.espertech.esper.support.eql.SupportDatabaseService;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import java.math.BigDecimal;
 import java.util.Properties;
 
 public class TestDatabaseJoinOptions extends TestCase
@@ -31,7 +30,7 @@ public class TestDatabaseJoinOptions extends TestCase
                 " sql:MyDB ['" + sql + "] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -59,7 +58,7 @@ public class TestDatabaseJoinOptions extends TestCase
                 " sql:MyDB ['" + sql + "] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -114,7 +113,7 @@ public class TestDatabaseJoinOptions extends TestCase
                 " sql:MyDB ['" + sql + "'] as s0," +
                 SupportBean.class.getName() + ".win:length(100) as s1";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 

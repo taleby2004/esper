@@ -24,7 +24,7 @@ public class TestSubscriberInvalid extends TestCase
 
     public void testBindWildcardJoin()
     {
-        EPStatement stmt = epAdmin.createEQL("select * from SupportBean");
+        EPStatement stmt = epAdmin.createEPL("select * from SupportBean");
         tryInvalid(this, stmt, "Subscriber object does not provide a public method by name 'update'");
         tryInvalid(new DummySubscriberEmptyUpd(), stmt, "No suitable subscriber method named 'update' found, expecting a method that takes 1 parameter of type SupportBean");
         tryInvalid(new DummySubscriberMultipleUpdate(), stmt, "No suitable subscriber method named 'update' found, expecting a method that takes 1 parameter of type SupportBean");
@@ -35,7 +35,7 @@ public class TestSubscriberInvalid extends TestCase
     public void testInvocationTargetEx()
     {
         // smoke test, need to consider log file
-        EPStatement stmt = epAdmin.createEQL("select * from SupportMarketDataBean");
+        EPStatement stmt = epAdmin.createEPL("select * from SupportMarketDataBean");
         stmt.setSubscriber(new DummySubscriberException());
 
         try

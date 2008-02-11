@@ -37,7 +37,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output every 6 events " +
                                 "order by sum(price), symbol";
 
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEQL(statementString);
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(statementString);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(statementString, model.toEQL());
 
@@ -81,7 +81,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output every 6 events " +
                                 "order by mySum, symbol";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         testListener = new SupportUpdateListener();
         statement.addListener(testListener);
 
@@ -99,7 +99,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output every 6 events " +
                                 "order by sum(price), symbol, volume";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         testListener = new SupportUpdateListener();
         statement.addListener(testListener);
 
@@ -116,7 +116,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output every 6 events " +
                                 "order by sum(price), symbol, volume";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         testListener = new SupportUpdateListener();
         statement.addListener(testListener);
 
@@ -137,7 +137,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output last every 6 events " +
                                 "order by sum(price)";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         testListener = new SupportUpdateListener();
         statement.addListener(testListener);
 
@@ -154,7 +154,7 @@ public class TestOrderByEventPerRow extends TestCase
                                 "output last every 6 events " +
                                 "order by sum(price)";
 
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         testListener = new SupportUpdateListener();
         statement.addListener(testListener);
 
@@ -203,7 +203,7 @@ public class TestOrderByEventPerRow extends TestCase
                     "where one.symbol = two.string " +
                     "group by symbol " +
                     "order by symbol";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         sendJoinEvents();
         sendEvent("CAT", 50);
         sendEvent("IBM", 49);

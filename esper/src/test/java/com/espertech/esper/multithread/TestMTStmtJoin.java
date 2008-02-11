@@ -5,7 +5,6 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.SupportBean;
 
 import java.util.concurrent.*;
@@ -33,7 +32,7 @@ public class TestMTStmtJoin extends TestCase
 
     public void testJoin() throws Exception
     {
-        EPStatement stmt = engine.getEPAdministrator().createEQL("select istream * \n" +
+        EPStatement stmt = engine.getEPAdministrator().createEPL("select istream * \n" +
                 "  from " + EVENT_NAME + "(string='s0').win:length(1000000) as s0,\n" +
                 "       " + EVENT_NAME + "(string='s1').win:length(1000000) as s1\n" +
                 "where s0.longPrimitive = s1.longPrimitive\n"

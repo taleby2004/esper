@@ -45,7 +45,7 @@ public class TestRSI extends TestCase implements StockTickerRegressionConstants 
         String rsiEvent = RSIEvent.class.getName();
         String viewExpr = "select * from " + rsiEvent + ".win:length(1)";
         _rsiListener = new RSIListener();
-        _factory = _epService.getEPAdministrator().createEQL(viewExpr);
+        _factory = _epService.getEPAdministrator().createEPL(viewExpr);
         _factory.addListener(_rsiListener);
 		_rsiListener.reset();
 

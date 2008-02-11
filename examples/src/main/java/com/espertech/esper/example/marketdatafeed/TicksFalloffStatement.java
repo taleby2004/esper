@@ -14,7 +14,7 @@ public class TicksFalloffStatement
                       "group by feed " +
                       "having cnt < avg(cnt) * 0.75 ";
 
-        statement = admin.createEQL(stmt);
+        statement = admin.createEPL(stmt);
     }
 
     public void addListener(UpdateListener listener)

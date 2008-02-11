@@ -60,7 +60,7 @@ public class TestNoSchemaXMLEvent extends TestCase
                        "element3.myattribute as invalidattr " +
                       "from TestXMLNoSchemaType.win:length(100)";
 
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
     }
 
@@ -87,7 +87,7 @@ public class TestNoSchemaXMLEvent extends TestCase
         updateListener = new SupportUpdateListener();
 
         String stmt = "select b.c as type, element1, result1 from AEvent";
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
         sendXMLEvent("<a><b><c></c></b></a>");
@@ -120,7 +120,7 @@ public class TestNoSchemaXMLEvent extends TestCase
         updateListener = new SupportUpdateListener();
 
         String stmt = "select event.type as type, event.uid as uid from MyEvent";
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
         sendXMLEvent("<event type=\"a-f-G\" uid=\"terminal.55\" time=\"2007-04-19T13:05:20.22Z\" version=\"2.0\"></event>");
@@ -144,7 +144,7 @@ public class TestNoSchemaXMLEvent extends TestCase
         updateListener = new SupportUpdateListener();
 
         String stmt = "select event.type as type, event.uid as uid from MyEvent";
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
         String xml = "<batch-event>" +
@@ -179,7 +179,7 @@ public class TestNoSchemaXMLEvent extends TestCase
         updateListener = new SupportUpdateListener();
 
         String stmt = "select request.symbol as symbol_a, symbol as symbol_b from StockQuote";
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
         String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";
@@ -214,7 +214,7 @@ public class TestNoSchemaXMLEvent extends TestCase
         updateListener = new SupportUpdateListener();
 
         String stmt = "select symbol_a, symbol_b, symbol_c, request.symbol as symbol_d, symbol as symbol_e from StockQuote";
-        EPStatement joinView = epService.getEPAdministrator().createEQL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
         String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";

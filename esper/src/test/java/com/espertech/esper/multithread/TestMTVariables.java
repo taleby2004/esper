@@ -50,8 +50,8 @@ public class TestMTVariables extends TestCase
 
         String stmtSetOneText = "on " + SupportBean.class.getName() + " set var1=longPrimitive, var2=longPrimitive, var3=var3+1";
         String stmtSetTwoText = "on " + SupportMarketDataBean.class.getName() + " set var1=volume, var2=volume, var3=var3+1";
-        epService.getEPAdministrator().createEQL(stmtSetOneText).addListener(listenerSetOne);
-        epService.getEPAdministrator().createEQL(stmtSetTwoText).addListener(listenerSetTwo);
+        epService.getEPAdministrator().createEPL(stmtSetOneText).addListener(listenerSetOne);
+        epService.getEPAdministrator().createEPL(stmtSetTwoText).addListener(listenerSetTwo);
     }
 
     public void testMTSetAtomicity() throws Exception

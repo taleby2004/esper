@@ -57,7 +57,7 @@ public class TestFilterExpressions extends TestCase
     {
         String text = "select * from pattern [" +
             SupportBean.class.getName() + "(intPrimitive=" + ISupportA.class.getName() + ".VALUE_1)]";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         SupportBean event = new SupportBean("e1", 2);
@@ -73,7 +73,7 @@ public class TestFilterExpressions extends TestCase
     {
         String text = "select * from pattern [" +
             SupportBeanWithEnum.class.getName() + "(supportEnum=" + SupportEnum.class.getName() + ".valueOf('ENUM_VALUE_1'))]";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         SupportBeanWithEnum event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
@@ -89,7 +89,7 @@ public class TestFilterExpressions extends TestCase
     {
         String text = "select * from pattern [" +
             SupportBeanWithEnum.class.getName() + "(supportEnum=" + SupportEnum.class.getName() + ".ENUM_VALUE_2)]";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         SupportBeanWithEnum event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
@@ -104,7 +104,7 @@ public class TestFilterExpressions extends TestCase
 
         // test where clause
         text = "select * from " + SupportBeanWithEnum.class.getName() + " where supportEnum=" + SupportEnum.class.getName() + ".ENUM_VALUE_2";
-        stmt = epService.getEPAdministrator().createEQL(text);
+        stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
@@ -134,7 +134,7 @@ public class TestFilterExpressions extends TestCase
     public void tryNotEqualsConsolidate(String filter)
     {
         String text = "select * from " + SupportBean.class.getName() + "(" + filter + ")";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         for (int i = 0; i < 5; i++)
@@ -158,7 +158,7 @@ public class TestFilterExpressions extends TestCase
     {
         // Test for Esper-114
         String text = "select * from " + SupportBeanComplexProps.class.getName() + "(nested=nested)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         SupportBeanComplexProps eventOne = SupportBeanComplexProps.makeDefaultBean();
@@ -174,7 +174,7 @@ public class TestFilterExpressions extends TestCase
         String text = "select * from " + SupportBeanComplexProps.class.getName() + "(simpleProperty='1') as s0" +
                 ", " + SupportBeanComplexProps.class.getName() + "(simpleProperty='2') as s1" +
                 " where s0.nested = s1.nested";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         SupportBeanComplexProps eventOne = SupportBeanComplexProps.makeDefaultBean();
@@ -412,7 +412,7 @@ public class TestFilterExpressions extends TestCase
 
         for (int i = 0; i < intBoxedA.length; i++)
         {
-            EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+            EPStatement stmt = epService.getEPAdministrator().createEPL(text);
             stmt.addListener(listener);
 
             sendBeanIntDouble(intBoxedA[i], doubleBoxedA[i]);
@@ -440,7 +440,7 @@ public class TestFilterExpressions extends TestCase
 
         for (int i = 0; i < intBoxedA.length; i++)
         {
-            EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+            EPStatement stmt = epService.getEPAdministrator().createEPL(text);
             stmt.addListener(listener);
 
             sendBeanIntDouble(intBoxedA[i], doubleBoxedA[i]);
@@ -575,7 +575,7 @@ public class TestFilterExpressions extends TestCase
 
     public void tryFilterRelationalOpRange(String text, int[] testData, boolean[] isReceived)
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         assertEquals(testData.length,  isReceived.length);
@@ -589,7 +589,7 @@ public class TestFilterExpressions extends TestCase
 
     private void tryFilter(String text, boolean isReceived)
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         sendBeanString("a");
@@ -608,7 +608,7 @@ public class TestFilterExpressions extends TestCase
                             Double[] doubleBoxed,
                             boolean[] expected)
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         assertEquals(intPrimitive.length, doubleBoxed.length);
@@ -626,7 +626,7 @@ public class TestFilterExpressions extends TestCase
     public void testFilterBooleanExpr()
     {
         String text = "select * from " + SupportBean.class.getName() + "(2*intBoxed=doubleBoxed)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         sendBeanIntDouble(20, 50d);
@@ -635,7 +635,7 @@ public class TestFilterExpressions extends TestCase
         assertTrue(listener.getAndClearIsInvoked());
 
         text = "select * from " + SupportBean.class.getName() + "(2*intBoxed=doubleBoxed, string='s')";
-        stmt = epService.getEPAdministrator().createEQL(text);
+        stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmt.addListener(listenerTwo);
 
@@ -673,7 +673,7 @@ public class TestFilterExpressions extends TestCase
 
     private void tryFilterWithEqualsSameCompare(String text, int[] intBoxed, double[] doubleBoxed, boolean[] expected)
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         assertEquals(intBoxed.length, doubleBoxed.length);
@@ -723,7 +723,7 @@ public class TestFilterExpressions extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().createEQL(text);
+            epService.getEPAdministrator().createEPL(text);
             fail();
         }
         catch (EPStatementException ex)
@@ -745,7 +745,7 @@ public class TestFilterExpressions extends TestCase
 
     private void tryPatternWithExpr(String text)
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         sendBeanLong(10L);
@@ -787,7 +787,7 @@ public class TestFilterExpressions extends TestCase
 
     private void tryArithmatic(String text)
     {
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
         sendBeanIntDouble(5, 5d);
@@ -805,7 +805,7 @@ public class TestFilterExpressions extends TestCase
     public void testExpressionReversed()
     {
         String expr = "select * from " + SupportBean.class.getName() + "(5 = intBoxed)";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(expr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expr);
         stmt.addListener(listener);
 
         sendBean("intBoxed", 5);

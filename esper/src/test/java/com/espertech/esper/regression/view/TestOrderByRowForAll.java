@@ -33,7 +33,7 @@ public class TestOrderByRowForAll extends TestCase
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
                     "where one.symbol = two.string " +
                     "order by price";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         sendJoinEvents();
         sendEvent("CAT", 50);
         sendEvent("IBM", 49);

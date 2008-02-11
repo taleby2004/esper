@@ -27,7 +27,7 @@ public class TestEPStatement extends TestCase
         sendTimer(1000);
 
         String text = "select * from " + SupportBean.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text, "s1");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text, "s1");
         assertEquals(1000l, stmt.getTimeLastStateChange());
         assertEquals(false, stmt.isDestroyed());
         assertEquals(false, stmt.isStopped());
@@ -54,7 +54,7 @@ public class TestEPStatement extends TestCase
     {
         sendTimer(5000);
         String text = "select * from " + SupportBean.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(text, "s1");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text, "s1");
         assertEquals(false, stmt.isDestroyed());
         assertEquals(false, stmt.isStopped());
         assertEquals(true, stmt.isStarted());

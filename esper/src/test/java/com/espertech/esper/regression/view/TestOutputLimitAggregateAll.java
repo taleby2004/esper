@@ -194,7 +194,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion12(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -219,7 +219,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion34(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -234,7 +234,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion13_14(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -254,7 +254,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion15_16(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -274,7 +274,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion78(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -294,7 +294,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion56(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -314,7 +314,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion17(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -334,7 +334,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void runAssertion18(String stmtText, String outputLimit)
     {
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(stmtText);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         String fields[] = new String[] {"symbol", "sum(price)"};
@@ -359,7 +359,7 @@ public class TestOutputLimitAggregateAll extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:time(3 sec) " +
                           "having avg(price) > 10" +
                           "output every 1 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
 
         runHavingAssertion();
@@ -374,7 +374,7 @@ public class TestOutputLimitAggregateAll extends TestCase
                           SupportBean.class.getName() + ".win:keepall() as s where s.string = md.symbol " +
                           "having avg(price) > 10" +
                           "output every 1 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("SYM1", -1));
@@ -410,7 +410,7 @@ public class TestOutputLimitAggregateAll extends TestCase
         String viewExpr = "select irstream volume, max(price) as maxVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".win:time(1 sec) " +
                           "output every 1 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
 
         sendEvent("SYM1", 1d);
@@ -434,7 +434,7 @@ public class TestOutputLimitAggregateAll extends TestCase
         String selectStmt = "select symbol, sum(price) as sumprice from " + SupportMarketDataBean.class.getName() +
                 ".win:time(10 seconds) output snapshot every 1 seconds order by symbol asc";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(selectStmt);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
         sendEvent("ABC", 20);
 
@@ -483,7 +483,7 @@ public class TestOutputLimitAggregateAll extends TestCase
                 ".win:time(10 seconds) as m, " + SupportBean.class.getName() +
                 ".win:keepall() as s where s.string = m.symbol output snapshot every 1 seconds order by symbol asc";
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(selectStmt);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("ABC", 1));
@@ -542,7 +542,7 @@ public class TestOutputLimitAggregateAll extends TestCase
                           " from " + SupportMarketDataBean.class.getName() + ".ext:sort(volume, true, 1) as s0," +
                           SupportBean.class.getName() + " as s1 " +
                           "output every 1 seconds";
-        EPStatement stmt = epService.getEPAdministrator().createEQL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
         epService.getEPRuntime().sendEvent(new SupportBean("JOIN_KEY", -1));
 
@@ -620,7 +620,7 @@ public class TestOutputLimitAggregateAll extends TestCase
 
         // Create the eql statement and add a listener
         String statementText = "select symbol, sum(volume) from " + EVENT_NAME + ".win:length(5) output first every 3 seconds";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener updateListener = new SupportUpdateListener();
         statement.addListener(updateListener);
         updateListener.reset();
@@ -672,7 +672,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         // Create the eql statement and add a listener
         String statementText = "select symbol, sum(volume) from " + EVENT_NAME + ".win:length(5) output first every 3 events";
-        EPStatement statement = epService.getEPAdministrator().createEQL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener updateListener = new SupportUpdateListener();
         statement.addListener(updateListener);
         updateListener.reset();
@@ -709,7 +709,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private SupportUpdateListener createStmtAndListenerNoJoin(String viewExpr) {
 		epService.initialize();
 		SupportUpdateListener updateListener = new SupportUpdateListener();
-		EPStatement view = epService.getEPAdministrator().createEQL(viewExpr);
+		EPStatement view = epService.getEPAdministrator().createEPL(viewExpr);
 	    view.addListener(updateListener);
 
 	    return updateListener;
@@ -785,7 +785,7 @@ public class TestOutputLimitAggregateAll extends TestCase
 		epService.initialize();
 
 		SupportUpdateListener updateListener = new SupportUpdateListener();
-		EPStatement view = epService.getEPAdministrator().createEQL(viewExpr);
+		EPStatement view = epService.getEPAdministrator().createEPL(viewExpr);
 	    view.addListener(updateListener);
 
 	    epService.getEPRuntime().sendEvent(new SupportBeanString(JOIN_KEY));

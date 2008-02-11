@@ -34,7 +34,7 @@ public class TestViewTimeLengthBatch extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(10 sec, 3)");
         stmt.addListener(listener);
@@ -194,7 +194,7 @@ public class TestViewTimeLengthBatch extends TestCase
         final long startTime = 1000;
         sendTimer(startTime);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(10 sec, 3, 'FORCE_UPDATE')");
         stmt.addListener(listener);
@@ -389,7 +389,7 @@ public class TestViewTimeLengthBatch extends TestCase
         final long startTime = 1000;
         sendTimer(startTime);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select sum(price) from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(10 sec, 3, 'FORCE_UPDATE')");
         stmt.addListener(listener);
@@ -421,7 +421,7 @@ public class TestViewTimeLengthBatch extends TestCase
         final long startTime = 1000;
         sendTimer(startTime);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select sum(price) from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(10 sec, 3, 'force_update, start_eager')");
         stmt.addListener(listener);
@@ -453,7 +453,7 @@ public class TestViewTimeLengthBatch extends TestCase
         final long startTime = 1000;
         sendTimer(startTime);
 
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select sum(price) from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(10 sec, 3, 'force_update')");
         stmt.addListener(listener);
@@ -471,7 +471,7 @@ public class TestViewTimeLengthBatch extends TestCase
     {
         final long startTime = 1000;
         sendTimer(startTime);
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select price, prev(1, price) as prevPrice, prior(1, price) as priorPrice from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(10 sec, 3)");
         stmt.addListener(listener);
@@ -497,7 +497,7 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime);
 
         EPRuntime engine = epService.getEPRuntime();
-        EPStatement stmt = epService.getEPAdministrator().createEQL(
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
                 "select symbol, sum(price) as s from " + SupportMarketDataBean.class.getName() +
                 ".win:time_length_batch(5, 10, \"START_EAGER\") group by symbol order by symbol asc");
         stmt.addListener(listener);
