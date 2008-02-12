@@ -2,11 +2,9 @@ package com.espertech.esper.event;
 
 import com.espertech.esper.event.property.*;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.client.EPException;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Implementation of the {@link EventType} interface for handling plain Maps containing name value pairs.
@@ -49,33 +47,60 @@ public class MapEventType implements EventType
             final String name = entry.getKey();
             hashCode = hashCode ^ name.hashCode();
 
-            propertyNames[index++] = name;
-
-            EventPropertyGetter getter = new EventPropertyGetter()
-            {
-                public Object get(EventBean obj)
-                {
-                    // The underlying is expected to be a map
-                    if (!(obj.getUnderlying() instanceof Map))
-                    {
-                        throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                                "the underlying data object is not of type java.lang.Map");
-                    }
-
-                    Map map = (Map) obj.getUnderlying();
-
-                    // If the map does not contain the key, this is allowed and represented as null
-                    return map.get(name);
-                }
-
-                public boolean isExistsProperty(EventBean eventBean)
-                {
-                    return true; // Property exists as the property is not dynamic (unchecked)
-                }
-            };
-
+            EventPropertyGetter getter = new MapEventPropertyGetter(name);
             propertyGetters.put(name, getter);
+            propertyNames[index++] = name;
         }
+    }
+
+    /**
+     * TODO: nestable map constructor
+     * Constructor takes a type name, map of property names and types.
+     * @param typeName is the event type name used to distinquish map types that have the same property types,
+     * empty string for anonymous maps, or for insert-into statements generating map events
+     * the stream name
+     * @param propertyTypes is pairs of property name and type
+     * @param eventAdapterService is required for access to objects properties within map values
+     */
+    public MapEventType(String typeName,
+                        EventAdapterService eventAdapterService,
+                        Map<String, Object> propertyTypes)
+    {
+        this.typeName = typeName;
+        this.eventAdapterService = eventAdapterService;
+        this.types = new HashMap<String, Class>();
+        List<String> propertyNameList = new ArrayList<String>();
+
+        hashCode = typeName.hashCode();
+        propertyGetters = new HashMap<String, EventPropertyGetter>();
+
+        // Initialize getters and names array
+        for (Map.Entry<String, Object> entry : propertyTypes.entrySet())
+        {
+            String name = entry.getKey();
+            hashCode = hashCode ^ name.hashCode();
+
+            if (entry.getValue() instanceof Class)
+            {
+                types.put(name, (Class) entry.getValue());
+                propertyNameList.add(name);
+                EventPropertyGetter getter = new MapEventPropertyGetter(name);
+                propertyGetters.put(name, getter);
+                continue;
+            }
+            if (!(entry.getValue() instanceof Map))
+            {
+                generateExceptionNestedProp(name, entry.getValue());
+            }
+
+            Stack<String> accessPathStack = new Stack<String>();
+            accessPathStack.push(name);
+
+            // nested map: this could be a deep nestable map
+            getNestingRecursive(accessPathStack, name, (Map) entry.getValue(), propertyNameList, propertyGetters, types);
+        }
+
+        propertyNames = propertyNameList.toArray(new String[propertyNameList.size()]);
     }
 
     public final Class getPropertyType(String propertyName)
@@ -396,5 +421,57 @@ public class MapEventType implements EventType
         }
 
         return true;
+    }
+
+    private void getNestingRecursive(Stack<String> accessPathStack,
+                               String accessPathName,
+                               Map map,
+                               List<String> propertyNameList,
+                               Map<String, EventPropertyGetter> propertyGetters,
+                               Map<String, Class> types)
+    {
+        for (Object nestedProperty : map.entrySet())
+        {
+            Map.Entry entry = (Map.Entry) nestedProperty;
+            if (!(entry.getKey() instanceof String))
+            {
+                throw new EPException("Nestable map type configuration encountered an unexpected key type of '"
+                    + entry.getKey().getClass() + ", expected String-type property name");
+            }
+
+            String propertyName = (String) entry.getKey();
+            String fullName = accessPathName + "." + propertyName;
+
+            if (entry.getValue() instanceof Class)
+            {
+                types.put(fullName, (Class) entry.getValue());
+                propertyNameList.add(fullName);
+
+                Stack<String> accessPathStackProp = new Stack<String>();
+                accessPathStackProp.addAll(accessPathStack);
+                accessPathStackProp.add(propertyName);
+                EventPropertyGetter getter = new MapNestedEventPropertyGetter(accessPathStackProp);
+                propertyGetters.put(propertyName, getter);
+                
+                continue;
+            }
+            if (!(entry.getValue() instanceof Map))
+            {
+                generateExceptionNestedProp(propertyName, entry.getValue());
+            }
+
+            Stack<String> accessPathStackProp = new Stack<String>();
+            accessPathStackProp.addAll(accessPathStack);
+            accessPathStackProp.add(propertyName);
+            getNestingRecursive(accessPathStackProp, fullName, (Map) entry.getValue(), propertyNameList, propertyGetters, types);
+        }
+
+    }
+
+    private void generateExceptionNestedProp(String name, Object value) throws EPException
+    {
+        String clazzName = (value == null) ? "null" : value.getClass().toString();
+        throw new EPException("Nestable map type configuration encountered an unexpected property type of '"
+            + clazzName + "' for property '" + name + "', expected java.lang.Class or java.util.Map definition");
     }
 }

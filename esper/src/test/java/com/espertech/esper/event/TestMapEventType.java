@@ -12,6 +12,8 @@ import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestMapEventType extends TestCase
@@ -188,6 +190,28 @@ public class TestMapEventType extends TestCase
         assertEquals(20, eventType.getValue("myInt", valuesMap));
         assertEquals(100, eventType.getValue("mySupportBean.intPrimitive", valuesMap));
         assertEquals("nestedValue", eventType.getValue("myComplexBean.nested.nestedValue", valuesMap));
+    }
+
+    public void testNestedMap()
+    {
+        Map<String, Object> levelTwo = new HashMap<String, Object>();
+        levelTwo.put("simpleTwo", float.class);
+        levelTwo.put("objTwo", SupportBean_B.class);
+
+        Map<String, Object> levelOne = new HashMap<String, Object>();
+        levelOne.put("simpleOne", Integer.class);
+        levelOne.put("objOne", SupportBean_A.class);
+        levelOne.put("mapOne", levelTwo);
+
+        Map<String, Object> levelZero = new HashMap<String, Object>();
+        levelZero.put("simple", double.class);
+        levelZero.put("obj", SupportBean.class);
+        levelZero.put("map", levelOne);
+
+        MapEventType mapType = new MapEventType("M1", eventAdapterService, levelZero);
+
+        assertEquals(Integer.class, mapType.getPropertyType("map.simpleOne"));
+
     }
 
     private static final Log log = LogFactory.getLog(TestMapEventType.class);
