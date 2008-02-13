@@ -48,7 +48,7 @@
 			</packageset>
 
 			<group title="Esper Adapter API"
-				packages="com.espertech.esper.adapter,com.espertech.esper.adapter.csv"/>
+				packages="com.espertech.esperio,com.espertech.esperio.csv,com.espertech.esperio.jms,com.espertech.esperio.subscription"/>
 						
 		</javadoc>
 		<copy file="${doc.api.dir}/package.html" todir="${dist.api.dir}"/>

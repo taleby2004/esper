@@ -147,7 +147,7 @@
 			<title>Using AdapterInputSource</title>
 	
 			<para>
-					The <literal>com.espertech.esper.adapter.AdapterInputSource</literal> encapsulates information about an input source. Input adapters use the <literal>AdapterInputSource</literal> to determine how to read input. The class provides constructors for use with different input sources:
+					The <literal>com.espertech.esperio.AdapterInputSource</literal> encapsulates information about an input source. Input adapters use the <literal>AdapterInputSource</literal> to determine how to read input. The class provides constructors for use with different input sources:
 			</para>	
 
 			<itemizedlist spacing="compact">
