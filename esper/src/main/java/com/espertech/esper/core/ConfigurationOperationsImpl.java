@@ -137,6 +137,18 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
+    public void addNestableEventTypeAlias(String eventTypeAlias, Map<String, Object> typeMap)
+    {
+        try
+        {
+            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap);
+        }
+        catch (EventAdapterException t)
+        {
+            throw new ConfigurationException(t.getMessage(), t);
+        }
+    }
+
     public void addEventTypeAlias(String eventTypeAlias, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
     {
         try

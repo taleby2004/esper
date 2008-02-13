@@ -26,6 +26,8 @@ public interface ConfigurationInformation
      */
     public String getEPServicesContextFactoryClassName();
 
+    public Map<String, Map<String, Object>> getEventTypesNestableMapEvents();
+
     /**
      * Returns the mapping of event type alias to Java class name.
      * @return event type aliases for Java class names

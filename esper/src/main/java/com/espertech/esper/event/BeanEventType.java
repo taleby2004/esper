@@ -69,7 +69,7 @@ public class BeanEventType implements EventType
             return simpleProp.getClazz();
         }
 
-        Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory);
+        Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory, false);
         if (prop instanceof SimpleProperty)
         {
             // there is no such property since it wasn't in simplePropertyTypes
@@ -109,7 +109,7 @@ public class BeanEventType implements EventType
             return simpleProp.getGetter();
         }
 
-        Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory);
+        Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory, false);
         if (prop instanceof SimpleProperty)
         {
             // there is no such property since it wasn't in simplePropertyGetters

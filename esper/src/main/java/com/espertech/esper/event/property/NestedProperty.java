@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.Map;
+import java.io.StringWriter;
 
 /**
  * This class represents a nested property, each nesting level made up of a property instance that
@@ -116,40 +117,157 @@ public class NestedProperty implements Property
         return result;
     }
 
-    public Class getPropertyTypeMap()
+    public Class getPropertyTypeMap(Map optionalMapPropTypes)
     {
-        // Only if the top-level property is a dynamic property can this property exist
-        if (properties.get(0) instanceof DynamicProperty)
-        {
-            return Object.class;
-        }
-        else
-        {
-            return null;
-        }
-    }
+        Map currentDictionary = optionalMapPropTypes;
 
-    public EventPropertyGetter getGetterMap()
-    {
-        // Only if the top-level property is a dynamic property can this property exist
-        if (!(properties.get(0) instanceof DynamicProperty))
-        {
-            return null;
-        }
-
-        List<EventPropertyGetter> getters = new LinkedList<EventPropertyGetter>();
-
+        int count = 0;
         for (Iterator<Property> it = properties.iterator(); it.hasNext();)
         {
+            count++;
             Property property = it.next();
-            EventPropertyGetter getter = property.getGetterMap();
+            PropertyBase base = (PropertyBase) property;
+            String propertyName = base.getPropertyNameAtomic();
+
+            Object nestedType = null;
+            if (currentDictionary != null)
+            {
+                nestedType = currentDictionary.get(propertyName);
+            }
+
+            if (nestedType == null)
+            {
+                if (property instanceof DynamicProperty)
+                {
+                    return Object.class;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            if (!it.hasNext())
+            {
+                if (nestedType instanceof Class)
+                {
+                    return (Class) nestedType;
+                }
+                if (nestedType instanceof Map)
+                {
+                    return Map.class;
+                }
+            }
+
+            if (nestedType == Map.class)
+            {
+                return Object.class;
+            }
+
+            if (nestedType instanceof Class)
+            {
+                Class pojoClass = (Class) nestedType;
+                BeanEventType beanType = beanEventTypeFactory.createBeanType(pojoClass.getName(), pojoClass);
+                String remainingProps = toPropertyEPL(properties, count);
+                return beanType.getPropertyType(remainingProps);
+            }
+
+            if (!(nestedType instanceof Map))
+            {
+                String message = "Nestable map type configuration encountered an unexpected value type of '"
+                    + nestedType.getClass() + " for property '" + propertyName + "', expected Class, Map.class or Map<String, Object> as value type";
+                throw new PropertyAccessException(message);
+            }
+
+            currentDictionary = (Map) nestedType;
+        }
+        throw new IllegalStateException("Unexpected end of nested property");
+    }
+
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes)
+    {
+        List<EventPropertyGetter> getters = new LinkedList<EventPropertyGetter>();
+        Map currentDictionary = optionalMapPropTypes;
+
+        int count = 0;
+        for (Iterator<Property> it = properties.iterator(); it.hasNext();)
+        {
+            count++;
+            Property property = it.next();
+
+            // manufacture a getter for getting the item out of the map
+            EventPropertyGetter getter = property.getGetterMap(currentDictionary);
             if (getter == null)
             {
                 return null;
             }
             getters.add(getter);
+
+            PropertyBase base = (PropertyBase) property;
+            String propertyName = base.getPropertyNameAtomic();
+
+            // For the next property if there is one, check how to property type is defined
+            if (!it.hasNext())
+            {
+                continue;
+            }
+
+            if (currentDictionary != null)
+            {
+                // check the type that this property will return
+                Object propertyReturnType = currentDictionary.get(propertyName);
+
+                if (propertyReturnType == null)
+                {
+                    currentDictionary = null;
+                }
+                if (propertyReturnType != null)
+                {
+                    if (propertyReturnType instanceof Map)
+                    {
+                        currentDictionary = (Map) propertyReturnType;
+                    }
+                    else if (propertyReturnType == Map.class)
+                    {
+                        currentDictionary = null;
+                    }
+                    else
+                    {
+                        // treat the return type of the map property as a POJO
+                        Class pojoClass = (Class) propertyReturnType;
+                        BeanEventType beanType = beanEventTypeFactory.createBeanType(pojoClass.getName(), pojoClass);
+                        String remainingProps = toPropertyEPL(properties, count);
+                        getters.add(beanType.getGetter(remainingProps));
+                        break; // the single Pojo getter handles the rest
+                    }
+                }
+            }
         }
 
-        return new MapNestedPropertyGetter(getters);
+        return new MapNestedPropertyGetter(getters, beanEventTypeFactory);
+    }
+
+    public void toPropertyEPL(StringWriter writer)
+    {
+        String delimiter = "";
+        for (Property property : properties)
+        {
+            writer.append(delimiter);
+            property.toPropertyEPL(writer);
+            delimiter = ".";
+        }
+    }
+
+    private static String toPropertyEPL(List<Property> property, int startFromIndex)
+    {
+        String delimiter = "";
+        StringWriter writer = new StringWriter();
+        for (int i = startFromIndex; i < property.size(); i++)
+        {
+            writer.append(delimiter);
+            property.get(i).toPropertyEPL(writer);
+            delimiter = ".";
+        }
+        return writer.getBuffer().toString();
     }
 }

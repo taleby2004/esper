@@ -22,25 +22,28 @@ public class TestPropertyParser extends TestCase
 
     public void testParse() throws Exception
     {
-        Property property = PropertyParser.parse("a", beanEventTypeFactory);
-        assertEquals("a", ((SimpleProperty)property).getPropertyName());
+        Property property = PropertyParser.parse("a", beanEventTypeFactory, false);
+        assertEquals("a", ((SimpleProperty)property).getPropertyNameAtomic());
 
-        property = PropertyParser.parse("i[1]", beanEventTypeFactory);
-        assertEquals("i", ((IndexedProperty)property).getPropertyName());
+        property = PropertyParser.parse("i[1]", beanEventTypeFactory, false);
+        assertEquals("i", ((IndexedProperty)property).getPropertyNameAtomic());
         assertEquals(1, ((IndexedProperty)property).getIndex());
 
-        property = PropertyParser.parse("m('key')", beanEventTypeFactory);
-        assertEquals("m", ((MappedProperty)property).getPropertyName());
+        property = PropertyParser.parse("m('key')", beanEventTypeFactory, false);
+        assertEquals("m", ((MappedProperty)property).getPropertyNameAtomic());
         assertEquals("key", ((MappedProperty)property).getKey());
 
-        property = PropertyParser.parse("a.b[2].c('m')", beanEventTypeFactory);
+        property = PropertyParser.parse("a.b[2].c('m')", beanEventTypeFactory, false);
         List<Property> nested = ((NestedProperty)property).getProperties();
         assertEquals(3, nested.size());
-        assertEquals("a", ((SimpleProperty)nested.get(0)).getPropertyName());
-        assertEquals("b", ((IndexedProperty)nested.get(1)).getPropertyName());
+        assertEquals("a", ((SimpleProperty)nested.get(0)).getPropertyNameAtomic());
+        assertEquals("b", ((IndexedProperty)nested.get(1)).getPropertyNameAtomic());
         assertEquals(2, ((IndexedProperty)nested.get(1)).getIndex());
-        assertEquals("c", ((MappedProperty)nested.get(2)).getPropertyName());
+        assertEquals("c", ((MappedProperty)nested.get(2)).getPropertyNameAtomic());
         assertEquals("m", ((MappedProperty)nested.get(2)).getKey());
+
+        property = PropertyParser.parse("a", beanEventTypeFactory, true);
+        assertEquals("a", ((DynamicSimpleProperty)property).getPropertyNameAtomic());
     }
 
     public void testParseMapKey() throws Exception
@@ -52,7 +55,7 @@ public class TestPropertyParser extends TestCase
     {
         String propertyName = "m(\"" + key + "\")";
         log.debug(".tryKey propertyName=" + propertyName + " key=" + key);
-        Property property = PropertyParser.parse(propertyName, beanEventTypeFactory);
+        Property property = PropertyParser.parse(propertyName, beanEventTypeFactory, false);
         return ((MappedProperty)property).getKey();
     }
 

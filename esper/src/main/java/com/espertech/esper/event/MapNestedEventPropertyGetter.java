@@ -8,7 +8,14 @@ public class MapNestedEventPropertyGetter implements EventPropertyGetter
     private final Stack<String> accessPath;
 
     public MapNestedEventPropertyGetter(Stack<String> accessPath) {
-        this.accessPath = accessPath;
+        this.accessPath = new Stack<String>();
+        this.accessPath.addAll(accessPath);
+    }
+
+    public MapNestedEventPropertyGetter(Stack<String> accessPath, String leaf) {
+        this.accessPath = new Stack<String>();
+        this.accessPath.addAll(accessPath);
+        this.accessPath.add(leaf);
     }
 
     public Object get(EventBean obj)

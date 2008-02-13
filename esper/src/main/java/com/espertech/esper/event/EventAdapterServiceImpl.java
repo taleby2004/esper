@@ -57,6 +57,10 @@ public class EventAdapterServiceImpl implements EventAdapterService
         beanEventAdapter = new BeanEventAdapter(typesPerJavaBean);
     }
 
+    public BeanEventTypeFactory getBeanEventTypeFactory() {
+        return beanEventAdapter;
+    }
+
     /**
      * Set the legacy Java class type information.
      * @param classToLegacyConfigs is the legacy class configs
@@ -230,6 +234,29 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return newEventType;
     }
 
+    public synchronized EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes) throws EventAdapterException
+    {
+        MapEventType newEventType = new MapEventType(eventTypeAlias, this, propertyTypes);
+
+        EventType existingType = aliasToTypeMap.get(eventTypeAlias);
+        if (existingType != null)
+        {
+            // The existing type must be the same as the type createdStatement
+            if (!newEventType.equals(existingType))
+            {
+                throw new EventAdapterException("Event type named '" + eventTypeAlias +
+                        "' has already been declared with differing column name or type information");
+            }
+
+            // Since it's the same, return the existing type
+            return existingType;
+        }
+
+        aliasToTypeMap.put(eventTypeAlias, newEventType);
+
+        return newEventType;
+    }
+
     public EventBean adapterForMap(Map event, String eventTypeAlias) throws EventAdapterException
     {
         EventType existingType = aliasToTypeMap.get(eventTypeAlias);
@@ -238,14 +265,13 @@ public class EventAdapterServiceImpl implements EventAdapterService
             throw new EventAdapterException("Event type alias '" + eventTypeAlias + "' has not been defined");
         }
 
-        Map<String, Object> eventMap = (Map<String, Object>) event;
-        return createMapFromValues(eventMap, existingType);
+        return createMapFromValues(event, existingType);
     }
 
     public EventBean adapterForDOM(Node node)
     {
         String rootElementName;
-        Node namedNode = null;
+        Node namedNode;
         if (node instanceof Document)
         {
             namedNode = ((Document) node).getDocumentElement();

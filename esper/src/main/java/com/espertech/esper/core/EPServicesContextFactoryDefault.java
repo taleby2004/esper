@@ -1,32 +1,35 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.epl.core.*;
+import com.espertech.esper.epl.core.EngineImportException;
+import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.core.EngineImportServiceImpl;
+import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.db.DatabaseConfigService;
 import com.espertech.esper.epl.db.DatabaseConfigServiceImpl;
+import com.espertech.esper.epl.named.NamedWindowService;
+import com.espertech.esper.epl.named.NamedWindowServiceImpl;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.variable.VariableExistsException;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableServiceImpl;
+import com.espertech.esper.epl.variable.VariableTypeException;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.epl.view.OutputConditionFactoryDefault;
-import com.espertech.esper.epl.named.NamedWindowServiceImpl;
-import com.espertech.esper.epl.named.NamedWindowService;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.epl.variable.VariableExistsException;
-import com.espertech.esper.epl.variable.VariableTypeException;
-import com.espertech.esper.epl.variable.VariableServiceImpl;
 import com.espertech.esper.event.EventAdapterException;
-import com.espertech.esper.event.EventAdapterServiceImpl;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventAdapterServiceImpl;
+import com.espertech.esper.filter.FilterService;
+import com.espertech.esper.filter.FilterServiceProvider;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.SchedulingServiceProvider;
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.timer.TimerService;
 import com.espertech.esper.timer.TimerServiceImpl;
-import com.espertech.esper.filter.FilterServiceProvider;
-import com.espertech.esper.filter.FilterService;
-import com.espertech.esper.view.stream.StreamFactoryServiceProvider;
+import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.view.stream.StreamFactoryService;
+import com.espertech.esper.view.stream.StreamFactoryServiceProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -186,6 +189,20 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             {
                 Map<String, Class> propertyTypes = createPropertyTypes(entry.getValue());
                 eventAdapterService.addMapType(entry.getKey(), propertyTypes);
+            }
+            catch (EventAdapterException ex)
+            {
+                throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+            }
+        }
+
+        // Add nestable map event types
+        Map<String, Map<String, Object>> nestableMapAliases = configSnapshot.getEventTypesNestableMapEvents();
+        for(Map.Entry<String, Map<String, Object>> entry : nestableMapAliases.entrySet())
+        {
+            try
+            {
+                eventAdapterService.addNestableMapType(entry.getKey(), entry.getValue());
             }
             catch (EventAdapterException ex)
             {

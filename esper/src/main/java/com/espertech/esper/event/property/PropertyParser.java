@@ -35,7 +35,7 @@ public class PropertyParser
      * @param beanEventTypeFactory is the chache and factory for event bean types and event wrappers
      * @return Property instance for property
      */
-    public static Property parse(String propertyName, BeanEventTypeFactory beanEventTypeFactory)
+    public static Property parse(String propertyName, BeanEventTypeFactory beanEventTypeFactory, boolean isRootedDynamic)
     {
         CharStream input;
         try
@@ -70,11 +70,11 @@ public class PropertyParser
 
         if (tree.getChildCount() == 1)
         {
-            return makeProperty(tree.getChild(0), false);
+            return makeProperty(tree.getChild(0), isRootedDynamic);
         }
 
         List<Property> properties = new LinkedList<Property>();
-        boolean isRootedInDynamic = false;
+        boolean isRootedInDynamic = isRootedDynamic;
         for (int i = 0; i < tree.getChildCount(); i++)
         {
         	Tree child = tree.getChild(i);

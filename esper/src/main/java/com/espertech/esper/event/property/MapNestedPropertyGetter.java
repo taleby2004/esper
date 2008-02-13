@@ -11,14 +11,17 @@ import java.util.Map;
 public class MapNestedPropertyGetter implements EventPropertyGetter
 {
     private final EventPropertyGetter[] getterChain;
+    private final BeanEventTypeFactory beanEventTypeFactory;
 
     /**
      * Ctor.
      * @param getterChain is the chain of getters to retrieve each nested property
      */
-    public MapNestedPropertyGetter(List<EventPropertyGetter> getterChain)
+    public MapNestedPropertyGetter(List<EventPropertyGetter> getterChain,
+                                   BeanEventTypeFactory beanEventTypeFactory)
     {
         this.getterChain = getterChain.toArray(new EventPropertyGetter[getterChain.size()]);
+        this.beanEventTypeFactory = beanEventTypeFactory;
     }
 
     public Object get(EventBean eventBean) throws PropertyAccessException
@@ -37,11 +40,15 @@ public class MapNestedPropertyGetter implements EventPropertyGetter
             // this is not the last element
             if (i < (getterChain.length - 1))
             {
-                if (!(result instanceof Map))
+                if (result instanceof Map)
                 {
-                    return null;    // not a map, ignore value
+                    eventBean = new MapEventBean((Map) result, null);
                 }
-                eventBean = new MapEventBean((Map) result, null);                
+                else
+                {
+                    BeanEventType type = beanEventTypeFactory.createBeanType(result.getClass().getName(), result.getClass());
+                    eventBean = new BeanEventBean(result, type);
+                }
             }
             else
             {
@@ -67,11 +74,15 @@ public class MapNestedPropertyGetter implements EventPropertyGetter
             }
             else
             {
-                if (!(result instanceof Map))
+                if (result instanceof Map)
                 {
-                    return false;
+                    eventBean = new MapEventBean((Map) result, null);
                 }
-                eventBean = new MapEventBean((Map)result, null);
+                else
+                {
+                    BeanEventType type = beanEventTypeFactory.createBeanType(result.getClass().getName(), result.getClass());
+                    eventBean = new BeanEventBean(result, type);
+                }
             }
         }
 

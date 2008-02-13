@@ -1,8 +1,11 @@
 package com.espertech.esper.event;
 
-import com.espertech.esper.event.property.*;
-import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.event.property.DynamicProperty;
+import com.espertech.esper.event.property.MapPropertyGetter;
+import com.espertech.esper.event.property.Property;
+import com.espertech.esper.event.property.PropertyParser;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.*;
 
@@ -12,11 +15,17 @@ import java.util.*;
 public class MapEventType implements EventType
 {
     private final String typeName;
+    private final EventAdapterService eventAdapterService;
+
+    // Simple (not-nested) properties are stored here
     private final String[] propertyNames;       // Cache an array of property names so not to construct one frequently
-    private final Map<String, Class> types;     // Mapping of property name and type
-    private Map<String, EventPropertyGetter> propertyGetters;   // Mapping of property name and getters
+    private final Map<String, Class> simplePropertyTypes;     // Mapping of property name (simple-only) and type
+    private final Map<String, EventPropertyGetter> propertyGetters;   // Mapping of property name and getters
+
+    // Nestable definition of Map contents is here
+    private final Map<String, Object> nestableTypes;  // Deep definition of the map-type, containing nested maps and objects
+
     private int hashCode;
-    private EventAdapterService eventAdapterService;
 
     /**
      * Constructor takes a type name, map of property names and types.
@@ -32,17 +41,20 @@ public class MapEventType implements EventType
     {
         this.typeName = typeName;
         this.eventAdapterService = eventAdapterService;
-        // copy the property names and types
-        this.types = new HashMap<String, Class>();
-        this.types.putAll(propertyTypes);
+
+        // copy the property names and types (simple-properties only)
+        this.nestableTypes = new HashMap<String, Object>();
+        this.nestableTypes.putAll(propertyTypes);
+        this.simplePropertyTypes = new HashMap<String, Class>();
+        this.simplePropertyTypes.putAll(propertyTypes);
 
         hashCode = typeName.hashCode();
-        propertyNames = new String[types.size()];
+        propertyNames = new String[simplePropertyTypes.size()];
         propertyGetters = new HashMap<String, EventPropertyGetter>();
 
         // Initialize getters and names array
         int index = 0;
-        for (Map.Entry<String, Class> entry : types.entrySet())
+        for (Map.Entry<String, Class> entry : simplePropertyTypes.entrySet())
         {
             final String name = entry.getKey();
             hashCode = hashCode ^ name.hashCode();
@@ -68,13 +80,17 @@ public class MapEventType implements EventType
     {
         this.typeName = typeName;
         this.eventAdapterService = eventAdapterService;
-        this.types = new HashMap<String, Class>();
+
+        this.simplePropertyTypes = new HashMap<String, Class>();
         List<String> propertyNameList = new ArrayList<String>();
+        this.nestableTypes = new HashMap<String, Object>();
+        this.nestableTypes.putAll(propertyTypes);
 
         hashCode = typeName.hashCode();
         propertyGetters = new HashMap<String, EventPropertyGetter>();
 
-        // Initialize getters and names array
+        // Initialize getters and names array: at this time we do not care about nested types,
+        // these are handled at the time someone is asking for them
         for (Map.Entry<String, Object> entry : propertyTypes.entrySet())
         {
             String name = entry.getKey();
@@ -82,7 +98,7 @@ public class MapEventType implements EventType
 
             if (entry.getValue() instanceof Class)
             {
-                types.put(name, (Class) entry.getValue());
+                simplePropertyTypes.put(name, (Class) entry.getValue());
                 propertyNameList.add(name);
                 EventPropertyGetter getter = new MapEventPropertyGetter(name);
                 propertyGetters.put(name, getter);
@@ -93,11 +109,11 @@ public class MapEventType implements EventType
                 generateExceptionNestedProp(name, entry.getValue());
             }
 
-            Stack<String> accessPathStack = new Stack<String>();
-            accessPathStack.push(name);
-
-            // nested map: this could be a deep nestable map
-            getNestingRecursive(accessPathStack, name, (Map) entry.getValue(), propertyNameList, propertyGetters, types);
+            // Add Map itself as a property
+            simplePropertyTypes.put(name, Map.class);
+            propertyNameList.add(name);
+            EventPropertyGetter getter = new MapEventPropertyGetter(name);
+            propertyGetters.put(name, getter);
         }
 
         propertyNames = propertyNameList.toArray(new String[propertyNameList.size()]);
@@ -105,7 +121,7 @@ public class MapEventType implements EventType
 
     public final Class getPropertyType(String propertyName)
     {
-        Class result = types.get(propertyName);
+        Class result = simplePropertyTypes.get(propertyName);
         if (result != null)
         {
             return result;
@@ -131,25 +147,44 @@ public class MapEventType implements EventType
         // Take apart the nested property into a map key and a nested value class property name
         String propertyMap = propertyName.substring(0, index);
         String propertyNested = propertyName.substring(index + 1, propertyName.length());
-        result = types.get(propertyMap);
-        if (result == null)
+        boolean isRootedDynamic = false;
+
+        // If the property is dynamic, remove the ? since the property type is defined without
+        if (propertyMap.endsWith("?"))
+        {
+            propertyMap = propertyMap.substring(0, propertyMap.length() - 1);
+            isRootedDynamic = true;
+        }
+
+        Object nestedType = nestableTypes.get(propertyMap);
+        if (nestedType == null)
         {
             return null;
         }
 
         // If there is a map value in the map, return the Object value if this is a dynamic property
-        if (result == Map.class)
+        if (nestedType == Map.class)
         {
-            // The inner property must be a dynamic property otherwise it cannot exist since the Map-of-Map
-            // contents are undefined
-            Property prop = PropertyParser.parse(propertyNested, null);
-            return prop.getPropertyTypeMap();
+            Property prop = PropertyParser.parse(propertyNested, eventAdapterService.getBeanEventTypeFactory(), isRootedDynamic);
+            return prop.getPropertyTypeMap(null);   // we don't have a definition of the nested props
+        }
+        else if (nestedType instanceof Map)
+        {
+            Property prop = PropertyParser.parse(propertyNested, eventAdapterService.getBeanEventTypeFactory(), isRootedDynamic);
+            Map nestedTypes = (Map) nestedType;
+            return prop.getPropertyTypeMap(nestedTypes);
+        }
+        else if (nestedType instanceof Class)
+        {
+            Class simpleClass = (Class) nestedType;
+            EventType nestedEventType = eventAdapterService.addBeanType(simpleClass.getName(), simpleClass);
+            return nestedEventType.getPropertyType(propertyNested);
         }
         else
         {
-            // ask the nested class to resolve the property
-            EventType nestedType = eventAdapterService.addBeanType(result.getName(), result);
-            return nestedType.getPropertyType(propertyNested);
+            String message = "Nestable map type configuration encountered an unexpected value type of '"
+                + nestedType.getClass() + " for property '" + propertyName + "', expected Class, Map.class or Map<String, Object> as value type";
+            throw new PropertyAccessException(message);
         }
     }
 
@@ -171,83 +206,75 @@ public class MapEventType implements EventType
         if (index == -1)
         {
             // dynamic property for maps is allowed
-            Property prop = PropertyParser.parse(propertyName, null);
+            Property prop = PropertyParser.parse(propertyName, eventAdapterService.getBeanEventTypeFactory(), false);
             if (prop instanceof DynamicProperty)
             {
-                return prop.getGetterMap();
+                return prop.getGetterMap(null);
             }
             return null;
         }
 
         // Take apart the nested property into a map key and a nested value class property name
-        final String propertyMap = propertyName.substring(0, index);
-        final String propertyNested = propertyName.substring(index + 1, propertyName.length());
+        String propertyMap = propertyName.substring(0, index);
+        String propertyNested = propertyName.substring(index + 1, propertyName.length());
+        boolean isRootedDynamic = false;
 
-        Class result = types.get(propertyMap);
-        if (result == null)
+        // If the property is dynamic, remove the ? since the property type is defined without
+        if (propertyMap.endsWith("?"))
+        {
+            propertyMap = propertyMap.substring(0, propertyMap.length() - 1);
+            isRootedDynamic = true;
+        }
+
+        Object nestedType = nestableTypes.get(propertyMap);
+        if (nestedType == null)
         {
             return null;
         }
 
         // The map contains another map, we resolve the property dynamically
-        if (result == Map.class)
+        if (nestedType == Map.class)
         {
-            // The inner property must be a dynamic property otherwise it cannot exist since the Map-of-Map
-            // contents are undefined
-            Property prop = PropertyParser.parse(propertyNested, null);
-            EventPropertyGetter getterNestedMap = prop.getGetterMap();
+            Property prop = PropertyParser.parse(propertyNested, eventAdapterService.getBeanEventTypeFactory(), isRootedDynamic);
+            EventPropertyGetter getterNestedMap = prop.getGetterMap(null);
             if (getterNestedMap == null)
             {
-                return null;    // May not be possible as mapped property in "mapped('key')" is really nested "mapped.key"
+                return null;
             }
             return new MapPropertyGetter(propertyMap, getterNestedMap);
         }
-        else
+        else if (nestedType instanceof Map)
+        {
+            Property prop = PropertyParser.parse(propertyNested, eventAdapterService.getBeanEventTypeFactory(), isRootedDynamic);
+            Map nestedTypes = (Map) nestedType;
+            EventPropertyGetter getterNestedMap = prop.getGetterMap(nestedTypes);
+            if (getterNestedMap == null)
+            {
+                return null;
+            }
+            return new MapPropertyGetter(propertyMap, getterNestedMap);
+        }
+        else if (nestedType instanceof Class)
         {
             // ask the nested class to resolve the property
-            EventType nestedType = eventAdapterService.addBeanType(result.getName(), result);
-            final EventPropertyGetter nestedGetter = nestedType.getGetter(propertyNested);
+            Class simpleClass = (Class) nestedType;
+            EventType nestedEventType = eventAdapterService.addBeanType(simpleClass.getName(), simpleClass);
+            final EventPropertyGetter nestedGetter = nestedEventType.getGetter(propertyNested);
             if (nestedGetter == null)
             {
                 return null;
             }
 
             // construct getter for nested property
-            getter = new EventPropertyGetter()
-            {
-                public Object get(EventBean obj)
-                {
-                    Object underlying = obj.getUnderlying();
-
-                    // The underlying is expected to be a map
-                    if (!(underlying instanceof Map))
-                    {
-                        throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                                "the underlying data object is not of type java.lang.Map");
-                    }
-
-                    Map map = (Map) underlying;
-
-                    // If the map does not contain the key, this is allowed and represented as null
-                    Object value = map.get(propertyMap);
-
-                    if (value == null)
-                    {
-                        return null;
-                    }
-
-                    // Object within the map
-                    EventBean event = MapEventType.this.eventAdapterService.adapterForBean(value);
-                    return nestedGetter.get(event);
-                }
-
-                public boolean isExistsProperty(EventBean eventBean)
-                {
-                    return true; // Property exists as the property is not dynamic (unchecked)
-                }
-            };
+            getter = new MapPOJOEntryPropertyGetter(propertyMap, nestedGetter, eventAdapterService);
 
             return getter;
+        }
+        else
+        {
+            String message = "Nestable map type configuration encountered an unexpected value type of '"
+                + nestedType.getClass() + " for property '" + propertyName + "', expected Class, Map.class or Map<String, Object> as value type";
+            throw new PropertyAccessException(message);            
         }
     }
 
@@ -260,7 +287,7 @@ public class MapEventType implements EventType
     public Object getValue(String propertyName, Map values)
     {
         // if a known type, return value
-        if (types.get(propertyName) != null)
+        if (simplePropertyTypes.get(propertyName) != null)
         {
             return values.get(propertyName);
         }
@@ -272,12 +299,11 @@ public class MapEventType implements EventType
             return null;
         }
 
-
         // Take apart the nested property into a map key and a nested value class property name
         final String propertyMap = propertyName.substring(0, index);
         String propertyNested = propertyName.substring(index + 1, propertyName.length());
 
-        Class result = types.get(propertyMap);
+        Class result = simplePropertyTypes.get(propertyMap);
         if (result == null)
         {
             return null;
@@ -312,7 +338,7 @@ public class MapEventType implements EventType
         if (propertyType == null)
         {
             // Could be a native null type, such as "insert into A select null as field..."
-            if (types.containsKey(propertyName))
+            if (simplePropertyTypes.containsKey(propertyName))
             {
                 return true;
             }
@@ -357,7 +383,7 @@ public class MapEventType implements EventType
             return false;
         }
 
-        return isEqualsProperties(other.types, this.types);
+        return isDeepEqualsProperties(other.nestableTypes, this.nestableTypes);
     }
 
     public int hashCode()
@@ -375,12 +401,13 @@ public class MapEventType implements EventType
     }
 
     /**
+     * TODO
      * Returns the name-type map of map properties.
      * @return is the property name and types
      */
     public Map<String, Class> getTypes()
     {
-        return types;
+        return this.simplePropertyTypes;
     }
 
     /**
@@ -423,49 +450,60 @@ public class MapEventType implements EventType
         return true;
     }
 
-    private void getNestingRecursive(Stack<String> accessPathStack,
-                               String accessPathName,
-                               Map map,
-                               List<String> propertyNameList,
-                               Map<String, EventPropertyGetter> propertyGetters,
-                               Map<String, Class> types)
+    /**
+     * Compares two sets of properties and determines if they are the same, allowing for
+     * boxed/unboxed types, and nested map types.
+     * @param setOne is the first set of properties
+     * @param setTwo is the second set of properties
+     * @return true if the property set is equivalent, false if not
+     */
+    public static boolean isDeepEqualsProperties(Map<String, Object> setOne, Map<String, Object> setTwo)
     {
-        for (Object nestedProperty : map.entrySet())
+        // Should have the same number of properties
+        if (setOne.size() != setTwo.size())
         {
-            Map.Entry entry = (Map.Entry) nestedProperty;
-            if (!(entry.getKey() instanceof String))
-            {
-                throw new EPException("Nestable map type configuration encountered an unexpected key type of '"
-                    + entry.getKey().getClass() + ", expected String-type property name");
-            }
-
-            String propertyName = (String) entry.getKey();
-            String fullName = accessPathName + "." + propertyName;
-
-            if (entry.getValue() instanceof Class)
-            {
-                types.put(fullName, (Class) entry.getValue());
-                propertyNameList.add(fullName);
-
-                Stack<String> accessPathStackProp = new Stack<String>();
-                accessPathStackProp.addAll(accessPathStack);
-                accessPathStackProp.add(propertyName);
-                EventPropertyGetter getter = new MapNestedEventPropertyGetter(accessPathStackProp);
-                propertyGetters.put(propertyName, getter);
-                
-                continue;
-            }
-            if (!(entry.getValue() instanceof Map))
-            {
-                generateExceptionNestedProp(propertyName, entry.getValue());
-            }
-
-            Stack<String> accessPathStackProp = new Stack<String>();
-            accessPathStackProp.addAll(accessPathStack);
-            accessPathStackProp.add(propertyName);
-            getNestingRecursive(accessPathStackProp, fullName, (Map) entry.getValue(), propertyNameList, propertyGetters, types);
+            return false;
         }
 
+        // Compare property by property
+        for (Map.Entry<String, Object> entry : setOne.entrySet())
+        {
+            Object setTwoType = setTwo.get(entry.getKey());
+            Object setOneType = entry.getValue();
+            if (((setTwoType == null) && (setOneType != null)) ||
+                 (setTwoType != null) && (setOneType == null))
+            {
+                return false;
+            }
+            if (setTwoType == null)
+            {
+                continue;
+            }
+
+            if ((setTwoType instanceof Class) && (setOneType instanceof Class))
+            {
+                Class boxedOther = JavaClassHelper.getBoxedType((Class)setTwoType);
+                Class boxedThis = JavaClassHelper.getBoxedType((Class)setOneType);
+                if (!boxedOther.equals(boxedThis))
+                {
+                    return false;
+                }
+            }
+            else if ((setTwoType instanceof Map) && (setOneType instanceof Map))
+            {
+                boolean isDeepEqual = isDeepEqualsProperties((Map<String, Object>)setOneType, (Map<String, Object>)setTwoType);
+                if (!isDeepEqual)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void generateExceptionNestedProp(String name, Object value) throws EPException

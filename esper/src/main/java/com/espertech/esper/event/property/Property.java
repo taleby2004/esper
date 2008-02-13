@@ -2,6 +2,9 @@ package com.espertech.esper.event.property;
 
 import com.espertech.esper.event.*;
 
+import java.util.Map;
+import java.io.StringWriter;
+
 /**
  * Interface for a property of an event of type BeanEventType (JavaBean event). Properties are designed to
  * handle the different types of properties for such events: indexed, mapped, simple, nested, or a combination of
@@ -25,13 +28,19 @@ public interface Property
 
     /**
      * Returns the property type for use with Map event representations.
-     * @return property type
+     * @return property type @param optionalMapPropTypes
      */
-    public Class getPropertyTypeMap();
+    public Class getPropertyTypeMap(Map optionalMapPropTypes);
 
     /**
      * Returns the getter-method for use with Map event representations.
-     * @return getter for maps
+     * @return getter for maps @param optionalMapPropTypes
      */
-    public EventPropertyGetter getGetterMap();
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes);
+
+    /**
+     * Write the EPL-representation of the property.
+     * @param writer to write to
+     */
+    public void toPropertyEPL(StringWriter writer);    
 }

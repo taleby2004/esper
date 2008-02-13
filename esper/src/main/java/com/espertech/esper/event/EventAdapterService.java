@@ -34,7 +34,7 @@ public interface EventAdapterService
      * @throws EventAdapterException if alias already exists and doesn't match property type info
      */
     public EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException;
-    
+    public EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes) throws EventAdapterException;
     
     /**
      * Add an event type with the given alias and the given underlying event type, 
@@ -197,4 +197,6 @@ public interface EventAdapterService
      * @param javaPackageName is the fully-qualified Java package name of the Java package that event classes reside in
      */
     public void addAutoAliasPackage(String javaPackageName);
+
+    public BeanEventTypeFactory getBeanEventTypeFactory(); 
 }

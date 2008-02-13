@@ -3,6 +3,9 @@ package com.espertech.esper.event.property;
 import com.espertech.esper.event.EventPropertyGetter;
 import com.espertech.esper.event.BeanEventType;
 
+import java.util.Map;
+import java.io.StringWriter;
+
 /**
  * Represents a dynamic mapped property of a given name.
  * <p>
@@ -25,7 +28,7 @@ public class DynamicMappedProperty extends PropertyBase implements DynamicProper
 
     public EventPropertyGetter getGetter(BeanEventType eventType)
     {
-        return new DynamicMappedPropertyGetter(propertyName, key);
+        return new DynamicMappedPropertyGetter(propertyNameAtomic, key);
     }
 
     public Class getPropertyType(BeanEventType eventType)
@@ -33,13 +36,22 @@ public class DynamicMappedProperty extends PropertyBase implements DynamicProper
         return Object.class;
     }
 
-    public Class getPropertyTypeMap()
+    public Class getPropertyTypeMap(Map optionalMapPropTypes)
     {
         return Object.class;
     }
 
-    public EventPropertyGetter getGetterMap()
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes)
     {
-        return new MapMappedPropertyGetter(this.getPropertyName(), key);
+        return new MapMappedPropertyGetter(this.getPropertyNameAtomic(), key);
+    }
+
+    public void toPropertyEPL(StringWriter writer)
+    {
+        writer.append(propertyNameAtomic);
+        writer.append("('");
+        writer.append(key);
+        writer.append("')");
+        writer.append('?');
     }
 }

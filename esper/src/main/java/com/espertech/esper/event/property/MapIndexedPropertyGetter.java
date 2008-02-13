@@ -1,15 +1,11 @@
 package com.espertech.esper.event.property;
 
+import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventPropertyGetter;
 import com.espertech.esper.event.PropertyAccessException;
-import com.espertech.esper.event.EventBean;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.io.StringWriter;
 import java.util.Map;
-import java.util.Arrays;
 
 /**
  * Getter for a dynamic indexed property for maps.

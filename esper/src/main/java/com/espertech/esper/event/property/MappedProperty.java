@@ -7,6 +7,8 @@ import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.io.StringWriter;
 
 /**
  * Represents a mapped property or array property, ie. an 'value' property with read method getValue(int index)
@@ -38,7 +40,7 @@ public class MappedProperty extends PropertyBase
 
     public EventPropertyGetter getGetter(BeanEventType eventType)
     {
-        EventPropertyDescriptor propertyDesc = eventType.getMappedProperty(propertyName);
+        EventPropertyDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             // property not found, is not a property
@@ -60,7 +62,7 @@ public class MappedProperty extends PropertyBase
 
     public Class getPropertyType(BeanEventType eventType)
     {
-        EventPropertyDescriptor propertyDesc = eventType.getMappedProperty(propertyName);
+        EventPropertyDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             // property not found, is not a property
@@ -69,13 +71,21 @@ public class MappedProperty extends PropertyBase
         return propertyDesc.getReadMethod().getReturnType();
     }
 
-    public Class getPropertyTypeMap()
+    public Class getPropertyTypeMap(Map optionalMapPropTypes)
     {
         return null;  // Mapped properties are not allowed in non-dynamic form in a map
     }
 
-    public EventPropertyGetter getGetterMap()
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes)
     {
         return null;  // Mapped properties are not allowed in non-dynamic form in a map
+    }
+
+    public void toPropertyEPL(StringWriter writer)
+    {
+        writer.append(propertyNameAtomic);
+        writer.append("('");
+        writer.append(key);
+        writer.append("')");
     }
 }

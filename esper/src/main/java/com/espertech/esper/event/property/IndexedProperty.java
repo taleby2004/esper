@@ -6,6 +6,8 @@ import net.sf.cglib.reflect.FastClass;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.io.StringWriter;
 
 /**
  * Represents an indexed property or array property, ie. an 'value' property with read method getValue(int index)
@@ -38,7 +40,7 @@ public class IndexedProperty extends PropertyBase
     public EventPropertyGetter getGetter(BeanEventType eventType)
     {
         FastClass fastClass = eventType.getFastClass();
-        EventPropertyDescriptor propertyDesc = eventType.getIndexedProperty(propertyName);
+        EventPropertyDescriptor propertyDesc = eventType.getIndexedProperty(propertyNameAtomic);
         if (propertyDesc != null)
         {
             if (fastClass != null)
@@ -54,7 +56,7 @@ public class IndexedProperty extends PropertyBase
         }
 
         // Try the array as a simple property
-        propertyDesc = eventType.getSimpleProperty(propertyName);
+        propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             return null;
@@ -88,14 +90,14 @@ public class IndexedProperty extends PropertyBase
 
     public Class getPropertyType(BeanEventType eventType)
     {
-        EventPropertyDescriptor descriptor = eventType.getIndexedProperty(propertyName);
+        EventPropertyDescriptor descriptor = eventType.getIndexedProperty(propertyNameAtomic);
         if (descriptor != null)
         {
             return descriptor.getReturnType();
         }
 
         // Check if this is an method returning array which is a type of simple property
-        descriptor = eventType.getSimpleProperty(propertyName);
+        descriptor = eventType.getSimpleProperty(propertyNameAtomic);
         if (descriptor == null)
         {
             return null;
@@ -109,13 +111,21 @@ public class IndexedProperty extends PropertyBase
         return null;
     }
 
-    public Class getPropertyTypeMap()
+    public Class getPropertyTypeMap(Map optionalMapPropTypes)
     {
         return null;  // indexed properties are not allowed in non-dynamic form in a map
     }
 
-    public EventPropertyGetter getGetterMap()
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes)
     {
         return null;  // indexed properties are not allowed in non-dynamic form in a map
+    }
+
+    public void toPropertyEPL(StringWriter writer)
+    {
+        writer.append(propertyNameAtomic);
+        writer.append("[");
+        writer.append(Integer.toString(index));
+        writer.append("]");
     }
 }

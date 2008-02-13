@@ -59,6 +59,13 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 	 */
 	protected Map<String, Properties> mapAliases;
 
+    /**
+     * TODO
+     * The type aliases for events that result when maps are sent
+     * into the engine.
+     */
+    protected Map<String, Map<String, Object>> nestableMapAliases;
+
 	/**
 	 * The class and package name imports that
 	 * will be used to resolve partial class names.
@@ -195,6 +202,18 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     /**
+     * TODO
+     * Add an alias for an event type that represents java.util.Map events.
+     * @param eventTypeAlias is the alias for the event type
+     * @param typeMap maps the name of each property in the Map event to the type
+     * (fully qualified classname) of its value in Map event instances.
+     */
+    public void addNestableEventTypeAlias(String eventTypeAlias, Map<String, Object> typeMap)
+    {
+    	nestableMapAliases.put(eventTypeAlias, typeMap);
+    }
+
+    /**
      * Add an alias for an event type that represents java.util.Map events, taking a Map of
      * event property and class name as a parameter.
      * <p>
@@ -283,6 +302,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public Map<String, Properties> getEventTypesMapEvents()
     {
     	return mapAliases;
+    }
+
+    public Map<String, Map<String, Object>> getEventTypesNestableMapEvents()
+    {
+    	return nestableMapAliases;
     }
 
     public Map<String, ConfigurationEventTypeXMLDOM> getEventTypesXMLDOM()
@@ -595,6 +619,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     {
         eventClasses = new HashMap<String, String>();
         mapAliases = new HashMap<String, Properties>();
+        nestableMapAliases = new HashMap<String, Map<String, Object>>();
         eventTypesXMLDOM = new HashMap<String, ConfigurationEventTypeXMLDOM>();
         eventTypesLegacy = new HashMap<String, ConfigurationEventTypeLegacy>();
         databaseReferences = new HashMap<String, ConfigurationDBRef>();

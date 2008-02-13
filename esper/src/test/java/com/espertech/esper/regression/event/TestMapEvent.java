@@ -1,16 +1,16 @@
 package com.espertech.esper.regression.event;
 
+import com.espertech.esper.client.*;
+import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.bean.SupportBeanComplexProps;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class TestMapEvent extends TestCase
 {
@@ -34,51 +34,8 @@ public class TestMapEvent extends TestCase
         configuration.addEventTypeAlias("myMapEvent", properties);
         configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
-        epService = EPServiceProviderManager.getProvider("myProvider", configuration);
-    }
-
-    public void testNestedMaps()
-    {
-        /**
-         * TODO: test for nested maps
-         */
-        /*
-        Properties propertiesNestedNested = new Properties();
-        propertiesNestedNested.put("n1n1", String.class);
-
-        Properties propertiesNested = new Properties();
-        propertiesNested.put("n1", String.class);
-        propertiesNested.put("n2", propertiesNestedNested);
-
-        properties = new Properties();
-        properties.put("nested", propertiesNested);
-
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("NestedMap", properties);
-
-        String statementText = "select nested as a, " +
-                    "nested.n1 as b," +
-                    "nested.n2 as c," +
-                    "nested.n2.n1n1 as d " +
-                    "from NestedMap.win:length(5)";
-        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
-        SupportUpdateListener listener = new SupportUpdateListener();
-        statement.addListener(listener);
-
-        Map nestedNested = new HashMap<String, Object>();
-        nestedNested.put("n1n1", "abc");
-        Map nested = new HashMap<String, Object>();
-        nested.put("n1n1", "abc");
-
-        map = new HashMap<String, Object>();
-        map.put("nested", nested);
-
-        epService.getEPRuntime().sendEvent(map, "NestedMap");
-        assertSame(nested, listener.getLastNewData()[0].get("a"));
-        assertSame(nested.get("n1"), listener.getLastNewData()[0].get("b"));
-        assertSame(nestedNested, listener.getLastNewData()[0].get("c"));
-        assertSame("n1n1", listener.getLastNewData()[0].get("d"));
-        statement.stop();
-        */
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
     }
 
     public void testNestedObjects()
@@ -206,7 +163,7 @@ public class TestMapEvent extends TestCase
         assertEquals("string3", listener.getLastNewData()[0].get("myString"));
     }
 
-    public void tryInvalid(String statementText)
+    private void tryInvalid(String statementText)
     {
         try
         {

@@ -8,7 +8,7 @@ public abstract class PropertyBase implements Property
     /**
      * Property name.
      */
-    protected String propertyName;
+    protected String propertyNameAtomic;
 
     /**
      * Ctor.
@@ -16,15 +16,15 @@ public abstract class PropertyBase implements Property
      */
     public PropertyBase(String propertyName)
     {
-        this.propertyName = propertyName;
+        this.propertyNameAtomic = propertyName;
     }
 
     /**
-     * Returns the property name.
-     * @return name of property
+     * Returns the atomic property name, which is a part of all of the full (complex) property name.
+     * @return atomic name of property
      */
-    public String getPropertyName()
+    public String getPropertyNameAtomic()
     {
-        return propertyName;
+        return propertyNameAtomic;
     }
 }

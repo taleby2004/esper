@@ -6,6 +6,7 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.PropertyAccessException;
 
 import java.util.Map;
+import java.io.StringWriter;
 
 /**
  * Represents a dynamic simple property of a given name.
@@ -25,7 +26,7 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
 
     public EventPropertyGetter getGetter(BeanEventType eventType)
     {
-        return new DynamicSimplePropertyGetter(propertyName);
+        return new DynamicSimplePropertyGetter(propertyNameAtomic);
     }
 
     public Class getPropertyType(BeanEventType eventType)
@@ -33,14 +34,14 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
         return Object.class;
     }
 
-    public Class getPropertyTypeMap()
+    public Class getPropertyTypeMap(Map optionalMapPropTypes)
     {
         return Object.class;
     }
 
-    public EventPropertyGetter getGetterMap()
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes)
     {
-        final String propertyName = this.getPropertyName();
+        final String propertyName = this.getPropertyNameAtomic();
         return new EventPropertyGetter()
         {
             public Object get(EventBean eventBean) throws PropertyAccessException
@@ -56,4 +57,9 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
             }
         };
     }
+
+    public void toPropertyEPL(StringWriter writer)
+    {
+        writer.append(propertyNameAtomic);
+    }        
 }
