@@ -106,7 +106,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     /**
      * List of adapter loaders.
      */
-    protected List<ConfigurationAdapterLoader> adapterLoaders;
+    protected List<ConfigurationPluginLoader> pluginLoaders;
 
     /**
      * Saves engine default configs such as threading settings
@@ -334,9 +334,9 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         return plugInViews;
     }
 
-    public List<ConfigurationAdapterLoader> getAdapterLoaders()
+    public List<ConfigurationPluginLoader> getPluginLoaders()
     {
-        return adapterLoaders;
+        return pluginLoaders;
     }
 
     public List<ConfigurationPlugInAggregationFunction> getPlugInAggregationFunctions()
@@ -360,18 +360,18 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     /**
-     * Add an input/output adapter loader.
+     * Add a plugin loader (f.e. an input/output adapter loader).
      * @param loaderName is the name of the loader
      * @param className is the fully-qualified classname of the loader class
      * @param configuration is loader cofiguration entries
      */
-    public void addAdapterLoader(String loaderName, String className, Properties configuration)
+    public void addPluginLoader(String loaderName, String className, Properties configuration)
     {
-        ConfigurationAdapterLoader adapterLoader = new ConfigurationAdapterLoader();
-        adapterLoader.setLoaderName(loaderName);
-        adapterLoader.setClassName(className);
-        adapterLoader.setConfigProperties(configuration);
-        adapterLoaders.add(adapterLoader);
+        ConfigurationPluginLoader pluginLoader = new ConfigurationPluginLoader();
+        pluginLoader.setLoaderName(loaderName);
+        pluginLoader.setClassName(className);
+        pluginLoader.setConfigProperties(configuration);
+        pluginLoaders.add(pluginLoader);
     }
 
     /**
@@ -627,7 +627,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         addDefaultImports();
         isUsingDefaultImports = true;
         plugInViews = new ArrayList<ConfigurationPlugInView>();
-        adapterLoaders = new ArrayList<ConfigurationAdapterLoader>();
+        pluginLoaders = new ArrayList<ConfigurationPluginLoader>();
         plugInAggregationFunctions = new ArrayList<ConfigurationPlugInAggregationFunction>();
         plugInPatternObjects = new ArrayList<ConfigurationPlugInPatternObject>();
         engineDefaults = new ConfigurationEngineDefaults();

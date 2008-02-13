@@ -7,13 +7,7 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-
 import java.util.*;
-import java.io.*;
-import java.net.URL;
 
 /**
  * Provides configurations for an engine instance.
@@ -72,10 +66,10 @@ public interface ConfigurationInformation
     public List<ConfigurationPlugInView> getPlugInViews();
 
     /**
-     * Returns a list of configured adapter loaders.
+     * Returns a list of configured plugin loaders.
      * @return adapter loaders
      */
-    public List<ConfigurationAdapterLoader> getAdapterLoaders();
+    public List<ConfigurationPluginLoader> getPluginLoaders();
 
     /**
      * Returns a list of configured plug-in aggregation functions.

@@ -1,4 +1,4 @@
-package com.espertech.esper.support.adapter;
+package com.espertech.esper.support.plugin;
 
 import com.espertech.esper.plugin.PluginLoader;
 import com.espertech.esper.core.EPServiceProviderSPI;

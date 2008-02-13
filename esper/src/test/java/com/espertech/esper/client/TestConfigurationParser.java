@@ -161,19 +161,19 @@ public class TestConfigurationParser extends TestCase
         }
 
         // assert adapter loaders parsed
-        List<ConfigurationAdapterLoader> adapters = config.getAdapterLoaders();
-        assertEquals(2, adapters.size());
-        ConfigurationAdapterLoader adapterOne = adapters.get(0);
-        assertEquals("Loader1", adapterOne.getLoaderName());
-        assertEquals("com.espertech.esper.support.adapter.SupportLoaderOne", adapterOne.getClassName());
-        assertEquals(2, adapterOne.getConfigProperties().size());
-        assertEquals("val1", adapterOne.getConfigProperties().get("name1"));
-        assertEquals("val2", adapterOne.getConfigProperties().get("name2"));
+        List<ConfigurationPluginLoader> plugins = config.getPluginLoaders();
+        assertEquals(2, plugins.size());
+        ConfigurationPluginLoader pluginOne = plugins.get(0);
+        assertEquals("Loader1", pluginOne.getLoaderName());
+        assertEquals("com.espertech.esper.support.plugin.SupportLoaderOne", pluginOne.getClassName());
+        assertEquals(2, pluginOne.getConfigProperties().size());
+        assertEquals("val1", pluginOne.getConfigProperties().get("name1"));
+        assertEquals("val2", pluginOne.getConfigProperties().get("name2"));
 
-        ConfigurationAdapterLoader adapterTwo = adapters.get(1);
-        assertEquals("Loader2", adapterTwo.getLoaderName());
-        assertEquals("com.espertech.esper.support.adapter.SupportLoaderTwo", adapterTwo.getClassName());
-        assertEquals(0, adapterTwo.getConfigProperties().size());
+        ConfigurationPluginLoader pluginTwo = plugins.get(1);
+        assertEquals("Loader2", pluginTwo.getLoaderName());
+        assertEquals("com.espertech.esper.support.plugin.SupportLoaderTwo", pluginTwo.getClassName());
+        assertEquals(0, pluginTwo.getConfigProperties().size());
 
         // assert plug-in aggregation function loaded
         assertEquals(2, config.getPlugInAggregationFunctions().size());

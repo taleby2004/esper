@@ -42,7 +42,7 @@ public class TestJMSSpringOutputAdapter extends TestCase
         // define loader
         Properties props = new Properties();
         props.put(SpringContext.CLASSPATH_CONTEXT, "regression/jms_regression_output_spring.xml");
-        config.addAdapterLoader("MyLoader", SpringContextLoader.class.getName(), props);
+        config.addPluginLoader("MyLoader", SpringContextLoader.class.getName(), props);
         EPServiceProvider service = EPServiceProviderManager.getProvider(this.getClass().getName() + "_testOutputAdapter", config);
 
         service.getEPAdministrator().createEPL(

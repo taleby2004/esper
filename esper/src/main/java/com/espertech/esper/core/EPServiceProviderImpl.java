@@ -251,28 +251,28 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      */
     private void loadAdapters(ConfigurationInformation configuration, EPServicesContext services)
     {
-        List<ConfigurationAdapterLoader> adapterLoaders = configuration.getAdapterLoaders();
-        if ((adapterLoaders == null) || (adapterLoaders.size() == 0))
+        List<ConfigurationPluginLoader> pluginLoaders = configuration.getPluginLoaders();
+        if ((pluginLoaders == null) || (pluginLoaders.size() == 0))
         {
             return;
         }
-        for (ConfigurationAdapterLoader config : adapterLoaders)
+        for (ConfigurationPluginLoader config : pluginLoaders)
         {
             String className = config.getClassName();
-            Class adapterLoaderClass;
+            Class pluginLoaderClass;
             try
             {
-                adapterLoaderClass = Class.forName(className);
+                pluginLoaderClass = Class.forName(className);
             }
             catch (ClassNotFoundException ex)
             {
                 throw new ConfigurationException("Failed to load adapter loader class '" + className + "'", ex);
             }
 
-            Object adapterLoaderObj;
+            Object pluginLoaderObj;
             try
             {
-                adapterLoaderObj = adapterLoaderClass.newInstance();
+                pluginLoaderObj = pluginLoaderClass.newInstance();
             }
             catch (InstantiationException ex)
             {
@@ -283,13 +283,13 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 throw new ConfigurationException("Illegal access to instantiate adapter loader class '" + className + "' via default constructor", ex);
             }
 
-            PluginLoader pluginLoader = (PluginLoader) adapterLoaderObj;
+            PluginLoader pluginLoader = (PluginLoader) pluginLoaderObj;
             pluginLoader.init(config.getLoaderName(), config.getConfigProperties(), this);
 
             // register adapter loader in JNDI context tree
             try
             {
-                services.getEngineEnvContext().bind("adapter-loader/" + config.getLoaderName(), pluginLoader);
+                services.getEngineEnvContext().bind("plugin-loader/" + config.getLoaderName(), pluginLoader);
             }
             catch (NamingException e)
             {

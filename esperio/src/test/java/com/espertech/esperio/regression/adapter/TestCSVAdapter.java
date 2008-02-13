@@ -9,7 +9,7 @@ import com.espertech.esperio.AdapterState;
 import com.espertech.esperio.InputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esperio.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.io.EOFException;

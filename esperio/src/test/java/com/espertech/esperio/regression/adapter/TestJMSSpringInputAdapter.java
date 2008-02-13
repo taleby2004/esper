@@ -40,7 +40,7 @@ public class TestJMSSpringInputAdapter extends TestCase
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         Properties props = new Properties();
         props.put(SpringContext.CLASSPATH_CONTEXT, "regression/jms_regression_input_spring.xml");
-        config.addAdapterLoader("MyLoader", SpringContextLoader.class.getName(), props);
+        config.addPluginLoader("MyLoader", SpringContextLoader.class.getName(), props);
         EPServiceProvider service = EPServiceProviderManager.getProvider(this.getClass().getName() + "_testSerializable", config);
 
         EPStatement statement = service.getEPAdministrator().createEPL("select * from " + SupportSerializableBean.class.getName());
@@ -56,7 +56,7 @@ public class TestJMSSpringInputAdapter extends TestCase
         assertEquals("x2", listener.assertOneGetNewAndReset().get("string"));
 
         EPServiceProviderSPI spi = (EPServiceProviderSPI) service;
-        PluginLoader loader = (PluginLoader) spi.getContext().lookup("adapter-loader/MyLoader");
+        PluginLoader loader = (PluginLoader) spi.getContext().lookup("plugin-loader/MyLoader");
         loader.destroy();
     }
 
@@ -68,7 +68,7 @@ public class TestJMSSpringInputAdapter extends TestCase
         // define loader
         Properties props = new Properties();
         props.put(SpringContext.CLASSPATH_CONTEXT, "regression/jms_regression_input_spring.xml");
-        config.addAdapterLoader("MyLoader", SpringContextLoader.class.getName(), props);
+        config.addPluginLoader("MyLoader", SpringContextLoader.class.getName(), props);
 
         // define type
         Map<String, Class> typeProps = new HashMap<String, Class>();

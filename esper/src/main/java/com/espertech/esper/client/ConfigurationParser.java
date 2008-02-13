@@ -137,9 +137,9 @@ class ConfigurationParser {
             {
                 handleVariable(configuration, element);
             }
-            else if (nodeName.equals("adapter-loader"))
+            else if (nodeName.equals("plugin-loader"))
             {
-                handleAdapterLoaders(configuration, element);
+                handlePluginLoaders(configuration, element);
             }
             else if (nodeName.equals("engine-settings"))
             {
@@ -504,7 +504,7 @@ class ConfigurationParser {
         configuration.addVariable(variableName, variableType, initValue);
     }
 
-    private static void handleAdapterLoaders(Configuration configuration, Element element)
+    private static void handlePluginLoaders(Configuration configuration, Element element)
     {
         String loaderName = element.getAttributes().getNamedItem("name").getTextContent();
         String className = element.getAttributes().getNamedItem("class-name").getTextContent();
@@ -520,7 +520,7 @@ class ConfigurationParser {
                 properties.put(name, value);
             }
         }
-        configuration.addAdapterLoader(loaderName, className, properties);
+        configuration.addPluginLoader(loaderName, className, properties);
     }
 
     private static void handleEngineSettings(Configuration configuration, Element element)

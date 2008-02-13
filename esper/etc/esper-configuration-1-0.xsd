@@ -13,7 +13,7 @@
 				<xs:element ref="plugin-pattern-guard" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="plugin-pattern-observer" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="variable" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="adapter-loader" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="plugin-loader" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="engine-settings" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
@@ -255,7 +255,7 @@
 			<xs:attribute name="factory-class" type="xs:string" use="required"/>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="adapter-loader">
+	<xs:element name="plugin-loader">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="init-arg" minOccurs="0" maxOccurs="unbounded"/>
