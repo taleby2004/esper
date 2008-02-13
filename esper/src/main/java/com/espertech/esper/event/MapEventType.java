@@ -66,8 +66,8 @@ public class MapEventType implements EventType
     }
 
     /**
-     * TODO: nestable map constructor
-     * Constructor takes a type name, map of property names and types.
+     * Constructor takes a type name, map of property names and types, for
+     * use with nestable Map events.
      * @param typeName is the event type name used to distinquish map types that have the same property types,
      * empty string for anonymous maps, or for insert-into statements generating map events
      * the stream name
@@ -93,12 +93,25 @@ public class MapEventType implements EventType
         // these are handled at the time someone is asking for them
         for (Map.Entry<String, Object> entry : propertyTypes.entrySet())
         {
+            if (!(entry.getKey() instanceof String))
+            {
+                throw new EPException("Invalid map type configuration: property name is not a String-type value");
+            }
             String name = entry.getKey();
             hashCode = hashCode ^ name.hashCode();
 
             if (entry.getValue() instanceof Class)
             {
                 simplePropertyTypes.put(name, (Class) entry.getValue());
+                propertyNameList.add(name);
+                EventPropertyGetter getter = new MapEventPropertyGetter(name);
+                propertyGetters.put(name, getter);
+                continue;
+            }
+            // A null-type is also allowed
+            if (entry.getValue() == null)
+            {
+                simplePropertyTypes.put(name, null);
                 propertyNameList.add(name);
                 EventPropertyGetter getter = new MapEventPropertyGetter(name);
                 propertyGetters.put(name, getter);
@@ -508,7 +521,7 @@ public class MapEventType implements EventType
 
     private void generateExceptionNestedProp(String name, Object value) throws EPException
     {
-        String clazzName = (value == null) ? "null" : value.getClass().toString();
+        String clazzName = (value == null) ? "null" : value.getClass().getSimpleName();
         throw new EPException("Nestable map type configuration encountered an unexpected property type of '"
             + clazzName + "' for property '" + name + "', expected java.lang.Class or java.util.Map definition");
     }

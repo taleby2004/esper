@@ -11,7 +11,7 @@ public class SupportEventTypeFactory
         return SupportEventAdapterService.getService().addBeanType(clazz.getName(), clazz);
     }
 
-    public static EventType createMapType(Map<String,Class> map)
+    public static EventType createMapType(Map<String,Object> map)
     {
         return SupportEventAdapterService.getService().createAnonymousMapType(map);
     }

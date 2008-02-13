@@ -30,6 +30,7 @@ public class ResultSetProcessorHandThrough extends ResultSetProcessorBaseSimple
      * Ctor.
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * a row per group even if groups didn't change
+     * @param isSelectRStream - true if remove stream events should be generated
      */
     public ResultSetProcessorHandThrough(SelectExprProcessor selectExprProcessor, boolean isSelectRStream)
     {

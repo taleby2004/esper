@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class TestMapEventBean extends TestCase
 {
-    private Map<String, Class> testTypesMap;
+    private Map<String, Object> testTypesMap;
     private Map<String, Object> testValuesMap;
 
     private EventType eventType;
@@ -24,7 +24,7 @@ public class TestMapEventBean extends TestCase
 
     public void setUp()
     {
-        testTypesMap = new HashMap<String, Class>();
+        testTypesMap = new HashMap<String, Object>();
         testTypesMap.put("aString", String.class);
         testTypesMap.put("anInt", Integer.class);
         testTypesMap.put("myComplexBean", SupportBeanComplexProps.class);
@@ -34,7 +34,7 @@ public class TestMapEventBean extends TestCase
         testValuesMap.put("anInt", 10);
         testValuesMap.put("myComplexBean", supportBean);
 
-        eventType = new MapEventType("", testTypesMap, SupportEventAdapterService.getService());
+        eventType = new MapEventType("", SupportEventAdapterService.getService(), testTypesMap);
         eventBean = new MapEventBean(testValuesMap, eventType);
     }
 

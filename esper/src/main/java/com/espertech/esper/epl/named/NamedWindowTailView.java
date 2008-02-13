@@ -32,7 +32,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
      * @param namedWindowService the service for dispatches to consumers for hooking into the dispatch loop
      * @param namedWindowRootView the root data window view for indicating remove stream events to be removed from possible on-delete indexes
      * @param createWindowStmtHandle statement handle for the statement that created the named window, for safe iteration
-     * @param statementResultService
+     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      */
     public NamedWindowTailView(EventType eventType, NamedWindowService namedWindowService, NamedWindowRootView namedWindowRootView, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService)
     {

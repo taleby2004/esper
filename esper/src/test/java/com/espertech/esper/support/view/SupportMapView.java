@@ -25,7 +25,7 @@ public class SupportMapView extends SupportBaseView
         updateChildren(newData, oldData);
     }
 
-    public SupportMapView(Map<String, Class> eventTypeMap)
+    public SupportMapView(Map<String, Object> eventTypeMap)
     {
         super(SupportEventTypeFactory.createMapType(eventTypeMap));
         instances.add(this);

@@ -172,7 +172,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
         }
 
         // Build event type that reflects all selected properties
-        Map<String, Class> selPropertyTypes = new HashMap<String, Class>();
+        Map<String, Object> selPropertyTypes = new HashMap<String, Object>();
         int count = 0;
         for (ExprNode expressionNode : expressionNodes)
         {
@@ -209,7 +209,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
                 }
                 else
                 {
-                    resultEventType = eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
+                    resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
                 }
             }
             catch (EventAdapterException ex)

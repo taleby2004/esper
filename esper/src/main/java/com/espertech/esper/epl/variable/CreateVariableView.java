@@ -36,6 +36,7 @@ public class CreateVariableView extends ViewSupport implements VariableChangeCal
      * @param eventAdapterService for creating events
      * @param variableService for looking up variables
      * @param variableName is the name of the variable to create
+     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      */
     public CreateVariableView(EventAdapterService eventAdapterService, VariableService variableService, String variableName, StatementResultService statementResultService)
     {
@@ -44,7 +45,7 @@ public class CreateVariableView extends ViewSupport implements VariableChangeCal
         this.statementResultService = statementResultService;
         reader = variableService.getReader(variableName);
 
-        Map<String, Class> variableTypes = new HashMap<String, Class>();
+        Map<String, Object> variableTypes = new HashMap<String, Object>();
         variableTypes.put(variableName, reader.getType());
         eventType = eventAdapterService.createAnonymousMapType(variableTypes);
     }

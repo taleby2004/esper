@@ -41,6 +41,7 @@ public class OnSetVariableView extends ViewSupport
      * @param desc specification for the on-set statement
      * @param eventAdapterService for creating statements
      * @param variableService for setting variables
+     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      * @throws ExprValidationException if the assignment expressions are invalid
      */
     public OnSetVariableView(OnTriggerSetDesc desc, EventAdapterService eventAdapterService, VariableService variableService, StatementResultService statementResultService)
@@ -51,7 +52,7 @@ public class OnSetVariableView extends ViewSupport
         this.variableService = variableService;
         this.statementResultService = statementResultService;
 
-        Map<String, Class> variableTypes = new HashMap<String, Class>();
+        Map<String, Object> variableTypes = new HashMap<String, Object>();
         readers = new VariableReader[desc.getAssignments().size()];
         mustCoerce = new boolean[desc.getAssignments().size()];
 

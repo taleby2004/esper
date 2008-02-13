@@ -33,6 +33,8 @@ public class PropertyParser
      * Parse the given property name returning a Property instance for the property.
      * @param propertyName is the property name to parse
      * @param beanEventTypeFactory is the chache and factory for event bean types and event wrappers
+     * @param isRootedDynamic is true to indicate that the property is already rooted in a dynamic
+     * property and therefore all child properties should be dynamic properties as well
      * @return Property instance for property
      */
     public static Property parse(String propertyName, BeanEventTypeFactory beanEventTypeFactory, boolean isRootedDynamic)

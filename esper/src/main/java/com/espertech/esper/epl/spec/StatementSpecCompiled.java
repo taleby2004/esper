@@ -250,6 +250,10 @@ public class StatementSpecCompiled
         return hasVariables;
     }
 
+    /**
+     * Sets the stream selection.
+     * @param selectStreamDirEnum stream selection
+     */
     public void setSelectStreamDirEnum(SelectClauseStreamSelectorEnum selectStreamDirEnum) {
         this.selectStreamDirEnum = selectStreamDirEnum;
     }

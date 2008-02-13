@@ -54,15 +54,17 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 	protected Map<String, ConfigurationEventTypeLegacy> eventTypesLegacy;
 
 	/**
-	 * The type aliases for events that result when maps are sent
-	 * into the engine.
+	 * The type aliases for events that are backed by java.util.Map,
+     * not containing strongly-typed nested maps.
 	 */
 	protected Map<String, Properties> mapAliases;
 
     /**
-     * TODO
-     * The type aliases for events that result when maps are sent
-     * into the engine.
+     * The type aliases for events that are backed by java.util.Map,
+     * possibly containing strongly-typed nested maps.
+     * <p>
+     * Each entrie's value must be either a Class or a Map<String,Object> to
+     * define nested maps.
      */
     protected Map<String, Map<String, Object>> nestableMapAliases;
 
@@ -202,8 +204,12 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     /**
-     * TODO
-     * Add an alias for an event type that represents java.util.Map events.
+     * Add an alias for an event type that represents java.util.Map events,
+     * and for which each property may itself be a Map of further properties,
+     * with unlimited nesting levels.
+     * <p>
+     * Each entry in the type mapping must contain the String property name
+     * and either a Class or further Map<String, Object> value. 
      * @param eventTypeAlias is the alias for the event type
      * @param typeMap maps the name of each property in the Map event to the type
      * (fully qualified classname) of its value in Map event instances.

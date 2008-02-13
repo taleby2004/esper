@@ -59,6 +59,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
      * @param variableService for variable access
      * @param input is the tree nodes to walk
      * @param engineTime is the current engine time
+     * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
      */
     public EPLTreeWalker(TreeNodeStream input,
                          EngineImportService engineImportService,

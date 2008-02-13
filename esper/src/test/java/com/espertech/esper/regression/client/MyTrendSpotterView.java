@@ -122,7 +122,7 @@ public class MyTrendSpotterView extends ViewSupport
      */
     protected static EventType createEventType(StatementContext statementContext)
     {
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
+        Map<String, Object> eventTypeMap = new HashMap<String, Object>();
         eventTypeMap.put(PROPERTY_NAME, Long.class);
         return statementContext.getEventAdapterService().createAnonymousMapType(eventTypeMap);
     }

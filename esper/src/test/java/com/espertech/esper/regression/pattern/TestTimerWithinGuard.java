@@ -211,40 +211,6 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         assertFalse(testListener.isInvoked());
     }
 
-    public void testAndWithin()
-    {
-        /**
-         * TODO - this test is reported for investigation
-         */
-        /*
-        Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("A", SupportBean_A.class);
-        config.addEventTypeAlias("B", SupportBean_B.class);
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
-        epService.initialize();
-
-        // External clocking
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
-        sendTimer(0, epService);
-
-        // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEPL(
-                "select * from pattern [every ((A and B) where timer:within(2))]");
-
-        SupportUpdateListener testListener = new SupportUpdateListener();
-        statement.addListener(testListener);
-
-        sendTimer(15000, epService);
-        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
-        assertFalse(testListener.isInvoked());
-
-        sendTimer(16000, epService);
-        epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        assertTrue(testListener.isInvoked());
-        */
-    }
-
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
         CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);

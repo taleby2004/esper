@@ -127,7 +127,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
 
         // Build event type
-        Map<String, Class> selPropertyTypes = new HashMap<String, Class>();
+        Map<String, Object> selPropertyTypes = new HashMap<String, Object>();
         for (int i = 0; i < expressionNodes.length; i++)
         {
             Class expressionReturnType = expressionNodes[i].getType();
@@ -167,7 +167,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                     }
                     if (resultEventType == null)
                     {
-                        resultEventType = eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
+                        resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes);
                     }
                 }
             }

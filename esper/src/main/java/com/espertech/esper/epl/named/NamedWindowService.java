@@ -36,7 +36,7 @@ public interface NamedWindowService
      * @param name window name
      * @param eventType the event type of the window
      * @param createWindowStmtHandle is the handle and lock of the create-named-window statement
-     * @param statementResultService
+     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */

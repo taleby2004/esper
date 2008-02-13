@@ -283,7 +283,7 @@ public final class MultiDimStatsView extends ViewSupport implements CloneableVie
      */
     protected static EventType createEventType(StatementContext statementContext)
     {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        Map<String, Object> schemaMap = new HashMap<String, Object>();
         schemaMap.put(ViewFieldEnum.MULTIDIM_OLAP__CUBE.getName(), Cube.class);
         return statementContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }

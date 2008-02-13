@@ -157,15 +157,6 @@ public class TestEventBeanUtility extends TestCase
         return getters;
     }
 
-    private EventType makeEventType()
-    {
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
-        eventTypeMap.put("a", SupportBean.class);
-        eventTypeMap.put("b", SupportBean.class);
-        EventType eventType = SupportEventTypeFactory.createMapType(eventTypeMap);
-        return eventType;
-    }
-
     private EventBean[] makeEventArray(String[] texts)
     {
         EventBean[] events = new EventBean[texts.length];

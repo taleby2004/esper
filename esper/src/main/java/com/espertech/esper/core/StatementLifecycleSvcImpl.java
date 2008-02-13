@@ -384,7 +384,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EPStatementSPI statement = desc.getEpStatement();
         if (statement.getState() == EPStatementState.STARTED)
         {
-            throw new IllegalStateException("Statement already started");
+            log.debug(".startInternal - Statement already started");
+            return;
         }
 
         Pair<Viewable, EPStatementStopMethod> pair;
@@ -441,7 +442,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
             if (statement.getState() == EPStatementState.STOPPED)
             {
-                throw new IllegalStateException("Statement already stopped");
+                log.debug(".startInternal - Statement already stopped");
+                return;
             }
 
             stopMethod.stop();
@@ -473,7 +475,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             EPStatementDesc desc = stmtIdToDescMap.get(statementId);
             if (desc == null)
             {
-                throw new IllegalStateException("Statement already destroyed");
+                log.debug(".startInternal - Statement already destroyed");
+                return;
             }
 
             EPStatementSPI statement = desc.getEpStatement();

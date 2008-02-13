@@ -175,7 +175,7 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
      */
     protected static EventType createEventType(StatementContext statementContext)
     {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        Map<String, Object> schemaMap = new HashMap<String, Object>();
         schemaMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), double.class);
         return statementContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }

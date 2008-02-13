@@ -188,16 +188,16 @@ else
 				<tbody>
 					<row>
 						<entry>1</entry>
-						<entry>Guard postfix</entry>
-						<entry><literal>where timer:within</literal> (or plug-in pattern guard)</entry>
-						<entry><programlisting><![CDATA[MyEvent where timer:within(1 sec)]]></programlisting></entry>
-					</row>
-					<row>
-						<entry>2</entry>
 						<entry>unary</entry>
 						<entry><literal>every, not</literal></entry>
 						<entry><programlisting><![CDATA[every MyEvent
 timer:interval(5 min) and not MyEvent]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>2</entry>
+						<entry>Guard postfix</entry>
+						<entry><literal>where timer:within</literal> (or plug-in pattern guard)</entry>
+						<entry><programlisting><![CDATA[MyEvent where timer:within(1 sec)]]></programlisting></entry>
 					</row>
 					<row>
 						<entry>3</entry>
@@ -262,6 +262,11 @@ timer:interval(5 min) and not MyEvent]]></programlisting></entry>
 						<entry>A and B or C</entry>
 						<entry>(A and B) or C</entry>
 						<entry>The <literal>and</literal> operator has higher precedence then the <literal>or</literal> operator</entry>
+					</row>
+					<row>
+						<entry>every A where timer:within(5)</entry>
+						<entry>every (A where timer:within(5))</entry>
+						<entry>The <literal>every</literal> operator has higher precedence then the <literal>timer:within</literal> guard postfix</entry>
 					</row>
 				</tbody>
 			</tgroup>
@@ -850,6 +855,11 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
         <para>
 			In the pattern above, the guard terminates the subexpression looking for all MyEvent events after 10 seconds after start of the pattern. This pattern alerts for all MyEvent events arriving within 10 seconds after pattern start, and then stops.
         </para>
+
+        <para>
+			Guards do not change the truth value of the subexpression of which the guard controls the lifecycle, and therefore do not cause a restart of the subexpression when used with the <literal>every</literal> operator. For example, the next pattern stops returning matches after 10 seconds unless a match occured within 10 seconds after pattern start:
+        </para>
+		<programlisting><![CDATA[every ( (A and B) where timer.within(10 sec) )]]></programlisting>
 
         <sect2 id="pattern-timer-within" >
            <title>timer:within</title>

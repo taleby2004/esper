@@ -100,7 +100,7 @@ public final class SizeView extends ViewSupport implements CloneableView
      */
     protected static EventType createEventType(StatementContext statementContext)
     {
-        Map<String, Class> schemaMap = new HashMap<String, Class>();
+        Map<String, Object> schemaMap = new HashMap<String, Object>();
         schemaMap.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), long.class);
         return statementContext.getEventAdapterService().createAnonymousMapType(schemaMap);
     }

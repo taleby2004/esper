@@ -337,7 +337,7 @@ config.addEventTypeAlias("MyLegacyEvent", MyLegacyEventClass.class.getName(), le
 			<title>Events represented by <literal>java.util.Map</literal></title>
 			
 			<para>
-				The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names in pattern or EPL statements. Values can be of any type. JavaBean-style objects as values in a <literal>Map</literal> can also be processed by the engine. Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.
+				The engine can process <literal>java.util.Map</literal> events via the <literal>sendEvent(Map map, String eventTypeAlias)</literal> method on the <literal>EPRuntime</literal> interface. Entries in the Map represent event properties. Keys must be of type <literal>java.util.String</literal> for the engine to be able to look up event property names in pattern or EPL statements. Values can be of any type. JavaBean-style objects as values in a <literal>Map</literal> can be processed by the engine, and strongly-typed nested maps are also supported. Please see the <xref linkend="event_representation"/> section for details on how to use <literal>Map</literal> events with the engine.
 			</para>
 			
 			<para>
@@ -418,7 +418,7 @@ config.addEventTypeAlias("MyLegacyEvent", MyLegacyEventClass.class.getName(), le
 			</itemizedlist>
 
 			<para>
-				 You can also use the configuration API to configure <literal>Map</literal> event types, as the short code snippet below demonstrates. 
+				 You can also use the configuration API to configure <literal>Map</literal> event types, as the short code snippet below demonstrates:
 			</para>
 
 			<programlisting><![CDATA[Properties properties = new Properties();
@@ -428,6 +428,10 @@ properties.put("assembly", Assembly.class.getName());
 
 Configuration configuration = new Configuration();
 configuration.addEventTypeAlias("MyMapEvent", properties);]]></programlisting>
+
+			<para>
+				 For strongly-typed nested maps (maps-within-maps), the configuration API method <literal>addNestableEventTypeAlias</literal> must be used to define the nested types. The XML configuration does not provide the capability to configure nested maps.
+			</para>
 
 			<para>
 				Finally, here is a sample EPL statement that uses the configured <literal>MyMapEvent</literal> map event. This statement uses the <literal>chassisTag</literal> and <literal>numParts</literal> properties of <literal>Assembly</literal> objects in each map.

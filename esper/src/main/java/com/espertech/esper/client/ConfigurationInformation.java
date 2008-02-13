@@ -20,8 +20,6 @@ public interface ConfigurationInformation
      */
     public String getEPServicesContextFactoryClassName();
 
-    public Map<String, Map<String, Object>> getEventTypesNestableMapEvents();
-
     /**
      * Returns the mapping of event type alias to Java class name.
      * @return event type aliases for Java class names
@@ -34,6 +32,14 @@ public interface ConfigurationInformation
      * @return map of event type alias name and definition of event properties
      */
     public Map<String, Properties> getEventTypesMapEvents();
+
+    /**
+     * Returns a map keyed by event type alias name, and values being the definition for the
+     * event type of the property names and types that make up the event,
+     * for nestable, strongly-typed Map-based event representations. 
+     * @return map of event type alias name and definition of event properties
+     */
+    public Map<String, Map<String, Object>> getEventTypesNestableMapEvents();
 
     /**
      * Returns the mapping of event type alias to XML DOM event type information.

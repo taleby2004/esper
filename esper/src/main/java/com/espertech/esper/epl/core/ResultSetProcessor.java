@@ -66,7 +66,21 @@ public interface ResultSetProcessor
      */
     public void clear();
 
+    /**
+     * Processes batched events in case of output-rate limiting.
+     * @param joinEventsSet the join results
+     * @param generateSynthetic flag to indicate whether synthetic events must be generated
+     * @param outputLimitLimitType the type of output rate limiting
+     * @return results for dispatch
+     */
     public UniformPair<EventBean[]> processOutputLimitedJoin(List<UniformPair<Set<MultiKey<EventBean>>>> joinEventsSet, boolean generateSynthetic, OutputLimitLimitType outputLimitLimitType);
 
+    /**
+     * Processes batched events in case of output-rate limiting.
+     * @param viewEventsList the view results
+     * @param generateSynthetic flag to indicate whether synthetic events must be generated
+     * @param outputLimitLimitType the type of output rate limiting
+     * @return results for dispatch
+     */
     public UniformPair<EventBean[]> processOutputLimitedView(List<UniformPair<EventBean[]>> viewEventsList, boolean generateSynthetic, OutputLimitLimitType outputLimitLimitType);
 }

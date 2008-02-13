@@ -222,6 +222,7 @@ public class SelectClause implements Serializable
     /**
      * Sets the stream selector.
      * @param streamSelector stream selector to set
+     * @return select clause
      */
     public SelectClause setStreamSelector(StreamSelector streamSelector)
     {

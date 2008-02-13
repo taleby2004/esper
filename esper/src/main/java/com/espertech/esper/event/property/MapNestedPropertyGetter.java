@@ -16,6 +16,7 @@ public class MapNestedPropertyGetter implements EventPropertyGetter
     /**
      * Ctor.
      * @param getterChain is the chain of getters to retrieve each nested property
+     * @param beanEventTypeFactory is a factory for POJO bean event types
      */
     public MapNestedPropertyGetter(List<EventPropertyGetter> getterChain,
                                    BeanEventTypeFactory beanEventTypeFactory)

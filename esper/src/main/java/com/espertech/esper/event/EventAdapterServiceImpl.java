@@ -432,10 +432,10 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return false;
     }
 
-    public final EventType createAnonymousMapType(Map<String, Class> propertyTypes) throws EventAdapterException
+    public final EventType createAnonymousMapType(Map<String, Object> propertyTypes) throws EventAdapterException
     {
         String alias = UuidGenerator.generate(propertyTypes);
-        return new MapEventType(alias, propertyTypes, this);
+        return new MapEventType(alias, this, propertyTypes);
     }
 
     public final EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException
@@ -446,7 +446,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public final EventType createAddToEventType(EventType originalType, String[] fieldNames, Class[] fieldTypes)
     {
-        Map<String, Class> types = new HashMap<String, Class>();
+        Map<String, Object> types = new HashMap<String, Object>();
 
         // Copy properties of original event, add property value
         for (String property : originalType.getPropertyNames())

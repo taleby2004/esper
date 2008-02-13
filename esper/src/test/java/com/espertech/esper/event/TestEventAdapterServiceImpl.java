@@ -30,8 +30,8 @@ public class TestEventAdapterServiceImpl extends TestCase
 
     public void testCreateMapType()
     {
-        Map<String, Class> testTypesMap;
-        testTypesMap = new HashMap<String, Class>();
+        Map<String, Object> testTypesMap;
+        testTypesMap = new HashMap<String, Object>();
         testTypesMap.put("key1", String.class);
         EventType eventType = adapterService.createAnonymousMapType(testTypesMap);
 
@@ -100,7 +100,7 @@ public class TestEventAdapterServiceImpl extends TestCase
     public void testAddWrapperType()
     {
         EventType beanEventType = adapterService.addBeanType("mybean", SupportMarketDataBean.class);
-        Map<String, Class> props = new HashMap<String, Class>();
+        Map<String, Object> props = new HashMap<String, Object>();
         props.put("a", Long.class);
         props.put("b", String.class);
 
@@ -177,7 +177,7 @@ public class TestEventAdapterServiceImpl extends TestCase
 
     public void testCreateAddToEventType()
     {
-        Map<String, Class> schema = new HashMap<String, Class>();
+        Map<String, Object> schema = new HashMap<String, Object>();
         schema.put("STDDEV", Double.class);
         EventType parentEventType = adapterService.createAnonymousMapType(schema);
 

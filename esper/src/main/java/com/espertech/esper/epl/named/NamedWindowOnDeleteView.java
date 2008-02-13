@@ -24,6 +24,7 @@ public class NamedWindowOnDeleteView extends NamedWindowOnExprBaseView
      * @param statementStopService for indicating a statement was stopped or destroyed for cleanup
      * @param lookupStrategy for handling trigger events to determine deleted events
      * @param removeStreamView to indicate which events to delete
+     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      */
     public NamedWindowOnDeleteView(StatementStopService statementStopService,
                                  LookupStrategy lookupStrategy,

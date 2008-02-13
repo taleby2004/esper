@@ -23,7 +23,7 @@ public class TestWrapperEventBean extends TestCase
 		EventType underlyingEventTypeSimple = eventService.addBeanType("underlyingSimpleBean", SupportBeanSimple.class);
 		EventType underlyingEventTypeCombined = eventService.addBeanType("underlyingCombinedBean", SupportBeanCombinedProps.class);
 		
-		Map<String, Class> typeMap = new HashMap<String, Class>();
+		Map<String, Object> typeMap = new HashMap<String, Object>();
 		typeMap.put("string", String.class);
 		typeMap.put("int", Integer.class);
 		

@@ -34,6 +34,10 @@ public class StatementSpecRaw implements MetaDefItem
     private boolean existsSubstitutionParameters;
     private boolean hasVariables;
 
+    /**
+     * Ctor.
+     * @param defaultStreamSelector stream selection for the statement
+     */
     public StatementSpecRaw(SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
         selectStreamDirEnum = defaultStreamSelector;

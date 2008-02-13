@@ -28,12 +28,14 @@ public interface Property
 
     /**
      * Returns the property type for use with Map event representations.
+     * @param optionalMapPropTypes a map-within-map type definition, if supplied, or null if not supplied
      * @return property type @param optionalMapPropTypes
      */
     public Class getPropertyTypeMap(Map optionalMapPropTypes);
 
     /**
      * Returns the getter-method for use with Map event representations.
+     * @param optionalMapPropTypes a map-within-map type definition, if supplied, or null if not supplied
      * @return getter for maps @param optionalMapPropTypes
      */
     public EventPropertyGetter getGetterMap(Map optionalMapPropTypes);

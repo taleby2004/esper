@@ -41,6 +41,8 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * @param aggregationService - handles aggregation
      * @param optionalHavingNode - having clause expression node
+     * @param isSelectRStream - true if remove stream events should be generated
+     * @param orderByProcessor - for ordering output events
      */
     public ResultSetProcessorRowForAll(SelectExprProcessor selectExprProcessor,
                                        AggregationService aggregationService,

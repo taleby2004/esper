@@ -24,7 +24,7 @@ public class TestPollExecStrategyDBQuery extends TestCase
         DatabaseConnectionFactory databaseConnectionFactory = SupportDatabaseService.makeService().getConnectionFactory("mydb");
         ConnectionCache connectionCache = new ConnectionNoCacheImpl(databaseConnectionFactory, sql);
 
-        Map<String, Class> resultProperties = new HashMap<String, Class>();
+        Map<String, Object> resultProperties = new HashMap<String, Object>();
         resultProperties.put("myvarchar", String.class);
         EventType resultEventType = SupportEventAdapterService.getService().createAnonymousMapType(resultProperties);
 

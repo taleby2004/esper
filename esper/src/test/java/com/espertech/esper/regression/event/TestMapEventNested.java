@@ -16,9 +16,6 @@ import java.util.Map;
 
 public class TestMapEventNested extends TestCase
 {
-    // TODO: wrapper selecting nested maps
-    // TODO: invalid cases testing
-
     public void testNestedMapRuntime()
     {
         EPServiceProvider epService = getEngineInitialized(null, null);
@@ -207,6 +204,30 @@ public class TestMapEventNested extends TestCase
         assertEquals(SupportBean_A.class, eventType.getPropertyType("object"));
 
         assertNull(eventType.getPropertyType("map.mapOne.simpleOne"));
+    }
+
+    public void testInvalidType()
+    {
+        EPServiceProvider epService = getEngineInitialized(null, null);
+
+        Map<String, Object> invalid = makeMap(new Object[][] {{new SupportBean(), null} });
+        tryInvalid(epService, invalid, "Invalid map type configuration: property name is not a String-type value");
+
+        invalid = makeMap(new Object[][] {{"abc", new SupportBean()} });
+        tryInvalid(epService, invalid, "Nestable map type configuration encountered an unexpected property type of 'SupportBean' for property 'abc', expected java.lang.Class or java.util.Map definition");
+    }
+
+    private void tryInvalid(EPServiceProvider epService, Map<String, Object> config, String message)
+    {
+        try
+        {
+            epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("NestedMap", config);
+            fail();
+        }
+        catch (Exception ex)
+        {
+            assertTrue("expected '" + message + "' but received '" + ex.getMessage(), ex.getMessage().contains(message));
+        }
     }
 
     private Map<String, Object> getTestDefinition()

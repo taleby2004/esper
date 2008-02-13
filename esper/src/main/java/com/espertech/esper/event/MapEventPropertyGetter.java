@@ -2,10 +2,17 @@ package com.espertech.esper.event;
 
 import java.util.Map;
 
+/**
+ * A getter for use with Map-based events simply returns the value for the key.
+ */
 public class MapEventPropertyGetter implements EventPropertyGetter 
 {
     private final String propertyName;
 
+    /**
+     * Ctor.
+     * @param propertyName property to get
+     */
     public MapEventPropertyGetter(String propertyName) {
         this.propertyName = propertyName;
     }

@@ -16,14 +16,14 @@ public class TestWrapperEventType extends TestCase
 	private EventType underlyingEventTypeOne;
 	private EventType underlyingEventTypeTwo;
 	private EventType eventType;
-	private Map<String, Class> properties;
+	private Map<String, Object> properties;
 	private EventAdapterService eventAdapterService;
 	
 	protected void setUp()
 	{
         underlyingEventTypeOne = new BeanEventType(SupportBeanSimple.class, new BeanEventAdapter(new ConcurrentHashMap<Class, BeanEventType>()), null, "abc");
         underlyingEventTypeTwo = new BeanEventType(SupportBean_A.class, new BeanEventAdapter(new ConcurrentHashMap<Class, BeanEventType>()), null, "abc");
-        properties = new HashMap<String, Class>();
+        properties = new HashMap<String, Object>();
         properties.put("additionalString", String.class);
         properties.put("additionalInt", Integer.class);
         eventAdapterService = SupportEventAdapterService.getService();
@@ -73,7 +73,7 @@ public class TestWrapperEventType extends TestCase
 	
 	public void testEquals()
 	{
-		Map<String, Class> otherProperties = new HashMap<String, Class>(properties);
+		Map<String, Object> otherProperties = new HashMap<String, Object>(properties);
 		EventType otherType = new WrapperEventType("mytype", underlyingEventTypeOne, otherProperties, eventAdapterService);
 		assertTrue(eventType.equals(otherType));
 		assertTrue(otherType.equals(eventType));

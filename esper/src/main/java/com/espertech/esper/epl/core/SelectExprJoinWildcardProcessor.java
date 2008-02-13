@@ -41,7 +41,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         this.eventAdapterService = eventAdapterService;
 
         // Create EventType of result join events
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
+        Map<String, Object> eventTypeMap = new HashMap<String, Object>();
         for (int i = 0; i < streamTypes.length; i++)
         {
             eventTypeMap.put(streamNames[i], streamTypes[i].getUnderlyingType());
@@ -52,7 +52,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         {
         	try
             {
-                resultEventType = eventAdapterService.addMapType(insertIntoDesc.getEventTypeAlias(), eventTypeMap);
+                resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeAlias(), eventTypeMap);
             }
             catch (EventAdapterException ex)
             {

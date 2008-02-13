@@ -5,6 +5,10 @@ import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.event.EventBean;
 
+/**
+ * Interface for a statement-level service for coordinating the insert/remove stream generation,
+ * native deliver to subscribers and the presence/absence of listener or subscribers to a statement. 
+ */
 public interface StatementResultService
 {
     /**

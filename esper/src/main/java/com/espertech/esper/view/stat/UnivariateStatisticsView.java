@@ -148,7 +148,7 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
      */
     protected static EventType createEventType(StatementContext statementContext)
     {
-        Map<String, Class> eventTypeMap = new HashMap<String, Class>();
+        Map<String, Object> eventTypeMap = new HashMap<String, Object>();
         eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName(), long.class);
         eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName(), double.class);
         eventTypeMap.put(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName(), double.class);

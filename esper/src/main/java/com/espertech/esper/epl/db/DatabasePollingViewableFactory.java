@@ -188,7 +188,7 @@ public class DatabasePollingViewableFactory
 
         // Create event type
         // Construct an event type from SQL query result metadata
-        Map<String, Class> eventTypeFields = new HashMap<String, Class>();
+        Map<String, Object> eventTypeFields = new HashMap<String, Object>();
         for (Map.Entry<String, DBOutputTypeDesc> entry : queryMetaData.getOutputParameters().entrySet())
         {
             String name = entry.getKey();

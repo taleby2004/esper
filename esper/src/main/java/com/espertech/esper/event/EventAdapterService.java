@@ -34,6 +34,22 @@ public interface EventAdapterService
      * @throws EventAdapterException if alias already exists and doesn't match property type info
      */
     public EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException;
+
+    /**
+     * Add an event type with the given alias and a given set of properties,
+     * wherein properties may itself be Maps, nested and strongly-typed.
+     * <p>
+     * If the alias already exists with the same event property information, returns the
+     * existing EventType instance.
+     * <p>
+     * If the alias already exists with different event property information, throws an exception.
+     * <p>
+     * If the alias does not already exists, adds the alias and constructs a new {@link com.espertech.esper.event.MapEventType}.
+     * @param eventTypeAlias is the alias name for the event type
+     * @param propertyTypes is the names and types of event properties
+     * @return event type is the type added
+     * @throws EventAdapterException if alias already exists and doesn't match property type info
+     */
     public EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes) throws EventAdapterException;
     
     /**
@@ -58,7 +74,7 @@ public interface EventAdapterService
      * @param propertyTypes is a map of String to Class objects
      * @return EventType implementation for map field names and value types
      */
-    public EventType createAnonymousMapType(Map<String, Class> propertyTypes);
+    public EventType createAnonymousMapType(Map<String, Object> propertyTypes);
 
     /**
      * Create an event wrapper bean from a set of event properties (name and value objectes) stored in a Map.
@@ -198,5 +214,9 @@ public interface EventAdapterService
      */
     public void addAutoAliasPackage(String javaPackageName);
 
+    /**
+     * Returns a subset of the functionality of the service specific to creating POJO bean event types.
+     * @return bean event type factory
+     */
     public BeanEventTypeFactory getBeanEventTypeFactory(); 
 }

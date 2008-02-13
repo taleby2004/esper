@@ -2,12 +2,21 @@ package com.espertech.esper.event;
 
 import java.util.Map;
 
+/**
+ * A getter that works on POJO events residing within a Map as an event property.
+ */
 public class MapPOJOEntryPropertyGetter implements EventPropertyGetter {
 
     private final String propertyMap;
     private final EventPropertyGetter mapEntryGetter;
     private final EventAdapterService eventAdapterService;
 
+    /**
+     * Ctor.
+     * @param propertyMap the property to look at
+     * @param mapEntryGetter the getter for the map entry
+     * @param eventAdapterService for producing wrappers to objects
+     */
     public MapPOJOEntryPropertyGetter(String propertyMap, EventPropertyGetter mapEntryGetter, EventAdapterService eventAdapterService) {
         this.propertyMap = propertyMap;
         this.mapEntryGetter = mapEntryGetter;
@@ -45,4 +54,5 @@ public class MapPOJOEntryPropertyGetter implements EventPropertyGetter {
         return true; // Property exists as the property is not dynamic (unchecked)
     }
 }
+
 

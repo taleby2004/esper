@@ -24,7 +24,7 @@ public class TestDatabasePollingViewable extends TestCase
 
         DataCache dataCache = new DataCacheLRUImpl(100);
 
-        Map<String, Class> resultProperties = new HashMap<String, Class>();
+        Map<String, Object> resultProperties = new HashMap<String, Object>();
         resultProperties.put("myvarchar", String.class);
         EventType resultEventType = SupportEventAdapterService.getService().createAnonymousMapType(resultProperties);
 

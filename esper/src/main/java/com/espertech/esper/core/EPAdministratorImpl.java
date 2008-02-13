@@ -72,6 +72,7 @@ public class EPAdministratorImpl implements EPAdministrator
      * Constructor - takes the services context as argument.
      * @param services - references to services
      * @param configurationOperations - runtime configuration operations
+     * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
      */
     public EPAdministratorImpl(EPServicesContext services,
                                ConfigurationOperations configurationOperations,
@@ -242,6 +243,7 @@ public class EPAdministratorImpl implements EPAdministrator
      * @param eplStatement expression to compile
      * @param statementName is the name of the statement
      * @param services is the context
+     * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
      * @return statement specification
      */
     protected static StatementSpecRaw compileEPL(String eplStatement, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)

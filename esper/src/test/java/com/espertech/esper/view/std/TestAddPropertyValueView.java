@@ -22,7 +22,7 @@ public class TestAddPropertyValueView extends TestCase
 
     public void setUp()
     {
-        Map<String, Class> schema = new HashMap<String, Class>();
+        Map<String, Object> schema = new HashMap<String, Object>();
         schema.put("STDDEV", Double.class);
         parentEventType = SupportEventTypeFactory.createMapType(schema);
 

@@ -459,7 +459,88 @@ epRuntime.sendEvent(event, "TxnEvent");]]></programlisting>
 		<para>
 			An example statement could look as follows.
 		</para>
-		<programlisting>select account.id, account.rate * txn.amount from TxnEvent.win:time(60 sec) group by account.id</programlisting> 
+		<programlisting>select account.id, account.rate * txn.amount 
+from TxnEvent.win:time(60 sec) 
+group by account.id</programlisting> 
+		
+		<sect2 id="eventrep-xml-map-nested">
+		   <title>Map-Within-Map Nested Events</title>
+		   
+		   <para>
+			   Strongly-typed nested <literal>Map</literal>-within-<literal>Map</literal> events can be used to build rich, type-safe event types on the fly. Use the <literal>addNestableEventTypeAlias</literal> method on <literal>Configuration</literal> or <literal>ConfigurationOperations</literal> for initialization-time and runtime-time type definition.
+		   </para>
+
+		   <para>
+			   Noteworthy points are:
+		   </para>
+
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						JavaBean (POJO) objects can also appear as properties in <literal>Map</literal>-within-<literal>Map</literal>. 
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						There is no limit to the number of nesting levels. 
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Dynamic properties can be used to query <literal>Map</literal>-within-<literal>Map</literal> keys that may not be known in advance. 
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The engine returns a <literal>null</literal> value for properties for which the access path into the nested structure cannot be followed where map entries do not exist.
+					</para>
+				</listitem>
+			</itemizedlist>
+
+		   <para>
+			   For demonstration, in this example our top-level event type is an AccountUpdate event, which has an UpdatedField structure as a property. Inside the UpdatedField structure the example defines various fields, as well as a property by name 'history' that holds a JavaBean class 'UpdateHistory' to represent the update history for the account. The code snippet to define the event type is thus:
+		   </para>
+
+		<programlisting><![CDATA[Map<String, Object> updatedFieldDef = new HashMap<String, Object>();
+updatedFieldDef.put("name", String.class);
+updatedFieldDef.put("addressLine1", String.class);
+updatedFieldDef.put("history", UpdateHistory.class);
+
+Map<String, Object> accountUpdateDef = new HashMap<String, Object>();
+accountUpdateDef.put("accountId", long.class);
+accountUpdateDef.put("fields", updatedFieldDef);
+
+epService.getEPAdministrator().getConfiguration().
+    addNestableEventTypeAlias("AccountUpdate", accountUpdateDef);]]></programlisting>
+
+		   <para>
+			   The next code snippet populates a sample event and sends the event into the engine:
+		   </para>
+
+		<programlisting><![CDATA[Map<String, Object> updatedField = new HashMap<String, Object>();
+updatedField.put("name", "Joe Doe");
+updatedField.put("addressLine1", "40 Popular Street");
+updatedField.put("history", new UpdateHistory());
+
+Map<String, Object> accountUpdate = new HashMap<String, Object>();
+accountUpdate.put("accountId", 10009901);
+accountUpdate.put("fields", updatedField);
+
+epService.getEPRuntime().sendEvent(accountUpdate, "AccountUpdate");]]></programlisting>
+
+		   <para>
+			   Last, a sample query to interrogate AccountUpdate events is as follows:
+		   </para>
+			<programlisting><![CDATA[select accountId, fields.name, fields.addressLine1, fields.history.lastUpdate
+from AccountUpdate]]></programlisting>
+
+			<para>
+				Note that type information for nested maps is only available to the immediately selecting stream. For example, the second select-query does not work:
+			</para>			
+			<programlisting><![CDATA[insert into MyStream select fields from NestedMapEvent
+// this does not work ... instead select the individual fields in the insert-into statement
+select fields.name from MyStream ]]></programlisting>
+	   </sect2>
 
     </sect1>
 
@@ -544,4 +625,5 @@ from SensorEvent.win:time(30 sec)]]></programlisting>
 	</sect1>
    
 </chapter>
+
 

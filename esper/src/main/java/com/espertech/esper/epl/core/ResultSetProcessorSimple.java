@@ -30,6 +30,7 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      * @param selectExprProcessor - for processing the select expression and generting the final output rows
      * @param orderByProcessor - for sorting the outgoing events according to the order-by clause
      * @param optionalHavingNode - having clause expression node
+     * @param isSelectRStream - true if remove stream events should be generated
      */
     public ResultSetProcessorSimple(SelectExprProcessor selectExprProcessor,
                                     OrderByProcessor orderByProcessor,
@@ -512,6 +513,8 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      * @param events - input events
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @param result is the result event list to populate
+     * @param optSortKeys is the result sort key list to populate, for sorting
      */
     protected static void getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
     {
@@ -541,6 +544,8 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      * @param events - input events
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @param result is the result event list to populate
+     * @param optSortKeys is the result sort key list to populate, for sorting
      */
     protected static void getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
     {
@@ -572,6 +577,8 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      * @param optionalHavingNode - supplies the having-clause expression
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @param result is the result event list to populate
+     * @param optSortKeys is the result sort key list to populate, for sorting
      */
     protected static void getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, EventBean[] events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
     {
@@ -610,6 +617,8 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      * @param optionalHavingNode - supplies the having-clause expression
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @param result is the result event list to populate
+     * @param optSortKeys is the result sort key list to populate, for sorting
      */
     protected static void getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
     {

@@ -3,15 +3,27 @@ package com.espertech.esper.event;
 import java.util.Map;
 import java.util.Stack;
 
+/**
+ * A getter for querying Map-within-Map event properties.
+ */
 public class MapNestedEventPropertyGetter implements EventPropertyGetter
 {
     private final Stack<String> accessPath;
 
+    /**
+     * Ctor.
+     * @param accessPath is the properties to follow down into nested maps.
+     */
     public MapNestedEventPropertyGetter(Stack<String> accessPath) {
         this.accessPath = new Stack<String>();
         this.accessPath.addAll(accessPath);
     }
 
+    /**
+     * Ctor.
+     * @param accessPath is the properties to follow down into nested maps.
+     * @param leaf the last property we are looking for in the final map
+     */
     public MapNestedEventPropertyGetter(Stack<String> accessPath, String leaf) {
         this.accessPath = new Stack<String>();
         this.accessPath.addAll(accessPath);

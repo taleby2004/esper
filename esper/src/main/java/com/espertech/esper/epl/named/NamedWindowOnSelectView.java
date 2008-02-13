@@ -39,6 +39,7 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
      * @param internalEventRouter for insert-into behavior
      * @param resultSetProcessor for processing aggregation, having and ordering
      * @param statementHandle required for routing events
+     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      */
     public NamedWindowOnSelectView(StatementStopService statementStopService,
                                    LookupStrategy lookupStrategy,
