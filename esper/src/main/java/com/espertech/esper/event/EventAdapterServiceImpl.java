@@ -352,7 +352,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return new MapEventBean(properties, eventType);
     }
 
-    public synchronized EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException
+    public synchronized EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException
 	{
         // If we are wrapping an underlying type that is itself a wrapper, then this is a special case
         if (underlyingEventType instanceof WrapperEventType)
@@ -362,7 +362,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             // the underlying type becomes the type already wrapped
             // properties are a superset of the wrapped properties and the additional properties
             underlyingEventType = underlyingWrapperType.getUnderlyingEventType();
-            Map<String, Class> propertiesSuperset = new HashMap<String, Class>();
+            Map<String, Object> propertiesSuperset = new HashMap<String, Object>();
             propertiesSuperset.putAll(underlyingWrapperType.getUnderlyingMapType().getTypes());
             propertiesSuperset.putAll(propertyTypes);
             propertyTypes = propertiesSuperset;
@@ -403,7 +403,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
      * @param propertyTypes is the additional properties
      * @return true for compatible, or false if not
      */
-    public static boolean isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Class> propertyTypes)
+    public static boolean isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Object> propertyTypes)
     {
         if (!(existingType instanceof WrapperEventType))
         {
@@ -411,7 +411,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         }
         WrapperEventType existingWrapper = (WrapperEventType) existingType;
 
-        if (!(MapEventType.isEqualsProperties(existingWrapper.getUnderlyingMapType().getTypes(), propertyTypes)))
+        if (!(MapEventType.isDeepEqualsProperties(existingWrapper.getUnderlyingMapType().getTypes(), propertyTypes)))
         {
             return false;
         }
@@ -438,7 +438,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return new MapEventType(alias, propertyTypes, this);
     }
 
-    public final EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException
+    public final EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException
     {
         String alias = UuidGenerator.generate(propertyTypes);
     	return new WrapperEventType(alias, underlyingEventType, propertyTypes, this);

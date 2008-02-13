@@ -2,6 +2,7 @@ package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.event.EventBean;
+import com.espertech.esper.event.EventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -15,50 +16,32 @@ import java.util.Map;
 
 public class TestMapEventNested extends TestCase
 {
-    private EPServiceProvider epService;
-
     // TODO: wrapper selecting nested maps
     // TODO: invalid cases testing
 
     public void testNestedMapRuntime()
     {
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
+        EPServiceProvider epService = getEngineInitialized(null, null);
         epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("NestedMap", getTestDefinition());
         runAssertion(epService);
     }
 
     public void testNestedConfigEngine()
     {
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addNestableEventTypeAlias("NestedMap", getTestDefinition());
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
+        EPServiceProvider epService = getEngineInitialized("NestedMap", getTestDefinition());
         runAssertion(epService);
     }
 
     public void testInsertInto()
     {
-        Map<String, Object> levelZero = getTestDefTwo();
+        EPServiceProvider epService = getEngineInitialized("NestedMap", getTestDefTwo());
 
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addNestableEventTypeAlias("NestedMap", levelZero);
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
-
-        String statementText = "select " +
-                                "exists(map.mapOne?) as a," +
-                                "exists(map.mapOne?.simpleOne) as b," +
-                                "exists(map.mapOne?.simpleTwo) as c," +
-                                "exists(map.mapOne?.mapTwo) as d," +
-                                "exists(map.mapOne.mapTwo?) as e," +
-                                "exists(map.mapOne.mapTwo.simpleThree?) as f," +
-                                "exists(map.mapOne.mapTwo.objectThree?) as g " +
+        String statementText = "insert into MyStream select " +
+                                "map.mapOne as val1" +
                                 " from NestedMap.win:length(5)";
+        epService.getEPAdministrator().createEPL(statementText);
+
+        statementText = "select val1 as a from MyStream";
         EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -67,31 +50,19 @@ public class TestMapEventNested extends TestCase
         epService.getEPRuntime().sendEvent(testdata, "NestedMap");
 
         // test all properties exist
-        String[] fields = "a,b,c,d,e,f,g".split(",");
+        String[] fields = "a".split(",");
         EventBean received = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields,
-                new Object[] {true, false, true, true, true, true, true});
-
-        // test partial properties exist
-        testdata = getTestDataThree();
-        epService.getEPRuntime().sendEvent(testdata, "NestedMap");
-
-        received = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields,
-                new Object[] {true, false, false, true, true, true, false});
+        ArrayAssertionUtil.assertProps(received, fields, new Object[] {getNestedKey(testdata, "map", "mapOne")});
     }
 
     public void testAddIdenticalMapTypes()
     {
+        EPServiceProvider epService = getEngineInitialized(null, null);
+
         Map<String, Object> levelOne_1 = makeMap(new Object[][] {{"simpleOne", Integer.class}});
         Map<String, Object> levelOne_2 = makeMap(new Object[][] {{"simpleOne", Long.class}});
         Map<String, Object> levelZero_1 = makeMap(new Object[][] {{"map", levelOne_1}});
         Map<String, Object> levelZero_2 = makeMap(new Object[][] {{"map", levelOne_2}});
-
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
 
         // can add the same nested type twice
         epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("ABC", levelZero_1);
@@ -110,13 +81,7 @@ public class TestMapEventNested extends TestCase
 
     public void testNestedPojo()
     {
-        Map<String, Object> levelZero = getTestDefTwo();
-
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addNestableEventTypeAlias("NestedMap", levelZero);
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
+        EPServiceProvider epService = getEngineInitialized("NestedMap", getTestDefTwo());
 
         String statementText = "select " +
                                 "simple, object, nodefmap, map, " +
@@ -172,13 +137,7 @@ public class TestMapEventNested extends TestCase
 
     public void testIsExists()
     {
-        Map<String, Object> levelZero = getTestDefTwo();
-
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addNestableEventTypeAlias("NestedMap", levelZero);
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
+        EPServiceProvider epService = getEngineInitialized("NestedMap", getTestDefTwo());
 
         String statementText = "select " +
                                 "exists(map.mapOne?) as a," +
@@ -233,30 +192,21 @@ public class TestMapEventNested extends TestCase
         statement.stop();
     }
 
-    public void testInvalidStatement()
+    public void testEventType()
     {
-        Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addNestableEventTypeAlias("NestedMap", getTestDefinition());
-        epService = EPServiceProviderManager.getDefaultProvider(configuration);
-        epService.initialize();
+        EPServiceProvider epService = getEngineInitialized("NestedMap", getTestDefTwo());
+        EPStatement stmt = epService.getEPAdministrator().createEPL(("select * from NestedMap"));
+        EventType eventType = stmt.getEventType();
+        
+        String[] propertiesReceived = eventType.getPropertyNames();
+        String[] propertiesExpected = new String[] {"simple", "object", "nodefmap", "map"};
+        ArrayAssertionUtil.assertEqualsAnyOrder(propertiesReceived, propertiesExpected);
+        assertEquals(String.class, eventType.getPropertyType("simple"));
+        assertEquals(Map.class, eventType.getPropertyType("map"));
+        assertEquals(Map.class, eventType.getPropertyType("nodefmap"));
+        assertEquals(SupportBean_A.class, eventType.getPropertyType("object"));
 
-        tryInvalid(epService, "select XXX from myMapEvent.win:length(5)");
-        tryInvalid(epService, "select myString * 2 from myMapEvent.win:length(5)");
-        tryInvalid(epService, "select String.trim(myInt) from myMapEvent.win:length(5)");
-    }
-
-    private void tryInvalid(EPServiceProvider epService, String statementText)
-    {
-        try
-        {
-            epService.getEPAdministrator().createEPL(statementText);
-            fail();
-        }
-        catch (EPException ex)
-        {
-            // expected
-        }
+        assertNull(eventType.getPropertyType("map.mapOne.simpleOne"));
     }
 
     private Map<String, Object> getTestDefinition()
@@ -400,6 +350,21 @@ public class TestMapEventNested extends TestCase
         Map map = (Map) root.get(keyOne);
         map = (Map) map.get(keyTwo);
         return map.get(keyThree);
+    }
+
+    private EPServiceProvider getEngineInitialized(String name, Map<String, Object> definition)
+    {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+
+        if (name != null)
+        {
+            configuration.addNestableEventTypeAlias(name, definition);
+        }
+        
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+        return epService;
     }
 
     private static Log log = LogFactory.getLog(TestMapEvent.class);

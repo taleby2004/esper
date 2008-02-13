@@ -821,7 +821,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // If no columns selected, simply create a wrapper type
         // Build a list of properties
         SelectClauseSpecRaw newSelectClauseSpecRaw = new SelectClauseSpecRaw();
-        Map<String, Class> properties = new HashMap<String, Class>();
+        Map<String, Object> properties = new HashMap<String, Object>();
         for (SelectClauseExprCompiledSpec selectElement : select)
         {
             properties.put(selectElement.getAssignedName(), selectElement.getSelectExpression().getType());
@@ -842,7 +842,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             // Some columns selected, use the types of the columns
             if (spec.getSelectClauseSpec().getSelectExprList().size() > 0)
             {
-                targetType = statementContext.getEventAdapterService().addMapType(typeName, properties);
+                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, properties);
             }
             else
             {
@@ -850,11 +850,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 if (selectFromType instanceof MapEventType)
                 {
                     MapEventType mapType = (MapEventType) selectFromType;
-                    targetType = statementContext.getEventAdapterService().addMapType(typeName, mapType.getTypes());
+                    targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes());
                 }
                 else
                 {
-                    Map<String, Class> addOnTypes = new HashMap<String, Class>();
+                    Map<String, Object> addOnTypes = new HashMap<String, Object>();
                     targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, addOnTypes);
                 }
             }

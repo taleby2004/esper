@@ -44,12 +44,12 @@ public class WrapperEventType implements EventType
      * @param properties is the additional properties this wrapper adds
      * @param eventAdapterService is the ser
      */
-    public WrapperEventType(String typeName, EventType eventType, Map<String, Class> properties, EventAdapterService eventAdapterService)
+    public WrapperEventType(String typeName, EventType eventType, Map<String, Object> properties, EventAdapterService eventAdapterService)
 	{
 		checkForRepeatedPropertyNames(eventType, properties);
 		
 		this.underlyingEventType = eventType;
-		this.underlyingMapType = new MapEventType(typeName, properties, eventAdapterService);
+		this.underlyingMapType = new MapEventType(typeName, eventAdapterService, properties);
         this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
         this.isNoMapProperties = properties.isEmpty();
 
@@ -229,7 +229,7 @@ public class WrapperEventType implements EventType
         return hashCode;
     }
 
-    private void checkForRepeatedPropertyNames(EventType eventType, Map<String, Class> properties)
+    private void checkForRepeatedPropertyNames(EventType eventType, Map<String, Object> properties)
 	{
 		for(String property : eventType.getPropertyNames())
 		{

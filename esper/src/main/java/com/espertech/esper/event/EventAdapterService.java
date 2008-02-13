@@ -45,7 +45,7 @@ public interface EventAdapterService
      * @return eventType is the type added
      * @throws EventAdapterException if alias already exists and doesn't match this type's info
      */
-    public EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException;
+    public EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException;
     
     /**
      * Creates a new anonymous EventType instance for an event type that contains a map of name value pairs.
@@ -170,7 +170,7 @@ public interface EventAdapterService
      * @return eventType is the type createdStatement
      * @throws EventAdapterException if alias already exists and doesn't match this type's info
      */
-    public EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Class> propertyTypes) throws EventAdapterException;
+    public EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException;
 
     /**
      * Adds an XML DOM event type.

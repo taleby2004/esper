@@ -405,9 +405,9 @@ public class MapEventType implements EventType
      * Returns the name-type map of map properties.
      * @return is the property name and types
      */
-    public Map<String, Class> getTypes()
+    public Map<String, Object> getTypes()
     {
-        return this.simplePropertyTypes;
+        return this.nestableTypes;
     }
 
     /**
