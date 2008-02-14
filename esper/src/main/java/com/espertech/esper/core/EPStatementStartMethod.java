@@ -1,7 +1,6 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPStatementException;
-import com.espertech.esper.collection.FlushedEventBuffer;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.*;
@@ -22,6 +21,11 @@ import com.espertech.esper.epl.variable.OnSetVariableView;
 import com.espertech.esper.epl.variable.VariableDeclarationException;
 import com.espertech.esper.epl.variable.VariableExistsException;
 import com.espertech.esper.epl.view.*;
+import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.AggregationServiceFactory;
+import com.espertech.esper.epl.subquery.SubselectAggregatorView;
+import com.espertech.esper.epl.subquery.SubqueryStopCallback;
+import com.espertech.esper.epl.subquery.SubselectBufferObserver;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.pattern.EvalRootNode;
@@ -32,7 +36,6 @@ import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
-import com.espertech.esper.view.internal.BufferObserver;
 import com.espertech.esper.view.internal.BufferView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -866,7 +869,6 @@ public class EPStatementStartMethod
         for (ExprSubselectNode subselect : statementSpec.getSubSelectExpressions())
         {
             StatementSpecCompiled statementSpec = subselect.getStatementSpecCompiled();
-            SelectClauseSpecCompiled selectClauseSpec = statementSpec.getSelectClauseSpec();
 
             if (statementSpec.getStreamSpecs().get(0) instanceof FilterStreamSpecCompiled)
             {
@@ -897,34 +899,6 @@ public class EPStatementStartMethod
                 NamedWindowConsumerView consumerView = processor.addConsumer(namedSpec.getFilterExpressions(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
                 ViewFactoryChain viewFactoryChain = services.getViewService().createFactories(0, consumerView.getEventType(), namedSpec.getViewSpecs(), statementContext);
                 subSelectStreamDesc.add(subselect, subselectStreamNumber, consumerView, viewFactoryChain);
-            }
-
-            // no aggregation functions allowed in select
-            if (selectClauseSpec.getSelectExprList().size() > 0)
-            {
-                SelectClauseElementCompiled compiledExpr = selectClauseSpec.getSelectExprList().get(0);
-                if (compiledExpr instanceof SelectClauseExprCompiledSpec)
-                {
-                    SelectClauseExprCompiledSpec selectExpr = (SelectClauseExprCompiledSpec) compiledExpr;
-                    ExprNode selectExpression = selectExpr.getSelectExpression();
-                    List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
-                    ExprAggregateNode.getAggregatesBottomUp(selectExpression, aggExprNodes);
-                    if (aggExprNodes.size() > 0)
-                    {
-                        throw new ExprValidationException("Aggregation functions are not supported within subqueries, consider using insert-into instead");
-                    }
-                }
-            }
-
-            // no aggregation functions allowed in filter
-            if (statementSpec.getFilterRootNode() != null)
-            {
-                List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
-                ExprAggregateNode.getAggregatesBottomUp(statementSpec.getFilterRootNode(), aggExprNodes);
-                if (aggExprNodes.size() > 0)
-                {
-                    throw new ExprValidationException("Aggregation functions are not supported within subqueries, consider using insert-into instead");
-                }
             }
         }
 
@@ -968,16 +942,62 @@ public class EPStatementStartMethod
 
             // Validate select expression
             SelectClauseSpecCompiled selectClauseSpec = subselect.getStatementSpecCompiled().getSelectClauseSpec();
+            AggregationService aggregationService = null;
             if (selectClauseSpec.getSelectExprList().size() > 0)
             {
                 SelectClauseElementCompiled element = selectClauseSpec.getSelectExprList().get(0);
                 if (element instanceof SelectClauseExprCompiledSpec)
                 {
+                    // validate
                     SelectClauseExprCompiledSpec compiled = (SelectClauseExprCompiledSpec) element;
                     ExprNode selectExpression = compiled.getSelectExpression();
                     selectExpression = selectExpression.getValidatedSubtree(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService());
                     subselect.setSelectClause(selectExpression);
                     subselect.setSelectAsName(compiled.getAssignedName());
+
+                    // handle aggregation
+                    List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
+                    ExprAggregateNode.getAggregatesBottomUp(selectExpression, aggExprNodes);
+                    if (aggExprNodes.size() > 0)
+                    {
+                        List<ExprAggregateNode> havingAgg = Collections.emptyList();
+                        List<ExprAggregateNode> orderByAgg = Collections.emptyList();
+                        aggregationService = AggregationServiceFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, null);
+
+                        // Other stream properties, if there is aggregation, cannot be under aggregation.
+                        for (ExprAggregateNode aggNode : aggExprNodes)
+                        {
+                            List<Pair<Integer, String>> propertiesNodesAggregated = getExpressionProperties(aggNode, true);
+                            for (Pair<Integer, String> pair : propertiesNodesAggregated)
+                            {
+                                if (pair.getFirst() != 0)
+                                {
+                                    throw new ExprValidationException("Subselect aggregation function cannot aggregate across correlated properties");
+                                }
+                            }
+                        }
+
+                        // This stream (stream 0) properties must either all be under aggregation, or all not be.
+                        List<Pair<Integer, String>> propertiesNotAggregated = getExpressionProperties(selectExpression, false);
+                        for (Pair<Integer, String> pair : propertiesNotAggregated)
+                        {
+                            if (pair.getFirst() == 0)
+                            {
+                                throw new ExprValidationException("Subselect properties must all be within aggregation functions");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // no aggregation functions allowed in filter
+            if (statementSpec.getFilterRootNode() != null)
+            {
+                List<ExprAggregateNode> aggExprNodesFilter = new LinkedList<ExprAggregateNode>();
+                ExprAggregateNode.getAggregatesBottomUp(statementSpec.getFilterRootNode(), aggExprNodesFilter);
+                if (aggExprNodesFilter.size() > 0)
+                {
+                    throw new ExprValidationException("Aggregation functions are not supported within subquery filters, consider using insert-into instead");
                 }
             }
 
@@ -990,26 +1010,51 @@ public class EPStatementStartMethod
                 {
                     throw new ExprValidationException("Subselect filter expression must return a boolean value");
                 }
-                subselect.setFilterExpr(filterExpr);
+
+                // check the presence of a correlated filter, not allowed with aggregation
+                ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
+                filterExpr.accept(visitor);
+                List<Pair<Integer, String>> propertiesNodes = visitor.getExprProperties();
+                for (Pair<Integer, String> pair : propertiesNodes)
+                {
+                    if ((pair.getFirst() != 0) && (aggregationService != null))
+                    {
+                        throw new ExprValidationException("Subselect filter expression cannot be a correlated expression when aggregating properties via aggregation function");
+                    }
+                }
             }
 
             // Finally create views
             Viewable viewableRoot = subSelectStreamDesc.getRootViewable(subselect);
             Viewable subselectView = services.getViewService().createViews(viewableRoot, viewFactoryChain.getViewFactoryChain(), statementContext);
 
-            // Determine indexing of the filter expression
-            Pair<EventTable, TableLookupStrategy> indexPair = determineSubqueryIndex(filterExpr, eventType,
-                    outerEventTypes, subselectTypeService);
-            subselect.setStrategy(indexPair.getSecond());
-            final EventTable eventIndex = indexPair.getFirst();
+            // If we do aggregation, then the view results must be added and removed from aggregation
+            final EventTable eventIndex;
+            // Under aggregation conditions, there is no lookup/corelated subquery strategy, and
+            // the view-supplied events are simply aggregated, a null-event supplied to the stream for the select-clause, and not kept in index.
+            // Note that "var1 + max(var2)" is not allowed as some properties are not under aggregation (which event to use?). 
+            if (aggregationService != null)
+            {
+                SubselectAggregatorView aggregatorView = new SubselectAggregatorView(aggregationService, filterExpr);
+                subselectView.addView(aggregatorView);
+                subselectView = aggregatorView;
+
+                eventIndex = null;
+                subselect.setStrategy(new TableLookupStrategyNullRow());
+                subselect.setFilterExpr(null);      // filter not evaluated by subselect expression as not correlated
+            }
+            else
+            {
+                // Determine indexing of the filter expression
+                Pair<EventTable, TableLookupStrategy> indexPair = determineSubqueryIndex(filterExpr, eventType,
+                        outerEventTypes, subselectTypeService);
+                subselect.setStrategy(indexPair.getSecond());
+                subselect.setFilterExpr(filterExpr);
+                eventIndex = indexPair.getFirst();
+            }
 
             // Clear out index on statement stop
-            stopCallbacks.add(new StopCallback() {
-                public void stop()
-                {
-                    eventIndex.clear();
-                }
-            });
+            stopCallbacks.add(new SubqueryStopCallback(eventIndex));
 
             // Preload
             if (filterStreamSpec instanceof NamedWindowConsumerStreamSpec)
@@ -1026,7 +1071,10 @@ public class EPStatementStartMethod
                 }
                 EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
                 ((View)viewableRoot).update(newEvents, null); // fill view
-                eventIndex.add(newEvents);  // fill index
+                if (eventIndex != null)
+                {
+                    eventIndex.add(newEvents);  // fill index
+                }
             }
             else        // preload from the data window that site on top
             {
@@ -1039,20 +1087,16 @@ public class EPStatementStartMethod
                     {
                         preloadEvents.add(it.next());
                     }
-                    eventIndex.add(preloadEvents.toArray(new EventBean[preloadEvents.size()]));
+                    if (eventIndex != null)
+                    {
+                        eventIndex.add(preloadEvents.toArray(new EventBean[preloadEvents.size()]));
+                    }
                 }
             }
 
             // hook up subselect viewable and event table
             BufferView bufferView = new BufferView(subselectStreamNumber);
-            bufferView.setObserver(new BufferObserver() {
-                public void newData(int streamId, FlushedEventBuffer newEventBuffer, FlushedEventBuffer oldEventBuffer)
-                {
-                    eventIndex.add(newEventBuffer.getAndFlush());
-                    eventIndex.remove(oldEventBuffer.getAndFlush());
-                }
-
-            });
+            bufferView.setObserver(new SubselectBufferObserver(eventIndex));
             subselectView.addView(bufferView);
         }
     }
@@ -1155,6 +1199,13 @@ public class EPStatementStartMethod
         StreamTypeService typeService = new StreamTypeServiceImpl(namesAndTypes, false, false);
 
         return deleteJoinExpr.getValidatedSubtree(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService());
+    }
+
+    private List<Pair<Integer, String>> getExpressionProperties(ExprNode exprNode, boolean visitAggregateNodes)
+    {
+        ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(visitAggregateNodes);
+        exprNode.accept(visitor);
+        return visitor.getExprProperties();
     }
 
     private static final Log log = LogFactory.getLog(EPStatementStartMethod.class);

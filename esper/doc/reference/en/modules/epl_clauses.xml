@@ -1516,6 +1516,16 @@ where tick.symbol = news.symbol]]></programlisting>
 		</para>
 
 		<para>
+			Aggregation functions may be used in the <literal>select</literal> clause of the subselect as this example outlines:
+		</para>
+		<programlisting><![CDATA[select * from MarketData
+where price > (select max(price) from MarketData(symbol='GOOG').std:lastevent())]]></programlisting>
+
+		<para>
+			As the sub-select expression is evaluated first, the query above actually never fires for the GOOG symbol, only for other symbols that have a price higher then the current maximum for GOOG. As a sidenote, the <literal>insert into</literal> clause can also be handy to compute aggregation results for use in multiple subqueries.
+		</para>
+		
+		<para>
 			The following restrictions apply to subqueries:
 		</para>
 
@@ -1527,13 +1537,31 @@ where tick.symbol = news.symbol]]></programlisting>
 			</listitem>
 			<listitem>
 				<para>
-					Aggregation functions cannot be used in subqueries. Instead, the <literal>insert into</literal> clause can be used to provide aggregation results for use in subqueries
+					Subqueries can only consist of a <literal>select</literal> clause, a <literal>from</literal> clause and a <literal>where</literal> clause. The <literal>group by</literal> and <literal>having</literal> clauses, as well as joins, outer-joins and output rate limiting are not permitted within subqueries.
 				</para>
 			</listitem>
 			<listitem>
 				<para>
-					Subqueries can only consist of a <literal>select</literal> clause, a <literal>from</literal> clause and a <literal>where</literal> clause. The <literal>group by</literal> and <literal>having</literal> clauses, as well as joins, outer-joins and output rate limiting are not permitted within subqueries.
+					If using aggregation functions in a subquery, note these limitations:
 				</para>
+				<orderedlist spacing="compact">
+					<listitem>
+						<para>
+							None of the properties of the correlated stream(s) can be used within aggregation functions.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							The properties of the subselect stream must all be within aggregation functions.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							The <literal>where</literal> clause cannot be used to correlate between the subselect stream and the enclosing stream, since the engine would otherwise be forced to re-evaluate 
+							the aggregation considering all events in the subselect-stream data window, which would likely be a very expensive operation.
+						</para>
+					</listitem>
+				</orderedlist>
 			</listitem>
 		</orderedlist>
 

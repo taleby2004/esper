@@ -121,9 +121,13 @@ public interface ConfigurationOperations
             throws ConfigurationException;
 
     /**
-     * TODO
-     * Add an alias for an event type that represents java.util.Map events, taking a Map of
+     * Add an alias for an event type that represents nestable strong-typed java.util.Map events, taking a Map of
      * event property and class name as a parameter.
+     * <p>
+     * This method takes a Map of String property names and Object property type. Each Object property
+     * type can either be a java.lang.Class to denote a built-in type or POJO application object,
+     * or can itself also be a Map<String, Object> to describe a property that itself is a
+     * map of further properties. 
      * <p>
      * This method is provided for convenience and is same in function to method
      * taking a Properties object that contain fully qualified class name as values.

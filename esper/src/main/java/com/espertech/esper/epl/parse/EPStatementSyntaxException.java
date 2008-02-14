@@ -41,6 +41,12 @@ public class EPStatementSyntaxException extends EPStatementException
      */
     public static EPStatementSyntaxException convert(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
     {
+        if (expression.trim().length() == 0)
+        {
+            String message = "Unexpected end of input";
+            return new EPStatementSyntaxException(message, expression);            
+        }
+
         Token t;
         if (e.index < parser.getTokenStream().size())
         {
@@ -175,54 +181,6 @@ public class EPStatementSyntaxException extends EPStatementException
     }
 
     /**
-     * Converts from a syntax error to a nice statement exception.
-     * @param e is the syntax error
-     * @param expression is the expression text
-     * @return syntax exception
-    public static EPStatementSyntaxException convert(RecognitionException e, String expression)
-    {
-        String tip = "";
-        if (e instanceof NoViableAltException)
-        {
-            NoViableAltException noViable = (NoViableAltException) e;
-            Token t = noViable.token;
-            if (t != null)
-            {
-                tip = " (tip: check for reserved or misspelled keywords in the online grammar documentation near the token '" + t.getText() + "')";
-            }
-            else
-            {
-                tip = "";
-            }
-        }
-        return new EPStatementSyntaxException(e.getMessage() + getPositionInfo(e) + tip, expression);
-    }
-     */
-
-    /**
-     * Converts end-of-input error from a syntax error to a nice statement exception.
-     * @param e is the syntax error
-     * @param expression is the expression text
-     * @param tokenNameExpected is the name or paraphrase of the expected token
-     * @return syntax exception
-    public static EPStatementSyntaxException convertEndOfInput(RecognitionException e, String tokenNameExpected, String expression)
-    {
-        return new EPStatementSyntaxException("end of input when expecting " + tokenNameExpected + getPositionInfo(e), expression);
-    }
-     */
-
-    /**
-     * Converts end-of-input error from a syntax error to a nice statement exception.
-     * @param e is the syntax error
-     * @param expression is the expression text
-     * @return syntax exception
-    public static EPStatementSyntaxException convertEndOfInput(RecognitionException e, String expression)
-    {
-        return new EPStatementSyntaxException("end of input" + getPositionInfo(e), expression);
-    }
-     */
-
-    /**
      * Returns the position information string for a parser exception.
      * @param t the token to return the information for
      * @return is a string with line and column information
@@ -234,5 +192,6 @@ public class EPStatementSyntaxException extends EPStatementException
                 : "";
     }
 }
+
 
 

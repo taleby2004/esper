@@ -414,8 +414,8 @@ public class MapEventType implements EventType
     }
 
     /**
-     * TODO
-     * Returns the name-type map of map properties.
+     * Returns the name-type map of map properties, each value in the map
+     * can be a Class or a Map<String, Object> (for nested maps).
      * @return is the property name and types
      */
     public Map<String, Object> getTypes()

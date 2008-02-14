@@ -200,6 +200,44 @@ public class TestNamedWindowSubquery extends TestCase
         }
     }
 
+    public void testSubqueryAggregation()
+    {
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+
+        // create insert into
+        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEPL(stmtTextInsertOne);
+
+        // create consumer
+        String stmtTextSelectOne = "select irstream (select sum(b) from MyWindow) as value, symbol from " + SupportMarketDataBean.class.getName();
+        EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
+        stmtSelectOne.addListener(listenerStmtOne);
+
+        sendMarketBean("M1");
+        String fieldsStmt[] = new String[] {"value", "symbol"};
+        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M1"});
+
+        sendSupportBean("S1", 5L, -1L);
+        sendMarketBean("M2");
+        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {5L, "M2"});
+
+        sendSupportBean("S2", 10L, -1L);
+        sendMarketBean("M3");
+        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {15L, "M3"});
+
+        // create 2nd consumer
+        EPStatement stmtSelectTwo = epService.getEPAdministrator().createEPL(stmtTextSelectOne); // same stmt
+        stmtSelectTwo.addListener(listenerStmtTwo);
+
+        sendSupportBean("S3", 8L, -1L);
+        sendMarketBean("M4");
+        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {23L, "M4"});
+        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {23L, "M4"});
+    }
+
     private SupportBean sendSupportBean(String string, long longPrimitive, Long longBoxed)
     {
         SupportBean bean = new SupportBean();

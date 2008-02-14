@@ -173,11 +173,8 @@ public class TestSubselectUnfiltered extends TestCase {
         tryInvalid("select (select (select id from S1.std:lastevent()) id from S1.std:lastevent()) as idS1 from S0",
                    "Incorrect syntax near 'id' at line 1 column 51, please check the subquery within the select clause [select (select (select id from S1.std:lastevent()) id from S1.std:lastevent()) as idS1 from S0]");
 
-        tryInvalid("select (select sum(id) from S1.std:lastevent()) as idS1 from S0",
-                   "Error starting view: Aggregation functions are not supported within subqueries, consider using insert-into instead [select (select sum(id) from S1.std:lastevent()) as idS1 from S0]");
-
         tryInvalid("select (select id from S1.std:lastevent() where (sum(id) = 5)) as idS1 from S0",
-                   "Error starting view: Aggregation functions are not supported within subqueries, consider using insert-into instead [select (select id from S1.std:lastevent() where (sum(id) = 5)) as idS1 from S0]");
+                   "Error starting view: Aggregation functions are not supported within subquery filters, consider using insert-into instead [select (select id from S1.std:lastevent() where (sum(id) = 5)) as idS1 from S0]");
 
         tryInvalid("select * from S0(id=5 and (select id from S1))",
                    "Subselects not allowed within filters [select * from S0(id=5 and (select id from S1))]");

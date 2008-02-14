@@ -22,6 +22,7 @@ New Features
   - Added support for map return types in from-clause method invocations
   - Added support for a "unidirectional" keyword in joins/outer join to control join direction
   - Added support for multiple event properties in unique view (std:unique)
+  - Added support for use of aggregation functions in subselect
   - Fixed issue ESPER-136 Improve error messages when encountering reserved keywords
   - Fixed issue ESPER-138 Allow Map event type to contain nested Map values
   - Fixed issue ESPER-145 Ignore start or stop commands on already started or stopped EPStatements.
@@ -315,4 +316,5 @@ This enabled event patterns and EQL to use short event names not requiring makin
 version 0.7.0
 -------------
 Initial alpha version
+
 
