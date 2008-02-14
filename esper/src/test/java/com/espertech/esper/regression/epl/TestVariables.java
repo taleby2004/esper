@@ -534,7 +534,7 @@ public class TestVariables extends TestCase
     public void testEngineConfigXML() throws Exception
     {
         String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<esper-configuration xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"../esper-configuration-1-0.xsd\">" +
+                "<esper-configuration xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"../esper-configuration-2-0.xsd\">" +
                 "<variable name=\"p_1\" type=\"string\" />" +
                 "<variable name=\"p_2\" type=\"bool\" initialization-value=\"true\"/>" +
                 "<variable name=\"p_3\" type=\"long\" initialization-value=\"10\"/>" +
