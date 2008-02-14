@@ -1862,14 +1862,14 @@ select orderId, orderAmount from
 			<para>
 				In the sample join statement shown next, the method 'lookupAsset' provided by class 'MyLookupLib' returns one or more rows based on the asset id (a property of the AssetMoveEvent) that is passed to the method:
 			</para>
-			<programlisting><![CDATA[select * from AssetMoveEvent, MyLookupLib.lookupAsset(assetId)]]></programlisting>
+			<programlisting><![CDATA[select * from AssetMoveEvent, method:MyLookupLib.lookupAsset(assetId)]]></programlisting>
 	
 			<para>
 				The following statement demonstrates the use of the <literal>where</literal> clause to join events to the rows returned by a method invocation, which in this example does not take parameters:
 			</para>
 			<programlisting><![CDATA[select assetId, assetDesc from AssetMoveEvent as asset, 
-    MyLookupLib.getAssetDescriptions() as desc 
-  where asset.assetid = desc.assetid]]></programlisting>
+       method:MyLookupLib.getAssetDescriptions() as desc 
+where asset.assetid = desc.assetid]]></programlisting>
 	
 			<para>
 				Your method invocation may return zero, one or many rows for each method invocation. If you have caching enabled through configuration, then Esper can avoid the method invocation and instead use cached results. Similar to SQL joins, Esper also indexes cached result rows such that join operations based on the <literal>where</literal> clause can be very efficient, especially if your method invocation returns a large number of rows.
@@ -1925,7 +1925,7 @@ select orderId, orderAmount from
 				As an example, consider the method 'getAssetDescriptions' provided by class 'MyLookupLib' as discussed earlier:
 			</para>
 			<programlisting><![CDATA[]]>select assetId, assetDesc from AssetMoveEvent as asset,
-    com.mypackage.MyLookupLib.getAssetDescriptions() as desc 
+       method:com.mypackage.MyLookupLib.getAssetDescriptions() as desc 
   where asset.assetid = desc.assetid</programlisting>
 																	
 			<para>
@@ -1977,7 +1977,7 @@ select orderId, orderAmount from
 				In the following example, a class 'MyLookupLib' provides a method to return historical data based on asset id and asset code:
 			</para>
 			<programlisting><![CDATA[]]>select assetId, location, x_coord, y_coord from AssetMoveEvent as asset,
-    com.mypackage.MyLookupLib.getAssetHistory(assetId, assetCode) as history</programlisting>
+       method:com.mypackage.MyLookupLib.getAssetHistory(assetId, assetCode) as history</programlisting>
 																	
 			<para>
 				A sample implementation of the class 'MyLookupLib' is shown below. 
