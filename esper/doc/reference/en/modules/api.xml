@@ -655,35 +655,6 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
 		</sect2>
     </sect1>
 
-    <sect1 id="api-controlling-time">
-        <title>Time-Keeping Events</title>
-
-		<indexterm><primary>time</primary><secondary>controlling</secondary></indexterm>
-        <para>
-			Special events are provided that can be used to control the time-keeping of an engine instance. There are two models for an engine to keep track of time.
-			Internal clocking is when the engine instance relies on the <literal>java.util.Timer</literal> class for time tick events. External clocking can be used to supply time ticks to the engine. The latter is useful for testing time-based event sequences or for synchronizing the engine with an external time source.
-        </para>
-
-        <para>
-			By default, the Esper engine uses internal time ticks. This behavior can be changed by sending a timer control event to the engine as shown below.
-        </para>
-
-		<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
-EPRuntime runtime = epService.getEPRuntime();
-// switch to external clocking
-runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
-
-// send a time tick
-long timeInMillis = System.currentTimeMillis();	// Or get the time somewhere else
-runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
-]]></programlisting>
-
-		<para>
-			We recommend that when disabling the internal timer, applications send an external timer event setting the start time before creating statements,
-			such that statement start time is well-defined.
-		</para>
-    </sect1>
-
     <sect1 id="api-events-received">
         <title>Events Received from the Engine</title>
 
@@ -776,7 +747,7 @@ To send events into an engine concurrently by multiple execution threads, typica
         </para>
 
 		<para>
-Each engine instance maintains a single timer thread (internal timer) providing for time or schedule-based processing within the engine. The default resolution at which the timer operates is 100 milliseconds. The internal timer thread can be disabled and applications can instead send external time events to an engine instance to perform timer or scheduled processing at the resolution required by an application.
+Each engine instance maintains a single timer thread (internal timer) providing for time or schedule-based processing within the engine. The default resolution at which the internal timer operates is 100 milliseconds. The internal timer thread can be disabled and applications can instead send external time events to an engine instance to perform timer or scheduled processing at the resolution required by an application.
         </para>
         
 		<para>
@@ -795,6 +766,62 @@ In multithreaded environments, when one or more statements make result events av
 		<para>
 We generally recommended that listener implementations do not block. By implementing listener code as non-blocking code execution threads can often achieve higher levels of concurrency. 
         </para>
+    </sect1>
+
+    <sect1 id="api-controlling-time">
+        <title>Time-Keeping Events</title>
+
+		<indexterm><primary>time</primary><secondary>controlling</secondary></indexterm>
+        <para>
+			Special events are provided that can be used to control the time-keeping of an engine instance. There are two models for an engine to keep track of time.
+			Internal clocking is when the engine instance relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. External clocking can be used to supply time ticks to the engine. The latter is useful for testing time-based event sequences or for synchronizing the engine with an external time source.
+        </para>
+
+        <para>
+			By default, the Esper engine uses internal time ticks. This behavior can be changed by sending a timer control event to the engine as shown below.
+        </para>
+
+		<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+EPRuntime runtime = epService.getEPRuntime();
+// switch to external clocking
+runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+
+// send a time tick
+long timeInMillis = System.currentTimeMillis();	// Or get the time somewhere else
+runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
+]]></programlisting>
+
+		<para>
+			We recommend that when disabling the internal timer, applications send an external timer event setting the start time before creating statements,
+			such that statement start time is well-defined. Also, note that the engine outputs a warning is duplicate external time events are received.
+		</para>
+    </sect1>
+
+    <sect1 id="api-time-nanosecond">
+        <title>Time Resolution</title>
+
+		<indexterm><primary>time</primary><secondary>resolution</secondary></indexterm>
+        <para>
+			The minimum resolution that all data windows, patterns and output rate limiting operate at is the millisecond. 
+			Parameters to time window views, pattern operators or the <literal>output</literal> clause that are less then 1 millisecond are not allowed. As stated earlier, the default frequency at which the internal timer operates is 100 milliseconds.
+        </para>
+        
+        <para>
+			The internal timer thread uses the call <literal>System.nanoTime()</literal> to obtain system time and divides the result by 1000000 to convert to milliseconds. Please see the JIRA issue ESPER-191 Support nano/microsecond resolution for more information on Java system time-call performance, accuracy and drift. The internal timer is based on <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> rather then <literal>java.util.Timer</literal> as the former supports high accuracy VM time.
+        </para>
+			
+        <para>
+			Your application can achieve a higher tick rate then 1 tick per millisecond by sending external timer events that carry a long-value which is not based on milliseconds since January 1, 1970, 00:00:00 GMT. In this case, your time interval parameters need to take consideration of the changed use of engine time. 
+        </para>
+			
+        <para>
+			Thus, if your external timer events send long values that represents microseconds (1E-6 sec), then your time window interval must be 1000-times larger, i.e. "win:time(1000)" becomes a 1-second time window.
+        </para>
+			        
+        <para>
+			And therefore, if your external timer events send long values that represents nanoseconds (1E-9 sec), then your time window interval must be 1000000-times larger, i.e. "win:time(1000000)" becomes a 1-second time window.
+        </para>
+
     </sect1>
 
     <sect1 id="api-soda">

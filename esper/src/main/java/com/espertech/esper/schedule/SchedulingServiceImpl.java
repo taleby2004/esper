@@ -12,6 +12,8 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
+import com.espertech.esper.core.EPRuntimeImpl;
+
 /**
  * Implements the schedule service by simply keeping a sorted set of long millisecond
  * values and a set of handles for each.
@@ -40,7 +42,8 @@ public final class SchedulingServiceImpl implements SchedulingService
     {
         this.timeHandleMap = new TreeMap<Long, SortedMap<ScheduleSlot, ScheduleHandle>>();
         this.handleSetMap = new Hashtable<ScheduleHandle, SortedMap<ScheduleSlot, ScheduleHandle>>();
-        this.currentTime = System.currentTimeMillis();
+        // initialize time to just before now as there is a check for duplicate external time events
+        this.currentTime = (System.nanoTime() / EPRuntimeImpl.NANOS_TO_MILLIS) - 1;
     }
 
     public void destroy()

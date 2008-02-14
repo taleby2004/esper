@@ -63,9 +63,9 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
             }
         }
 
-        if (millisecondsQuietTime < 100)
+        if (millisecondsQuietTime < 1)
         {
-            throw new ViewParameterException("Time accumulative batch view requires a size of at least 100 msec");
+            throw new ViewParameterException("Time accumulative batch view requires a size of at least 1 msec");
         }
     }
 

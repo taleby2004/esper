@@ -85,9 +85,9 @@ public class TimeLengthBatchViewFactory implements DataWindowViewFactory
         }
         numberOfEvents = ((Number) parameter).longValue();
 
-        if (millisecondsBeforeExpiry < 100)
+        if (millisecondsBeforeExpiry < 1)
         {
-            throw new ViewParameterException("Time-length-combination batch view requires a size of at least 100 msec");
+            throw new ViewParameterException("Time-length-combination batch view requires a size of at least 1 msec");
         }
 
         if (viewParameters.size() > 2)

@@ -10,7 +10,10 @@ package com.espertech.esper.timer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Timer;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -20,8 +23,7 @@ public final class TimerServiceImpl implements TimerService
 {
     private final long msecTimerResolution;
     private TimerCallback timerCallback;
-    private Timer timer;
-    private EPLTimerTask timerTask;
+    private ScheduledThreadPoolExecutor timer;
     private static AtomicInteger NEXT_ID = new AtomicInteger(0);
     private final int id;
 
@@ -69,11 +71,12 @@ public final class TimerServiceImpl implements TimerService
             throw new IllegalStateException("Timer callback not set");
         }
 
-        timer = new Timer("com.espertech.esper.Timer-" + id, true);        // Timer started as a deamon thread
-        timerTask = new EPLTimerTask(timerCallback);
+        getScheduledThreadPoolExecutorDaemonThread();
+        EPLTimerTask timerTask = new EPLTimerTask(timerCallback);
 
         // With no delay start every internal
-        timer.scheduleAtFixedRate(timerTask, 0, msecTimerResolution);
+        ScheduledFuture<?> future = timer.scheduleAtFixedRate(timerTask, 0, msecTimerResolution, TimeUnit.MILLISECONDS);
+        timerTask.setFuture(future);
     }
 
     public final void stopInternalClock(boolean warnIfNotStarted)
@@ -92,9 +95,7 @@ public final class TimerServiceImpl implements TimerService
             log.debug(".stopInternalClock Stopping internal clock daemon thread");
         }
 
-        timerTask.setCancelled(true);
-        timerTask.cancel();
-        timer.cancel();
+        timer.shutdown();
 
         try
         {
@@ -139,6 +140,18 @@ public final class TimerServiceImpl implements TimerService
         //return timerTask._invocationCount;
         return 0;
     }
+
+   	private void getScheduledThreadPoolExecutorDaemonThread() {
+		timer = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+			// set new thread as daemon thread and name appropriately
+			public Thread newThread(Runnable r) {
+				Thread t = new Thread(r, "com.espertech.esper.Timer-" + id);
+				t.setDaemon(true);
+				return t;
+			}
+		});
+		timer.setMaximumPoolSize(timer.getCorePoolSize());
+	}    
 
     private static final Log log = LogFactory.getLog(TimerServiceImpl.class);
 }

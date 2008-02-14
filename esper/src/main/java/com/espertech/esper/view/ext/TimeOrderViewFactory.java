@@ -76,9 +76,9 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
             }
         }
 
-        if (intervalSize < 100)
+        if (intervalSize < 1)
         {
-            throw new ViewParameterException("Time order view requires a size of at least 100 msec");
+            throw new ViewParameterException("Time order view requires a size of at least 1 msec");
         }       
     }
 

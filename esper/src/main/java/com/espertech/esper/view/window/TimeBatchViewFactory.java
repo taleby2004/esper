@@ -68,9 +68,9 @@ public class TimeBatchViewFactory implements DataWindowViewFactory
             }
         }
 
-        if (millisecondsBeforeExpiry < 100)
+        if (millisecondsBeforeExpiry < 1)
         {
-            throw new ViewParameterException("Time batch view requires a size of at least 100 msec");
+            throw new ViewParameterException("Time batch view requires a size of at least 1 msec");
         }
 
         if (viewParameters.size() == 2)

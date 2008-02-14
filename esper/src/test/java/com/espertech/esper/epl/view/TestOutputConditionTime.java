@@ -73,7 +73,7 @@ public class TestOutputConditionTime extends TestCase
     {
 	    try
 	    {
-	        condition = new OutputConditionTime(0.01, false, null, context, callback);
+	        condition = new OutputConditionTime(0d, false, null, context, callback);
 	        fail();
 	    }
 	    catch (IllegalArgumentException ex)

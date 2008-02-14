@@ -34,6 +34,8 @@ import java.util.*;
  */
 public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRouter
 {
+    public static final int NANOS_TO_MILLIS = 1000000;
+
     private EPServicesContext services;
     private boolean isLatchStatementInsertStream;
     private volatile UnmatchedListener unmatchedListener;
@@ -89,7 +91,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             log.debug(".timerCallback Evaluating scheduled callbacks");
         }
 
-        long msec = System.currentTimeMillis();
+        long msec = System.nanoTime() / NANOS_TO_MILLIS;
         CurrentTimeEvent currentTimeEvent = new CurrentTimeEvent(msec);
         sendEvent(currentTimeEvent);
     }
@@ -266,6 +268,12 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
 
         CurrentTimeEvent current = (CurrentTimeEvent) event;
         long currentTime = current.getTimeInMillis();
+        if (currentTime == services.getSchedulingService().getTime()) {
+            if (log.isWarnEnabled())
+            {
+                log.warn("Duplicate time event received for currentTime " + currentTime);
+            }
+        }
         services.getSchedulingService().setTime(currentTime);
 
         processSchedule();

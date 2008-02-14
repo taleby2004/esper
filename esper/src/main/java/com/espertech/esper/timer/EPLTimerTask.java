@@ -7,14 +7,16 @@
  **************************************************************************************/
 package com.espertech.esper.timer;
 
-import java.util.TimerTask;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Timer task to simply invoke the callback when triggered.
  */
-final class EPLTimerTask extends TimerTask
+final class EPLTimerTask implements Runnable
 {
     private final TimerCallback callback;
+    private ScheduledFuture<?> future;
     private boolean isCancelled;
 
     protected boolean _enableStats;
@@ -38,7 +40,12 @@ final class EPLTimerTask extends TimerTask
         if (!isCancelled)
         {
             if (_enableStats) {
-                _lastDrift = System.currentTimeMillis()-scheduledExecutionTime();
+                // If we are called early, then delay will be positive. If we are called late, then the delay will be negative.
+                // NOTE: don't allow _enableStats to be set until future has been set
+                if (future != null)
+                {
+                    _lastDrift = Math.abs(future.getDelay(TimeUnit.MILLISECONDS));
+                }
                 _totalDrift += _lastDrift;
                 _invocationCount++;
                 if (_lastDrift > _maxDrift) _maxDrift = _lastDrift;
@@ -59,4 +66,8 @@ final class EPLTimerTask extends TimerTask
     {
         isCancelled = cancelled;
     }
+
+	public void setFuture(ScheduledFuture<?> future) {
+		this.future = future;
+	}    
 }

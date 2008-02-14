@@ -58,9 +58,9 @@ public final class OutputConditionTime implements OutputCondition
 		}
         if (!isMinutesUnit)
         {
-            if ((intervalSize < 0.1) && (reader == null))
+            if ((intervalSize < 0.001) && (reader == null))
             {
-                throw new IllegalArgumentException("Output condition by time requires a millisecond interval size of at least 100 msec or a variable");
+                throw new IllegalArgumentException("Output condition by time requires a millisecond interval size of at least 1 msec or a variable");
             }
         }
         if (context == null)
