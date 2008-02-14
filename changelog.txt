@@ -10,15 +10,17 @@ Major API changes
   - We have made changes to engine output to make the output more useful and consistent between different types of queries, 
     and to make the engine more performant. Please see http://docs.codehaus.org/display/ESPER/Migrating+Esper+1.x+to+Esper+2.x for details.
   - We have upgraded 3rd party library dependencies to new versions
+  - We have switched the schema to 2.0, made it namespace-aware and available online
 
 New Features
   - New strongly-typed and fast output event delivery to subscriber objects via method call
   - Performance improvement: statements without listeners or subscriber (iterator or output-snapshot statements that use insert-into) now compute much faster
   - We have upgraded to ANTLR Version 3 to gain excellent error handling, incremental parsing, easy-to-read grammar and a smaller runtime jar
   - We have changed view parameter syntax such that event properties do no longer need to appear in quotes
+  - Added support for nano/microsecond timer resolution (ESPER-191)
+  - Added API for setting variable values (ESPER-181)
   - Added support for map return types in from-clause method invocations
   - Added support for a "unidirectional" keyword in joins/outer join to control join direction
-  - Added API for setting variable values (ESPER-181)
   - Added support for multiple event properties in unique view (std:unique)
   - Fixed issue ESPER-136 Improve error messages when encountering reserved keywords
   - Fixed issue ESPER-138 Allow Map event type to contain nested Map values
