@@ -293,7 +293,7 @@ for user-controlled imports of classes and packages as outlined in <xref linkend
 			</para>
 			<programlisting><![CDATA[select current_timestamp from MyEvent
 // equivalent to
-select current_timestamp from MyEvent]]></programlisting>
+select current_timestamp() from MyEvent]]></programlisting>
 		</sect2>
 
 		<sect2 id="epl-single-row-function-exists">
