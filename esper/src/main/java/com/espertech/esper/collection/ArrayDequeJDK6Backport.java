@@ -138,7 +138,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
      * Copies the elements from our element array into the specified array,
      * in order (from first to last element in the deque).  It is assumed
      * that the array is large enough to hold all elements in the deque.
-     *
+     * @param a array to copy
      * @return its argument
      */
     private <T> T[] copyElements(T[] a) {
@@ -244,6 +244,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
+     * @return first
      * @throws NoSuchElementException no more elements
      */
     public E removeFirst() {
@@ -254,6 +255,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
+     * @return last
      * @throws NoSuchElementException no more elements
      */
     public E removeLast() {
@@ -263,6 +265,10 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
         return x;
     }
 
+    /**
+     * See equivalent Queue API method.
+     * @return first or null
+     */
     public E pollFirst() {
         int h = head;
         E result = elements[h]; // Element is null if deque empty
@@ -273,6 +279,10 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
         return result;
     }
 
+    /**
+     * See equivalent Queue API method.
+     * @return last or null
+     */
     public E pollLast() {
         int t = (tail - 1) & (elements.length - 1);
         E result = elements[t];
@@ -284,6 +294,8 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
+     * See equivalent Queue API method.
+     * @return first
      * @throws NoSuchElementException no more elements
      */
     public E getFirst() {
@@ -294,7 +306,9 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
     }
 
     /**
-     * @throws java.util.NoSuchElementException no more elements
+     * See equivalent Queue API method.
+     * @return last
+     * @throws NoSuchElementException no more elements
      */
     public E getLast() {
         E x = elements[(tail - 1) & (elements.length - 1)];
@@ -303,10 +317,18 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
         return x;
     }
 
+    /**
+     * See equivalent Queue API method.
+     * @return first
+     */
     public E peekFirst() {
         return elements[head]; // elements[head] is null if deque empty
     }
 
+    /**
+     * See equivalent Queue API method.
+     * @return last
+     */
     public E peekLast() {
         return elements[(tail - 1) & (elements.length - 1)];
     }
@@ -496,7 +518,7 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
      *
      * <p>This method is called delete rather than remove to emphasize
      * that its semantics differ from those of {@link java.util.List#remove(int)}.
-     *
+     * @param i index to delete at
      * @return true if elements moved backwards
      */
     private boolean delete(int i) {
@@ -570,6 +592,10 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
         return new DeqIterator();
     }
 
+    /**
+     * See equivalent Queue API method.
+     * @return iterator
+     */
     public Iterator<E> descendingIterator() {
         return new DescendingIterator();
     }
@@ -787,10 +813,11 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
 
     /**
      * Serialize this deque.
-     *
+     * @param s stream
      * @serialData The current size (<tt>int</tt>) of the deque,
      * followed by all of its elements (each an object reference) in
      * first-to-last order.
+     * @throws IOException
      */
     private void writeObject(ObjectOutputStream s) throws IOException {
         s.defaultWriteObject();
@@ -806,6 +833,9 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
 
     /**
      * Deserialize this deque.
+     * @param s stream
+     * @throws IOException
+     * @throws ClassNotFoundException
      */
     private void readObject(ObjectInputStream s)
             throws IOException, ClassNotFoundException {

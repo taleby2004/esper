@@ -198,7 +198,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     statementContext.getEpStatementHandle(), statementContext.getVariableService(), statementContext.getStatementResultService());
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
-            statementContext.getStatementResultService().setContext(statement, epServiceProvider, isInsertInto, isPattern);
+            statementContext.getStatementResultService().setContext(statement, epServiceProvider,
+                    isInsertInto, isPattern, services.getStatementLifecycleSvc());
 
             // create start method
             startMethod = new EPStatementStartMethod(compiledSpec, services, statementContext);
@@ -608,11 +609,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return finalStatementName;
     }
 
-    //TODO ALEX REMOVE
-//    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners)
-//    {
-//        log.debug(".updatedListeners No action for base implementation");
-//    }
+    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners)
+    {
+        log.debug(".updatedListeners No action for base implementation");
+    }
 
     /**
      * Statement information.

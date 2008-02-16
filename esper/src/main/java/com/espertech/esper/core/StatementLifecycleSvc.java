@@ -22,7 +22,10 @@ public interface StatementLifecycleSvc
      */
     public void addObserver(StatementLifecycleObserver observer);
 
-    //TODO ALEX DOC
+    /**
+     * Dispatch event to observers.
+     * @param event to dispatch
+     */
     public void dispatchStatementLifecycleEvent(StatementLifecycleEvent event);
 
     /**
@@ -87,13 +90,13 @@ public interface StatementLifecycleSvc
      */
     public void destroyAllStatements() throws EPException;
 
-//    /** TODO ALEX REMOVE
-//     * Statements indicate that listeners have been added through this method.
-//     * @param statementId is the statement id for which listeners were added
-//     * @param statementName is the statement name
-//     * @param listeners is the set of listeners after adding the new listener
-//     */
-//    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners);
+    /**
+     * Statements indicate that listeners have been added through this method.
+     * @param statementId is the statement id for which listeners were added
+     * @param statementName is the statement name
+     * @param listeners is the set of listeners after adding the new listener
+     */
+    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners);
 
     /**
      * Destroy the service.

@@ -487,10 +487,10 @@ public class ConfigurationEngineDefaults implements Serializable
          * selection keywords (istream/rstream/irstream), by default,
          * generate selection results for the insert stream only, and not for the remove stream.
          * <p>
-         * This setting can be used to change the default behavior: Use the {@see StreamSelector.RSTREAM_ISTREAM_BOTH}
+         * This setting can be used to change the default behavior: Use the RSTREAM_ISTREAM_BOTH
          * value to have your statements generate both insert and remove stream results
          * without the use of the "irstream" keyword in the select clause. 
-         * @return default stream selector, which is {@see StreamSelector.ISTREAM_ONLY} unless changed
+         * @return default stream selector, which is ISTREAM_ONLY unless changed
          */
         public StreamSelector getDefaultStreamSelector()
         {
@@ -504,7 +504,7 @@ public class ConfigurationEngineDefaults implements Serializable
          * selection keywords (istream/rstream/irstream), by default,
          * generate selection results for the insert stream only, and not for the remove stream.
          * <p>
-         * This setting can be used to change the default behavior: Use the {@see StreamSelector.RSTREAM_ISTREAM_BOTH}
+         * This setting can be used to change the default behavior: Use the RSTREAM_ISTREAM_BOTH
          * value to have your statements generate both insert and remove stream results
          * without the use of the "irstream" keyword in the select clause.
          * @param defaultStreamSelector default stream selector

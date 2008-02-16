@@ -31,15 +31,37 @@ public interface TimerService
      */
     public void stopInternalClock(boolean warnIfNotStarted);
 
-    void enableStats();
+    /**
+     * Enable statistics.
+     */
+    public void enableStats();
 
-    void disableStats();
+    /**
+     * Disable statistics.
+     */
+    public void disableStats();
 
-    long getMaxDrift();
+    /**
+     * Return maximum drift.
+     * @return drift
+     */
+    public long getMaxDrift();
 
-    long getLastDrift();
+    /**
+     * Return last drift.
+     * @return drift
+     */
+    public long getLastDrift();
 
-    long getTotalDrift();
+    /**
+     * Return total drift.
+     * @return drift
+     */
+    public long getTotalDrift();
 
-    long getInvocationCount();
+    /**
+     * Return invocation count.
+     * @return count
+     */
+    public long getInvocationCount();
 }

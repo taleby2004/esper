@@ -24,10 +24,11 @@ public class StatementResultServiceImpl implements StatementResultService
     private static Log log = LogFactory.getLog(StatementResultServiceImpl.class);
 
     // Part of the statement context
-    private EPStatement epStatement;
+    private EPStatementSPI epStatement;
     private EPServiceProvider epServiceProvider;
     private boolean isInsertInto;
     private boolean isPattern;
+    private StatementLifecycleSvc statementLifecycleSvc;
 
     // For natural delivery derived out of select-clause expressions
     private Class[] selectClauseTypes;
@@ -51,10 +52,12 @@ public class StatementResultServiceImpl implements StatementResultService
         }
     };
 
-    public void setContext(EPStatement epStatement, EPServiceProvider epServiceProvider, boolean isInsertInto, boolean isPattern)
+    public void setContext(EPStatementSPI epStatement, EPServiceProvider epServiceProvider,
+                           boolean isInsertInto, boolean isPattern, StatementLifecycleSvc statementLifecycleSvc)
     {
         this.epStatement = epStatement;
         this.epServiceProvider = epServiceProvider;
+        this.statementLifecycleSvc = statementLifecycleSvc;
         this.isInsertInto = isInsertInto;
         this.isPattern = isPattern;
         isMakeSynthetic = isInsertInto || isPattern;
@@ -91,6 +94,8 @@ public class StatementResultServiceImpl implements StatementResultService
 
     public void setUpdateListeners(EPStatementListenerSet statementListenerSet)
     {
+        // indicate that listeners were updated for potential persistence of listener set
+        this.statementLifecycleSvc.updatedListeners(epStatement.getStatementId(), epStatement.getName(), statementListenerSet);
         this.statementListenerSet = statementListenerSet;
 
         isMakeNatural = statementListenerSet.getSubscriber() != null;

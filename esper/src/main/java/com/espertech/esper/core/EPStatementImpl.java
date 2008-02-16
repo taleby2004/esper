@@ -263,7 +263,6 @@ public class EPStatementImpl implements EPStatementSPI
         }
 
         statementListenerSet.removeListener(listener);
-        //TODO ALEX why before next method call? statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
         statementResultService.setUpdateListeners(statementListenerSet);
         statementLifecycleSvc.dispatchStatementLifecycleEvent(
                 new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_REMOVE, listener));
