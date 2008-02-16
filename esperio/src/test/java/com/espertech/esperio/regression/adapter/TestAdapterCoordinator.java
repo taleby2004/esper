@@ -1,28 +1,23 @@
 package com.espertech.esperio.regression.adapter;
 
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import junit.framework.TestCase;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.time.TimerControlEvent;
+import com.espertech.esper.event.EventBean;
 import com.espertech.esperio.AdapterCoordinator;
 import com.espertech.esperio.AdapterCoordinatorImpl;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPAdministrator;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-
+import com.espertech.esperio.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestAdapterCoordinator extends TestCase
 {

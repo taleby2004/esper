@@ -7,9 +7,9 @@ import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.InputAdapter;
 import com.espertech.esperio.AdapterCoordinatorImpl;
 import com.espertech.esperio.AdapterCoordinator;
+import com.espertech.esperio.support.util.SupportUpdateListener;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Map;
