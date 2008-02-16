@@ -43,7 +43,7 @@ public final class SchedulingServiceImpl implements SchedulingService
         this.timeHandleMap = new TreeMap<Long, SortedMap<ScheduleSlot, ScheduleHandle>>();
         this.handleSetMap = new Hashtable<ScheduleHandle, SortedMap<ScheduleSlot, ScheduleHandle>>();
         // initialize time to just before now as there is a check for duplicate external time events
-        this.currentTime = (System.nanoTime() / EPRuntimeImpl.NANOS_TO_MILLIS) - 1;
+        this.currentTime = System.currentTimeMillis() - 1;
     }
 
     public void destroy()

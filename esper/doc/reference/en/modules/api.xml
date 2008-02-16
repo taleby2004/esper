@@ -797,7 +797,7 @@ runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
 		</para>
     </sect1>
 
-    <sect1 id="api-time-nanosecond">
+    <sect1 id="api-time-resolution">
         <title>Time Resolution</title>
 
 		<indexterm><primary>time</primary><secondary>resolution</secondary></indexterm>
@@ -807,7 +807,7 @@ runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
         </para>
         
         <para>
-			The internal timer thread uses the call <literal>System.nanoTime()</literal> to obtain system time and divides the result by 1000000 to convert to milliseconds. Please see the JIRA issue ESPER-191 Support nano/microsecond resolution for more information on Java system time-call performance, accuracy and drift. The internal timer is based on <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> rather then <literal>java.util.Timer</literal> as the former supports high accuracy VM time.
+			The internal timer thread uses the call <literal>System.currentTimeMillis()</literal> to obtain system time. Please see the JIRA issue ESPER-191 Support nano/microsecond resolution for more information on Java system time-call performance, accuracy and drift. The internal timer is based on <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> rather then <literal>java.util.Timer</literal> as the former supports high accuracy VM time.
         </para>
 			
         <para>

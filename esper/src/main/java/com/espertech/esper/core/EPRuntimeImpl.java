@@ -34,11 +34,6 @@ import java.util.*;
  */
 public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRouter
 {
-    /**
-     * Constant for computing a millisecond value out of a nanosecond value.
-     */
-    public static final int NANOS_TO_MILLIS = 1000000;
-
     private EPServicesContext services;
     private boolean isLatchStatementInsertStream;
     private volatile UnmatchedListener unmatchedListener;
@@ -94,7 +89,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             log.debug(".timerCallback Evaluating scheduled callbacks");
         }
 
-        long msec = System.nanoTime() / NANOS_TO_MILLIS;
+        long msec = System.currentTimeMillis();
         CurrentTimeEvent currentTimeEvent = new CurrentTimeEvent(msec);
         sendEvent(currentTimeEvent);
     }

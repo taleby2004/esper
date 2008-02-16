@@ -33,7 +33,7 @@ public class TestVariablesTimer extends TestCase
         epService.getEPAdministrator().getConfiguration().addVariable("var2", Long.class, "2");
         epService.getEPAdministrator().getConfiguration().addVariable("var3", Long.class, null);
 
-        long startTime = System.nanoTime() / EPRuntimeImpl.NANOS_TO_MILLIS;        
+        long startTime = System.currentTimeMillis();        
         String stmtTextSet = "on pattern [every timer:interval(100 milliseconds)] set var1 = current_timestamp, var2 = var1 + 1, var3 = var1 + var2";
         EPStatement stmtSet = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmtSet.addListener(listenerSet);
