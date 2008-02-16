@@ -545,7 +545,7 @@ every a=F -> (
       </answer>
     </faq>    
 
-    <faq id="subquery_max">
+    <faq id="subquery_insert_into">
       <question>How to implement a sell trailing stop order?</question>
       <answer>
 		<p>
@@ -565,7 +565,11 @@ every a=F -> (
 		<p>			
 			The solution considers the maximum market price since statement start time, compared against the current market price:
 		</p>
-		<div class="source"><pre>select * from Quote(symbol=GOOGL) where price &lt;= max(select max(price) from Quote(symbol=GOOGL) - 100, 600)
+		<div class="source"><pre>// since release 2.0
+select * from Quote(symbol=GOOGL) where price &lt;= max(select max(lastPx) as lastPx from Quote(symbol='GOOG')) - 100, 600)
+// or since for release 1.x		
+insert into MaxPrice(lastPx) select max(lastPx) as lastPx from Quote(symbol='GOOG')
+select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPrice.std:lastevent()) - 100, 600)
 		</pre></div>
       </answer>
     </faq>    

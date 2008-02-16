@@ -1,10 +1,7 @@
 package com.espertech.esper.regression.support;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
@@ -58,11 +55,12 @@ public class PatternTestHarness implements SupportBeanConstants
 
     private void runTest(PatternTestStyle testStyle) throws Exception
     {
-        EPServiceProvider serviceProvider = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        EPServiceProvider serviceProvider = EPServiceProviderManager.getDefaultProvider(config);
         serviceProvider.initialize();
 
         EPRuntime runtime = serviceProvider.getEPRuntime();
-        runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
         // Send the start time to the runtime
         if (sendEventCollection.getTime(EventCollection.ON_START_EVENT_ID) != null)

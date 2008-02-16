@@ -3,13 +3,106 @@ Change History
 
 	This section lists the changes between Esper releases. The changes introduced in each release are split into the following categories.
 
-	* <<API changes>>: Any changes to the API that may impact existing users.
+	* <<API changes>>: Any changes to the API, or the EPL or engine input and output that may impact existing users.
 	
-	* <<Major changes>>: Major new features.
+	* <<Major changes>>: Major new features that do not change existing functionality
 
 	* <<Minor changes>>: Smaller changes and bug fixes.
 	
 	[]
+
+
+Version 2.0.0 Major Release
+
+	Released February 17, 2008
+	
+	Built using Sun JDK 5.0 Update 12; Tested and certified for JDK 6 Update 1.3
+
+* API changes
+
+	* Please consult {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+1.x+to+Esper+2.x}Migrating Esper 1.x to Esper 2.x}}
+	  for detailed information
+
+	* All package names have changed from "net.esper" to "com.espertech.esper"
+	
+	* We have renamed EQL to EPL: All method names and other references to EQL have been renamed to EPL, i.e. createEQL to createEPL
+	
+	* We have made changes to engine output to make the output more useful and consistent between different types of queries, and to make the engine more performant.
+    
+        * We have upgraded 3rd party library dependencies to new versions.
+        
+        * We have switched the schema to 2.0, made it namespace-aware and available online.
+	
+	[]
+    
+* Major changes
+    
+        * New strongly-typed and fast output event delivery to subscriber objects via method call
+
+        * Performance improvement: statements without listeners or subscriber (iterator or output-snapshot statements that use insert-into) now compute much faster
+
+        * We have upgraded to ANTLR Version 3 to gain excellent error handling, incremental parsing, easy-to-read grammar and a smaller runtime jar
+
+        * We have changed view parameter syntax such that event properties do no longer need to appear in quotes
+
+        * Added support for nano/microsecond timer resolution (ESPER-191)
+
+        * Added API for setting variable values (ESPER-181)
+
+        * Added support for map return types in from-clause method invocations
+
+        * Added support for a "unidirectional" keyword in joins/outer join to control join direction
+
+        * Added support for multiple event properties in unique view (std:unique)
+
+        * Added support for use of aggregation functions in subselect
+
+	[]
+
+* Minor changes	    	
+
+	* Changes to configuration classes:
+    Moved the classes ExpiryTimeCacheDesc, LRUCacheDesc, DataCacheDesc, CacheReferenceType out inner classes of ConfigurationDBRef to 
+    ConfigurationExpiryTimeCache, ConfigurationLRUCache, ConfigurationDataCache, ConfigurationCacheReferenceType
+    since the classes were applicable elsewhere
+    
+    	* Renamed method addJavaSqlTypesBinding on ConfigurationDBRef to addSqlTypesBinding
+    	
+    	* Minor change to SelectClause in the SODA API
+    	
+        * Fixed issue ESPER-136 Improve error messages when encountering reserved keywords
+
+        * Fixed issue ESPER-138 Allow Map event type to contain nested Map values
+
+        * Fixed issue ESPER-145 Ignore start or stop commands on already started or stopped EPStatements.
+
+        * Fixed issue ESPER-178 Problem selecting "sum" as a property of event posted by stat:uni view
+
+        * Fixed issue ESPER-179 Iterator on select statement selecting from a named window may return incomplete results  
+
+        * Fixed issue ESPER-180 Null aggregation results outer joining a named window on filled named window
+
+        * Fixed issue ESPER-183 Replace LinkedLists with ArrayDeque where possible
+
+        * Fixed issue ESPER-184 NPE when using regexp or like on null pojo properties
+
+        * Fixed issue ESPER-185 Remove limitation whereas grouped-by properties cannot also occur within aggregation functions  
+
+        * Fixed issue ESPER-186 Iterator not honoring order by clause for grouped join query with output-rate clause
+
+        * Fixed issue ESPER-187 Join of two or more named windows on late start may not return correct aggregation state on iterate
+
+        * Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
+
+        * Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
+
+        * Fixed issue ESPER-192 Support non-String type auto-discovery in EsperIO
+
+        * Fixed issue ESPER-194 Nullpointer when using Jcl104-over-slf4j
+
+        * Fixed issue ESPER-195 Not considering having-clause in un-aggregated and un-grouped query (no-join only)
+	
+    	[]    	
 
 
 Version 1.12.0 Update

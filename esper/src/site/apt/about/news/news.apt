@@ -1,5 +1,81 @@
 News
 
+* February 16, 2008  -  Esper 2.0.0  and  NEsper 1.12.0 Beta 1
+
+  The Esper release 2.0 makes certain changes to the API and engine output that are not backwards-compatible to release 1 engines. 
+  The changes were required to strategically address usability, consistency, performance and aspects of how we publish the project.
+
+  Please read through the summary below. We have outlined in detail the changes that are not backwards compatible on the Wiki at 
+  {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+1.x+to+Esper+2.x}Migrating Esper 1.x to Esper 2.x}}
+  
+  Please see below for NEsper 1.12 beta-1 release details.
+  
+  * New strongly-typed and fast output event delivery to subscriber objects via method call
+  
+  * Performance improvement: statements without listeners or subscriber (iterator or output-snapshot statements that use insert-into) now compute much faster
+  
+  * We have upgraded to ANTLR Version 3 to gain excellent error handling, incremental parsing, easy-to-read grammar and a smaller runtime jar
+  
+  * We have changed view parameter syntax such that event properties do no longer need to appear in quotes
+  
+  * Added support for nano/microsecond timer resolution (ESPER-191)
+  
+  * Added API for setting variable values (ESPER-181)
+  
+  * Added support for map return types in from-clause method invocations
+  
+  * Added support for a "unidirectional" keyword in joins/outer join to control join direction
+  
+  * Added support for multiple event properties in unique view (std:unique)
+  
+  * Added support for use of aggregation functions in subselect
+  
+  * Fixed issue ESPER-136 Improve error messages when encountering reserved keywords
+  
+  * Fixed issue ESPER-138 Allow Map event type to contain nested Map values
+  
+  * Fixed issue ESPER-145 Ignore start or stop commands on already started or stopped EPStatements.
+  
+  * Fixed issue ESPER-178 Problem selecting "sum" as a property of event posted by stat:uni view
+  
+  * Fixed issue ESPER-179 Iterator on select statement selecting from a named window may return incomplete results  
+  
+  * Fixed issue ESPER-180 Null aggregation results outer joining a named window on filled named window
+  
+  * Fixed issue ESPER-183 Replace LinkedLists with ArrayDeque where possible
+  
+  * Fixed issue ESPER-184 NPE when using regexp or like on null pojo properties
+  
+  * Fixed issue ESPER-185 Remove limitation whereas grouped-by properties cannot also occur within aggregation functions  
+  
+  * Fixed issue ESPER-186 Iterator not honoring order by clause for grouped join query with output-rate clause
+  
+  * Fixed issue ESPER-187 Join of two or more named windows on late start may not return correct aggregation state on iterate
+  
+  * Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
+  
+  * Fixed issue ESPER-188 Output snapshot buffers events until output condition is reached
+  
+  * Fixed issue ESPER-192 Support non-String type auto-discovery in EsperIO
+  
+  * Fixed issue ESPER-194 Nullpointer when using Jcl104-over-slf4j
+  
+  * Fixed issue ESPER-195 Not considering having-clause in un-aggregated and un-grouped query (no-join only)
+  
+  []   
+
+
+* February 16, 2008  -  NEsper for .NET 1.12.0 Beta 1
+
+  * Feature equivalent with Esper 1.12.0
+  
+  * Improved support for SQL and database access
+  
+  * Includes benchmark kits
+  
+  []
+
+
 * December 15, 2007  -  Esper 1.12.0
     
 	* New feature: Named windows

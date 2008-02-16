@@ -28,15 +28,6 @@ public class SelectClauseSpecRaw implements MetaDefItem
     }
 
     /**
-     * Ctor.
-     * @param selectList for a populates list of select expressions
-     */
-    public SelectClauseSpecRaw(List<SelectClauseElementRaw> selectList)
-	{
-        selectList = new ArrayList<SelectClauseElementRaw>();
-	}
-
-    /**
      * Adds an select expression within the select clause.
      * @param element is the expression to add
      */

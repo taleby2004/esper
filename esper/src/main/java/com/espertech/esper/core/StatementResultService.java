@@ -17,10 +17,9 @@ public interface StatementResultService
      * @param epServiceProvider the engine instance
      * @param isInsertInto true if this is insert into
      * @param isPattern true if this is a pattern statement
-     * @param statementLifecycleSvc handles persistence for statements
      */
     public void setContext(EPStatementSPI epStatement, EPServiceProvider epServiceProvider,
-                           boolean isInsertInto, boolean isPattern, StatementLifecycleSvc statementLifecycleSvc);
+                           boolean isInsertInto, boolean isPattern);
 
     /**
      * For initialize of the service providing select clause column types and names.

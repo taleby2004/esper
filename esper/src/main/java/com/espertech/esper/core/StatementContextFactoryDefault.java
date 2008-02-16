@@ -114,6 +114,6 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getOutputConditionFactory(),
                 engineServices.getNamedWindowService(),
                 engineServices.getVariableService(),
-                new StatementResultServiceImpl());
+                new StatementResultServiceImpl(engineServices.getStatementLifecycleSvc()));
     }
 }

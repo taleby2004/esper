@@ -199,7 +199,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
             statementContext.getStatementResultService().setContext(statement, epServiceProvider,
-                    isInsertInto, isPattern, services.getStatementLifecycleSvc());
+                    isInsertInto, isPattern);
 
             // create start method
             startMethod = new EPStatementStartMethod(compiledSpec, services, statementContext);

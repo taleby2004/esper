@@ -28,13 +28,12 @@
    </logger>
 
    <logger name="PREFORMATTED">
-      <level value="DEBUG"/>
-      <appender-ref ref="terminalunformatted"/>
+      <level value="INFO"/>
    </logger>
 
    <root>
       <level value="WARN"/>
-      <!-- <appender-ref ref="terminal"/> -->
+      <appender-ref ref="terminal"/>
    </root>
    
 </log4j:configuration>

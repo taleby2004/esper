@@ -1,10 +1,7 @@
 package com.espertech.esper.regression.pattern;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
@@ -188,11 +185,12 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
     {
         int totalEventsReceived = 0;
 
-        EPServiceProvider serviceProvider = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        EPServiceProvider serviceProvider = EPServiceProviderManager.getDefaultProvider(config);
         serviceProvider.initialize();
 
         EPRuntime runtime = serviceProvider.getEPRuntime();
-        runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         // Send the start time to the runtime
         TimerEvent startTime = new CurrentTimeEvent(baseTime);
         runtime.sendEvent(startTime);

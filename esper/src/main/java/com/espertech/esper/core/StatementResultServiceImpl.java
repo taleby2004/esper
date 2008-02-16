@@ -1,11 +1,9 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.StatementAwareUpdateListener;
 import com.espertech.esper.client.UpdateListener;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventBeanUtility;
@@ -52,12 +50,21 @@ public class StatementResultServiceImpl implements StatementResultService
         }
     };
 
+    /**
+     * Ctor.
+     * @param statementLifecycleSvc handles persistence for statements
+     */
+    public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc)
+    {
+        log.debug(".ctor");
+        this.statementLifecycleSvc = statementLifecycleSvc;
+    }
+
     public void setContext(EPStatementSPI epStatement, EPServiceProvider epServiceProvider,
-                           boolean isInsertInto, boolean isPattern, StatementLifecycleSvc statementLifecycleSvc)
+                           boolean isInsertInto, boolean isPattern)
     {
         this.epStatement = epStatement;
         this.epServiceProvider = epServiceProvider;
-        this.statementLifecycleSvc = statementLifecycleSvc;
         this.isInsertInto = isInsertInto;
         this.isPattern = isPattern;
         isMakeSynthetic = isInsertInto || isPattern;
@@ -94,8 +101,12 @@ public class StatementResultServiceImpl implements StatementResultService
 
     public void setUpdateListeners(EPStatementListenerSet statementListenerSet)
     {
-        // indicate that listeners were updated for potential persistence of listener set
-        this.statementLifecycleSvc.updatedListeners(epStatement.getStatementId(), epStatement.getName(), statementListenerSet);
+        // indicate that listeners were updated for potential persistence of listener set, once the statement context is known
+        if (epStatement != null)
+        {
+            this.statementLifecycleSvc.updatedListeners(epStatement.getStatementId(), epStatement.getName(), statementListenerSet);
+        }
+
         this.statementListenerSet = statementListenerSet;
 
         isMakeNatural = statementListenerSet.getSubscriber() != null;

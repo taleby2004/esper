@@ -42,7 +42,7 @@ public class SupportStatementContextFactory
                 new OutputConditionFactoryDefault(),
                 null,
                 null,
-                new StatementResultServiceImpl() // statement result svc
+                new StatementResultServiceImpl(null) // statement result svc
                 );
     }
 }

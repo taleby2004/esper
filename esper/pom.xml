@@ -134,6 +134,10 @@ mvn javadoc:javadoc
 					<includes>
 						<include>**/Test*.java</include>
 					</includes>
+					<excludes>
+						<exclude>**/TestManual*.java</exclude>
+						<exclude>**/Test*$*</exclude>
+					</excludes>
 					<systemProperties>
 						<property>
 							<name>log4j.configuration</name>
