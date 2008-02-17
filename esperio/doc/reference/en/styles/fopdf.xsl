@@ -46,7 +46,7 @@
                     <fo:table-row>
                         <fo:table-cell text-align="center">
                             <fo:block>
-                                <fo:external-graphic src="file:images/esper_logo_a.png"/>
+                                <fo:external-graphic src="file:images/esper_logo.png"/>
                             </fo:block>
                             <fo:block font-family="Helvetica" font-size="22pt" padding-before="10mm">
                                 <xsl:value-of select="bookinfo/subtitle"/>
@@ -54,6 +54,12 @@
                             <fo:block font-family="Helvetica" font-size="12pt" padding="10mm">
                                 Version:
                                 <xsl:value-of select="bookinfo/releaseinfo"/>
+                            </fo:block>
+                            <fo:block font-family="Helvetica" font-size="12pt" padding="10mm" text-align="center">
+                            	provided by
+                            </fo:block>
+                            <fo:block>
+			        <fo:external-graphic src="file:images/espertech_logo.png"/>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
@@ -83,6 +89,14 @@
         <xsl:attribute name="margin-right">-5em</xsl:attribute>
     </xsl:attribute-set>
 
+    <!-- More space in the footer for long text -->
+    <xsl:attribute-set name="footer.content.properties">
+        <xsl:attribute name="font-family">
+            <xsl:value-of select="$body.font.family"/>
+        </xsl:attribute>
+        <xsl:attribute name="margin-right">-5em</xsl:attribute>
+    </xsl:attribute-set>
+
     <!--###################################################
                           Custom Footer
         ################################################### -->
@@ -97,7 +111,7 @@
         <xsl:variable name="Version">
             <xsl:choose>
                 <xsl:when test="//releaseinfo">
-                    <xsl:text>Esper </xsl:text>
+                    <xsl:text>&#169; 2008 EsperTech Inc. - EsperIO </xsl:text>
                     <xsl:value-of select="//releaseinfo"/>
                 </xsl:when>
                 <xsl:otherwise>

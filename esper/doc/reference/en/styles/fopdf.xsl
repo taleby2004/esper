@@ -89,6 +89,14 @@
         <xsl:attribute name="margin-right">-5em</xsl:attribute>
     </xsl:attribute-set>
 
+    <!-- More space in the footer for long text -->
+    <xsl:attribute-set name="footer.content.properties">
+        <xsl:attribute name="font-family">
+            <xsl:value-of select="$body.font.family"/>
+        </xsl:attribute>
+        <xsl:attribute name="margin-right">-5em</xsl:attribute>
+    </xsl:attribute-set>
+
     <!--###################################################
                           Custom Footer
         ################################################### -->
@@ -103,7 +111,7 @@
         <xsl:variable name="Version">
             <xsl:choose>
                 <xsl:when test="//releaseinfo">
-                    <xsl:text>&#169; 2007 EsperTech Inc. - Esper</xsl:text>
+                    <xsl:text>&#169; 2008 EsperTech Inc. - Esper </xsl:text>
                     <xsl:value-of select="//releaseinfo"/>
                 </xsl:when>
                 <xsl:otherwise>

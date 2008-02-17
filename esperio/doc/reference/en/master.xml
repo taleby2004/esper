@@ -7,9 +7,13 @@
 ]>
 <book lang="en">
 	<bookinfo>
-		<title>Esper Adapters</title>
-		<subtitle>Esper Adapter Reference Documentation</subtitle>
+		<title>EsperIO Adapters</title>
+		<subtitle>EsperIO Reference Documentation</subtitle>
 		<releaseinfo>2.0.0</releaseinfo>
+        <copyright>
+            <year>2008</year>
+            <holder>EsperTech Inc.</holder>
+        </copyright>
 	</bookinfo>
 	<toc/>
 	<preface id="preface" revision="1">
