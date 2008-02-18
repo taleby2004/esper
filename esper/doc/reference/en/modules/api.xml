@@ -793,7 +793,7 @@ runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
 
 		<para>
 			We recommend that when disabling the internal timer, applications send an external timer event setting the start time before creating statements,
-			such that statement start time is well-defined. Also, note that the engine outputs a warning is duplicate external time events are received.
+			such that statement start time is well-defined. Also, note that the engine outputs a warning if duplicate external time events are received.
 		</para>
     </sect1>
 

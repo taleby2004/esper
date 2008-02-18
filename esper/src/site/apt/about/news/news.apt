@@ -18,9 +18,7 @@ News
 
   Please read through the summary below. We have outlined in detail the changes that are not backwards compatible on the Wiki at 
   {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+1.x+to+Esper+2.x}Migrating Esper 1.x to Esper 2.x}}
-  
-  Please see below for NEsper 1.12 beta-1 release details.
-  
+    
   * New strongly-typed and fast output event delivery to subscriber objects via method call
   
   * Performance improvement: statements without listeners or subscriber (iterator or output-snapshot statements that use insert-into) now compute much faster
