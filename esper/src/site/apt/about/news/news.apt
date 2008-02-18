@@ -1,6 +1,17 @@
 News
 
-* February 16, 2008  -  Esper 2.0.0  and  NEsper 1.12.0 Beta 1
+* February 16, 2008  -  NEsper 1.12.0 Beta 1
+
+  * Feature equivalent with Esper 1.12.0
+  
+  * Improved support for SQL and database access
+  
+  * Includes benchmark kits
+  
+  []
+
+
+* February 16, 2008  -  Esper 2.0.0 
 
   The Esper release 2.0 makes certain changes to the API and engine output that are not backwards-compatible to release 1 engines. 
   The changes were required to strategically address usability, consistency, performance and aspects of how we publish the project.
@@ -63,17 +74,6 @@ News
   * Fixed issue ESPER-195 Not considering having-clause in un-aggregated and un-grouped query (no-join only)
   
   []   
-
-
-* February 16, 2008  -  NEsper for .NET 1.12.0 Beta 1
-
-  * Feature equivalent with Esper 1.12.0
-  
-  * Improved support for SQL and database access
-  
-  * Includes benchmark kits
-  
-  []
 
 
 * December 15, 2007  -  Esper 1.12.0
