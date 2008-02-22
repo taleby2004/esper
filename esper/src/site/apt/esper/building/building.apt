@@ -25,6 +25,15 @@ cd esper/esper
 mvn install
 ----------------------------------------	
 
+  <Since release 2.0>, the new version of ANTLR 3 and Maven plug-in for building ANTLR grammar files may return an error on the first build:
+  
+----------------------------------------
+error(3):  cannot find tokens file esper/target/generated-sources/antlr/com/espertech/esper/epl/generated/EsperEPL2Grammar...
+----------------------------------------
+
+  If you see the above error which is due to the Maven plug-in not recognizing a grammar build order, then please change 
+  directory to esper/target/generated-sources/antlr/com/espertech/esper/epl/generated and remove all files except the *token* files, and build again.
+
   <Note>, in order to run all tests successfully, the following preconditions must be met:
   
     * For tests performing database joins to work, MySQL must be installed and available at connection string 
