@@ -110,8 +110,8 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
             {
                 // Remove the handle if this list is now empty
                 handleRemoved = entry.getKey();
+                break;
             }
-            break;
         }
         if (handleRemoved != null)
         {
