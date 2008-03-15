@@ -7,6 +7,9 @@
  **************************************************************************************/
 package com.espertech.esper.timer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -15,6 +18,7 @@ import java.util.concurrent.TimeUnit;
  */
 final class EPLTimerTask implements Runnable
 {
+    private static final Log log = LogFactory.getLog(EPLTimerTask.class);
     private final TimerCallback callback;
     private ScheduledFuture<?> future;
     private boolean isCancelled;
@@ -50,7 +54,15 @@ final class EPLTimerTask implements Runnable
                 _invocationCount++;
                 if (_lastDrift > _maxDrift) _maxDrift = _lastDrift;
             }
-            callback.timerCallback();
+
+            try
+            {
+                callback.timerCallback();
+            }
+            catch (Throwable t)
+            {
+                log.error("Timer thread caught unhandled exception: " + t.getMessage(), t);
+            }
         }
     }
 

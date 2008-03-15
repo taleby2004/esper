@@ -11,6 +11,8 @@ import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewSupport;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This view is hooked into a named window's view chain as the last view and handles dispatching of named window
@@ -38,7 +40,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     {
         this.eventType = eventType;
         this.namedWindowService = namedWindowService;
-        consumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
+        consumers = new ConcurrentHashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
         this.namedWindowRootView = namedWindowRootView;
         this.createWindowStmtHandle = createWindowStmtHandle;
         this.statementResultService = statementResultService;
@@ -79,11 +81,11 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         List<NamedWindowConsumerView> viewsPerStatements = consumers.get(statementHandle);
         if (viewsPerStatements == null)
         {
-            viewsPerStatements = new ArrayList<NamedWindowConsumerView>();
+            viewsPerStatements = new CopyOnWriteArrayList<NamedWindowConsumerView>();
 
             // avoid concurrent modification as a thread may currently iterate over consumers as its dispatching
             // without the engine lock
-            Map<EPStatementHandle, List<NamedWindowConsumerView>> newConsumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
+            Map<EPStatementHandle, List<NamedWindowConsumerView>> newConsumers = new ConcurrentHashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
             newConsumers.putAll(consumers);
             newConsumers.put(statementHandle, viewsPerStatements);
             consumers = newConsumers;
