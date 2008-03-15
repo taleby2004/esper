@@ -45,39 +45,95 @@ public class CEPProvider {
 
         private EPRuntime epRuntime;
 
+        // only one of those 2 will be attached to statement depending on the -mode selected
         private UpdateListener updateListener;
+        private MySubscriber subscriber;
+
+        private static int sleepListenerMillis;
 
         public EsperCEPProvider() {
         }
 
-        public void init(final int sleepListenerMillis) {
-            Configuration configuration = new Configuration();
+        public void init(final int _sleepListenerMillis) {
+            sleepListenerMillis = _sleepListenerMillis;
+            Configuration configuration;
+            try {
+                Class configurationHAClass = Class.forName("com.espertech.esperha.client.ConfigurationHA");
+                configuration = (Configuration) configurationHAClass.newInstance();
+                System.out.println("=== EsperHA is available, using ConfigurationHA ===");
+            } catch (ClassNotFoundException e) {
+                configuration = new Configuration();
+            } catch (Throwable t) {
+                System.err.println("Could not properly determine if EsperHA is available, default to Esper");
+                t.printStackTrace();
+                configuration = new Configuration();
+            }
             configuration.addEventTypeAlias("Market", MarketData.class);
             EPServiceProvider epService = EPServiceProviderManager.getProvider("benchmark", configuration);
             epAdministrator = epService.getEPAdministrator();
-            updateListener = new UpdateListener() {
-                public void update(EventBean[] newEvents, EventBean[] oldEvents) {
-                    if (newEvents != null) {
-                        if (sleepListenerMillis > 0) {
-                            try {
-                                Thread.sleep(sleepListenerMillis);
-                            } catch (InterruptedException ie) {
-                                ;
-                            }
-                        }
-                    }
-                }
-            };
+            updateListener = new MyUpdateListener();
+            subscriber = new MySubscriber();
             epRuntime = epService.getEPRuntime();
         }
 
         public void registerStatement(String statement, String statementID) {
             EPStatement stmt = epAdministrator.createEPL(statement, statementID);
-            stmt.addListener(updateListener);
+            if (System.getProperty("esper.benchmark.ul") != null) {
+                stmt.addListener(updateListener);
+            } else {
+                stmt.setSubscriber(subscriber);
+            }
         }
 
         public void sendEvent(Object event) {
             epRuntime.sendEvent(event);
         }
     }
+
+    public static class MyUpdateListener implements UpdateListener {
+        public void update(EventBean[] newEvents, EventBean[] oldEvents) {
+            if (newEvents != null) {
+                if (EsperCEPProvider.sleepListenerMillis > 0) {
+                    try {
+                        Thread.sleep(EsperCEPProvider.sleepListenerMillis);
+                    } catch (InterruptedException ie) {
+                        ;
+                    }
+                }
+            }
+        }
+    }
+
+    public static class MySubscriber {
+        public void update(String ticker) {
+            if (EsperCEPProvider.sleepListenerMillis > 0) {
+                try {
+                    Thread.sleep(EsperCEPProvider.sleepListenerMillis);
+                } catch (InterruptedException ie) {
+                    ;
+                }
+            }
+        }
+
+        public void update(MarketData marketData) {
+            if (EsperCEPProvider.sleepListenerMillis > 0) {
+                try {
+                    Thread.sleep(EsperCEPProvider.sleepListenerMillis);
+                } catch (InterruptedException ie) {
+                    ;
+                }
+            }
+        }
+
+        public void update(String ticker, double avg, long count, double sum) {
+            if (EsperCEPProvider.sleepListenerMillis > 0) {
+                try {
+                    Thread.sleep(EsperCEPProvider.sleepListenerMillis);
+                } catch (InterruptedException ie) {
+                    ;
+                }
+            }
+        }
+    }
+
 }

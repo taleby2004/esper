@@ -37,6 +37,11 @@ import java.util.concurrent.*;
  * <p/>
  * If you use -rate nxM (n threads, M event/s), the server will simulate the load for a standalone simulation without
  * any remote client(s).
+ * <p/>
+ * By default the benchmark registers a subscriber to the statement(s). Use -Desper.benchmark.ul to use
+ * an UpdateListener instead. Note that the subscriber contains suitable update(..) methods for the default
+ * proposed statement in the statements.properties files but might not be suitable if you change statements due
+ * to the strong binding with statement results. 
  *
  * @author Alexandre Vasseur http://avasseur.blogspot.com
  */

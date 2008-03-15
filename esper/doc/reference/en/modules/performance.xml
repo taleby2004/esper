@@ -452,6 +452,14 @@ etc;build;lib\esper-2.0.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.1_
                 </listitem>
                 <listitem>
                     <para>
+                        By default the benchmark registers a subscriber to the statement(s). Use <literal>-Desper.benchmark.ul</literal> to use
+                        an UpdateListener instead. Note that the subscriber contains suitable update(..) methods for the default
+                        proposed statement in the <literal>etc/statements.properties</literal> file but might not be suitable if you change statements due
+                        to the strong binding with statement results. Refer to <xref linkend="api-receive-results"/>.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
                         Establish a performance baseline in simulation mode (without clients). Use the
                         <literal>-rate 1x5000</literal>
                         option

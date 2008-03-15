@@ -152,7 +152,7 @@ public class StatementResultServiceImpl implements StatementResultService
 
         UniformPair<EventBean[]> events = EventBeanUtility.flattenList(dispatches);
 
-        if (log.isDebugEnabled())
+        if (ExecutionPathDebugLog.isDebugEnabled && log.isDebugEnabled())
         {
             ViewSupport.dumpUpdateParams(".execute", events);
         }
