@@ -471,7 +471,7 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							The function requires a data window view, or a group-by and data window view, without any additional sub-views. Data window views are: length window, time and time batch window and sorted window
+							The function requires a data window view, or a group-by and data window view, without any additional sub-views. See <xref linkend=" epl-views"/> for built-in data window views.
 						</para>
 					</listitem>
 				</itemizedlist>
