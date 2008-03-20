@@ -12,7 +12,6 @@ import com.espertech.esper.view.ViewSupport;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This view is hooked into a named window's view chain as the last view and handles dispatching of named window
@@ -24,7 +23,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     private final EventType eventType;
     private final NamedWindowRootView namedWindowRootView;
     private final NamedWindowService namedWindowService;
-    private transient Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;
+    private transient Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;  // handles as copy-on-write
     private final EPStatementHandle createWindowStmtHandle;
     private final StatementResultService statementResultService;
 
@@ -40,7 +39,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     {
         this.eventType = eventType;
         this.namedWindowService = namedWindowService;
-        consumers = new ConcurrentHashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
+        consumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
         this.namedWindowRootView = namedWindowRootView;
         this.createWindowStmtHandle = createWindowStmtHandle;
         this.statementResultService = statementResultService;
@@ -85,7 +84,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
 
             // avoid concurrent modification as a thread may currently iterate over consumers as its dispatching
             // without the engine lock
-            Map<EPStatementHandle, List<NamedWindowConsumerView>> newConsumers = new ConcurrentHashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
+            Map<EPStatementHandle, List<NamedWindowConsumerView>> newConsumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
             newConsumers.putAll(consumers);
             newConsumers.put(statementHandle, viewsPerStatements);
             consumers = newConsumers;
@@ -117,7 +116,10 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         }
         if (handleRemoved != null)
         {
-            consumers.remove(handleRemoved);
+            Map<EPStatementHandle, List<NamedWindowConsumerView>> newConsumers = new HashMap<EPStatementHandle, List<NamedWindowConsumerView>>();
+            newConsumers.putAll(consumers);
+            newConsumers.remove(handleRemoved);
+            consumers = newConsumers;
         }
     }
 
