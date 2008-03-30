@@ -218,43 +218,78 @@
 ]]></programlisting>
 
 			<para>
-				Your <literal>update</literal> method will be processing incoming (insert stream) and outgoing (remove stream) events, as well as providing incoming and outgoing events to child views. The convention required of your update method implementation is that the view releases any insert stream events which the view generates as semantically-equal remove stream events at a later time. A sample <literal>update</literal> method implementation that computes a number of events in an upward trend is shown below:
+				Your <literal>update</literal> method will be processing incoming (insert stream) and outgoing (remove stream) events posted by the parent view (if any), as well as providing incoming and outgoing events to child views. The convention required of your update method implementation is that the view releases any insert stream events (EventBean object references) which the view generates as reference-equal remove stream events (EventBean object references) at a later time. 
 			</para>
-			<programlisting><![CDATA[public final void update(EventBean[] newData, EventBean[] oldData) {
-  EventBean oldDataPost = populateMap(trendcount);
-
-  // add data points
-  if (newData != null) {
-    for (int i = 0; i < newData.length; i++) {
-      double dataPoint = ((Number) fieldGetter.get(newData[i])).doubleValue();
-
-      if (lastDataPoint == null) {
-        trendcount = 1L;
-      }
-      else if (lastDataPoint < dataPoint) {
-        trendcount++;
-      }
-      else if (lastDataPoint > dataPoint) {
-        trendcount = 0L;
-      }
-      lastDataPoint = dataPoint;
-    }
-  }
-
-  if (this.hasViews())	{
-    EventBean newDataPost = populateMap(trendcount);
-    updateChildren(new EventBean[] {newDataPost}, new EventBean[] {oldDataPost});
-  }
-}]]></programlisting>
 
 			<para>
-				This <literal>update</literal> method must adhere to the following view conventions, to prevent memory leaks and to enable correct behavior within the engine:
+				The view implementation must call the <literal>updateChildren</literal> method to post outgoing insert and remove stream events. Similar to the <literal>update</literal> method, the <literal>updateChildren</literal> method takes insert and remove stream events as parameters.
+			</para>
+
+			<para>
+				A sample <literal>update</literal> method implementation that computes a number of events in an upward trend is shown below:
+			</para>
+			<programlisting><![CDATA[public final void update(EventBean[] newData, EventBean[] oldData) {
+    // The remove stream most post the same exact object references of events that were posted as the insert stream
+    EventBean[] removeStreamToPost;
+    if (lastInsertStreamEvent != null) {
+        removeStreamToPost = new EventBean[] {lastInsertStreamEvent};
+    } 
+    else {
+        removeStreamToPost = new EventBean[] {populateMap(null)};
+    }
+
+    // add data points
+    if (newData != null) {
+        for (EventBean aNewData : newData) {
+            double dataPoint = ((Number) fieldGetter.get(aNewData)).doubleValue();
+
+            if (lastDataPoint == null) {
+                trendcount = 1L;
+            }
+            else if (lastDataPoint < dataPoint) {
+                trendcount++;
+            }
+            else if (lastDataPoint > dataPoint) {
+                trendcount = 0L;
+            }
+            lastDataPoint = dataPoint;
+        }
+    }
+
+    if (this.hasViews()) {
+        EventBean newDataPost = populateMap(trendcount);
+        lastInsertStreamEvent = newDataPost; 
+        updateChildren(new EventBean[] {newDataPost}, removeStreamToPost);
+    }
+}]]></programlisting>
+		</sect2>
+
+		<sect2 id="custom-views-contract" revision="1">
+			<title>View Contract</title>
+
+			<para>
+				The <literal>update</literal> method must adhere to the following conventions, to prevent memory leaks and to enable correct behavior within the engine:
 			</para>
 
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Views must post a remove stream in the form of old data to child views. The remove stream must consist of the same event reference(s) posted as insert stream (new data).
+						A view implementation that posts events to the insert stream must post unique <literal>EventBean</literal> object references as insert stream events, and cannot post the same <literal>EventBean</literal> object reference multiple times. The underlying event to the <literal>EventBean</literal> object reference can be the same object reference, however the <literal>EventBean</literal> object reference posted by the view into the insert stream must be a new instance for each insert stream event.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						If the custom view posts a continuous insert stream, then the views must also post a continuous remove stream (second parameter to the <literal>updateChildren</literal> method). If the view does not post remove stream events, it assumes unbound keep-all semantics.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>EventBean</literal> events posted as remove stream events must be the same object reference as the <literal>EventBean</literal> events posted as insert stream by the view. Thus remove stream events posted by the view (the <literal>EventBean</literal> instances, does not affect the underlying representation) must be reference-equal to insert stream events posted by the view as part of an earlier invocation of the update method, or the same invocation of the update method.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>EventBean</literal> events represent a unique observation. The values of the observation can be the same, thus the underlying representation of an <literal>EventBean</literal> event can be reused, however event property values must be kept immutable and not be subject to change.
 					</para>
 				</listitem>
 			</itemizedlist>
@@ -262,14 +297,12 @@
 			<para>
 				The engine can provide a callback to the view indicating when a statement using the view is stopped. The callback is available to the view via the <literal>com.espertech.esper.view.StatementStopCallback</literal> interface. Your
 				view code must subscribe to the stop callback in order for the engine to invoke the callback:
-			</para>
-			
+			</para>			
 			<programlisting><![CDATA[statementContext.getStatementStopService().addSubscriber(this);]]></programlisting>
 
 			<para>
 				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods.
 			</para>
-
 		</sect2>
 		
 		<sect2 id="custom-views-config" revision="1">

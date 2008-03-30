@@ -23,6 +23,9 @@ public class MyTrendSpotterView extends ViewSupport
     private Long trendcount;
     private Double lastDataPoint;
 
+    // The remove stream must post the same object event reference
+    private EventBean lastInsertStreamEvent;
+
     /**
      * Constructor requires the name of the field to use in the parent view to compute a trend.
      * @param fieldName is the name of the field within the parent view to use to get numeric data points for this view
@@ -60,14 +63,23 @@ public class MyTrendSpotterView extends ViewSupport
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        EventBean oldDataPost = populateMap(trendcount);
+        // The remove stream most post the same exact object references of events that were posted as the insert stream
+        EventBean[] removeStreamToPost;
+        if (lastInsertStreamEvent != null)
+        {
+            removeStreamToPost = new EventBean[] {lastInsertStreamEvent};
+        }
+        else
+        {
+            removeStreamToPost = new EventBean[] {populateMap(null)};
+        }
 
         // add data points
         if (newData != null)
         {
-            for (int i = 0; i < newData.length; i++)
+            for (EventBean aNewData : newData)
             {
-                double dataPoint = ((Number) fieldGetter.get(newData[i])).doubleValue();
+                double dataPoint = ((Number) fieldGetter.get(aNewData)).doubleValue();
 
                 if (lastDataPoint == null)
                 {
@@ -88,7 +100,8 @@ public class MyTrendSpotterView extends ViewSupport
         if (this.hasViews())
         {
             EventBean newDataPost = populateMap(trendcount);
-            updateChildren(new EventBean[] {newDataPost}, new EventBean[] {oldDataPost});
+            lastInsertStreamEvent = newDataPost; 
+            updateChildren(new EventBean[] {newDataPost}, removeStreamToPost);
         }
     }
 
