@@ -622,11 +622,14 @@ public class EPStatementStartMethod
                 NamedWindowTailView consumerView = processor.getTailView();
                 NamedWindowConsumerView view = (NamedWindowConsumerView) eventStreamParentViewable[i];
 
-                // preload view for stream
+                // preload view for stream unless the expiry policy is batch window
                 ArrayList<EventBean> eventsInWindow = new ArrayList<EventBean>();
-                for (EventBean aConsumerView : consumerView)
+                if (!consumerView.isParentBatchWindow())
                 {
-                    eventsInWindow.add(aConsumerView);
+                    for (EventBean aConsumerView : consumerView)
+                    {
+                        eventsInWindow.add(aConsumerView);
+                    }
                 }
                 if (!eventsInWindow.isEmpty())
                 {

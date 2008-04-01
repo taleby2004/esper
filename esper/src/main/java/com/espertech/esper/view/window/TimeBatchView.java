@@ -9,10 +9,7 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.view.DataWindowView;
+import com.espertech.esper.view.*;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +32,7 @@ import java.util.LinkedList;
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  * In that case also, no next callback is scheduled with the scheduling service until the next event arrives.
  */
-public final class TimeBatchView extends ViewSupport implements CloneableView, DataWindowView
+public final class TimeBatchView extends ViewSupport implements CloneableView, BatchingDataWindowView
 {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;

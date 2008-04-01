@@ -9,10 +9,7 @@ import com.espertech.esper.event.EventType;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.view.DataWindowView;
+import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +27,7 @@ import java.util.Iterator;
  * <p>
  * The view starts the first interval when the view is created.
  */
-public final class TimeLengthBatchView extends ViewSupport implements CloneableView, DataWindowView
+public final class TimeLengthBatchView extends ViewSupport implements CloneableView, BatchingDataWindowView
 {
     private static final Log log = LogFactory.getLog(TimeLengthBatchView.class);
 

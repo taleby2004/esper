@@ -9,6 +9,7 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewSupport;
+import com.espertech.esper.view.BatchingDataWindowView;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,6 +44,15 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         this.namedWindowRootView = namedWindowRootView;
         this.createWindowStmtHandle = createWindowStmtHandle;
         this.statementResultService = statementResultService;
+    }
+
+    public boolean isParentBatchWindow()
+    {
+        if (this.getParent() instanceof BatchingDataWindowView)
+        {
+            return true;
+        }
+        return false;
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)

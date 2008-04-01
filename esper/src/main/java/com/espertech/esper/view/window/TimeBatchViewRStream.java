@@ -9,10 +9,7 @@ import com.espertech.esper.event.EventType;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.view.DataWindowView;
+import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,7 +19,7 @@ import java.util.LinkedHashSet;
 /**
  * Same as the {@link TimeBatchView}, this view also supports fast-remove from the batch for remove stream events.
  */
-public final class TimeBatchViewRStream extends ViewSupport implements CloneableView, DataWindowView
+public final class TimeBatchViewRStream extends ViewSupport implements CloneableView, BatchingDataWindowView
 {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;

@@ -650,6 +650,41 @@ public class TestNamedWindowViews extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
     }
 
+    public void testTimeBatchLateConsumer()
+    {
+        sendTimer(0);
+
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:time_batch(10 sec) as MyMap";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+
+        // create insert into
+        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEPL(stmtTextInsert);
+
+        sendTimer(0);
+        sendSupportBean("E1", 1L);
+
+        sendTimer(5000);
+        sendSupportBean("E2", 2L);
+
+        // create consumer
+        String stmtTextSelectOne = "select sum(value) as value from MyWindow";
+        EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
+        stmtSelectOne.addListener(listenerStmtOne);
+
+        sendTimer(8000);
+        sendSupportBean("E3", 3L);
+        assertFalse(listenerStmtOne.isInvoked());
+
+        sendTimer(10000);
+        EventBean[] newData = listenerStmtOne.getLastNewData();
+        assertEquals(1, newData.length);
+        ArrayAssertionUtil.assertProps(newData[0], new String[] {"value"}, new Object[] {6L});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), new String[] {"value"}, null);
+    }
+
     public void testLengthBatch()
     {
         String[] fields = new String[] {"key", "value"};
