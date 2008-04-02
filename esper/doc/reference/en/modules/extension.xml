@@ -301,7 +301,7 @@
 			<programlisting><![CDATA[statementContext.getStatementStopService().addSubscriber(this);]]></programlisting>
 
 			<para>
-				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods.
+				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods. The iterator of the custom view implementation does not need to be thread-safe.
 			</para>
 		</sect2>
 		
