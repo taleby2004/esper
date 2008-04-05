@@ -227,13 +227,16 @@ from StockTick(symbol='IBM').win:length(100).stat:uni(volume)]]></programlisting
 			<para>
 				Event properties and expressions can be renamed using below syntax.
 			</para>
-			<synopsis>select [event property | expression] as <emphasis>identifier</emphasis> [, ...]</synopsis>
+			<synopsis>select [<emphasis>event_property</emphasis> | <emphasis>expression</emphasis>] as <emphasis>identifier</emphasis> [, ...]</synopsis>
 
 			<para>
-				The following statement selects volume multiplied by price and specifies the name <emphasis>volPrice</emphasis> for the event property.
+				The following statement selects volume multiplied by price and specifies the name <emphasis>volPrice</emphasis> for the resulting column.
 			</para>
-			<programlisting><![CDATA[select volume * price as volPrice from StockTick.win:length(100)
-]]></programlisting>
+			<programlisting><![CDATA[select volume * price as volPrice from StockTick.win:length(100)]]></programlisting>
+
+			<para>
+				Identifiers cannot contain the "." (dot) character, i.e. "vol.price" is not a valid identifier for the rename syntax.
+			</para>
 		</sect2>
 		
         <sect2 id="epl-select-all-join">
