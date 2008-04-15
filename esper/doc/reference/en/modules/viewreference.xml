@@ -57,7 +57,7 @@
 					</row>
 					<row>
 						<entry>Time batch window</entry>
-						<entry>win:time_batch(<emphasis>time period</emphasis>)</entry>
+						<entry>win:time_batch(<emphasis>time period</emphasis>[,<emphasis>optional_reference_point</emphasis>])</entry>
 						<entry>Tumbling window that batches events and releases them every specified time interval</entry>
 					</row>
 					<row>
@@ -305,8 +305,13 @@ win:time(125)</programlisting>
 					This window view buffers events (tumbling window) and releases them every specified time interval in one update. The view takes a time period or a number of seconds as a parameter.
 				</para>
 
-				<synopsis>win:time_batch(<emphasis>time_period</emphasis>)</synopsis>
-				<synopsis>win:time_batch(<emphasis>number_of_seconds</emphasis>)</synopsis>
+				<synopsis>win:time_batch(<emphasis>time_period</emphasis>[,<emphasis>optional_reference_point</emphasis>])</synopsis>
+				<synopsis>win:time_batch(<emphasis>number_of_seconds</emphasis>[,<emphasis>optional_reference_point</emphasis>])</synopsis>
+
+				<para>
+					The time batch window takes a second, optional parameter that serves as a reference point to batch flush times. If not specified, the arrival of the first event into the batch window sets the 
+					reference point. Therefore if the reference point is not specified and the first event arrives at time t<subscript>1</subscript>, then the batch flushes at time t<subscript>1</subscript> plus <emphasis>time_period</emphasis> and every <emphasis>time_period</emphasis> thereafter.
+				</para>
 
 				<para>
 					The below example batches events into a 5 second window releasing new batches every 5 seconds. Listeners to updates
