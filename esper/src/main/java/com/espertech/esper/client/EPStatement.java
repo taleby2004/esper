@@ -98,6 +98,12 @@ public interface EPStatement extends EPListenable, EPIterable
      *   needed to receive statement results
      */
     public Object getSubscriber();
+
+    /**
+     * Returns true if statement is a pattern
+     * @return true if statement is a pattern
+     */
+    public boolean isPattern();
 }
 
 

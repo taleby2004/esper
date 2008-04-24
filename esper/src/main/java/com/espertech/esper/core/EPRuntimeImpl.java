@@ -146,14 +146,19 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
         processEvent(eventBean);
     }
 
-    public int getNumEventsReceived()
+    public long getNumEventsReceived()
     {
         return services.getFilterService().getNumEventsEvaluated();
     }
 
-    public int getNumEventsEmitted()
+    public long getNumEventsEmitted()
     {
         return services.getEmitService().getNumEventsEmitted();
+    }
+
+    public void resetStats() {
+        services.getFilterService().resetStats();
+        services.getEmitService().resetStats();
     }
 
     public void route(Object event)

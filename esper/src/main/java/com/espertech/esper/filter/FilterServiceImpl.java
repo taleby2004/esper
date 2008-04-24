@@ -8,8 +8,9 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.event.EventBean;
+
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation of the filter service interface.
@@ -19,7 +20,7 @@ public final class FilterServiceImpl implements FilterService
 {
     private final EventTypeIndexBuilder indexBuilder;
     private final EventTypeIndex eventTypeIndex;
-    private final AtomicInteger numEventsEvaluated = new AtomicInteger();
+    private final AtomicLong numEventsEvaluated = new AtomicLong();
 
     /**
      * Constructor.
@@ -54,8 +55,12 @@ public final class FilterServiceImpl implements FilterService
         eventTypeIndex.matchEvent(eventBean, matches);
     }
 
-    public final int getNumEventsEvaluated()
+    public final long getNumEventsEvaluated()
     {
         return numEventsEvaluated.get();
+    }
+
+    public void resetStats() {
+        numEventsEvaluated.set(0);
     }
 }

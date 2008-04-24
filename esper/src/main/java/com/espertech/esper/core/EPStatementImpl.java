@@ -346,4 +346,8 @@ public class EPStatementImpl implements EPStatementSPI
     {
         return statementListenerSet.getSubscriber();
     }
+
+    public boolean isPattern() {
+        return isPattern;
+    }
 }

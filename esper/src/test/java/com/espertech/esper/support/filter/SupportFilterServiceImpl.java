@@ -30,9 +30,13 @@ public class SupportFilterServiceImpl implements FilterService
         removed.add(callback);
     }
 
-    public int getNumEventsEvaluated()
+    public long getNumEventsEvaluated()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public void resetStats() {
+        throw new UnsupportedOperationException();        
     }
 
     public List<Pair<FilterValueSet, FilterHandle>> getAdded()

@@ -48,16 +48,23 @@ public interface EPRuntime
     public void sendEvent(org.w3c.dom.Node node) throws EPException;
 
     /**
-     * Number of events received over the lifetime of the event stream processing runtime.
+     * Number of events received over the lifetime of the event stream processing runtime,
+     * or since the last resetStats() call
      * @return number of events received
      */
-    public int getNumEventsReceived();
+    public long getNumEventsReceived();
 
     /**
-     * Number of events emitted over the lifetime of the event stream processing runtime.
+     * Number of events emitted over the lifetime of the event stream processing runtime,
+     * or since the last resetStats() call
      * @return number of events emitted
      */
-    public int getNumEventsEmitted();
+    public long getNumEventsEmitted();
+
+    /**
+     * Reset number of events received and emitted
+     */
+    public void resetStats();
 
     /**
      * Emit an event object to any registered EmittedListener instances listening to the default channel.

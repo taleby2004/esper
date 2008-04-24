@@ -122,6 +122,17 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             }
 
             engine.getRuntime().destroy();
+            // plugin-loaders
+            List<ConfigurationPluginLoader> pluginLoaders = configSnapshot.getPluginLoaders();
+            for (ConfigurationPluginLoader config : pluginLoaders) {
+                PluginLoader plugin = null;
+                try {
+                    plugin = (PluginLoader) engine.getServices().getEngineEnvContext().lookup("plugin-loader/" + config.getLoaderName());
+                    plugin.destroy();
+                } catch (NamingException e) {
+                    ;
+                }
+            }
             engine.getAdmin().destroy();
             engine.getServices().destroy();
 
@@ -235,7 +246,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         engine = new EPServiceEngine(services, runtime, admin);
 
         // Load and initialize adapter loader classes
-        loadAdapters(configSnapshot, services);
+        loadAdapters(services);
 
         // Initialize extension services
         if (services.getExtensionServicesContext() != null)
@@ -246,12 +257,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
     /**
      * Loads and initializes adapter loaders.
-     * @param configuration is the engine configs
      * @param services is the engine instance services
      */
-    private void loadAdapters(ConfigurationInformation configuration, EPServicesContext services)
+    private void loadAdapters(EPServicesContext services)
     {
-        List<ConfigurationPluginLoader> pluginLoaders = configuration.getPluginLoaders();
+        List<ConfigurationPluginLoader> pluginLoaders = configSnapshot.getPluginLoaders();
         if ((pluginLoaders == null) || (pluginLoaders.size() == 0))
         {
             return;

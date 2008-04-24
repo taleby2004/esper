@@ -42,5 +42,10 @@ public interface EmitService
      * Number of events emitted.
      * @return total of events emitted
      */
-    public int getNumEventsEmitted();
+    public long getNumEventsEmitted();
+
+    /**
+     * Resets the number of events emitted
+     */
+    public void resetStats();
 }

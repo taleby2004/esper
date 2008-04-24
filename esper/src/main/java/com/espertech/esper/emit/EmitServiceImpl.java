@@ -12,7 +12,7 @@ import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -23,7 +23,7 @@ public final class EmitServiceImpl implements EmitService
 {
     private final HashMap<String, ArrayDequeJDK6Backport<EmittedListener>> channelEmitListeners = new HashMap<String, ArrayDequeJDK6Backport<EmittedListener>>();
     private final ReadWriteLock channelEmitListenersRWLock = new ReentrantReadWriteLock();
-    private final AtomicInteger numEventsEmitted = new AtomicInteger();
+    private final AtomicLong numEventsEmitted = new AtomicLong();
 
     /**
      * Constructor.
@@ -126,8 +126,12 @@ public final class EmitServiceImpl implements EmitService
         numEventsEmitted.incrementAndGet();
     }
 
-    public final int getNumEventsEmitted()
+    public final long getNumEventsEmitted()
     {
         return numEventsEmitted.get();
+    }
+
+    public void resetStats() {
+        numEventsEmitted.set(0);
     }
 }

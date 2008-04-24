@@ -49,7 +49,12 @@ public interface FilterService
      * Return a count of the number of events evaluated by this service.
      * @return count of invocations of evaluate method
      */
-    public int getNumEventsEvaluated();
+    public long getNumEventsEvaluated();
+
+    /**
+     * Reset the number of events evaluated
+     */
+    public void resetStats();
 
     /**
      * Destroy the service.
