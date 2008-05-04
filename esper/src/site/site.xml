@@ -27,8 +27,8 @@
 				<item name="About Esper for Java" href="/about/esper/esper.html"/>
 				<item name="About NEsper for .NET" href="/about/nesper/nesper.html"/>
 				<item name="License" href="/about/license/license.html"/>
-                <item name="Terms of Use" href="/about/license/terms.html"/>
-            </item>
+                	<item name="Terms of Use" href="/about/license/terms.html"/>
+            		</item>
 			<item name="Tutorials and Case Studies" href="/tutorials/tutorials.html" collapse="false">
 				<item name="Tutorial" href="/tutorials/tutorial/tutorial.html"/>
 				<item name="Quick Start" href="/tutorials/tutorial/quickstart.html"/>

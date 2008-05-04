@@ -297,6 +297,7 @@
     #foreach( $author in $authors )
       <meta name="author" content="$author" />
     #end
+    <META NAME="keywords" content="Esper, NEsper, eda, open source, source, esp, cep, event stream, complex event, soa, services, support, free, event server">    
     <meta name="author" content="David Herreman (www.free-css-templates.com)" />
     <meta http-equiv="Content-Type" content="text/html; charset=${outputEncoding}" />
     <meta http-equiv="Pragma" content="no-cache"/>
@@ -306,57 +307,65 @@
 	<script type="text/javascript">
 	_uacct = "UA-1261295-1";
 	</script>
-
+<link rel="shortcut icon" href="$relativePath/images/favicon.ico" />
+<!--[if IE]>
+<style type="text/css" media="screen">
+ #menu ul li {float: left; width: 100%;}
+</style>
+<![endif]-->
+<!--[if lt IE 7]>
+<style type="text/css" media="screen">
+body {
+behavior: url($relativePath/css/csshover.htc);
+}
+</style>
+<![endif]-->
   </head>
-<body>  
-<div class="content">
-	<div id="top">
-				<div id="icons">
-					<a href="$relativePath/index.html" title="Home page"><img src="$relativePath/images/home.gif" alt="Home" /></a>
-					<a href="http://www.espertech.com/company/contact.php" title="Contact us"><img src="$relativePath/images/contact.gif" alt="Contact" /></a>
-				</div>
-				<a href="$relativePath/index.html" title="Home page">
-					<h1>EsperTech - Esper: Event Stream and Complex Event Processing</h1>
-					<h2>Event Stream Intelligence</h2>
-				</a>
+<body>
+<div id="top">
+	<div class="content">
+			<div id="icons">
+				<a href="http://www.espertech.com/index.php" title="Home page"><img src="$relativePath/images/home.gif" alt="Home" /></a>
+				<a href="http://www.espertech.com/company/contact.php" title="Contact us"><img src="$relativePath/images/contact.gif" alt="Contact" /></a>
+			</div>
+			<table border="0">
+				<tr><td>
+					<img src="$relativePath/images/espertech_logo_transparent.png"/>
+				</td><td>
+					<h2>Event Stream Intelligence: <small>Esper & NEsper</small></h2>
+				</td></tr>
+			</table>
 	</div>
-	<!-- end of the Top part -->
-</div>
+</div><!-- top -->
+#if ($alignedFileName.equals("index.html"))
+<div id="precHOME">
+#else
 <div id="prec">
-	<div id="wrap">
-		<table border="0" width="100%">
-			<tr valign="top">
-				<td width="180px">
-					<div id="menu">
-					<ul>
-						<li><a href="http://www.espertech.com/index.php" title="EsperTech home page" target="_blank">HOME</a></li>
-						<li><a href="http://www.espertech.com/products/" title="Products" target="_blank"><b>PRODUCTS</b></a></li>
-						<li><a href="http://www.espertech.com/company/" title="Company" target="_blank">COMPANY</a></li>
-						<li><a href="http://www.espertech.com/support/" title="Support & Services" target="_blank">SUPPORT & SERVICES</a></li>
-						<li><a href="http://www.espertech.com/partners/" title="Partners & OEM" target="_blank">PARTNERS & OEM</a></li>
-						##<li><a href="http://esper.codehaus.org" target="_blank" onClick="javascript:urchinTracker('/out/esper_codehaus_org');">COMMUNITY AREA <img src="/images/cat-li.gif"/></a></li>
-						##<li><a href="http://www.espertech.com/download/" title="Download">DOWNLOAD</a></li>
-					</ul>
-					</div>
-				</td>
-				<td>
-					<div id="menu2"><ul>
-<li>&nbsp;</li>
-<li><a href="http://www.espertech.com/products/index.php" title="Products" target="_blank">Products</a></li>
-<li><a href="http://esper.codehaus.org" title="Esper"><b>Esper</b></a></li>
-<li><a href="http://www.espertech.com/products/esperha.php" title="EsperHA" target="_blank">EsperHA</a></li>
-</ul></div>
-				</td>
-			</tr>
-		</table>
+#end
+<div id="wrap">
+		<div id="dmenu">
+<ul><li><h2><a href="http://www.espertech.com/index.php" title="Home"><img src="$relativePath/images/home.gif" valign="bottom"/></a></h2></li></ul><ul><li><h2><a>|</a></h2></li></ul><ul><li><h2><a href="http://www.espertech.com/products/">Products</a></h2></li></ul><ul><li><h2><a>|</a></h2></li></ul><ul><li><h2><a href="http://www.espertech.com/support/">Support & Services</a></h2></li></ul><ul><li><h2><a>|</a></h2></li></ul><ul><li><h2><a href="http://www.espertech.com/partners/">Customers & OEMs</a></h2></li></ul><ul><li><h2><a>|</a></h2></li></ul><ul><li><h2><a href="http://www.espertech.com/community/">Community</a></h2>
+	<ul><li><a href="http://www.espertech.com/community/index.php">User Forums</a></li><li><a href="http://www.espertech.com/community/../download/index.php">Products Download</a></li><li><a href="http://esper.codehaus.org" target="_blank">Esper and NEsper at Codehaus</a></li></ul>
+</li></ul><ul><li><h2><a>|</a></h2></li></ul><ul><li><h2><a href="http://www.espertech.com/company/">Company</a></h2></li></ul><ul><li><h2><a>|</a></h2></li></ul><ul><li><h2><a href="http://www.espertech.com/company/contact.php" title="Contact us"><img src="$relativePath/images/contact.gif" valign="bottom"/></a></h2></li></ul><br/>&nbsp;
+		</div>
+#if ($alignedFileName.equals("index.html"))
+	<div id="pic">
+		<div id="slogan">
+			Where <b>Complex Event Processing meets Open Source</b>: <a href="/products/">Esper & NEsper</a></b><br/>
+			<b>Make no compromise</b> on enterprise readiness: discover <a href="/products/esperha.php">EsperHA</a> and our <a href="/support/">support services</a>.<br/>
+			Embed mainstream CEP in your products and deployments: Learn about our <a href="/partners/embedded.php">licensing options</a>.<br/>
+			<small><a href="/products/" style="color: #A00">Product info</a> | <a href="/partners/partners.php" style="color: #A00">Customers</a> | <a href="/company/contact.php" style="color: #A00">Contact us</a></small>
+		</div>
 	</div>
-</div>
+#end
+</div></div>
 <div class="content">
 	<div id="main">
-		<div id="right_side">
+		<div id="left_side">
 		        $bodyContent
     		</div><!-- right_side -->
-		<div id="left_side">
+		<div id="right_side">
+			<a href="$relativePath/index.html"><img src="$relativePath/images/home.gif" alt="Esper and NEsper at Codehaus"/></a>
 		       #mainMenu( $decoration.body.menus )
 		       <h3>&nbsp;</h3>
 		       <a href="http://www.codehaus.org"><img src="$relativePath/images/logos/codehaus-small.gif" alt="" width="100"/></a>
