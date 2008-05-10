@@ -1,6 +1,21 @@
 Esper Changelog
 ===================
 
+Changes in version 2.1.0
+------------------------
+- Fixed issue ESPER-209 Stop of consumer statements of named windows may not entirely deregister consumer
+- Fixed issue ESPER-213 ConcurrentModificationException creating consuming statements to a single named window under threading
+- Fixed issue ESPER-214 ClassCastException in named window dispatch for timer thread when multiple insert-into
+- Fixed issue ESPER-221 Named window with batch expiry policy causes late consumers to post incorrect data or throw IllegalArgumentException
+- Fixed issue ESPER-222 No documentation on time-batch view parameter for reference point
+- ESPER-191 Support nano_microsecond resolution : TimeSource configurable to be milli or nano
+- ESPER-197 EsperIO_CSV reported to be slow
+- ESPER-198 EsperIO CSV adapter to support sending of bean events
+- ESPER-208 EsperIO runs out of stack space when processing largeCSV file and not using engine thread
+- ESPER-220 TimeBatchView.computeWaitMSec can give incorrect results for low "interval"
+- ESPER-226 Allow esperio to use external timer
+
+
 Changes in version 2.0.0
 ------------------------
 

@@ -6,6 +6,7 @@ import java.util.TreeSet;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.core.EPStatementHandle;
@@ -14,6 +15,7 @@ import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.util.ManagedLockImpl;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,20 +45,22 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 	private EPRuntime runtime;
 	private SchedulingService schedulingService;
-	private boolean usingEngineThread;
+	private boolean usingEngineThread, usingExternalTimer;
 	private long currentTime = 0;
+	private long lastEventTime = 0;
 	private long startTime;
-
 
 	/**
 	 * Ctor.
 	 * @param epService - the EPServiceProvider for the engine runtime and services
 	 * @param usingEngineThread - true if the Adapter should set time by the scheduling service in the engine,
 	 *                            false if it should set time externally through the calling thread
+	 * @param usingExternalTimer - true to use esper's external timer mechanism instead of internal timing
 	 */
-	public AbstractCoordinatedAdapter(EPServiceProvider epService, boolean usingEngineThread)
+	public AbstractCoordinatedAdapter(EPServiceProvider epService, boolean usingEngineThread, boolean usingExternalTimer)
 	{
 		this.usingEngineThread = usingEngineThread;
+		this.usingExternalTimer = usingExternalTimer;
 
 		if(epService == null)
 		{
@@ -77,14 +81,20 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 	public void start() throws EPException
 	{
-		log.debug(".start");
-		if(runtime == null)
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".start");
+        }
+        if(runtime == null)
 		{
 			throw new EPException("Attempting to start an Adapter that hasn't had the epService provided");
 		}
 		startTime = getCurrentTime();
-		log.debug(".start startTime==" + startTime);
-		stateManager.start();
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".start startTime==" + startTime);
+        }
+        stateManager.start();
 		continueSendingEvents();
 	}
 
@@ -107,7 +117,10 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 	public void stop() throws EPException
 	{
-		log.debug(".stop");
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".stop");
+        }
 		stateManager.stop();
 		eventsToSend.clear();
 		currentTime = 0;
@@ -128,6 +141,16 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 	public void setUsingEngineThread(boolean usingEngineThread)
 	{
 		this.usingEngineThread = usingEngineThread;
+	}
+
+
+    /**
+     * Set to true to use esper's external timer mechanism instead of internal timing
+     * @param usingExternalTimer true for external timer
+     */
+    public void setUsingExternalTimer(boolean usingExternalTimer)
+	{
+		this.usingExternalTimer = usingExternalTimer;
 	}
 
 	/* (non-Javadoc)
@@ -176,21 +199,30 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 	private void continueSendingEvents()
 	{
-		if(stateManager.getState() == AdapterState.STARTED)
+		boolean keepLooping = true;
+		while(stateManager.getState() == AdapterState.STARTED && keepLooping)
 		{
 			currentTime = getCurrentTime();
-			log.debug(".continueSendingEvents currentTime==" + currentTime);
-			fillEventsToSend();
+            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+            {
+                log.debug(".continueSendingEvents currentTime==" + currentTime);
+            }
+            fillEventsToSend();
 			sendSoonestEvents();
-			waitToSendEvents();
+			keepLooping = waitToSendEvents();
 		}
 	}
 
-	private void waitToSendEvents()
+	private boolean waitToSendEvents()
 	{
-		if(usingEngineThread)
+		if(usingExternalTimer)
+		{
+			return false;
+		}
+		else if(usingEngineThread)
 		{
 			scheduleNextCallback();
+			return false;
 		}
 		else
 		{
@@ -212,7 +244,7 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 			{
 				throw new EPException(ex);
 			}
-			continueSendingEvents();
+			return true;
 		}
 	}
 
@@ -235,13 +267,42 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 	private void sendSoonestEvents()
 	{
-		while(!eventsToSend.isEmpty() && eventsToSend.first().getSendTime() <= currentTime - startTime)
+		if (usingExternalTimer)
 		{
-			log.debug(".sendSoonestEvents currentTime==" + currentTime);
-			log.debug(".sendSoonestEvents sending event " + eventsToSend.first() + ", its sendTime==" + eventsToSend.first().getSendTime());
-			eventsToSend.first().send(runtime);
-			replaceFirstEventToSend();
+			// send all events in order and when time clicks over send time event for previous time
+			while (!eventsToSend.isEmpty())
+			{
+				long currentEventTime = eventsToSend.first().getSendTime();
+				// check whether time has increased. Cannot go backwards due to checks elsewhere
+				if (currentEventTime > lastEventTime)
+				{
+					this.runtime.sendEvent(new CurrentTimeEvent(lastEventTime));
+					lastEventTime = currentEventTime;
+				}
+				sendFirstEvent();
+			}
+			// send final time tick
+			this.runtime.sendEvent(new CurrentTimeEvent(lastEventTime));
 		}
+		else
+		{
+			// watch time and send events to catch up
+			while(!eventsToSend.isEmpty() && eventsToSend.first().getSendTime() <= currentTime - startTime)
+			{
+	            sendFirstEvent();
+			}
+		}
+	}
+
+	private void sendFirstEvent()
+	{
+		if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+		{
+		    log.debug(".sendFirstEvent currentTime==" + currentTime);
+		    log.debug(".sendFirstEvent sending event " + eventsToSend.first() + ", its sendTime==" + eventsToSend.first().getSendTime());                
+		}
+		eventsToSend.first().send(runtime);
+		replaceFirstEventToSend();
 	}
 
 	private void scheduleNextCallback()
@@ -252,8 +313,11 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 		if(eventsToSend.isEmpty())
 		{
-			log.debug(".scheduleNextCallback no events to send, scheduling callback in 100 ms");
-			nextScheduleSlot = new ScheduleSlot(0,0);
+            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+            {
+			    log.debug(".scheduleNextCallback no events to send, scheduling callback in 100 ms");
+            }
+            nextScheduleSlot = new ScheduleSlot(0,0);
 			schedulingService.add(100, scheduleCSVHandle, nextScheduleSlot);
 		}
 		else
@@ -263,8 +327,11 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
             long afterMsec = eventsToSend.first().getSendTime() - baseMsec;
 
 			nextScheduleSlot = eventsToSend.first().getScheduleSlot();
-			log.debug(".scheduleNextCallback schedulingCallback in " + afterMsec + " milliseconds");
-			schedulingService.add(afterMsec, scheduleCSVHandle, nextScheduleSlot);
+            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+            {
+			    log.debug(".scheduleNextCallback schedulingCallback in " + afterMsec + " milliseconds");
+            }
+            schedulingService.add(afterMsec, scheduleCSVHandle, nextScheduleSlot);
 		}
 	}
 }

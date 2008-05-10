@@ -11,6 +11,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.schedule.ScheduleBucket;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +25,7 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 
     private final Map<SendableEvent, CoordinatedAdapter> eventsFromAdapters = new HashMap<SendableEvent, CoordinatedAdapter>();
 	private final Set<CoordinatedAdapter> emptyAdapters = new HashSet<CoordinatedAdapter>();
-	private final boolean usingEngineThread;
+	private final boolean usingEngineThread, usingExternalTimer;
 	private final ScheduleBucket scheduleBucket;
 	private final EPServiceProvider epService;
 
@@ -36,7 +37,18 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 	 */
 	public AdapterCoordinatorImpl(EPServiceProvider epService, boolean usingEngineThread)
 	{
-		super(epService, usingEngineThread);
+		this(epService, usingEngineThread, false);
+	}
+	/**
+	 * Ctor.
+	 * @param epService - the EPServiceProvider for the engine services and runtime
+	 * @param usingEngineThread - true if the coordinator should set time by the scheduling service in the engine,
+	 *                            false if it should set time externally through the calling thread
+     * @param usingExternalTimer - true to use esper's external timer mechanism instead of internal timing
+	 */
+	public AdapterCoordinatorImpl(EPServiceProvider epService, boolean usingEngineThread, boolean usingExternalTimer)
+	{
+		super(epService, usingEngineThread, usingExternalTimer);
 		if(epService == null)
 		{
 			throw new NullPointerException("epService cannot be null");
@@ -48,6 +60,7 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 		this.epService = epService;
 		this.scheduleBucket = ((EPServiceProviderSPI)epService).getSchedulingService().allocateBucket();
 		this.usingEngineThread = usingEngineThread;
+		this.usingExternalTimer = usingExternalTimer;
 	}
 
 
@@ -56,14 +69,20 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 	 */
 	public SendableEvent read() throws EPException
 	{
-		log.debug(".read");
-		pollEmptyAdapters();
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+		    log.debug(".read");
+        }
+        pollEmptyAdapters();
 
-		log.debug(".read eventsToSend.isEmpty==" + eventsToSend.isEmpty());
-		log.debug(".read eventsFromAdapters.isEmpty==" + eventsFromAdapters.isEmpty());
-		log.debug(".read emptyAdapters.isEmpty==" + emptyAdapters.isEmpty());
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".read eventsToSend.isEmpty==" + eventsToSend.isEmpty());
+            log.debug(".read eventsFromAdapters.isEmpty==" + eventsFromAdapters.isEmpty());
+            log.debug(".read emptyAdapters.isEmpty==" + emptyAdapters.isEmpty());
+        }
 
-		if(eventsToSend.isEmpty() && eventsFromAdapters.isEmpty() && emptyAdapters.isEmpty())
+        if(eventsToSend.isEmpty() && eventsFromAdapters.isEmpty() && emptyAdapters.isEmpty())
 		{
 			stop();
 		}
@@ -102,6 +121,7 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 		adapter.disallowStateTransitions();
 		adapter.setEPService(epService);
 		adapter.setUsingEngineThread(usingEngineThread);
+		adapter.setUsingExternalTimer(usingExternalTimer);
 		adapter.setScheduleSlot(scheduleBucket.allocateSlot());
 		addNewEvent(adapter);
 	}
@@ -121,8 +141,11 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 	 */
 	protected void replaceFirstEventToSend()
 	{
-		log.debug(".replaceFirstEventToSend");
-		SendableEvent event = eventsToSend.first();
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+		    log.debug(".replaceFirstEventToSend");
+        }
+        SendableEvent event = eventsToSend.first();
 		eventsToSend.remove(event);
 		addNewEvent(eventsFromAdapters.get(event));
 		pollEmptyAdapters();
@@ -138,12 +161,18 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 	}
 	private void addNewEvent(CoordinatedAdapter adapter)
 	{
-		log.debug(".addNewEvent eventsFromAdapters==" + eventsFromAdapters);
-		SendableEvent event = adapter.read();
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+		    log.debug(".addNewEvent eventsFromAdapters==" + eventsFromAdapters);
+        }
+        SendableEvent event = adapter.read();
 		if(event != null)
 		{
-			log.debug(".addNewEvent event==" + event);
-			eventsToSend.add(event);
+            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+            {
+			    log.debug(".addNewEvent event==" + event);
+            }
+            eventsToSend.add(event);
 			eventsFromAdapters.put(event, adapter);
 		}
 		else
@@ -161,8 +190,12 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 
 	private void pollEmptyAdapters()
 	{
-		log.debug(".pollEmptyAdapters emptyAdapters.size==" + emptyAdapters.size());
-		for(Iterator<CoordinatedAdapter> iterator = emptyAdapters.iterator(); iterator.hasNext(); )
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+		    log.debug(".pollEmptyAdapters emptyAdapters.size==" + emptyAdapters.size());
+        }
+        
+        for(Iterator<CoordinatedAdapter> iterator = emptyAdapters.iterator(); iterator.hasNext(); )
 		{
 			CoordinatedAdapter adapter = iterator.next();
 			if(adapter.getState() == AdapterState.DESTROYED)
