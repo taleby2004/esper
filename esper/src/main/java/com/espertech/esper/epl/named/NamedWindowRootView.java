@@ -15,6 +15,7 @@ import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.StatementStopService;
@@ -44,14 +45,17 @@ public class NamedWindowRootView extends ViewSupport
     private final NamedWindowIndexRepository indexRepository;
     private Iterable<EventBean> dataWindowContents;
     private final Map<LookupStrategy, PropertyIndexedEventTable> tablePerStrategy;
+    private final ValueAddEventProcessor revisionProcessor;
 
     /**
      * Ctor.
+     * @param revisionProcessor handle update events if supplied, or null if not handling revisions
      */
-    public NamedWindowRootView()
+    public NamedWindowRootView(ValueAddEventProcessor revisionProcessor)
     {
         this.indexRepository = new NamedWindowIndexRepository();
         this.tablePerStrategy = new HashMap<LookupStrategy, PropertyIndexedEventTable>();
+        this.revisionProcessor = revisionProcessor;
     }
 
     /**
@@ -67,12 +71,18 @@ public class NamedWindowRootView extends ViewSupport
      * Called by tail view to indicate that the data window view exired events that must be removed from index tables.
      * @param oldData removed stream of the data window
      */
-    //
     public void removeOldData(EventBean[] oldData)
     {
-        for (EventTable table : indexRepository.getTables())
+        if (revisionProcessor != null)
         {
-            table.remove(oldData);
+            revisionProcessor.removeOldData(oldData, indexRepository);
+        }
+        else
+        {
+            for (EventTable table : indexRepository.getTables())
+            {
+                table.remove(oldData);
+            }
         }
     }
 
@@ -86,15 +96,22 @@ public class NamedWindowRootView extends ViewSupport
                     "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
         }
 
-        // Update indexes for fast deletion, if there are any
-        for (EventTable table : indexRepository.getTables())
+        if (revisionProcessor != null)
         {
-            table.add(newData);
-            table.remove(oldData);
+            revisionProcessor.onUpdate(newData, oldData, this, indexRepository);
         }
+        else
+        {
+            // Update indexes for fast deletion, if there are any
+            for (EventTable table : indexRepository.getTables())
+            {
+                table.add(newData);
+                table.remove(oldData);
+            }
 
-        // Update child views
-        updateChildren(newData, oldData);
+            // Update child views
+            updateChildren(newData, oldData);
+        }
     }
 
     /**

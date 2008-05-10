@@ -22,6 +22,7 @@ import java.util.LinkedList;
 public final class FilterSpecCompiled
 {
     private final EventType eventType;
+    private final String eventTypeAlias;
     private final List<FilterSpecParam> parameters;
 
     /**
@@ -29,11 +30,13 @@ public final class FilterSpecCompiled
      * property names or mismatcing filter operators are found.
      * @param eventType is the event type
      * @param parameters is a list of filter parameters
+     * @param eventTypeAlias is the alias name of the event type
      * @throws IllegalArgumentException if validation invalid
      */
-    public FilterSpecCompiled(EventType eventType, List<FilterSpecParam> parameters)
+    public FilterSpecCompiled(EventType eventType, String eventTypeAlias, List<FilterSpecParam> parameters)
     {
         this.eventType = eventType;
+        this.eventTypeAlias = eventTypeAlias;
         this.parameters = parameters;
     }
 
@@ -53,6 +56,15 @@ public final class FilterSpecCompiled
     public final List<FilterSpecParam> getParameters()
     {
         return parameters;
+    }
+
+    /**
+     * Returns the event type alias name.
+     * @return event type alias
+     */
+    public String getEventTypeAlias()
+    {
+        return eventTypeAlias;
     }
 
     /**

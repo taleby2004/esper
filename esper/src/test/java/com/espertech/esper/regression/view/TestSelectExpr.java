@@ -6,10 +6,13 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.bean.SupportBeanKeywords;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
@@ -25,11 +28,51 @@ public class TestSelectExpr extends TestCase
     public void setUp()
     {
         testListener = new SupportUpdateListener();
-        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventTypeAlias("SupportBean", SupportBean.class);
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
     
+    public void testGraphSelect()
+    {
+        epService.getEPAdministrator().createEPL("insert into MyStream select nested from " + SupportBeanComplexProps.class.getName());
+
+        String viewExpr = "select nested.nestedValue, nested.nestedNested.nestedNestedValue from MyStream";
+        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        selectTestView.addListener(testListener);
+
+        epService.getEPRuntime().sendEvent(SupportBeanComplexProps.makeDefaultBean());
+        assertNotNull(testListener.assertOneGetNewAndReset());
+    }
+
+    public void testKeywordsAllowed()
+    {
+        String fields = "count,escape,every,sum,avg,max,min,coalesce,median,stddev,avedev,events,seconds,minutes,first,last,unidirectional,pattern,sql,metadatasql,prev,prior,weekday,lastweekday,cast,snapshot,variable,window";
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("Keywords", SupportBeanKeywords.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select " + fields + " from Keywords");
+        stmt.addListener(testListener);
+        epService.getEPRuntime().sendEvent(new SupportBeanKeywords());
+
+        EventBean event = testListener.assertOneGetNewAndReset();
+        String[] fieldsArr = fields.split(",");
+        for (int i = 0; i < fieldsArr.length; i++)
+        {
+            assertEquals(1, event.get(fieldsArr[i]));
+        }
+        stmt.destroy();
+
+        stmt = epService.getEPAdministrator().createEPL("select escape as stddev, count(*) as count, last from Keywords");
+        stmt.addListener(testListener);
+        epService.getEPRuntime().sendEvent(new SupportBeanKeywords());
+
+        event = testListener.assertOneGetNewAndReset();
+        assertEquals(1, event.get("stddev"));
+        assertEquals(1L, event.get("count"));
+        assertEquals(1, event.get("last"));
+    }
+
     public void testGetEventType()
     {
         String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +

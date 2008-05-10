@@ -126,7 +126,6 @@ select * from MyEvent  // this is a slash-slash comment
  * not required.
  */		
 select * from MyEvent  /* this also works */]]></programlisting>
-		</sect2>
 
 			<para>
 				Comments styles can also be mixed:
@@ -134,6 +133,37 @@ select * from MyEvent  /* this also works */]]></programlisting>
 			<programlisting><![CDATA[select field1, // first comment
   /* second comment*/  field2
   from MyEvent]]></programlisting>
+		</sect2>
+
+		<sect2 id="epl-syntax-keywords">
+			<title>Reserved Keywords</title>
+			<indexterm><primary>keywords</primary></indexterm>
+
+			<para>
+				Certain words such as <literal>select</literal>, <literal>delete</literal> or <literal>set</literal> are reserved and may not be used as identifiers. Please consult <xref linkend="appendix_keywords"/> for the list of reserved keywords and permitted keywords.
+			</para>
+
+			<para>
+				Names of built-in functions and certain auxiliary keywords are permitted as event property names and in the rename syntax of the <literal>select</literal> clause. For example, <literal>count</literal> is acceptable. 
+			</para>
+			
+			<para>
+				Consider the example below, which assumes that <literal>'last'</literal> is an event property of MyEvent:
+			</para>
+			<programlisting><![CDATA[// valid
+select last, count(*) as count from MyEvent]]></programlisting>
+		
+			<para>
+				This example shows an incorrect use of a reserved keyword:
+			</para>
+			<programlisting><![CDATA[// invalid
+select insert from MyEvent]]></programlisting>
+
+			<para>
+				EPL does not offer an escape syntax for reserved keywords.
+			</para>
+		</sect2>
+
     </sect1>
 
     <sect1 id="epl-select-list">
@@ -281,6 +311,24 @@ where stock.symbol = news.symbol]]></programlisting>
 			<para>
 				The output events of the above example have two properties 'stocktick' and 'news' that are the StockTick and News events.
 			</para>
+
+			<para>
+				The stream name itself, as further described in <xref linkend="epl-from-clause-stream-name"/>, may be used within expressions or alone. 
+			</para>
+			
+			<para>
+				This example passes events to a user-defined function named <literal>compute</literal> and also shows <literal>insert-into</literal> to populate an event stream of combined events:
+			</para>
+			<programlisting><![CDATA[insert into TickNewStream select tick, news, MyLib.compute(news, tick) as result
+from StockTick.win:time(10) as tick, News.win:time(10) as news
+where tick.symbol = news.symbol
+
+// second statement that uses the TickNewStream stream
+select tick.price, news.text, result from TickNewStream]]></programlisting>
+
+			<para>
+				In summary, the <emphasis>stream_name.*</emphasis> streamname wildcard syntax can be used to select a stream as the underlying event or as a property, but cannot appear within an expression. While the <emphasis>stream_name</emphasis> syntax (without wildcard) always selects a property (and not as an underlying event), and can occur anywhere within an expression.
+			</para>
 		</sect2>
 
         <sect2 id="epl-select-pattern" >
@@ -305,6 +353,16 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 				You may also select the matching event itself using the <literal>tick.*</literal> syntax. The engine outputs the StockTick event itself to listeners:
 			</para>
 			<programlisting><![CDATA[select tick.* from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting>
+
+			<para>
+				A tag name as specified in a pattern is a valid expression itself. This example uses the <literal>insert into</literal> clause to make available the events matched by a pattern to further statements:
+			</para>
+			<programlisting><![CDATA[// make a new stream of ticks and news available
+insert into StockTickAndNews 
+select tick, news from pattern [every tick=StockTick -> news=News(symbol=tick.symbol)]
+      
+// second statement to select from the stream of ticks and news
+select tick.symbol, tick.price, news.text from StockTickAndNews]]></programlisting>
 		</sect2>
 
         <sect2 id="epl-select-using-istream-rstream" >
@@ -350,6 +408,37 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 			<para>
 				The <literal>istream</literal> and <literal>rstream</literal> keywords in the <literal>select</literal> clause are matched by same-name keywords available in the <literal>insert into</literal> clause. While the keywords in the <literal>select</literal> clause control the event stream posted to listeners to the statement, the same keywords in the <literal>insert into</literal> clause specify the event stream that the engine makes available to other statements.
 			</para>
+		</sect2>
+
+		<sect2 id="epl-syntax-prefix-propsandstream">
+			<title>Qualifying property names and stream names</title>
+			
+			<para>
+				Property or column names can optionally be qualified by a stream name and the provider URI. The syntax is:
+			</para>
+			<synopsis>[[<emphasis>provider_URI</emphasis>.]<emphasis>stream_name</emphasis>.]<emphasis>property_name</emphasis></synopsis>
+
+			<para>
+				The <emphasis>provider_URI</emphasis> is the URI supplied to the <literal>EPServiceProviderManager</literal> class, or the string <literal>default</literal> for the default provider.
+			</para>
+		
+			<para>
+				This example assumes the provider is the default provider:
+			</para>
+			<programlisting>select MyEvent.myProperty from MyEvent
+// ... equivalent to ...
+select default.MyEvent.myProperty from MyEvent</programlisting>
+
+			<para>
+				Stream names can also be qualified by the provider URI. The syntax is:
+			</para>
+			<synopsis>[<emphasis>provider_URI</emphasis>.]<emphasis>stream_name</emphasis></synopsis>
+
+			<para>
+				The next example assumes a provider URI by name of <literal>Processor</literal>:
+			</para>
+			<programlisting>select Processor.MyEvent.myProperty from Processor.MyEvent</programlisting>
+
 		</sect2>
 
     </sect1>
@@ -1009,6 +1098,11 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				<synopsis>output [all | first | last | snapshot] every <emphasis>output_rate</emphasis> [minutes | seconds | events]</synopsis>
 
 				<para>
+					An alternate syntax specifies the time period as outlined in <xref linkend="epl-syntax-time-periods"/> :
+				</para>
+				<synopsis>output [all | first | last | snapshot] every <emphasis>time_period</emphasis></synopsis>
+
+				<para>
 					The <literal>all</literal> keyword is the default and specifies that all events in a batch should be output, each incoming row in the batch producing an output row.
 					Note that for statements that group via the <literal>group by</literal> clause, the <literal>all</literal> keyword provides special behavior as below.
 				</para>
@@ -1275,7 +1369,32 @@ select A.customerId as custId, A.timestamp - B.timestamp as latency
 select linkUp.ip as ip 
 from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)]</programlisting>
 
-		<sect4 id="insert-into-merging-columns">
+		<sect2 id="insert-into-property-transpose">
+			<title>Transposing a Property To a Stream</title>			
+			<para>
+				Sometimes your events may carry properties that are themselves event objects. Therefore EPL offers a special syntax to insert the value of a property itself as an event into a stream:
+			</para>
+			<synopsis>insert into <emphasis>stream_name</emphasis> select <emphasis>property_name</emphasis>.* from ...</synopsis>
+
+			<para>
+				This feature is only supported for JavaBean events and is not supported for <literal>Map</literal> or <literal>XML</literal> events. Nested property names are also not supported.
+			</para>
+
+			<para>
+				In this example, the class <literal>Summary</literal> with properties <literal>bid</literal> and <literal>ask</literal> that are of type <literal>Quote</literal> is:
+			</para>
+			<programlisting><![CDATA[public class Summary {
+  private Quote bid;
+  private Quote ask;
+  ...]]></programlisting>			
+  
+			<para>
+				The statement to populate a stream of <literal>Quote</literal> events is thus:
+			</para>
+			<programlisting><![CDATA[insert into MyBidStream select bid.* from Summary]]></programlisting>			
+		</sect2>
+
+		<sect2 id="insert-into-merging-columns">
 			<title>Merging Streams By Event Type</title>			
 			<para>
 				The <literal>insert into</literal> clause allows to merge multiple event streams into a event single stream. 
@@ -1310,7 +1429,59 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 			<para>
 			    Esper specifically recognizes a conversion function: A conversion function must be the only selected column, and it must return either a Java object or <literal>java.util.Map</literal>.
 			</para>
-		</sect4>
+		</sect2>
+
+		<sect2 id="insert-into-merging-types">
+			<title>Merging Disparate Types of Events: Variant Streams</title>			
+			<indexterm><primary>variant stream</primary></indexterm>
+			<para>
+				A <emphasis>variant stream</emphasis> is a predefined stream into which events of multiple disparate event types can be inserted. 
+			</para>
+
+			<para>
+				A variant stream name may appear anywhere in a pattern or <literal>from</literal> clause. In a pattern, a filter against a variant stream matches any events of any of the event types inserted into the variant stream. 
+				In a <literal>from</literal> clause including for named windows, views declared onto a variant stream may hold events of any of the event types inserted into the variant stream.
+			</para>
+
+			<para>
+				A variant stream is thus useful in problems that require different types of event to be treated the same.
+			</para>
+
+			<para>
+				Variant streams are predefined via runtime or initialization-time configuration as described in <xref linkend="config-variantstream"/>. Your application may predefine variant streams to carry events of a limited set of event types, or you may choose the variant stream to carry any and all types of events. This choice affects what event properties are available for consuming statements or patterns of the variant stream.
+			</para>
+				
+			<para>
+				Assume that an application predefined a variant stream named <literal>OrderStream</literal> to carry only <literal>ServiceOrder</literal> and <literal>ProductOrder</literal> events. An <literal>insert into</literal> clause inserts events into
+				the variant stream:
+			</para>
+			<programlisting>insert into OrderStream select * from ServiceOrder
+insert into OrderStream select * from ProductOrder</programlisting>			
+
+			<para>
+				Here is a sample statement that consumes the variant stream and outputs a total price per customer id for the last 30 seconds of <literal>ServiceOrder</literal> and <literal>ProductOrder</literal> events:
+			</para>
+			<programlisting>select customerId, sum(price) from OrderStream.win:time(30 sec) group by customerId</programlisting>			
+
+			<para>
+				If your application predefines the variant stream to hold specific type of events, as the sample above did, then all event properties that are common to all specified types are visible on the variant stream, including nested, indexed and mapped properties. For access to properties that are only available on one of the types, the dynamic property syntax must be used. In the example above, the <literal>customerId</literal> and <literal>price</literal> were properties common to both <literal>ServiceOrder</literal> and <literal>ProductOrder</literal> events.
+			</para>		
+
+			<para>
+				For example, here is a consuming statement that selects a <literal>service duraction</literal> property that only <literal>ServiceOrder</literal> events have, and that must therefore be casted to double and null values removed in order to aggregate:
+			</para>
+			<programlisting>select customerId, sum(coalesce(cast(serviceDuraction?, double), 0)) 
+from OrderStream.win:time(30 sec) group by customerId</programlisting>			
+
+			<para>
+				If your application predefines a variant stream to hold any type of events (the <literal>any</literal> type variance), then all event properties of the variant stream are effectively dynamic properties. 
+			</para>		
+
+			<para>
+				For example, an application may define an <literal>OutgoingEvents</literal> variant stream to hold any type of event. The next statement is a sample consumer of the <literal>OutgoingEvents</literal> variant stream that looks for the <literal>destination</literal> property and fires for each event in which the property exists with a value of <literal>'email'</literal>:
+			</para>		
+			<programlisting>select * from OutgoingEvents(destination = 'email')</programlisting>			
+		</sect2>
 	</sect1>
 
     <sect1 id="epl-join">
@@ -2478,6 +2649,108 @@ select win.* from OrdersNamedWindow as win]]></programlisting>
 				Here is a sample consuming statement of the MyOrderStream. The statement further filters the events provided by the <literal>on insert</literal> statement by user id and reports a total of volume per symbol:
 			</para>
 			<programlisting><![CDATA[select symbol, sum(volume) from MyOrderStream(userId='user1') group by symbol]]></programlisting>
+		</sect2>
+
+		<sect2 id="named_update" revision="1">
+			<title>Updating and Versioning Events in Named Windows</title>
+			
+			<indexterm><primary>update</primary></indexterm>
+			<indexterm><primary>named window</primary><secondary>updating events</secondary></indexterm>
+
+			<para>
+				As outlined in <xref linkend="eventrep-update"/>, revision event types process updates or new versions of events held by a named window.
+			</para>
+
+			<para>
+			    A revision event type is simply one or more existing event types whose events are related by event properties that provide same key values. The purpose of key values is to 
+			    indicate that arriving events are related: An event amends, updates or adds properties to an earlier event that shares the same key values.
+			</para>
+
+			<para>
+			    Revision event types can be useful in these situations:
+			</para>
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						Some of your events carry only partial information that is related to a prior event.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Events arrive that add additional properties or change existing properties of prior events.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Events may carry properties that have null values or properties that do no exist (for example events backed by Map or XML), and for such properties the earlier value must be used instead.
+					</para>
+				</listitem>
+			</orderedlist>
+
+			<para>
+			    To better illustrate, consider a revision event type that represents events for creation and updates to user profiles. Lets assume the user profile creation events carry the user id and a full profile. The profile update events indicate only the user id and the individual properties that actually changed. The user id property shall serve as a key value relating profile creation events and update events.
+			</para>
+
+			<para>
+			    A revision event type must be configured to instruct the engine which event types participate and what their key properties are. Configuration is described in <xref linkend="config-revisionevent"/> and is not shown here.
+			</para>
+			
+			<para>				
+				Assume that an alias <literal>UserProfileRevisions</literal> has been configured to hold profile events, i.e. creation and update events related by user id. This statement creates a named window to hold the last 1 hour of current profiles per user id:
+			</para>
+			<programlisting><![CDATA[create window UserProfileWindow.win:time(1 hour) select * from UserProfileRevisions
+insert into UserProfileWindow select * from UserProfileCreation
+insert into UserProfileWindow select * from UserProfileUpdate]]></programlisting>
+
+			<para>				
+			    In revision event types, the term <emphasis>base</emphasis> event is used to describe events that are subject to update. Events that update, amend or add additional properties to base events are termed <emphasis>delta</emphasis> events. 
+			    In the example, base events are profile creation events and delta events are profile update events. 
+			</para>
+
+			<para>				
+			    Base events are expected to arrive before delta events. In the case where a delta event arrives and is not related by key value to a base event or a revision of the base event currently held by the named window the engine ignores the delta event. Thus, considering the example, profile update events for a user id that does not have an existing profile in the named window are not applied.
+			</para>
+
+			<para>
+			    When a base or delta event arrives, the insert and remove stream output by the named window are the current and the prior version of the event. Let's come back to the example. As creation events arrive that are followed by update events or more creation events for the same user id, the engine posts the current version of the profile as insert stream (new data) and the prior version of the profile as remove stream (old data).
+			</para>
+
+			<para>				
+			    Base events are also implicitly delta events. That is, if multiple base events of the same key property values arrive, then each base event provides a new version. In the example, if multiple profile creation events arrive for the same user id then new versions of the current profile for that user id are output by the engine for each base event, as it does for delta events.
+			</para>
+
+			<para>				
+			    The expiry policy as specified by view definitions applies to each distinct key value, or multiple distinct key values for composite keys. An expiry policy re-evaluates when new versions arrive. In the example, user profile events expire from the time window when no creation or update event for a given user id has been received for 1 hour.
+			</para>
+
+			<para>				
+			    Several strategies are available for merging or overlaying events as the configuration chapter describes in greater detail.
+			</para>
+
+			<para>				
+			    Any of the Map, XML and JavaBean event representations as well as plug-in event representations may participate in a revision event type. For example, profile creation events could be JavaBean events, while profile update events could be <literal>java.util.Map</literal> events.
+			</para>
+
+			<para>				
+			    Delta events may also add properties to the revision event type. For example, one could add a new event type with security information to the revision event type and such security-related properties become available on the resulting revision event type.
+			</para>
+
+			<para>
+				The following restrictions apply to revision event types:
+			</para>        
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						Nested properties are only supported for the JavaBean event representation. Nested properties are not individually versioned; they are instead versioned by the containing property.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Dynamic, indexed and mapped properties are only supported for nested properties and not as properties of the revision event type itself.
+					</para>
+				</listitem>
+			</itemizedlist>
+
 		</sect2>
 
 	</sect1>

@@ -1,6 +1,7 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.view.ViewProcessingException;
@@ -32,15 +33,22 @@ public interface NamedWindowService
     public boolean isNamedWindow(String name);
 
     /**
+     * Returns the names of all named windows known.
+     * @return named window names
+     */
+    public String[] getNamedWindows();
+
+    /**
      * Create a new named window.
      * @param name window name
      * @param eventType the event type of the window
      * @param createWindowStmtHandle is the handle and lock of the create-named-window statement
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
+     * @param revisionProcessor handles update events
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.

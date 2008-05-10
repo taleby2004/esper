@@ -8,8 +8,6 @@
 package com.espertech.esper.epl.parse;
 
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.antlr.runtime.tree.Tree;
 
 /**
@@ -28,40 +26,41 @@ public class ASTFilterSpecHelper
         StringBuilder buffer = new StringBuilder();
         String delimiter = "";
 
-        for (int i = startIndex; i < parentNode.getChildCount(); i++)
+        int childIndex = startIndex;
+        while (childIndex < parentNode.getChildCount())
         {
-        	Tree child = parentNode.getChild(i);
+        	Tree child = parentNode.getChild(childIndex);
             buffer.append(delimiter);
 
             switch (child.getType()) {
                 case EsperEPL2GrammarParser.EVENT_PROP_SIMPLE:
-                    buffer.append(child.getChild(0).getText());
+                    buffer.append(escapeDot(child.getChild(0).getText()));
                     break;
                 case EsperEPL2GrammarParser.EVENT_PROP_MAPPED:
-                    buffer.append(child.getChild(0).getText());
+                    buffer.append(escapeDot(child.getChild(0).getText()));
                     buffer.append('(');
                     buffer.append(child.getChild(1).getText());
                     buffer.append(')');
                     break;
                 case EsperEPL2GrammarParser.EVENT_PROP_INDEXED:
-                    buffer.append(child.getChild(0).getText());
+                    buffer.append(escapeDot(child.getChild(0).getText()));
                     buffer.append('[');
                     buffer.append(child.getChild(1).getText());
                     buffer.append(']');
                     break;
                 case EsperEPL2GrammarParser.EVENT_PROP_DYNAMIC_SIMPLE:
-                    buffer.append(child.getChild(0).getText());
+                    buffer.append(escapeDot(child.getChild(0).getText()));
                     buffer.append('?');
                     break;
                 case EsperEPL2GrammarParser.EVENT_PROP_DYNAMIC_MAPPED:
-                    buffer.append(child.getChild(0).getText());
+                    buffer.append(escapeDot(child.getChild(0).getText()));
                     buffer.append('(');
                     buffer.append(child.getChild(1).getText());
                     buffer.append(')');
                     buffer.append('?');
                     break;
                 case EsperEPL2GrammarParser.EVENT_PROP_DYNAMIC_INDEXED:
-                    buffer.append(child.getChild(0).getText());
+                    buffer.append(escapeDot(child.getChild(0).getText()));
                     buffer.append('[');
                     buffer.append(child.getChild(1).getText());
                     buffer.append(']');
@@ -72,10 +71,127 @@ public class ASTFilterSpecHelper
             }
 
             delimiter = ".";
+            childIndex++;
         }
 
         return buffer.toString();
     }
 
-    private static Log log = LogFactory.getLog(ASTFilterSpecHelper.class);
+    /**
+     * Escape all unescape dot characters in the text (identifier only) passed in.
+     * @param identifierToEscape text to escape
+     * @return text where dots are escaped
+     */
+    protected static String escapeDot(String identifierToEscape)
+    {
+        int indexof = identifierToEscape.indexOf(".");
+        if (indexof == -1)
+        {
+            return identifierToEscape;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < identifierToEscape.length(); i++)
+        {
+            char c = identifierToEscape.charAt(i);
+            if (c != '.')
+            {
+                builder.append(c);
+                continue;
+            }
+
+            if (i > 0)
+            {
+                if (identifierToEscape.charAt(i - 1) == '\\')
+                {
+                    builder.append('.');
+                    continue;
+                }
+            }
+
+            builder.append('\\');
+            builder.append('.');
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Find the index of an unescaped dot (.) character, or return -1 if none found.
+     * @param identifier text to find an un-escaped dot character
+     * @return index of first unescaped dot
+     */
+    public static int unescapedIndexOfDot(String identifier)
+    {
+        int indexof = identifier.indexOf(".");
+        if (indexof == -1)
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < identifier.length(); i++)
+        {
+            char c = identifier.charAt(i);
+            if (c != '.')
+            {
+                continue;
+            }
+
+            if (i > 0)
+            {
+                if (identifier.charAt(i - 1) == '\\')
+                {
+                    continue;
+                }
+            }
+
+            return i;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Un-Escape all escaped dot characters in the text (identifier only) passed in.
+     * @param identifierToUnescape text to un-escape
+     * @return string
+     */
+    public static String unescapeDot(String identifierToUnescape)
+    {
+        int indexof = identifierToUnescape.indexOf(".");
+        if (indexof == -1)
+        {
+            return identifierToUnescape;
+        }
+        indexof = identifierToUnescape.indexOf("\\");
+        if (indexof == -1)
+        {
+            return identifierToUnescape;
+        }
+
+        StringBuilder builder = new StringBuilder();
+        int index = -1;
+        int max = identifierToUnescape.length() - 1;
+        do
+        {
+            index++;
+            char c = identifierToUnescape.charAt(index);
+            if (c != '\\') {
+                builder.append(c);
+                continue;
+            }
+            if (index < identifierToUnescape.length() - 1)
+            {
+                if (identifierToUnescape.charAt(index + 1) == '.')
+                {
+                    builder.append('.');
+                    index++;
+                    continue;
+                }
+            }
+        }
+        while (index < max);
+
+        return builder.toString();
+    }
 }

@@ -9,6 +9,7 @@ package com.espertech.esper.client;
 
 import java.io.*;
 import java.net.URL;
+import java.net.URI;
 import java.util.*;
 
 import org.apache.commons.logging.Log;
@@ -131,6 +132,32 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 	protected Map<String, ConfigurationMethodRef> methodInvocationReferences;
 
     /**
+     * Map of plug-in event representation name and configuration
+     */
+	protected Map<URI, ConfigurationPlugInEventRepresentation> plugInEventRepresentation;
+
+    /**
+     * Map of plug-in event types.
+     */
+	protected Map<String, ConfigurationPlugInEventType> plugInEventTypes;
+
+    /**
+     * URIs that point to plug-in event representations that are given a chance to dynamically resolve an event type alias to an
+     * event type, as it occurs in a new EPL statement.
+     */
+    protected URI[] plugInEventTypeAliasResolutionURIs;
+
+    /**
+     * All revision event types which allow updates to past events.
+     */
+    protected Map<String, ConfigurationRevisionEventType> revisionEventTypes;
+
+    /**
+     * Variant streams allow events of disparate types to be treated the same.
+     */
+    protected Map<String, ConfigurationVariantStream> variantStreams;
+
+    /**
      * Constructs an empty configuration. The auto import values
      * are set by default to java.lang, java.math, java.text and
      * java.util.
@@ -160,6 +187,20 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         entry.setFunctionClassName(aggregationClassName);
         entry.setName(functionName);
         plugInAggregationFunctions.add(entry);
+    }
+
+    /**
+     * Checks if an eventTypeAlias has already been registered for that alias name.
+     * @since 2.1
+     * @param eventTypeAlias the alias name
+     * @return true if already registered
+     */
+    public boolean isEventTypeAliasExists(String eventTypeAlias) {
+        return eventClasses.containsKey(eventTypeAlias)
+                || mapAliases.containsKey(eventTypeAlias)
+                || nestableMapAliases.containsKey(eventTypeAlias)
+                || eventTypesXMLDOM.containsKey(eventTypeAlias);
+        //note: no need to check legacy as they get added as class event type
     }
 
     /**
@@ -219,6 +260,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     	nestableMapAliases.put(eventTypeAlias, typeMap);
     }
 
+    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap)
+    {
+    	addNestableEventTypeAlias(eventTypeAlias, typeMap);
+    }
+
     /**
      * Add an alias for an event type that represents java.util.Map events, taking a Map of
      * event property and class name as a parameter.
@@ -246,6 +292,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void addEventTypeAlias(String eventTypeAlias, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
     {
         eventTypesXMLDOM.put(eventTypeAlias, xmlDOMEventTypeDesc);
+    }
+
+    public void addRevisionEventType(String revisionEventTypeAlias, ConfigurationRevisionEventType revisionEventTypeConfig)
+    {
+        revisionEventTypes.put(revisionEventTypeAlias, revisionEventTypeConfig);
     }
 
     /**
@@ -365,6 +416,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         return methodInvocationReferences;
     }
 
+    public Map<String, ConfigurationRevisionEventType> getRevisionEventTypes()
+    {
+        return revisionEventTypes;
+    }
+
     /**
      * Add a plugin loader (f.e. an input/output adapter loader).
      * @param loaderName is the name of the loader
@@ -440,6 +496,63 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         variables.put(variableName, configVar);
     }
 
+    /**
+     * Adds an event representation responsible for creating event types (event metadata) and event bean instances (events) for
+     * a certain kind of object representation that holds the event property values.
+     * @param eventRepresentationRootURI uniquely identifies the event representation and acts as a parent
+     * for child URIs used in resolving
+     * @param eventRepresentationClassName is the name of the class implementing {@link com.espertech.esper.plugin.PlugInEventRepresentation}.
+     * @param initializer is optional configuration or initialization information, or null if none required 
+     */
+    public void addPlugInEventRepresentation(URI eventRepresentationRootURI, String eventRepresentationClassName, Serializable initializer)
+    {
+        ConfigurationPlugInEventRepresentation config = new ConfigurationPlugInEventRepresentation();
+        config.setEventRepresentationClassName(eventRepresentationClassName);
+        config.setInitializer(initializer);
+        this.plugInEventRepresentation.put(eventRepresentationRootURI, config);
+    }
+
+    /**
+     * Adds an event representation responsible for creating event types (event metadata) and event bean instances (events) for
+     * a certain kind of object representation that holds the event property values.
+     * @param eventRepresentationRootURI uniquely identifies the event representation and acts as a parent
+     * for child URIs used in resolving
+     * @param eventRepresentationClass is the class implementing {@link com.espertech.esper.plugin.PlugInEventRepresentation}.
+     * @param initializer is optional configuration or initialization information, or null if none required
+     */
+    public void addPlugInEventRepresentation(URI eventRepresentationRootURI, Class eventRepresentationClass, Serializable initializer)
+    {
+        addPlugInEventRepresentation(eventRepresentationRootURI, eventRepresentationClass.getName(), initializer);
+    }
+
+    public void addPlugInEventType(String eventTypeAlias, URI[] resolutionURIs, Serializable initializer)
+    {
+        ConfigurationPlugInEventType config = new ConfigurationPlugInEventType();
+        config.setEventRepresentationResolutionURIs(resolutionURIs);
+        config.setInitializer(initializer);
+        plugInEventTypes.put(eventTypeAlias, config);
+    }
+
+    public void setPlugInEventTypeAliasResolutionURIs(URI[] urisToResolveAlias)
+    {
+        plugInEventTypeAliasResolutionURIs = urisToResolveAlias;
+    }
+
+    public URI[] getPlugInEventTypeAliasResolutionURIs()
+    {
+        return plugInEventTypeAliasResolutionURIs;
+    }
+
+    public Map<URI, ConfigurationPlugInEventRepresentation> getPlugInEventRepresentation()
+    {
+        return plugInEventRepresentation;
+    }
+
+    public Map<String, ConfigurationPlugInEventType> getPlugInEventTypes()
+    {
+        return plugInEventTypes;
+    }
+
     public Set<String> getEventTypeAutoAliasPackages()
     {
         return eventTypeAutoAliasPackages;
@@ -448,6 +561,16 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public ConfigurationEngineDefaults getEngineDefaults()
     {
         return engineDefaults;
+    }
+
+    public void addVariantStream(String variantEventTypeAlias, ConfigurationVariantStream variantStreamConfig)
+    {
+        variantStreams.put(variantEventTypeAlias, variantStreamConfig);
+    }
+
+    public Map<String, ConfigurationVariantStream> getVariantStreams()
+    {
+        return variantStreams;
     }
 
     /**
@@ -479,9 +602,9 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     {
         if (log.isDebugEnabled())
         {
-            log.debug( "configuring from resource: " + resource );
+            log.debug( "Configuring from resource: " + resource );
         }
-        InputStream stream = getConfigurationInputStream( resource );
+        InputStream stream = getConfigurationInputStream(resource );
         ConfigurationParser.doConfigure(this, stream, resource );
         return this;
     }
@@ -498,10 +621,6 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
      */
     protected static InputStream getConfigurationInputStream(String resource) throws EPException
     {
-        if (log.isDebugEnabled())
-        {
-            log.debug( "Configuration resource: " + resource );
-        }
         return getResourceAsStream(resource);
     }
 
@@ -640,6 +759,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         eventTypeAutoAliasPackages = new LinkedHashSet<String>();
         variables = new HashMap<String, ConfigurationVariable>();
         methodInvocationReferences = new HashMap<String, ConfigurationMethodRef>();
+        plugInEventRepresentation = new HashMap<URI, ConfigurationPlugInEventRepresentation>();
+        plugInEventTypes = new HashMap<String, ConfigurationPlugInEventType>();
+        revisionEventTypes = new HashMap<String, ConfigurationRevisionEventType>();
+        variantStreams = new HashMap<String, ConfigurationVariantStream>();
     }
 
     /**

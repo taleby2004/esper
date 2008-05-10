@@ -24,9 +24,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Properties;
+import java.io.StringWriter;
+import java.util.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Parser for configuration XML.
@@ -145,6 +152,26 @@ class ConfigurationParser {
             {
                 handleEngineSettings(configuration, element);
             }
+            else if (nodeName.equals("plugin-event-representation"))
+            {
+                handlePlugInEventRepresentation(configuration, element);
+            }
+            else if (nodeName.equals("plugin-event-type"))
+            {
+                handlePlugInEventType(configuration, element);
+            }
+            else if (nodeName.equals("plugin-event-type-alias-resolution"))
+            {
+                handlePlugInEventTypeAliasResolution(configuration, element);
+            }
+            else if (nodeName.equals("revision-event-type"))
+            {
+                handleRevisionEventType(configuration, element);
+            }
+            else if (nodeName.equals("variant-stream"))
+            {
+                handleVariantStream(configuration, element);
+            }
         }
     }
 
@@ -211,12 +238,16 @@ class ConfigurationParser {
         String schemaResource = getOptionalAttribute(xmldomElement, "schema-resource");
         String defaultNamespace = getOptionalAttribute(xmldomElement, "default-namespace");
         String resolvePropertiesAbsoluteStr = getOptionalAttribute(xmldomElement, "resolve-properties-absolute");
+        String xpathFunctionResolverClass = getOptionalAttribute(xmldomElement, "xpath-function-resolver");
+        String xpathVariableResolverClass = getOptionalAttribute(xmldomElement, "xpath-variable-resolver");
 
         ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
         xmlDOMEventTypeDesc.setRootElementName(rootElementName);
         xmlDOMEventTypeDesc.setSchemaResource(schemaResource);
         xmlDOMEventTypeDesc.setRootElementNamespace(rootElementNamespace);
         xmlDOMEventTypeDesc.setDefaultNamespace(defaultNamespace);
+        xmlDOMEventTypeDesc.setXPathFunctionResolver(xpathFunctionResolverClass);
+        xmlDOMEventTypeDesc.setXPathVariableResolver(xpathVariableResolverClass);
         if (resolvePropertiesAbsoluteStr != null)
         {
             xmlDOMEventTypeDesc.setResolvePropertiesAbsolute(Boolean.parseBoolean(resolvePropertiesAbsoluteStr));
@@ -237,6 +268,7 @@ class ConfigurationParser {
             {
                 String propertyName = propertyElement.getAttributes().getNamedItem("property-name").getTextContent();
                 String xPath = propertyElement.getAttributes().getNamedItem("xpath").getTextContent();
+
                 String propertyType = propertyElement.getAttributes().getNamedItem("type").getTextContent();
                 QName xpathConstantType;
                 if (propertyType.toUpperCase().equals("NUMBER"))
@@ -256,7 +288,14 @@ class ConfigurationParser {
                     throw new IllegalArgumentException("Invalid xpath property type for property '" +
                         propertyName + "' and type '" + propertyType + '\'');
                 }
-                xmlDOMEventTypeDesc.addXPathProperty(propertyName, xPath, xpathConstantType);
+
+                String castToClass = null;
+                if (propertyElement.getAttributes().getNamedItem("cast") != null)
+                {
+                    castToClass = propertyElement.getAttributes().getNamedItem("cast").getTextContent();
+                }
+
+                xmlDOMEventTypeDesc.addXPathProperty(propertyName, xPath, xpathConstantType, castToClass);
             }
         }
     }
@@ -521,6 +560,204 @@ class ConfigurationParser {
             }
         }
         configuration.addPluginLoader(loaderName, className, properties);
+    }
+
+    private static void handlePlugInEventRepresentation(Configuration configuration, Element element)
+    {
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        String uri = element.getAttributes().getNamedItem("uri").getTextContent();
+        String className = element.getAttributes().getNamedItem("class-name").getTextContent();
+        String initializer = null;
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("initializer"))
+            {
+                DOMElementIterator nodeIter = new DOMElementIterator(subElement.getChildNodes());
+                if (!nodeIter.hasNext())
+                {
+                    throw new ConfigurationException("Error handling initializer for plug-in event representation '" + uri + "', no child node found under initializer element, expecting an element node");
+                }
+
+                StringWriter output = new StringWriter();
+                try
+                {
+                    TransformerFactory.newInstance().newTransformer().transform(new DOMSource(nodeIter.next()), new StreamResult(output));
+                }
+                catch (TransformerException e)
+                {
+                    throw new ConfigurationException("Error handling initializer for plug-in event representation '" + uri + "' :" + e.getMessage(), e);
+                }
+                initializer = output.toString();
+            }
+        }
+
+        URI uriParsed;
+        try
+        {
+            uriParsed = new URI(uri);
+        }
+        catch (URISyntaxException ex)
+        {
+            throw new ConfigurationException("Error parsing URI '" + uri + "' as a valid java.net.URI string:" + ex.getMessage(), ex);
+        }
+        configuration.addPlugInEventRepresentation(uriParsed, className, initializer);
+    }
+
+    private static void handlePlugInEventType(Configuration configuration, Element element)
+    {
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        List<URI> uris = new ArrayList<URI>();
+        String alias = element.getAttributes().getNamedItem("alias").getTextContent();
+        String initializer = null;
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("resolution-uri"))
+            {
+                String uriValue = subElement.getAttributes().getNamedItem("value").getTextContent();
+                URI uri;
+                try
+                {
+                    uri = new URI(uriValue);
+                }
+                catch (URISyntaxException ex)
+                {
+                    throw new ConfigurationException("Error parsing URI '" + uriValue + "' as a valid java.net.URI string:" + ex.getMessage(), ex);
+                }
+                uris.add(uri);
+            }
+            if (subElement.getNodeName().equals("initializer"))
+            {
+                DOMElementIterator nodeIter = new DOMElementIterator(subElement.getChildNodes());
+                if (!nodeIter.hasNext())
+                {
+                    throw new ConfigurationException("Error handling initializer for plug-in event type '" + alias + "', no child node found under initializer element, expecting an element node");
+                }
+
+                StringWriter output = new StringWriter();
+                try
+                {
+                    TransformerFactory.newInstance().newTransformer().transform(new DOMSource(nodeIter.next()), new StreamResult(output));
+                }
+                catch (TransformerException e)
+                {
+                    throw new ConfigurationException("Error handling initializer for plug-in event type '" + alias + "' :" + e.getMessage(), e);
+                }
+                initializer = output.toString();
+            }
+        }
+
+        configuration.addPlugInEventType(alias, uris.toArray(new URI[uris.size()]), initializer);
+    }
+
+    private static void handlePlugInEventTypeAliasResolution(Configuration configuration, Element element)
+    {
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        List<URI> uris = new ArrayList<URI>();
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("resolution-uri"))
+            {
+                String uriValue = subElement.getAttributes().getNamedItem("value").getTextContent();
+                URI uri;
+                try
+                {
+                    uri = new URI(uriValue);
+                }
+                catch (URISyntaxException ex)
+                {
+                    throw new ConfigurationException("Error parsing URI '" + uriValue + "' as a valid java.net.URI string:" + ex.getMessage(), ex);
+                }
+                uris.add(uri);
+            }
+        }
+
+        configuration.setPlugInEventTypeAliasResolutionURIs(uris.toArray(new URI[uris.size()]));
+    }
+
+    private static void handleRevisionEventType(Configuration configuration, Element element)
+    {
+        ConfigurationRevisionEventType revEventType = new ConfigurationRevisionEventType();
+        String revTypeAlias = element.getAttributes().getNamedItem("alias").getTextContent();
+
+        if (element.getAttributes().getNamedItem("property-revision") != null)
+        {
+            String propertyRevision = element.getAttributes().getNamedItem("property-revision").getTextContent();
+            ConfigurationRevisionEventType.PropertyRevision propertyRevisionEnum;
+            try
+            {
+                propertyRevisionEnum = ConfigurationRevisionEventType.PropertyRevision.valueOf(propertyRevision.trim().toUpperCase());
+                revEventType.setPropertyRevision(propertyRevisionEnum);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new ConfigurationException("Invalid enumeration value for property-revision attribute '" + propertyRevision + "'");
+            }
+        }
+
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        Set<String> keyProperties = new HashSet<String>();
+
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("base-event-type"))
+            {
+                String alias = subElement.getAttributes().getNamedItem("alias").getTextContent();
+                revEventType.addAliasBaseEventType(alias);
+            }
+            if (subElement.getNodeName().equals("delta-event-type"))
+            {
+                String alias = subElement.getAttributes().getNamedItem("alias").getTextContent();
+                revEventType.addAliasDeltaEventType(alias);
+            }
+            if (subElement.getNodeName().equals("key-property"))
+            {
+                String name = subElement.getAttributes().getNamedItem("name").getTextContent();
+                keyProperties.add(name);
+            }
+        }
+
+        String[] keyProps = keyProperties.toArray(new String[keyProperties.size()]);
+        revEventType.setKeyPropertyNames(keyProps);
+        
+        configuration.addRevisionEventType(revTypeAlias, revEventType);
+    }
+
+    private static void handleVariantStream(Configuration configuration, Element element)
+    {
+        ConfigurationVariantStream variantStream = new ConfigurationVariantStream();
+        String varianceAlias = element.getAttributes().getNamedItem("alias").getTextContent();
+
+        if (element.getAttributes().getNamedItem("type-variance") != null)
+        {
+            String typeVar = element.getAttributes().getNamedItem("type-variance").getTextContent();
+            ConfigurationVariantStream.TypeVariance typeVarianceEnum;
+            try
+            {
+                typeVarianceEnum = ConfigurationVariantStream.TypeVariance.valueOf(typeVar.trim().toUpperCase());
+                variantStream.setTypeVariance(typeVarianceEnum);
+            }
+            catch (RuntimeException ex)
+            {
+                throw new ConfigurationException("Invalid enumeration value for type-variance attribute '" + typeVar + "'");
+            }
+        }
+
+        DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("variant-event-type"))
+            {
+                String alias = subElement.getAttributes().getNamedItem("alias").getTextContent();
+                variantStream.addEventTypeAlias(alias);
+            }
+        }
+
+        configuration.addVariantStream(varianceAlias, variantStream);
     }
 
     private static void handleEngineSettings(Configuration configuration, Element element)

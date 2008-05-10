@@ -117,6 +117,8 @@ public class ResultSetProcessorFactory
             SelectClauseStreamCompiledSpec streamSelectSpec = (SelectClauseStreamCompiledSpec) compiled;
             int streamNum = Integer.MIN_VALUE;
             boolean isTaggedEvent = false;
+            boolean isProperty = false;
+            Class propertyType = null;
             for (int i = 0; i < typeService.getStreamNames().length; i++)
             {
                 String streamAlias = streamSelectSpec.getStreamAliasName();
@@ -138,13 +140,32 @@ public class ResultSetProcessorFactory
                 }
             }
 
+            // stream alias not found
             if (streamNum == Integer.MIN_VALUE)
             {
-                throw new ExprValidationException("Stream selector '" + streamSelectSpec.getStreamAliasName() + ".*' does not match any stream alias name in the from clause");
+                // see if the stream name specified resolves as a property
+                PropertyResolutionDescriptor desc = null;
+                try
+                {
+                    desc = typeService.resolveByPropertyName(streamSelectSpec.getStreamAliasName());
+                }
+                catch (StreamTypesException e)
+                {
+                    // not handled
+                }
+
+                if (desc == null)
+                {
+                    throw new ExprValidationException("Stream selector '" + streamSelectSpec.getStreamAliasName() + ".*' does not match any stream alias name in the from clause");
+                }
+                isProperty = true;
+                propertyType = desc.getPropertyType();
+                streamNum = desc.getStreamNum();
             }
 
             streamSelectSpec.setStreamNumber(streamNum);
             streamSelectSpec.setTaggedEvent(isTaggedEvent);
+            streamSelectSpec.setProperty(isProperty, propertyType);
         }
 
         // Validate group-by expressions, if any (could be empty list for no group-by)
@@ -242,7 +263,7 @@ public class ResultSetProcessorFactory
                 groupByNodes, orderByList, aggregationService, stmtContext.getEventAdapterService());
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService());
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService(), stmtContext.getValueAddEventService());
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);

@@ -240,6 +240,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case EVENT_LIMIT_EXPR:
             case SEC_LIMIT_EXPR:
             case MIN_LIMIT_EXPR:
+            case TIMEPERIOD_LIMIT_EXPR:
             	leaveOutputLimit(node);
             	break;
             case INSERTINTO_EXPR:
@@ -945,7 +946,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
         // i.e. 's0.p0' could mean that the event has a nested property to 's0' of name 'p0', or 's0' is the stream name
         else
         {
-            String streamOrNestedPropertyName = node.getChild(0).getChild(0).getText();
+            String leadingIdentifier = node.getChild(0).getChild(0).getText();
+            String streamOrNestedPropertyName = ASTFilterSpecHelper.escapeDot(leadingIdentifier);
             propertyName = ASTFilterSpecHelper.getPropertyName(node, 1);
             exprNode = new ExprIdentNode(propertyName, streamOrNestedPropertyName);
         }

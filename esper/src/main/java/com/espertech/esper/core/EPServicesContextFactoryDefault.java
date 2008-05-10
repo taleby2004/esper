@@ -19,8 +19,12 @@ import com.espertech.esper.epl.view.OutputConditionFactoryDefault;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventAdapterServiceImpl;
+import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
+import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterServiceProvider;
+import com.espertech.esper.plugin.PlugInEventRepresentation;
+import com.espertech.esper.plugin.PlugInEventRepresentationContext;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.SchedulingServiceProvider;
@@ -30,6 +34,8 @@ import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.view.stream.StreamFactoryService;
 import com.espertech.esper.view.stream.StreamFactoryServiceProvider;
 
+import java.io.Serializable;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,7 +57,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         TimeSourceService timeSourceService = makeTimeSource(configSnapshot);
         SchedulingService schedulingService = SchedulingServiceProvider.newService(timeSourceService);
         EngineImportService engineImportService = makeEngineImportService(configSnapshot);
-        EngineSettingsService engineSettingsService = new EngineSettingsService(configSnapshot.getEngineDefaults());
+        EngineSettingsService engineSettingsService = new EngineSettingsService(configSnapshot.getEngineDefaults(), configSnapshot.getPlugInEventTypeAliasResolutionURIs());
         DatabaseConfigService databaseConfigService = makeDatabaseRefService(configSnapshot, schedulingService);
 
         PluggableObjectCollection plugInViews = new PluggableObjectCollection();
@@ -82,12 +88,15 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         FilterService filterService = FilterServiceProvider.newService();
         NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService);
 
+        ValueAddEventService valueAddEventService = new ValueAddEventServiceImpl();
+        valueAddEventService.init(configSnapshot.getRevisionEventTypes(), configSnapshot.getVariantStreams(), eventAdapterService);
+
         // New services context
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
                 plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
-                namedWindowService, variableService, timeSourceService);
+                namedWindowService, variableService, timeSourceService, valueAddEventService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -217,6 +226,66 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             {
                 throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
             }
+        }
+
+        // Add plug-in event representations
+        Map<URI, ConfigurationPlugInEventRepresentation> plugInReps = configSnapshot.getPlugInEventRepresentation();
+        for (Map.Entry<URI, ConfigurationPlugInEventRepresentation> entry : plugInReps.entrySet())
+        {
+            String className = entry.getValue().getEventRepresentationClassName();
+            Class eventRepClass;
+            try
+            {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                eventRepClass = Class.forName(className, true, cl);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                throw new ConfigurationException("Failed to load plug-in event representation class '" + className + "'", ex);
+            }
+
+            Object pluginEventRepObj;
+            try
+            {
+                pluginEventRepObj = eventRepClass.newInstance();
+            }
+            catch (InstantiationException ex)
+            {
+                throw new ConfigurationException("Failed to instantiate plug-in event representation class '" + className + "' via default constructor", ex);
+            }
+            catch (IllegalAccessException ex)
+            {
+                throw new ConfigurationException("Illegal access to instantiate plug-in event representation class '" + className + "' via default constructor", ex);
+            }
+
+            if (!(pluginEventRepObj instanceof PlugInEventRepresentation))
+            {
+                throw new ConfigurationException("Plug-in event representation class '" + className + "' does not implement the required interface " + PlugInEventRepresentation.class.getName());
+            }
+
+            URI eventRepURI = entry.getKey();
+            PlugInEventRepresentation pluginEventRep = (PlugInEventRepresentation) pluginEventRepObj;
+            Serializable initializer = entry.getValue().getInitializer();
+            PlugInEventRepresentationContext context = new PlugInEventRepresentationContext(eventAdapterService, eventRepURI, initializer);
+
+            try
+            {
+                pluginEventRep.init(context);
+                eventAdapterService.addEventRepresentation(eventRepURI, pluginEventRep);
+            }
+            catch (Throwable t)
+            {
+                throw new ConfigurationException("Plug-in event representation class '" + className + "' and URI '" + eventRepURI + "' did not initialize correctly : " + t.getMessage(), t);
+            }
+        }
+
+        // Add plug-in event type aliases
+        Map<String, ConfigurationPlugInEventType> plugInAliases = configSnapshot.getPlugInEventTypes();
+        for (Map.Entry<String, ConfigurationPlugInEventType> entry : plugInAliases.entrySet())
+        {
+            String alias = entry.getKey();
+            ConfigurationPlugInEventType config = entry.getValue();
+            eventAdapterService.addPlugInEventType(alias, config.getEventRepresentationResolutionURIs(), config.getInitializer());
         }
     }
 

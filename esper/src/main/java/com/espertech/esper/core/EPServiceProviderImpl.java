@@ -15,6 +15,7 @@ import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.timer.TimerService;
 
 import javax.naming.Context;
@@ -89,6 +90,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
     public ConfigurationInformation getConfigurationInformation() {
         return configSnapshot;
+    }
+
+    public NamedWindowService getNamedWindowService()
+    {
+        return engine.getServices().getNamedWindowService();
     }
 
     public ExtensionServicesContext getExtensionServicesContext()
@@ -185,7 +191,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             Class clazz;
             try
             {
-                clazz = Class.forName(epServicesContextFactoryClassName);
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                clazz = Class.forName(epServicesContextFactoryClassName, true, cl);
             }
             catch (ClassNotFoundException e)
             {
@@ -222,7 +229,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         services.getStatementLifecycleSvc().init();
 
         // New admin
-        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService(), services.getEngineImportService(), services.getVariableService());
+        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService(), services.getEngineImportService(), services.getVariableService(), services.getEngineSettingsService(), services.getValueAddEventService());
         SelectClauseStreamSelectorEnum defaultStreamSelector = SelectClauseStreamSelectorEnum.mapFromSODA(configSnapshot.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
         EPAdministratorImpl admin = new EPAdministratorImpl(services, configOps, defaultStreamSelector);
 
@@ -272,7 +279,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             Class pluginLoaderClass;
             try
             {
-                pluginLoaderClass = Class.forName(className);
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                pluginLoaderClass = Class.forName(className, true, cl);
             }
             catch (ClassNotFoundException ex)
             {

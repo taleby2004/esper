@@ -1,21 +1,20 @@
 package com.espertech.esper.core;
 
+import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.join.JoinSetComposerFactoryImpl;
-import com.espertech.esper.epl.spec.PluggableObjectCollection;
-import com.espertech.esper.epl.spec.OnTriggerDesc;
 import com.espertech.esper.epl.spec.CreateWindowDesc;
+import com.espertech.esper.epl.spec.OnTriggerDesc;
 import com.espertech.esper.epl.spec.OnTriggerWindowDesc;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import com.espertech.esper.pattern.*;
-import com.espertech.esper.pattern.PatternObjectHelper;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.view.StatementStopServiceImpl;
 import com.espertech.esper.view.ViewEnumHelper;
 import com.espertech.esper.view.ViewResolutionService;
 import com.espertech.esper.view.ViewResolutionServiceImpl;
-import com.espertech.esper.client.EPStatementException;
 
 import java.util.Map;
 
@@ -114,6 +113,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getOutputConditionFactory(),
                 engineServices.getNamedWindowService(),
                 engineServices.getVariableService(),
-                new StatementResultServiceImpl(engineServices.getStatementLifecycleSvc()));
+                new StatementResultServiceImpl(engineServices.getStatementLifecycleSvc()),
+                engineServices.getEngineSettingsService().getPlugInEventTypeResolutionURIs(),
+                engineServices.getValueAddEventService());
     }
 }

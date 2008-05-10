@@ -5,6 +5,8 @@
 			<xs:sequence>
 				<xs:element ref="esper:event-type-auto-alias" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:event-type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="esper:revision-event-type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="esper:variant-stream" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:auto-import" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:method-reference" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:database-reference" minOccurs="0" maxOccurs="unbounded"/>
@@ -12,6 +14,9 @@
 				<xs:element ref="esper:plugin-aggregation-function" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:plugin-pattern-guard" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:plugin-pattern-observer" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="esper:plugin-event-representation" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="esper:plugin-event-type" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="esper:plugin-event-type-alias-resolution" minOccurs="0" maxOccurs="1"/>				
 				<xs:element ref="esper:variable" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:plugin-loader" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="esper:engine-settings" minOccurs="0" maxOccurs="unbounded"/>
@@ -54,6 +59,8 @@
 			<xs:attribute name="default-namespace" type="xs:string" use="optional"/>
 			<xs:attribute name="schema-resource" type="xs:string" use="optional"/>
 			<xs:attribute name="resolve-properties-absolute" type="xs:string" use="optional"/>
+			<xs:attribute name="xpath-function-resolver" type="xs:string" use="optional"/>
+			<xs:attribute name="xpath-variable-resolver" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="namespace-prefix">
@@ -67,6 +74,7 @@
 			<xs:attribute name="property-name" type="xs:string" use="required"/>
 			<xs:attribute name="xpath" type="xs:string" use="required"/>
 			<xs:attribute name="type" type="esper:xpath-type" use="required"/>
+			<xs:attribute name="cast" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:simpleType name="xpath-type">
@@ -139,6 +147,42 @@
 		<xs:restriction base="xs:token">
 			<xs:enumeration value="enabled"/>
 			<xs:enumeration value="disabled"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="revision-event-type">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="esper:base-event-type" minOccurs="1" maxOccurs="unbounded"/>
+					<xs:element ref="esper:delta-event-type" minOccurs="1" maxOccurs="unbounded"/>
+					<xs:element ref="esper:key-property" minOccurs="1" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:choice>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+			<xs:attribute name="property-revision" type="esper:property-revision" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="base-event-type">
+		<xs:complexType>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="delta-event-type">
+		<xs:complexType>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="key-property">
+		<xs:complexType>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="property-revision">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="overlay_declared"/>
+			<xs:enumeration value="merge_declared"/>
+			<xs:enumeration value="merge_non_null"/>
+			<xs:enumeration value="merge_exists"/>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:element name="database-reference">
@@ -461,4 +505,69 @@
 			<xs:enumeration value="nano"/>
 		</xs:restriction>
 	</xs:simpleType>
+	<xs:element name="plugin-event-representation">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="esper:initializer" minOccurs="0" maxOccurs="1"/>
+				</xs:sequence>
+			</xs:choice>
+			<xs:attribute name="uri" type="xs:string" use="required"/>
+			<xs:attribute name="class-name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="plugin-event-type">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="esper:resolution-uri" minOccurs="1" maxOccurs="unbounded"/>
+					<xs:element ref="esper:initializer" minOccurs="0" maxOccurs="1"/>
+				</xs:sequence>
+			</xs:choice>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="plugin-event-type-alias-resolution">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="esper:resolution-uri" minOccurs="1" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="resolution-uri">
+		<xs:complexType>
+			<xs:attribute name="value" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+    <xs:element name="initializer">
+      <xs:complexType>
+        <xs:sequence>
+          <xs:any minOccurs="0"/>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:element>
+	<xs:element name="variant-stream">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="esper:variant-event-type" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:choice>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+			<xs:attribute name="type-variance" type="esper:type-variance" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="type-variance">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="predefined"/>
+			<xs:enumeration value="any"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:element name="variant-event-type">
+		<xs:complexType>
+			<xs:attribute name="alias" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>

@@ -694,7 +694,8 @@ public class JavaClassHelper
         {
             return long.class;
         }
-        return Class.forName(className);
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        return Class.forName(className, true, cl);
     }
 
     /**
@@ -736,7 +737,8 @@ public class JavaClassHelper
 
         try
         {
-            return Class.forName(boxedClassName);
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            return Class.forName(boxedClassName, true, cl);
         }
         catch (ClassNotFoundException ex)
         {
@@ -745,7 +747,8 @@ public class JavaClassHelper
         boxedClassName = JavaClassHelper.getBoxedClassName(className.toLowerCase().trim());
         try
         {
-            return Class.forName(boxedClassName);
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            return Class.forName(boxedClassName, true, cl);
         }
         catch (ClassNotFoundException ex)
         {
@@ -870,6 +873,27 @@ public class JavaClassHelper
         return recursiveSuperclassImplementsInterface(clazz, interfaceClass);
     }
 
+    /**
+     * Method to check if a given class, and its superclasses and interfaces (deep), implement a given interface or extend a given class.
+     * @param extendorOrImplementor is the class to inspects its extends and implements clauses
+     * @param extendedOrImplemented is the potential interface, or superclass, to check
+     * @return true if such interface is implemented by any of the clazz or its superclasses or
+     * extends by any interface and superclasses (deep check)
+     */
+    public static boolean isSubclassOrImplementsInterface(Class extendorOrImplementor, Class extendedOrImplemented)
+    {
+        if (extendorOrImplementor.equals(extendedOrImplemented))
+        {
+            return true;
+        }
+        if (extendedOrImplemented.isInterface())
+        {
+            return recursiveIsImplementsInterface(extendorOrImplementor, extendedOrImplemented) ||
+                   recursiveSuperclassImplementsInterface(extendorOrImplementor, extendedOrImplemented);
+        }
+        return recursiveIsSuperClass(extendorOrImplementor, extendedOrImplemented);
+    }
+
     private static boolean recursiveIsSuperClass(Class clazz, Class superClass)
     {
         if (clazz == null)
@@ -927,5 +951,86 @@ public class JavaClassHelper
             }
         }
         return false;
+    }
+
+    /**
+     * Looks up the given class and checks that it implements or extends the required interface,
+     * and instantiates an object.
+     * @param implementedOrExtendedClass is the class that the looked-up class should extend or implement
+     * @param className of the class to load, check type and instantiate
+     * @return instance of given class, via newInstance
+     * @throws ClassInstantiationException if the type does not match or the class cannot be loaded or an object instantiated
+     */
+    public static Object instantiate(Class implementedOrExtendedClass, String className) throws ClassInstantiationException
+    {
+        Class clazz;
+        try
+        {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            clazz = Class.forName(className, true, cl);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            throw new ClassInstantiationException("Unable to load class '" + className + "', class not found", ex);
+        }
+
+        if (!JavaClassHelper.isSubclassOrImplementsInterface(clazz, implementedOrExtendedClass))
+        {
+            if (implementedOrExtendedClass.isInterface())
+            {
+                throw new ClassInstantiationException("Class '" + className + "' does not implement interface '" + implementedOrExtendedClass.getName() + "'");
+            }
+            throw new ClassInstantiationException("Class '" + className + "' does not extend '" + implementedOrExtendedClass.getName() + "'");
+        }
+
+        Object obj;
+        try
+        {
+            obj = clazz.newInstance();
+        }
+        catch (InstantiationException ex)
+        {
+            throw new ClassInstantiationException("Unable to instantiate from class '" + className + "' via default constructor", ex);
+        }
+        catch (IllegalAccessException ex)
+        {
+            throw new ClassInstantiationException("Illegal access when instantiating class '" + className + "' via default constructor", ex);
+        }
+
+        return obj;
+    }
+
+    /**
+     * Populates all interface and superclasses for the given class, recursivly.
+     * @param clazz to reflect upon
+     * @param result set of classes to populate
+     */
+    public static void getSuper(Class clazz, Set<Class> result)
+    {
+        getSuperInterfaces(clazz, result);
+        getSuperClasses(clazz, result);
+    }
+
+    private static void getSuperInterfaces(Class clazz, Set<Class> result)
+    {
+        Class interfaces[] = clazz.getInterfaces();
+
+        for (int i = 0; i < interfaces.length; i++)
+        {
+            result.add(interfaces[i]);
+            getSuperInterfaces(interfaces[i], result);
+        }
+    }
+
+    private static void getSuperClasses(Class clazz, Set<Class> result)
+    {
+        Class superClass = clazz.getSuperclass();
+        if (superClass == null)
+        {
+            return;
+        }
+
+        result.add(superClass);
+        getSuper(superClass, result);
     }
 }

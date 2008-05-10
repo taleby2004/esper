@@ -518,11 +518,36 @@ public class ArrayAssertionUtil
                 return;
             }
         }
+        Assert.assertEquals(propertyNames.length, propertiesThisRow.length);
 
         for (int j = 0; j < propertiesThisRow.length; j++)
         {
             String name = propertyNames[j].trim();
             Object value = propertiesThisRow[j];
+            Object eventProp = received.get(name);
+            Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);
+        }
+    }
+
+    public static void assertAllProps(EventBean received, Object[] propertiesSortedByName)
+    {
+        if (propertiesSortedByName == null)
+        {
+            if (received == null)
+            {
+                return;
+            }
+        }
+
+        String[] propertyNames = received.getEventType().getPropertyNames();
+        String[] propertyNamesSorted = new String[propertyNames.length];
+        System.arraycopy(propertyNames, 0, propertyNamesSorted, 0, propertyNames.length);
+        Arrays.sort(propertyNamesSorted);
+
+        for (int j = 0; j < propertiesSortedByName.length; j++)
+        {
+            String name = propertyNamesSorted[j].trim();
+            Object value = propertiesSortedByName[j];
             Object eventProp = received.get(name);
             Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);
         }
@@ -827,7 +852,7 @@ public class ArrayAssertionUtil
 
         if (rows.size() == 0)
         {
-            Assert.assertNull(expectedValues);
+            Assert.assertNull("Expected rows in result but received none", expectedValues);
             return;
         }
 

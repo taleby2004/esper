@@ -132,6 +132,7 @@ tokens
    	EVENT_LIMIT_EXPR;
 	SEC_LIMIT_EXPR;
 	MIN_LIMIT_EXPR;
+	TIMEPERIOD_LIMIT_EXPR;
 	INSERTINTO_EXPR;
 	INSERTINTO_EXPRCOL;
 	CONCAT;	
@@ -568,10 +569,13 @@ selectionList
 	;
 
 selectionListElement
+  @init { String identifier = null; } 
 	:   	s=STAR -> WILDCARD_SELECT[$s]
 	|	(streamSelector) => streamSelector
-	|	expression (AS i=IDENT)?
-		-> ^(SELECTION_ELEMENT_EXPR expression $i?)
+	|	expression (AS i=keywordAllowedIdent { identifier = i.getTree().toString(); } )?
+		-> {identifier != null}? ^(SELECTION_ELEMENT_EXPR expression IDENT[identifier])
+		-> {identifier == null}? ^(SELECTION_ELEMENT_EXPR expression)
+		-> ^(SELECTION_ELEMENT_EXPR expression)
 	;
 	
 streamSelector
@@ -641,10 +645,15 @@ havingClause
 outputLimit
 @init  { paraphrases.push("output rate clause"); }
 @after { paraphrases.pop(); }
-	:   (k=ALL|k=FIRST|k=LAST|k=SNAPSHOT)? EVERY_EXPR (number | i=IDENT) (e=EVENTS|sec=SECONDS|min=MINUTES)
+	:   (k=ALL|k=FIRST|k=LAST|k=SNAPSHOT)? EVERY_EXPR 
+		( 
+		  (time_period) => time_period
+		| (number | i=IDENT) (e=EVENTS|sec=SECONDS|min=MINUTES)
+		)
 	    -> {$e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i?)
 	    -> {$sec != null}? ^(SEC_LIMIT_EXPR $k? number? $i?)
-	    -> ^(MIN_LIMIT_EXPR $k? number? $i?)		
+	    -> {$min != null}? ^(MIN_LIMIT_EXPR $k? number? $i?)
+	    -> ^(TIMEPERIOD_LIMIT_EXPR $k? time_period)		
 	;	
 
 whenClause
@@ -1015,16 +1024,66 @@ eventProperty
 	;
 	
 eventPropertyAtomic
-	:	i=IDENT -> ^(EVENT_PROP_SIMPLE $i)
-	|	i=IDENT LBRACK ni=NUM_INT RBRACK (q=QUESTION)?
-			-> {$q == null}? ^(EVENT_PROP_INDEXED $i $ni)
-			-> ^(EVENT_PROP_DYNAMIC_INDEXED $i $ni)
-	|	i=IDENT LPAREN (s=STRING_LITERAL | s=QUOTED_STRING_LITERAL) RPAREN (q=QUESTION)?
-			-> {$q == null}? ^(EVENT_PROP_MAPPED $i $s)
-			-> ^(EVENT_PROP_DYNAMIC_MAPPED $i $s)
-	|	i=IDENT QUESTION -> ^(EVENT_PROP_DYNAMIC_SIMPLE $i)
+	:	eventPropertyIdent (
+			lb=LBRACK ni=NUM_INT RBRACK (q=QUESTION)?
+			|
+			lp=LPAREN (s=STRING_LITERAL | s=QUOTED_STRING_LITERAL) RPAREN (q=QUESTION)?
+			|
+			q1=QUESTION 
+			)?
+		
+		-> {lb!= null && $q == null}? ^(EVENT_PROP_INDEXED eventPropertyIdent $ni)
+		-> {lb!= null && $q != null}? ^(EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni)
+		-> {lp!= null && $q == null}? ^(EVENT_PROP_MAPPED eventPropertyIdent $s)
+		-> {lp!= null && $q != null}? ^(EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s)
+		-> {q1 != null}? 	      ^(EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent)
+		-> ^(EVENT_PROP_SIMPLE eventPropertyIdent)
+		;
+		
+eventPropertyIdent
+  @init { String identifier = ""; } 
+	:	ipi=keywordAllowedIdent { identifier = ipi.getTree().toString(); }
+		(
+		  ESCAPECHAR DOT ipi2=keywordAllowedIdent? { identifier += "."; if (ipi2 != null) identifier += ipi2.getTree().toString(); }
+		)*
+	    	-> ^(IDENT[identifier])
 	;
-
+	
+keywordAllowedIdent
+  @init { String identifier = ""; } 
+	:	i1=IDENT { identifier = $i1.getText(); }
+		|COUNT { identifier = "count"; }
+		|ESCAPE { identifier = "escape"; }
+    		|EVERY_EXPR { identifier = "every"; }
+		|SUM { identifier = "sum"; }
+		|AVG { identifier = "avg"; }
+		|MAX { identifier = "max"; }
+		|MIN { identifier = "min"; }
+		|COALESCE { identifier = "coalesce"; }
+		|MEDIAN { identifier = "median"; }
+		|STDDEV { identifier = "stddev"; }
+		|AVEDEV { identifier = "avedev"; }
+		|EVENTS { identifier = "events"; }
+		|SECONDS { identifier = "seconds"; }
+		|MINUTES { identifier = "minutes"; }
+		|FIRST { identifier = "first"; }
+		|LAST { identifier = "last"; }
+		|UNIDIRECTIONAL { identifier = "unidirectional"; }
+		|PATTERN { identifier = "pattern"; }
+		|SQL { identifier = "sql"; }
+		|METADATASQL { identifier = "metadatasql"; }
+		|PREVIOUS { identifier = "prev"; }
+		|PRIOR { identifier = "prior"; }
+		|WEEKDAY { identifier = "weekday"; }
+		|LW { identifier = "lastweekday"; }
+		|INSTANCEOF { identifier = "instanceof"; }
+		|CAST { identifier = "cast"; }
+		|SNAPSHOT { identifier = "snapshot"; }
+		|VARIABLE { identifier = "variable"; }		
+		|WINDOW { identifier = "window"; }
+	-> ^(IDENT[identifier])
+	;
+		
 time_period 	
 	:	
 	(	
@@ -1118,6 +1177,7 @@ DOT 		: '.';
 NUM_LONG	: '\u18FF';  // assign bogus unicode characters so the token exists
 NUM_DOUBLE	: '\u18FE';
 NUM_FLOAT	: '\u18FD';
+ESCAPECHAR	: '\\';
 
 // Whitespace -- ignored
 WS	:	(	' '

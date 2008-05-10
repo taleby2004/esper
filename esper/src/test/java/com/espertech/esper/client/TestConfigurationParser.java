@@ -4,11 +4,13 @@ import junit.framework.TestCase;
 
 import javax.xml.xpath.XPathConstants;
 import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
 import com.espertech.esper.client.soda.StreamSelector;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestConfigurationParser extends TestCase
 {
@@ -49,7 +51,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(StreamSelector.ISTREAM_ONLY, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
     }
 
-    protected static void assertFileConfig(Configuration config)
+    protected static void assertFileConfig(Configuration config) throws Exception
     {
         // assert alias for class
         assertEquals(2, config.getEventTypeAutoAliasPackages().size());
@@ -73,6 +75,9 @@ public class TestConfigurationParser extends TestCase
         assertEquals("MyNoSchemaEvent", noSchemaDesc.getRootElementName());
         assertEquals("/myevent/element1", noSchemaDesc.getXPathProperties().get("element1").getXpath());
         assertEquals(XPathConstants.NUMBER, noSchemaDesc.getXPathProperties().get("element1").getType());
+        assertEquals(null, noSchemaDesc.getXPathProperties().get("element1").getOptionalCastToType());
+        assertNull(noSchemaDesc.getXPathFunctionResolver());
+        assertNull(noSchemaDesc.getXPathVariableResolver());
 
         // assert XML DOM - with schema
         ConfigurationEventTypeXMLDOM schemaDesc = config.getEventTypesXMLDOM().get("MySchemaXMLEventAlias");
@@ -80,11 +85,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals("MySchemaXMLEvent.xsd", schemaDesc.getSchemaResource());
         assertEquals("samples:schemas:simpleSchema", schemaDesc.getRootElementNamespace());
         assertEquals("default-name-space", schemaDesc.getDefaultNamespace());
-        assertEquals("/myevent/element1", schemaDesc.getXPathProperties().get("element1").getXpath());
-        assertEquals(XPathConstants.NUMBER, schemaDesc.getXPathProperties().get("element1").getType());
+        assertEquals("/myevent/element2", schemaDesc.getXPathProperties().get("element2").getXpath());
+        assertEquals(XPathConstants.STRING, schemaDesc.getXPathProperties().get("element2").getType());
+        assertEquals(Long.class, schemaDesc.getXPathProperties().get("element2").getOptionalCastToType());
         assertEquals(1, schemaDesc.getNamespacePrefixes().size());
         assertEquals("samples:schemas:simpleSchema", schemaDesc.getNamespacePrefixes().get("ss"));
         assertFalse(schemaDesc.isResolvePropertiesAbsolute());
+        assertEquals("com.mycompany.OptionalFunctionResolver", schemaDesc.getXPathFunctionResolver());
+        assertEquals("com.mycompany.OptionalVariableResolver", schemaDesc.getXPathVariableResolver());
 
         // assert mapped events
         assertEquals(1, config.getEventTypesMapEvents().size());
@@ -245,5 +253,49 @@ public class TestConfigurationParser extends TestCase
         ref = config.getMethodInvocationReferences().get("def");
         lruCache = (ConfigurationLRUCache) ref.getDataCacheDesc();
         assertEquals(20, lruCache.getSize());
+
+        // plug-in event representations
+        assertEquals(2, config.getPlugInEventRepresentation().size());
+        ConfigurationPlugInEventRepresentation rep = config.getPlugInEventRepresentation().get(new URI("type://format/rep/name"));
+        assertEquals("com.mycompany.MyPlugInEventRepresentation", rep.getEventRepresentationClassName());
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><anyxml>test string event rep init</anyxml>", rep.getInitializer());
+        rep = config.getPlugInEventRepresentation().get(new URI("type://format/rep/name2"));
+        assertEquals("com.mycompany.MyPlugInEventRepresentation2", rep.getEventRepresentationClassName());
+        assertEquals(null, rep.getInitializer());
+
+        // plug-in event types
+        assertEquals(2, config.getPlugInEventTypes().size());
+        ConfigurationPlugInEventType type = config.getPlugInEventTypes().get("MyEvent");
+        assertEquals(2, type.getEventRepresentationResolutionURIs().length);
+        assertEquals("type://format/rep", type.getEventRepresentationResolutionURIs()[0].toString());
+        assertEquals("type://format/rep2", type.getEventRepresentationResolutionURIs()[1].toString());
+        assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?><anyxml>test string event type init</anyxml>", type.getInitializer());
+        type = config.getPlugInEventTypes().get("MyEvent2");
+        assertEquals(1, type.getEventRepresentationResolutionURIs().length);
+        assertEquals("type://format/rep2", type.getEventRepresentationResolutionURIs()[0].toString());
+        assertEquals(null, type.getInitializer());
+
+        // plug-in event representation resolution URIs when using a new alias in a statement
+        assertEquals(2, config.getPlugInEventTypeAliasResolutionURIs().length);
+        assertEquals("type://format/rep", config.getPlugInEventTypeAliasResolutionURIs()[0].toString());
+        assertEquals("type://format/rep2", config.getPlugInEventTypeAliasResolutionURIs()[1].toString());
+
+        // revision types
+        assertEquals(1, config.getRevisionEventTypes().size());
+        ConfigurationRevisionEventType configRev = config.getRevisionEventTypes().get("MyRevisionEvent");
+        assertEquals(1, configRev.getAliasBaseEventTypes().size());
+        assertTrue(configRev.getAliasBaseEventTypes().contains("MyBaseEventAlias"));
+        assertTrue(configRev.getAliasDeltaEventTypes().contains("MyDeltaEventAliasOne"));
+        assertTrue(configRev.getAliasDeltaEventTypes().contains("MyDeltaEventAliasTwo"));
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"id", "id2"}, configRev.getKeyPropertyNames());
+        assertEquals(ConfigurationRevisionEventType.PropertyRevision.MERGE_NON_NULL, configRev.getPropertyRevision());
+
+        // variance types
+        assertEquals(1, config.getVariantStreams().size());
+        ConfigurationVariantStream configVStream = config.getVariantStreams().get("MyVariantStream");
+        assertEquals(2, configVStream.getVariantTypeAliases().size());
+        assertTrue(configVStream.getVariantTypeAliases().contains("MyEvenTypetAliasOne"));
+        assertTrue(configVStream.getVariantTypeAliases().contains("MyEvenTypetAliasTwo"));
+        assertEquals(ConfigurationVariantStream.TypeVariance.ANY, configVStream.getTypeVariance());
     }
 }

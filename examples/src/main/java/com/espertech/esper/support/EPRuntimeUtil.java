@@ -19,7 +19,7 @@ public class EPRuntimeUtil
                  " events within " + numSecAwait + " sec");
         
         int secondsWaitTotal = numSecAwait;
-        int lastNumEventsProcessed = 0;
+        long lastNumEventsProcessed = 0;
         int secondsUntilReport = 0;
 
         long startTimeMSec = System.currentTimeMillis();
@@ -37,11 +37,11 @@ public class EPRuntimeUtil
 
             secondsWaitTotal -= numSecThreadSleep;
             secondsUntilReport += numSecThreadSleep;
-            int currNumEventsProcessed = epRuntime.getNumEventsReceived();
+            long currNumEventsProcessed = epRuntime.getNumEventsReceived();
 
             if (secondsUntilReport > numSecThreadReport)
             {
-                int numPerSec = (currNumEventsProcessed - lastNumEventsProcessed) / numSecThreadReport;
+                long numPerSec = (currNumEventsProcessed - lastNumEventsProcessed) / numSecThreadReport;
                 log.info(".awaitCompletion received=" + epRuntime.getNumEventsReceived() +
                          "  emitted=" + epRuntime.getNumEventsEmitted() +
                          "  processed=" + currNumEventsProcessed +
@@ -64,7 +64,7 @@ public class EPRuntimeUtil
             return false;
         }
 
-        int totalUnitsProcessed = epRuntime.getNumEventsReceived();
+        long totalUnitsProcessed = epRuntime.getNumEventsReceived();
         long deltaTimeSec = (endTimeMSec - startTimeMSec) / 1000;
 
         long numPerSec = 0;
@@ -79,7 +79,7 @@ public class EPRuntimeUtil
 
         log.info(".awaitCompletion Completed, sec=" + deltaTimeSec + "  avgPerSec=" + numPerSec);
 
-        int numReceived = epRuntime.getNumEventsReceived();
+        long numReceived = epRuntime.getNumEventsReceived();
         long numReceivedPerSec = 0;
         if (deltaTimeSec > 0)
         {

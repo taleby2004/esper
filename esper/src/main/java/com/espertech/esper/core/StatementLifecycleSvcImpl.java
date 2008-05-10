@@ -698,7 +698,15 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
     }
 
-    private static StatementSpecCompiled compile(StatementSpecRaw spec, String eplStatement, StatementContext statementContext) throws EPStatementException
+    /**
+     * Compiles a statement returning the compile (verified, non-serializable) form of a statement.
+     * @param spec is the statement specification
+     * @param eplStatement the statement to compile
+     * @param statementContext the statement services
+     * @return compiled statement
+     * @throws EPStatementException if the statement cannot be compiled
+     */
+    protected static StatementSpecCompiled compile(StatementSpecRaw spec, String eplStatement, StatementContext statementContext) throws EPStatementException
     {
         List<StreamSpecCompiled> compiledStreams;
 
@@ -707,7 +715,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService(), statementContext.getSchedulingService(), statementContext.getNamedWindowService(), statementContext.getVariableService());
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService(), statementContext.getSchedulingService(), statementContext.getNamedWindowService(), statementContext.getValueAddEventService(), statementContext.getVariableService(), statementContext.getEngineURI(), statementContext.getPlugInTypeResolutionURIs());
                 compiledStreams.add(compiled);
             }
         }
@@ -729,7 +737,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             {
                 FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) compiledStreams.get(0);
                 EventType selectFromType = filterStreamSpec.getFilterSpec().getEventType();
-                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, spec, eplStatement, statementContext);
+                String selectFromTypeAlias = filterStreamSpec.getFilterSpec().getEventTypeAlias();
+                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, selectFromTypeAlias, spec, eplStatement, statementContext);
                 filterStreamSpec.setFilterSpec(newFilter.getFirst());
                 spec.setSelectClauseSpec(newFilter.getSecond());
 
@@ -810,6 +819,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     // This section expected s single FilterStreamSpecCompiled representing the selected type.
     // It creates a new event type representing the window type and a sets the type selected on the filter stream spec.
     private static Pair<FilterSpecCompiled, SelectClauseSpecRaw> handleCreateWindow(EventType selectFromType,
+                                           String selectFromTypeAlias,
                                            StatementSpecRaw spec,
                                            String eplStatement,
                                            StatementContext statementContext)
@@ -819,7 +829,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EventType targetType = null;
 
         // Validate the select expressions which consists of properties only
-        List<SelectClauseExprCompiledSpec> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType);
+        List<SelectClauseExprCompiledSpec> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType, selectFromTypeAlias, statementContext.getEngineURI());
 
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
@@ -837,7 +847,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
         boolean isWildcard = spec.getSelectClauseSpec().isUsingWildcard();
-        if (isWildcard)
+        if (statementContext.getValueAddEventService().isRevisionTypeAlias(selectFromTypeAlias))
+        {
+            targetType = statementContext.getValueAddEventService().createRevisionType(typeName, selectFromTypeAlias, statementContext.getStatementStopService(), statementContext.getEventAdapterService());
+        }
+        else if (isWildcard)
         {
             targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, properties);
         }
@@ -864,14 +878,14 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
         }
 
-        FilterSpecCompiled filter = new FilterSpecCompiled(targetType, new ArrayList<FilterSpecParam>());
+        FilterSpecCompiled filter = new FilterSpecCompiled(targetType, typeName, new ArrayList<FilterSpecParam>());
         return new Pair<FilterSpecCompiled, SelectClauseSpecRaw>(filter, newSelectClauseSpecRaw);
     }
 
-    private static List<SelectClauseExprCompiledSpec> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType)
+    private static List<SelectClauseExprCompiledSpec> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType, String selectFromTypeAlias, String engineURI)
     {
         List<SelectClauseExprCompiledSpec> selectProps = new LinkedList<SelectClauseExprCompiledSpec>();
-        StreamTypeService streams = new StreamTypeServiceImpl(new EventType[] {singleType}, new String[] {"stream_0"});
+        StreamTypeService streams = new StreamTypeServiceImpl(new EventType[] {singleType}, new String[] {"stream_0"}, engineURI, new String[] {selectFromTypeAlias});
 
         for (SelectClauseElementRaw raw : spec.getSelectExprList())
         {

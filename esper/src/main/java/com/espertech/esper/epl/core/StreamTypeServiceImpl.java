@@ -8,6 +8,9 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,6 +22,8 @@ public class StreamTypeServiceImpl implements StreamTypeService
 {
     private final EventType[] eventTypes;
     private final String[] streamNames;
+    private final String engineURIQualifier;
+    private final String[] eventTypeAlias;
     private boolean isStreamZeroUnambigous;
     private boolean requireStreamNames;
 
@@ -26,11 +31,23 @@ public class StreamTypeServiceImpl implements StreamTypeService
      * Ctor.
      * @param eventTypes - array of event types, one for each stream
      * @param streamNames - array of stream names, one for each stream
+     * @param engineURI - engine URI
+     * @param eventTypeAlias - alias name of the event type
      */
-    public StreamTypeServiceImpl (EventType[] eventTypes, String[] streamNames)
+    public StreamTypeServiceImpl (EventType[] eventTypes, String[] streamNames, String engineURI, String[] eventTypeAlias)
     {
         this.eventTypes = eventTypes;
         this.streamNames = streamNames;
+        this.eventTypeAlias = eventTypeAlias;
+
+        if (engineURI == null)
+        {
+            engineURIQualifier = EPServiceProviderSPI.DEFAULT_ENGINE_URI__QUALIFIER;
+        }
+        else
+        {
+            engineURIQualifier = engineURI;
+        }
 
         if (eventTypes.length != streamNames.length)
         {
@@ -43,19 +60,23 @@ public class StreamTypeServiceImpl implements StreamTypeService
      * @param namesAndTypes is the ordered list of stream names and event types available (stream zero to N)
      * @param isStreamZeroUnambigous indicates whether when a property is found in stream zero and another stream an exception should be
      * thrown or the stream zero should be assumed
+     * @param engineURI uri of the engine
      * @param requireStreamNames is true to indicate that stream names are required for any non-zero streams (for subqueries)
      */
-    public StreamTypeServiceImpl (LinkedHashMap<String, EventType> namesAndTypes, boolean isStreamZeroUnambigous, boolean requireStreamNames)
+    public StreamTypeServiceImpl (LinkedHashMap<String, Pair<EventType, String>> namesAndTypes, String engineURI, boolean isStreamZeroUnambigous, boolean requireStreamNames)
     {
         this.isStreamZeroUnambigous = isStreamZeroUnambigous;
         this.requireStreamNames = requireStreamNames;
+        this.engineURIQualifier = engineURI;
         eventTypes = new EventType[namesAndTypes.size()] ;
         streamNames = new String[namesAndTypes.size()] ;
+        eventTypeAlias = new String[namesAndTypes.size()] ;
         int count = 0;
-        for (Map.Entry<String, EventType> entry : namesAndTypes.entrySet())
+        for (Map.Entry<String, Pair<EventType, String>> entry : namesAndTypes.entrySet())
         {
             streamNames[count] = entry.getKey();
-            eventTypes[count] = entry.getValue();
+            eventTypes[count] = entry.getValue().getFirst();
+            eventTypeAlias[count] = entry.getValue().getSecond();
             count++;
         }
     }
@@ -96,7 +117,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         {
             throw new IllegalArgumentException("Null property name");
         }
-        return findByStreamName(propertyName, streamName);
+        return findByStreamAndEngineName(propertyName, streamName);
     }
 
     public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName) throws DuplicatePropertyException, PropertyNotFoundException
@@ -115,7 +136,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         catch (PropertyNotFoundException ex)
         {
             // Attempt to resolve by extracting a stream name
-            int index = streamAndPropertyName.indexOf('.');
+            int index = ASTFilterSpecHelper.unescapedIndexOfDot(streamAndPropertyName);
             if (index == -1)
             {
                 throw ex;
@@ -125,11 +146,24 @@ public class StreamTypeServiceImpl implements StreamTypeService
             try
             {
                 // try to resolve a stream and property name
-                desc = findByStreamName(propertyName, streamName);
+                desc = findByStreamAndEngineName(propertyName, streamName);
             }
             catch (StreamNotFoundException e)
             {
-                throw ex;       // throws PropertyNotFoundException
+                // Consider the engine URI as a further prefix
+                Pair<String, String> propertyNoEnginePair = getIsEngineQualified(propertyName, streamName);
+                if (propertyNoEnginePair == null)
+                {
+                    throw ex;
+                }
+                try
+                {
+                    return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond());
+                }
+                catch (StreamNotFoundException e1)
+                {
+                    throw ex;
+                }
             }
             return desc;
         }
@@ -175,12 +209,64 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
     }
 
-    private PropertyResolutionDescriptor findByStreamName(String propertyName, String streamName)
+    private PropertyResolutionDescriptor findByStreamAndEngineName(String propertyName, String streamName)
+        throws PropertyNotFoundException, StreamNotFoundException
+    {
+        PropertyResolutionDescriptor desc;
+        try
+        {
+            desc = findByStreamNameOnly(propertyName, streamName);
+        }
+        catch (PropertyNotFoundException ex)
+        {
+            Pair<String, String> propertyNoEnginePair = getIsEngineQualified(propertyName, streamName);
+            if (propertyNoEnginePair == null)
+            {
+                throw ex;
+            }
+            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond());
+        }
+        catch (StreamNotFoundException ex)
+        {
+            Pair<String, String> propertyNoEnginePair = getIsEngineQualified(propertyName, streamName);
+            if (propertyNoEnginePair == null)
+            {
+                throw ex;
+            }
+            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond());
+        }
+        return desc;
+    }
+
+    private Pair<String, String> getIsEngineQualified(String propertyName, String streamName) {
+
+        // If still not found, test for the stream name to contain the engine URI
+        if (!streamName.equals(engineURIQualifier))
+        {
+            return null;
+        }
+
+        int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
+        if (index == -1)
+        {
+            return null;
+        }
+
+        String streamNameNoEngine = propertyName.substring(0, index);
+        String propertyNameNoEngine = propertyName.substring(index + 1, propertyName.length());
+        return new Pair<String, String>(propertyNameNoEngine, streamNameNoEngine);
+    }
+
+    private PropertyResolutionDescriptor findByStreamNameOnly(String propertyName, String streamName)
         throws PropertyNotFoundException, StreamNotFoundException
     {
         int index = 0;
         EventType streamType = null;
 
+        // Stream name resultion examples:
+        // A)  select A1.price from Event.price as A2  => mismatch stream alias, cannot resolve
+        // B)  select Event1.price from Event2.price   => mismatch event type alias, cannot resolve
+        // C)  select default.Event2.price from Event2.price   => possible prefix of engine name
         for (int i = 0; i < eventTypes.length; i++)
         {
             if ((streamNames[i] != null) && (streamNames[i].equals(streamName)))
@@ -188,10 +274,17 @@ public class StreamTypeServiceImpl implements StreamTypeService
                 streamType = eventTypes[i];
                 break;
             }
+
+            // If the stream name is the event type alias, that is also acceptable
+            if ((eventTypeAlias[i] != null) && (eventTypeAlias[i].equals(streamName)))
+            {
+                streamType = eventTypes[i];
+                break;
+            }
+
             index++;
         }
 
-        // Stream name not found
         if (streamType == null)
         {
             throw new StreamNotFoundException("Stream named " + streamName + " is not defined");

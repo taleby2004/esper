@@ -13,6 +13,7 @@ import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.timer.TimerService;
+import com.espertech.esper.epl.named.NamedWindowService;
 
 import javax.naming.Context;
 
@@ -21,6 +22,12 @@ import javax.naming.Context;
  */
 public interface EPServiceProviderSPI extends EPServiceProvider
 {
+    /**
+     * For the default provider instance, which carries a null provider URI,
+     * the property name qualification and stream name qualification may use "default".
+     */
+    public static final String DEFAULT_ENGINE_URI__QUALIFIER = "default";
+
     /**
      * Returns statement management service for the engine.
      * @return the StatementLifecycleSvc
@@ -50,6 +57,12 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      * @return timer service
      */
     public TimerService getTimerService();
+
+    /**
+     * Returns the named window service.
+     * @return named window service
+     */
+    public NamedWindowService getNamedWindowService(); 
 
     /**
      * Returns the current configuration.

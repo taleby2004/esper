@@ -13,6 +13,10 @@ import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.ThreadWorkQueue;
+import com.espertech.esper.epl.variable.VariableReader;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.epl.spec.StatementSpecRaw;
+import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
@@ -22,20 +26,22 @@ import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.util.ThreadLogUtil;
-import com.espertech.esper.epl.variable.VariableReader;
+import com.espertech.esper.util.UuidGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
+import java.net.URI;
 
 /**
  * Implements runtime interface. Also accepts timer callbacks for synchronizing time events with regular events
  * sent in.
  */
-public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRouter
+public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerCallback, InternalEventRouter
 {
     private EPServicesContext services;
     private boolean isLatchStatementInsertStream;
+    private boolean isUsingExternalClocking;
     private volatile UnmatchedListener unmatchedListener;
 
     private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
@@ -80,6 +86,7 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
     {
         this.services = services;
         isLatchStatementInsertStream = this.services.getEngineSettingsService().getEngineSettings().getThreading().isInsertIntoDispatchPreserveOrder();
+        isUsingExternalClocking = !this.services.getEngineSettingsService().getEngineSettings().getThreading().isInternalTimerEnabled();
     }
 
     public void timerCallback()
@@ -220,6 +227,11 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             eventBean = services.getEventAdapterService().adapterForBean(event);
         }
 
+        processWrappedEvent(eventBean);
+    }
+
+    public void processWrappedEvent(EventBean eventBean)
+    {
         // Acquire main processing lock which locks out statement management
         services.getEventProcessingRWLock().acquireReadLock();
         try
@@ -253,11 +265,13 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
                 // Start internal clock which supplies CurrentTimeEvent events every 100ms
                 // This may be done without delay thus the write lock indeed must be reentrant.
                 services.getTimerService().startInternalClock();
+                isUsingExternalClocking = false;
             }
             else
             {
                 // Stop internal clock, for unit testing and for external clocking
                 services.getTimerService().stopInternalClock(true);
+                isUsingExternalClocking = true;
             }
 
             return;
@@ -271,7 +285,9 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
 
         CurrentTimeEvent current = (CurrentTimeEvent) event;
         long currentTime = current.getTimeInMillis();
-        if (currentTime == services.getSchedulingService().getTime()) {
+
+        if (isUsingExternalClocking && (currentTime == services.getSchedulingService().getTime()))
+        {
             if (log.isWarnEnabled())
             {
                 log.warn("Duplicate time event received for currentTime " + currentTime);
@@ -790,6 +806,80 @@ public class EPRuntimeImpl implements EPRuntime, TimerCallback, InternalEventRou
             values.put(entry.getValue().getVariableName(), value);
         }
         return values;
+    }
+
+    public EPQueryResult executeQuery(String epl)
+    {
+        try
+        {
+            EPPreparedExecuteMethod executeMethod = getExecuteMethod(epl);
+            EPPreparedQueryResult result = executeMethod.execute();
+            return new EPQueryResultImpl(result);
+        }
+        catch (EPStatementException ex)
+        {
+            throw ex;
+        }
+        catch (Throwable t)
+        {
+            String message = "Error executing statement: " + t.getMessage();
+            log.debug(message, t);
+            throw new EPStatementException(message, epl);
+        }
+    }
+
+
+    public EPPreparedQuery prepareQuery(String epl)
+    {
+        try
+        {
+            EPPreparedExecuteMethod startMethod = getExecuteMethod(epl);
+            return new EPPreparedQueryImpl(startMethod, epl);
+        }
+        catch (EPStatementException ex)
+        {
+            throw ex;
+        }
+        catch (Throwable t)
+        {
+            String message = "Error executing statement: " + t.getMessage();
+            log.debug(message, t);
+            throw new EPStatementException(message, epl);
+        }
+    }
+
+    private EPPreparedExecuteMethod getExecuteMethod(String epl)
+    {
+        String stmtName = UuidGenerator.generate(epl);
+        String stmtId = UuidGenerator.generate(epl + " ");
+
+        try
+        {
+            StatementSpecRaw spec = EPAdministratorImpl.compileEPL(epl, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null);
+            StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext);
+            return new EPPreparedExecuteMethod(compiledSpec, services, statementContext);
+        }
+        catch (EPStatementException ex)
+        {
+            throw ex;
+        }
+        catch (Throwable t)
+        {
+            String message = "Error executing statement: " + t.getMessage();
+            log.debug(message, t);
+            throw new EPStatementException(message, epl);
+        }
+    }
+
+    public EventSender getEventSender(String eventTypeAlias)
+    {
+        return services.getEventAdapterService().getStaticTypeEventSender(this, eventTypeAlias);
+    }
+
+    public EventSender getEventSender(URI uri[]) throws EventTypeException
+    {
+        return services.getEventAdapterService().getDynamicTypeEventSender(this, uri);
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

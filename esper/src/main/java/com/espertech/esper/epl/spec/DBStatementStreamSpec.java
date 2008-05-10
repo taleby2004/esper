@@ -7,16 +7,17 @@
  **************************************************************************************/
 package com.espertech.esper.epl.spec;
 
-import com.espertech.esper.epl.spec.ViewSpec;
-import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.util.MetaDefItem;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.pattern.PatternObjectResolutionService;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.MetaDefItem;
 
 import java.util.List;
+import java.net.URI;
 
 /**
  * Specification object for historical data poll via database SQL statement.
@@ -76,7 +77,10 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
                                       PatternObjectResolutionService patternObjectResolutionService,
                                       TimeProvider timeProvider,
                                       NamedWindowService namedWindowService,
-                                      VariableService variableService)
+                                      ValueAddEventService valueAddEventService,
+                                      VariableService variableService,
+                                      String engineURI,
+                                      URI[] plugInTypeResolutionURIs)
     {
         return this;
     }

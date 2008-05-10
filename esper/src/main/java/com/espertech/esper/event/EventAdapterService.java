@@ -1,17 +1,30 @@
 package com.espertech.esper.event;
 
 import java.util.Map;
+import java.net.URI;
+import java.io.Serializable;
 
 import org.w3c.dom.Node;
-import com.espertech.esper.client.ConfigurationEventTypeXMLDOM;
-import com.espertech.esper.client.ConfigurationEventTypeLegacy;
-import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.*;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.plugin.PlugInEventRepresentation;
+import com.espertech.esper.core.EPRuntimeSPI;
+import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.EPRuntimeImpl;
 
 /**
  * Interface for a service to resolve event names to event type.
  */
 public interface EventAdapterService
 {
+    /**
+     * Adds an event type to the registery available for use, and originating outside as a non-adapter.
+     * @param alias to add an event type under
+     * @param eventType the type to add
+     * @throws EventAdapterException if the alias is already in used by another type
+     */
+    public void addTypeByAlias(String alias, EventType eventType) throws EventAdapterException;
+
     /**
      * Return the event type for a given event name, or null if none is registered for that name.
      * @param eventTypeAlias is the event type alias name to return type for
@@ -167,7 +180,7 @@ public interface EventAdapterService
      * @param taggedEventTypes is a map of name keys and event type values
      * @return event type representing a composite event
      */
-    public EventType createAnonymousCompositeType(Map<String, EventType> taggedEventTypes);
+    public EventType createAnonymousCompositeType(Map<String, Pair<EventType, String>> taggedEventTypes);
 
     /**
      * Creates a wrapper for a composite event type. The wrapper wraps an event that
@@ -218,5 +231,38 @@ public interface EventAdapterService
      * Returns a subset of the functionality of the service specific to creating POJO bean event types.
      * @return bean event type factory
      */
-    public BeanEventTypeFactory getBeanEventTypeFactory(); 
+    public BeanEventTypeFactory getBeanEventTypeFactory();
+
+    /**
+     * Add a plug-in event representation.
+     * @param eventRepURI URI is the unique identifier for the event representation
+     * @param pluginEventRep is the instance
+     */
+    public void addEventRepresentation(URI eventRepURI, PlugInEventRepresentation pluginEventRep);
+
+    /**
+     * Adds a plug-in event type.
+     * @param alias is the name of the event type
+     * @param resolutionURIs is the URIs of plug-in event representations, or child URIs of such
+     * @param initializer is configs for the type
+     * @return type
+     */
+    public EventType addPlugInEventType(String alias, URI[] resolutionURIs, Serializable initializer);
+
+    /**
+     * Returns an event sender for a specific type, only generating events of that type.
+     * @param runtimeEventSender the runtime handle for sending the wrapped type
+     * @param eventTypeAlias is the name of the event type to return the sender for
+     * @return event sender that is static, single-type
+     */
+    public EventSender getStaticTypeEventSender(EPRuntimeEventSender runtimeEventSender, String eventTypeAlias);
+
+    /**
+     * Returns an event sender that dynamically decides what the event type for a given object is.
+     * @param runtimeEventSender the runtime handle for sending the wrapped type
+     * @param uri is for plug-in event representations to provide implementations, if accepted, to make a wrapped event
+     * @return event sender that is dynamic, multi-type based on multiple event bean factories provided by
+     * plug-in event representations
+     */
+    public EventSender getDynamicTypeEventSender(EPRuntimeEventSender runtimeEventSender, URI[] uri);
 }

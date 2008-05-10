@@ -9,6 +9,8 @@ package com.espertech.esper.client;
 
 import java.util.Map;
 import java.util.Properties;
+import java.net.URI;
+import java.io.Serializable;
 
 /**
  * Provides configuration operations for configuration-time and runtime parameters.
@@ -52,6 +54,14 @@ public interface ConfigurationOperations
      * @throws ConfigurationException if incorrect package or class names are encountered
      */
     public void addImport(String importName) throws ConfigurationException;
+
+    /**
+     * Checks if an eventTypeAlias has already been registered for that alias name.
+     * @since 2.1
+     * @param eventTypeAlias the alias name
+     * @return true if already registered
+     */
+    public boolean isEventTypeAliasExists(String eventTypeAlias);
 
     /**
      * Add an alias for an event type represented by JavaBean object events.
@@ -121,6 +131,21 @@ public interface ConfigurationOperations
             throws ConfigurationException;
 
     /**
+     * Add an alias for an event type that represents java.util.Map events,
+     * and for which each property may itself be a Map of further properties,
+     * with unlimited nesting levels.
+     * <p>
+     * Each entry in the type mapping must contain the String property name
+     * and either a Class or further Map<String, Object> value.
+     * @param eventTypeAlias is the alias for the event type
+     * @param typeMap maps the name of each property in the Map event to the type
+     * (fully qualified classname) of its value in Map event instances.
+     * @throws ConfigurationException if the alias is already in used for a different type
+     */
+    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap)
+            throws ConfigurationException;
+
+    /**
      * Add an alias for an event type that represents nestable strong-typed java.util.Map events, taking a Map of
      * event property and class name as a parameter.
      * <p>
@@ -162,4 +187,44 @@ public interface ConfigurationOperations
      * is already in use
      */
     public void addVariable(String variableName, Class type, Object initializationValue) throws ConfigurationException;
+
+    /**
+     * Adds an alias for an event type that one of the plug-in event representations resolves to an event type.
+     * <p>
+     * The order of the URIs matters as event representations are asked in turn, to accept the event type.
+     * <p>
+     * URIs can be child URIs of plug-in event representations and can add additional parameters or fragments
+     * for use by the event representation.
+     * @param eventTypeAlias is the alias name of the event type
+     * @param resolutionURIs is URIs that are matched to registered event representations
+     * @param initializer is an optional value for parameterizing or configuring the event type
+     */
+    public void addPlugInEventType(String eventTypeAlias, URI[] resolutionURIs, Serializable initializer);
+
+    /**
+     * Sets the URIs that point to plug-in event representations that are given a chance to dynamically resolve an event
+     * type alias to an event type, when a new (unseen) event type alias occurs in a new EPL statement.
+     * <p>
+     * The order of the URIs matters as event representations are asked in turn, to accept the alias.
+     * <p>
+     * URIs can be child URIs of plug-in event representations and can add additional parameters or fragments
+     * for use by the event representation.
+     * @param urisToResolveAlias URIs for resolving the alias
+     */
+    public void setPlugInEventTypeAliasResolutionURIs(URI[] urisToResolveAlias);
+
+    /**
+     * Adds an revision event type. The alias name of the event type may be used with named windows
+     * to indicate that updates or new versions of events are processed.
+     * @param revisionEventTypeAlias the alias name of the revision event type
+     * @param revisionEventTypeConfig the configuration 
+     */
+    public void addRevisionEventType(String revisionEventTypeAlias, ConfigurationRevisionEventType revisionEventTypeConfig);
+
+    /**
+     * Adds a new variant stream. Variant streams allow events of disparate types to be treated the same.
+     * @param variantStreamName is the name of the variant stream
+     * @param variantStreamConfig the configuration such as variant type aliases and any-type setting
+     */
+    public void addVariantStream(String variantStreamName, ConfigurationVariantStream variantStreamConfig);
 }

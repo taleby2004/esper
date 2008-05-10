@@ -16,6 +16,34 @@ import java.util.Map;
 
 public class TestMapEventNested extends TestCase
 {
+    public void testEscapedDot()
+    {
+        Map<String, Object> definition = makeMap(new Object[][] {
+                {"a.b", int.class},
+                {"a.b.c", int.class},
+                {"nes.", int.class},
+                {"nes.nes2", makeMap(new Object[][] {{"x.y", int.class}}) }
+        });
+        EPServiceProvider epService = getEngineInitialized("DotMap", definition);
+
+        String statementText = "select a\\.b, a\\.b\\.c, nes\\., nes\\.nes2.x\\.y from DotMap";
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        Map<String, Object> data = makeMap(new Object[][] {
+                {"a.b", 10},
+                {"a.b.c", 20},
+                {"nes.", 30},
+                {"nes.nes2", makeMap(new Object[][] {{"x.y", 40}}) }
+        });
+        epService.getEPRuntime().sendEvent(data, "DotMap");
+
+        String[] fields = "a.b,a.b.c,nes.,nes.nes2.x.y".split(",");
+        EventBean received = listener.assertOneGetNewAndReset();
+        ArrayAssertionUtil.assertProps(received, fields, new Object[] {10, 20, 30, 40});
+    }
+
     public void testNestedMapRuntime()
     {
         EPServiceProvider epService = getEngineInitialized(null, null);
@@ -214,7 +242,7 @@ public class TestMapEventNested extends TestCase
         tryInvalid(epService, invalid, "Invalid map type configuration: property name is not a String-type value");
 
         invalid = makeMap(new Object[][] {{"abc", new SupportBean()} });
-        tryInvalid(epService, invalid, "Nestable map type configuration encountered an unexpected property type of 'SupportBean' for property 'abc', expected java.lang.Class or java.util.Map definition");
+        tryInvalid(epService, invalid, "Nestable map type configuration encountered an unexpected property type of 'SupportBean' for property 'abc', expected java.lang.Class or java.util.Map");
     }
 
     private void tryInvalid(EPServiceProvider epService, Map<String, Object> config, String message)

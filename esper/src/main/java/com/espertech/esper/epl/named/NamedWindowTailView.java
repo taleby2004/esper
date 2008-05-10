@@ -1,5 +1,6 @@
 package com.espertech.esper.epl.named;
 
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.NullIterator;
 import com.espertech.esper.core.EPStatementHandle;
@@ -7,6 +8,7 @@ import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewSupport;
 import com.espertech.esper.view.BatchingDataWindowView;
@@ -27,6 +29,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     private transient Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;  // handles as copy-on-write
     private final EPStatementHandle createWindowStmtHandle;
     private final StatementResultService statementResultService;
+    private final ValueAddEventProcessor revisionProcessor;
 
     /**
      * Ctor.
@@ -35,8 +38,9 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
      * @param namedWindowRootView the root data window view for indicating remove stream events to be removed from possible on-delete indexes
      * @param createWindowStmtHandle statement handle for the statement that created the named window, for safe iteration
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
+     * @param revisionProcessor handles update events
      */
-    public NamedWindowTailView(EventType eventType, NamedWindowService namedWindowService, NamedWindowRootView namedWindowRootView, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService)
+    public NamedWindowTailView(EventType eventType, NamedWindowService namedWindowService, NamedWindowRootView namedWindowRootView, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor)
     {
         this.eventType = eventType;
         this.namedWindowService = namedWindowService;
@@ -44,6 +48,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         this.namedWindowRootView = namedWindowRootView;
         this.createWindowStmtHandle = createWindowStmtHandle;
         this.statementResultService = statementResultService;
+        this.revisionProcessor = revisionProcessor;
     }
 
     public boolean isParentBatchWindow()
@@ -57,7 +62,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        // Only old data needs to be removed
+        // Only old data (remove stream) needs to be removed from indexes (kept by root view), if any
         if (oldData != null)
         {
             namedWindowRootView.removeOldData(oldData);
@@ -140,6 +145,12 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
 
     public Iterator<EventBean> iterator()
     {
+        if (revisionProcessor != null)
+        {
+            Collection<EventBean> coll = revisionProcessor.getSnapshot(createWindowStmtHandle, parent);
+            return coll.iterator();
+        }
+        
         createWindowStmtHandle.getStatementLock().acquireLock(null);
         try
         {
@@ -154,6 +165,39 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
                 list.add(it.next());
             }
             return new ArrayEventIterator(list.toArray(new EventBean[list.size()]));
+        }
+        finally
+        {
+            createWindowStmtHandle.getStatementLock().releaseLock(null);
+        }
+    }
+
+    /**
+     * Returns a snapshot of window contents, thread-safely
+     * @return window contents
+     */
+    public Collection<EventBean> snapshot()
+    {
+        if (revisionProcessor != null)
+        {
+            Collection<EventBean> coll = revisionProcessor.getSnapshot(createWindowStmtHandle, parent);
+            return coll;
+        }
+
+        createWindowStmtHandle.getStatementLock().acquireLock(null);
+        try
+        {
+            Iterator<EventBean> it = parent.iterator();
+            if (!it.hasNext())
+            {
+                return Collections.EMPTY_LIST;
+            }
+            ArrayDequeJDK6Backport<EventBean> list = new ArrayDequeJDK6Backport<EventBean>();
+            while (it.hasNext())
+            {
+                list.add(it.next());
+            }
+            return list;
         }
         finally
         {

@@ -7,14 +7,14 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.client.ConfigurationEventTypeXMLDOM;
-import com.espertech.esper.client.ConfigurationException;
-import com.espertech.esper.client.ConfigurationOperations;
+import com.espertech.esper.client.*;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportException;
+import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.variable.VariableExistsException;
 import com.espertech.esper.epl.variable.VariableTypeException;
@@ -22,6 +22,8 @@ import com.espertech.esper.epl.variable.VariableTypeException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.net.URI;
+import java.io.Serializable;
 
 /**
  * Provides runtime engine configuration operations.
@@ -31,20 +33,28 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     private final EventAdapterService eventAdapterService;
     private final EngineImportService engineImportService;
     private final VariableService variableService;
+    private final EngineSettingsService engineSettingsService;
+    private final ValueAddEventService valueAddEventService;
 
     /**
      * Ctor.
      * @param eventAdapterService is the event wrapper and type service
      * @param engineImportService for imported aggregation functions and static functions
      * @param variableService - provides access to variable values
+     * @param engineSettingsService - some engine settings are writable
+     * @param valueAddEventService - update event handling
      */
     public ConfigurationOperationsImpl(EventAdapterService eventAdapterService,
                                        EngineImportService engineImportService,
-                                       VariableService variableService)
+                                       VariableService variableService,
+                                       EngineSettingsService engineSettingsService,
+                                       ValueAddEventService valueAddEventService)
     {
         this.eventAdapterService = eventAdapterService;
         this.engineImportService = engineImportService;
         this.variableService = variableService;
+        this.engineSettingsService = engineSettingsService;
+        this.valueAddEventService = valueAddEventService;
     }
 
     public void addEventTypeAutoAlias(String javaPackageName)
@@ -74,6 +84,10 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         {
             throw new ConfigurationException(e.getMessage(), e);
         }
+    }
+
+    public boolean isEventTypeAliasExists(String eventTypeAlias) {
+        return eventAdapterService.getExistsTypeByAlias(eventTypeAlias) != null;
     }
 
     public void addEventTypeAlias(String eventTypeAlias, String javaEventClassName)
@@ -137,6 +151,18 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
+    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap) throws ConfigurationException
+    {
+        try
+        {
+            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap);
+        }
+        catch (EventAdapterException t)
+        {
+            throw new ConfigurationException(t.getMessage(), t);
+        }
+    }
+
     public void addNestableEventTypeAlias(String eventTypeAlias, Map<String, Object> typeMap)
     {
         try
@@ -179,7 +205,8 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
             Class clazz;
             try
             {
-                clazz = Class.forName(boxedClassName);
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                clazz = Class.forName(boxedClassName, true, cl);
             }
             catch (ClassNotFoundException ex)
             {
@@ -205,5 +232,33 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         {
             throw new ConfigurationException("Error creating variable: " + e.getMessage(), e);
         }
+    }
+
+
+    public void addPlugInEventType(String eventTypeAlias, URI[] resolutionURIs, Serializable initializer)
+    {
+        try
+        {
+            eventAdapterService.addPlugInEventType(eventTypeAlias, resolutionURIs, initializer);
+        }
+        catch (EventAdapterException e)
+        {
+            throw new ConfigurationException("Error adding plug-in event type: " + e.getMessage(), e);
+        }
+    }
+
+    public void setPlugInEventTypeAliasResolutionURIs(URI[] urisToResolveAlias)
+    {
+        engineSettingsService.setPlugInEventTypeResolutionURIs(urisToResolveAlias);
+    }
+
+    public void addRevisionEventType(String revisionEventTypeAlias, ConfigurationRevisionEventType revisionEventTypeConfig)
+    {
+        valueAddEventService.addRevisionEventType(revisionEventTypeAlias, revisionEventTypeConfig, eventAdapterService);
+    }
+
+    public void addVariantStream(String variantEventTypeAlias, ConfigurationVariantStream variantStreamConfig)
+    {
+        valueAddEventService.addVariantStream(variantEventTypeAlias, variantStreamConfig, eventAdapterService);
     }
 }

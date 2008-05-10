@@ -5,6 +5,7 @@ import com.espertech.esper.core.StatementLockFactory;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.view.ViewProcessingException;
 import com.espertech.esper.epl.variable.VariableService;
@@ -58,6 +59,12 @@ public class NamedWindowServiceImpl implements NamedWindowService
         dispatchesPerStmtTL.remove();
     }
 
+    public String[] getNamedWindows()
+    {
+        Set<String> names = processors.keySet();
+        return names.toArray(new String[names.size()]);
+    }
+
     public ManagedLock getNamedWindowLock(String windowName)
     {
         return windowStatementLocks.get(windowName);
@@ -83,14 +90,14 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return processor;
     }
 
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService) throws ViewProcessingException
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor) throws ViewProcessingException
     {
         if (processors.containsKey(name))
         {
             throw new ViewProcessingException("A named window by name '" + name + "' has already been created");
         }
 
-        NamedWindowProcessor processor = new NamedWindowProcessor(this, name, eventType, createWindowStmtHandle, statementResultService);
+        NamedWindowProcessor processor = new NamedWindowProcessor(this, name, eventType, createWindowStmtHandle, statementResultService, revisionProcessor);
         processors.put(name, processor);
 
         return processor;

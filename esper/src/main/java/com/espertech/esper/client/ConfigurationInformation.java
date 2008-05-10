@@ -7,7 +7,11 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.net.URI;
 
 /**
  * Provides configurations for an engine instance.
@@ -119,5 +123,47 @@ public interface ConfigurationInformation
      * and if successful, uses that class as the event type.
      * @return set of Java package names to look for events types when encountering a new event type alias
      */
-    public Set<String> getEventTypeAutoAliasPackages();    
+    public Set<String> getEventTypeAutoAliasPackages();
+
+    /**
+     * Returns a map of plug-in event representation URI and their event representation class and initializer.
+     * @return map of URI keys and event representation configuration
+     */
+    public Map<URI, ConfigurationPlugInEventRepresentation> getPlugInEventRepresentation();
+
+    /**
+     * Returns a map of event type alias of those event types that will be supplied by a plug-in event representation,
+     * and their configuration.
+     * @return map of alias to plug-in event type config
+     */
+    public Map<String, ConfigurationPlugInEventType> getPlugInEventTypes();
+
+    /**
+     * Returns the URIs that point to plug-in event representations that are given a chance to dynamically resolve an event
+     * type alias to an event type, when a new (unseen) event type alias occurs in a new EPL statement.
+     * <p>
+     * The order of the URIs matters as event representations are asked in turn, to accept the alias.
+     * <p>
+     * URIs can be child URIs of plug-in event representations and can add additional parameters or fragments
+     * for use by the event representation.
+     * @return URIs for resolving an event type alias
+     */
+    public URI[] getPlugInEventTypeAliasResolutionURIs();
+
+    /**
+     * Returns a map of revision event type alias and revision event type configuration. Revision event types handle updates (new versions)
+     * for past events.
+     * @return map of alias and revision event type config
+     */
+    public Map<String, ConfigurationRevisionEventType> getRevisionEventTypes();
+
+    /**
+     * Returns a map of variant stream alias and variant configuration information. Variant streams allows handling
+     * events of all sorts of different event types the same way.
+     * @return map of alias and variant stream config
+     */
+    public Map<String, ConfigurationVariantStream> getVariantStreams();
 }
+
+
+

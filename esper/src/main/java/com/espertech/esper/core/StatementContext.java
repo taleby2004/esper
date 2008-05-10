@@ -6,6 +6,7 @@ import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.pattern.PatternContextFactory;
 import com.espertech.esper.pattern.PatternObjectResolutionService;
@@ -13,6 +14,8 @@ import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewResolutionService;
+
+import java.net.URI;
 
 /**
  * Contains handles to the implementation of the the scheduling service for use in view evaluation.
@@ -40,6 +43,8 @@ public final class StatementContext
     private final NamedWindowService namedWindowService;
     private final VariableService variableService;
     private final StatementResultService statementResultService;
+    private final URI[] plugInTypeResolutionURIs;
+    private final ValueAddEventService valueAddEventService;
 
     /**
      * Constructor.
@@ -64,6 +69,8 @@ public final class StatementContext
      * @param namedWindowService is holding information about the named windows active in the system
      * @param variableService provides access to variable values
      * @param statementResultService handles awareness of listeners/subscriptions for a statement customizing output produced
+     * @param plugInTypeResolutionURIs is URIs for resolving the event name against plug-inn event representations, if any
+     * @param valueAddEventService - service that handles update events
      */
     public StatementContext(String engineURI,
                             String engineInstanceId,
@@ -85,7 +92,9 @@ public final class StatementContext
                               OutputConditionFactory outputConditionFactory,
                               NamedWindowService namedWindowService,
                               VariableService variableService,
-                              StatementResultService statementResultService)
+                              StatementResultService statementResultService,
+                              URI[] plugInTypeResolutionURIs,
+                              ValueAddEventService valueAddEventService)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -108,6 +117,8 @@ public final class StatementContext
         this.namedWindowService = namedWindowService;
         this.variableService = variableService;
         this.statementResultService = statementResultService;
+        this.plugInTypeResolutionURIs = plugInTypeResolutionURIs;
+        this.valueAddEventService = valueAddEventService;
     }
 
     /**
@@ -297,6 +308,24 @@ public final class StatementContext
     public StatementResultService getStatementResultService()
     {
         return statementResultService;
+    }
+
+    /**
+     * Returns the URIs for resolving the event name against plug-inn event representations, if any
+     * @return URIs
+     */
+    public URI[] getPlugInTypeResolutionURIs()
+    {
+        return plugInTypeResolutionURIs;
+    }
+
+    /**
+     * Returns the update event service.
+     * @return revision service
+     */
+    public ValueAddEventService getValueAddEventService()
+    {
+        return valueAddEventService;
     }
 
     public String toString()

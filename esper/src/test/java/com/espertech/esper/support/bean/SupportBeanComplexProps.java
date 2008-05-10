@@ -87,7 +87,7 @@ public class SupportBeanComplexProps implements Serializable, SupportMarkerInter
         indexedProps[index] = value;
     }
 
-	public static class SupportBeanSpecialGetterNested implements Serializable
+    public static class SupportBeanSpecialGetterNested implements Serializable
 	{
 		private String nestedValue;
         private SupportBeanSpecialGetterNestedNested nestedNested;

@@ -6,6 +6,7 @@ import com.espertech.esper.event.property.MapPropertyGetter;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 
 import java.util.*;
 
@@ -108,6 +109,7 @@ public class MapEventType implements EventType
                 propertyGetters.put(name, getter);
                 continue;
             }
+            
             // A null-type is also allowed
             if (entry.getValue() == null)
             {
@@ -117,15 +119,27 @@ public class MapEventType implements EventType
                 propertyGetters.put(name, getter);
                 continue;
             }
-            if (!(entry.getValue() instanceof Map))
+
+            if (entry.getValue() instanceof Map)
+            {
+                // Add Map itself as a property
+                simplePropertyTypes.put(name, Map.class);
+                propertyNameList.add(name);
+                EventPropertyGetter getter = new MapEventPropertyGetter(name);
+                propertyGetters.put(name, getter);
+                continue;
+            }
+
+            if (!(entry.getValue() instanceof EventType))
             {
                 generateExceptionNestedProp(name, entry.getValue());
             }
 
-            // Add Map itself as a property
-            simplePropertyTypes.put(name, Map.class);
+            // Add EventType itself as a property
+            EventType eventType = (EventType) entry.getValue();
+            simplePropertyTypes.put(name, eventType.getUnderlyingType());
             propertyNameList.add(name);
-            EventPropertyGetter getter = new MapEventPropertyGetter(name);
+            EventPropertyGetter getter = new MapEventBeanPropertyGetter(name);
             propertyGetters.put(name, getter);
         }
 
@@ -134,14 +148,14 @@ public class MapEventType implements EventType
 
     public final Class getPropertyType(String propertyName)
     {
-        Class result = simplePropertyTypes.get(propertyName);
+        Class result = simplePropertyTypes.get(ASTFilterSpecHelper.unescapeDot(propertyName));
         if (result != null)
         {
             return result;
         }
 
         // see if this is a nested property
-        int index = propertyName.indexOf('.');
+        int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
         if (index == -1)
         {
             // dynamic simple property
@@ -158,7 +172,7 @@ public class MapEventType implements EventType
         // The property getters therefore act on
 
         // Take apart the nested property into a map key and a nested value class property name
-        String propertyMap = propertyName.substring(0, index);
+        String propertyMap = ASTFilterSpecHelper.unescapeDot(propertyName.substring(0, index));
         String propertyNested = propertyName.substring(index + 1, propertyName.length());
         boolean isRootedDynamic = false;
 
@@ -193,6 +207,11 @@ public class MapEventType implements EventType
             EventType nestedEventType = eventAdapterService.addBeanType(simpleClass.getName(), simpleClass);
             return nestedEventType.getPropertyType(propertyNested);
         }
+        else if (nestedType instanceof EventType)
+        {
+            EventType innerType = (EventType) nestedType;
+            return innerType.getPropertyType(propertyNested);
+        }
         else
         {
             String message = "Nestable map type configuration encountered an unexpected value type of '"
@@ -208,14 +227,15 @@ public class MapEventType implements EventType
 
     public EventPropertyGetter getGetter(final String propertyName)
     {
-        EventPropertyGetter getter = propertyGetters.get(propertyName);
+        String unescapePropName = ASTFilterSpecHelper.unescapeDot(propertyName);
+        EventPropertyGetter getter = propertyGetters.get(unescapePropName);
         if (getter != null)
         {
             return getter;
         }
 
         // see if this is a nested property
-        int index = propertyName.indexOf('.');
+        int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
         if (index == -1)
         {
             // dynamic property for maps is allowed
@@ -228,7 +248,7 @@ public class MapEventType implements EventType
         }
 
         // Take apart the nested property into a map key and a nested value class property name
-        String propertyMap = propertyName.substring(0, index);
+        String propertyMap = ASTFilterSpecHelper.unescapeDot(propertyName.substring(0, index));
         String propertyNested = propertyName.substring(index + 1, propertyName.length());
         boolean isRootedDynamic = false;
 
@@ -283,6 +303,21 @@ public class MapEventType implements EventType
 
             return getter;
         }
+        else if (nestedType instanceof EventType)
+        {
+            // ask the nested class to resolve the property
+            EventType innerType = (EventType) nestedType;
+            final EventPropertyGetter nestedGetter = innerType.getGetter(propertyNested);
+            if (nestedGetter == null)
+            {
+                return null;
+            }
+
+            // construct getter for nested property
+            getter = new MapEventBeanEntryPropertyGetter(propertyMap, nestedGetter);
+
+            return getter;
+        }
         else
         {
             String message = "Nestable map type configuration encountered an unexpected value type of '"
@@ -300,20 +335,20 @@ public class MapEventType implements EventType
     public Object getValue(String propertyName, Map values)
     {
         // if a known type, return value
-        if (simplePropertyTypes.get(propertyName) != null)
+        if (simplePropertyTypes.get(ASTFilterSpecHelper.unescapeDot(propertyName)) != null)
         {
-            return values.get(propertyName);
+            return values.get(ASTFilterSpecHelper.unescapeDot(propertyName));
         }
 
         // see if this is a nested property
-        int index = propertyName.indexOf('.');
+        int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
         if (index == -1)
         {
             return null;
         }
 
         // Take apart the nested property into a map key and a nested value class property name
-        final String propertyMap = propertyName.substring(0, index);
+        final String propertyMap = ASTFilterSpecHelper.unescapeDot(propertyName.substring(0, index));
         String propertyNested = propertyName.substring(index + 1, propertyName.length());
 
         Class result = simplePropertyTypes.get(propertyMap);
@@ -351,7 +386,7 @@ public class MapEventType implements EventType
         if (propertyType == null)
         {
             // Could be a native null type, such as "insert into A select null as field..."
-            if (simplePropertyTypes.containsKey(propertyName))
+            if (simplePropertyTypes.containsKey(ASTFilterSpecHelper.unescapeDot(propertyName)))
             {
                 return true;
             }
@@ -523,6 +558,6 @@ public class MapEventType implements EventType
     {
         String clazzName = (value == null) ? "null" : value.getClass().getSimpleName();
         throw new EPException("Nestable map type configuration encountered an unexpected property type of '"
-            + clazzName + "' for property '" + name + "', expected java.lang.Class or java.util.Map definition");
+            + clazzName + "' for property '" + name + "', expected java.lang.Class or java.util.Map");
     }
 }

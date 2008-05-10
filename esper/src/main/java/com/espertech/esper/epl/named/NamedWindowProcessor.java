@@ -5,6 +5,7 @@ import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.InternalEventRouter;
 import com.espertech.esper.core.StatementResultService;
@@ -28,13 +29,14 @@ public class NamedWindowProcessor
      * @param eventType the type of event held by the named window
      * @param createWindowStmtHandle the statement handle of the statement that created the named window
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
+     * @param revisionProcessor for revision processing
      */
-    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService)
+    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor)
     {
         this.eventType = eventType;
 
-        rootView = new NamedWindowRootView();
-        tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle, statementResultService);
+        rootView = new NamedWindowRootView(revisionProcessor);
+        tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle, statementResultService, revisionProcessor);
         rootView.setDataWindowContents(tailView);   // for iteration used for delete without index
     }
 

@@ -11,6 +11,7 @@ import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.vaevent.ValueAddEventService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,6 +35,7 @@ public class SelectExprProcessorFactory
      * @param typeService - serves stream type information
      * @param eventAdapterService - for generating wrapper instances for events
      * @param statementResultService handles listeners/subscriptions awareness to reduce output result generation
+     * @param valueAddEventService - service that handles update events and variant events
      * @return select-clause expression processor
      * @throws com.espertech.esper.epl.expression.ExprValidationException to indicate the select expression cannot be validated
      */
@@ -42,10 +44,11 @@ public class SelectExprProcessorFactory
                                                    InsertIntoDesc insertIntoDesc,
                                                    StreamTypeService typeService, 
                                                    EventAdapterService eventAdapterService,
-                                                   StatementResultService statementResultService)
+                                                   StatementResultService statementResultService,
+                                                   ValueAddEventService valueAddEventService)
         throws ExprValidationException
     {
-        SelectExprProcessor synthetic = getProcessorInternal(selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService);
+        SelectExprProcessor synthetic = getProcessorInternal(selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService);
         BindProcessor bindProcessor = new BindProcessor(selectionList, typeService.getEventTypes(), typeService.getStreamNames());
         statementResultService.setSelectClause(bindProcessor.getExpressionTypes(), bindProcessor.getColumnNamesAssigned());
         
@@ -57,7 +60,8 @@ public class SelectExprProcessorFactory
                                                    boolean isUsingWildcard,
                                                    InsertIntoDesc insertIntoDesc,
                                                    StreamTypeService typeService,
-                                                   EventAdapterService eventAdapterService)
+                                                   EventAdapterService eventAdapterService,
+                                                   ValueAddEventService valueAddEventService)
         throws ExprValidationException
     {
         // Wildcard not allowed when insert into specifies column order
@@ -94,7 +98,7 @@ public class SelectExprProcessorFactory
         if (streamWildcards.size() == 0)
         {
             // This one only deals with wildcards and expressions in the selection
-            return new SelectExprEvalProcessor(expressionList, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService);
+            return new SelectExprEvalProcessor(expressionList, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService);
         }
         else
         {

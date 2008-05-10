@@ -12,8 +12,11 @@ import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.pattern.PatternObjectResolutionService;
 import com.espertech.esper.schedule.TimeProvider;
+
+import java.net.URI;
 
 /**
  * An uncompiled, unoptimize for of stream specification created by a parser.
@@ -29,6 +32,9 @@ public interface StreamSpecRaw extends StreamSpec
      * @param timeProvider - provides engine current time
      * @param namedWindowService is the service managing named windows
      * @param variableService provides variable values
+     * @param engineURI the engine URI
+     * @param optionalPlugInTypeResolutionURIS is URIs for resolving the event name against plug-inn event representations, if any  
+     * @param valueAddEventService service that handles update events
      * @return compiled stream
      * @throws ExprValidationException to indicate validation errors
      */
@@ -37,7 +43,10 @@ public interface StreamSpecRaw extends StreamSpec
                                       PatternObjectResolutionService patternObjectResolutionService,
                                       TimeProvider timeProvider,
                                       NamedWindowService namedWindowService,
-                                      VariableService variableService)
+                                      ValueAddEventService valueAddEventService,
+                                      VariableService variableService,
+                                      String engineURI,
+                                      URI[] optionalPlugInTypeResolutionURIS)
         throws ExprValidationException;
 
 }

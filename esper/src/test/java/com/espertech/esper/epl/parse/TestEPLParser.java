@@ -1,9 +1,9 @@
 package com.espertech.esper.epl.parse;
 
-import junit.framework.TestCase;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
 import com.espertech.esper.support.epl.parse.SupportParserHelper;
+import junit.framework.TestCase;
 import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +13,8 @@ public class TestEPLParser extends TestCase
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        String expression = "select b.c.d /* some comment */ from E";
+        //String expression = "select a\\.b\\.c[43]\\.dd('a') from A";
+        String expression = "select count from A";
 
         log.debug(".testDisplayAST parsing: " + expression);
         Tree ast = parse(expression);
@@ -130,7 +131,7 @@ public class TestEPLParser extends TestCase
         assertIsInvalid("select * from x where like");
         assertIsInvalid("select * from x where like escape");
         assertIsInvalid("select * from x where like a escape");
-        assertIsInvalid("select * from x where escape");
+        assertIsInvalid("select * from x where order");
         assertIsInvalid("select * from x where field rlike 'aa' escape '!'");
         assertIsInvalid("select * from x where field regexp 'aa' escape '!'");
         assertIsInvalid("select * from x where regexp 'aa'");
@@ -212,6 +213,23 @@ public class TestEPLParser extends TestCase
     {
         String className = SupportBean.class.getName();
         String preFill = "select * from " + className;
+
+        // output rate limiting
+        assertIsValid("select a from B output snapshot every 1 milliseconds");
+        assertIsValid("select a from B output snapshot every 1 millisecond");
+        assertIsValid("select a from B output snapshot every 1 msec");
+        assertIsValid("select a from B output snapshot every 10 seconds");
+        assertIsValid("select a from B output snapshot every 10 second");
+        assertIsValid("select a from B output snapshot every 10 sec");
+        assertIsValid("select a from B output snapshot every 3 minutes");
+        assertIsValid("select a from B output snapshot every 3 minute");
+        assertIsValid("select a from B output snapshot every 3 min");
+        assertIsValid("select a from B output snapshot every 3 hours");
+        assertIsValid("select a from B output snapshot every 3 hour");
+        assertIsValid("select a from B output snapshot every 3 days");
+        assertIsValid("select a from B output snapshot every 3 day");
+        assertIsValid("select a from B output snapshot every 1 day 2 hours 3 minutes 4 seconds 5 milliseconds");
+        assertIsValid("select a from B output first every 5 events");
 
         assertIsValid(preFill + "(string='test',intPrimitive=20).win:lenght(100)");
         assertIsValid(preFill + "(string in ('b', 'a'))");
@@ -582,6 +600,10 @@ public class TestEPLParser extends TestCase
         assertIsValid("select * from A.win:x(myprop.nested, a.c('s'), 'ss', *, null)");
         assertIsValid("select * from pattern[every X where a:b(myprop.nested, a.c('s'), 'ss', *, null)]");
         assertIsValid("select * from pattern[every X:b(myprop.nested, a.c('s'), 'ss', *, null)]");
+
+        // properties escaped
+        assertIsValid("select a\\.b, a\\.b\\.c.d.e\\.f, zz\\.\\.\\.aa\\.\\.\\.b\\.\\. from A");
+        assertIsValid("select count from A");
     }
 
     public void testBitWiseCases() throws Exception
