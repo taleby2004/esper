@@ -14,11 +14,14 @@ public class TestTimeSource extends TestCase
 {
     public void testWallClock() throws InterruptedException
     {
-    	// allow a tolerance as TimeSourceMillis resolution may be around 16ms
+        TimeSourceService.IS_SYSTEM_CURRENT_TIME = false;
+
+        // allow a tolerance as TimeSourceMillis resolution may be around 16ms
         final long TOLERANCE_MILLISECS = 20, DELAY_MILLISECS = 100;
 
-        TimeSourceService nanos = new TimeSourceServiceNanos();
-        TimeSourceService millis = new TimeSourceServiceMillis();
+        // This is a smoke test
+        TimeSourceService nanos = new TimeSourceService();
+        TimeSourceService millis = new TimeSourceService();
 
         assertTimeWithinTolerance(TOLERANCE_MILLISECS, nanos, millis);
         Thread.sleep(DELAY_MILLISECS);
@@ -27,6 +30,8 @@ public class TestTimeSource extends TestCase
         assertTimeWithinTolerance(TOLERANCE_MILLISECS, nanos, millis);
         Thread.sleep(DELAY_MILLISECS);
         assertTimeWithinTolerance(TOLERANCE_MILLISECS, nanos, millis);
+
+        TimeSourceService.IS_SYSTEM_CURRENT_TIME = true;
     }
 
 	private void assertTimeWithinTolerance(final long TOLERANCE_MILLISECS,

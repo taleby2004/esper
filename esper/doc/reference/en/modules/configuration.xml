@@ -1286,9 +1286,13 @@ config.getEngineDefaults().getStreamSelection()
 				</para>
 
 				<para>
-				   By default, the internal timer uses the call <literal>System.currentTimeMillis()</literal> to determine engine time in milliseconds. Via this setting the internal timer can be instructed to use <literal>System.nanoTime()</literal> instead. Please see <xref linkend="api-time-resolution"/> for more information.
+				   By default, the internal timer uses the call <literal>System.currentTimeMillis()</literal> to determine engine time in milliseconds. Via this setting the internal timer can be instructed to use <literal>System.nanoTime()</literal> instead. Please see <xref linkend="api-time-resolution"/> for more information. 
 				</para>
 				   
+				<para>
+					Note: This is a Java VM global setting. If running multiple engine instances in a Java VM, the timer setting is global and applies to all engine instances in the same Java VM, for performance reasons.
+				</para>
+
 				<para>
 					A sample XML configuration for this setting is shown below, whereas the sample setting sets the time source to the nanosecond time provider:
 				</para>

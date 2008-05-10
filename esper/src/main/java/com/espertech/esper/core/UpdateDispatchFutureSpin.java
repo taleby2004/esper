@@ -26,6 +26,7 @@ public class UpdateDispatchFutureSpin implements Dispatchable
      * @param view is the blocking dispatch view through which to execute a dispatch
      * @param earlier is the older future
      * @param msecTimeout is the timeout period to wait for listeners to complete a prior dispatch
+     * @param timeSourceService time source provider
      */
     public UpdateDispatchFutureSpin(UpdateDispatchViewBlockingSpin view, UpdateDispatchFutureSpin earlier, long msecTimeout, TimeSourceService timeSourceService)
     {
@@ -37,6 +38,7 @@ public class UpdateDispatchFutureSpin implements Dispatchable
 
     /**
      * Ctor - use for the first future to indicate completion.
+     * @param timeSourceService time source provider
      */
     public UpdateDispatchFutureSpin(TimeSourceService timeSourceService)
     {

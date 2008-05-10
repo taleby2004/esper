@@ -24,6 +24,7 @@ public class UpdateDispatchViewBlockingSpin extends UpdateDispatchViewBase
      * @param dispatchService - for performing the dispatch
      * @param msecTimeout - timeout for preserving dispatch order through blocking
      * @param statementResultService - handles result delivery
+     * @param timeSourceService time source provider
      */
     public UpdateDispatchViewBlockingSpin(StatementResultService statementResultService, DispatchService dispatchService, long msecTimeout, TimeSourceService timeSourceService)
     {

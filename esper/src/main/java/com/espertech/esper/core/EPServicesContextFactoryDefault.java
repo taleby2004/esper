@@ -105,13 +105,19 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         return services;
     }
 
+    /**
+     * Makes the time source provider.
+     * @param configSnapshot the configuration
+     * @return time source provider 
+     */
     protected static TimeSourceService makeTimeSource(ConfigurationInformation configSnapshot)
     {
         if (configSnapshot.getEngineDefaults().getTimeSource().getTimeSourceType() == ConfigurationEngineDefaults.TimeSourceType.NANO)
         {
-            return new TimeSourceServiceNanos();
+            // this is a static variable to keep overhead down for getting a current time
+            TimeSourceService.IS_SYSTEM_CURRENT_TIME = false;
         }
-        return new TimeSourceServiceMillis();
+        return new TimeSourceService();
     }
 
     /**

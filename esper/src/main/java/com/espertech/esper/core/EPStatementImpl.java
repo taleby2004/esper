@@ -50,6 +50,7 @@ public class EPStatementImpl implements EPStatementSPI
      * @param epStatementHandle the handle and statement lock associated with the statement
      * @param variableService provides access to variable values
      * @param statementResultService handles statement result generation
+     * @param timeSourceService time source provider
      */
     public EPStatementImpl(String statementId,
                               String statementName,

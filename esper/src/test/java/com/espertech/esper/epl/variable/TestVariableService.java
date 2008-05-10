@@ -2,7 +2,7 @@ package com.espertech.esper.epl.variable;
 
 import junit.framework.TestCase;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
-import com.espertech.esper.timer.TimeSourceServiceMillis;
+import com.espertech.esper.timer.TimeSourceService;
 
 import java.util.concurrent.*;
 
@@ -12,7 +12,7 @@ public class TestVariableService extends TestCase
     
     public void setUp()
     {
-        service = new VariableServiceImpl(10000, new SchedulingServiceImpl(new TimeSourceServiceMillis()), null);
+        service = new VariableServiceImpl(10000, new SchedulingServiceImpl(new TimeSourceService()), null);
     }
 
     public void testPerfSetVersion()
@@ -108,7 +108,7 @@ public class TestVariableService extends TestCase
 
     public void testRollover() throws Exception
     {
-        service = new VariableServiceImpl(VariableServiceImpl.ROLLOVER_READER_BOUNDARY - 100, 10000, new SchedulingServiceImpl(new TimeSourceServiceMillis()), null);
+        service = new VariableServiceImpl(VariableServiceImpl.ROLLOVER_READER_BOUNDARY - 100, 10000, new SchedulingServiceImpl(new TimeSourceService()), null);
         String[] variables = "a,b,c,d".split(",");
 
         VariableReader readers[] = new VariableReader[variables.length];

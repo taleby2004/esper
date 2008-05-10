@@ -17,7 +17,7 @@ import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.type.TimePeriodParameter;
-import com.espertech.esper.timer.TimeSourceServiceMillis;
+import com.espertech.esper.timer.TimeSourceService;
 import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +78,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkOnSet() throws Exception
     {
-        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceMillis()), null);
+        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceService()), null);
         variableService.createNewVariable("var1", Long.class, 100L, null);
 
         String expression = "on com.MyClass as myevent set var1 = 'a', var2 = 2*3, var3 = var1";

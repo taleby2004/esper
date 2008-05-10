@@ -86,6 +86,7 @@ public final class EPServicesContext
      * @param namedWindowService is holding information about the named windows active in the system
      * @param variableService provides access to variable values
      * @param valueAddEventService handles update events
+     * @param timeSourceService time source provider class
      */
     public EPServicesContext(String engineURI,
                              SchedulingService schedulingService,
@@ -439,6 +440,10 @@ public final class EPServicesContext
         return variableService;
     }
 
+    /**
+     * Returns the time source provider class.
+     * @return time source
+     */
     public TimeSourceService getTimeSource()
     {
         return timeSourceService;

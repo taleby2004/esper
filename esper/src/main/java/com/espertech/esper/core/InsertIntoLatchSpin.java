@@ -25,6 +25,7 @@ public class InsertIntoLatchSpin
      * @param earlier the latch before this latch that this latch should be waiting for
      * @param msecTimeout the timeout after which delivery occurs
      * @param payload the payload is an event to deliver
+     * @param timeSourceService time source provider
      */
     public InsertIntoLatchSpin(InsertIntoLatchSpin earlier, long msecTimeout, Object payload, TimeSourceService timeSourceService)
     {
@@ -36,6 +37,7 @@ public class InsertIntoLatchSpin
 
     /**
      * Ctor - use for the first and unused latch to indicate completion.
+     * @param timeSourceService time source provider 
      */
     public InsertIntoLatchSpin(TimeSourceService timeSourceService)
     {

@@ -16,6 +16,7 @@ public final class SchedulingServiceProvider
 {
     /**
      * Creates an implementation of the SchedulingService interface.
+     * @param timeSourceService time source provider
      * @return implementation
      */
     public static SchedulingService newService(TimeSourceService timeSourceService)

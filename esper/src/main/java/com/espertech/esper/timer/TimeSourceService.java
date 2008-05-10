@@ -6,34 +6,48 @@ package com.espertech.esper.timer;
  * information on Java system time-call performance, accuracy and drift.
  * @author Jerry Shea
  */
-public abstract class TimeSourceService
+public class TimeSourceService
 {
-	public static final long MICROS_TO_MILLIS = 1000;
-	public static final long NANOS_TO_MICROS = 1000;
+	private static final long MICROS_TO_MILLIS = 1000;
+	private static final long NANOS_TO_MICROS = 1000;
 
-	private String description;
+    /**
+     * A public variable indicating whether to use the System millisecond time or
+     * nano time, to be configured through the engine settings.
+     */
+    public static boolean IS_SYSTEM_CURRENT_TIME = true;
+    
+    private final long wallClockOffset;
+    private final String description;
 
-	/**
-	 * Get VM (wall clock) time.
-	 * @see System#currentTimeMillis()
-	 * @return The number of microseconds since Jan 1 1970 UTC
-	 */
-	public abstract long getTimeMicros();
+    /**
+     * Ctor.
+     */
+    public TimeSourceService()
+    {
+        this.wallClockOffset = System.currentTimeMillis() * MICROS_TO_MILLIS - this.getTimeMicros();        
+        this.description = String.format("%s: resolution %d microsecs",
+                           this.getClass().getSimpleName(), this.calculateResolution());
+    }
 
-	/**
+    /**
 	 * Convenience method to get time in milliseconds
 	 * @return wall-clock time in milliseconds
 	 */
 	public long getTimeMillis() {
-		return getTimeMicros() / MICROS_TO_MILLIS;
+        if (IS_SYSTEM_CURRENT_TIME)
+        {
+            return System.currentTimeMillis();
+        }
+        return getTimeMicros();
 	}
+    
+    private long getTimeMicros() {
+        return (System.nanoTime() / NANOS_TO_MICROS) + wallClockOffset;
+    }
 
-	public TimeSourceService() {
-		this.description = String.format("%s: resolution %d microsecs",
-						   this.getClass().getSimpleName(), this.calculateResolution());
-	}
 
-	/**
+    /**
 	 * Calculate resolution of this timer in microseconds i.e. what is the resolution
 	 * of the underlying platform's timer.
 	 * @return timer resolution

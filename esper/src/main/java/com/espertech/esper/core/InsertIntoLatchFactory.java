@@ -22,6 +22,7 @@ public class InsertIntoLatchFactory
      * @param name the factory name
      * @param msecWait the number of milliseconds latches will await maximually
      * @param locking the blocking strategy to employ
+     * @param timeSourceService time source provider
      */
     public InsertIntoLatchFactory(String name, long msecWait, ConfigurationEngineDefaults.Threading.Locking locking,
                                   TimeSourceService timeSourceService)

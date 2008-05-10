@@ -51,6 +51,10 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         this.revisionProcessor = revisionProcessor;
     }
 
+    /**
+     * Returns true to indicate that the data window view is a batch view.
+     * @return true if batch view
+     */
     public boolean isParentBatchWindow()
     {
         if (this.getParent() instanceof BatchingDataWindowView)

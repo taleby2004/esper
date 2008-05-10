@@ -92,6 +92,10 @@ public class ConfigurationEngineDefaults implements Serializable
         return streamSelection;
     }
 
+    /**
+     * Returns the time source configuration.
+     * @return time source enum
+     */
     public TimeSource getTimeSource()
     {
         return timeSource;
@@ -522,29 +526,53 @@ public class ConfigurationEngineDefaults implements Serializable
         }
     }
 
+    /**
+     * Time source configuration, the default in MILLI (millisecond resolution from System.currentTimeMillis).
+     */
     public class TimeSource implements Serializable
     {
         private TimeSourceType timeSourceType;
 
+        /**
+         * Ctor.
+         */
         public TimeSource()
         {
             timeSourceType = TimeSourceType.MILLI;
         }
 
+        /**
+         * Returns the time source type.
+         * @return time source type enum
+         */
         public TimeSourceType getTimeSourceType()
         {
             return timeSourceType;
         }
 
+        /**
+         * Sets the time source type.
+         * @param timeSourceType time source type enum
+         */
         public void setTimeSourceType(TimeSourceType timeSourceType)
         {
             this.timeSourceType = timeSourceType;
         }
     }
 
+    /**
+     * Time source type.
+     */
     public enum TimeSourceType
     {
+        /**
+         * Millisecond time source type with time originating from System.currentTimeMillis
+         */
         MILLI,
+
+        /**
+         * Nanosecond time source from a wallclock-adjusted System.nanoTime
+         */
         NANO;
     }
 }

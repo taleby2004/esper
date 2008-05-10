@@ -38,6 +38,7 @@ public final class SchedulingServiceImpl implements SchedulingService
 
     /**
      * Constructor.
+     * @param timeSourceService time source provider
      */
     public SchedulingServiceImpl(TimeSourceService timeSourceService)
     {
