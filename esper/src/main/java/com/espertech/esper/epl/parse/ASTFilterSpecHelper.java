@@ -186,7 +186,6 @@ public class ASTFilterSpecHelper
                 {
                     builder.append('.');
                     index++;
-                    continue;
                 }
             }
         }

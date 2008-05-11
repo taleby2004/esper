@@ -66,7 +66,7 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
             log.debug(".startObserve Starting at, spec=" + scheduleSpec);
         }
 
-        if (isTimerActive == true)
+        if (isTimerActive)
         {
             throw new IllegalStateException("Timer already active");
         }

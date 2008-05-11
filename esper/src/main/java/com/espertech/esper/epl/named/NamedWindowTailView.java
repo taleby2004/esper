@@ -184,8 +184,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     {
         if (revisionProcessor != null)
         {
-            Collection<EventBean> coll = revisionProcessor.getSnapshot(createWindowStmtHandle, parent);
-            return coll;
+            return revisionProcessor.getSnapshot(createWindowStmtHandle, parent);
         }
 
         createWindowStmtHandle.getStatementLock().acquireLock(null);

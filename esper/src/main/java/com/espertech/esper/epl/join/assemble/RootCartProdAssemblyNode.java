@@ -84,7 +84,6 @@ public class RootCartProdAssemblyNode extends BaseAssemblyNode
 
         // Compute the cartesian product
         postCartesian(rowsPerStream);
-        return;
     }
 
     public void result(EventBean[] row, int fromStreamNum, EventBean myEvent, Node myNode)

@@ -538,13 +538,17 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<indexterm><primary>data window views</primary><secondary>size window</secondary></indexterm>
 
 				<para>
-					This view simply posts the number of events received from a stream or view. The synopsis is simply:
+					This view posts the number of events received from a stream or view. The synopsis is:
 				</para>
 
 				<synopsis>std:size()</synopsis>
 
 				<para>					
 					The view posts a single long-typed property named <literal>size</literal>. The view posts the prior size as old data, and the current size as new data to update listeners of the view. Via the <literal>iterator</literal> method of the statement the size value can also be polled (read).
+				</para>
+
+				<para>					
+					This view provides only a single property named <literal>size</literal> and no other properties of your selected stream are available. Use the <literal>count(...)</literal> aggregation function to select other properties of your stream.
 				</para>
 
 				<para>

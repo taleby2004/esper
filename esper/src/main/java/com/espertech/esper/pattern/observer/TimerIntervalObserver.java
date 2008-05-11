@@ -52,7 +52,7 @@ public class TimerIntervalObserver implements EventObserver, ScheduleHandleCallb
 
     public void startObserve()
     {
-        if (isTimerActive == true)
+        if (isTimerActive)
         {
             throw new IllegalStateException("Timer already active");
         }

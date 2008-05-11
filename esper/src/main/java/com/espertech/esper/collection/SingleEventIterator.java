@@ -45,7 +45,7 @@ public class SingleEventIterator implements Iterator<EventBean>
 
     public EventBean next()
     {
-        if (hasMore == false)
+        if (!hasMore)
         {
             throw new NoSuchElementException();
         }

@@ -82,7 +82,6 @@ public class SortedDoubleVector
             throw new IllegalStateException("Value not found in collection");
         }
         values.remove(index);
-        return;
     }
 
     /**

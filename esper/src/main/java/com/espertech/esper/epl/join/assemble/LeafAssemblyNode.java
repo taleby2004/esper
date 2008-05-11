@@ -31,7 +31,6 @@ public class LeafAssemblyNode extends BaseAssemblyNode
 
     public void init(List<Node>[] result)
     {
-        return;
     }
 
     public void process(List<Node>[] result)

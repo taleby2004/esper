@@ -79,8 +79,7 @@ public class RevisionEventType implements EventType
             }
             Class nestedClass = (Class) desc.getPropertyType();
             BeanEventType complexProperty = (BeanEventType) eventAdapterService.addBeanType(nestedClass.getName(), nestedClass);
-            EventPropertyGetter getter = prop.getGetter(complexProperty);
-            return getter;
+            return prop.getGetter(complexProperty);
         }
 
         // Map event types allow 2 types of properties inside:

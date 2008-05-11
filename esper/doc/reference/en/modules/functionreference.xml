@@ -302,7 +302,7 @@ select current_timestamp() from MyEvent]]></programlisting>
 			<indexterm><primary>exists function</primary></indexterm>
 			<indexterm><primary>functions</primary><secondary>exists</secondary></indexterm>
 			<para>
-				The <literal>exists</literal> function returns a boolean value indicating whether the dynamic property, provided as a parameter to the function, exists on the event. The <literal>exists</literal> function accepts a single dynamic property name as it's only parameter. 
+				The <literal>exists</literal> function returns a boolean value indicating whether the dynamic property, provided as a parameter to the function, exists on the event. The <literal>exists</literal> function accepts a single dynamic property name as its only parameter. 
 			</para>
 
 			<para>
@@ -634,6 +634,10 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 				</tbody>
 			</tgroup>
 		</table>
+
+		<para>
+			Your application may also add its own aggregation function as <xref linkend="custom-aggregation-function"/> describes.
+		</para>
 	</sect1>		
 
 	<sect1 id="epl-function-user-defined">

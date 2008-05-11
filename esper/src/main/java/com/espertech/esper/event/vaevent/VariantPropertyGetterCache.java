@@ -126,7 +126,7 @@ public class VariantPropertyGetterCache
         return newArray;
     }
 
-    private class VariantPropertyGetterRow
+    private static class VariantPropertyGetterRow
     {
         private EventType eventType;
         private EventPropertyGetter[] getterPerProp;

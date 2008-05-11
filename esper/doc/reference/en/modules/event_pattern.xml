@@ -376,13 +376,22 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 			Filter criteria can also refer to events matching prior named events in the same expression. Below pattern is an example in which the pattern
 			matches once for every RfidEvent that is preceded by an RfidEvent with the same asset id.
 		 </para>
-		 <programlisting><![CDATA[every A=RfidEvent -> B=RfidEvent(assetId=A.assetId)]]></programlisting>
+		 <programlisting><![CDATA[every e1=RfidEvent -> e2=RfidEvent(assetId=e1.assetId)]]></programlisting>
 		 
 		<para>
-			The syntax shown above allows filter criteria to reference prior results by specifying the event name tag of the prior event, and the event property name. This syntax can be used in all filter operators or expressions including ranges and the <literal>in</literal> set-of-values check:
+			The syntax shown above allows filter criteria to reference prior results by specifying the event name tag of the prior event, and the event property name. The tag names in the above example were <literal>e1</literal> and <literal>e2</literal>. This syntax can be used in all filter operators or expressions including ranges and the <literal>in</literal> set-of-values check:
 		 </para>
-		 <programlisting><![CDATA[every A=RfidEvent -> 
-  B=RfidEvent(MyLib.isInRadius(A.x, A.y, x, y) and zone in (1, A.zone))]]></programlisting>
+		 <programlisting><![CDATA[every e1=RfidEvent -> 
+  e2=RfidEvent(MyLib.isInRadius(e1.x, e1.y, x, y) and zone in (1, e1.zone))]]></programlisting>
+
+		<para>
+			An arriving event changes the truth value of all expressions that look for the event. Consider the pattern as follows:
+		 </para>
+		 <programlisting><![CDATA[every (RfidEvent(zone > 1) and RfidEvent(zone < 10))]]></programlisting>		 
+		<para>
+			The pattern above is satisfied as soon as only one event with zone in the interval [2, 9] is received.
+		 </para>
+
 	</sect1>
 
     <sect1 id="pattern-operators">

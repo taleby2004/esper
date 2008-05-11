@@ -573,6 +573,6 @@ public class ConfigurationEngineDefaults implements Serializable
         /**
          * Nanosecond time source from a wallclock-adjusted System.nanoTime
          */
-        NANO;
+        NANO
     }
 }

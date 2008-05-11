@@ -168,14 +168,14 @@ public class ResultDeliveryStrategyFactory
         Method endMethod = null;
         Method rStreamMethod = null;
         try {
-            startMethod = subscriber.getClass().getMethod("updateStart", new Class[] {int.class, int.class});
+            startMethod = subscriber.getClass().getMethod("updateStart", int.class, int.class);
         }
         catch (NoSuchMethodException e) {
             // expected
         }
 
         try {
-            endMethod = subscriber.getClass().getMethod("updateEnd", new Class[] {});
+            endMethod = subscriber.getClass().getMethod("updateEnd");
         }
         catch (NoSuchMethodException e) {
             // expected

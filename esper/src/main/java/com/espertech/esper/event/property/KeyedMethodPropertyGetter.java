@@ -33,7 +33,7 @@ public class KeyedMethodPropertyGetter implements EventPropertyGetter
 
         try
         {
-            return method.invoke(underlying, new Object[] {key});
+            return method.invoke(underlying, key);
         }
         catch (ClassCastException e)
         {

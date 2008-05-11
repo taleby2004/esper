@@ -135,8 +135,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 try {
                     plugin = (PluginLoader) engine.getServices().getEngineEnvContext().lookup("plugin-loader/" + config.getLoaderName());
                     plugin.destroy();
-                } catch (NamingException e) {
-                    ;
+                }
+                catch (NamingException e) {                    
                 }
             }
             engine.getAdmin().destroy();

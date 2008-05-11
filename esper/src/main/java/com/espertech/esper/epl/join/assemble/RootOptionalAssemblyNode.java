@@ -44,7 +44,6 @@ public class RootOptionalAssemblyNode extends BaseAssemblyNode
         {
             EventBean[] row = new EventBean[numStreams];
             parentNode.result(row, streamNum, null, null);
-            return;
         }
     }
 

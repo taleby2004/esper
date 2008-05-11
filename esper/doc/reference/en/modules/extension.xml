@@ -322,6 +322,10 @@
         </para>
 
         <para>
+			Custom aggregation functions can also be passed multiple parameters using the array operator <literal>{}</literal>.
+        </para>
+
+        <para>
 			The following steps are required to develop and use a custom aggregation function with Esper. 
         </para>
 			

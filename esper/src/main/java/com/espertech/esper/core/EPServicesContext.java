@@ -354,7 +354,6 @@ public final class EPServicesContext
     {
         this.statementLifecycleSvc = null;
         this.engineURI = null;
-        this.engineInstanceId = null;
         this.schedulingService = null;
         this.eventAdapterService = null;
         this.engineImportService = null;

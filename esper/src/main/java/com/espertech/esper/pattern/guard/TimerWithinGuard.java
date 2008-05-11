@@ -44,7 +44,7 @@ public class TimerWithinGuard implements Guard, ScheduleHandleCallback
 
     public void startGuard()
     {
-        if (isTimerActive == true)
+        if (isTimerActive)
         {
             throw new IllegalStateException("Timer already active");
         }

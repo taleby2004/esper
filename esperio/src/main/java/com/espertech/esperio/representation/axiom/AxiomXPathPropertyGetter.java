@@ -32,7 +32,8 @@ public class AxiomXPathPropertyGetter implements TypedEventPropertyGetter
      * Ctor.
      * @param propertyName    is the name of the event property for which this getter gets values
      * @param resultType      is the resulting type
-     * @param xPath           the Axiom xpath expression 
+     * @param xPath           the Axiom xpath expression
+     * @param optionalCastToType null if no cast, or the type to cast to  
      */
     public AxiomXPathPropertyGetter(String propertyName, AXIOMXPath xPath, QName resultType, Class optionalCastToType)
     {

@@ -354,9 +354,10 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
     private static Map<String, Class> createPropertyTypes(Properties properties)
     {
         Map<String, Class> propertyTypes = new HashMap<String, Class>();
-        for(Object property : properties.keySet())
+        for(Map.Entry entry : properties.entrySet())
         {
-            String className = (String) properties.get(property);
+            String property = (String) entry.getKey();
+            String className = (String) entry.getValue();
             Class clazz = JavaClassHelper.getClassForSimpleName(className);
             propertyTypes.put((String) property, clazz);
         }

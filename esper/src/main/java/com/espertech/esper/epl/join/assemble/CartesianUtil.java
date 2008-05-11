@@ -73,14 +73,13 @@ public class CartesianUtil
         {
             List<EventBean[]> holdRows = streamOne;
             int holdSize = streamOneSize;
-            int[] holdSubStream = subStreamNumsOne;
 
             streamOne = streamTwo;
             streamOneSize = streamTwoSize;
 
             streamTwo = holdRows;
             streamTwoSize = holdSize;
-            subStreamNumsTwo = holdSubStream;
+            subStreamNumsTwo = subStreamNumsOne;
         }
 
         // allocate resultList of join
@@ -121,9 +120,9 @@ public class CartesianUtil
         }
 
         // Add results
-        for (int i = 0; i < results.length; i++)
+        for (EventBean[] result : results)
         {
-            resultList.add(results[i]);
+            resultList.add(result);
         }
     }
 
@@ -137,9 +136,8 @@ public class CartesianUtil
 
     private static void copy(int[] subStreamsFrom, EventBean[] from, EventBean[] to)
     {
-        for (int i = 0; i < subStreamsFrom.length; i++)
+        for (int index : subStreamsFrom)
         {
-            int index = subStreamsFrom[i];
             to[index] = from[index];
         }
     }

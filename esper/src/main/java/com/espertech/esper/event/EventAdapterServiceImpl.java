@@ -113,7 +113,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             {
                 PlugInEventRepresentation factory = (PlugInEventRepresentation) entry.getValue();
                 PlugInEventTypeHandlerContext context = new PlugInEventTypeHandlerContext(eventTypeURI, initializer, alias);
-                if (factory.acceptsType(context));
+                if (factory.acceptsType(context))
                 {
                     handlingFactory = factory;
                     handledEventTypeURI = eventTypeURI;
@@ -197,7 +197,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             {
                 PlugInEventRepresentation factory = (PlugInEventRepresentation) entry.getValue();
                 PlugInEventBeanReflectorContext context = new PlugInEventBeanReflectorContext(resolutionURI);
-                if (factory.acceptsEventBeanResolution(context));
+                if (factory.acceptsEventBeanResolution(context))
                 {
                     PlugInEventBeanFactory beanFactory = factory.getEventBeanFactory(context);
                     if (beanFactory == null)

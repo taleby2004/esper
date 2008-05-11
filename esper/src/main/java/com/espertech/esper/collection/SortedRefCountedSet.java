@@ -50,7 +50,6 @@ public class SortedRefCountedSet<K>
 
         value++;
         refSet.put(key, value);
-        return;
     }
 
     /**
@@ -94,7 +93,6 @@ public class SortedRefCountedSet<K>
 
         value--;
         refSet.put(key, value);
-        return;
     }
 
     /**

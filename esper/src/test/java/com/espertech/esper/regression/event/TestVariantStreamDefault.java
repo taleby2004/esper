@@ -21,18 +21,6 @@ public class TestVariantStreamDefault extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener listenerOne;
 
-    // TODO
-    // test type policies:
-    //   any type
-    //
-    // test property policies:
-    //   only common properties any type (type becomes Object)
-    //   at least one type must know property
-    //   all properties exists, all properties are object types, there is no type checking
-
-    // refactoring of revision processor
-    // javadoc and doc
-
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();

@@ -126,7 +126,6 @@ countStmt.start();]]></programlisting>
 									Listeners receive <literal>EventBean</literal> instances containing statement results.
 								</para>
 								<para>The engine continuously indicates results to all listeners as soon they occur, and following output rate limiting clauses if specified.</para>
-                                <para>Since Esper 2.0 it is advised to use the Subscriber Object when possible.</para>
                             </entry>
 						</row>
                         <row>

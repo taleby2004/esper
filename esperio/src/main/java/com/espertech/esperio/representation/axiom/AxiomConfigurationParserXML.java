@@ -17,8 +17,17 @@ import javax.xml.xpath.XPathConstants;
 import java.io.IOException;
 import java.io.StringReader;
 
+/**
+ * DOM-based parser for configuration XML for the Axiom event type representation.
+ */
 public class AxiomConfigurationParserXML
 {
+    /**
+     * Parses the configuration XML.
+     * @param string xml to parse
+     * @return parsed configuration
+     * @throws EPException if the parse operation failed
+     */
     protected static ConfigurationEventTypeAxiom parse(String string) throws EPException
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

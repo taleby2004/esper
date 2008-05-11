@@ -22,7 +22,7 @@ IOLIB=../../esperio/lib
 
 CLASSPATH=.
 CLASSPATH=$CLASSPATH:../target/classes
-CLASSPATH=$CLASSPATH:../../esper-2.0.0.jar
+CLASSPATH=$CLASSPATH:../../esper-2.1.0.jar
 CLASSPATH=$CLASSPATH:$LIB/cglib-nodep-2.1_3.jar
 CLASSPATH=$CLASSPATH:$LIB/commons-logging-1.1.1.jar
 CLASSPATH=$CLASSPATH:$LIB/log4j-1.2.14.jar

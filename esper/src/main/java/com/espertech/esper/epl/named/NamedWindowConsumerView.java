@@ -25,7 +25,6 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
     private final List<ExprNode> filterList;
     private final EventType eventType;
     private final NamedWindowTailView tailView;
-    private EventBean lastEvent;
     private EventBean[] eventPerStream = new EventBean[1];
 
     /**
@@ -62,11 +61,6 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
             oldData = passFilter(oldData, false);
         }
         
-        if ((newData != null) && (newData.length > 0))
-        {
-            lastEvent = newData[newData.length - 1];
-        }
-
         if ((newData != null) || (oldData != null))
         {
             updateChildren(newData, oldData);

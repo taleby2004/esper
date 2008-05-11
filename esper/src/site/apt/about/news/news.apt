@@ -1,5 +1,67 @@
 News
 
+* May 11, 2008  -  Esper 2.1.0
+
+    * Added support for variant event streams, into which events of disparate event types can be inserted and treated as the same type
+
+    * Added support to plug-in of a custom event type 	
+
+    * Added support for update events (aka. version or revision events)
+
+    * Added support for streaming XML using Apache Axiom
+
+    * Added support for EsperIO CSV adapter to send bean events
+
+    * Properties can now be prefixed by the engine URI and the event type alias used in the from-clause; Event streams can be prefixed by the engine URI (SQL compatibility)
+
+    * Added full support for nano/microsecond resolution
+
+    * Allowed access to statement's XPathFactory instance to supply XPathFunctionResolver, etc. 	
+
+    * Added support for an escape syntax for event property names that contain dots
+
+    * Allowed esperio to use external timer
+
+    * Added support to specify a time period in output rate limiting 	
+
+    * Added support for the "in" operator to accept array properties, collection (set, list) property or map property for contains-value semantics 	
+
+    * Allowed normalization of subevents into resultant stream 	
+
+    * Allowed DOM-type property of XML events transpose into new stream for use with XPath and nested syntax 	
+
+    * Added additional sendEvent method that accepts alias name and event object, plus EventSender instance to skip type lookup 	
+
+    * Now uses thread ClassLoader for compatilibility with OSGi
+
+    * Provide additional XPath return value types to cast to 	
+
+    * Allow certain keywords to be used as column alias, such as "select count(*) as count from foo"
+
+    * Fixed issue ESPER-197 EsperIO/CSV reported to be slow 	
+
+    * Fixed issue ESPER-208 Esperio runs out of stack space when processing largeCSV file and not using engine thread 	
+
+    * Fixed issue ESPER-209 Stop of consumer statements of named windows may not entirely deregister consumer 	
+
+    * Fixed issue ESPER-213 ConcurrentModificationException creating consuming statements to a single named window under threading 	
+
+    * Fixed issue ESPER-214 ClassCastException in named window dispatch for timer thread when multiple insert-into 	
+
+    * Fixed issue ESPER-219 Documentation for plug-in views not specifying implicit contract towards object references 	
+
+    * Fixed issue ESPER-220 TimeBatchView.computeWaitMSec can give incorrect results for low "interval" 	
+
+    * Fixed issue ESPER-221 Named window with batch expiry policy causes late consumers to post incorrect data or throw IllegalArgumentException
+
+    * Fixed issue ESPER-227 No documentation on time-batch view parameter for reference point
+
+    * Fixed issue ESPER-228 PDF document page number not showing
+
+    []
+
+ 
+
 * February 16, 2008  -  NEsper 1.12.0 Beta 1
 
   * Feature equivalent with Esper 1.12.0

@@ -16,7 +16,7 @@ set LIB=..\..\esper\lib
 set EXLIB=..\..\examples\lib
 set IOLIB=..\..\esperio\lib
 
-if not exist ..\..\esper-2.0.0.jar goto badenv_esperlib
+if not exist ..\..\esper-2.1.0.jar goto badenv_esperlib
 if not exist %LIB%\cglib-nodep-2.1_3.jar goto badenv
 if not exist %LIB%\commons-logging-1.1.1.jar goto badenv
 if not exist %LIB%\log4j-1.2.14.jar goto badenv
@@ -25,7 +25,7 @@ if not exist %EXLIB%\jms.jar goto badenv
 
 set CLASSPATH=.
 set CLASSPATH=%CLASSPATH%;..\target\classes
-set CLASSPATH=%CLASSPATH%;..\..\esper-2.0.0.jar
+set CLASSPATH=%CLASSPATH%;..\..\esper-2.1.0.jar
 set CLASSPATH=%CLASSPATH%;%LIB%\cglib-nodep-2.1_3.jar
 set CLASSPATH=%CLASSPATH%;%LIB%\commons-logging-1.1.1.jar
 set CLASSPATH=%CLASSPATH%;%LIB%\log4j-1.2.14.jar
