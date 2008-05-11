@@ -25,7 +25,7 @@ public class TimeSourceService
      */
     public TimeSourceService()
     {
-        this.wallClockOffset = System.currentTimeMillis() * MICROS_TO_MILLIS - this.getTimeMicros();        
+        this.wallClockOffset = System.currentTimeMillis() * MICROS_TO_MILLIS - this.getTimeMicros();
         this.description = String.format("%s: resolution %d microsecs",
                            this.getClass().getSimpleName(), this.calculateResolution());
     }
@@ -39,7 +39,7 @@ public class TimeSourceService
         {
             return System.currentTimeMillis();
         }
-        return getTimeMicros();
+        return getTimeMicros() / MICROS_TO_MILLIS;
 	}
     
     private long getTimeMicros() {

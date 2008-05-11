@@ -12,10 +12,13 @@ import org.apache.commons.logging.LogFactory;
  */
 public class TestTimeSource extends TestCase
 {
+    public void tearDown()
+    {
+        TimeSourceService.IS_SYSTEM_CURRENT_TIME = true;
+    }
+
     public void testWallClock() throws InterruptedException
     {
-        TimeSourceService.IS_SYSTEM_CURRENT_TIME = false;
-
         // allow a tolerance as TimeSourceMillis resolution may be around 16ms
         final long TOLERANCE_MILLISECS = 20, DELAY_MILLISECS = 100;
 
@@ -30,13 +33,15 @@ public class TestTimeSource extends TestCase
         assertTimeWithinTolerance(TOLERANCE_MILLISECS, nanos, millis);
         Thread.sleep(DELAY_MILLISECS);
         assertTimeWithinTolerance(TOLERANCE_MILLISECS, nanos, millis);
-
-        TimeSourceService.IS_SYSTEM_CURRENT_TIME = true;
     }
 
 	private void assertTimeWithinTolerance(final long TOLERANCE_MILLISECS,
 			TimeSourceService nanos, TimeSourceService millis) {
+
+        TimeSourceService.IS_SYSTEM_CURRENT_TIME = true;
 		long nanosWallClockTime = nanos.getTimeMillis();
+
+        TimeSourceService.IS_SYSTEM_CURRENT_TIME = false;
         long millisWallClockTime = millis.getTimeMillis();
 
         long diff = nanosWallClockTime - millisWallClockTime;

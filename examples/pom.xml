@@ -64,6 +64,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>-Dlog4j.configuration=../etc/infoonly_log4j.xml</argLine>
+					<argLine>-Xms256m -Xmx256m</argLine>
 					<systemProperties>
 						<property>
 							<name>log4j.configuration</name>

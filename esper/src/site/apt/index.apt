@@ -66,11 +66,13 @@ Features
 	
         * Supports event-type inheritance and polymorphism as provided by the Java language
 
-        * Events can be plain Java objects, XML document object model (DOM) and java.util.Map including nested objects
+        * Events can be plain Java objects, XML (DOM and streaming through Apache Axiom) and java.util.Map including nested objects and hierarchical maps
 
         * Event properties can be simple, indexed, mapped or nested - allows querying of deep Java object graphs and XML structures
         
         * Dynamic properties allow dynamic typing of properties, supported by <cast>, <instanceof> and <exists> functions
+
+        * Applications can plug-in their own event representation and type resolution
 
         []
         
@@ -187,7 +189,7 @@ Java - Known Limitations
 
 .NET - Known Limitations
 
-	* NEsper is the .NET version of the Java Esper version 1.10
+	* NEsper is the .NET version of the Java Esper version 1.12
 	
 	
 Summary

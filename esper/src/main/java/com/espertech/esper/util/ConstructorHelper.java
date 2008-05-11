@@ -61,7 +61,7 @@ public class ConstructorHelper
 
         // Find an Object[] constructor, which always matches (throws an exception if not found)
         ctor = getObjectArrayConstructor(clazz);
-        return ctor.newInstance(arguments);
+        return ctor.newInstance(new Object[] { arguments });
     }
 
     private static Constructor findMatchingConstructor(Class clazz, Class parameterTypes[])
