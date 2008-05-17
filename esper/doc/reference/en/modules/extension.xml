@@ -271,6 +271,11 @@
 						<literal>EventBean</literal> events represent a unique observation. The values of the observation can be the same, thus the underlying representation of an <literal>EventBean</literal> event can be reused, however event property values must be kept immutable and not be subject to change.
 					</para>
 				</listitem>
+				<listitem>
+					<para>
+						Array elements of the insert and remove stream events must not carry null values. Array size must match the number of <literal>EventBean</literal> instances posted. It is recommended to use a <literal>null</literal> value for no insert or remove stream events rather then an empty zero-size array. 
+					</para>
+				</listitem>
 			</itemizedlist>
 
 			<para>

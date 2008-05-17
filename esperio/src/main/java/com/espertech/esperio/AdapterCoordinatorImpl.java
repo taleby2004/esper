@@ -139,17 +139,18 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 	 * event returned by the read() method of the same Adapter that
 	 * provided the first event.
 	 */
-	protected void replaceFirstEventToSend()
-	{
+    protected void replaceFirstEventToSend()
+    {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
-		    log.debug(".replaceFirstEventToSend");
+            log.debug(".replaceFirstEventToSend Replacing event");
         }
         SendableEvent event = eventsToSend.first();
-		eventsToSend.remove(event);
-		addNewEvent(eventsFromAdapters.get(event));
-		pollEmptyAdapters();
-	}
+        eventsToSend.remove(event);
+        addNewEvent(eventsFromAdapters.get(event));
+        eventsFromAdapters.remove(event);
+        pollEmptyAdapters();
+    }
 
 	/**
 	 * Reset all the changeable state of this ReadableAdapter, as if it were just created.
