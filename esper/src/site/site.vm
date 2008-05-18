@@ -351,10 +351,9 @@ behavior: url($relativePath/css/csshover.htc);
 #if ($alignedFileName.equals("index.html"))
 	<div id="pic">
 		<div id="slogan">
-			Where <b>Complex Event Processing meets Open Source</b>: <a href="/products/">Esper & NEsper</a></b><br/>
-			<b>Make no compromise</b> on enterprise readiness: discover <a href="/products/esperha.php">EsperHA</a> and our <a href="/support/">support services</a>.<br/>
-			Embed mainstream CEP in your products and deployments: Learn about our <a href="/partners/embedded.php">licensing options</a>.<br/>
-			<small><a href="/products/" style="color: #A00">Product info</a> | <a href="/partners/partners.php" style="color: #A00">Customers</a> | <a href="/company/contact.php" style="color: #A00">Contact us</a></small>
+			Where <b>Complex Event Processing meets Open Source</b>: <a href="http://www.espertech.com/products/">Esper & NEsper</a></b><br/>
+			<b>Make no compromise</b> on enterprise readiness: discover <a href="http://www.espertech.com/products/esperha.php">EsperHA</a>, <a href="http://www.espertech.com/products/esperjdbc.php">EsperJDBC</a> and our <a href="http://www.espertech.com/support/">support services</a>.
+			Embed mainstream CEP in your products and deployments: Learn about our <a href="http://www.espertech.com/partners/embedded.php">licensing options</a>.<br/>
 		</div>
 	</div>
 #end
