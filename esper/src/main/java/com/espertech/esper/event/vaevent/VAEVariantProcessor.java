@@ -56,26 +56,31 @@ public class VAEVariantProcessor implements ValueAddEventProcessor
         {
             throw new ExprValidationException(getMessage());
         }
-        
+
+        // try each permitted type
         for (EventType variant : variantSpec.getEventTypes())
         {
             if (variant == eventType)
             {
                 return;
             }
+        }
 
+        // test if any of the supertypes of the eventtype is a variant type
+        for (EventType variant : variantSpec.getEventTypes())
+        {
             // Check all the supertypes to see if one of the matches the full or delta types
             Iterator<EventType> deepSupers = eventType.getDeepSuperTypes();
             if (deepSupers == null)
             {
-                throw new ExprValidationException(getMessage());
+                continue;
             }
 
-            EventType type;
+            EventType superType;
             for (;deepSupers.hasNext();)
             {
-                type = deepSupers.next();
-                if (type == eventType)
+                superType = deepSupers.next();
+                if (superType == variant)
                 {
                     return;
                 }

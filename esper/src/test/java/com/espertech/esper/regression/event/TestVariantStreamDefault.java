@@ -10,10 +10,7 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.AbstractList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TestVariantStreamDefault extends TestCase
 {
@@ -244,6 +241,30 @@ public class TestVariantStreamDefault extends TestCase
         epService.getEPRuntime().sendEvent(events[1]);
         epService.getEPRuntime().sendEvent(events[2]);
         assertTrue(listenerOne.isInvoked());
+    }
+
+    public void testDynamicMapType()
+    {
+        Map<String, Class> types = new HashMap<String, Class>();
+        types.put("someprop", String.class);
+
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MyEvent", types);
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MySecondEvent", types);
+
+        ConfigurationVariantStream variant = new ConfigurationVariantStream();
+        variant.addEventTypeAlias("MyEvent");
+        variant.addEventTypeAlias("MySecondEvent");
+        epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariant", variant);
+
+        epService.getEPAdministrator().createEPL("insert into MyVariant select * from MyEvent");
+        epService.getEPAdministrator().createEPL("insert into MyVariant select * from MySecondEvent");
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from MyVariant");
+        stmt.addListener(listenerOne);
+        epService.getEPRuntime().sendEvent(new HashMap(), "MyEvent");
+        assertNotNull(listenerOne.assertOneGetNewAndReset());
+        epService.getEPRuntime().sendEvent(new HashMap(), "MySecondEvent");
+        assertNotNull(listenerOne.assertOneGetNewAndReset());
     }
 
     public void testInvalidInsertInto()
