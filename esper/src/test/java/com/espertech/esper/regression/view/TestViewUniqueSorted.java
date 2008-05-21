@@ -6,6 +6,7 @@ import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportSensorEvent;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 
@@ -111,6 +112,30 @@ public class TestViewUniqueSorted extends TestCase
         Iterator<EventBean> it = stmt.iterator();
         SupportSensorEvent event = (SupportSensorEvent) it.next().getUnderlying();
         assertEquals (3,event.getId());
+    }
+
+    public void testReuseUnique()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.std:unique(intBoxed)");
+        stmt.addListener(testListener);
+
+        SupportBean beanOne = new SupportBean("E1", 1);
+        epService.getEPRuntime().sendEvent(beanOne);
+        testListener.reset();
+
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.std:unique(intBoxed)");
+        SupportUpdateListener testListenerTwo = new SupportUpdateListener();
+        stmtTwo.addListener(testListenerTwo);
+        stmt.start(); // no effect
+
+        SupportBean beanTwo = new SupportBean("E2", 2);
+        epService.getEPRuntime().sendEvent(beanTwo);
+
+        assertSame(beanTwo, testListener.getLastNewData()[0].getUnderlying());
+        assertSame(beanOne, testListener.getLastOldData()[0].getUnderlying());
+        assertSame(beanTwo, testListenerTwo.getLastNewData()[0].getUnderlying());
+        assertNull(testListenerTwo.getLastOldData());
     }
 
     private Object makeEvent(String symbol, double price)

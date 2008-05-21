@@ -160,6 +160,11 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
         }
     }
 
+    public boolean isEmpty()
+    {
+        return mostRecentEvents.isEmpty();
+    }
+
     public final Iterator<EventBean> iterator()
     {
         return mostRecentEvents.values().iterator();

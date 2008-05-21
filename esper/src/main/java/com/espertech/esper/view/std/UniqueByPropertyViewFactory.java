@@ -84,6 +84,6 @@ public class UniqueByPropertyViewFactory implements DataWindowViewFactory
             return false;
         }
 
-        return true;
+        return myView.isEmpty();
     }
 }
