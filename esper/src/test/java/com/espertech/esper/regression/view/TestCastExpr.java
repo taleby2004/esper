@@ -4,12 +4,15 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.util.SerializableObjectCopier;
 import com.espertech.esper.event.EventBean;
+
+import java.util.HashMap;
 
 public class TestCastExpr extends TestCase
 {
@@ -213,6 +216,27 @@ public class TestCastExpr extends TestCase
         epService.getEPRuntime().sendEvent(bean);
         event = listener.assertOneGetNewAndReset();
         assertResults(event, new Object[] {true, null, null});
+    }
+
+    public void testCastMapStringInt()
+    {
+        // TODO: Fix JIRA ESPER-247
+        HashMap map = new HashMap();
+        map.put("SIZE",String.class);
+        Configuration config = new Configuration();
+        config.addEventTypeAlias("md", map);
+
+        epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        String stmt = "select SIZE, cast(SIZE, int) as test from md";
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
+        statement.addListener(listener);
+        
+        map = new HashMap();
+        map.put("SIZE","400");
+        epService.getEPRuntime().sendEvent(map, "md");
+        System.out.println(listener.assertOneGetNewAndReset().get("test"));
     }
 
     private void assertResults(EventBean event, Object[] result)
