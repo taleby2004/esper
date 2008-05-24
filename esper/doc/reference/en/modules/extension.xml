@@ -60,6 +60,10 @@
 		</itemizedlist>
 
         <para>
+			<xref linkend="custom-views-contract"/> outlines the requirements for correct behavior of a your custom view within the engine.
+        </para>
+
+        <para>
 			Note that custom views may use engine services and APIs that can be subject to change between major releases. The engine services discussed above and view APIs are considered part of the engine internal public API and are stable. Any changes to such APIs are disclosed through the release change logs and history. Please also consider contributing your custom view to the Esper project team by submitting the view code through the mailing list or via a JIRA issue.
         </para>
 
@@ -285,7 +289,11 @@
 			<programlisting><![CDATA[statementContext.getStatementStopService().addSubscriber(this);]]></programlisting>
 
 			<para>
-				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods. The iterator of the custom view implementation does not need to be thread-safe.
+				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods.
+			</para>
+
+			<para>
+				In terms of multiple threads accessing view state, there is no need for your custom view factory or view implementation to perform any synchronization to protect internal state. The iterator of the custom view implementation does also not need to be thread-safe. The engine ensures the custom view executes in the context of a single thread at a time. If your view uses shared external state, such external state must be still considered for synchronization when using multiple threads.
 			</para>
 		</sect2>
 		

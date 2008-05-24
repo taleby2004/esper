@@ -1,6 +1,11 @@
 Esper Changelog
 ===================
 
+  - Fixed issue ESPER-239 esperio - memory leak in AdapterCoordinatorImpl
+  
+  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
+  - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
+
 Changes in version 2.1.0
 ------------------------
 
