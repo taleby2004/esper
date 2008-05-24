@@ -100,6 +100,24 @@ EPStatement myTrigger = admin.createEPL("select * from pattern [" +
 ]]></programlisting>
 		</sect2>
 		
+        <sect2 id="pattern-in-eql">
+           <title>Patterns in EPL</title>
+           
+			<para>
+				A pattern may appear anywhere in the <literal>from</literal> clause of an EPL statement including joins and subqueries. Patterns may therefore be used in combination with the <literal>where</literal> clause, <literal>group by</literal> clause, <literal>having</literal> clause as well as output rate limiting and <literal>insert into</literal>. In addition, a data window view can be declared onto a pattern.
+			</para>
+
+			<para>
+				This example statement demonstrates the idea by selecting a total price per customer over pairs of events (ServiceOrder followed by a ProductOrder event for the same customer id within 1 minute), occuring in the last 2 hours, in which the sum of price is greater then 100, and using a <literal>where</literal> clause to filter on name:
+			</para>
+			<programlisting><![CDATA[select a.custId, sum(a.price + b.price)
+from pattern [every a=ServiceOrder -> 
+    b=ProductOrder(custId = a.custId) where timer:within(1 min)].win:time(2 hour) 
+where a.name in ('Repair', b.name)
+group by a.custId
+having sum(a.price + b.price) > 100]]></programlisting>
+		</sect2>
+
         <sect2 id="patterns-howto-subscribe" >
            <title>Subscribing to Pattern Events</title>
            
