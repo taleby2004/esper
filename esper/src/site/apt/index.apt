@@ -110,7 +110,9 @@ Features
 
 * Other
 
-    * Relational database access via SQL-query joins with event streams
+    * <<Executes a large number of simultaneous queries>> - Esper's query processor can run thousands of queries continuously and simultaneously on a single instance
+
+    * <<Relational database access via SQL-query joins with event streams>>
 	
     	* LRU (least-recently used) and expiry-time query result caches
     	
@@ -118,36 +120,44 @@ Features
     	
     	* Engine indexes cached rows for fast filtering within a large number of SQL-query result rows
     	
-    * Joins to method invocation allows easy integration with distributed caches, web services and object-oriented databases 
+    	[]
+    	
+    * <<Joins to method invocation results>> allows easy integration with distributed caches, web services and object-oriented databases 
 
-    * Variables can occur in any expression and can dynamically control output rate
+    * <<Variables>> can occur in any expression and can dynamically control output rate
 
         * Guarantees of consistency and atomicity of variable updates
  
-    * Support for both the listener (push/subscription) API and the consumer (pull/receive) API for querying results
+    * Support for both the << listener (push/subscription) API>> and the <<consumer (pull/receive) API>> for querying results
 	
-    * Concurrency-safe iterator provides complete query capability for all statements    * Supports externally-provided time as well as Java system time, allowing applications full control over the concept of time within the engine
+    * <<Concurrency-safe iterator>> provides complete query capability for all statements    
+    
+    * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within the engine
     		
-    * Multithread-safe as of release 1.5
+    * <<Multithread-safe>> as of release 1.5
     
     	* Multithreaded sends of events into the engine
     	
-    	* Create, start and stop statements during operation
+    	* Create, start and stop statements during operation without adversely impacting performance
     	
     	* Applications can retain full control over threading
     	
     	* Efficiently sharing resources between statements and low thread blocking 
     	
-    * Supports multiple independent Esper engines per JavaVM
+    	[]
+    	
+    * Supports <<multiple independent Esper engines per JavaVM>>
     		  
-    * Pluggable architecture for event pattern and event stream analysis via user-defined functions, plug-in views, plug-in aggregation functions, plug-in 
+    * <<Pluggable architecture>> for event pattern and event stream analysis via user-defined functions, plug-in views, plug-in aggregation functions, plug-in 
       pattern guards and plug-in pattern event observers, event instance methods
       
-    * Unmatched event listener receives a callback if an event does not match any started statement
-    
-    * Performance-minded design: query strategy analysis and index building; array-based collections; delta networks and many other techniques
+    * <<Performance-minded design>>: query strategy analysis and index building; array-based collections; delta networks and many other techniques
     
     	* Benchmark kit available for download; Performance testing results and tips see page in menu
+    	
+    * <<Unmatched event listener>> receives a callback if an event does not match any started statement
+    
+    	[]
             
     []		
     

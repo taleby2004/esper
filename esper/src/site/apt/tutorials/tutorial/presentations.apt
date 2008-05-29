@@ -15,14 +15,23 @@ Past Presentation Material
 *------------------------+----------------------------------------------------------------------------+
 | {{{http://dist.codehaus.org/esper/NYJavaSIG_May_30_2007.pdf}New York City Java Special Interest Group on CEP and ESP with Esper (PDF)}} | May, 2007
 *------------------------+----------------------------------------------------------------------------+
-| {{{http://dist.codehaus.org/esper/NYJavaSIG_May_30_2007.pdf}New York City Java Special Interest Group on CEP and ESP with Esper (PDF)}} | May, 2007
-*------------------------+----------------------------------------------------------------------------+
 
 Articles in Other Languages
 ~~~~~~~~~~~~~~~~~~~~~~
 	
+*-------------------------------------------+----------------------------------------------------------------------------+-----------------+
+| Presentation                              | Date                                                                       | Language
+*-------------------------------------------+----------------------------------------------------------------------------+-----------------+
+| {{{http://www.touilleur-express.fr/2008/05/19/presentation-d%E2%80%99esper-moteur-de-gestion-de-flux-d%E2%80%99evenements-en-java/}Présentation d’Esper, moteur de gestion de flux d’événements en Java, Le Touilleur Express}} | May 2008 | French
+*-------------------------------------------+----------------------------------------------------------------------------+-----------------+
+| {{{http://adminsight.de/2008/04/17/article-esper-als-eda-plattfrom}Esper als EDA-Plattform, Java Magazin }} | May 2008 | German
+*-------------------------------------------+----------------------------------------------------------------------------+-----------------+
+
+Specifically for NEsper and .NET
+~~~~~~~~~~~~~~~~~~~~~~
+	
 *-------------------------------------------+----------------------------------------------------------------------------+
-| Presentation                       | Date
+| Presentation                       | Date 
 *-------------------------------------------+----------------------------------------------------------------------------+
-| {{{http://adminsight.de/2008/04/17/article-esper-als-eda-plattfrom}Esper als EDA-Plattform (German), Java Magazin }} | May 2008
+| {{{http://msdn.microsoft.com/en-gb/architecture/cc531255.aspx} Microsoft Architect Insight Conference 2008 (UK) (see Complex Event Processing, session 3 day 2)}} | April 2008
 *-------------------------------------------+----------------------------------------------------------------------------+
