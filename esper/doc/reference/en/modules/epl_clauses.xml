@@ -2232,7 +2232,7 @@ where asset.assetid = desc.assetid]]></programlisting>
 		<indexterm><primary>EPL</primary><secondary>named window</secondary></indexterm>
 
 		<para>
-			A <emphasis>named window</emphasis> is a global data window that can take part in many statement queries, and that can be inserted-into and deleted-from by multiple statements.
+			A <emphasis>named window</emphasis> is a global data window that can take part in many statement queries, and that can be inserted-into and deleted-from by multiple statements. A named window holds events of the same type or supertype, unless used with a variant stream. 
 		</para>
 		
 		<para>

@@ -72,7 +72,7 @@ Features
         
         * Dynamic properties allow dynamic typing of properties, supported by <cast>, <instanceof> and <exists> functions
 
-        * Applications can plug-in their own event representation and type resolution
+        * Applications can plug-in their own event representation and dynamic type resolution
 
         []
         
@@ -127,16 +127,21 @@ Features
     * <<Variables>> can occur in any expression and can dynamically control output rate
 
         * Guarantees of consistency and atomicity of variable updates
+        
+    * <<Variant event streams>> allows treating disparate types of events as the same type, such as when the event type can only be known at runtime, 
+       when the event type is expected to vary, or when optional properties are desired.
  
+    * Support for <<update events>> that update, provide a new version or that revise an existing event held by an engine.
+
     * Support for both the << listener (push/subscription) API>> and the <<consumer (pull/receive) API>> for querying results
 	
     * <<Concurrency-safe iterator>> provides complete query capability for all statements    
     
-    * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within the engine
+    * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within an engine
     		
     * <<Multithread-safe>> as of release 1.5
     
-    	* Multithreaded sends of events into the engine
+    	* Multithreaded sends of events into an engine
     	
     	* Create, start and stop statements during operation without adversely impacting performance
     	
