@@ -574,6 +574,31 @@ select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPr
       </answer>
     </faq>    
 
+    <faq id="result_originator">
+      <question>I have one listener for multiple statements, how do I track which statement generated a result?</question>
+      <answer>
+		<p>
+		  Your listener can implement the StatementAwareUpdateListener interface and get passed the statement and engine instance for each result.
+		</p>
+		<p>
+		  For some use cases it can also come in handy to simply add a constant  to each statement to identify the statement producing a result, for example:
+		</p>
+		<div class="source"><pre>select 120 as strategyId, * from Tick</pre></div>
+      </answer>
+    </faq>    
+
+    <faq id="window_contents">
+      <question>I there a way to receive the list of all events that participated in a window? I'm looking for a way to show the user the cause of the alert.</question>
+      <answer>
+		<p>
+			The pull API is a convenient way to retrieve data from a data window. The safeIterator method on EPStatement provides the events in a data window.
+		</p>
+		<p>
+			If the alert is based on a filter, then one may need to create a second statement that doesn't have the filter, such that iteration returns all current rows. A second statement with a same data window however would be inexpensive since the engine shares data windows. There is no possibility of a race condition: The engine guarantees that before a result is delivered to statements, all statements have up-to-date data.
+		</p>
+      </answer>
+    </faq>    
+
   </part>
 
 </faqs>
