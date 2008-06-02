@@ -6,10 +6,7 @@ import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.util.SimpleTypeCaster;
-import com.espertech.esper.util.SimpleTypeCasterFactory;
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.util.SimpleTypeCasterAnyType;
+import com.espertech.esper.util.*;
 
 /**
  * Represents the CAST(expression, type) function is an expression tree.
@@ -18,8 +15,7 @@ public class ExprCastNode extends ExprNode
 {
     private final String classIdentifier;
     private Class targetType;
-    private SimpleTypeCaster caster;
-    private boolean isNumeric;
+    private CastExprExecutor executor;
 
     /**
      * Ctor.
@@ -46,15 +42,15 @@ public class ExprCastNode extends ExprNode
             throw new ExprValidationException("Cast function node must have exactly 1 child node");
         }
 
-        // try the primitive names including "string"
+        // get source type
+        Class sourceType = this.getChildNodes().get(0).getType();
+        sourceType = JavaClassHelper.getBoxedType(sourceType);
+
+        // detemine target type
         targetType = JavaClassHelper.getPrimitiveClassForName(classIdentifier.trim());
-        if (targetType != null)
-        {
-            targetType = JavaClassHelper.getBoxedType(targetType);
-            caster = SimpleTypeCasterFactory.getCaster(targetType);
-            isNumeric = caster.isNumericCast();
-        }
-        else
+
+        // try to load target type
+        if (targetType == null)
         {
             try
             {
@@ -64,7 +60,58 @@ public class ExprCastNode extends ExprNode
             {
                 throw new ExprValidationException("Class as listed in cast function by name '" + classIdentifier + "' cannot be loaded", e);
             }
-            caster = new SimpleTypeCasterAnyType(targetType);
+        }
+
+        // casting to a built-in type
+        if (JavaClassHelper.isJavaBuiltinDataType(targetType))
+        {
+            targetType = JavaClassHelper.getBoxedType(targetType);
+
+            // no conversion
+            if (targetType == sourceType)
+            {
+                executor = new NoCastExecutor();
+            }
+            // print
+            else if (targetType == String.class)
+            {
+                executor = new StringTargetExecutor();
+            }
+            // parse
+            else if (sourceType == String.class)
+            {
+                SimpleTypeParser parser = SimpleTypeParserFactory.getParser(targetType);
+                executor = new ParseExecutor(parser);
+            }
+            // coerce between numeric types
+            else if ((JavaClassHelper.isNumeric(sourceType)) && (JavaClassHelper.isNumeric(targetType)))
+            {
+                SimpleTypeCaster caster = SimpleTypeCasterFactory.getCaster(targetType);
+                executor = new UncheckedExecutor(caster);
+            }
+            // checked coerce to numeric
+            else if (JavaClassHelper.isNumeric(targetType))
+            {
+                SimpleTypeCaster caster = SimpleTypeCasterFactory.getCaster(targetType);
+                executor = new CheckedNumericCoercionExecutor(caster);
+            }
+            else
+            {
+                throw new ExprValidationException("Cannot cast from type '" + sourceType.getSimpleName() + "' to type '" + targetType.getSimpleName() + "'");
+            }
+        }
+        else
+        {
+            // casting to a non-builtin type
+            if (targetType == sourceType)
+            {
+                executor = new NoCastExecutor();
+            }
+            else
+            {
+                SimpleTypeCaster caster = new SimpleTypeCasterAnyType(targetType);
+                executor = new UncheckedExecutor(caster);
+            }
         }
     }
 
@@ -86,23 +133,7 @@ public class ExprCastNode extends ExprNode
             return null;
         }
 
-        // Numeric
-        if (isNumeric)
-        {
-            if (result instanceof Number)
-            {
-                return caster.cast(result);
-            }
-            return null;
-        }
-        else if (targetType == String.class)
-        {
-            return result.toString();
-        }
-        else
-        {
-            return caster.cast(result);
-        }
+        return executor.cast(result);
     }
 
     public String toExpressionString()
@@ -129,5 +160,75 @@ public class ExprCastNode extends ExprNode
         }
 
         return false;
+    }
+
+    public interface CastExprExecutor
+    {
+        public Object cast(Object input);
+    }
+
+    public class ParseExecutor implements CastExprExecutor
+    {
+        private SimpleTypeParser parser;
+
+        public ParseExecutor(SimpleTypeParser parser)
+        {
+            this.parser = parser;
+        }
+
+        public Object cast(Object input)
+        {
+            return parser.parse((String)input);
+        }
+    }
+
+    public class CheckedNumericCoercionExecutor implements CastExprExecutor
+    {
+        private SimpleTypeCaster caster;
+
+        public CheckedNumericCoercionExecutor(SimpleTypeCaster caster)
+        {
+            this.caster = caster;
+        }
+
+        public Object cast(Object input)
+        {
+            if (input instanceof Number)
+            {
+                return caster.cast(input);
+            }
+            return null;
+        }
+    }
+
+    public class UncheckedExecutor implements CastExprExecutor
+    {
+        private final SimpleTypeCaster caster;
+
+        public UncheckedExecutor(SimpleTypeCaster caster)
+        {
+            this.caster = caster;
+        }
+
+        public Object cast(Object input)
+        {
+            return caster.cast(input);
+        }
+    }
+
+    public class StringTargetExecutor implements CastExprExecutor
+    {
+        public Object cast(Object input)
+        {
+            return input.toString();
+        }
+    }
+
+    public class NoCastExecutor implements CastExprExecutor
+    {
+        public Object cast(Object input)
+        {
+            return input;
+        }
     }
 }

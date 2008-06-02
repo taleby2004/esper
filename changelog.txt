@@ -1,10 +1,21 @@
 Esper Changelog
 ===================
 
-  - Fixed issue ESPER-239 esperio - memory leak in AdapterCoordinatorImpl
-  
-  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
+esper-2.1.0-JIRA247
+  - Fixed issue ESPER-247 Cast function for String to Int conversion returns null
   - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
+  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
+
+esper-2.1.0-JIRA246
+  - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
+  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
+
+esper-2.1.0-JIRA241
+  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
+
+esperio-2.1.0-JIRA239
+  - Fixed issue ESPER-239 esperio - memory leak in AdapterCoordinatorImpl  
+
 
 Changes in version 2.1.0
 ------------------------
@@ -359,5 +370,6 @@ This enabled event patterns and EQL to use short event names not requiring makin
 version 0.7.0
 -------------
 Initial alpha version
+
 
 

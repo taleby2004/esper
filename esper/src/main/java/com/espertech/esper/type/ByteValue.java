@@ -26,7 +26,7 @@ public final class ByteValue extends PrimitiveValueBase
      */
     public static byte parseString(String value)
     {
-        return Byte.parseByte(value);
+        return Byte.decode(value);
     }
 
     public final void parse(String value)

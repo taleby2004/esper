@@ -13,6 +13,8 @@ import com.espertech.esper.util.SerializableObjectCopier;
 import com.espertech.esper.event.EventBean;
 
 import java.util.HashMap;
+import java.math.BigInteger;
+import java.math.BigDecimal;
 
 public class TestCastExpr extends TestCase
 {
@@ -220,23 +222,59 @@ public class TestCastExpr extends TestCase
 
     public void testCastMapStringInt()
     {
-        // TODO: Fix JIRA ESPER-247
         HashMap map = new HashMap();
-        map.put("SIZE",String.class);
+        map.put("anInt",String.class);
+        map.put("anDouble",String.class);
+        map.put("anLong",String.class);
+        map.put("anFloat",String.class);
+        map.put("anByte",String.class);
+        map.put("anShort",String.class);
+        map.put("intPrimitive",int.class);
+        map.put("intBoxed",Integer.class);
+
         Configuration config = new Configuration();
-        config.addEventTypeAlias("md", map);
+        config.addEventTypeAlias("TestEvent", map);
 
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String stmt = "select SIZE, cast(SIZE, int) as test from md";
+        String stmt = "select cast(anInt, int) as intVal, " +
+                            "cast(anDouble, double) as doubleVal, " +
+                            "cast(anLong, long) as longVal, " +
+                            "cast(anFloat, float) as floatVal, " +
+                            "cast(anByte, byte) as byteVal, " +
+                            "cast(anShort, short) as shortVal, " +
+                            "cast(intPrimitive, int) as intOne, " +
+                            "cast(intBoxed, int) as intTwo, " +
+                            "cast(intPrimitive, java.lang.Long) as longOne, " +
+                            "cast(intBoxed, long) as longTwo " +
+                    "from TestEvent";
+        
         EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
         
         map = new HashMap();
-        map.put("SIZE","400");
-        epService.getEPRuntime().sendEvent(map, "md");
-        System.out.println(listener.assertOneGetNewAndReset().get("test"));
+        map.put("anInt","100");
+        map.put("anDouble","1.4E-1");
+        map.put("anLong","-10");
+        map.put("anFloat","1.001");
+        map.put("anByte","0x0A");
+        map.put("anShort","223");
+        map.put("intPrimitive",10);
+        map.put("intBoxed",11);
+
+        epService.getEPRuntime().sendEvent(map, "TestEvent");
+        EventBean row = listener.assertOneGetNewAndReset();
+        assertEquals(100, row.get("intVal"));
+        assertEquals(0.14d, row.get("doubleVal"));
+        assertEquals(-10L, row.get("longVal"));
+        assertEquals(1.001f, row.get("floatVal"));
+        assertEquals((byte)10, row.get("byteVal"));
+        assertEquals((short)223, row.get("shortVal"));
+        assertEquals(10, row.get("intOne"));
+        assertEquals(11, row.get("intTwo"));
+        assertEquals(10L, row.get("longOne"));
+        assertEquals(11L, row.get("longTwo"));
     }
 
     private void assertResults(EventBean event, Object[] result)
