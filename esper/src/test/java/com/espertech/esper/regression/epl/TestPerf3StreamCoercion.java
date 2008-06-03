@@ -20,6 +20,7 @@ public class TestPerf3StreamCoercion extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         listener = new SupportUpdateListener();
+        System.gc();
     }
 
     public void testPerfCoercion3waySceneOne()
@@ -51,6 +52,7 @@ public class TestPerf3StreamCoercion extends TestCase
         long delta = endTime - startTime;
 
         assertTrue("Failed perf test, delta=" + delta, delta < 1500);
+        stmt.destroy();
     }
 
     public void testPerfCoercion3waySceneTwo()
@@ -81,7 +83,8 @@ public class TestPerf3StreamCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        stmt.destroy();
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     public void testPerfCoercion3waySceneThree()
@@ -112,7 +115,8 @@ public class TestPerf3StreamCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        stmt.destroy();
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     private void sendEvent(String string, int intBoxed, long longBoxed, double doubleBoxed)

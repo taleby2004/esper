@@ -319,9 +319,10 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         String expression = "select * from pattern [every A=" + SupportBean.class.getName() +
                 " -> (timer:interval(1 seconds) and not " + SupportBean_A.class.getName() + ")]";
 
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
         EPStatement statement = epService.getEPAdministrator().createEPL(expression);

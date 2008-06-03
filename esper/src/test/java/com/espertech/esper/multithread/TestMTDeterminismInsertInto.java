@@ -178,6 +178,7 @@ public class TestMTDeterminismInsertInto extends TestCase
         Configuration config = SupportConfigFactory.getConfiguration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         config.getEngineDefaults().getThreading().setInsertIntoDispatchLocking(locking);
+        config.getEngineDefaults().getThreading().setInsertIntoDispatchTimeout(5000); // 5 second timeout
         // This should fail all test in this class
         // config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(false);
 

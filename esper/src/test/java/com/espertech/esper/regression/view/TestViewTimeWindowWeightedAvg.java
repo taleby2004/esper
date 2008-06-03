@@ -28,6 +28,7 @@ public class TestViewTimeWindowWeightedAvg extends TestCase
         Configuration config = SupportConfigFactory.getConfiguration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
 
         // Set up a 1 second time window
         weightedAvgView = epService.getEPAdministrator().createEPL(

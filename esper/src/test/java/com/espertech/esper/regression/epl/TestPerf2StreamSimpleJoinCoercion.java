@@ -53,7 +53,8 @@ public class TestPerf2StreamSimpleJoinCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        statement.destroy();
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     public void testPerformanceCoercionBack()
@@ -82,7 +83,8 @@ public class TestPerf2StreamSimpleJoinCoercion extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        statement.destroy();
+        assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
     private Object makeSupportEvent(String string, int intPrimitive, long longBoxed)
