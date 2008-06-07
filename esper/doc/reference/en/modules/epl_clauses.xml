@@ -1482,6 +1482,52 @@ from OrderStream.win:time(30 sec) group by customerId</programlisting>
 			</para>		
 			<programlisting>select * from OutgoingEvents(destination = 'email')</programlisting>			
 		</sect2>
+
+		<sect2 id="insert-into-decorated">
+			<title>Decorated Events</title>
+			<indexterm><primary>decorated event</primary></indexterm>
+
+			<para>
+				Your <literal>select</literal> clause may use the '*' wildcard together with further expressions to populate a stream of events. A sample statement is:				
+			</para>
+			<programlisting>insert into OrderStream select *, price*units as linePrice from PurchaseOrder</programlisting>			
+
+			<para>
+				When using wildcard and selecting additional expression results, the engine produces what is called <emphasis>decorating</emphasis> events for the resulting stream. Decorating events add additional property values to an underlying event.
+			</para>
+
+			<para>
+				In the above example the resulting OrderStream consists of underlying PurchaseOrder events <emphasis>decorated</emphasis> by a <literal>linePrice</literal> property that is a result of the <literal>price*units</literal> expression.
+			</para>
+
+			<para>
+				In order to use <literal>insert into </literal> to insert into an existing stream of decorated events, your underlying event type must match, and all additional decorating property names and types of the <literal>select</literal> clause must also match.
+			</para>
+		</sect2>
+		
+		<sect2 id="insert-into-eventasproperty">
+			<title>Event as a Property</title>
+			<indexterm><primary>event as a property</primary></indexterm>
+
+			<para>
+				Your <literal>select</literal> clause may use the stream name to populate a stream of events in which each event has properties that are itself an event. A sample statement is:				
+			</para>
+			<programlisting>insert into CompositeStream select order, service, order.price+service.price as totalPrice 
+from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as service</programlisting>			
+
+			<para>
+				When using the stream name (or tag in patterns) in the select clause, the engine produces composite events: One or more of the properties of the composite event are events themselves.
+			</para>
+
+			<para>
+				In the above example the resulting CompositeStream consists of 3 columns: the PurchaseOrder event, the ServiceEvent event and the <literal>totalPrice</literal> property that is a result of the <literal>order.price+service.price</literal> expression.
+			</para>
+
+			<para>
+				In order to use <literal>insert into </literal> to insert into an existing stream of events in which properties are themselves events, each event column's event type must match, and all additional property names and types of the <literal>select</literal> clause must also match.
+			</para>
+		</sect2>
+		
 	</sect1>
 
     <sect1 id="epl-join">
@@ -2247,6 +2293,11 @@ where asset.assetid = desc.assetid]]></programlisting>
 			To query a named window, simply use the window name in the <literal>from</literal> clause of your statement, including statements that contain subqueries, joins and outer-joins.
 		</para>	
 		
+		<para>
+			A named window may also decorate an event to preserve original events as described in <xref linkend="insert-into-decorated"/> and <xref linkend="named-insertinto-decorated"/>.
+			In addition, columns of a named window are allowed to hold events themselves, as further explained in <xref linkend="insert-into-eventasproperty"/> and <xref linkend="named-insertinto-eventasproperty"/>.
+		</para>
+
 		<sect2 id="named_create" revision="1">
 			<title>Creating Named Windows: the <literal>Create Window</literal> clause</title>
 			
@@ -2465,6 +2516,43 @@ where not exists (select * from OrdersWindow as win where win.id = spe.id)]]></p
 			<programlisting><![CDATA[// create in this order
 on ServiceProductEvent as spe delete from OrdersWindow as win where win.id = spe.id
 insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
+
+			<sect3 id="named-insertinto-decorated" revision="1">
+				<title>Named Windows Holding Decorated Events</title>
+				<para>
+					Decorated events hold an underlying event and add additional properties to the underlying event, as described further in <xref linkend="insert-into-decorated"/>.
+				</para>
+
+				<para>
+					Here we create a named window that decorates OrderEvent events by adding an additional property named <literal>priceTotal</literal> to each OrderEvent. A matching <literal>insert into</literal> statement is also part of the sample:
+				</para>
+				<programlisting><![CDATA[create window OrdersWindow as select *, price as priceTotal from OrderEvent
+
+insert into OrdersWindow select *, price * unit as priceTotal from ServiceOrderEvent]]></programlisting>
+
+				<para>
+					The property type of the additional <literal>priceTotal</literal> column is the property type of the existing <literal>price</literal> property of OrderEvent.
+				</para>
+			</sect3>
+
+			<sect3 id="named-insertinto-eventasproperty" revision="1">
+				<title>Named Windows Holding Events As Property</title>
+				<para>
+					Columns in a named window may also hold an event itself. More information on the <literal>insert into</literal> clause providing event columns is in <xref linkend="insert-into-eventasproperty"/>.
+				</para>
+
+				<para>
+					The next sample creates a named window that specifies two columns: A column that holds an OrderEvent, and a column by name <literal>priceTotal</literal>. A matching <literal>insert into</literal> statement is also part of the sample:
+				</para>
+				<programlisting><![CDATA[create window OrdersWindow as select this, price as priceTotal from OrderEvent
+
+insert into OrdersWindow select order, price * unit as priceTotal  
+from ServiceOrderEvent as order]]></programlisting>
+
+				<para>
+					Note that the <literal>this</literal> proprerty must exist on the event and must return the event class itself (JavaBean events only). The property type of the additional <literal>priceTotal</literal> column is the property type of the existing <literal>price</literal> property.
+				</para>
+			</sect3>
 		</sect2>
 
 		<sect2 id="named_selecting" revision="1">
