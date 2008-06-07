@@ -11,6 +11,7 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.event.EventBean;
 
 import java.util.Map;
@@ -30,6 +31,27 @@ public class TestInsertIntoTransposePattern extends TestCase
         epService.initialize();
         listener = new SupportUpdateListener();
         listenerInsertInto = new SupportUpdateListener();
+    }
+
+    public void testThisAsColumn()
+    {
+        // TODO - http://jira.codehaus.org/browse/ESPER-251
+        //
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("create window Alert7Window.win:time(1 day) as select string as alertId, this from SupportBean");
+
+        epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote.this as this " +
+                " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
+                     " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
+                " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
+
+        // this should also work:
+        /*
+        epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote as this " +
+                " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
+                     " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
+                " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
+        */
     }
 
     public void testTransposePOJOEventPattern()
