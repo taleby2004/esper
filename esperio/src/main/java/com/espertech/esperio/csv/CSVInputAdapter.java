@@ -10,14 +10,11 @@ import com.espertech.esper.event.PropertyAccessException;
 import com.espertech.esperio.*;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.ExecutionPathDebugLog;
-import net.sf.cglib.reflect.FastClass;
-import net.sf.cglib.reflect.FastConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 
 import java.io.EOFException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.beans.PropertyDescriptor;
 
@@ -30,7 +27,7 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 
 	private Integer eventsPerSec;
 	private CSVReader reader;
-	private Map<String, FastConstructor>propertyConstructors;
+	private AbstractTypeCoercer coercer = new BasicTypeCoercer();
 	private String[] propertyOrder;
 	private CSVInputAdapterSpec adapterSpec;
 	private Map<String, Class> propertyTypes;
@@ -40,6 +37,7 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 	boolean atEOF = false;
 	private String[] firstRow;
     private Class beanClass;
+	private int rowCount = 0;
 
     /**
 	 * Ctor.
@@ -152,6 +150,10 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		finishInitialization(epService, adapterSpec);
 	}
 
+	public void setCoercer(AbstractTypeCoercer coercer) {
+		this.coercer = coercer;
+	}
+
 	/**
 	 * Close the CSVReader.
 	 */
@@ -220,30 +222,17 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 			spi.getEventAdapterService().addMapType(eventTypeAlias, propertyTypes);
 		}
 
-		this.propertyConstructors = createPropertyConstructors(propertyTypes);
+		coercer.setPropertyTypes(propertyTypes);
 	}
 
 	private Map<String, Object> newMapEvent() throws EOFException
 	{
+		++rowCount;
 		String[] row =  firstRow != null ? firstRow : reader.getNextRecord();
 		firstRow = null;
-		updateTotalDelay(row, reader.getAndClearIsReset());
-		return createMapFromRow(row);
-	}
-
-	private Map<String, FastConstructor> createPropertyConstructors(Map<String, Class> propertyTypes)
-	{
-		Map<String, FastConstructor> constructors = new HashMap<String, FastConstructor>();
-
-        Class[] parameterTypes = new Class[] { String.class };
-        for(String property : propertyTypes.keySet())
-		{
-			log.debug(".createPropertyConstructors property==" + property + ", type==" + propertyTypes.get(property	));
-			FastClass fastClass = FastClass.create(JavaClassHelper.getBoxedType(propertyTypes.get(property)));
-			FastConstructor constructor = fastClass.getConstructor(parameterTypes);
-			constructors.put(property, constructor);
-		}
-		return constructors;
+		Map<String, Object> map = createMapFromRow(row);
+		updateTotalDelay(map, reader.getAndClearIsReset());
+		return map;
 	}
 
 	private Map<String, Object> createMapFromRow(String[] row)
@@ -263,12 +252,11 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 					count++;
 					continue;
 				}
-				Object[] parameters = new Object[] { row[count++] };
-				Object value = propertyConstructors.get(property).newInstance(parameters);
+				Object value = coercer.coerce(property, row[count++]);
 				map.put(property, value);
 			}
 		}
-		catch (InvocationTargetException e)
+		catch (Exception e)
 		{
 			throw new EPException(e);
 		}
@@ -293,7 +281,13 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		}
 		if(propertyTypesGiven != null && eventType.getPropertyNames().length != propertyTypesGiven.size())
 		{
-			throw new EPException("Event type " + eventTypeAlias + " has already been declared with a different number of parameters");
+			// allow this scenario for beans as we may want to bring in a subset of properties
+			if (beanClass != null) {
+				return propertyTypesGiven;
+			}
+			else {
+				throw new EPException("Event type " + eventTypeAlias + " has already been declared with a different number of parameters");
+			}
 		}
 		for(String property : eventType.getPropertyNames())
 		{
@@ -330,7 +324,7 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		return propertyTypes;
 	}
 
-	private void updateTotalDelay(String[] row, boolean isFirstRow)
+	private void updateTotalDelay(Map<String, Object> map, boolean isFirstRow)
 	{
 		if(eventsPerSec != null)
 		{
@@ -339,14 +333,14 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		}
 		else if(adapterSpec.getTimestampColumn() != null)
 		{
-			Long timestamp = resolveTimestamp(row);
+			Long timestamp = resolveTimestamp(map);
 			if(timestamp == null)
 			{
-				throw new EPException("Couldn't resolve the timestamp for record " + Arrays.asList(row));
+				throw new EPException("Couldn't resolve the timestamp for record " + map);
 			}
 			else if(timestamp < 0)
 			{
-				throw new EPException("Encountered negative timestamp for CSV record : " + Arrays.asList(row));
+				throw new EPException("Encountered negative timestamp for CSV record : " + map);
 			}
 			else
 			{
@@ -372,33 +366,16 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		}
 	}
 
-
-	private Long resolveTimestamp(String[] row)
+	private Long resolveTimestamp(Map<String, Object> map)
 	{
-		int timestampIndex = getTimestampIndex(row);
-		if(timestampIndex != -1)
+		if(adapterSpec.getTimestampColumn() != null)
 		{
-			return Long.parseLong(row[timestampIndex]);
+			return (Long) map.get(adapterSpec.getTimestampColumn());
 		}
 		else
 		{
 			return null;
 		}
-	}
-
-	private int getTimestampIndex(String[] row)
-	{
-		if(adapterSpec.getTimestampColumn() != null)
-		{
-			for(int i = 0; i < propertyOrder.length; i++)
-			{
-				if(propertyOrder[i].equals(adapterSpec.getTimestampColumn()))
-				{
-					return i;
-				}
-			}
-		}
-		return -1;
 	}
 
 	private Map<String, Class> resolvePropertyTypes(Map<String, Class> propertyTypes)
@@ -488,5 +465,9 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		{
 			throw new EPException("Cannot loop on a non-resettable input source");
 		}
+	}
+
+	public int getRowCount() {
+		return rowCount;
 	}
 }

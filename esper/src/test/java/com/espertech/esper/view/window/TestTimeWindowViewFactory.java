@@ -33,7 +33,7 @@ public class TestTimeWindowViewFactory extends TestCase
     {
         factory.setViewParameters(null, Arrays.asList(new Object[] {1000}));
         assertFalse(factory.canReuse(new SizeView(SupportStatementContextFactory.makeContext())));
-        assertFalse(factory.canReuse(new TimeBatchView(null, SupportStatementContextFactory.makeContext(), 1000, null, null)));
+        assertFalse(factory.canReuse(new TimeBatchView(null, SupportStatementContextFactory.makeContext(), 1000, null, false, false, null)));
         assertTrue(factory.canReuse(new TimeWindowView(SupportStatementContextFactory.makeContext(), factory, 1000000, null, false)));
     }
 

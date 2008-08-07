@@ -1,6 +1,5 @@
 package com.espertech.esperio;
 
-import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.schedule.ScheduleSlot;
 
 /**
@@ -15,7 +14,7 @@ public interface SendableEvent
 	 * Send the event into the runtime.
 	 * @param runtime - the runtime to send the event into
 	 */
-	public void send(EPRuntime runtime);
+	public void send(AbstractSender sender);
 
 	/**
 	 * Get the send time of this event, relative to all the other events sent or read by the same entity

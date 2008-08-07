@@ -13,13 +13,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory for instances of {@link EPServiceProvider}.
  */
 public final class EPServiceProviderManager
 {
-    private static Map<String, EPServiceProviderImpl> runtimes = Collections.synchronizedMap(new HashMap<String, EPServiceProviderImpl>());
+    private static Map<String, EPServiceProviderImpl> runtimes = new ConcurrentHashMap<String, EPServiceProviderImpl>();
 
     /**
      * Returns the default EPServiceProvider.

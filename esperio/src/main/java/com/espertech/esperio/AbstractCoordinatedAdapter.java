@@ -49,6 +49,7 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 	private long currentTime = 0;
 	private long lastEventTime = 0;
 	private long startTime;
+	private AbstractSender sender;
 
 	/**
 	 * Ctor.
@@ -72,6 +73,8 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		}
 		this.runtime = ((EPServiceProviderSPI)epService).getEPRuntime();
 		this.schedulingService = ((EPServiceProviderSPI)epService).getSchedulingService();
+		
+		this.setSender(new DirectSender());
 	}
 
 	public AdapterState getState()
@@ -111,6 +114,9 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 
 	public void destroy() throws EPException
 	{
+		if (sender != null) {
+			sender.onFinish();
+		}
 		stateManager.destroy();
 		close();
 	}
@@ -142,7 +148,6 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 	{
 		this.usingEngineThread = usingEngineThread;
 	}
-
 
     /**
      * Set to true to use esper's external timer mechanism instead of internal timing
@@ -276,13 +281,13 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 				// check whether time has increased. Cannot go backwards due to checks elsewhere
 				if (currentEventTime > lastEventTime)
 				{
-					this.runtime.sendEvent(new CurrentTimeEvent(lastEventTime));
+					this.sender.sendEvent(null, new CurrentTimeEvent(lastEventTime));
 					lastEventTime = currentEventTime;
 				}
 				sendFirstEvent();
 			}
 			// send final time tick
-			this.runtime.sendEvent(new CurrentTimeEvent(lastEventTime));
+			this.sender.sendEvent(null, new CurrentTimeEvent(lastEventTime));
 		}
 		else
 		{
@@ -301,7 +306,7 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		    log.debug(".sendFirstEvent currentTime==" + currentTime);
 		    log.debug(".sendFirstEvent sending event " + eventsToSend.first() + ", its sendTime==" + eventsToSend.first().getSendTime());                
 		}
-		eventsToSend.first().send(runtime);
+		eventsToSend.first().send(sender);
 		replaceFirstEventToSend();
 	}
 
@@ -333,5 +338,14 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
             }
             schedulingService.add(afterMsec, scheduleCSVHandle, nextScheduleSlot);
 		}
+	}
+
+	public EPRuntime getRuntime() {
+		return runtime;
+	}
+
+	public void setSender(AbstractSender sender) {
+		this.sender = sender;
+		this.sender.setRuntime(this.runtime);
 	}
 }

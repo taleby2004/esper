@@ -27,6 +27,8 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
     private final long msecIntervalSize;
     private final Long initialReferencePoint;
     private final ScheduleSlot scheduleSlot;
+    private final boolean isForceOutput;
+    private final boolean isStartEager;
 
     // Current running parameters
     private Long currentReferencePoint;
@@ -41,18 +43,31 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
      * there is no such reference point supplied
      * @param timeBatchViewFactory fr copying this view in a group-by
      * @param statementContext is required view services
+     * @param forceOutput is true if the batch should produce empty output if there is no value to output following time intervals
+     * @param isStartEager is true for start-eager
      */
     public TimeBatchViewRStream(TimeBatchViewFactory timeBatchViewFactory,
                          StatementContext statementContext,
                          long msecIntervalSize,
-                         Long referencePoint)
+                         Long referencePoint,
+                         boolean forceOutput,
+                         boolean isStartEager)
     {
         this.statementContext = statementContext;
         this.timeBatchViewFactory = timeBatchViewFactory;
         this.msecIntervalSize = msecIntervalSize;
         this.initialReferencePoint = referencePoint;
+        this.isStartEager = isStartEager;
+        this.isForceOutput = forceOutput;
 
         this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+
+        // schedule the first callback
+        if (this.isStartEager)
+        {
+            scheduleCallback();
+            isCallbackScheduled = true;
+        }
     }
 
     public View cloneView(StatementContext statementContext)
@@ -76,6 +91,24 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
     public final Long getInitialReferencePoint()
     {
         return initialReferencePoint;
+    }
+
+    /**
+     * True for force-output.
+     * @return indicates force-output
+     */
+    public boolean isForceOutput()
+    {
+        return isForceOutput;
+    }
+
+    /**
+     * True for start-eager.
+     * @return indicates start-eager
+     */
+    public boolean isStartEager()
+    {
+        return isStartEager;
     }
 
     public final EventType getEventType()
@@ -171,7 +204,7 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
                 oldData = lastBatch.toArray(new EventBean[lastBatch.size()]);
             }
 
-            if ((newData != null) || (oldData != null))
+            if ((newData != null) || (oldData != null) || (isForceOutput))
             {
                 updateChildren(newData, oldData);
             }
@@ -186,9 +219,12 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
             }
         }
 
-        // Only if there have been any events in this or the last interval do we schedule a callback,
+        // Only if forceOutput is enabled or 
+        // there have been any events in this or the last interval do we schedule a callback,
         // such as to not waste resources when no events arrive.
-        if ((!currentBatch.isEmpty()) || ((lastBatch != null) && (!lastBatch.isEmpty())))
+        if ((!currentBatch.isEmpty()) || ((lastBatch != null) && (!lastBatch.isEmpty()))
+            ||
+            (isForceOutput))
         {
             scheduleCallback();
             isCallbackScheduled = true;

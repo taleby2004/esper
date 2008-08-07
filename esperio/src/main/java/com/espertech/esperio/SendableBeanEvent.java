@@ -3,7 +3,6 @@ package com.espertech.esperio;
 import java.util.Map;
 
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.schedule.ScheduleSlot;
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -40,9 +39,9 @@ public class SendableBeanEvent extends AbstractSendableEvent
 	/* (non-Javadoc)
 	 * @see com.espertech.esperio.SendableEvent#send(com.espertech.esper.client.EPRuntime)
 	 */
-	public void send(EPRuntime runtime)
+	public void send(AbstractSender sender)
 	{
-		runtime.sendEvent(beanToSend);
+		sender.sendEvent(this, beanToSend);
 	}
 
 	public String toString()

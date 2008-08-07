@@ -2,7 +2,6 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.type.TimePeriodParameter;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
@@ -13,20 +12,13 @@ import java.util.List;
 /**
  * Factory for {@link TimeBatchView}. 
  */
-public class TimeBatchViewFactory implements DataWindowViewFactory
+public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements DataWindowViewFactory
 {
-    private EventType eventType;
-
-    /**
-     * Number of msec before expiry.
-     */
-    protected long millisecondsBeforeExpiry;
-
     /**
      * The reference point, or null if none supplied.
      */
     protected Long optionalReferencePoint;
-
+    
     /**
      * The access into the data window.
      */
@@ -39,41 +31,15 @@ public class TimeBatchViewFactory implements DataWindowViewFactory
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {
-        String errorMessage = "Time batch view requires a single numeric or time period parameter, and an optional long-typed reference point in msec";
-        if ((viewParameters.size() < 1) || (viewParameters.size() > 2))
+        String errorMessage = "Time batch view requires a single numeric or time period parameter, and an optional long-typed reference point in msec, and an optional list of control keywords as a string parameter (please see the documentation)";
+        if ((viewParameters.size() < 1) || (viewParameters.size() > 3))
         {
             throw new ViewParameterException(errorMessage);
         }
 
-        Object parameter = viewParameters.get(0);
-        if (parameter instanceof TimePeriodParameter)
-        {
-            TimePeriodParameter param = (TimePeriodParameter) parameter;
-            millisecondsBeforeExpiry = Math.round(1000d * param.getNumSeconds());
-        }
-        else if (!(parameter instanceof Number))
-        {
-            throw new ViewParameterException(errorMessage);
-        }
-        else
-        {
-            Number param = (Number) parameter;
-            if (JavaClassHelper.isFloatingPointNumber(param))
-            {
-                millisecondsBeforeExpiry = Math.round(1000d * param.doubleValue());
-            }
-            else
-            {
-                millisecondsBeforeExpiry = 1000 * param.longValue();
-            }
-        }
+        processExpiry(viewParameters.get(0), errorMessage, "Time batch view requires a size of at least 1 msec");
 
-        if (millisecondsBeforeExpiry < 1)
-        {
-            throw new ViewParameterException("Time batch view requires a size of at least 1 msec");
-        }
-
-        if (viewParameters.size() == 2)
+        if (viewParameters.size() >= 2)
         {
             Object paramRef = viewParameters.get(1);
             if ((!(paramRef instanceof Number)) || (JavaClassHelper.isFloatingPointNumber((Number)paramRef)))
@@ -81,6 +47,11 @@ public class TimeBatchViewFactory implements DataWindowViewFactory
                 throw new ViewParameterException("Time batch view requires a Long-typed reference point in msec as a second parameter");
             }
             optionalReferencePoint = ((Number) paramRef).longValue();
+        }
+        
+        if (viewParameters.size() == 3)
+        {
+            processKeywords(viewParameters.get(3), errorMessage);
         }
     }
 
@@ -128,11 +99,11 @@ public class TimeBatchViewFactory implements DataWindowViewFactory
 
         if (isRemoveStreamHandling)
         {
-            return new TimeBatchViewRStream(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint);            
+            return new TimeBatchViewRStream(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, isForceUpdate, isStartEager);            
         }
         else
         {
-            return new TimeBatchView(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, relativeAccessByEvent);
+            return new TimeBatchView(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, isForceUpdate, isStartEager, relativeAccessByEvent);
         }
     }
 
@@ -167,6 +138,16 @@ public class TimeBatchViewFactory implements DataWindowViewFactory
         }
         if ( ((myView.getInitialReferencePoint() == null) && (optionalReferencePoint != null)) ||
              ((myView.getInitialReferencePoint() != null) && (optionalReferencePoint == null)) )
+        {
+            return false;
+        }
+        
+        if (myView.isForceOutput() != isForceUpdate)
+        {
+            return false;
+        }
+
+        if (myView.isStartEager())  // since it's already started
         {
             return false;
         }

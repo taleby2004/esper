@@ -57,12 +57,12 @@
 					</row>
 					<row>
 						<entry>Time batch window</entry>
-						<entry>win:time_batch(<emphasis>time period</emphasis>[,<emphasis>optional_reference_point</emphasis>])</entry>
-						<entry>Tumbling window that batches events and releases them every specified time interval</entry>
+						<entry>win:time_batch(<emphasis>time period</emphasis>[,<emphasis>optional_reference_point</emphasis>] [, <emphasis>flow control</emphasis>])</entry>
+						<entry>Tumbling window that batches events and releases them every specified time interval, with flow control options</entry>
 					</row>
 					<row>
 						<entry>Time-Length combination batch window</entry>
-						<entry>win:time_length_batch(<emphasis>time period, size</emphasis>)</entry>
+						<entry>win:time_length_batch(<emphasis>time period, size [, flow control]</emphasis>)</entry>
 						<entry>Tumbling multi-policy time and length batch window with flow control options</entry>
 					</row>
 					<row>
@@ -302,11 +302,11 @@ win:time(125)</programlisting>
 				<indexterm><primary>data window views</primary><secondary>time batch window</secondary></indexterm>
 
 				<para>
-					This window view buffers events (tumbling window) and releases them every specified time interval in one update. The view takes a time period or a number of seconds as a parameter.
+					This window view buffers events (tumbling window) and releases them every specified time interval in one update. The view takes a time period or a number of seconds as a parameter, plus optional parameters described next.
 				</para>
 
-				<synopsis>win:time_batch(<emphasis>time_period</emphasis>[,<emphasis>optional_reference_point</emphasis>])</synopsis>
-				<synopsis>win:time_batch(<emphasis>number_of_seconds</emphasis>[,<emphasis>optional_reference_point</emphasis>])</synopsis>
+				<synopsis>win:time_batch(<emphasis>time_period</emphasis> [,<emphasis>optional_reference_point</emphasis>] [,<emphasis>flow control</emphasis>])</synopsis>
+				<synopsis>win:time_batch(<emphasis>number_of_seconds</emphasis> [,<emphasis>optional_reference_point</emphasis>] [,<emphasis>flow control</emphasis>])</synopsis>
 
 				<para>
 					The time batch window takes a second, optional parameter that serves as a reference point to batch flush times. If not specified, the arrival of the first event into the batch window sets the 
@@ -316,9 +316,38 @@ win:time(125)</programlisting>
 				<para>
 					The below example batches events into a 5 second window releasing new batches every 5 seconds. Listeners to updates
 					posted by this view receive updated information only every 5 seconds.
-				</para>
-	
+				</para>	
 				<programlisting><![CDATA[select * from StockTickEvent.win:time_batch(5 sec)]]></programlisting>
+				
+				<para>
+					By default, if there are no events arriving in the current interval (insert stream), and no events remain from the prior batch (remove stream), then the view does not post results to listeners. The view allows overriding this
+					default behavior via flow control keywords.
+				</para>
+
+				<para>
+					The synopsis with flow control parameters is:
+				</para>
+				<synopsis>win:time_batch(<emphasis>time_period or num seconds</emphasis> [,<emphasis>optional_reference_point</emphasis>] 
+    [, "flow-control-keyword [, keyword...]"] )</synopsis>
+
+				<para>
+					The FORCE_UPDATE flow control keyword instructs the view to post an empty result set to listeners if there is no
+					data to post for an interval. The view begins posting no later then after one time interval passed after the first
+					event arrives.
+				</para>
+				
+				<para>
+					The START_EAGER flow control keyword instructs the view to post empty result sets even before the first event
+					arrives, starting a time interval at statement creation time. As when using FORCE_UPDATE, the view also posts an
+					empty result set to listeners if there is no data to post for an interval, however it starts doing so at time of statement
+					creation rather then at the time of arrival of the first event.
+				</para>
+
+				<para>
+					Taking the two flow control keywords in one sample statement, this example presents a view that waits for 10
+					seconds. It posts empty result sets after one interval after the statement is created, and keeps posting an empty result set as no events arrive during intervals:					
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:time_batch(10 sec, "FORCE_UPDATE, START_EAGER")]]></programlisting>				
 			</sect2>
 
 			<sect2 id="view-win-time-length-batch" >

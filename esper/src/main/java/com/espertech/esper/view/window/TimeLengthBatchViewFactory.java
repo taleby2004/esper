@@ -2,7 +2,6 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.view.*;
 import com.espertech.esper.event.EventType;
-import com.espertech.esper.type.TimePeriodParameter;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ViewResourceCallback;
@@ -13,32 +12,12 @@ import java.util.List;
 /**
  * Factory for {@link com.espertech.esper.view.window.TimeLengthBatchView}.
  */
-public class TimeLengthBatchViewFactory implements DataWindowViewFactory
+public class TimeLengthBatchViewFactory extends TimeBatchViewFactoryParams implements DataWindowViewFactory
 {
-    private static final String FORCE_UPDATE_KEYWORD = "force_update";
-    private static final String START_EAGER_KEYWORD = "start_eager";
-
-    private EventType eventType;
-
     /**
      * Number of events to collect before batch fires.
      */
     protected long numberOfEvents;
-
-    /**
-     * Number of msec before batch fires (either interval or number of events).
-     */
-    protected long millisecondsBeforeExpiry;
-
-    /**
-     * Indicate whether to output only if there is data, or to keep outputing empty batches.
-     */
-    protected boolean isForceUpdate;
-
-    /**
-     * Indicate whether to output only if there is data, or to keep outputing empty batches.
-     */
-    protected boolean isStartEager;
 
     /**
      * The access into the data window.
@@ -54,73 +33,19 @@ public class TimeLengthBatchViewFactory implements DataWindowViewFactory
         }
 
         // parameter 1
-        Object parameter = viewParameters.get(0);
-        if (parameter instanceof TimePeriodParameter)
-        {
-            TimePeriodParameter param = (TimePeriodParameter) parameter;
-            millisecondsBeforeExpiry = Math.round(1000d * param.getNumSeconds());
-        }
-        else if (!(parameter instanceof Number))
-        {
-            throw new ViewParameterException(errorMessage);
-        }
-        else
-        {
-            Number param = (Number) parameter;
-            if (JavaClassHelper.isFloatingPointNumber(param))
-            {
-                millisecondsBeforeExpiry = Math.round(1000d * param.doubleValue());
-            }
-            else
-            {
-                millisecondsBeforeExpiry = 1000 * param.longValue();
-            }
-        }
+        processExpiry(viewParameters.get(0), errorMessage, "Time-length-combination batch view requires a size of at least 1 msec");
 
         // parameter 2
-        parameter = viewParameters.get(1);
+        Object parameter = viewParameters.get(1);
         if (!(parameter instanceof Number) || (JavaClassHelper.isFloatingPointNumber((Number) parameter)))
         {
             throw new ViewParameterException(errorMessage);
         }
         numberOfEvents = ((Number) parameter).longValue();
 
-        if (millisecondsBeforeExpiry < 1)
-        {
-            throw new ViewParameterException("Time-length-combination batch view requires a size of at least 1 msec");
-        }
-
         if (viewParameters.size() > 2)
         {
-            Object keywords = viewParameters.get(2);
-            if (!(keywords instanceof String))
-            {
-                throw new ViewParameterException(errorMessage);
-            }
-
-            String[] keyword = ((String) keywords).split(",");
-            for (int i = 0; i < keyword.length; i++)
-            {
-                String keywordText = keyword[i].toLowerCase().trim();
-                if (keywordText.length() == 0)
-                {
-                    continue;
-                }
-                if (keywordText.equals(FORCE_UPDATE_KEYWORD))
-                {
-                    isForceUpdate = true;
-                }
-                else if (keywordText.equals(START_EAGER_KEYWORD))
-                {
-                    isForceUpdate = true;
-                    isStartEager = true;
-                }
-                else
-                {
-                    String keywordRange = FORCE_UPDATE_KEYWORD + "," + START_EAGER_KEYWORD;
-                    throw new ViewParameterException("Time-length-combination view encountered an invalid keyword '" + keywordText + "', valid control keywords are: " + keywordRange);
-                }
-            }
+            processKeywords(viewParameters.get(2), errorMessage);
         }
     }
 

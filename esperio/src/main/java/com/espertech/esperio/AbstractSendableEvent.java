@@ -26,7 +26,7 @@ public abstract class AbstractSendableEvent implements SendableEvent {
 		this.scheduleSlot = scheduleSlot;
 	}
 
-	public abstract void send(EPRuntime runtime);
+	public abstract void send(AbstractSender sender);
 	
 	/* (non-Javadoc)
 	 * @see com.espertech.esperio.SendableEvent#getScheduleSlot()

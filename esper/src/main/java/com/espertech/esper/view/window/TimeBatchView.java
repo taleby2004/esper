@@ -1,5 +1,11 @@
 package com.espertech.esper.view.window;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.EPStatementHandleCallback;
@@ -9,13 +15,11 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
-import com.espertech.esper.view.*;
 import com.espertech.esper.util.ExecutionPathDebugLog;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Iterator;
-import java.util.LinkedList;
+import com.espertech.esper.view.BatchingDataWindowView;
+import com.espertech.esper.view.CloneableView;
+import com.espertech.esper.view.View;
+import com.espertech.esper.view.ViewSupport;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -39,6 +43,8 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
     private final StatementContext statementContext;
     private final long msecIntervalSize;
     private final Long initialReferencePoint;
+    private final boolean isForceOutput;
+    private final boolean isStartEager;
     private final ViewUpdatedCollection viewUpdatedCollection;
     private final ScheduleSlot scheduleSlot;
 
@@ -54,22 +60,35 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
      * @param referencePoint is the reference point onto which to base intervals, or null if
      * there is no such reference point supplied
      * @param viewUpdatedCollection is a collection that the view must update when receiving events
-     * @param timeBatchViewFactory fr copying this view in a group-by
+     * @param timeBatchViewFactory for copying this view in a group-by
+     * @param forceOutput is true if the batch should produce empty output if there is no value to output following time intervals
+     * @param isStartEager is true for start-eager
      * @param statementContext is required view services
      */
     public TimeBatchView(TimeBatchViewFactory timeBatchViewFactory,
                          StatementContext statementContext,
                          long msecIntervalSize,
                          Long referencePoint,
+                         boolean forceOutput,
+                         boolean isStartEager,
                          ViewUpdatedCollection viewUpdatedCollection)
     {
         this.statementContext = statementContext;
         this.timeBatchViewFactory = timeBatchViewFactory;
         this.msecIntervalSize = msecIntervalSize;
         this.initialReferencePoint = referencePoint;
+        this.isStartEager = isStartEager;
         this.viewUpdatedCollection = viewUpdatedCollection;
+        this.isForceOutput = forceOutput;
 
         this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+
+        // schedule the first callback
+        if (isStartEager)
+        {
+            scheduleCallback();
+            isCallbackScheduled = true;
+        }
     }
 
     public View cloneView(StatementContext statementContext)
@@ -93,6 +112,24 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
     public final Long getInitialReferencePoint()
     {
         return initialReferencePoint;
+    }
+
+    /**
+     * True for force-output.
+     * @return indicates force-output
+     */
+    public boolean isForceOutput()
+    {
+        return isForceOutput;
+    }
+
+    /**
+     * True for start-eager.
+     * @return indicates start-eager
+     */
+    public boolean isStartEager()
+    {
+        return isStartEager;
     }
 
     public final EventType getEventType()
@@ -185,7 +222,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
             {
                 viewUpdatedCollection.update(newData, oldData);
             }
-            if ((newData != null) || (oldData != null))
+            if ((newData != null) || (oldData != null) || (isForceOutput))
             {
                 updateChildren(newData, oldData);
             }
@@ -200,9 +237,12 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
             }
         }
 
-        // Only if there have been any events in this or the last interval do we schedule a callback,
+        // Only if forceOutput is enabled or 
+        // there have been any events in this or the last interval do we schedule a callback,
         // such as to not waste resources when no events arrive.
-        if ((!currentBatch.isEmpty()) || ((lastBatch != null) && (!lastBatch.isEmpty())))
+        if ((!currentBatch.isEmpty()) || ((lastBatch != null) && (!lastBatch.isEmpty()))
+            ||
+            (isForceOutput))
         {
             scheduleCallback();
             isCallbackScheduled = true;

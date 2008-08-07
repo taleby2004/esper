@@ -124,7 +124,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             }
             catch (InterruptedException ex)
             {
-                // No logic required here
+                Thread.currentThread().interrupt();
             }
 
             engine.getRuntime().destroy();
@@ -168,7 +168,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             }
             catch (InterruptedException ex)
             {
-                // No logic required here
+                Thread.currentThread().interrupt();
             }
 
             engine.getServices().destroy();
@@ -246,7 +246,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         }
         catch (InterruptedException ex)
         {
-            // No logic required here
+            Thread.currentThread().interrupt();
         }
 
         // Save engine instance

@@ -3,7 +3,6 @@ package com.espertech.esperio;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.schedule.ScheduleSlot;
 
 /**
@@ -32,9 +31,9 @@ public class SendableMapEvent extends AbstractSendableEvent
 	/* (non-Javadoc)
 	 * @see com.espertech.esperio.SendableEvent#send(com.espertech.esper.client.EPRuntime)
 	 */
-	public void send(EPRuntime runtime)
+	public void send(AbstractSender sender)
 	{
-		runtime.sendEvent(mapToSend, eventTypeAlias);
+		sender.sendEvent(this, mapToSend, eventTypeAlias);
 	}
 
 	public String toString()
