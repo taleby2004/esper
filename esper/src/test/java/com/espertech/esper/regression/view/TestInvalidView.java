@@ -239,7 +239,7 @@ public class TestInvalidView extends TestCase
         String exceptionText = null;
         try
         {
-            epService.getEPAdministrator().createEPL(expression);
+            epService.getEPAdministrator().createEPL(expression, "MyStatement");
             fail();
         }
         catch (EPStatementSyntaxException es)
@@ -255,6 +255,8 @@ public class TestInvalidView extends TestCase
                 log.debug(".getStatementExceptionView expression=" + expression, ex);
             }
         }
+
+        assertNull(epService.getEPAdministrator().getStatement("MyStatement"));
 
         return exceptionText;
     }

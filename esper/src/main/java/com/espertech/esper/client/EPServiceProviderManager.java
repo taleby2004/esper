@@ -20,7 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class EPServiceProviderManager
 {
-    private static Map<String, EPServiceProviderImpl> runtimes = new ConcurrentHashMap<String, EPServiceProviderImpl>();
+    // A synchronized map and not a ConcurrentHashMap as the former can handle null keys (default svc provider)
+    private static Map<String, EPServiceProviderImpl> runtimes = Collections.synchronizedMap(new HashMap<String, EPServiceProviderImpl>());
 
     /**
      * Returns the default EPServiceProvider.
