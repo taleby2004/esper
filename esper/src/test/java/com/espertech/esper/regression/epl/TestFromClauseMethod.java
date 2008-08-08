@@ -23,32 +23,260 @@ public class TestFromClauseMethod extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void test2JoinHistoricalSubordinateOuterMultiField()
+    {
+        String className = SupportStaticMethodLib.class.getName();
+        String stmtText;
+
+        // fetchBetween must execute first, fetchIdDelimited is dependent on the result of fetchBetween
+        stmtText = "select intPrimitive,intBoxed,col1,col2 from SupportBean.win:keepall() " +
+                   "left outer join " +
+                   "method:" + className + ".fetchResult100() " +
+                   "on intPrimitive = col1 and intBoxed = col2";
+
+        String[] fields = "intPrimitive,intBoxed,col1,col2".split(",");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        stmt.addListener(listener);
+
+        sendSupportBeanEvent(2, 4);
+        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{2,4,2,4}});
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{2,4,2,4}});
+
+        stmt.destroy();
+    }
+
+    public void test2JoinHistoricalSubordinateOuter()
+    {
+        String className = SupportStaticMethodLib.class.getName();
+        String stmtText;
+
+        // fetchBetween must execute first, fetchIdDelimited is dependent on the result of fetchBetween
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from method:" + className + ".fetchResult12(0) as s0 " +
+                   "left outer join " +
+                   "method:" + className + ".fetchResult23(s0.value) as s1 on s0.value = s1.value";
+        assertJoinHistoricalSubordinateOuter(stmtText);
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                    "method:" + className + ".fetchResult23(s0.value) as s1 " +
+                    "right outer join " +
+                    "method:" + className + ".fetchResult12(0) as s0 on s0.value = s1.value";
+        assertJoinHistoricalSubordinateOuter(stmtText);
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                    "method:" + className + ".fetchResult23(s0.value) as s1 " +
+                    "full outer join " +
+                    "method:" + className + ".fetchResult12(0) as s0 on s0.value = s1.value";
+        assertJoinHistoricalSubordinateOuter(stmtText);
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                    "method:" + className + ".fetchResult12(0) as s0 " +
+                    "full outer join " +
+                    "method:" + className + ".fetchResult23(s0.value) as s1 on s0.value = s1.value";
+        assertJoinHistoricalSubordinateOuter(stmtText);
+    }
+
+    public void test2JoinHistoricalIndependentOuter()
+    {
+        String[] fields = "valueOne,valueTwo".split(",");
+        String className = SupportStaticMethodLib.class.getName();
+        String stmtText;
+
+        // fetchBetween must execute first, fetchIdDelimited is dependent on the result of fetchBetween
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from method:" + className + ".fetchResult12(0) as s0 " +
+                   "left outer join " +
+                   "method:" + className + ".fetchResult23(0) as s1 on s0.value = s1.value";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}});
+        stmt.destroy();
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                    "method:" + className + ".fetchResult23(0) as s1 " +
+                    "right outer join " +
+                    "method:" + className + ".fetchResult12(0) as s0 on s0.value = s1.value";
+        stmt = epService.getEPAdministrator().createEPL(stmtText);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}});
+        stmt.destroy();
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                    "method:" + className + ".fetchResult23(0) as s1 " +
+                    "full outer join " +
+                    "method:" + className + ".fetchResult12(0) as s0 on s0.value = s1.value";
+        stmt = epService.getEPAdministrator().createEPL(stmtText);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}, {null, 3}});
+        stmt.destroy();
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                    "method:" + className + ".fetchResult12(0) as s0 " +
+                    "full outer join " +
+                    "method:" + className + ".fetchResult23(0) as s1 on s0.value = s1.value";
+        stmt = epService.getEPAdministrator().createEPL(stmtText);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}, {null, 3}});
+        stmt.destroy();
+    }
+
+    private void assertJoinHistoricalSubordinateOuter(String expression)
+    {
+        String[] fields = "valueOne,valueTwo".split(",");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expression);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}});
+        stmt.destroy();
+    }
+
+    public void test2JoinHistoricalOnlyDependent()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("create variable int lower");
+        epService.getEPAdministrator().createEPL("create variable int upper");
+        epService.getEPAdministrator().createEPL("on SupportBean set lower=intPrimitive,upper=intBoxed");
+
+        String className = SupportStaticMethodLib.class.getName();
+        String stmtText;
+
+        // fetchBetween must execute first, fetchIdDelimited is dependent on the result of fetchBetween
+        stmtText = "select value,result from method:" + className + ".fetchBetween(lower, upper), " +
+                                        "method:" + className + ".fetchIdDelimited(value)";
+        assertJoinHistoricalOnlyDependent(stmtText);
+
+        stmtText = "select value,result from " +
+                                        "method:" + className + ".fetchIdDelimited(value), " +
+                                        "method:" + className + ".fetchBetween(lower, upper)";
+        assertJoinHistoricalOnlyDependent(stmtText);
+    }
+
+    public void test2JoinHistoricalOnlyIndependent()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("create variable int lower");
+        epService.getEPAdministrator().createEPL("create variable int upper");
+        epService.getEPAdministrator().createEPL("on SupportBean set lower=intPrimitive,upper=intBoxed");
+
+        String className = SupportStaticMethodLib.class.getName();
+        String stmtText;
+
+        // fetchBetween must execute first, fetchIdDelimited is dependent on the result of fetchBetween
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from method:" + className + ".fetchBetween(lower, upper) as s0, " +
+                                        "method:" + className + ".fetchBetweenString(lower, upper) as s1";
+        assertJoinHistoricalOnlyIndependent(stmtText);
+
+        stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
+                                        "method:" + className + ".fetchBetweenString(lower, upper) as s1, " +
+                                        "method:" + className + ".fetchBetween(lower, upper) as s0 ";
+        assertJoinHistoricalOnlyIndependent(stmtText);
+    }
+
+    private void assertJoinHistoricalOnlyIndependent(String expression)
+    {
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expression);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        String[] fields = "valueOne,valueTwo".split(",");
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+
+        sendSupportBeanEvent(5, 5);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{5, "5"}});
+
+        sendSupportBeanEvent(1, 2);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, "1"}, {1, "2"}, {2, "1"}, {2, "2"}});
+
+        sendSupportBeanEvent(0, -1);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+
+        stmt.destroy();
+        sendSupportBeanEvent(0, -1);
+        assertFalse(listener.isInvoked());
+    }
+
+    private void assertJoinHistoricalOnlyDependent(String expression)
+    {
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expression);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        String[] fields = "value,result".split(",");
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+
+        sendSupportBeanEvent(5, 5);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{5, "|5|"}});
+
+        sendSupportBeanEvent(1, 2);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, "|1|"}, {2, "|2|"}});
+
+        sendSupportBeanEvent(0, -1);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+
+        sendSupportBeanEvent(4, 6);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{4, "|4|"}, {5, "|5|"}, {6, "|6|"}});
+
+        stmt.destroy();
+        sendSupportBeanEvent(0, -1);
+        assertFalse(listener.isInvoked());
+    }
+
+    public void testNoJoinIterateVariables()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("create variable int lower");
+        epService.getEPAdministrator().createEPL("create variable int upper");
+        epService.getEPAdministrator().createEPL("on SupportBean set lower=intPrimitive,upper=intBoxed");
+
+        // Test int and singlerow
+        String className = SupportStaticMethodLib.class.getName();
+        String stmtText = "select value from method:" + className + ".fetchBetween(lower, upper)";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, null);
+
+        sendSupportBeanEvent(5, 10);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, new Object[][] {{5}, {6}, {7}, {8}, {9}, {10}});
+
+        sendSupportBeanEvent(10, 5);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, null);
+
+        sendSupportBeanEvent(4, 4);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, new Object[][] {{4}});
+
+        stmt.destroy();
+        assertFalse(listener.isInvoked());
+    }
+    
     public void testMapReturnTypeMultipleRow()
     {
+        String[] fields = "string,intPrimitive,mapstring,mapint".split(",");
         String joinStatement = "select string, intPrimitive, mapstring, mapint from " +
                 SupportBean.class.getName() + ".win:keepall() as s1, " +
                 "method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchMapArray(string, intPrimitive)";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(joinStatement);
         stmt.addListener(listener);
-        String[] fields = new String[] {"string", "intPrimitive", "mapstring", "mapint"};
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
 
         sendBeanEvent("E1", 0);
         assertFalse(listener.isInvoked());
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
 
         sendBeanEvent("E2", -1);
         assertFalse(listener.isInvoked());
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
 
         sendBeanEvent("E3", 1);
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 1, "|E3_0|", 100});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 1, "|E3_0|", 100}});
 
         sendBeanEvent("E4", 2);
         ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
                 new Object[][] {{"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 1, "|E3_0|", 100}, {"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101}});
 
         sendBeanEvent("E5", 3);
         ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
                 new Object[][] {{"E5", 3, "|E5_0|", 100}, {"E5", 3, "|E5_1|", 101}, {"E5", 3, "|E5_2|", 102}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 1, "|E3_0|", 100}, 
+                {"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101},
+                {"E5", 3, "|E5_0|", 100}, {"E5", 3, "|E5_1|", 101}, {"E5", 3, "|E5_2|", 102}});
 
         stmt.destroy();
     }
@@ -261,7 +489,7 @@ public class TestFromClauseMethod extends TestCase
                    "Error starting view: Invalid return type for static method 'sleep' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib', expecting a Java class [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.sleep(100) where 1=2]");
 
         tryInvalid("select * from SupportBean, method:AClass. where 1=2",
-                   "Incorrect syntax near 'where' expecting an identifier but found 'where' at line 1 column 42, please check the view specifications within the from clause [select * from SupportBean, method:AClass. where 1=2]");
+                   "Incorrect syntax near 'where' (a reserved keyword) expecting an identifier but found 'where' at line 1 column 42, please check the view specifications within the from clause [select * from SupportBean, method:AClass. where 1=2]");
 
         tryInvalid("select * from SupportBean, method:Dummy.abc where 1=2",
                    "Error starting view: Could not load class by name 'Dummy'  [select * from SupportBean, method:Dummy.abc where 1=2]");
@@ -280,6 +508,15 @@ public class TestFromClauseMethod extends TestCase
 
         tryInvalid("select * from SupportBean, xyz:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayNoArg() where 1=2",
                    "Expecting keyword 'method', found 'xyz' [select * from SupportBean, xyz:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayNoArg() where 1=2]");
+
+        tryInvalid("select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s1.value, s1.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1",
+                   "Error starting view: Circular dependency detected between historical streams [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s1.value, s1.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1]");
+
+        tryInvalid("select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1",
+                   "Error starting view: Parameters for historical stream 0 indicate that the stream is subordinate to itself as stream parameters originate in the same stream [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1]");
+
+        tryInvalid("select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0",
+                   "Error starting view: Parameters for historical stream 0 indicate that the stream is subordinate to itself as stream parameters originate in the same stream [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0]");
     }
 
     private void tryInvalid(String stmt, String message)
@@ -307,6 +544,14 @@ public class TestFromClauseMethod extends TestCase
         SupportBean bean = new SupportBean();
         bean.setString(string);
         bean.setIntPrimitive(intPrimitive);
+        epService.getEPRuntime().sendEvent(bean);
+    }
+
+    private void sendSupportBeanEvent(int intPrimitive, int intBoxed)
+    {
+        SupportBean bean = new SupportBean();
+        bean.setIntPrimitive(intPrimitive);
+        bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
     }
 }

@@ -57,7 +57,6 @@ public class TestOutputConditionTime extends TestCase
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(TEST_INTERVAL_MSEC) != null);
         ((EPStatementHandleCallback) result).getScheduleCallback().scheduledTrigger(null);
-
         
     	// 0 new, 0 old
         condition.updateOutputCondition(0, 0);

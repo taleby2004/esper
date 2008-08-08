@@ -12,7 +12,7 @@ public class TestEventPatternParser extends TestCase
 {
     public void testDisplayAST() throws Exception
     {
-        String expression = "B(a('aa').b.c[1].d.e(\"ee\")=2)";
+        String expression = "A -> [10] B until C -> D";
 
         log.debug(".testDisplayAST parsing: " + expression);
         Tree ast = parse(expression);
@@ -361,6 +361,32 @@ public class TestEventPatternParser extends TestCase
         assertIsValid("A where timer:within(1 days 1 milliseconds)");
         assertIsValid("A where timer:within(100 days 0.00001 millisecond)");
         assertIsValid("A where timer:within(100 hours 3 minutes 1.00001 millisecond)");
+
+        // match until
+        assertIsValid("A until B");
+        assertIsValid("every A until B");
+        assertIsValid("every (A until B)");
+        assertIsValid("every ((A where timer:within(10 sec)) until (B where timer:within(10 sec)))");
+        assertIsValid("(A or B) until (B or C)");
+        assertIsValid("(A -> B) until (B -> C)");
+        assertIsValid("(A and B) until (B and C)");
+        assertIsValid("(a=A until b=B) or (d=D until e=E)");
+        assertIsValid("a=A until b=B or d=D until e=E");
+        assertIsValid("((a=A or X=x) until (b=B)) -> ((d=D) until (e=E and e=E))");
+        assertIsValid("every (A until B)");
+        assertIsValid("A -> B until C -> D");
+        assertIsValid("B until C -> B until C -> B until C");
+        assertIsValid("(B until B1) until (D until C) -> E");
+        assertIsValid("[1] A until B");
+        assertIsValid("[1..] A until B");
+        assertIsValid("[1 ..] A until B");
+        assertIsValid("[..2] A until B");
+        assertIsValid("[.. 2] A until B");
+        assertIsValid("[0 .. 10] A until B");
+        assertIsValid("[0..10] A until B");
+        assertIsValid("[0:10] A until B");
+        assertIsValid("[0 : 10] A until B");
+        assertIsValid("[5] A");   // no until
     }
 
     public void testParserNodeGeneration() throws Exception

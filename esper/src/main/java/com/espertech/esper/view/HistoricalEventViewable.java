@@ -1,15 +1,41 @@
 package com.espertech.esper.view;
 
+import com.espertech.esper.epl.join.PollResultIndexingStrategy;
+import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.db.DataCache;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.join.PollResultIndexingStrategy;
+
+import java.util.SortedSet;
 
 /**
  * Interface for views that poll data based on information from other streams.
  */
 public interface HistoricalEventViewable extends Viewable, ValidatedView, StopCallback
 {
+    /**
+     * Returns true if the parameters expressions to the historical require other stream's data,
+     * or false if there are no parameters or all parameter expressions are only contants and variables without
+     * properties of other stream events.
+     * @return indicator whether properties are required for parameter evaluation
+     */
+    public boolean hasRequiredStreams();
+
+    /**
+     * Returns the a set of stream numbers of all streams that provide property values
+     * in any of the parameter expressions to the stream.
+     * @return set of stream numbers
+     */
+    public SortedSet<Integer> getRequiredStreams();
+
+    /**
+     * Historical views are expected to provide a thread-local data cache
+     * for use in keeping row ({@see EventBean} references) returned during iteration
+     * stable, since the concept of a primary key does not exist.
+     * @return thread-local cache, can be null for any thread to indicate no caching
+     */
+    public ThreadLocal<DataCache> getDataCacheThreadLocal();
+        
     /**
      * Poll for stored historical or reference data using events per stream and
      * returing for each event-per-stream row a separate list with events

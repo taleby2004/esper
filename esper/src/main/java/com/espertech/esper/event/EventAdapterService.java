@@ -1,16 +1,19 @@
 package com.espertech.esper.event;
 
-import java.util.Map;
-import java.net.URI;
-import java.io.Serializable;
-
-import org.w3c.dom.Node;
-import com.espertech.esper.client.*;
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.ConfigurationEventTypeLegacy;
+import com.espertech.esper.client.ConfigurationEventTypeXMLDOM;
+import com.espertech.esper.client.EventSender;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.plugin.PlugInEventRepresentation;
-import com.espertech.esper.core.EPRuntimeSPI;
 import com.espertech.esper.core.EPRuntimeEventSender;
-import com.espertech.esper.core.EPRuntimeImpl;
+import com.espertech.esper.plugin.PlugInEventRepresentation;
+import org.w3c.dom.Node;
+
+import java.io.Serializable;
+import java.net.URI;
+import java.util.Map;
+import java.util.Set;
+import java.util.List;
 
 /**
  * Interface for a service to resolve event names to event type.
@@ -43,10 +46,11 @@ public interface EventAdapterService
      * If the alias does not already exists, adds the alias and constructs a new {@link com.espertech.esper.event.MapEventType}.
      * @param eventTypeAlias is the alias name for the event type
      * @param propertyTypes is the names and types of event properties
+     * @param optionalSupertype an optional set of Map event type aliases that are supertypes to the type
      * @return event type is the type added
      * @throws EventAdapterException if alias already exists and doesn't match property type info
      */
-    public EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException;
+    public EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes, Set<String> optionalSupertype) throws EventAdapterException;
 
     /**
      * Add an event type with the given alias and a given set of properties,
@@ -60,10 +64,11 @@ public interface EventAdapterService
      * If the alias does not already exists, adds the alias and constructs a new {@link com.espertech.esper.event.MapEventType}.
      * @param eventTypeAlias is the alias name for the event type
      * @param propertyTypes is the names and types of event properties
+     * @param optionalSupertype an optional set of Map event type aliases that are supertypes to the type
      * @return event type is the type added
      * @throws EventAdapterException if alias already exists and doesn't match property type info
      */
-    public EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes) throws EventAdapterException;
+    public EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes, Set<String> optionalSupertype) throws EventAdapterException;
     
     /**
      * Add an event type with the given alias and the given underlying event type, 
@@ -178,9 +183,11 @@ public interface EventAdapterService
      * Creates an unnamed composite event type with event properties that are name-value pairs
      * with values being other event types. Pattern statement generate events of such type.
      * @param taggedEventTypes is a map of name keys and event type values
+     * @param arrayEventTypes is a map of name tags and event type per tag for repeat-expressions that generate an array of events
      * @return event type representing a composite event
      */
-    public EventType createAnonymousCompositeType(Map<String, Pair<EventType, String>> taggedEventTypes);
+    public EventType createAnonymousCompositeType(Map<String, Pair<EventType, String>> taggedEventTypes,
+                                                  Map<String, Pair<EventType, String>> arrayEventTypes);
 
     /**
      * Creates a wrapper for a composite event type. The wrapper wraps an event that
@@ -189,7 +196,7 @@ public interface EventAdapterService
      * @param taggedEvents is the name-event map
      * @return wrapper for composite event
      */
-    public EventBean adapterForCompositeEvent(EventType eventType, Map<String, EventBean> taggedEvents);
+    public EventBean adapterForCompositeEvent(EventType eventType, Map<String, Object> taggedEvents);
 
     /**
      * Create a new anonymous event type with the given underlying event type, 
@@ -265,4 +272,20 @@ public interface EventAdapterService
      * plug-in event representations
      */
     public EventSender getDynamicTypeEventSender(EPRuntimeEventSender runtimeEventSender, URI[] uri);
+
+    /**
+     * Update a given Map  event type.
+     * @param mapEventTypeAlias alias to update
+     * @param typeMap additional properties to add, nesting allowed
+     * @throws EventAdapterException when the type is not found or is not a Map 
+     */
+    public void updateMapEventType(String mapEventTypeAlias, Map<String, Object> typeMap) throws EventAdapterException;
+
+    /**
+     * Casts event type of a list of events to either Wrapper or Map type.
+     * @param events to cast
+     * @param targetType target type
+     * @return type casted event array
+     */
+    public EventBean[] typeCast(List<EventBean> events, EventType targetType);
 }

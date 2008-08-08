@@ -13,6 +13,8 @@ import com.espertech.esper.type.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.math.BigInteger;
+import java.math.BigDecimal;
 
 /**
  * Helper for questions about Java classes such as
@@ -153,6 +155,8 @@ public class JavaClassHelper
     {
         if ((clazz == Double.class) ||
             (clazz == double.class) ||
+            (clazz == BigDecimal.class) ||
+            (clazz == BigInteger.class) ||
             (clazz == Float.class) ||
             (clazz == float.class) ||
             (clazz == Short.class) ||
@@ -277,6 +281,19 @@ public class JavaClassHelper
             throw new CoercionException("Cannot coerce types " + typeOne.getName() + " and " + typeTwo.getName());
         }
 
+        if ((boxedOne == BigDecimal.class) || (boxedTwo == BigDecimal.class))
+        {
+            return BigDecimal.class;
+        }
+        if ( ((boxedOne == BigInteger.class) && JavaClassHelper.isFloatingPointClass(boxedTwo)) ||
+             ((boxedTwo == BigInteger.class) && JavaClassHelper.isFloatingPointClass(boxedOne)))
+        {
+            return BigDecimal.class;
+        }
+        if ((boxedOne == BigInteger.class) || (boxedTwo == BigInteger.class))
+        {
+            return BigInteger.class;
+        }
         if ((boxedOne == Double.class) || (boxedTwo == Double.class))
         {
             return Double.class;
@@ -295,6 +312,9 @@ public class JavaClassHelper
     /**
      * Coerce the given number to the given type, assuming the type is a Boxed type. Allows coerce to lower resultion number.
      * Does't coerce to primitive types.
+     * <p>
+     * Meant for statement compile-time use, not for runtime use.
+     * 
      * @param numToCoerce is the number to coerce to the given type
      * @param resultBoxedType is the boxed result type to return
      * @return the numToCoerce as a value in the given result type
@@ -312,6 +332,18 @@ public class JavaClassHelper
         if (resultBoxedType == Long.class)
         {
             return numToCoerce.longValue();
+        }
+        if (resultBoxedType == BigInteger.class)
+        {
+            return BigInteger.valueOf(numToCoerce.longValue());
+        }
+        if (resultBoxedType == BigDecimal.class)
+        {
+            if (JavaClassHelper.isFloatingPointNumber(numToCoerce))
+            {
+                return BigDecimal.valueOf(numToCoerce.doubleValue());
+            }
+            return BigDecimal.valueOf(numToCoerce.longValue());
         }
         if (resultBoxedType == Float.class)
         {
@@ -390,11 +422,38 @@ public class JavaClassHelper
             throw new IllegalArgumentException("Types cannot be compared: " +
                     typeOne.getName() + " and " + typeTwo.getName());
         }
+        if ((typeOne == BigDecimal.class) || (typeTwo == BigDecimal.class))
+        {
+            return BigDecimal.class;
+        }
+        if ((isFloatingPointClass(typeOne) && (typeTwo == BigInteger.class)) ||
+            (isFloatingPointClass(typeTwo) && (typeOne == BigInteger.class)))
+        {
+            return BigDecimal.class;
+        }
         if (isFloatingPointClass(typeOne) || isFloatingPointClass(typeTwo))
         {
             return Double.class;
         }
+        if ((typeOne == BigInteger.class) || (typeTwo == BigInteger.class))
+        {
+            return BigInteger.class;
+        }
         return Long.class;
+    }
+
+    /**
+     * Returns true if the type is one of the big number types, i.e. BigDecimal or BigInteger
+     * @param clazz to check
+     * @return true for big number
+     */
+    public static boolean isBigNumberType(Class clazz)
+    {
+        if ((clazz == BigInteger.class) || (clazz == BigDecimal.class))
+        {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -435,6 +494,25 @@ public class JavaClassHelper
                     (boxedFrom == Long.class) ||
                     (boxedFrom == Float.class) ||
                     (boxedFrom == Double.class));
+        }
+        else if (boxedTo == BigDecimal.class)
+        {
+            return ((boxedFrom == Byte.class) ||
+                    (boxedFrom == Short.class) ||
+                    (boxedFrom == Integer.class) ||
+                    (boxedFrom == Long.class) ||
+                    (boxedFrom == Float.class) ||
+                    (boxedFrom == Double.class) ||
+                    (boxedFrom == BigInteger.class) ||
+                    (boxedFrom == BigDecimal.class));
+        }
+        else if (boxedTo == BigInteger.class)
+        {
+            return ((boxedFrom == Byte.class) ||
+                    (boxedFrom == Short.class) ||
+                    (boxedFrom == Integer.class) ||
+                    (boxedFrom == Long.class) ||
+                    (boxedFrom == BigInteger.class));
         }
         else if (boxedTo == Long.class)
         {
@@ -1009,6 +1087,23 @@ public class JavaClassHelper
     {
         getSuperInterfaces(clazz, result);
         getSuperClasses(clazz, result);
+    }
+
+    /**
+     * Returns true if the simple class name is the class name of the fully qualified classname.
+     * <p>This method does not verify validity of class and package names, it uses simple string compare
+     * inspecting the trailing part of the fully qualified class name.
+     * @param simpleClassName simple class name
+     * @param fullyQualifiedClassname fully qualified class name contains package name and simple class name
+     * @return true if simple class name of the fully qualified class name, false if not
+     */
+    public static boolean isSimpleNameFullyQualfied(String simpleClassName, String fullyQualifiedClassname)
+    {
+        if ((fullyQualifiedClassname.endsWith("." + simpleClassName)) || (fullyQualifiedClassname.equals(simpleClassName)))
+        {
+            return true;
+        }
+        return false;
     }
 
     private static void getSuperInterfaces(Class clazz, Set<Class> result)

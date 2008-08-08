@@ -90,20 +90,42 @@ onExprFrom
 	;
 
 createWindowExpr
-	:	^(i=CREATE_WINDOW_EXPR IDENT (viewListExpr)? (createSelectionList)? CLASS_IDENT { leaveNode($i); } )
-	;
-	
-createVariableExpr
-	:	^(i=CREATE_VARIABLE_EXPR IDENT IDENT (valueExpr)? { leaveNode($i); } )
+	:	^(i=CREATE_WINDOW_EXPR IDENT (viewListExpr)? 
+			(
+				(createSelectionList? CLASS_IDENT) 
+			       | 
+			        (createColTypeList)
+			)
+			createWindowExprInsert?
+		{ leaveNode($i); })
 	;
 
+createWindowExprInsert
+	:	^(INSERT valueExpr?)
+	;
+	
 createSelectionList
 	:	^(s=CREATE_WINDOW_SELECT_EXPR createSelectionListElement (createSelectionListElement)* { leaveNode($s); } )
 	;
 	
+createColTypeList
+	:	^(CREATE_WINDOW_COL_TYPE_LIST createColTypeListElement (createColTypeListElement)*)
+	;
+
+createColTypeListElement
+	:	^(CREATE_WINDOW_COL_TYPE IDENT IDENT)
+	;
+
 createSelectionListElement
 	:	w=WILDCARD_SELECT { leaveNode($w); }
-	|	^(s=SELECTION_ELEMENT_EXPR eventPropertyExpr (IDENT)? { leaveNode($s); } )
+	|	^(s=SELECTION_ELEMENT_EXPR (
+	              (eventPropertyExpr (IDENT)?) 
+	            | (constant[true] IDENT)
+	              ) { leaveNode($s); } )
+	;
+
+createVariableExpr
+	:	^(i=CREATE_VARIABLE_EXPR IDENT IDENT (valueExpr)? { leaveNode($i); } )
 	;
 
 selectExpr
@@ -115,6 +137,7 @@ selectExpr
 		(havingClause)?
 		(outputLimitExpr)?
 		(orderByClause)?
+		(rowLimitClause)?
 	;
 	
 insertIntoExpr
@@ -151,6 +174,7 @@ outerJoinIdent
 	:	^(tl=LEFT_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode($tl); } )
 	|	^(tr=RIGHT_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode($tr); } )
 	|	^(tf=FULL_OUTERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode($tf); } )
+	|	^(i=INNERJOIN_EXPR eventPropertyExpr eventPropertyExpr (eventPropertyExpr eventPropertyExpr)* { leaveNode($i); } )
 	;
 
 streamExpression
@@ -202,6 +226,16 @@ outputLimitExpr
 	|   	^(sec=SEC_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) { leaveNode($sec); } )
 	|   	^(min=MIN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) { leaveNode($min); } )
 	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? time_period { leaveNode($tp); } )
+	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet { leaveNode($cron); } )
+	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? { leaveNode($when); } )
+	;
+
+rowLimitClause
+	:	^(e=ROW_LIMIT_EXPR (number|IDENT) (number|IDENT)? COMMA? OFFSET? { leaveNode($e); } ) 
+	;
+
+crontabLimitParameterSet
+	:	^(CRONTAB_LIMIT_EXPR_PARAM parameter parameter parameter parameter parameter parameter?)
 	;
 
 relationalExpr
@@ -340,6 +374,7 @@ exprChoice
 	| 	^( a=EVERY_EXPR exprChoice { leaveNode($a); } )
 	| 	^( n=NOT_EXPR exprChoice { leaveNode($n); } )
 	| 	^( g=GUARD_EXPR exprChoice IDENT IDENT parameter* { leaveNode($g); } )
+	|	^( m=MATCH_UNTIL_EXPR matchUntilRange? exprChoice exprChoice? { leaveNode($m); } )
 	;
 	
 patternOp
@@ -357,6 +392,18 @@ eventFilterExpr
 	:	^( f=EVENT_FILTER_EXPR IDENT? CLASS_IDENT (valueExpr)* { leaveNode($f); } )
 	;
 	
+matchUntilRange
+	:	^(MATCH_UNTIL_RANGE_CLOSED matchUntilRangeParam matchUntilRangeParam)
+	| 	^(MATCH_UNTIL_RANGE_BOUNDED matchUntilRangeParam)
+	| 	^(MATCH_UNTIL_RANGE_HALFCLOSED matchUntilRangeParam)
+	|	^(MATCH_UNTIL_RANGE_HALFOPEN matchUntilRangeParam)
+	;
+
+matchUntilRangeParam
+	:	NUM_DOUBLE
+	|	NUM_INT
+	;
+
 filterParam
 	:	^(EVENT_FILTER_PARAM valueExpr (valueExpr)*)
 	;

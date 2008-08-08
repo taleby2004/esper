@@ -13,4 +13,14 @@ public class ObserverParameterException extends Exception
     {
         super(message);
     }
+
+    /**
+     * Ctor.
+     * @param message the error message
+     * @param cause the causal exception
+     */
+    public ObserverParameterException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
 }

@@ -1,12 +1,13 @@
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.event.property.DynamicProperty;
 import com.espertech.esper.event.property.MapPropertyGetter;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
+import com.espertech.esper.util.GraphUtil;
 
 import java.util.*;
 
@@ -17,14 +18,16 @@ public class MapEventType implements EventType
 {
     private final String typeName;
     private final EventAdapterService eventAdapterService;
+    private final EventType[] optionalSuperTypes;
+    private final Iterator<EventType> optionalDeepSupertypesIterator;
 
     // Simple (not-nested) properties are stored here
-    private final String[] propertyNames;       // Cache an array of property names so not to construct one frequently
+    private String[] propertyNames;       // Cache an array of property names so not to construct one frequently
     private final Map<String, Class> simplePropertyTypes;     // Mapping of property name (simple-only) and type
     private final Map<String, EventPropertyGetter> propertyGetters;   // Mapping of property name and getters
 
     // Nestable definition of Map contents is here
-    private final Map<String, Object> nestableTypes;  // Deep definition of the map-type, containing nested maps and objects
+    private Map<String, Object> nestableTypes;  // Deep definition of the map-type, containing nested maps and objects
 
     private int hashCode;
 
@@ -35,10 +38,14 @@ public class MapEventType implements EventType
      * the stream name
      * @param propertyTypes is pairs of property name and type
      * @param eventAdapterService is required for access to objects properties within map values
+     * @param optionalSuperTypes the supertypes to this type if any, or null if there are no supertypes
+     * @param optionalDeepSupertypes the deep supertypes to this type if any, or null if there are no deep supertypes
      */
     public MapEventType(String typeName,
                         Map<String, Class> propertyTypes,
-                        EventAdapterService eventAdapterService)
+                        EventAdapterService eventAdapterService,
+                        EventType[] optionalSuperTypes,
+                        Set<EventType> optionalDeepSupertypes)
     {
         this.typeName = typeName;
         this.eventAdapterService = eventAdapterService;
@@ -48,6 +55,16 @@ public class MapEventType implements EventType
         this.nestableTypes.putAll(propertyTypes);
         this.simplePropertyTypes = new HashMap<String, Class>();
         this.simplePropertyTypes.putAll(propertyTypes);
+
+        this.optionalSuperTypes = optionalSuperTypes;
+        if (optionalDeepSupertypes == null)
+        {
+            optionalDeepSupertypesIterator = null;
+        }
+        else
+        {
+            optionalDeepSupertypesIterator = optionalDeepSupertypes.iterator();
+        }
 
         hashCode = typeName.hashCode();
         propertyNames = new String[simplePropertyTypes.size()];
@@ -64,6 +81,9 @@ public class MapEventType implements EventType
             propertyGetters.put(name, getter);
             propertyNames[index++] = name;
         }
+
+        // Copy parent properties to child
+        copySuperTypes();
     }
 
     /**
@@ -74,76 +94,46 @@ public class MapEventType implements EventType
      * the stream name
      * @param propertyTypes is pairs of property name and type
      * @param eventAdapterService is required for access to objects properties within map values
+     * @param optionalSuperTypes the supertypes to this type if any, or null if there are no supertypes
+     * @param optionalDeepSupertypes the deep supertypes to this type if any, or null if there are no deep supertypes
      */
     public MapEventType(String typeName,
                         EventAdapterService eventAdapterService,
-                        Map<String, Object> propertyTypes)
+                        Map<String, Object> propertyTypes,
+                        EventType[] optionalSuperTypes,
+                        Set<EventType> optionalDeepSupertypes)
     {
         this.typeName = typeName;
         this.eventAdapterService = eventAdapterService;
 
-        this.simplePropertyTypes = new HashMap<String, Class>();
-        List<String> propertyNameList = new ArrayList<String>();
         this.nestableTypes = new HashMap<String, Object>();
         this.nestableTypes.putAll(propertyTypes);
 
-        hashCode = typeName.hashCode();
-        propertyGetters = new HashMap<String, EventPropertyGetter>();
-
-        // Initialize getters and names array: at this time we do not care about nested types,
-        // these are handled at the time someone is asking for them
-        for (Map.Entry<String, Object> entry : propertyTypes.entrySet())
+        this.optionalSuperTypes = optionalSuperTypes;
+        if (optionalDeepSupertypes == null)
         {
-            if (!(entry.getKey() instanceof String))
-            {
-                throw new EPException("Invalid map type configuration: property name is not a String-type value");
-            }
-            String name = entry.getKey();
-            hashCode = hashCode ^ name.hashCode();
-
-            if (entry.getValue() instanceof Class)
-            {
-                simplePropertyTypes.put(name, (Class) entry.getValue());
-                propertyNameList.add(name);
-                EventPropertyGetter getter = new MapEventPropertyGetter(name);
-                propertyGetters.put(name, getter);
-                continue;
-            }
-            
-            // A null-type is also allowed
-            if (entry.getValue() == null)
-            {
-                simplePropertyTypes.put(name, null);
-                propertyNameList.add(name);
-                EventPropertyGetter getter = new MapEventPropertyGetter(name);
-                propertyGetters.put(name, getter);
-                continue;
-            }
-
-            if (entry.getValue() instanceof Map)
-            {
-                // Add Map itself as a property
-                simplePropertyTypes.put(name, Map.class);
-                propertyNameList.add(name);
-                EventPropertyGetter getter = new MapEventPropertyGetter(name);
-                propertyGetters.put(name, getter);
-                continue;
-            }
-
-            if (!(entry.getValue() instanceof EventType))
-            {
-                generateExceptionNestedProp(name, entry.getValue());
-            }
-
-            // Add EventType itself as a property
-            EventType eventType = (EventType) entry.getValue();
-            simplePropertyTypes.put(name, eventType.getUnderlyingType());
-            propertyNameList.add(name);
-            EventPropertyGetter getter = new MapEventBeanPropertyGetter(name);
-            propertyGetters.put(name, getter);
+            optionalDeepSupertypesIterator = null;
+        }
+        else
+        {
+            optionalDeepSupertypesIterator = optionalDeepSupertypes.iterator();
         }
 
+        // determine property set and prepare getters
+        PropertySetDescriptor propertySet = getNestableMapProperties(propertyTypes);
+        List<String> propertyNameList = propertySet.getPropertyNameList();
         propertyNames = propertyNameList.toArray(new String[propertyNameList.size()]);
+        propertyGetters = propertySet.getPropertyGetters();
+        simplePropertyTypes = propertySet.getSimplePropertyTypes();
+
+        hashCode = typeName.hashCode();
+        for (Map.Entry<String, Class> entry : simplePropertyTypes.entrySet())
+        {
+            hashCode = hashCode ^ entry.getKey().hashCode();
+        }
+
+        // Copy parent properties to child
+        copySuperTypes();
     }
 
     public final Class getPropertyType(String propertyName)
@@ -239,7 +229,13 @@ public class MapEventType implements EventType
         if (index == -1)
         {
             // dynamic property for maps is allowed
-            Property prop = PropertyParser.parse(propertyName, eventAdapterService.getBeanEventTypeFactory(), false);
+            BeanEventTypeFactory beanFactory = null;
+            if (eventAdapterService != null)
+            {
+                beanFactory = eventAdapterService.getBeanEventTypeFactory();
+            }
+
+            Property prop = PropertyParser.parse(propertyName, beanFactory, false);
             if (prop instanceof DynamicProperty)
             {
                 return prop.getGetterMap(null);
@@ -396,12 +392,12 @@ public class MapEventType implements EventType
 
     public EventType[] getSuperTypes()
     {
-        return null;
+        return optionalSuperTypes;
     }
 
     public Iterator<EventType> getDeepSuperTypes()
     {
-        return null;
+        return optionalDeepSupertypesIterator;
     }
 
     public String toString()
@@ -499,6 +495,43 @@ public class MapEventType implements EventType
     }
 
     /**
+     * Adds additional properties that do not yet exist on the given type.
+     * <p.
+     * Ignores properties already present. Allows nesting.
+     * @param typeMap properties to add
+     */
+    public void addAdditionalProperties(Map<String, Object> typeMap)
+    {
+        // merge type graphs
+        nestableTypes = GraphUtil.mergeNestableMap(typeMap, nestableTypes);
+
+        // construct getters and types for each property (new or old)
+        PropertySetDescriptor propertySet = getNestableMapProperties(typeMap);
+
+        // add each that is not already present
+        List<String> newPropertyNames = new ArrayList<String>();
+        for (String propertyName : propertySet.getPropertyNameList())
+        {
+            if (propertyGetters.containsKey(propertyName))  // not a new property
+            {
+                continue;
+            }
+            newPropertyNames.add(propertyName);
+            propertyGetters.put(propertyName, propertySet.getPropertyGetters().get(propertyName));
+            simplePropertyTypes.put(propertyName, propertySet.getSimplePropertyTypes().get(propertyName));
+        }
+
+        String[] allPropertyNames = new String[propertyNames.length + newPropertyNames.size()];
+        System.arraycopy(propertyNames, 0, allPropertyNames, 0, propertyNames.length);
+        int count = propertyNames.length;
+        for (String newProperty : newPropertyNames)
+        {
+            allPropertyNames[count++] = newProperty;
+        }
+        propertyNames = allPropertyNames;
+    }
+
+    /**
      * Compares two sets of properties and determines if they are the same, allowing for
      * boxed/unboxed types, and nested map types.
      * @param setOne is the first set of properties
@@ -545,6 +578,13 @@ public class MapEventType implements EventType
                     return false;
                 }
             }
+            else if ((setTwoType instanceof EventType) && (setOneType instanceof EventType))
+            {
+                if (!setOneType.equals(setTwoType))
+                {
+                    return false;
+                }
+            }
             else
             {
                 return false;
@@ -554,10 +594,139 @@ public class MapEventType implements EventType
         return true;
     }
 
-    private void generateExceptionNestedProp(String name, Object value) throws EPException
+    private static void generateExceptionNestedProp(String name, Object value) throws EPException
     {
         String clazzName = (value == null) ? "null" : value.getClass().getSimpleName();
         throw new EPException("Nestable map type configuration encountered an unexpected property type of '"
             + clazzName + "' for property '" + name + "', expected java.lang.Class or java.util.Map");
+    }
+
+    private void copySuperTypes()
+    {
+        if (optionalSuperTypes != null)
+        {
+            Set<String> allProperties = new LinkedHashSet<String>(Arrays.asList(propertyNames));
+            for (int i = 0; i < optionalSuperTypes.length; i++)
+            {
+                allProperties.addAll(Arrays.asList(optionalSuperTypes[i].getPropertyNames()));
+                MapEventType mapSuperType = (MapEventType) optionalSuperTypes[i];
+                simplePropertyTypes.putAll(mapSuperType.simplePropertyTypes);
+                propertyGetters.putAll(mapSuperType.propertyGetters);
+                nestableTypes.putAll(mapSuperType.nestableTypes);
+            }
+            propertyNames = allProperties.toArray(new String[allProperties.size()]);
+        }
+    }
+
+    private static PropertySetDescriptor getNestableMapProperties(Map<String, Object> propertiesToAdd)
+            throws EPException
+    {
+        List<String> propertyNameList = new ArrayList<String>();
+        Map<String, Class> simplePropertyTypes = new HashMap<String, Class>();
+        Map<String, EventPropertyGetter> propertyGetters = new HashMap<String, EventPropertyGetter>();
+
+        // Initialize getters and names array: at this time we do not care about nested types,
+        // these are handled at the time someone is asking for them
+        for (Map.Entry<String, Object> entry : propertiesToAdd.entrySet())
+        {
+            if (!(entry.getKey() instanceof String))
+            {
+                throw new EPException("Invalid map type configuration: property name is not a String-type value");
+            }
+            String name = entry.getKey();
+
+            if (entry.getValue() instanceof Class)
+            {
+                simplePropertyTypes.put(name, (Class) entry.getValue());
+                propertyNameList.add(name);
+                EventPropertyGetter getter = new MapEventPropertyGetter(name);
+                propertyGetters.put(name, getter);
+                continue;
+            }
+
+            // A null-type is also allowed
+            if (entry.getValue() == null)
+            {
+                simplePropertyTypes.put(name, null);
+                propertyNameList.add(name);
+                EventPropertyGetter getter = new MapEventPropertyGetter(name);
+                propertyGetters.put(name, getter);
+                continue;
+            }
+
+            if (entry.getValue() instanceof Map)
+            {
+                // Add Map itself as a property
+                simplePropertyTypes.put(name, Map.class);
+                propertyNameList.add(name);
+                EventPropertyGetter getter = new MapEventPropertyGetter(name);
+                propertyGetters.put(name, getter);
+                continue;
+            }
+
+            if (!(entry.getValue() instanceof EventType))
+            {
+                generateExceptionNestedProp(name, entry.getValue());
+            }
+
+            // Add EventType itself as a property
+            EventType eventType = (EventType) entry.getValue();
+            simplePropertyTypes.put(name, eventType.getUnderlyingType());
+            propertyNameList.add(name);
+            EventPropertyGetter getter = new MapEventBeanPropertyGetter(name);
+            propertyGetters.put(name, getter);
+        }
+
+        return new PropertySetDescriptor(propertyNameList, simplePropertyTypes, propertyGetters);
+    }
+
+    /**
+     * Descriptor of a property set.
+     */
+    public static class PropertySetDescriptor
+    {
+        private final List<String> propertyNameList;
+        private final Map<String, Class> simplePropertyTypes;
+        private final Map<String, EventPropertyGetter> propertyGetters;
+
+        /**
+         * Ctor.
+         * @param propertyNameList property name list
+         * @param simplePropertyTypes property types
+         * @param propertyGetters property getters
+         */
+        public PropertySetDescriptor(List<String> propertyNameList, Map<String, Class> simplePropertyTypes, Map<String, EventPropertyGetter> propertyGetters)
+        {
+            this.propertyNameList = propertyNameList;
+            this.simplePropertyTypes = simplePropertyTypes;
+            this.propertyGetters = propertyGetters;
+        }
+
+        /**
+         * Returns map of property name and class.
+         * @return property name and class
+         */
+        public Map<String, Class> getSimplePropertyTypes()
+        {
+            return simplePropertyTypes;
+        }
+
+        /**
+         * Returns map of property name and getter.
+         * @return property name and getter
+         */
+        public Map<String, EventPropertyGetter> getPropertyGetters()
+        {
+            return propertyGetters;
+        }
+
+        /**
+         * Returns property name list.
+         * @return property name list
+         */
+        public List<String> getPropertyNameList()
+        {
+            return propertyNameList;
+        }
     }
 }

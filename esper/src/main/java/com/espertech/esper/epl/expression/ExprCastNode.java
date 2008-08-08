@@ -8,6 +8,9 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.*;
 
+import java.math.BigInteger;
+import java.math.BigDecimal;
+
 /**
  * Represents the CAST(expression, type) function is an expression tree.
  */
@@ -15,7 +18,8 @@ public class ExprCastNode extends ExprNode
 {
     private final String classIdentifier;
     private Class targetType;
-    private CastExprExecutor executor;
+    private CasterParserComputer casterParserComputer;
+    private boolean isNumeric;
 
     /**
      * Ctor.
@@ -42,15 +46,31 @@ public class ExprCastNode extends ExprNode
             throw new ExprValidationException("Cast function node must have exactly 1 child node");
         }
 
-        // get source type
-        Class sourceType = this.getChildNodes().get(0).getType();
-        sourceType = JavaClassHelper.getBoxedType(sourceType);
+        Class fromType = this.getChildNodes().get(0).getType();
 
-        // detemine target type
+        // identify target type
+        // try the primitive names including "string"
+        SimpleTypeCaster caster;
         targetType = JavaClassHelper.getPrimitiveClassForName(classIdentifier.trim());
-
-        // try to load target type
-        if (targetType == null)
+        if (targetType != null)
+        {
+            targetType = JavaClassHelper.getBoxedType(targetType);
+            caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
+            isNumeric = caster.isNumericCast();
+        }
+        else if (classIdentifier.trim().toLowerCase().equals("BigInteger".toLowerCase()))
+        {
+            targetType = BigInteger.class;
+            caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
+            isNumeric = true;
+        }
+        else if (classIdentifier.trim().toLowerCase().equals("BigDecimal".toLowerCase()))
+        {
+            targetType = BigDecimal.class;
+            caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
+            isNumeric = true;
+        }
+        else
         {
             try
             {
@@ -60,58 +80,29 @@ public class ExprCastNode extends ExprNode
             {
                 throw new ExprValidationException("Class as listed in cast function by name '" + classIdentifier + "' cannot be loaded", e);
             }
+            caster = new SimpleTypeCasterAnyType(targetType);
         }
 
-        // casting to a built-in type
-        if (JavaClassHelper.isJavaBuiltinDataType(targetType))
+        // to-string
+        if (targetType == String.class)
         {
-            targetType = JavaClassHelper.getBoxedType(targetType);
-
-            // no conversion
-            if (targetType == sourceType)
-            {
-                executor = new NoCastExecutor();
-            }
-            // print
-            else if (targetType == String.class)
-            {
-                executor = new StringTargetExecutor();
-            }
-            // parse
-            else if (sourceType == String.class)
-            {
-                SimpleTypeParser parser = SimpleTypeParserFactory.getParser(targetType);
-                executor = new ParseExecutor(parser);
-            }
-            // coerce between numeric types
-            else if ((JavaClassHelper.isNumeric(sourceType)) && (JavaClassHelper.isNumeric(targetType)))
-            {
-                SimpleTypeCaster caster = SimpleTypeCasterFactory.getCaster(targetType);
-                executor = new UncheckedExecutor(caster);
-            }
-            // checked coerce to numeric
-            else if (JavaClassHelper.isNumeric(targetType))
-            {
-                SimpleTypeCaster caster = SimpleTypeCasterFactory.getCaster(targetType);
-                executor = new CheckedNumericCoercionExecutor(caster);
-            }
-            else
-            {
-                throw new ExprValidationException("Cannot cast from type '" + sourceType.getSimpleName() + "' to type '" + targetType.getSimpleName() + "'");
-            }
+            casterParserComputer = new StringXFormComputer();
         }
+        // parse
+        else if (fromType == String.class)
+        {
+            SimpleTypeParser parser = SimpleTypeParserFactory.getParser(JavaClassHelper.getBoxedType(targetType));
+            casterParserComputer = new StringParserComputer(parser);
+        }
+        // numeric cast with check
+        else if (isNumeric)
+        {
+            casterParserComputer = new NumberCasterComputer(caster);
+        }
+        // non-numeric cast
         else
         {
-            // casting to a non-builtin type
-            if (targetType == sourceType)
-            {
-                executor = new NoCastExecutor();
-            }
-            else
-            {
-                SimpleTypeCaster caster = new SimpleTypeCasterAnyType(targetType);
-                executor = new UncheckedExecutor(caster);
-            }
+            casterParserComputer = new NonnumericCasterComputer(caster);
         }
     }
 
@@ -133,7 +124,7 @@ public class ExprCastNode extends ExprNode
             return null;
         }
 
-        return executor.cast(result);
+        return casterParserComputer.compute(result);
     }
 
     public String toExpressionString()
@@ -162,73 +153,98 @@ public class ExprCastNode extends ExprNode
         return false;
     }
 
-    public interface CastExprExecutor
+    /**
+     * Casting and parsing computer.
+     */
+    public interface CasterParserComputer
     {
-        public Object cast(Object input);
+        /**
+         * Compute an result performing casting and parsing.
+         * @param input to process
+         * @return cast or parse result
+         */
+        public Object compute(Object input);
     }
 
-    public class ParseExecutor implements CastExprExecutor
+    /**
+     * Casting and parsing computer.
+     */
+    public static class StringXFormComputer implements CasterParserComputer
     {
-        private SimpleTypeParser parser;
-
-        public ParseExecutor(SimpleTypeParser parser)
-        {
-            this.parser = parser;
-        }
-
-        public Object cast(Object input)
-        {
-            return parser.parse((String)input);
-        }
-    }
-
-    public class CheckedNumericCoercionExecutor implements CastExprExecutor
-    {
-        private SimpleTypeCaster caster;
-
-        public CheckedNumericCoercionExecutor(SimpleTypeCaster caster)
-        {
-            this.caster = caster;
-        }
-
-        public Object cast(Object input)
-        {
-            if (input instanceof Number)
-            {
-                return caster.cast(input);
-            }
-            return null;
-        }
-    }
-
-    public class UncheckedExecutor implements CastExprExecutor
-    {
-        private final SimpleTypeCaster caster;
-
-        public UncheckedExecutor(SimpleTypeCaster caster)
-        {
-            this.caster = caster;
-        }
-
-        public Object cast(Object input)
-        {
-            return caster.cast(input);
-        }
-    }
-
-    public class StringTargetExecutor implements CastExprExecutor
-    {
-        public Object cast(Object input)
+        public Object compute(Object input)
         {
             return input.toString();
         }
     }
 
-    public class NoCastExecutor implements CastExprExecutor
+    /**
+     * Casting and parsing computer.
+     */
+    public static class NumberCasterComputer implements CasterParserComputer
     {
-        public Object cast(Object input)
+        private final SimpleTypeCaster numericTypeCaster;
+
+        /**
+         * Ctor.
+         * @param numericTypeCaster caster
+         */
+        public NumberCasterComputer(SimpleTypeCaster numericTypeCaster)
         {
-            return input;
+            this.numericTypeCaster = numericTypeCaster;
+        }
+
+        public Object compute(Object input)
+        {
+            if (input instanceof Number)
+            {
+                return numericTypeCaster.cast(input);
+            }
+            return null;
         }
     }
+
+    /**
+     * Casting and parsing computer.
+     */
+    public static class StringParserComputer implements CasterParserComputer
+    {
+        private final SimpleTypeParser parser;
+
+        /**
+         * Ctor.
+         * @param parser parser
+         */
+        public StringParserComputer(SimpleTypeParser parser)
+        {
+            this.parser = parser;
+        }
+
+        public Object compute(Object input)
+        {
+            return parser.parse(input.toString());
+        }
+    }
+
+    /**
+     * Casting and parsing computer.
+     */
+    public static class NonnumericCasterComputer implements CasterParserComputer
+    {
+        private final SimpleTypeCaster caster;
+
+        /**
+         * Ctor.
+         * @param numericTypeCaster caster
+         */
+        public NonnumericCasterComputer(SimpleTypeCaster numericTypeCaster)
+        {
+            this.caster = numericTypeCaster;
+        }
+
+        public Object compute(Object input)
+        {
+            return caster.cast(input);
+        }
+    }
+
 }

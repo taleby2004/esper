@@ -18,6 +18,10 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.generated.EsperEPL2Ast;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.type.*;
+import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.PlaceholderParser;
+import com.espertech.esper.util.PlaceholderParseException;
+import com.espertech.esper.antlr.ASTUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.antlr.runtime.tree.Tree;
@@ -224,7 +228,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case LEFT_OUTERJOIN_EXPR:
             case RIGHT_OUTERJOIN_EXPR:
             case FULL_OUTERJOIN_EXPR:
-                leaveOuterJoin(node);
+            case INNERJOIN_EXPR:
+                leaveOuterInnerJoin(node);
                 break;
             case GROUP_BY_EXPR:
                 leaveGroupBy(node);
@@ -241,7 +246,12 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case SEC_LIMIT_EXPR:
             case MIN_LIMIT_EXPR:
             case TIMEPERIOD_LIMIT_EXPR:
+            case CRONTAB_LIMIT_EXPR:
+            case WHEN_LIMIT_EXPR:
             	leaveOutputLimit(node);
+            	break;
+            case ROW_LIMIT_EXPR:
+            	leaveRowLimit(node);
             	break;
             case INSERTINTO_EXPR:
             	leaveInsertInto(node);
@@ -272,6 +282,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 break;
             case OBSERVER_EXPR:
                 leaveObserver(node);
+                break;
+            case MATCH_UNTIL_EXPR:
+                leaveMatch(node);
                 break;
             case IN_SET:
             case NOT_IN_SET:
@@ -384,20 +397,43 @@ public class EPLTreeWalker extends EsperEPL2Ast
         String windowName = node.getChild(0).getText();
 
         String eventName = null;
-        for (int i = 0; i < node.getChildCount(); i++)
+        Tree eventNameNode = ASTUtil.findFirstNode(node, CLASS_IDENT);
+        if (eventNameNode != null)
         {
-        	Tree child = node.getChild(i);
-            if (child.getType() == CLASS_IDENT) // the event type
-            {
-                eventName = child.getText();
-            }
+            eventName = eventNameNode.getText();
         }
         if (eventName == null)
         {
-            throw new ASTWalkException("Event type AST not found");
+            eventName = "java.lang.Object";
         }
 
-        CreateWindowDesc desc = new CreateWindowDesc(windowName, viewSpecs);
+        // handle table-create clause, i.e. (col1 type, col2 type)
+        if ((node.getChildCount() > 2) && node.getChild(2).getType() == CREATE_WINDOW_COL_TYPE_LIST)
+        {
+            Tree parent = node.getChild(2);
+            for (int i = 0; i < parent.getChildCount(); i++)
+            {
+                String name = parent.getChild(i).getChild(0).getText();
+                String type = parent.getChild(i).getChild(1).getText();
+                Class clazz = JavaClassHelper.getClassForSimpleName(type);
+                SelectClauseExprRawSpec selectElement = new SelectClauseExprRawSpec(new ExprConstantNode(clazz), name);
+                statementSpec.getSelectClauseSpec().add(selectElement);
+            }
+        }
+
+        boolean isInsert = false;
+        ExprNode insertWhereExpr = null;
+        Tree insertNode = ASTUtil.findFirstNode(node, INSERT);
+        if (insertNode != null)
+        {
+            isInsert = true;
+            if (insertNode.getChildCount() > 0)
+            {
+                insertWhereExpr = ASTUtil.getRemoveExpr(insertNode.getChild(0),  this.astExprNodeMap);
+            }
+        }
+
+        CreateWindowDesc desc = new CreateWindowDesc(windowName, viewSpecs, isInsert, insertWhereExpr);
         statementSpec.setCreateWindowDesc(desc);
 
         FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, new LinkedList<ExprNode>());
@@ -502,18 +538,24 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
         else
         {
-            OnTriggerSetDesc setDesc = getOnTriggerSet(typeChildNode);
-            statementSpec.setOnTriggerDesc(setDesc);
+            List<OnTriggerSetAssignment> assignments = getOnTriggerSetAssignments(typeChildNode, astExprNodeMap);
+            statementSpec.setOnTriggerDesc(new OnTriggerSetDesc(assignments));
         }
         statementSpec.getStreamSpecs().add(streamSpec);
     }
 
-    private OnTriggerSetDesc getOnTriggerSet(Tree typeChildNode)
+    /**
+     * Returns the list of set-variable assignments under the given node.
+     * @param childNode node to inspect
+     * @param astExprNodeMap map of AST to expression
+     * @return list of assignments
+     */
+    protected static List<OnTriggerSetAssignment> getOnTriggerSetAssignments(Tree childNode, Map<Tree, ExprNode> astExprNodeMap)
     {
-        OnTriggerSetDesc desc = new OnTriggerSetDesc();
+        List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
 
         int count = 0;
-        Tree child = typeChildNode.getChild(count);
+        Tree child = childNode.getChild(count);
         do
         {
             // get variable name
@@ -524,16 +566,16 @@ public class EPLTreeWalker extends EsperEPL2Ast
             String variableName = child.getText();
 
             // get expression
-            child = typeChildNode.getChild(++count);
+            child = childNode.getChild(++count);
             ExprNode childEvalNode = astExprNodeMap.get(child);
             astExprNodeMap.remove(child);
 
-            desc.addAssignment(new OnTriggerSetAssignment(variableName, childEvalNode));
-            child = typeChildNode.getChild(++count);
+            assignments.add(new OnTriggerSetAssignment(variableName, childEvalNode));
+            child = childNode.getChild(++count);
         }
-        while (count < typeChildNode.getChildCount());
+        while (count < childNode.getChildCount());
 
-        return desc;
+        return assignments;
     }
 
     private UniformPair<String> getWindowName(Tree typeChildNode)
@@ -878,6 +920,25 @@ public class EPLTreeWalker extends EsperEPL2Ast
             Tree dbrootNode = node.getChild(0);
             String dbName = dbrootNode.getChild(0).getText();
             String sqlWithParams = StringValue.parseString(dbrootNode.getChild(1).getText().trim());
+
+            // determine if there is variables used
+            List<PlaceholderParser.Fragment> sqlFragments;
+            try
+            {
+                sqlFragments = PlaceholderParser.parsePlaceholder(sqlWithParams);
+                for (PlaceholderParser.Fragment fragment : sqlFragments)
+                {
+                    if (variableService.getReader(fragment.getValue()) != null)
+                    {
+                        statementSpec.setHasVariables(true);
+                    }
+                }
+            }
+            catch (PlaceholderParseException ex)
+            {
+                log.warn("Failed to parse SQL text for parameter and variable use '" + sqlWithParams + "' :" + ex.getMessage());
+                // Let the view construction handle the validation
+            }
 
             String sampleSQL = null;
             if (dbrootNode.getChildCount() > 2)
@@ -1264,7 +1325,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
     {
         log.debug(".leaveOutputLimit");
 
-        OutputLimitSpec spec = ASTOutputLimitHelper.buildOutputLimitSpec(node);
+        OutputLimitSpec spec = ASTOutputLimitHelper.buildOutputLimitSpec(node, engineTime, astExprNodeMap);
         statementSpec.setOutputLimitSpec(spec);
 
         if (spec.getVariableName() != null)
@@ -1273,9 +1334,22 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
     }
 
-    private void leaveOuterJoin(Tree node)
+    private void leaveRowLimit(Tree node) throws ASTWalkException
     {
-        log.debug(".leaveOuterJoin");
+        log.debug(".leaveRowLimit");
+
+        RowLimitSpec spec = ASTOutputLimitHelper.buildRowLimitSpec(node);
+        statementSpec.setRowLimitSpec(spec);
+
+        if ((spec.getNumRowsVariable() != null) || (spec.getOptionalOffsetVariable() != null))
+        {
+            statementSpec.setHasVariables(true);
+        }
+    }
+
+    private void leaveOuterInnerJoin(Tree node)
+    {
+        log.debug(".leaveOuterInnerJoin");
 
         OuterJoinType joinType;
         switch (node.getType())
@@ -1288,6 +1362,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 break;
             case FULL_OUTERJOIN_EXPR:
                 joinType = OuterJoinType.FULL;
+                break;
+            case INNERJOIN_EXPR:
+                joinType = OuterJoinType.INNER;
                 break;
             default:
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized outer join node type");
@@ -1618,6 +1695,77 @@ public class EPLTreeWalker extends EsperEPL2Ast
         PatternObserverSpec observerSpec = new PatternObserverSpec(objectNamespace, objectName, objectParams);
         EvalObserverNode observerNode = new EvalObserverNode(observerSpec);
         astPatternNodeMap.put(node, observerNode);
+    }
+
+    private void leaveMatch(Tree node) throws ASTWalkException
+    {
+        log.debug(".leaveMatch");
+
+        boolean hasRange = true;
+        int type = node.getChild(0).getType();
+        EvalMatchUntilSpec spec;
+        if (type == MATCH_UNTIL_RANGE_HALFOPEN)
+        {
+            Double low = DoubleValue.parseString(node.getChild(0).getChild(0).getText());
+            spec = new EvalMatchUntilSpec(low.intValue(), null);
+        }
+        else if (type == MATCH_UNTIL_RANGE_HALFCLOSED)
+        {
+            String high = node.getChild(0).getChild(0).getText();
+            if (high.charAt(0) == '.')
+            {
+                high = high.substring(1);
+            }
+            Double highVal = DoubleValue.parseString(high);
+            if (highVal.intValue() == 0)
+            {
+                throw new ASTWalkException("Incorrect range specification, a high endpoint of zero is not allowed");
+            }
+            spec = new EvalMatchUntilSpec(null, highVal.intValue());
+        }
+        else if (type == MATCH_UNTIL_RANGE_BOUNDED)
+        {
+            Double low = DoubleValue.parseString(node.getChild(0).getChild(0).getText());
+            if (low == 0)
+            {
+                throw new ASTWalkException("Incorrect range specification, a bounds of zero is not allowed");
+            }
+            spec = new EvalMatchUntilSpec(low.intValue(), low.intValue());
+        }
+        else if (type == MATCH_UNTIL_RANGE_CLOSED)
+        {
+            Double low = DoubleValue.parseString(node.getChild(0).getChild(0).getText());
+            String high = node.getChild(0).getChild(1).getText();
+            if (high.charAt(0) == '.')
+            {
+                high = high.substring(1);
+            }
+            Double highVal = DoubleValue.parseString(high);
+
+            if (highVal < low)
+            {
+                throw new ASTWalkException("Incorrect range specification, lower bounds value '" + low.intValue() +
+                        "' is higher then higher bounds '" + highVal.intValue() + "'");
+            }
+            if ((highVal == 0) && (low == 0))
+            {
+                throw new ASTWalkException("Incorrect range specification, lower bounds and higher bounds values are zero");
+            }
+            spec = new EvalMatchUntilSpec(low.intValue(), highVal.intValue());
+        }
+        else
+        {
+            spec = new EvalMatchUntilSpec(null, null);
+            hasRange = false;
+        }
+
+        if ((node.getChildCount() == 2) && (hasRange) && (!spec.isTightlyBound()))
+        {
+            throw new ASTWalkException("Variable bounds repeat operator requires an until-expression");            
+        }
+
+        EvalMatchUntilNode fbNode = new EvalMatchUntilNode(spec);
+        astPatternNodeMap.put(node, fbNode);
     }
 
     private void leaveSelectClause(Tree node)

@@ -5,6 +5,7 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.spec.OutputLimitSpec;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
@@ -31,6 +32,7 @@ public class OutputProcessViewSnapshot extends OutputProcessView
      * @param statementContext is the services the output condition may depend on
      * @param isInsertInto is true if the statement is a insert-into
      * @param outputStrategy is the method to use to produce output
+     * @throws  ExprValidationException if validation of the output expressions fails
      */
     public OutputProcessViewSnapshot(ResultSetProcessor resultSetProcessor,
                           OutputStrategy outputStrategy,
@@ -38,6 +40,7 @@ public class OutputProcessViewSnapshot extends OutputProcessView
                           int streamCount,
     					  OutputLimitSpec outputLimitSpec,
     					  StatementContext statementContext)
+            throws ExprValidationException
     {
         super(resultSetProcessor, outputStrategy, isInsertInto, statementContext.getStatementResultService());
         log.debug(".ctor");

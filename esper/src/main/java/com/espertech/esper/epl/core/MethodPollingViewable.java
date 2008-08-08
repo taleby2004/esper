@@ -1,12 +1,16 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.collection.IterablesArrayIterator;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.db.DataCache;
 import com.espertech.esper.epl.db.PollExecStrategy;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeIdentifierVisitor;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 import com.espertech.esper.epl.spec.MethodStreamSpec;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventBean;
@@ -15,10 +19,7 @@ import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.View;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Polling-data provider that calls a static method on a class and passed parameters, and wraps the
@@ -32,8 +33,23 @@ public class MethodPollingViewable implements HistoricalEventViewable
     private final List<ExprNode> inputParameters;
     private final DataCache dataCache;
     private final EventType eventType;
+    private final ThreadLocal<DataCache> dataCacheThreadLocal = new ThreadLocal<DataCache>();
 
+    private SortedSet<Integer> requiredStreams;
     private ExprNode[] validatedExprNodes;
+
+    private static final EventBean[][] NULL_ROWS;
+    static {
+        NULL_ROWS = new EventBean[1][];
+        NULL_ROWS[0] = new EventBean[1];
+    }
+    private static final PollResultIndexingStrategy iteratorIndexingStrategy = new PollResultIndexingStrategy()
+    {
+        public EventTable index(List<EventBean> pollResult, boolean isActiveCache)
+        {
+            return new UnindexedEventTableList(pollResult);
+        }
+    };
 
     /**
      * Ctor.
@@ -65,6 +81,11 @@ public class MethodPollingViewable implements HistoricalEventViewable
         pollExecStrategy.destroy();
     }
 
+    public ThreadLocal<DataCache> getDataCacheThreadLocal()
+    {
+        return dataCacheThreadLocal;
+    }
+
     public void validate(StreamTypeService streamTypeService,
                          MethodResolutionService methodResolutionService,
                          TimeProvider timeProvider,
@@ -73,6 +94,8 @@ public class MethodPollingViewable implements HistoricalEventViewable
         Class[] paramTypes = new Class[inputParameters.size()];
         int count = 0;
         validatedExprNodes = new ExprNode[inputParameters.size()];
+        requiredStreams = new TreeSet<Integer>();
+        ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
 
         for (ExprNode exprNode : inputParameters)
         {
@@ -80,6 +103,13 @@ public class MethodPollingViewable implements HistoricalEventViewable
             validatedExprNodes[count] = validated;
             paramTypes[count] = validated.getType();
             count++;
+
+            validated.accept(visitor);
+        }
+
+        for (Pair<Integer, String> identifier : visitor.getExprProperties())
+        {
+            requiredStreams.add(identifier.getFirst());
         }
 
         // Try to resolve the method, also checking parameter types
@@ -100,6 +130,8 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
     public EventTable[] poll(EventBean[][] lookupEventsPerStream, PollResultIndexingStrategy indexingStrategy)
     {
+        DataCache localDataCache = dataCacheThreadLocal.get();
+
         pollExecStrategy.start();
 
         EventTable[] resultPerInputRow = new EventTable[lookupEventsPerStream.length];
@@ -116,8 +148,24 @@ public class MethodPollingViewable implements HistoricalEventViewable
                 lookupValues[valueNum] = parameterValue;
             }
 
-            // Get the result from cache
-            EventTable result = dataCache.getCached(lookupValues);
+            EventTable result = null;
+
+            // try the threadlocal iteration cache, if set
+            if (localDataCache != null)
+            {
+                result = localDataCache.getCached(lookupValues);
+            }
+
+            // try the connection cache
+            if (result == null)
+            {
+                result = dataCache.getCached(lookupValues);
+                if ((result != null) && (localDataCache != null))
+                {
+                    localDataCache.put(lookupValues, result);
+                }
+            }
+
             if (result != null)     // found in cache
             {
                 resultPerInputRow[row] = result;
@@ -137,6 +185,11 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
                     // save in cache
                     dataCache.put(lookupValues, indexTable);
+
+                    if (localDataCache != null)
+                    {
+                        localDataCache.put(lookupValues, indexTable);
+                    }
                 }
                 catch (EPException ex)
                 {
@@ -153,12 +206,13 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
     public View addView(View view)
     {
+        view.setParent(this);
         return view;
     }
 
     public List<View> getViews()
     {
-        return new LinkedList<View>();
+        return Collections.emptyList();
     }
 
     public boolean removeView(View view)
@@ -178,6 +232,17 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
     public Iterator<EventBean> iterator()
     {
-        throw new UnsupportedOperationException("Iterator not supported");
+        EventTable[] result = poll(NULL_ROWS, iteratorIndexingStrategy);
+        return new IterablesArrayIterator(result);
+    }
+
+    public SortedSet<Integer> getRequiredStreams()
+    {
+        return requiredStreams;
+    }
+
+    public boolean hasRequiredStreams()
+    {
+        return !requiredStreams.isEmpty();
     }
 }

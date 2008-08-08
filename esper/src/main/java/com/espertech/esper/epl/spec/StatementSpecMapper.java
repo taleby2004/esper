@@ -8,8 +8,8 @@ import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.type.MathArithTypeEnum;
 import com.espertech.esper.type.MinMaxTypeEnum;
@@ -45,7 +45,7 @@ public class StatementSpecMapper
     private static StatementSpecRaw map(EPStatementObjectModel sodaStatement, StatementSpecMapContext mapContext)
     {
         StatementSpecRaw raw = new StatementSpecRaw(SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
-        mapCreateWindow(sodaStatement.getCreateWindow(), raw);
+        mapCreateWindow(sodaStatement.getCreateWindow(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
         mapOnTrigger(sodaStatement.getOnExpr(), raw, mapContext);
         mapInsertInto(sodaStatement.getInsertInto(), raw);
@@ -56,6 +56,7 @@ public class StatementSpecMapper
         mapHaving(sodaStatement.getHavingClause(), raw, mapContext);
         mapOutputLimit(sodaStatement.getOutputLimitClause(), raw, mapContext);
         mapOrderBy(sodaStatement.getOrderByClause(), raw, mapContext);
+        mapRowLimit(sodaStatement.getRowLimitClause(), raw, mapContext);
         return raw;
     }
 
@@ -69,7 +70,7 @@ public class StatementSpecMapper
         StatementSpecUnMapContext unmapContext = new StatementSpecUnMapContext();
 
         EPStatementObjectModel model = new EPStatementObjectModel();
-        unmapCreateWindow(statementSpec.getCreateWindowDesc(), model);
+        unmapCreateWindow(statementSpec.getCreateWindowDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
         unmapOnClause(statementSpec.getOnTriggerDesc(), model, unmapContext);
         unmapInsertInto(statementSpec.getInsertIntoDesc(), model);
@@ -78,8 +79,9 @@ public class StatementSpecMapper
         unmapWhere(statementSpec.getFilterRootNode(), model, unmapContext);
         unmapGroupBy(statementSpec.getGroupByExpressions(), model, unmapContext);
         unmapHaving(statementSpec.getHavingExprRootNode(), model, unmapContext);
-        unmapOutputLimit(statementSpec.getOutputLimitSpec(), model);
+        unmapOutputLimit(statementSpec.getOutputLimitSpec(), model, unmapContext);
         unmapOrderBy(statementSpec.getOrderByList(), model, unmapContext);
+        unmapRowLimit(statementSpec.getRowLimitSpec(), model, unmapContext);
 
         return new StatementSpecUnMapResult(model, unmapContext.getIndexedParams());
     }
@@ -113,13 +115,22 @@ public class StatementSpecMapper
         }
     }
 
-    private static void unmapCreateWindow(CreateWindowDesc createWindowDesc, EPStatementObjectModel model)
+    private static void unmapCreateWindow(CreateWindowDesc createWindowDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
     {
         if (createWindowDesc == null)
         {
             return;
         }
-        model.setCreateWindow(new CreateWindowClause(createWindowDesc.getWindowName(), unmapViews(createWindowDesc.getViewSpecs())));
+        Expression filter = null;
+        if (createWindowDesc.getInsertFilter() != null)
+        {
+            filter = unmapExpressionDeep(createWindowDesc.getInsertFilter(), unmapContext);
+        }
+
+        CreateWindowClause clause = new CreateWindowClause(createWindowDesc.getWindowName(), unmapViews(createWindowDesc.getViewSpecs()));
+        clause.setInsert(createWindowDesc.isInsert());
+        clause.setInsertWhereClause(filter);
+        model.setCreateWindow(clause);
     }
 
     private static void unmapCreateVariable(CreateVariableDesc createVariableDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -152,7 +163,7 @@ public class StatementSpecMapper
         model.setOrderByClause(clause);
     }
 
-    private static void unmapOutputLimit(OutputLimitSpec outputLimitSpec, EPStatementObjectModel model)
+    private static void unmapOutputLimit(OutputLimitSpec outputLimitSpec, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
     {
         if (outputLimitSpec == null)
         {
@@ -177,18 +188,55 @@ public class StatementSpecMapper
             selector = OutputLimitSelector.ALL;
         }
 
+        OutputLimitClause clause;
         OutputLimitUnit unit = OutputLimitUnit.EVENTS;
         if (outputLimitSpec.getRateType() == OutputLimitRateType.TIME_MIN)
         {
             unit = OutputLimitUnit.MINUTES;
+            clause = new OutputLimitClause(selector, outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), unit);
         }
-        if (outputLimitSpec.getRateType() == OutputLimitRateType.TIME_SEC)
+        else if (outputLimitSpec.getRateType() == OutputLimitRateType.TIME_SEC)
         {
             unit = OutputLimitUnit.SECONDS;
+            clause = new OutputLimitClause(selector, outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), unit);
+        }
+        else if (outputLimitSpec.getRateType() == OutputLimitRateType.WHEN_EXPRESSION)
+        {
+            unit = OutputLimitUnit.WHEN_EXPRESSION;
+            Expression whenExpression = unmapExpressionDeep(outputLimitSpec.getWhenExpressionNode(), unmapContext);
+            List<Pair<String, Expression>> thenAssignments = new ArrayList<Pair<String, Expression>>();
+            clause = new OutputLimitClause(selector, whenExpression, thenAssignments);
+            if (outputLimitSpec.getThenExpressions() != null)
+            {
+                for (OnTriggerSetAssignment assignment : outputLimitSpec.getThenExpressions())
+                {
+                    Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
+                    clause.addThenAssignment(assignment.getVariableName(), expr);
+                }
+            }            
+        }
+        else if (outputLimitSpec.getRateType() == OutputLimitRateType.CRONTAB)
+        {
+            unit = OutputLimitUnit.CRONTAB_EXPRESSION;
+            clause = new OutputLimitClause(selector, outputLimitSpec.getCrontabAtSchedule()); 
+        }
+        else
+        {
+            clause = new OutputLimitClause(selector, outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), unit);
         }
 
-        OutputLimitClause clause = new OutputLimitClause(selector, outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), unit);
         model.setOutputLimitClause(clause);
+    }
+
+    private static void unmapRowLimit(RowLimitSpec rowLimitSpec, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (rowLimitSpec == null)
+        {
+            return;
+        }
+        RowLimitClause spec = new RowLimitClause(rowLimitSpec.getNumRows(), rowLimitSpec.getOptionalOffset(),
+                rowLimitSpec.getNumRowsVariable(), rowLimitSpec.getOptionalOffsetVariable());
+        model.setRowLimitClause(spec);
     }
 
     private static void mapOrderBy(OrderByClause orderByClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -227,6 +275,14 @@ public class StatementSpecMapper
         {
             rateType = OutputLimitRateType.TIME_SEC;
         }
+        else if (outputLimitClause.getUnit() == OutputLimitUnit.CRONTAB_EXPRESSION)
+        {
+            rateType = OutputLimitRateType.CRONTAB;
+        }
+        else if (outputLimitClause.getUnit() == OutputLimitUnit.WHEN_EXPRESSION)
+        {
+            rateType = OutputLimitRateType.WHEN_EXPRESSION;
+        }
 
         Double frequency = outputLimitClause.getFrequency();
         String frequencyVariable = outputLimitClause.getFrequencyVariable();
@@ -236,7 +292,21 @@ public class StatementSpecMapper
             mapContext.setHasVariables(true);
         }
 
-        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit);
+        ExprNode whenExpression = null;
+        List<OnTriggerSetAssignment> assignments = null;
+        if (outputLimitClause.getWhenExpression() != null)
+        {
+            whenExpression = mapExpressionDeep(outputLimitClause.getWhenExpression(), mapContext);
+
+            assignments = new ArrayList<OnTriggerSetAssignment>();
+            for (Pair<String, Expression> pair : outputLimitClause.getThenAssignments())
+            {
+                ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
+                assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+            }
+        }
+
+        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, outputLimitClause.getCrontabAtParameters());
         raw.setOutputLimitSpec(spec);
     }
 
@@ -260,19 +330,35 @@ public class StatementSpecMapper
         else if (onExpr instanceof OnSetClause)
         {
             OnSetClause setClause = (OnSetClause) onExpr;
-            OnTriggerSetDesc desc = new OnTriggerSetDesc();
             mapContext.setHasVariables(true);
+            List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
             for (Pair<String, Expression> pair : setClause.getAssignments())
             {
                 ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
-                desc.addAssignment(new OnTriggerSetAssignment(pair.getFirst(), expr));
+                assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
             }
+            OnTriggerSetDesc desc = new OnTriggerSetDesc(assignments);
             raw.setOnTriggerDesc(desc);
         }
         else
         {
             throw new IllegalArgumentException("Cannot map on-clause expression type : " + onExpr);
         }
+    }
+
+    private static void mapRowLimit(RowLimitClause rowLimitClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    {
+        if (rowLimitClause == null)
+        {
+            return;
+        }
+        if ((rowLimitClause.getNumRowsVariable() != null) ||
+            (rowLimitClause.getOptionalOffsetRowsVariable() != null))
+        {
+            raw.setHasVariables(true);
+        }
+        raw.setRowLimitSpec(new RowLimitSpec(rowLimitClause.getNumRows(), rowLimitClause.getOptionalOffsetRows(),
+                rowLimitClause.getNumRowsVariable(), rowLimitClause.getOptionalOffsetRowsVariable()));
     }
 
     private static void mapHaving(Expression havingClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -465,14 +551,19 @@ public class StatementSpecMapper
                         insertIntoDesc.getColumnNames().toArray(new String[0]), s));
     }
 
-    private static void mapCreateWindow(CreateWindowClause createWindow, StatementSpecRaw raw)
+    private static void mapCreateWindow(CreateWindowClause createWindow, StatementSpecRaw raw, StatementSpecMapContext mapContext)
     {
         if (createWindow == null)
         {
             return;
         }
 
-        raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews())));
+        ExprNode insertFromWhereExpr = null;
+        if (createWindow.getInsertWhereClause() != null)
+        {
+            insertFromWhereExpr = mapExpressionDeep(createWindow.getInsertWhereClause(), mapContext);
+        }
+        raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews()), createWindow.isInsert(), insertFromWhereExpr));
     }
 
     private static void mapCreateVariable(CreateVariableClause createVariable, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -1182,6 +1273,11 @@ public class StatementSpecMapper
         {
             return new EvalNotNode();
         }
+        else if (eval instanceof PatternMatchUntilExpr)
+        {
+            PatternMatchUntilExpr until = (PatternMatchUntilExpr) eval;
+            return new EvalMatchUntilNode(new EvalMatchUntilSpec(until.getLow(), until.getHigh()));
+        }
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }
 
@@ -1224,6 +1320,11 @@ public class StatementSpecMapper
             EvalGuardNode guardNode = (EvalGuardNode) eval;
             return new PatternGuardExpr(guardNode.getPatternGuardSpec().getObjectNamespace(),
                     guardNode.getPatternGuardSpec().getObjectName(), guardNode.getPatternGuardSpec().getObjectParameters());
+        }
+        else if (eval instanceof EvalMatchUntilNode)
+        {
+            EvalMatchUntilNode matchUntilNode = (EvalMatchUntilNode) eval;
+            return new PatternMatchUntilExpr(matchUntilNode.getSpec().getLowerBounds(), matchUntilNode.getSpec().getUpperBounds());
         }
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }

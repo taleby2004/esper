@@ -7,7 +7,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.spec;
 
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.MetaDefItem;
+
+import java.util.List;
 
 /**
  * Spec for defining an output rate
@@ -18,6 +21,9 @@ public class OutputLimitSpec implements MetaDefItem
     private final OutputLimitRateType rateType;
     private final Double rate;
     private final String variableName;
+    private ExprNode whenExpressionNode;
+    private final List<OnTriggerSetAssignment> thenExpressions;    
+    private final Object[] crontabAtSchedule;
 
     /**
 	 * Ctor.
@@ -26,13 +32,19 @@ public class OutputLimitSpec implements MetaDefItem
 	 * @param displayLimit - indicates whether to output only the first, only the last, or all events
      * @param variableForRate - an optional variable name instead of the rate
      * @param rateType - type of the rate
-	 */
-	public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit)
+     * @param whenExpressionNode - for controlling output by a boolean expression
+     * @param thenExpressions variable assignments, if null if none
+     * @param crontabAtSchedule - crontab parameters
+     */
+    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, Object[] crontabAtSchedule)
 	{
 		this.rate = rate;
 		this.displayLimit = displayLimit;
         this.variableName = variableForRate;
         this.rateType = rateType;
+        this.crontabAtSchedule = crontabAtSchedule;
+        this.whenExpressionNode = whenExpressionNode;
+        this.thenExpressions = thenExpressions;
     }
 
     /**
@@ -69,5 +81,41 @@ public class OutputLimitSpec implements MetaDefItem
     public String getVariableName()
     {
         return variableName;
+    }
+
+    /**
+     * Returns the when-keyword trigger expression, or null if not using when.
+     * @return expression
+     */
+    public ExprNode getWhenExpressionNode()
+    {
+        return whenExpressionNode;
+    }
+
+    /**
+     * Returns crontab parameters, or null if not using crontab-at output.
+     * @return schedule parameters
+     */
+    public Object[] getCrontabAtSchedule()
+    {
+        return crontabAtSchedule;
+    }
+
+    /**
+     * Sets a new when-keyword trigger expression.
+     * @param whenExpressionNode to set
+     */
+    public void setWhenExpressionNode(ExprNode whenExpressionNode)
+    {
+        this.whenExpressionNode = whenExpressionNode;
+    }
+
+    /**
+     * Returns a list of variable assignments, or null if none made.
+     * @return variable assignments
+     */
+    public List<OnTriggerSetAssignment> getThenExpressions()
+    {
+        return thenExpressions;
     }
 }

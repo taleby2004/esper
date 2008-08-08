@@ -12,10 +12,13 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.RelationalOpEnum;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.SimpleNumberCoercer;
+import com.espertech.esper.util.SimpleNumberCoercerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -44,10 +47,12 @@ public final class FilterSpecCompiler
      * @param eventTypeAlias is the alias name of the event type
      * @param filterExpessions is a list of filter expressions
      * @param taggedEventTypes is a map of stream names (tags) and event types available
+     * @param arrayEventTypes is a map of name tags and event type per tag for repeat-expressions that generate an array of events
      * @param streamTypeService is used to set rules for resolving properties
      * @param methodResolutionService resolved imports for static methods and such
      * @param timeProvider - provides engine current time
      * @param variableService - provides access to variables
+     * @param eventAdapterService - for event type and bean generation
      * @return compiled filter specification
      * @throws ExprValidationException if the expression or type validations failed
      */
@@ -55,10 +60,12 @@ public final class FilterSpecCompiler
                                                     String eventTypeAlias,
                                                     List<ExprNode> filterExpessions,
                                                     LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
+                                                    LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
                                                     StreamTypeService streamTypeService,
                                                     MethodResolutionService methodResolutionService,
                                                     TimeProvider timeProvider,
-                                                    VariableService variableService)
+                                                    VariableService variableService,
+                                                    EventAdapterService eventAdapterService)
             throws ExprValidationException
     {
         // Validate all nodes, make sure each returns a boolean and types are good;
@@ -66,7 +73,7 @@ public final class FilterSpecCompiler
         List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService, timeProvider, variableService);
 
         // From the constituents make a filter specification
-        FilterSpecCompiled spec = makeFilterSpec(eventType, eventTypeAlias, constituents, taggedEventTypes, variableService);
+        FilterSpecCompiled spec = makeFilterSpec(eventType, eventTypeAlias, constituents, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService);
         if (log.isDebugEnabled())
         {
             log.debug(".makeFilterSpec spec=" + spec);
@@ -209,7 +216,9 @@ public final class FilterSpecCompiler
                                                      String eventTypeAlias,
                                                      List<ExprNode> constituents,
                                                      LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
-                                                     VariableService variableService)
+                                                     LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
+                                                     VariableService variableService,
+                                                     EventAdapterService eventAdapterService)
             throws ExprValidationException
     {
         FilterParamExprMap filterParamExprMap = new FilterParamExprMap();
@@ -252,7 +261,7 @@ public final class FilterSpecCompiler
         // if there are boolean expressions, add
         if (exprNode != null)
         {
-            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, variableService);
+            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService);
             filterParams.add(param);
         }
 
@@ -278,7 +287,7 @@ public final class FilterSpecCompiler
             {
                 FilterSpecParamEventProp eventProp = (FilterSpecParamEventProp) param;
                 values.add(new InSetOfValuesEventProp(eventProp.getResultEventAsName(), eventProp.getResultEventProperty(),
-                        eventProp.isMustCoerce(), eventProp.getCoercionType()));
+                        eventProp.isMustCoerce(), JavaClassHelper.getBoxedType(eventProp.getCoercionType())));
             }
             else
             {
@@ -417,7 +426,7 @@ public final class FilterSpecCompiler
                     }
 
                     boolean isMustCoerce = false;
-                    Class numericCoercionType = identNodeInSet.getType();
+                    Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeInSet.getType());
                     if (identNodeInner.getType() != identNodeInSet.getType())
                     {
                         if (JavaClassHelper.isNumeric(identNodeInSet.getType()))
@@ -526,7 +535,8 @@ public final class FilterSpecCompiler
         String propertyName = identNodeLeft.getResolvedPropertyName();
 
         boolean isMustCoerce = false;
-        Class numericCoercionType = identNodeLeft.getType();
+        SimpleNumberCoercer numberCoercer = null;
+        Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeLeft.getType());
         if (identNodeRight.getType() != identNodeLeft.getType())
         {
             if (JavaClassHelper.isNumeric(identNodeRight.getType()))
@@ -536,11 +546,12 @@ public final class FilterSpecCompiler
                     throwConversionError(identNodeRight.getType(), identNodeLeft.getType(), identNodeLeft.getResolvedPropertyName());
                 }
                 isMustCoerce = true;
+                numberCoercer = SimpleNumberCoercerFactory.getCoercer(identNodeRight.getType(), numericCoercionType);
             }
         }
 
         return new FilterSpecParamEventProp(propertyName, op, identNodeRight.getResolvedStreamName(), identNodeRight.getResolvedPropertyName(),
-                isMustCoerce, numericCoercionType);
+                isMustCoerce, numberCoercer, numericCoercionType);
     }
 
     private static void throwConversionError(Class fromType, Class toType, String propertyName)

@@ -28,8 +28,7 @@ import com.espertech.esper.util.UuidGenerator;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.collection.Pair;
 
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 import java.net.URI;
 
 /**
@@ -104,8 +103,34 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             throw new ExprValidationException("Failed to resolve pattern object: " + e.getMessage(), e); 
         }
 
+        // Determine tags that are arrays of events, all under the "match" clause
+        Set<String> matchUntilArrayTags = new HashSet<String>();
+        for (EvalMatchUntilNode matchUntilNode : evalNodeAnalysisResult.getRepeatNodes())
+        {
+            Set<String> arrayTags = null;
+            EvalNodeAnalysisResult matchUntilAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(matchUntilNode.getChildNodes().get(0));
+            for (EvalFilterNode filterNode : matchUntilAnalysisResult.getFilterNodes())
+            {
+                String optionalTag = filterNode.getEventAsName();
+                if (optionalTag != null)
+                {
+                    if (arrayTags == null)
+                    {
+                        arrayTags = new HashSet<String>();
+                    }
+                    arrayTags.add(optionalTag);
+                }
+            }
+            if (arrayTags != null)
+            {
+                matchUntilArrayTags.addAll(arrayTags);
+            }
+            matchUntilNode.setTagsArrayedSet(arrayTags);
+        }
+
         // Resolve all event types; some filters are tagged and we keep the order in which they are specified
         LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
+        LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         for (EvalFilterNode filterNode : evalNodeAnalysisResult.getFilterNodes())
         {
             String eventName = filterNode.getRawFilterSpec().getEventTypeAlias();
@@ -120,14 +145,31 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
                 if (pair != null)
                 {
                     existingType = pair.getFirst();
-                }                
+                }
+                if (existingType == null)
+                {
+                    pair = arrayEventTypes.get(optionalTag);
+                    if (pair != null)
+                    {
+                        throw new ExprValidationException("Tag '" + optionalTag + "' for event '" + eventName +
+                                "' used in the repeat-until operator cannot also appear in other filter expressions");
+                    }
+                }
                 if ((existingType != null) && (existingType != eventType))
                 {
-                    throw new IllegalArgumentException("Tag '" + optionalTag + "' for event '" + eventName +
+                    throw new ExprValidationException("Tag '" + optionalTag + "' for event '" + eventName +
                             "' has already been declared for events of type " + existingType.getUnderlyingType().getName());
                 }
                 pair = new Pair<EventType, String>(eventType, eventName);
-                taggedEventTypes.put(optionalTag, pair);
+
+                if (matchUntilArrayTags.contains(optionalTag))
+                {
+                    arrayEventTypes.put(optionalTag, pair);                    
+                }
+                else
+                {
+                    taggedEventTypes.put(optionalTag, pair);
+                }
             }
 
             // For this filter, filter types are all known tags at this time,
@@ -144,13 +186,35 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             Pair<EventType, String> typePair = new Pair<EventType, String>(eventType, eventName);
             filterTypes.put(selfStreamName, typePair);
             filterTypes.putAll(taggedEventTypes);
-            StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, engineURI, true, false);
 
+            // for the filter, specify all tags used
+            LinkedHashMap<String, Pair<EventType, String>> filterTaggedEventTypes = new LinkedHashMap<String, Pair<EventType, String>>(taggedEventTypes);
+            filterTaggedEventTypes.remove(optionalTag);
+
+            // handle array tags (match-until clause)
+            LinkedHashMap<String, Pair<EventType, String>> arrayCompositeEventTypes = null;
+            if (arrayEventTypes != null)
+            {
+                arrayCompositeEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
+                EventType arrayTagCompositeEventType = eventAdapterService.createAnonymousCompositeType(new HashMap(), arrayEventTypes);
+                for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
+                {
+                    String tag = entry.getKey();
+                    if (!filterTypes.containsKey(tag))
+                    {
+                        Pair<EventType, String> pair = new Pair<EventType, String>(arrayTagCompositeEventType, tag);
+                        filterTypes.put(tag, pair);
+                        arrayCompositeEventTypes.put(tag, pair);
+                    }
+                }
+            }
+
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, engineURI, true, false);
             List<ExprNode> exprNodes = filterNode.getRawFilterSpec().getFilterExpressions();
-            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, eventName, exprNodes, taggedEventTypes, streamTypeService, methodResolutionService, timeProvider, variableService);
+            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, eventName, exprNodes, filterTaggedEventTypes, arrayCompositeEventTypes, streamTypeService, methodResolutionService, timeProvider, variableService, eventAdapterService);
             filterNode.setFilterSpec(spec);
         }
 
-        return new PatternStreamSpecCompiled(evalNode, taggedEventTypes, this.getViewSpecs(), this.getOptionalStreamName(), this.isUnidirectional());
+        return new PatternStreamSpecCompiled(evalNode, taggedEventTypes, arrayEventTypes, this.getViewSpecs(), this.getOptionalStreamName(), this.isUnidirectional());
     }
 }

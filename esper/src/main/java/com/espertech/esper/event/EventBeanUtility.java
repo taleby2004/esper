@@ -278,7 +278,27 @@ public class EventBeanUtility
         String[] properties = event.getEventType().getPropertyNames();
         for (int i = 0; i < properties.length; i++)
         {
-            writer.println( "#" + i + "  " + properties[i] + " = " + event.get(properties[i]));
+            String propName = properties[i];
+            if (propName.contains("[]"))
+            {
+                propName = propName.replace("[]", "");
+            }
+
+            Object property = event.get(propName);
+            String printProperty;
+            if (property == null)
+            {
+                printProperty = "null";
+            }
+            else if (property.getClass().isArray())
+            {
+                printProperty = "Array :" + Arrays.toString((Object[]) property);
+            }
+            else
+            {
+                printProperty = property.toString();
+            }
+            writer.println( "#" + i + "  " + propName + " = " + printProperty);
         }
     }
 
@@ -318,5 +338,19 @@ public class EventBeanUtility
         }
 
         return new UniformPair<Set<MultiKey<EventBean>>>(newEvents, oldEvents);
+    }
+
+    /**
+     * Expand the array passed in by the single element to add.
+     * @param array to expand
+     * @param eventToAdd element to add
+     * @return resized array
+     */
+    public static EventBean[] addToArray(EventBean[] array, EventBean eventToAdd)
+    {
+        EventBean[] newArray = new EventBean[array.length + 1];
+        System.arraycopy(array, 0, newArray, 0, array.length);
+        newArray[newArray.length - 1] = eventToAdd;
+        return newArray;
     }
 }

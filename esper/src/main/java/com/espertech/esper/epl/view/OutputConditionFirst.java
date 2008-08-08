@@ -7,9 +7,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.epl.spec.OutputLimitSpec;
-import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.epl.spec.OutputLimitLimitType;
+import com.espertech.esper.epl.spec.OutputLimitSpec;
+import com.espertech.esper.epl.expression.ExprValidationException;
 
 /**
  * An output condition that is satisfied at the first event
@@ -26,15 +27,17 @@ public class OutputConditionFirst implements OutputCondition
      * @param outputLimitSpec specifies what kind of condition to create
      * @param statementContext supplies the services required such as for scheduling callbacks
      * @param outputCallback is the method to invoke for output
+     * @throws  ExprValidationException if validation of the output expressions fails
 	 */
 	public OutputConditionFirst(OutputLimitSpec outputLimitSpec, StatementContext statementContext, OutputCallback outputCallback)
-	{
+            throws ExprValidationException
+    {
 		if(outputCallback ==  null)
 		{
 			throw new NullPointerException("Output condition by count requires a non-null callback");
 		}
 		this.outputCallback = outputCallback;
-		OutputLimitSpec innerSpec = new OutputLimitSpec(outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), outputLimitSpec.getRateType(), OutputLimitLimitType.DEFAULT);
+		OutputLimitSpec innerSpec = new OutputLimitSpec(outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), outputLimitSpec.getRateType(), OutputLimitLimitType.DEFAULT, outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), outputLimitSpec.getCrontabAtSchedule());
 		OutputCallback localCallback = createCallbackToLocal();
 		this.innerCondition = statementContext.getOutputConditionFactory().createCondition(innerSpec, statementContext, localCallback);
 		this.witnessedFirst = false;

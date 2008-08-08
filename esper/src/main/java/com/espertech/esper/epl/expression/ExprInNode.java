@@ -140,6 +140,15 @@ public class ExprInNode extends ExprNode
         boolean matched = false;
         if (!hasCollection)
         {
+            // coerce upfront when comparing single values, coerce later when comparing against collections
+            if (mustCoerce)
+            {
+                if (inPropResult != null)
+                {
+                    inPropResult = JavaClassHelper.coerceBoxed((Number) inPropResult, coercionType);
+                }
+            }
+
             // handle value-by-value compare
             do
             {
@@ -238,9 +247,8 @@ public class ExprInNode extends ExprNode
         }
         else
         {
-            Number left = JavaClassHelper.coerceBoxed((Number) leftResult, coercionType);
             Number right = JavaClassHelper.coerceBoxed((Number) rightResult, coercionType);
-            return left.equals(right);
+            return leftResult.equals(right);
         }
     }
 

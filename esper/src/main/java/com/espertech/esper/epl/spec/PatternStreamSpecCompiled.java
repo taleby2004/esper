@@ -26,17 +26,19 @@ import java.util.Map;
 public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamSpecCompiled
 {
     private final EvalNode evalNode;
-    private final Map<String, Pair<EventType, String>> taggedEventTypes;       // Stores types for filters with tags
+    private final Map<String, Pair<EventType, String>> taggedEventTypes;       // Stores types for filters with tags, single event
+    private final Map<String, Pair<EventType, String>> arrayEventTypes;       // Stores types for filters with tags, array event
 
     /**
      * Ctor.
      * @param evalNode - pattern evaluation node representing pattern statement
      * @param viewSpecs - specifies what view to use to derive data
      * @param taggedEventTypes - event tags and their types as specified in the pattern, copied to allow original collection to change
+     * @param arrayEventTypes - event tags and their types as specified in the pattern for any repeat-expressions that generate an array of events
      * @param optionalStreamName - stream name, or null if none supplied
      * @param isUnidirectional - true to indicate a unidirectional stream in a join, applicable for joins
      */
-    public PatternStreamSpecCompiled(EvalNode evalNode, Map<String, Pair<EventType, String>> taggedEventTypes, List<ViewSpec> viewSpecs, String optionalStreamName, boolean isUnidirectional)
+    public PatternStreamSpecCompiled(EvalNode evalNode, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, List<ViewSpec> viewSpecs, String optionalStreamName, boolean isUnidirectional)
     {
         super(optionalStreamName, viewSpecs, isUnidirectional);
         this.evalNode = evalNode;
@@ -44,6 +46,10 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
         Map<String, Pair<EventType, String>> copy = new HashMap<String, Pair<EventType, String>>();
         copy.putAll(taggedEventTypes);
         this.taggedEventTypes = copy;
+
+        copy = new HashMap<String, Pair<EventType, String>>();
+        copy.putAll(arrayEventTypes);
+        this.arrayEventTypes = copy;
     }
 
     /**
@@ -62,5 +68,14 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
     public Map<String, Pair<EventType, String>> getTaggedEventTypes()
     {
         return taggedEventTypes;
+    }
+
+    /**
+     * Returns event types tagged in the pattern expression under a repeat-operator.
+     * @return map of tag and event type tagged in pattern expression, repeated an thus producing array events
+     */
+    public Map<String, Pair<EventType, String>> getArrayEventTypes()
+    {
+        return arrayEventTypes;
     }
 }

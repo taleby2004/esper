@@ -17,8 +17,15 @@ import java.util.Iterator;
  */
 public class VAEVariantProcessor implements ValueAddEventProcessor
 {
-    private final VariantSpec variantSpec;
-    private final VariantEventType variantEventType;
+    /**
+     * Specification for the variant stream.
+     */
+    protected final VariantSpec variantSpec;
+
+    /**
+     * The event type representing the variant stream.
+     */
+    protected VariantEventType variantEventType;
 
     /**
      * Ctor.
@@ -37,6 +44,7 @@ public class VAEVariantProcessor implements ValueAddEventProcessor
         {
             strategy = new VariantPropResolutionStrategyDefault(variantSpec);
         }
+
         variantEventType = new VariantEventType(variantSpec, strategy);
     }
 

@@ -178,6 +178,22 @@ public class EventAdapterServiceImpl implements EventAdapterService
         throw new EventTypeException("An event sender for event type named '" + eventTypeAlias + "' could not be created as the type is internal");
     }
 
+    public void updateMapEventType(String mapEventTypeAlias, Map<String, Object> typeMap) throws EventAdapterException
+    {
+        EventType type = aliasToTypeMap.get(mapEventTypeAlias);
+        if (type == null)
+        {
+            throw new EventAdapterException("Event type alias '" + mapEventTypeAlias + "' has not been declared");
+        }
+        if (!(type instanceof MapEventType))
+        {
+            throw new EventAdapterException("Event type by alias '" + mapEventTypeAlias + "' is not a Map event type");
+        }
+
+        MapEventType mapEventType = (MapEventType) type;
+        mapEventType.addAdditionalProperties(typeMap);
+    }
+
     public EventSender getDynamicTypeEventSender(EPRuntimeEventSender epRuntime, URI[] uri) throws EventTypeException
     {
         List<EventSenderURIDesc> handlingFactories = new ArrayList<EventSenderURIDesc>();
@@ -376,9 +392,10 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventType;
     }
 
-    public synchronized EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes) throws EventAdapterException
+    public synchronized EventType addMapType(String eventTypeAlias, Map<String, Class> propertyTypes, Set<String> optionalSuperType) throws EventAdapterException
     {
-        MapEventType newEventType = new MapEventType(eventTypeAlias, propertyTypes, this);
+        Pair<EventType[], Set<EventType>> mapSuperTypes = getMapSuperTypes(optionalSuperType);
+        MapEventType newEventType = new MapEventType(eventTypeAlias, propertyTypes, this, mapSuperTypes.getFirst(), mapSuperTypes.getSecond());
 
         EventType existingType = aliasToTypeMap.get(eventTypeAlias);
         if (existingType != null)
@@ -399,9 +416,10 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return newEventType;
     }
 
-    public synchronized EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes) throws EventAdapterException
+    public synchronized EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes, Set<String> optionalSuperType) throws EventAdapterException
     {
-        MapEventType newEventType = new MapEventType(eventTypeAlias, this, propertyTypes);
+        Pair<EventType[], Set<EventType>> mapSuperTypes = getMapSuperTypes(optionalSuperType);
+        MapEventType newEventType = new MapEventType(eventTypeAlias, this, propertyTypes, mapSuperTypes.getFirst(), mapSuperTypes.getSecond());
 
         EventType existingType = aliasToTypeMap.get(eventTypeAlias);
         if (existingType != null)
@@ -599,7 +617,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
     public final EventType createAnonymousMapType(Map<String, Object> propertyTypes) throws EventAdapterException
     {
         String alias = UuidGenerator.generate(propertyTypes);
-        return new MapEventType(alias, this, propertyTypes);
+        return new MapEventType(alias, this, propertyTypes, null, null);
     }
 
     public final EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException
@@ -627,10 +645,11 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return createAnonymousMapType(types);
     }
 
-    public final EventType createAnonymousCompositeType(Map<String, Pair<EventType, String>> taggedEventTypes)
+    public final EventType createAnonymousCompositeType(Map<String, Pair<EventType, String>> taggedEventTypes,
+                                                        Map<String, Pair<EventType, String>> arrayEventTypes)
     {
         String alias = UuidGenerator.generate(taggedEventTypes);
-        return new CompositeEventType(alias, taggedEventTypes);
+        return new CompositeEventType(alias, taggedEventTypes, arrayEventTypes);
     }
 
 	public final EventBean createWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
@@ -647,7 +666,8 @@ public class EventAdapterServiceImpl implements EventAdapterService
         }
     }
 
-    public final EventBean adapterForCompositeEvent(EventType eventType, Map<String, EventBean> taggedEvents)
+    public final EventBean adapterForCompositeEvent(EventType eventType,
+                                                    Map<String, Object> taggedEvents)
     {
         return new CompositeEventBean(taggedEvents, eventType);
     }
@@ -656,4 +676,75 @@ public class EventAdapterServiceImpl implements EventAdapterService
     {
         javaPackageNames.add(javaPackageName);
     }
+
+    private Pair<EventType[], Set<EventType>> getMapSuperTypes(Set<String> optionalSuperTypes)
+            throws EventAdapterException
+    {
+        if ((optionalSuperTypes == null) || (optionalSuperTypes.isEmpty()))
+        {
+            return new Pair<EventType[], Set<EventType>>(null,null);
+        }
+            
+        EventType[] superTypes = new EventType[optionalSuperTypes.size()];
+        Set<EventType> deepSuperTypes = new LinkedHashSet<EventType>();
+
+        int count = 0;
+        for (String superAlias : optionalSuperTypes)
+        {
+            EventType type = this.aliasToTypeMap.get(superAlias);
+            if (type == null)
+            {
+                throw new EventAdapterException("Map supertype by alias '" + superAlias + "' could not be found");
+            }
+            if (!(type instanceof MapEventType))
+            {
+                throw new EventAdapterException("Supertype by alias '" + superAlias + "' is not a Map, expected a Map event type as a supertype");
+            }
+            superTypes[count++] = type;
+            deepSuperTypes.add(type);
+            addRecursiveSupertypes(deepSuperTypes, type);
+        }
+        return new Pair<EventType[], Set<EventType>>(superTypes,deepSuperTypes);
+    }
+
+    private static void addRecursiveSupertypes(Set<EventType> superTypes, EventType child)
+    {
+        if (child.getSuperTypes() != null)
+        {
+            for (int i = 0; i < child.getSuperTypes().length; i++)
+            {
+                superTypes.add(child.getSuperTypes()[i]);
+                addRecursiveSupertypes(superTypes, child.getSuperTypes()[i]);
+            }
+        }
+    }
+
+    public EventBean[] typeCast(List<EventBean> events, EventType targetType)
+    {
+        EventBean[] convertedArray = new EventBean[events.size()];
+        int count = 0;
+        for (EventBean event : events)
+        {
+            EventBean converted;
+            if (event instanceof WrapperEventBean)
+            {
+                WrapperEventBean wrapper = (WrapperEventBean) event;
+                converted = createWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
+            }
+            else if (event instanceof MapEventBean)
+            {
+                MapEventBean mapEvent = (MapEventBean) event;
+                converted = this.createMapFromValues(mapEvent.getProperties(), targetType);
+            }
+            else
+            {
+                throw new EPException("Unknown event type " + event.getEventType());
+            }
+            convertedArray[count] = converted;
+            count++;
+        }
+        return convertedArray;
+    }
+
+
 }

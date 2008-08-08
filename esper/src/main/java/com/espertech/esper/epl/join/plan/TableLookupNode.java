@@ -12,7 +12,9 @@ import com.espertech.esper.epl.join.exec.ExecNode;
 import com.espertech.esper.epl.join.exec.TableLookupExecNode;
 import com.espertech.esper.epl.join.exec.TableLookupStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.util.IndentWriter;
+import com.espertech.esper.view.Viewable;
 
 /**
  * Specifies exection of a table lookup using the supplied plan for performing the lookup.
@@ -45,7 +47,7 @@ public class TableLookupNode extends QueryPlanNode
                " tableLookupPlan=" + tableLookupPlan);
     }
 
-    public ExecNode makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes)
+    public ExecNode makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists)
     {
         TableLookupStrategy lookupStrategy = tableLookupPlan.makeStrategy(indexesPerStream, streamTypes);
 

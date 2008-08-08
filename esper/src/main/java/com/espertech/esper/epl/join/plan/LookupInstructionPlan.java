@@ -10,8 +10,10 @@ package com.espertech.esper.epl.join.plan;
 import com.espertech.esper.epl.join.exec.TableLookupStrategy;
 import com.espertech.esper.epl.join.exec.LookupInstructionExec;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.util.IndentWriter;
+import com.espertech.esper.view.Viewable;
 
 import java.util.Arrays;
 
@@ -26,6 +28,7 @@ public class LookupInstructionPlan
     private final int[] toStreams;
     private final TableLookupPlan[] lookupPlans;
     private final boolean[] requiredPerStream;
+    private final HistoricalDataPlanNode[] historicalPlans;
 
     /**
      * Ctor.
@@ -34,8 +37,9 @@ public class LookupInstructionPlan
      * @param toStreams - the set of streams to look up in
      * @param lookupPlans - the plan to use for each stream to look up in
      * @param requiredPerStream - indicates which of the lookup streams are required to build a result and which are not
+     * @param historicalPlans - plans for use with historical streams
      */
-    public LookupInstructionPlan(int fromStream, String fromStreamName, int[] toStreams, TableLookupPlan[] lookupPlans, boolean[] requiredPerStream)
+    public LookupInstructionPlan(int fromStream, String fromStreamName, int[] toStreams, TableLookupPlan[] lookupPlans, HistoricalDataPlanNode[] historicalPlans, boolean[] requiredPerStream)
     {
         if (toStreams.length != lookupPlans.length)
         {
@@ -54,6 +58,7 @@ public class LookupInstructionPlan
         this.fromStreamName = fromStreamName;
         this.toStreams = toStreams;
         this.lookupPlans = lookupPlans;
+        this.historicalPlans = historicalPlans;
         this.requiredPerStream = requiredPerStream;
     }
 
@@ -61,14 +66,23 @@ public class LookupInstructionPlan
      * Constructs the executable from the plan.
      * @param indexesPerStream is the index objects for use in lookups
      * @param streamTypes is the types of each stream
+     * @param streamViews the viewable representing each stream
+     * @param historicalStreamIndexLists index management for historical streams
      * @return executable instruction
      */
-    public LookupInstructionExec makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes)
+    public LookupInstructionExec makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists)
     {
         TableLookupStrategy strategies[] = new TableLookupStrategy[lookupPlans.length];
         for (int i = 0; i < lookupPlans.length; i++)
         {
-            strategies[i] = lookupPlans[i].makeStrategy(indexesPerStream, streamTypes);
+            if (lookupPlans[i] != null)
+            {
+                strategies[i] = lookupPlans[i].makeStrategy(indexesPerStream, streamTypes);
+            }
+            else
+            {
+                strategies[i] = historicalPlans[i].makeOuterJoinStategy(streamViews, i, historicalStreamIndexLists);
+            }
         }
         return new LookupInstructionExec(fromStream, fromStreamName, toStreams, strategies, requiredPerStream);
     }
@@ -88,7 +102,14 @@ public class LookupInstructionPlan
         writer.incrIndent();
         for (int i = 0; i < lookupPlans.length; i++)
         {
-            writer.println("plan " + i + " :" + lookupPlans[i].toString());
+            if (lookupPlans[i] != null)
+            {
+                writer.println("plan " + i + " :" + lookupPlans[i].toString());
+            }
+            else
+            {
+                writer.println("plan " + i + " : no lookup plan");
+            }
         }
         writer.decrIndent();
     }

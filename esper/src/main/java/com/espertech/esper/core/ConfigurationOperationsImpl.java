@@ -11,6 +11,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
+import com.espertech.esper.event.vaevent.VariantEventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportException;
@@ -18,10 +19,9 @@ import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.variable.VariableExistsException;
 import com.espertech.esper.epl.variable.VariableTypeException;
+import com.espertech.esper.epl.metric.MetricReportingService;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.net.URI;
 import java.io.Serializable;
 
@@ -35,6 +35,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     private final VariableService variableService;
     private final EngineSettingsService engineSettingsService;
     private final ValueAddEventService valueAddEventService;
+    private final MetricReportingService metricReportingService;
 
     /**
      * Ctor.
@@ -43,18 +44,21 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
      * @param variableService - provides access to variable values
      * @param engineSettingsService - some engine settings are writable
      * @param valueAddEventService - update event handling
+     * @param metricReportingService - for metric reporting
      */
     public ConfigurationOperationsImpl(EventAdapterService eventAdapterService,
                                        EngineImportService engineImportService,
                                        VariableService variableService,
                                        EngineSettingsService engineSettingsService,
-                                       ValueAddEventService valueAddEventService)
+                                       ValueAddEventService valueAddEventService,
+                                       MetricReportingService metricReportingService)
     {
         this.eventAdapterService = eventAdapterService;
         this.engineImportService = engineImportService;
         this.variableService = variableService;
         this.engineSettingsService = engineSettingsService;
         this.valueAddEventService = valueAddEventService;
+        this.metricReportingService = metricReportingService;
     }
 
     public void addEventTypeAutoAlias(String javaPackageName)
@@ -131,7 +135,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         Map<String, Class> types = createPropertyTypes(typeMap);
         try
         {
-            eventAdapterService.addMapType(eventTypeAlias, types);
+            eventAdapterService.addMapType(eventTypeAlias, types, null);
         }
         catch (EventAdapterException t)
         {
@@ -143,7 +147,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     {
         try
         {
-            eventAdapterService.addMapType(eventTypeAlias, typeMap);
+            eventAdapterService.addMapType(eventTypeAlias, typeMap, null);
         }
         catch (EventAdapterException t)
         {
@@ -155,7 +159,25 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     {
         try
         {
-            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap);
+            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap, null);
+        }
+        catch (EventAdapterException t)
+        {
+            throw new ConfigurationException(t.getMessage(), t);
+        }
+    }
+
+    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap, String[] superTypes) throws ConfigurationException
+    {
+        Set<String> superTypeAliases = null;
+        if ((superTypes != null) && (superTypes.length > 0))
+        {
+            superTypeAliases = new HashSet<String>(Arrays.asList(superTypes));
+        }
+
+        try
+        {
+            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap, superTypeAliases);
         }
         catch (EventAdapterException t)
         {
@@ -167,7 +189,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     {
         try
         {
-            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap);
+            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap, null);
         }
         catch (EventAdapterException t)
         {
@@ -260,5 +282,34 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     public void addVariantStream(String variantEventTypeAlias, ConfigurationVariantStream variantStreamConfig)
     {
         valueAddEventService.addVariantStream(variantEventTypeAlias, variantStreamConfig, eventAdapterService);
+    }
+
+    public void updateMapEventType(String mapEventTypeAlias, Map<String, Object> typeMap) throws ConfigurationException
+    {
+        try
+        {
+            eventAdapterService.updateMapEventType(mapEventTypeAlias, typeMap);
+        }
+        catch (EventAdapterException e)
+        {
+            throw new ConfigurationException("Error updating Map event type: " + e.getMessage(), e);
+        }
+    }
+
+    public void setMetricsReportingInterval(String stmtGroupName, long newInterval)
+    {
+        try
+        {
+            metricReportingService.setMetricsReportingInterval(stmtGroupName, newInterval);
+        }
+        catch (RuntimeException e)
+        {
+            throw new ConfigurationException("Error updating interval for metric reporting: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean isVariantStreamExists(String name)
+    {
+        return valueAddEventService.getValueAddProcessor(name).getValueAddEventType() instanceof VariantEventType;
     }
 }

@@ -7,14 +7,14 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URI;
-import java.util.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.util.*;
 
 /**
  * An instance of <tt>Configuration</tt> allows the application
@@ -68,6 +68,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
      * define nested maps.
      */
     protected Map<String, Map<String, Object>> nestableMapAliases;
+
+    /**
+     * Map event types that are subtypes of one or more Map event types
+     */
+    protected Map<String, Set<String>> mapSuperTypes;
 
 	/**
 	 * The class and package name imports that
@@ -265,6 +270,18 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     	addNestableEventTypeAlias(eventTypeAlias, typeMap);
     }
 
+    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap, String[] superTypes)
+    {
+        addNestableEventTypeAlias(eventTypeAlias, typeMap);
+        if (superTypes != null)
+        {
+            for (int i = 0; i < superTypes.length; i++)
+            {
+                this.addMapSuperType(eventTypeAlias, superTypes[i]);
+            }
+        }
+    }
+
     /**
      * Add an alias for an event type that represents java.util.Map events, taking a Map of
      * event property and class name as a parameter.
@@ -282,6 +299,25 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
             properties.put(entry.getKey(), entry.getValue().getName());
         }
         addEventTypeAlias(eventTypeAlias, properties);
+    }
+
+    /**
+     * Add, for a given Map event type identified by the first parameter, the event type alias supertype
+     * of a Map supertype.
+     * <p>
+     * Each Map event type may have any number of supertypes, each supertype must also be of a Map-type event.
+     * @param mapEventTypeAlias the alias of a Map event type, that is to have a supertype
+     * @param mapSupertypeAlias the alias of a Map event type that is the supertype 
+     */
+    public void addMapSuperType(String mapEventTypeAlias, String mapSupertypeAlias)
+    {
+        Set<String> superTypes = mapSuperTypes.get(mapEventTypeAlias);
+        if (superTypes == null)
+        {
+            superTypes = new HashSet<String>();
+            mapSuperTypes.put(mapEventTypeAlias, superTypes);
+        }
+        superTypes.add(mapSupertypeAlias);
     }
 
     /**
@@ -419,6 +455,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public Map<String, ConfigurationRevisionEventType> getRevisionEventTypes()
     {
         return revisionEventTypes;
+    }
+
+    public Map<String, Set<String>> getMapSuperTypes()
+    {
+        return mapSuperTypes;
     }
 
     /**
@@ -571,6 +612,21 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public Map<String, ConfigurationVariantStream> getVariantStreams()
     {
         return variantStreams;
+    }
+
+    public void updateMapEventType(String mapEventTypeAlias, Map<String, Object> typeMap) throws ConfigurationException
+    {
+        throw new UnsupportedOperationException("Map type update is only available in runtime configuration");
+    }
+
+    public boolean isVariantStreamExists(String name)
+    {
+        return variantStreams.containsKey(name);
+    }
+
+    public void setMetricsReportingInterval(String stmtGroupName, long newInterval)
+    {
+        this.getEngineDefaults().getMetricsReporting().setStatementGroupInterval(stmtGroupName, newInterval);
     }
 
     /**
@@ -763,6 +819,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         plugInEventTypes = new HashMap<String, ConfigurationPlugInEventType>();
         revisionEventTypes = new HashMap<String, ConfigurationRevisionEventType>();
         variantStreams = new HashMap<String, ConfigurationVariantStream>();
+        mapSuperTypes = new HashMap<String, Set<String>>();
     }
 
     /**

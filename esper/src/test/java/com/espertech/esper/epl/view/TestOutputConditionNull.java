@@ -1,11 +1,10 @@
 package com.espertech.esper.epl.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 public class TestOutputConditionNull extends TestCase
 {
-
 	private OutputConditionNull condition;	
     private SupportUpdateListener listener;
 	private OutputCallback callback;
@@ -20,11 +19,8 @@ public class TestOutputConditionNull extends TestCase
 		    			listener.update(null, null);
 		    		}
 		    	};
-		condition = new OutputConditionNull(callback);
-    	
+		condition = new OutputConditionNull(callback);    	
     }
-
-
     
     public void testUpdateCondition()
     {
@@ -38,9 +34,6 @@ public class TestOutputConditionNull extends TestCase
     	condition.updateOutputCondition(0,0);
     	assertTrue(listener.getAndClearIsInvoked());
     }
-    
-
-    
 
     public void testIncorrectUse()
 	{
@@ -54,7 +47,4 @@ public class TestOutputConditionNull extends TestCase
 	    	// Expected exception
 	    }
 	}
-
-
-
 }

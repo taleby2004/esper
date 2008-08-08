@@ -14,7 +14,7 @@ public class TestEPLParser extends TestCase
     {
         String className = SupportBean.class.getName();
         //String expression = "select a\\.b\\.c[43]\\.dd('a') from A";
-        String expression = "select count from A";
+        String expression = "select count from A limit 1";
 
         log.debug(".testDisplayAST parsing: " + expression);
         Tree ast = parse(expression);
@@ -105,7 +105,7 @@ public class TestEPLParser extends TestCase
         assertIsInvalid("insert into A(,a) select 1 from b.win:length(1)");
         assertIsInvalid("insert xxx into A(,a) select 1 from b.win:length(1)");
 
-        assertIsInvalid("select coalesce(tick.price) from x");
+        assertIsInvalid("select coalesce(processTimeEvent.price) from x");
 
         // time periods
         assertIsInvalid("select * from x.win:time(sec 99)");
@@ -184,7 +184,6 @@ public class TestEPLParser extends TestCase
         assertIsInvalid("create window AAA as select from MyType");
         assertIsInvalid("create window AAA as , *, b from MyType");
         assertIsInvalid("create window as select a from MyType");
-        assertIsInvalid("create window AAA.win:length(10) select a from MyType");
         assertIsInvalid("create window AAA as select from MyType");
         assertIsInvalid("create window AAA.win:length(10)");
         assertIsInvalid("create window AAA");
@@ -230,6 +229,10 @@ public class TestEPLParser extends TestCase
         assertIsValid("select a from B output snapshot every 3 day");
         assertIsValid("select a from B output snapshot every 1 day 2 hours 3 minutes 4 seconds 5 milliseconds");
         assertIsValid("select a from B output first every 5 events");
+        assertIsValid("select a from B output snapshot at (123, 333, 33, 33, 3)");
+        assertIsValid("select a from B output snapshot at (*, *, *, *, *)");
+        assertIsValid("select a from B output snapshot when myvar*count > 10");
+        assertIsValid("select a from B output snapshot when myvar*count > 10 then set myvar = 1, myvar2 = 2*5");
 
         assertIsValid(preFill + "(string='test',intPrimitive=20).win:lenght(100)");
         assertIsValid(preFill + "(string in ('b', 'a'))");
@@ -303,7 +306,7 @@ public class TestEPLParser extends TestCase
         tryJoin("right");
         tryJoin("full");
         assertIsValid("select * from A left outer join B on a = b and c=d");
-
+        assertIsValid("select * from A left outer join B on a = b and c=d inner join C on d=c");
 
         // complex property access
         assertIsValid("select array[1], map('a'), map(\"b\"), nested.nested " +
@@ -372,9 +375,9 @@ public class TestEPLParser extends TestCase
         assertIsValid("select istream 1, 2 from xxx");
 
         // coalesce
-        assertIsValid("select coalesce(tick.price, 0) from x");
-        assertIsValid("select coalesce(tick.price, null, -1) from x");
-        assertIsValid("select coalesce(tick.price, tick.price, tick.price, tick.price) from x");
+        assertIsValid("select coalesce(processTimeEvent.price, 0) from x");
+        assertIsValid("select coalesce(processTimeEvent.price, null, -1) from x");
+        assertIsValid("select coalesce(processTimeEvent.price, processTimeEvent.price, processTimeEvent.price, processTimeEvent.price) from x");
 
         // time intervals
         assertIsValid("select * from x.win:time(1 seconds)");
@@ -548,9 +551,16 @@ public class TestEPLParser extends TestCase
         assertIsValid("create window AAA as select * from MyType");
         assertIsValid("create window AAA as select a, *, b from MyType");
         assertIsValid("create window AAA as select a from MyType");
+        assertIsValid("create window AAA.win:length(10) select a from MyType");
+        assertIsValid("create window AAA select a from MyType");
         assertIsValid("create window AAA.win:length(10) as select a from MyType");
         assertIsValid("create window AAA.win:length(10) as select a,b from MyType");
         assertIsValid("create window AAA.win:length(10).win:time(1 sec) as select a,b from MyType");
+        assertIsValid("create window AAA as select 0 as val, 2 as noway, '' as stringval, true as boolval from MyType");
+        assertIsValid("create window AAA as (a b, c d, e f)");
+        assertIsValid("create window AAA (a b, c d, e f)");
+        assertIsValid("create window AAA as select * from MyOtherNamedWindow insert");
+        assertIsValid("create window AAA as MyOtherNamedWindow insert where b=4");
 
         // on-delete statement
         assertIsValid("on MyEvent delete from MyNamedWindow");
@@ -604,6 +614,16 @@ public class TestEPLParser extends TestCase
         // properties escaped
         assertIsValid("select a\\.b, a\\.b\\.c.d.e\\.f, zz\\.\\.\\.aa\\.\\.\\.b\\.\\. from A");
         assertIsValid("select count from A");
+
+        // limit
+        assertIsValid("select count from A limit 1");
+        assertIsValid("select count from A limit 1,2");
+        assertIsValid("select count from A limit 1 offset 2");
+        assertIsValid("select count from A where a=b group by x having c=d output every 5 events order by r limit 1 offset 2");
+        assertIsValid("select count from A limit myvar");
+        assertIsValid("select count from A limit myvar,myvar2");
+        assertIsValid("select count from A limit myvar offset myvar2");
+        assertIsValid("select count from A limit -1");
     }
 
     public void testBitWiseCases() throws Exception

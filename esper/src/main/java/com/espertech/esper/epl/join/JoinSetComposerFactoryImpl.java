@@ -9,15 +9,11 @@ package com.espertech.esper.epl.join;
 
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.expression.ExprAndNode;
-import com.espertech.esper.epl.expression.ExprEqualsNode;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.exec.ExecNode;
 import com.espertech.esper.epl.join.plan.*;
-import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.join.table.PropertyIndTableCoerceAll;
-import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
-import com.espertech.esper.epl.join.table.UnindexedEventTable;
+import com.espertech.esper.epl.join.table.*;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.event.EventType;
@@ -59,36 +55,28 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
                                                    boolean[] isNamedWindow)
             throws ExprValidationException
     {
-        // Determine if there is a historical
+        // Determine if there is a historical stream, and what dependencies exist
+        HistoricalDependencyGraph historicalDependencyGraph = new HistoricalDependencyGraph(streamTypes.length);
+        boolean[] isHistorical = new boolean[streamViews.length];
         boolean hasHistorical = false;
         for (int i = 0; i < streamViews.length; i++)
         {
             if (streamViews[i] instanceof HistoricalEventViewable)
             {
-                if (hasHistorical)
-                {
-                    throw new ExprValidationException("Joins between historical data streams are not supported");
-                }
+                HistoricalEventViewable historicalViewable = (HistoricalEventViewable) streamViews[i];
+                isHistorical[i] = true;
                 hasHistorical = true;
-                if (streamTypes.length > 2)
-                {
-                    throw new ExprValidationException("Joins between historical data require a only one event stream in the join");
-                }
+                historicalDependencyGraph.addDependency(i, historicalViewable.getRequiredStreams());
             }
         }
 
         EventTable[][] indexes;
         QueryStrategy[] queryStrategies;
 
-        // Handle a join with a database or other historical data source
-        if (hasHistorical)
+        // Handle a join with a database or other historical data source for 2 streams
+        if ((hasHistorical) && (streamViews.length == 2))
         {
-            Pair<EventTable[][], QueryStrategy[]> indexAndStrategies =
-                    makeComposerHistorical(outerJoinDescList, optionalFilterNode, streamTypes, streamViews);
-            indexes = indexAndStrategies.getFirst();
-            queryStrategies = indexAndStrategies.getSecond();
-
-            return new JoinSetComposerImpl(indexes, queryStrategies, selectStreamSelectorEnum);
+            return makeComposerHistorical2Stream(outerJoinDescList, optionalFilterNode, streamTypes, streamViews);
         }
 
         // Determine if any stream has a unidirectional keyword
@@ -109,13 +97,55 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
             throw new ExprValidationException("The unidirectional keyword requires that no views are declared onto the stream");
         }
 
-        QueryPlan queryPlan = QueryPlanBuilder.getPlan(streamTypes, outerJoinDescList, optionalFilterNode, streamNames);
+        // Query graph for graph relationships between streams/historicals
+        // For outer joins the query graph will just contain outer join relationships
+        QueryGraph queryGraph = new QueryGraph(streamTypes.length);
+        if (!outerJoinDescList.isEmpty())
+        {
+            OuterJoinAnalyzer.analyze(outerJoinDescList, queryGraph);
+            if (log.isDebugEnabled())
+            {
+                log.debug(".makeComposer After outer join queryGraph=\n" + queryGraph);
+            }
+        }
+        else
+        {
+            // Let the query graph reflect the where-clause
+            if (optionalFilterNode != null)
+            {
+                // Analyze relationships between streams using the optional filter expression.
+                // Relationships are properties in AND and EQUALS nodes of joins.
+                FilterExprAnalyzer.analyze(optionalFilterNode, queryGraph);
+                if (log.isDebugEnabled())
+                {
+                    log.debug(".makeComposer After filter expression queryGraph=\n" + queryGraph);
+                }
+
+                // Add navigation entries based on key and index property equivalency (a=b, b=c follows a=c)
+                QueryGraph.fillEquivalentNav(queryGraph);
+                if (log.isDebugEnabled())
+                {
+                    log.debug(".makeComposer After fill equiv. nav. queryGraph=\n" + queryGraph);
+                }
+            }
+        }
+
+        // Historical index lists
+        HistoricalStreamIndexList[] historicalStreamIndexLists = new HistoricalStreamIndexList[streamTypes.length];
+
+        QueryPlan queryPlan = QueryPlanBuilder.getPlan(streamTypes, outerJoinDescList, queryGraph, streamNames,
+                hasHistorical, isHistorical, historicalDependencyGraph, historicalStreamIndexLists);
 
         // Build indexes
         QueryPlanIndex[] indexSpecs = queryPlan.getIndexSpecs();
         indexes = new EventTable[indexSpecs.length][];
         for (int streamNo = 0; streamNo < indexSpecs.length; streamNo++)
         {
+            if (indexSpecs[streamNo] == null)
+            {
+                continue;
+            }
+            
             String[][] indexProps = indexSpecs[streamNo].getIndexProps();
             Class[][] coercionTypes = indexSpecs[streamNo].getCoercionTypesPerIndex();
             indexes[streamNo] = new EventTable[indexProps.length];
@@ -131,7 +161,13 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
         for (int i = 0; i < queryExecSpecs.length; i++)
         {
             QueryPlanNode planNode = queryExecSpecs[i];
-            ExecNode executionNode = planNode.makeExec(indexes, streamTypes);
+            if (planNode == null)
+            {
+                log.debug(".makeComposer No execution node for stream " + i + " '" + streamNames[i] + "'");
+                continue;
+            }
+
+            ExecNode executionNode = planNode.makeExec(indexes, streamTypes, streamViews, historicalStreamIndexLists);
 
             if (log.isDebugEnabled())
             {
@@ -145,7 +181,14 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
         // If all streams have views, normal business is a query plan for each stream
         if (unidirectionalStreamNumber == -1)
         {
-            return new JoinSetComposerImpl(indexes, queryStrategies, selectStreamSelectorEnum);
+            if (hasHistorical)
+            {
+                return new JoinSetComposerHistoricalImpl(indexes, queryStrategies, streamViews);
+            }
+            else
+            {
+                return new JoinSetComposerImpl(indexes, queryStrategies);
+            }
         }
         else
         {
@@ -153,34 +196,60 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
         }
     }
 
-    private Pair<EventTable[][], QueryStrategy[]> makeComposerHistorical(List<OuterJoinDesc> outerJoinDescList,
-                                                                         ExprNode optionalFilterNode,
-                                                                         EventType[] streamTypes,
-                                                                         Viewable[] streamViews)
+    private JoinSetComposer makeComposerHistorical2Stream(List<OuterJoinDesc> outerJoinDescList,
+                                                   ExprNode optionalFilterNode,
+                                                   EventType[] streamTypes,
+                                                   Viewable[] streamViews)
             throws ExprValidationException
     {
-        EventTable[][] indexes;
         QueryStrategy[] queryStrategies;
 
         // No tables for any streams
-        indexes = new EventTable[streamTypes.length][];
         queryStrategies = new QueryStrategy[streamTypes.length];
-        for (int streamNo = 0; streamNo < streamTypes.length; streamNo++)
-        {
-            indexes[streamNo] = new EventTable[0];
-        }
 
-        int polledView = 0;
-        int streamView = 1;
+        int polledViewNum = 0;
+        int streamViewNum = 1;
         if (streamViews[1] instanceof HistoricalEventViewable)
         {
-            streamView = 0;
-            polledView = 1;
+            streamViewNum = 0;
+            polledViewNum = 1;
+        }
+
+        // if all-historical join, check dependency
+        boolean isAllHistoricalNoSubordinate = false;
+        if ((streamViews[0] instanceof HistoricalEventViewable) && (streamViews[1] instanceof HistoricalEventViewable))
+        {
+            HistoricalDependencyGraph graph = new HistoricalDependencyGraph(2);
+            graph.addDependency(0, ((HistoricalEventViewable) streamViews[0]).getRequiredStreams());
+            graph.addDependency(1, ((HistoricalEventViewable) streamViews[1]).getRequiredStreams());
+            if (graph.getFirstCircularDependency() != null)
+            {
+                throw new ExprValidationException("Circular dependency detected between historical streams");
+            }
+
+            // if both streams are independent
+            if (graph.getRootNodes().size() == 2)
+            {
+                isAllHistoricalNoSubordinate = true; // No parameters used by either historical
+            }
+            else
+            {
+                if ((graph.getDependenciesForStream(0).size() == 0))
+                {
+                    streamViewNum = 0;
+                    polledViewNum = 1;
+                }
+                else
+                {
+                    streamViewNum = 1;
+                    polledViewNum = 0;
+                }                
+            }
         }
 
         // Build an outer join expression node
         boolean isOuterJoin = false;
-        ExprEqualsNode outerJoinEqualsNode = null;
+        ExprNode outerJoinEqualsNode = null;
         if (!outerJoinDescList.isEmpty())
         {
             OuterJoinDesc outerJoinDesc = outerJoinDescList.get(0);
@@ -189,20 +258,17 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
                 isOuterJoin = true;
             }
             else if ((outerJoinDesc.getOuterJoinType().equals(OuterJoinType.LEFT)) &&
-                    (streamView == 0))
+                    (streamViewNum == 0))
             {
                     isOuterJoin = true;
             }
             else if ((outerJoinDesc.getOuterJoinType().equals(OuterJoinType.RIGHT)) &&
-                    (streamView == 1))
+                    (streamViewNum == 1))
             {
                     isOuterJoin = true;
             }
 
-            outerJoinEqualsNode = new ExprEqualsNode(false);
-            outerJoinEqualsNode.addChildNode(outerJoinDesc.getLeftNode());
-            outerJoinEqualsNode.addChildNode(outerJoinDesc.getRightNode());
-            outerJoinEqualsNode.validate(null, null, null, null, null);
+            outerJoinEqualsNode  = outerJoinDesc.makeExprNode();
         }
 
         // Determine filter for indexing purposes
@@ -223,16 +289,44 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
         }
 
         Pair<HistoricalIndexLookupStrategy, PollResultIndexingStrategy> indexStrategies =
-                determineIndexing(filterForIndexing, streamTypes[polledView], streamTypes[streamView], polledView, streamView);
+                determineIndexing(filterForIndexing, streamTypes[polledViewNum], streamTypes[streamViewNum], polledViewNum, streamViewNum);
 
-        HistoricalEventViewable viewable = (HistoricalEventViewable) streamViews[polledView];
-        queryStrategies[streamView] = new HistoricalDataQueryStrategy(streamView, polledView, viewable, isOuterJoin, outerJoinEqualsNode,
+        HistoricalEventViewable viewable = (HistoricalEventViewable) streamViews[polledViewNum];
+        queryStrategies[streamViewNum] = new HistoricalDataQueryStrategy(streamViewNum, polledViewNum, viewable, isOuterJoin, outerJoinEqualsNode,
                 indexStrategies.getFirst(), indexStrategies.getSecond());
 
-        return new Pair<EventTable[][], QueryStrategy[]>(indexes, queryStrategies);
+        // for strictly historical joins, create a query strategy for the non-subordinate historical view
+        if (isAllHistoricalNoSubordinate)
+        {
+            isOuterJoin = false;
+            if (!outerJoinDescList.isEmpty())
+            {
+                OuterJoinDesc outerJoinDesc = outerJoinDescList.get(0);
+                if (outerJoinDesc.getOuterJoinType().equals(OuterJoinType.FULL))
+                {
+                    isOuterJoin = true;
+                }
+                else if ((outerJoinDesc.getOuterJoinType().equals(OuterJoinType.LEFT)) &&
+                        (polledViewNum == 0))
+                {
+                        isOuterJoin = true;
+                }
+                else if ((outerJoinDesc.getOuterJoinType().equals(OuterJoinType.RIGHT)) &&
+                        (polledViewNum == 1))
+                {
+                        isOuterJoin = true;
+                }
+            }
+
+            viewable = (HistoricalEventViewable) streamViews[streamViewNum];
+            queryStrategies[polledViewNum] = new HistoricalDataQueryStrategy(polledViewNum, streamViewNum, viewable, isOuterJoin, outerJoinEqualsNode,
+                    new HistoricalIndexLookupStrategyNoIndex(), new PollResultIndexingStrategyNoIndex());
+        }
+
+        return new JoinSetComposerHistoricalImpl(null, queryStrategies, streamViews);
     }
 
-    private Pair<HistoricalIndexLookupStrategy, PollResultIndexingStrategy> determineIndexing(ExprNode filterForIndexing,
+    private static Pair<HistoricalIndexLookupStrategy, PollResultIndexingStrategy> determineIndexing(ExprNode filterForIndexing,
                                                                                               EventType polledViewType,
                                                                                               EventType streamViewType,
                                                                                               int polledViewStreamNum,
@@ -249,6 +343,27 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
         QueryGraph queryGraph = new QueryGraph(2);
         FilterExprAnalyzer.analyze(filterForIndexing, queryGraph);
 
+        return determineIndexing(queryGraph, polledViewType, streamViewType, polledViewStreamNum, streamViewStreamNum);
+    }
+
+    /**
+     * Constructs indexing and lookup strategy for a given relationship that a historical stream may have with another
+     * stream (historical or not) that looks up into results of a poll of a historical stream.
+     * <p>
+     * The term "polled" refers to the assumed-historical stream.
+     * @param queryGraph relationship representation of where-clause filter and outer join on-expressions
+     * @param polledViewType the event type of the historical that is indexed
+     * @param streamViewType the event type of the stream looking up in indexes
+     * @param polledViewStreamNum the stream number of the historical that is indexed
+     * @param streamViewStreamNum the stream number of the historical that is looking up
+     * @return indexing and lookup strategy pair
+     */
+    public static Pair<HistoricalIndexLookupStrategy, PollResultIndexingStrategy> determineIndexing(QueryGraph queryGraph,
+                                                                                                  EventType polledViewType,
+                                                                                                  EventType streamViewType,
+                                                                                                  int polledViewStreamNum,
+                                                                                                  int streamViewStreamNum)
+        {
         // index and key property names
         String[] keyPropertiesJoin = queryGraph.getKeyProperties(streamViewStreamNum, polledViewStreamNum);
         String[] indexPropertiesJoin = queryGraph.getIndexProperties(streamViewStreamNum, polledViewStreamNum);

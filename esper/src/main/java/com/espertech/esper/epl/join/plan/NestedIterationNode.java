@@ -10,8 +10,10 @@ package com.espertech.esper.epl.join.plan;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.epl.join.exec.ExecNode;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.epl.join.exec.NestedIterationExecNode;
 import com.espertech.esper.util.IndentWriter;
+import com.espertech.esper.view.Viewable;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -57,7 +59,7 @@ public class NestedIterationNode extends QueryPlanNode
         return childNodes;
     }
 
-    public ExecNode makeExec(EventTable[][] indexPerStream, EventType[] streamTypes)
+    public ExecNode makeExec(EventTable[][] indexPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexList)
     {
         if (childNodes.isEmpty())
         {
@@ -67,7 +69,7 @@ public class NestedIterationNode extends QueryPlanNode
         NestedIterationExecNode execNode = new NestedIterationExecNode(nestingOrder);
         for (QueryPlanNode child : childNodes)
         {
-            ExecNode childExec = child.makeExec(indexPerStream, streamTypes);
+            ExecNode childExec = child.makeExec(indexPerStream, streamTypes, streamViews, historicalStreamIndexList);
             execNode.addChildNode(childExec);
         }
         return execNode;

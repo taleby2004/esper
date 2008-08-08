@@ -7,10 +7,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
+import com.espertech.esper.epl.variable.VariableReader;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.util.ExecutionPathDebugLog;
-import com.espertech.esper.epl.variable.VariableReader;
 
 /**
  * Output limit condition that is satisfied when either

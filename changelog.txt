@@ -1,21 +1,36 @@
 Esper Changelog
 ===================
 
-esper-2.1.0-JIRA247
+Changes in version 2.2.0
+------------------------
+
+Major API changes
+    
+New Features
+  - Support for repeat and repeat-until in pattern matching
+  - named windows allow constants and table-like definition syntax
+  - plug-in aggregation functions accept multiple parameters
+  - allow inner join and outer join mixed
+  - allow variables used in SQL join and method join
+  - allow polling via iterator a from a statement that contains only an SQL query or a method invocation
+  - fix for ESPER-xxx which is support for iterator on an SQL join or a method join
+  - "as" not required in create window
+  - removed limitation on historical data joins, now supporting an unlimited number of streams in join and iterator
+  - support for Map inheritance
+  - support for adding properties at runtime
+  - optimization for simple filter-only statements that filter using a where-clause
+  - allow create window model after another create window, allow populate from another named window
+  - instrumentation
+  
+Minor changes	    		
+
   - Fixed issue ESPER-247 Cast function for String to Int conversion returns null
   - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
   - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
-
-esper-2.1.0-JIRA246
   - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
   - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
-
-esper-2.1.0-JIRA241
   - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
-
-esperio-2.1.0-JIRA239
   - Fixed issue ESPER-239 esperio - memory leak in AdapterCoordinatorImpl  
-
 
 Changes in version 2.1.0
 ------------------------

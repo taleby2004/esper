@@ -1,4 +1,14 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.util;
+
+import java.math.BigInteger;
+import java.math.BigDecimal;
 
 /**
  * Factory for casters, which take an object and safely cast to a given type, performing coercion or dropping
@@ -8,11 +18,17 @@ public class SimpleTypeCasterFactory
 {
     /**
      * Returns a caster that casts to a target type.
+     * @param fromType can be null, if not known
      * @param targetType to cast to
      * @return caster for casting objects to the required type
      */
-    public static SimpleTypeCaster getCaster(Class targetType)
+    public static SimpleTypeCaster getCaster(Class fromType, Class targetType)
     {
+        if (fromType == targetType)
+        {
+            return new NullCaster();
+        }
+
         targetType = JavaClassHelper.getBoxedType(targetType);
         if (targetType == Integer.class)
         {
@@ -37,6 +53,18 @@ public class SimpleTypeCasterFactory
         else if (targetType == Byte.class)
         {
             return new ByteCaster();
+        }
+        else if (targetType == BigInteger.class)
+        {
+            return new BigIntCaster();
+        }
+        else if (targetType == BigDecimal.class)
+        {
+            if (JavaClassHelper.isFloatingPointClass(fromType))
+            {
+                return new BigDecDoubleCaster();
+            }
+            return new BigDecLongCaster();                
         }
         else
         {
@@ -137,6 +165,73 @@ public class SimpleTypeCasterFactory
         public boolean isNumericCast()
         {
             return true;
+        }
+    }
+
+    /**
+     * Cast implementation for numeric values.
+     */
+    private static class BigIntCaster implements SimpleTypeCaster
+    {
+        public Object cast(Object object)
+        {
+            long value = ((Number) object).longValue();
+            return BigInteger.valueOf(value);
+        }
+
+        public boolean isNumericCast()
+        {
+            return true;
+        }
+    }
+
+    /**
+     * Cast implementation for numeric values.
+     */
+    private static class BigDecLongCaster implements SimpleTypeCaster
+    {
+        public Object cast(Object object)
+        {
+            long value = ((Number) object).longValue();
+            return BigDecimal.valueOf(value);
+        }
+
+        public boolean isNumericCast()
+        {
+            return true;
+        }
+    }
+
+    /**
+     * Cast implementation for numeric values.
+     */
+    private static class BigDecDoubleCaster implements SimpleTypeCaster
+    {
+        public Object cast(Object object)
+        {
+            double value = ((Number) object).doubleValue();
+            return BigDecimal.valueOf(value);
+        }
+
+        public boolean isNumericCast()
+        {
+            return true;
+        }
+    }
+
+    /**
+     * Cast implementation for numeric values.
+     */
+    private static class NullCaster implements SimpleTypeCaster
+    {
+        public Object cast(Object object)
+        {
+            return object;
+        }
+
+        public boolean isNumericCast()
+        {
+            return false;
         }
     }
 }

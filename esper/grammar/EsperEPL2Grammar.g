@@ -8,6 +8,7 @@ options
 }
 
 // language tokens
+// Declare all tokens here and add to the "parserTokenParaphases" map below.
 tokens
 {
 	CREATE='create';
@@ -41,6 +42,7 @@ tokens
 	END='end';
 	FROM='from';
 	OUTER='outer';
+	INNER='inner';
 	JOIN='join';
 	LEFT='left';
 	RIGHT='right';
@@ -54,8 +56,6 @@ tokens
 	ALL='all';
 	OUTPUT='output';
 	EVENTS='events';
-	SECONDS='seconds';
-	MINUTES='minutes';
 	FIRST='first';
 	LAST='last';
 	INSERT='insert';
@@ -82,6 +82,25 @@ tokens
 	SNAPSHOT='snapshot';
 	SET='set';
 	VARIABLE='variable';
+	UNTIL='until';
+	AT='at';
+	TIMEPERIOD_DAY='day';
+	TIMEPERIOD_DAYS='days';
+	TIMEPERIOD_HOUR='hour';
+	TIMEPERIOD_HOURS='hours';
+	TIMEPERIOD_MINUTE='minute';
+	TIMEPERIOD_MINUTES='minutes';
+	TIMEPERIOD_SEC='sec';
+	TIMEPERIOD_SECOND='second';
+	TIMEPERIOD_SECONDS='seconds';	
+	TIMEPERIOD_MILLISEC='msec';
+	TIMEPERIOD_MILLISECOND='millisecond';
+	TIMEPERIOD_MILLISECONDS='milliseconds';
+	BOOLEAN_TRUE='true';
+	BOOLEAN_FALSE='false';
+	VALUE_NULL='null';
+	ROW_LIMIT_EXPR='limit';
+	OFFSET='offset';
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -116,6 +135,7 @@ tokens
    	SELECTION_STREAM;
    	STREAM_EXPR;
    	OUTERJOIN_EXPR;
+   	INNERJOIN_EXPR;
    	LEFT_OUTERJOIN_EXPR;
    	RIGHT_OUTERJOIN_EXPR;
    	FULL_OUTERJOIN_EXPR;
@@ -133,6 +153,9 @@ tokens
 	SEC_LIMIT_EXPR;
 	MIN_LIMIT_EXPR;
 	TIMEPERIOD_LIMIT_EXPR;
+	CRONTAB_LIMIT_EXPR;
+	CRONTAB_LIMIT_EXPR_PARAM;
+	WHEN_LIMIT_EXPR;
 	INSERTINTO_EXPR;
 	INSERTINTO_EXPRCOL;
 	CONCAT;	
@@ -174,6 +197,13 @@ tokens
 	ON_SET_EXPR;
 	CREATE_VARIABLE_EXPR;
 	METHOD_JOIN_EXPR;
+	MATCH_UNTIL_EXPR;
+	MATCH_UNTIL_RANGE_HALFOPEN;
+	MATCH_UNTIL_RANGE_HALFCLOSED;
+	MATCH_UNTIL_RANGE_CLOSED;
+	MATCH_UNTIL_RANGE_BOUNDED;
+	CREATE_WINDOW_COL_TYPE_LIST;
+	CREATE_WINDOW_COL_TYPE;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -213,11 +243,19 @@ tokens
 @members {
   // provide nice error messages
   private Stack<String> paraphrases = new Stack<String>();
-  private Map<Integer, String> lexerTokenParaphases = new HashMap<Integer, String>();
-  private Map<Integer, String> parserTokenParaphases = new HashMap<Integer, String>();
   
+  // static information initialized once
+  private static Map<Integer, String> lexerTokenParaphases = new HashMap<Integer, String>();
+  private static Map<Integer, String> parserTokenParaphases = new HashMap<Integer, String>();
+  private static java.util.Set<String> parserKeywordSet = new java.util.HashSet<String>();
+    
   public Stack getParaphrases() {
     return paraphrases;
+  }
+
+  public java.util.Set<String> getKeywords() {
+  	getParserTokenParaphrases();
+  	return parserKeywordSet;
   }
   
   public Map<Integer, String> getLexerTokenParaphrases() {
@@ -271,7 +309,7 @@ tokens
 	lexerTokenParaphases.put(BAND_ASSIGN, "a binary and assign '&='");
 	lexerTokenParaphases.put(LAND, "a logical and '&&'");
 	lexerTokenParaphases.put(SEMI, "a semicolon ';'");
-	lexerTokenParaphases.put(DOT, "a dot '.'");	
+	lexerTokenParaphases.put(DOT, "a dot '.'");		
     }
     return lexerTokenParaphases;
   }
@@ -322,8 +360,6 @@ tokens
 	parserTokenParaphases.put(ALL, "'all'");
 	parserTokenParaphases.put(OUTPUT, "'output'");
 	parserTokenParaphases.put(EVENTS, "'events'");
-	parserTokenParaphases.put(SECONDS, "'seconds'");
-	parserTokenParaphases.put(MINUTES, "'minutes'");
 	parserTokenParaphases.put(FIRST, "'first'");
 	parserTokenParaphases.put(LAST, "'last'");
 	parserTokenParaphases.put(INSERT, "'insert'");
@@ -350,6 +386,25 @@ tokens
 	parserTokenParaphases.put(SNAPSHOT, "'snapshot'");
 	parserTokenParaphases.put(SET, "'set'");
 	parserTokenParaphases.put(VARIABLE, "'variable'");
+	parserTokenParaphases.put(UNTIL, "'until'");
+	parserTokenParaphases.put(AT, "'at'");
+	parserTokenParaphases.put(TIMEPERIOD_DAY, "'day'");
+	parserTokenParaphases.put(TIMEPERIOD_DAYS, "'days'");
+	parserTokenParaphases.put(TIMEPERIOD_HOUR, "'hour'");
+	parserTokenParaphases.put(TIMEPERIOD_HOURS, "'hours'");
+	parserTokenParaphases.put(TIMEPERIOD_MINUTE, "'minute'");
+	parserTokenParaphases.put(TIMEPERIOD_MINUTES, "'minutes'");
+	parserTokenParaphases.put(TIMEPERIOD_SEC, "'sec'");
+	parserTokenParaphases.put(TIMEPERIOD_SECOND, "'second'");
+	parserTokenParaphases.put(TIMEPERIOD_SECONDS, "'seconds';");
+	parserTokenParaphases.put(TIMEPERIOD_MILLISEC, "'msec'");
+	parserTokenParaphases.put(TIMEPERIOD_MILLISECOND, "'millisecond'");
+	parserTokenParaphases.put(TIMEPERIOD_MILLISECONDS, "'milliseconds'");
+	parserTokenParaphases.put(BOOLEAN_TRUE, "'true'");
+	parserTokenParaphases.put(BOOLEAN_FALSE, "'false'");
+	parserTokenParaphases.put(VALUE_NULL, "'null'");
+
+	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }
     return parserTokenParaphases;
   }
@@ -404,13 +459,17 @@ substitution
 	;
 	
 constant
+	:   numberconstant
+	|   stringconstant
+    	|   t=BOOLEAN_TRUE -> ^(BOOL_TYPE[$t])
+    	|   f=BOOLEAN_FALSE -> ^(BOOL_TYPE[$f])
+    	|   nu=VALUE_NULL -> ^(NULL_TYPE[$nu])
+	;
+
+numberconstant
 	:  (m=MINUS | p=PLUS)? number
 		-> {$m != null}? {adaptor.create($number.tree.getType(), "-" + $number.text)}
 		-> number
-	|   stringconstant
-    	|   t='true' -> ^(BOOL_TYPE[$t])
-    	|   f='false' -> ^(BOOL_TYPE[$f])
-    	|   nu='null' -> ^(NULL_TYPE[$nu])
 	;
 
 stringconstant
@@ -437,6 +496,7 @@ selectExpr
 		(HAVING! havingClause)?
 		(OUTPUT! outputLimit)?
 		(ORDER! BY! orderByListExpr)?
+		(ROW_LIMIT_EXPR! rowLimit)?
 	;
 	
 onExpr 
@@ -484,13 +544,36 @@ onExprFrom
 	;
 
 createWindowExpr
-	:	CREATE WINDOW i=IDENT (DOT viewExpression (DOT viewExpression)*)? AS (SELECT createSelectionList FROM)? classIdentifier
-		-> ^(CREATE_WINDOW_EXPR $i viewExpression* createSelectionList? classIdentifier)
+	:	CREATE WINDOW i=IDENT (DOT viewExpression (DOT viewExpression)*)? AS? 
+		  (
+		  	createWindowExprModelAfter		  
+		  |   	LPAREN createWindowColumnList RPAREN
+		  )		
+		  (i1=INSERT (WHERE expression)? )?
+		-> {i1 != null}? ^(CREATE_WINDOW_EXPR $i viewExpression* createWindowExprModelAfter? createWindowColumnList? 
+				^(INSERT expression?))
+		-> ^(CREATE_WINDOW_EXPR $i viewExpression* createWindowExprModelAfter? createWindowColumnList?)
+	;
+
+createWindowExprModelAfter
+	:	(SELECT! createSelectionList FROM!)? classIdentifier
 	;
 		
 createVariableExpr
 	:	CREATE VARIABLE t=IDENT n=IDENT (EQUALS expression)?
 		-> ^(CREATE_VARIABLE_EXPR $t $n expression?)
+	;
+
+createWindowColumnList 	
+@init  { paraphrases.push("create window column list"); }
+@after { paraphrases.pop(); }
+	:	createWindowColumnListElement (COMMA createWindowColumnListElement)*
+		-> ^(CREATE_WINDOW_COL_TYPE_LIST createWindowColumnListElement+)
+	;
+	
+createWindowColumnListElement
+	:   	name=IDENT type=IDENT
+		-> ^(CREATE_WINDOW_COL_TYPE $name $type)
 	;
 
 createSelectionList 	
@@ -505,6 +588,8 @@ createSelectionListElement
 		-> WILDCARD_SELECT[$s]
 	|	eventProperty (AS i=IDENT)?
 		-> ^(SELECTION_ELEMENT_EXPR eventProperty $i?)
+	|	constant AS i=IDENT
+		-> ^(SELECTION_ELEMENT_EXPR constant $i?)
 	;
 
 insertIntoExpr
@@ -536,7 +621,11 @@ outerJoinList
 outerJoin
 @init  { paraphrases.push("outer join"); }
 @after { paraphrases.pop(); }
-	:	(tl=LEFT|tr=RIGHT|tf=FULL) OUTER JOIN streamExpression outerJoinIdent
+	:	(
+	            ((tl=LEFT|tr=RIGHT|tf=FULL) OUTER)? 
+	          | (i=INNER)
+	        ) JOIN streamExpression outerJoinIdent
+		-> {$i != null}? streamExpression ^(INNERJOIN_EXPR outerJoinIdent)
 		-> {$tl != null}? streamExpression ^(LEFT_OUTERJOIN_EXPR outerJoinIdent)
 		-> {$tr != null}? streamExpression ^(RIGHT_OUTERJOIN_EXPR outerJoinIdent)
 		-> streamExpression ^(FULL_OUTERJOIN_EXPR outerJoinIdent)
@@ -645,16 +734,38 @@ havingClause
 outputLimit
 @init  { paraphrases.push("output rate clause"); }
 @after { paraphrases.pop(); }
-	:   (k=ALL|k=FIRST|k=LAST|k=SNAPSHOT)? EVERY_EXPR 
-		( 
-		  (time_period) => time_period
-		| (number | i=IDENT) (e=EVENTS|sec=SECONDS|min=MINUTES)
+	:   (k=ALL|k=FIRST|k=LAST|k=SNAPSHOT)? 
+	      (
+	        ( ev=EVERY_EXPR 
+		  ( 
+		    (time_period) => time_period
+		  | (number | i=IDENT) (e=EVENTS|sec=TIMEPERIOD_SECONDS|min=TIMEPERIOD_MINUTES)
+		  )
 		)
-	    -> {$e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i?)
-	    -> {$sec != null}? ^(SEC_LIMIT_EXPR $k? number? $i?)
-	    -> {$min != null}? ^(MIN_LIMIT_EXPR $k? number? $i?)
-	    -> ^(TIMEPERIOD_LIMIT_EXPR $k? time_period)		
+		|
+		( at=AT crontabLimitParameterSet )
+		|
+		( wh=WHEN expression (THEN onSetExpr)? )
+	      )
+	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i?)
+	    -> {$ev != null && $sec != null}? ^(SEC_LIMIT_EXPR $k? number? $i?)
+	    -> {$ev != null && $min != null}? ^(MIN_LIMIT_EXPR $k? number? $i?)
+	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? time_period)		
+	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet)		
+	    -> ^(WHEN_LIMIT_EXPR $k? expression onSetExpr?)		
 	;	
+
+rowLimit
+@init  { paraphrases.push("row limit clause"); }
+@after { paraphrases.pop(); }
+	:   (n1=numberconstant | i1=IDENT) ((c=COMMA | o=OFFSET) (n2=numberconstant | i2=IDENT))?
+	    -> ^(ROW_LIMIT_EXPR $n1? $i1? $n2? $i2? $o? $c?)		
+	;	
+
+crontabLimitParameterSet
+	:	LPAREN parameter COMMA parameter COMMA parameter COMMA parameter COMMA parameter (COMMA parameter)? RPAREN 
+		-> ^(CRONTAB_LIMIT_EXPR_PARAM parameter*)			
+	;			
 
 whenClause
 	: (WHEN! expression THEN! expression)
@@ -894,8 +1005,16 @@ orExpression
 	;
 
 andExpression
-	:	qualifyExpression (a=AND_EXPR qualifyExpression)*
-		-> {$a != null}? ^(AND_EXPR qualifyExpression+)
+	:	matchUntilExpression (a=AND_EXPR matchUntilExpression)*
+		-> {$a != null}? ^(AND_EXPR matchUntilExpression+)
+		-> matchUntilExpression
+	;
+
+matchUntilExpression
+	:	(r=matchUntilRange)? qualifyExpression (a=UNTIL qualifyExpression)?
+		-> {r != null && a != null}? ^(MATCH_UNTIL_EXPR matchUntilRange qualifyExpression+)
+		-> {r != null && a == null}? ^(MATCH_UNTIL_EXPR matchUntilRange qualifyExpression)
+		-> {$a != null}? ^(MATCH_UNTIL_EXPR qualifyExpression+)
 		-> qualifyExpression
 	;
 
@@ -915,14 +1034,42 @@ atomicExpression
 	;
 		
 observerExpression
-	:	ns=IDENT COLON nm=IDENT LPAREN parameterSet? RPAREN
+	:	ns=IDENT COLON (nm=IDENT | a=AT) LPAREN parameterSet? RPAREN
+		-> {$a != null}? ^(OBSERVER_EXPR $ns ^(IDENT[$a.text]) parameterSet?)
 		-> ^(OBSERVER_EXPR $ns $nm parameterSet?)
 	;
 
 guardExpression
 	:	IDENT COLON! IDENT LPAREN! (parameterSet)? RPAREN!
 	;
-
+	
+// syntax is [a..b]  or [..b]  or  [a..] or [a:b]   wherein a and b may be recognized as double
+matchUntilRange
+	:	LBRACK (
+			l=NUM_INT (  (d1=DOT DOT r=NUM_INT?) 
+			           | (c1=COLON r=NUM_INT)
+				  )? 
+		   |	db=NUM_DOUBLE (
+		                        d1=DOT r=NUM_INT? 
+		                        |
+		                        db2=NUM_DOUBLE
+		                      )? 
+		   |	DOT DOT r=NUM_INT
+		   |	DOT db3=NUM_DOUBLE
+		   )
+		RBRACK
+		-> {$l != null && d1 != null && r != null}? ^(MATCH_UNTIL_RANGE_CLOSED $l $r) 
+		-> {$l != null && d1 != null}? ^(MATCH_UNTIL_RANGE_HALFOPEN $l) 
+		-> {$l != null && c1 != null}? ^(MATCH_UNTIL_RANGE_CLOSED $l $r) 
+		-> {$l != null}? ^(MATCH_UNTIL_RANGE_BOUNDED $l) 
+		-> {$db != null && d1 != null && r != null}? ^(MATCH_UNTIL_RANGE_CLOSED $db $r) 
+		-> {$db != null && d1 != null}? ^(MATCH_UNTIL_RANGE_HALFOPEN $db) 
+		-> {$db != null && db2 != null}? ^(MATCH_UNTIL_RANGE_CLOSED $db $db2) 
+		-> {$db3 != null}? ^(MATCH_UNTIL_RANGE_HALFCLOSED $db3)
+		-> {$r != null}? ^(MATCH_UNTIL_RANGE_HALFCLOSED $r) 
+		-> ^(MATCH_UNTIL_RANGE_HALFCLOSED $db) 
+	;
+	
 //----------------------------------------------------------------------------
 // Parameter Set is used by guards, observers and views
 //----------------------------------------------------------------------------
@@ -1052,6 +1199,7 @@ eventPropertyIdent
 keywordAllowedIdent
   @init { String identifier = ""; } 
 	:	i1=IDENT { identifier = $i1.getText(); }
+		|AT { identifier = "at"; }
 		|COUNT { identifier = "count"; }
 		|ESCAPE { identifier = "escape"; }
     		|EVERY_EXPR { identifier = "every"; }
@@ -1064,11 +1212,12 @@ keywordAllowedIdent
 		|STDDEV { identifier = "stddev"; }
 		|AVEDEV { identifier = "avedev"; }
 		|EVENTS { identifier = "events"; }
-		|SECONDS { identifier = "seconds"; }
-		|MINUTES { identifier = "minutes"; }
+		|TIMEPERIOD_SECONDS { identifier = "seconds"; }
+		|TIMEPERIOD_MINUTES { identifier = "minutes"; }
 		|FIRST { identifier = "first"; }
 		|LAST { identifier = "last"; }
 		|UNIDIRECTIONAL { identifier = "unidirectional"; }
+		|UNTIL { identifier = "until"; }
 		|PATTERN { identifier = "pattern"; }
 		|SQL { identifier = "sql"; }
 		|METADATASQL { identifier = "metadatasql"; }
@@ -1081,6 +1230,11 @@ keywordAllowedIdent
 		|SNAPSHOT { identifier = "snapshot"; }
 		|VARIABLE { identifier = "variable"; }		
 		|WINDOW { identifier = "window"; }
+		|LEFT { identifier = "left"; }
+		|RIGHT { identifier = "right"; }
+		|OUTER { identifier = "outer"; }
+		|FULL { identifier = "full"; }
+		|JOIN { identifier = "join"; }
 	-> ^(IDENT[identifier])
 	;
 		
@@ -1097,27 +1251,27 @@ time_period
 	;
 
 dayPart
-	:	number ('days' | 'day')
+	:	number (TIMEPERIOD_DAYS | TIMEPERIOD_DAY)
 		-> ^(DAY_PART number)
 	;
 
 hourPart 
-	:	number ('hours' | 'hour')
+	:	number (TIMEPERIOD_HOURS | TIMEPERIOD_HOUR)
 		-> ^(HOUR_PART number)
 	;
 
 minutePart 
-	:	number ('minutes' | 'minute' | 'min')
+	:	number (TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN)
 		-> ^(MINUTE_PART number)
 	;
 	
 secondPart 
-	:	number ('seconds' | 'second' | 'sec')
+	:	number (TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC)
 		-> ^(SECOND_PART number)
 	;
 	
 millisecondPart 
-	:	number ('milliseconds' | 'millisecond' | 'msec')
+	:	number (TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC)
 		-> ^(MILLISECOND_PART number)
 	;
 	

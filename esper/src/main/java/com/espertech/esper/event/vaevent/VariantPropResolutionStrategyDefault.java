@@ -140,12 +140,12 @@ public class VariantPropResolutionStrategyDefault implements VariantPropResoluti
         EventPropertyGetter getter;
         if (mustCoerce)
         {
-            final SimpleTypeCaster caster = SimpleTypeCasterFactory.getCaster(commonType);
+            final SimpleTypeCaster caster = SimpleTypeCasterFactory.getCaster(null, commonType);
             getter = new EventPropertyGetter()
             {
                 public Object get(EventBean eventBean) throws PropertyAccessException
                 {
-                    VariantEventBean variant = (VariantEventBean) eventBean;
+                    VariantEvent variant = (VariantEvent) eventBean;
                     EventPropertyGetter getter = propertyGetterCache.getGetter(assignedPropertyNumber, variant.getUnderlyingEventBean().getEventType());
                     if (getter == null)
                     {
@@ -161,7 +161,7 @@ public class VariantPropResolutionStrategyDefault implements VariantPropResoluti
 
                 public boolean isExistsProperty(EventBean eventBean)
                 {
-                    VariantEventBean variant = (VariantEventBean) eventBean;
+                    VariantEvent variant = (VariantEvent) eventBean;
                     EventPropertyGetter getter = propertyGetterCache.getGetter(assignedPropertyNumber, variant.getUnderlyingEventBean().getEventType());
                     if (getter == null)
                     {
@@ -177,7 +177,7 @@ public class VariantPropResolutionStrategyDefault implements VariantPropResoluti
             {
                 public Object get(EventBean eventBean) throws PropertyAccessException
                 {
-                    VariantEventBean variant = (VariantEventBean) eventBean;
+                    VariantEvent variant = (VariantEvent) eventBean;
                     EventPropertyGetter getter = propertyGetterCache.getGetter(assignedPropertyNumber, variant.getUnderlyingEventBean().getEventType());
                     if (getter == null)
                     {
@@ -188,7 +188,7 @@ public class VariantPropResolutionStrategyDefault implements VariantPropResoluti
 
                 public boolean isExistsProperty(EventBean eventBean)
                 {
-                    VariantEventBean variant = (VariantEventBean) eventBean;
+                    VariantEvent variant = (VariantEvent) eventBean;
                     EventPropertyGetter getter = propertyGetterCache.getGetter(assignedPropertyNumber, variant.getUnderlyingEventBean().getEventType());
                     if (getter == null)
                     {

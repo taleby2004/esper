@@ -1,20 +1,19 @@
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerEvent;
+import com.espertech.esper.client.time.TimerControlEvent;
+import com.espertech.esper.event.EventBean;
+import com.espertech.esper.regression.support.ResultAssertExecution;
+import com.espertech.esper.regression.support.ResultAssertTestResult;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.regression.support.ResultAssertTestResult;
-import com.espertech.esper.regression.support.ResultAssertExecution;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 public class TestOutputLimitSimple extends TestCase
 {

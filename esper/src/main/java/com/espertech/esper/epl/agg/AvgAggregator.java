@@ -4,7 +4,7 @@ import com.espertech.esper.epl.agg.AggregationMethod;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
- * Average always generates double-types numbers.
+ * Average that generates double-typed numbers.
  */
 public class AvgAggregator implements AggregationMethod
 {
@@ -53,6 +53,6 @@ public class AvgAggregator implements AggregationMethod
 
     public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
     {
-        return methodResolutionService.makeAvgAggregator();
+        return methodResolutionService.makeAvgAggregator(Double.class);
     }
 }

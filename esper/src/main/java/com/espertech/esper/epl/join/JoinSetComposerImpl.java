@@ -10,12 +10,11 @@ package com.espertech.esper.epl.join;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.event.EventBean;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.Iterator;
 
 /**
  * Implements the function to determine a join result set using tables/indexes and query strategy
@@ -25,7 +24,6 @@ public class JoinSetComposerImpl implements JoinSetComposer
 {
     private final EventTable[][] repositories;
     private final QueryStrategy[] queryStrategies;
-    private final SelectClauseStreamSelectorEnum selectStreamSelectorEnum;
 
     // Set semantic eliminates duplicates in result set, use Linked set to preserve order
     private Set<MultiKey<EventBean>> oldResults = new LinkedHashSet<MultiKey<EventBean>>();
@@ -35,13 +33,11 @@ public class JoinSetComposerImpl implements JoinSetComposer
      * Ctor.
      * @param repositories - for each stream an array of (indexed/unindexed) tables for lookup.
      * @param queryStrategies - for each stream a strategy to execute the join
-     * @param selectStreamSelectorEnum - indicator for rstream or istream-only, for optimization
      */
-    public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies, SelectClauseStreamSelectorEnum selectStreamSelectorEnum)
+    public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies)
     {
         this.repositories = repositories;
         this.queryStrategies = queryStrategies;
-        this.selectStreamSelectorEnum = selectStreamSelectorEnum;
     }
 
     public void init(EventBean[][] eventsPerStream)
@@ -62,10 +58,13 @@ public class JoinSetComposerImpl implements JoinSetComposer
     {
         for (int i = 0; i < repositories.length; i++)
         {
-            for (EventTable table : repositories[i])
+            if (repositories[i] != null)
             {
-                table.clear();
-            }            
+                for (EventTable table : repositories[i])
+                {
+                    table.clear();
+                }
+            }
         }
     }
 
@@ -146,6 +145,11 @@ public class JoinSetComposerImpl implements JoinSetComposer
         // for each stream, perform query strategy
         for (int stream = 0; stream < queryStrategies.length; stream++)
         {
+            if (repositories[stream] == null)
+            {
+                continue;
+            }
+            
             Iterator<EventBean> streamEvents = repositories[stream][0].iterator();
             for (;streamEvents.hasNext();)
             {

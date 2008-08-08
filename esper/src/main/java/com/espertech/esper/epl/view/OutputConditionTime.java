@@ -7,14 +7,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.schedule.ScheduleHandleCallback;
-import com.espertech.esper.schedule.ScheduleSlot;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.variable.VariableReader;
-
+import com.espertech.esper.schedule.ScheduleHandleCallback;
+import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -84,7 +83,6 @@ public final class OutputConditionTime implements OutputCondition
             intervalSize = intervalSize * 60d;
         }
         this.msecIntervalSize = Math.round(1000 * intervalSize);
-
     }
 
     /**
@@ -228,6 +226,4 @@ public final class OutputConditionTime implements OutputCondition
     }
 
     private static final Log log = LogFactory.getLog(OutputConditionTime.class);
-
-
 }

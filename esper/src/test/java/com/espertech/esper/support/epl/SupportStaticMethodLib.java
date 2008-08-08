@@ -6,6 +6,8 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.math.BigInteger;
+import java.math.BigDecimal;
 
 public class SupportStaticMethodLib 
 {
@@ -14,7 +16,7 @@ public class SupportStaticMethodLib
         return beanOne.getSymbol().equals(beanTwo.getString());
     }
 
-    public static Map fetchMapMetadata()
+    public static Map fetchMapArrayMetadata()
     {
         Map<String, Class> values = new HashMap<String, Class>();
         values.put("mapstring", String.class);
@@ -22,11 +24,142 @@ public class SupportStaticMethodLib
         return values;
     }
 
-    public static Map fetchMapArrayMetadata()
+    public static Map fetchSingleValueMetadata()
     {
         Map<String, Class> values = new HashMap<String, Class>();
-        values.put("mapstring", String.class);
-        values.put("mapint", Integer.class);
+        values.put("result", Integer.class);
+        return values;
+    }
+
+    public static Map[] fetchResult12(Integer value)
+    {
+        if (value == null)
+        {
+            return new Map[0];
+        }
+
+        Map[] result = new Map[2];
+        result[0] = new HashMap<String, Integer>();
+        result[0].put("value", 1);
+        result[1] = new HashMap<String, Integer>();
+        result[1].put("value", 2);
+        return result;
+    }
+
+    public static Map fetchResult12Metadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("value", Integer.class);
+        return values;
+    }
+
+    public static Map[] fetchResult23(Integer value)
+    {
+        if (value == null)
+        {
+            return new Map[0];
+        }
+
+        Map[] result = new Map[2];
+        result[0] = new HashMap<String, Integer>();
+        result[0].put("value", 2);
+        result[1] = new HashMap<String, Integer>();
+        result[1].put("value", 3);
+        return result;
+    }
+
+    public static Map fetchResult23Metadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("value", Integer.class);
+        values.put("valueTwo", Integer.class);
+        return values;
+    }
+
+    public static Map[] fetchResult100()
+    {
+        Map[] result = new Map[100];
+        int count = 0;
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                result[count] = new HashMap<String, Integer>();
+                result[count].put("col1", i);
+                result[count].put("col2", j);
+                count++;
+            }
+        }
+        return result;
+    }
+
+    public static Map fetchResult100Metadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("col1", Integer.class);
+        values.put("col2", Integer.class);
+        return values;
+    }
+
+    public static Map[] fetchBetween(Integer lower, Integer upper)
+    {
+        if (lower == null || upper == null)
+        {
+            return new Map[0];
+        }
+
+        if (upper < lower)
+        {
+            return new Map[0];
+        }
+        
+        int delta = upper - lower + 1;
+        Map[] result = new Map[delta];
+        int count = 0;
+        for (int i = lower; i <= upper; i++)
+        {
+            Map<String, Integer> values = new HashMap<String, Integer>();
+            values.put("value", i);
+            result[count++] = values;
+        }
+        return result;
+    }
+
+    public static Map[] fetchBetweenString(Integer lower, Integer upper)
+    {
+        if (lower == null || upper == null)
+        {
+            return new Map[0];
+        }
+
+        if (upper < lower)
+        {
+            return new Map[0];
+        }
+
+        int delta = upper - lower + 1;
+        Map[] result = new Map[delta];
+        int count = 0;
+        for (int i = lower; i <= upper; i++)
+        {
+            Map<String, String> values = new HashMap<String, String>();
+            values.put("value", Integer.toString(i));
+            result[count++] = values;
+        }
+        return result;
+    }
+
+    public static Map fetchBetweenMetadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("value", Integer.class);
+        return values;
+    }
+
+    public static Map fetchBetweenStringMetadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("value", String.class);
         return values;
     }
 
@@ -55,6 +188,14 @@ public class SupportStaticMethodLib
         return rows;
     }
 
+    public static Map fetchMapMetadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("mapstring", String.class);
+        values.put("mapint", Integer.class);
+        return values;
+    }
+
     public static Map fetchMap(String string, int id)
     {
         if (id < 0)
@@ -70,6 +211,20 @@ public class SupportStaticMethodLib
         
         values.put("mapstring", "|" + string + "|");
         values.put("mapint", id + 1);
+        return values;
+    }
+
+    public static Map fetchIdDelimitedMetadata()
+    {
+        Map<String, Class> values = new HashMap<String, Class>();
+        values.put("result", String.class);
+        return values;
+    }
+
+    public static Map fetchIdDelimited(Integer value)
+    {
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("result", "|" + value + "|");
         return values;
     }
 
@@ -216,5 +371,15 @@ public class SupportStaticMethodLib
     public static boolean volumeGreaterZero(SupportMarketDataBean bean)
     {
         return bean.getVolume() > 0;
+    }
+
+    public static BigInteger myBigIntFunc(BigInteger val)
+    {
+        return val;
+    }
+
+    public static BigDecimal myBigDecFunc(BigDecimal val)
+    {
+        return val;
     }
 }

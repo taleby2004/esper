@@ -1,22 +1,24 @@
 package com.espertech.esper.regression.db;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBeanComplexProps;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.epl.SupportDatabaseService;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 
-import java.util.Properties;
-import java.sql.*;
 import java.math.BigDecimal;
+import java.sql.*;
+import java.util.Properties;
 
 public class TestDatabaseJoin extends TestCase
 {
@@ -50,6 +52,70 @@ public class TestDatabaseJoin extends TestCase
                 SupportBean.class.getName() + ".win:time_batch(10 sec) as s1";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         runtestTimeBatch(stmt);
+    }
+
+    public void test2HistoricalStar()
+    {
+        String[] fields = "intPrimitive,myint,myvarchar".split(",");
+        String stmtText = "select intPrimitive, myint, myvarchar from " +
+                SupportBean.class.getName() + ".win:keepall() as s0, " +
+                " sql:MyDB ['select myint from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s1," +
+                " sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s2 ";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+
+        sendSupportBeanEvent(6);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {6, 60, "F"});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}});
+
+        sendSupportBeanEvent(9);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {9, 90, "I"});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}, {9, 90, "I"}});
+
+        sendSupportBeanEvent(20);
+        assertFalse(listener.isInvoked());
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}, {9, 90, "I"}});
+
+        stmt.destroy();
+    }
+
+    public void testVariables()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("A", SupportBean_A.class);
+        epService.getEPAdministrator().createEPL("create variable int queryvar");
+        epService.getEPAdministrator().createEPL("on SupportBean set queryvar=intPrimitive");
+
+        String stmtText = "select myint from " +
+                " sql:MyDB ['select myint from mytesttable where ${queryvar} = mytesttable.mybigint'] as s0, " +
+                "A.win:keepall() as s1";
+        
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        sendSupportBeanEvent(5);
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+
+        EventBean received = listener.assertOneGetNewAndReset();
+        assertEquals(50, received.get("myint"));
+        stmt.destroy();
+
+        stmtText = "select myint from " +
+                "A.win:keepall() as s1, " +
+                "sql:MyDB ['select myint from mytesttable where ${queryvar} = mytesttable.mybigint'] as s0";
+
+        stmt = epService.getEPAdministrator().createEPL(stmtText);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        sendSupportBeanEvent(6);
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+
+        received = listener.assertOneGetNewAndReset();
+        assertEquals(60, received.get("myint"));
     }
 
     public void testTimeBatchOM() throws Exception
@@ -89,14 +155,21 @@ public class TestDatabaseJoin extends TestCase
 
     private void runtestTimeBatch(EPStatement statement)
     {
+        String[] fields = new String[] {"myint"};
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, null);
 
         sendSupportBeanEvent(10);
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{100}});
+
         sendSupportBeanEvent(5);
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{100}, {50}});
+
         sendSupportBeanEvent(2);
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{100}, {50}, {20}});
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
         EventBean[] received = listener.getLastNewData();
@@ -104,6 +177,14 @@ public class TestDatabaseJoin extends TestCase
         assertEquals(100, received[0].get("myint"));
         assertEquals(50, received[1].get("myint"));
         assertEquals(20, received[2].get("myint"));
+
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, null);
+
+        sendSupportBeanEvent(9);
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{90}});
+
+        sendSupportBeanEvent(8);
+        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{90}, {80}});
     }
 
     public void testInvalidSQL()
@@ -137,24 +218,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Joins between historical data streams are not supported [select s0.myvarchar as s0Name, s1.mychar as s1Name from sql:MyDB ['select myvarchar from mytesttable where ${mychar} = mytesttable.mybigint'] as s0, sql:MyDB ['select mychar from mytesttable where ${myvarchar} = mytesttable.mybigint']  as s1]", ex.getMessage());
-        }
-    }
-
-    public void testInvalid3Streams()
-    {
-        String sql = "sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} = mytesttable.mybigint']";
-        String stmtText = "select s0.myvarchar as s0Name from " +
-                sql + " as s0, " + SupportBean.class.getName() + " as s1," + SupportBean_S0.class.getName() + " as s2";
-
-        try
-        {
-            epService.getEPAdministrator().createEPL(stmtText);
-            fail();
-        }
-        catch (EPStatementException ex)
-        {
-            assertEquals("Error starting view: Joins between historical data require a only one event stream in the join [select s0.myvarchar as s0Name from sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s0, com.espertech.esper.support.bean.SupportBean as s1,com.espertech.esper.support.bean.SupportBean_S0 as s2]", ex.getMessage());
+            assertEquals("Error starting view: Circular dependency detected between historical streams [select s0.myvarchar as s0Name, s1.mychar as s1Name from sql:MyDB ['select myvarchar from mytesttable where ${mychar} = mytesttable.mybigint'] as s0, sql:MyDB ['select mychar from mytesttable where ${myvarchar} = mytesttable.mybigint']  as s1]", ex.getMessage());
         }
     }
 

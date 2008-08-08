@@ -5,16 +5,20 @@ import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.event.EventPropertyGetter;
 import com.espertech.esper.event.EventBean;
+import com.espertech.esper.event.PropertyAccessException;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
 import com.espertech.esper.epl.core.StreamTypesException;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.collection.IterablesArrayIterator;
 
 import java.util.*;
 
@@ -29,9 +33,24 @@ public class DatabasePollingViewable implements HistoricalEventViewable
     private final List<String> inputParameters;
     private final DataCache dataCache;
     private final EventType eventType;
+    private final ThreadLocal<DataCache> dataCacheThreadLocal = new ThreadLocal<DataCache>();
 
     private EventPropertyGetter[] getters;
     private int[] getterStreamNumbers;
+    private SortedSet<Integer> subordinateStreams;
+
+    private static final EventBean[][] NULL_ROWS;
+    static {
+        NULL_ROWS = new EventBean[1][];
+        NULL_ROWS[0] = new EventBean[1];
+    }
+    private static final PollResultIndexingStrategy iteratorIndexingStrategy = new PollResultIndexingStrategy()
+    {
+        public EventTable index(List<EventBean> pollResult, boolean isActiveCache)
+        {
+            return new UnindexedEventTableList(pollResult);
+        }
+    };
 
     /**
      * Ctor.
@@ -66,6 +85,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
     {
         getters = new EventPropertyGetter[inputParameters.size()];
         getterStreamNumbers = new int[inputParameters.size()];
+        subordinateStreams = new TreeSet<Integer>();
 
         int count = 0;
         for (String inputParam : inputParameters)
@@ -79,18 +99,38 @@ public class DatabasePollingViewable implements HistoricalEventViewable
             }
             catch (StreamTypesException ex)
             {
-                throw new ExprValidationException("Property '" + inputParam + "' failed to resolve, reason: " + ex.getMessage());
+                if (variableService.getReader(inputParam) == null)
+                {
+                    throw new ExprValidationException("Property '" + inputParam + "' failed to resolve, reason: " + ex.getMessage());
+                }
             }
 
-            // hold on to getter and stream number for each stream
-            int streamId = desc.getStreamNum();
-            if (streamId == myStreamNumber)
+            // Parameter is a property
+            if (desc != null)
             {
-                throw new ExprValidationException("Invalid property '" + inputParam + "' resolves to the historical data itself");
+                // hold on to getter and stream number for each stream
+                int streamId = desc.getStreamNum();
+                if (streamId == myStreamNumber)
+                {
+                    throw new ExprValidationException("Invalid property '" + inputParam + "' resolves to the historical data itself");
+                }
+                String propName = desc.getPropertyName();
+                getters[count] = streamTypeService.getEventTypes()[streamId].getGetter(propName);
+                getterStreamNumbers[count] = streamId;
+                subordinateStreams.add(streamId);
             }
-            String propName = desc.getPropertyName();
-            getters[count] = streamTypeService.getEventTypes()[streamId].getGetter(propName);
-            getterStreamNumbers[count] = streamId;
+            else
+            // Parameter is a variable
+            {
+                final VariableReader reader = variableService.getReader(inputParam);
+                getters[count] = new EventPropertyGetter() {
+                    public Object get(EventBean eventBean) throws PropertyAccessException
+                    {
+                        return reader.getValue();
+                    }
+                    public boolean isExistsProperty(EventBean eventBean) {return true;}
+                };
+            }
 
             count++;
         }
@@ -98,6 +138,8 @@ public class DatabasePollingViewable implements HistoricalEventViewable
 
     public EventTable[] poll(EventBean[][] lookupEventsPerStream, PollResultIndexingStrategy indexingStrategy)
     {
+        DataCache localDataCache = dataCacheThreadLocal.get();
+
         pollExecStrategy.start();
 
         EventTable[] resultPerInputRow = new EventTable[lookupEventsPerStream.length];
@@ -116,8 +158,25 @@ public class DatabasePollingViewable implements HistoricalEventViewable
                 lookupValues[valueNum] = lookupValue;
             }
 
-            // Get the result from cache
-            EventTable result = dataCache.getCached(lookupValues);
+            EventTable result = null;
+
+            // try the threadlocal iteration cache, if set
+            if (localDataCache != null)
+            {
+                result = localDataCache.getCached(lookupValues);
+            }
+
+            // try the connection cache
+            if (result == null)
+            {
+                result = dataCache.getCached(lookupValues);
+                if ((result != null) && (localDataCache != null))
+                {
+                    localDataCache.put(lookupValues, result);
+                }
+            }
+
+            // use the result from cache
             if (result != null)     // found in cache
             {
                 resultPerInputRow[row] = result;
@@ -137,6 +196,11 @@ public class DatabasePollingViewable implements HistoricalEventViewable
 
                     // save in cache
                     dataCache.put(lookupValues, indexTable);
+
+                    if (localDataCache != null)
+                    {
+                        localDataCache.put(lookupValues, indexTable);
+                    }
                 }
                 catch (EPException ex)
                 {
@@ -153,12 +217,13 @@ public class DatabasePollingViewable implements HistoricalEventViewable
 
     public View addView(View view)
     {
+        view.setParent(this);
         return view;
     }
 
     public List<View> getViews()
     {
-        return new LinkedList<View>();
+        return Collections.emptyList();
     }
 
     public boolean removeView(View view)
@@ -178,6 +243,22 @@ public class DatabasePollingViewable implements HistoricalEventViewable
 
     public Iterator<EventBean> iterator()
     {
-        throw new UnsupportedOperationException("Iterator not supported");
+        EventTable[] result = poll(NULL_ROWS, iteratorIndexingStrategy);
+        return new IterablesArrayIterator(result);
+    }
+
+    public SortedSet<Integer> getRequiredStreams()
+    {
+        return subordinateStreams;
+    }
+
+    public boolean hasRequiredStreams()
+    {
+        return !subordinateStreams.isEmpty();
+    }
+
+    public ThreadLocal<DataCache> getDataCacheThreadLocal()
+    {
+        return dataCacheThreadLocal;
     }
 }

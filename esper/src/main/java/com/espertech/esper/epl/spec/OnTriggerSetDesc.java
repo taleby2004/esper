@@ -9,23 +9,15 @@ import java.util.ArrayList;
 public class OnTriggerSetDesc extends OnTriggerDesc
 {
     private List<OnTriggerSetAssignment> assignments;
-    
-    /**
-     * Ctor.
-     */
-    public OnTriggerSetDesc()
-    {
-        super(OnTriggerType.ON_SET);
-        assignments = new ArrayList<OnTriggerSetAssignment>();
-    }
 
     /**
-     * Adds a variable assignment.
-     * @param assignment to add
+     * Ctor.
+     * @param assignments is a list of assignments
      */
-    public void addAssignment(OnTriggerSetAssignment assignment)
+    public OnTriggerSetDesc(List<OnTriggerSetAssignment> assignments)
     {
-        assignments.add(assignment);
+        super(OnTriggerType.ON_SET);
+        this.assignments = assignments;
     }
 
     /**

@@ -140,7 +140,32 @@ public class ArrayAssertionUtil
 
         for (int i = 0; i < expectedValues.length; i++)
         {
-            TestCase.assertEquals(expectedValues[i], data[i]);
+            TestCase.assertEquals("at element " + i, expectedValues[i], data[i]);
+        }
+    }
+
+    /**
+     * Reference-equals the objects in the two object arrays assuming the exact same order.
+     * @param data is the data to check reference against
+     * @param expectedValues is the expected values
+     */
+    public static void assertSameExactOrder(Object[] expectedValues, Object[] data)
+    {
+        if ((expectedValues == null) && (data == null))
+        {
+            return;
+        }
+        if ( ((expectedValues == null) && (data != null)) ||
+             ((expectedValues != null) && (data == null)) )
+        {
+            TestCase.assertTrue(false);
+        }
+
+        TestCase.assertEquals(expectedValues.length, data.length);
+
+        for (int i = 0; i < expectedValues.length; i++)
+        {
+            TestCase.assertSame("at element " + i, expectedValues[i], data[i]);
         }
     }
 
@@ -166,6 +191,31 @@ public class ArrayAssertionUtil
         for (int i = 0; i < expectedValues.length; i++)
         {
             TestCase.assertEquals(expectedValues[i], data[i]);
+        }
+    }
+
+    /**
+     * Compare the integer values in the two int arrays assuming the exact same order.
+     * @param data is the data to assertEqualsExactOrder against
+     * @param expectedValues is the expected values
+     */
+    public static void assertEqualsExactOrder(int[] expectedValues, Integer[] data)
+    {
+        if ((expectedValues == null) && (data == null))
+        {
+            return;
+        }
+        if ( ((expectedValues == null) && (data != null)) ||
+             ((expectedValues != null) && (data == null)) )
+        {
+            TestCase.assertTrue(false);
+        }
+
+        TestCase.assertEquals(expectedValues.length, data.length);
+
+        for (int i = 0; i < expectedValues.length; i++)
+        {
+            TestCase.assertEquals(expectedValues[i], (int) data[i]);
         }
     }
 
@@ -274,7 +324,7 @@ public class ArrayAssertionUtil
      * @param iterator returns the data to assertEqualsExactOrder against
      * @param expectedValues is the expected values
      */
-    public static void assertEqualsExactOrder(Iterator<Object> iterator, Object[] expectedValues)
+    public static void assertEqualsExactOrder(Iterator iterator, Object[] expectedValues)
     {
         ArrayList<Object> values = new ArrayList<Object>();
         while (iterator.hasNext())
@@ -588,6 +638,7 @@ public class ArrayAssertionUtil
             {
                 return;
             }
+            Assert.fail("Expected no results but received " + received.length + " events");
         }
         Assert.assertEquals(propertiesListPerRow.length, received.length);
 
@@ -926,6 +977,36 @@ public class ArrayAssertionUtil
 
             TestCase.assertEquals(valueExpected, property);
         }
+    }
+
+    public static Object[][] addArray(Object[][] first, Object[][] ...more)
+    {
+        int len = first.length;
+        for (int i = 0; i < more.length; i++)
+        {
+            Object[][] next = more[i];
+            len += next.length;
+        }
+
+        Object[][] result = new Object[len][];
+        int count = 0;
+        for (int i = 0; i < first.length; i++)
+        {
+            result[count] = first[i];
+            count++;
+        }
+
+        for (int i = 0; i < more.length; i++)
+        {
+            Object[][] next = more[i];
+            for (int j = 0; j < next.length; j++)
+            {
+                result[count] = next[j];
+                count++;
+            }
+        }
+
+        return result;
     }
 
     private static final Log log = LogFactory.getLog(ArrayAssertionUtil.class);
