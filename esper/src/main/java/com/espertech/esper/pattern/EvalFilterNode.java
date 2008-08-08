@@ -18,9 +18,10 @@ import org.apache.commons.logging.Log;
  */
 public final class EvalFilterNode extends EvalNode
 {
+    private static final long serialVersionUID = 0L;
     private final FilterSpecRaw rawFilterSpec;
     private final String eventAsName;
-    private FilterSpecCompiled filterSpec;
+    private transient FilterSpecCompiled filterSpec;
 
     public final EvalStateNode newState(Evaluator parentNode,
                                         MatchedEventMap beginState,

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.stat.olap;
 
 import java.util.NoSuchElementException;
@@ -82,7 +89,7 @@ public final class CubeDimensionHelper
      * For example, for dimensionIndizes [1, 4, 3] and sizes [2, 5, 4] the ordinal is 1 + 4 * 2 + 3 * 10.
      * @param dimensionIndizes index value for each dimension, each value between and dimension size - 1
      * @param dimensionSizes size of each dimension
-     * @return cell ordinal, between 0 and   (dimensionSizes[0] + dimensionSizes[1] * dimensionSizes[0] etc.)  
+     * @return cell ordinal, between 0 and   (dimensionSizes[0] + dimensionSizes[1] * dimensionSizes[0] etc.)
      */
     protected static int getOrdinal(int[] dimensionIndizes, int[] dimensionSizes)
     {

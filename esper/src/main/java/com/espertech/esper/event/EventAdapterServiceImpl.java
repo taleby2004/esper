@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.*;
@@ -94,7 +101,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         if ((resolutionURIs == null) || (resolutionURIs.length == 0))
         {
             throw new EventAdapterException("Event type named '" + alias + "' could not be created as" +
-                    " no resolution URIs for dynamic resolution of event type aliases through a plug-in event representation have been defined");            
+                    " no resolution URIs for dynamic resolution of event type aliases through a plug-in event representation have been defined");
         }
 
         for (URI eventTypeURI : resolutionURIs)
@@ -169,7 +176,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         {
             return new EventSenderXMLDOM(runtimeEventSender, (BaseXMLEventType) eventType);
         }
-        
+
         PlugInEventTypeHandler handlers = aliasToHandlerMap.get(eventTypeAlias);
         if (handlers != null)
         {
@@ -684,7 +691,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         {
             return new Pair<EventType[], Set<EventType>>(null,null);
         }
-            
+
         EventType[] superTypes = new EventType[optionalSuperTypes.size()];
         Set<EventType> deepSuperTypes = new LinkedHashSet<EventType>();
 

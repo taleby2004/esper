@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
@@ -24,7 +31,7 @@ public class NamedWindowConsumerStreamSpec extends StreamSpecBase implements Str
     {
         super(optionalAsName, viewSpecs, isUnidirectional);
         this.windowName = windowName;
-        this.filterExpressions = filterExpressions; 
+        this.filterExpressions = filterExpressions;
     }
 
     /**

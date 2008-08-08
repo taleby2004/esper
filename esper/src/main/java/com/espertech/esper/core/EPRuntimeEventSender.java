@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.event.EventBean;
@@ -11,5 +18,5 @@ public interface EPRuntimeEventSender
      * Equivalent to the sendEvent method of EPRuntime, for use to process an known event.
      * @param eventBean is the event object wrapped by an event bean providing the event metadata
      */
-    public void processWrappedEvent(EventBean eventBean);   
+    public void processWrappedEvent(EventBean eventBean);
 }

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.collection;
 
 import com.espertech.esper.event.EventBean;
@@ -22,13 +29,13 @@ public class OneEventCollection
         {
             throw new IllegalArgumentException("Null event not allowed");
         }
-        
+
         if (firstEvent == null)
         {
             firstEvent = event;
             return;
         }
-        
+
         if (additionalEvents == null)
         {
             additionalEvents = new ArrayDequeJDK6Backport<EventBean>();

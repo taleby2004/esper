@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPServiceProvider;
@@ -7,7 +14,7 @@ import com.espertech.esper.event.EventBean;
 
 /**
  * Interface for a statement-level service for coordinating the insert/remove stream generation,
- * native deliver to subscribers and the presence/absence of listener or subscribers to a statement. 
+ * native deliver to subscribers and the presence/absence of listener or subscribers to a statement.
  */
 public interface StatementResultService
 {
@@ -28,7 +35,7 @@ public interface StatementResultService
      * @param selectClauseColumnNames column names
      */
     public void setSelectClause(Class[] selectClauseTypes, String[] selectClauseColumnNames);
-    
+
     /**
      * Returns true to indicate that synthetic events should be produced, for
      * use in select expression processing.

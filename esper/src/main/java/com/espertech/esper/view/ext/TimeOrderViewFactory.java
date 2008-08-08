@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.ext;
 
 import com.espertech.esper.core.StatementContext;
@@ -79,7 +86,7 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
         if (intervalSize < 1)
         {
             throw new ViewParameterException("Time order view requires a size of at least 1 msec");
-        }       
+        }
     }
 
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException

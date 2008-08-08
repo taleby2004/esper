@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.epl.core.ViewResourceCallback;
@@ -10,7 +17,7 @@ import com.espertech.esper.core.StatementContext;
 import java.util.List;
 
 /**
- * Factory for {@link TimeBatchView}. 
+ * Factory for {@link TimeBatchView}.
  */
 public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements DataWindowViewFactory
 {
@@ -18,7 +25,7 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
      * The reference point, or null if none supplied.
      */
     protected Long optionalReferencePoint;
-    
+
     /**
      * The access into the data window.
      */
@@ -48,7 +55,7 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
             }
             optionalReferencePoint = ((Number) paramRef).longValue();
         }
-        
+
         if (viewParameters.size() == 3)
         {
             processKeywords(viewParameters.get(3), errorMessage);
@@ -82,7 +89,7 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
         }
         if (relativeAccessGetterImpl == null)
         {
-            relativeAccessGetterImpl = new RelativeAccessByEventNIndexGetter();            
+            relativeAccessGetterImpl = new RelativeAccessByEventNIndexGetter();
         }
         resourceCallback.setViewResource(relativeAccessGetterImpl);
     }
@@ -99,7 +106,7 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
 
         if (isRemoveStreamHandling)
         {
-            return new TimeBatchViewRStream(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, isForceUpdate, isStartEager);            
+            return new TimeBatchViewRStream(this, statementContext, millisecondsBeforeExpiry, optionalReferencePoint, isForceUpdate, isStartEager);
         }
         else
         {
@@ -141,7 +148,7 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
         {
             return false;
         }
-        
+
         if (myView.isForceOutput() != isForceUpdate)
         {
             return false;

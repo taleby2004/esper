@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EPException;
@@ -23,7 +30,7 @@ import java.util.*;
 
 /**
  * Polling-data provider that calls a static method on a class and passed parameters, and wraps the
- * results as POJO events. 
+ * results as POJO events.
  */
 public class MethodPollingViewable implements HistoricalEventViewable
 {
@@ -121,7 +128,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
 		{
             if (inputParameters.size() == 0)
             {
-                throw new ExprValidationException("Method footprint does not match the number or type of expression parameters, expecting no parameters in method: " + e.getMessage());                
+                throw new ExprValidationException("Method footprint does not match the number or type of expression parameters, expecting no parameters in method: " + e.getMessage());
             }
             throw new ExprValidationException("Method footprint does not match the number or type of expression parameters, expecting a method where parameters are typed '" +
                     Arrays.toString(paramTypes) + "': " + e.getMessage());

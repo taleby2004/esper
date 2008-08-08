@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.util;
 
 import org.apache.commons.logging.Log;
@@ -12,24 +19,24 @@ import java.util.Set;
 
 /**
  * Used for retrieving static and instance method objects. It
- * provides two points of added functionality over the standard 
- * java.lang.reflect mechanism of retrieving methods. First, 
+ * provides two points of added functionality over the standard
+ * java.lang.reflect mechanism of retrieving methods. First,
  * class names can be partial, and if the class name is partial
- * then java.lang is searched for the class. Second, 
+ * then java.lang is searched for the class. Second,
  * invocation parameter types don't have to match the declaration
  * parameter types exactly when the standard java conversion
- * mechanisms (currently autoboxing and widening conversions) 
- * will make the invocation valid. Preference is given to those 
+ * mechanisms (currently autoboxing and widening conversions)
+ * will make the invocation valid. Preference is given to those
  * methods that require the fewest widening conversions.
  */
 public class MethodResolver
 {
 	private static final Log log = LogFactory.getLog(MethodResolver.class);
-	
+
 	private static final Map<Class, Set<Class>> wideningConversions = new HashMap<Class, Set<Class>>();
 	private static final Map<Class, Set<Class>> wrappingConversions = new HashMap<Class, Set<Class>>();
-	
-	static 
+
+	static
 	{
 		// Initialize the map of wrapper conversions
 		Set<Class> booleanWrappers = new HashSet<Class>();
@@ -37,43 +44,43 @@ public class MethodResolver
 		booleanWrappers.add(Boolean.class);
 		wrappingConversions.put(boolean.class, booleanWrappers);
 		wrappingConversions.put(Boolean.class, booleanWrappers);
-		
+
 		Set<Class> charWrappers = new HashSet<Class>();
 		charWrappers.add(char.class);
-		charWrappers.add(Character.class);		
+		charWrappers.add(Character.class);
 		wrappingConversions.put(char.class, charWrappers);
 		wrappingConversions.put(Character.class, charWrappers);
-		
+
 		Set<Class> byteWrappers = new HashSet<Class>();
 		byteWrappers.add(byte.class);
 		byteWrappers.add(Byte.class);
 		wrappingConversions.put(byte.class, byteWrappers);
 		wrappingConversions.put(Byte.class, byteWrappers);
-		
+
 		Set<Class> shortWrappers = new HashSet<Class>();
 		shortWrappers.add(short.class);
 		shortWrappers.add(Short.class);
 		wrappingConversions.put(short.class, shortWrappers);
 		wrappingConversions.put(Short.class, shortWrappers);
-		
+
 		Set<Class> intWrappers = new HashSet<Class>();
 		intWrappers.add(int.class);
 		intWrappers.add(Integer.class);
 		wrappingConversions.put(int.class, intWrappers);
 		wrappingConversions.put(Integer.class, intWrappers);
-		
+
 		Set<Class> longWrappers = new HashSet<Class>();
 		longWrappers.add(long.class);
 		longWrappers.add(Long.class);
 		wrappingConversions.put(long.class, longWrappers);
 		wrappingConversions.put(Long.class, longWrappers);
-		
+
 		Set<Class> floatWrappers = new HashSet<Class>();
 		floatWrappers.add(float.class);
 		floatWrappers.add(Float.class);
 		wrappingConversions.put(float.class, floatWrappers);
 		wrappingConversions.put(Float.class, floatWrappers);
-		
+
 		Set<Class> doubleWrappers = new HashSet<Class>();
 		doubleWrappers.add(double.class);
 		doubleWrappers.add(Double.class);
@@ -84,12 +91,12 @@ public class MethodResolver
 		Set<Class> wideningConversions = new HashSet<Class>(byteWrappers);
 		MethodResolver.wideningConversions.put(short.class, new HashSet<Class>(wideningConversions));
 		MethodResolver.wideningConversions.put(Short.class, new HashSet<Class>(wideningConversions));
-		
+
 		wideningConversions.addAll(shortWrappers);
 		wideningConversions.addAll(charWrappers);
 		MethodResolver.wideningConversions.put(int.class, new HashSet<Class>(wideningConversions));
 		MethodResolver.wideningConversions.put(Integer.class, new HashSet<Class>(wideningConversions));
-		
+
 		wideningConversions.addAll(intWrappers);
 		MethodResolver.wideningConversions.put(long.class, new HashSet<Class>(wideningConversions));
 		MethodResolver.wideningConversions.put(Long.class, new HashSet<Class>(wideningConversions));
@@ -97,7 +104,7 @@ public class MethodResolver
 		wideningConversions.addAll(longWrappers);
 		MethodResolver.wideningConversions.put(float.class, new HashSet<Class>(wideningConversions));
 		MethodResolver.wideningConversions.put(Float.class, new HashSet<Class>(wideningConversions));
-	
+
 		wideningConversions.addAll(floatWrappers);
 		MethodResolver.wideningConversions.put(double.class, new HashSet<Class>(wideningConversions));
 		MethodResolver.wideningConversions.put(Double.class, new HashSet<Class>(wideningConversions));
@@ -131,44 +138,44 @@ public class MethodResolver
         {
             log.debug(".resolve method className=" + declaringClass.getSimpleName() + ", methodName=" + methodName);
         }
-		
+
 		// Get all the methods for this class
 		Method[] methods = declaringClass.getMethods();
-		
-		Method bestMatch = null; 
+
+		Method bestMatch = null;
 		int bestConversionCount = -1;
-		
-		// Examine each method, checking if the signature is compatible 
+
+		// Examine each method, checking if the signature is compatible
 		for(Method method : methods)
 		{
-			// Check the modifiers: we only want public and static, if required			
+			// Check the modifiers: we only want public and static, if required
 			if(!isPublicAndStatic(method, allowInstance))
 			{
 				continue;
 			}
-			
+
 			// Check the name
 			if(!method.getName().equals(methodName))
 			{
 				continue;
 			}
-			
+
 			// Check the parameter list
 			int conversionCount = compareParameterTypes(method, paramTypes);
-			
+
 			// Parameters don't match
 			if(conversionCount == -1)
 			{
 				continue;
 			}
-			
+
 			// Parameters match exactly
 			if(conversionCount == 0)
 			{
 				bestMatch = method;
 				break;
 			}
-			
+
 			// No previous match
 			if(bestMatch == null)
 			{
@@ -184,7 +191,7 @@ public class MethodResolver
 					bestConversionCount = conversionCount;
 				}
 			}
-				
+
 		}
 
 		if(bestMatch != null)
@@ -207,7 +214,7 @@ public class MethodResolver
 			throw new NoSuchMethodException("Unknown method " + declaringClass.getSimpleName() + '.' + methodName + '(' + params + ')');
 		}
 	}
-	
+
 	private static boolean isWideningConversion(Class declarationType, Class invocationType)
 	{
 		if(wideningConversions.containsKey(declarationType))
@@ -219,7 +226,7 @@ public class MethodResolver
 			return false;
 		}
 	}
-	
+
 	private static boolean isPublicAndStatic(Method method, boolean allowInstance)
 	{
 		int modifiers = method.getModifiers();
@@ -232,19 +239,19 @@ public class MethodResolver
             return Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers);
         }
     }
-	
+
 	// Returns -1 if the invocation parameters aren't applicable
 	// to the method. Otherwise returns the number of parameters
 	// that have to be converted
 	private static int compareParameterTypes(Method method, Class[] invocationParameters)
 	{
 		Class[] declarationParameters = method.getParameterTypes();
-		
+
 		if(invocationParameters == null)
 		{
 			return declarationParameters.length == 0 ? 0 : -1;
 		}
-		
+
 		if(declarationParameters.length != invocationParameters.length)
 		{
 			return -1;
@@ -268,16 +275,16 @@ public class MethodResolver
 
 		return conversionCount;
 	}
-	
-	// Identity conversion means no conversion, wrapper conversion, 
+
+	// Identity conversion means no conversion, wrapper conversion,
 	// or conversion to a supertype
 	private static boolean isIdentityConversion(Class declarationType, Class invocationType)
 	{
 		if(wrappingConversions.containsKey(declarationType))
 		{
-			return wrappingConversions.get(declarationType).contains(invocationType) || declarationType.isAssignableFrom(invocationType);	
+			return wrappingConversions.get(declarationType).contains(invocationType) || declarationType.isAssignableFrom(invocationType);
 		}
-		else 
+		else
 		{
 			return declarationType.isAssignableFrom(invocationType);
 		}

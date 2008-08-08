@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.dispatch.Dispatchable;
@@ -22,7 +29,7 @@ public class UpdateDispatchFutureWait implements Dispatchable
 
     /**
      * Ctor.
-     * @param view is the blocking dispatch view through which to execute a dispatch 
+     * @param view is the blocking dispatch view through which to execute a dispatch
      * @param earlier is the older future
      * @param msecTimeout is the timeout period to wait for listeners to complete a prior dispatch
      */

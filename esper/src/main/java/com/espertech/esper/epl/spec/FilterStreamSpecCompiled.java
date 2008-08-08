@@ -19,7 +19,8 @@ import java.util.List;
  */
 public class FilterStreamSpecCompiled extends StreamSpecBase implements StreamSpecCompiled
 {
-    private FilterSpecCompiled filterSpec;
+    private static final long serialVersionUID = 0L;
+    private transient FilterSpecCompiled filterSpec;
 
     /**
      * Ctor.

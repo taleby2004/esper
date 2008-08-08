@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.collection.MultiKeyUntyped;
@@ -139,7 +146,7 @@ public class RevisionEventBeanDeclared implements EventBean
     public Object getVersionedValue(RevisionGetterParameters params)
     {
         RevisionBeanHolder holderMostRecent = null;
-        
+
         if (holders != null)
         {
             for (int numSet : params.getPropertyGroups())

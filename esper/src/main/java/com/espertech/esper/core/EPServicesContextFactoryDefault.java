@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
@@ -95,7 +102,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         MetricReportingServiceImpl metricsReporting = new MetricReportingServiceImpl(configSnapshot.getEngineDefaults().getMetricsReporting(), epServiceProvider.getURI());
 
         // New services context
-        EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), schedulingService,
+        EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
                 plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
@@ -114,7 +121,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
     /**
      * Makes the time source provider.
      * @param configSnapshot the configuration
-     * @return time source provider 
+     * @return time source provider
      */
     protected static TimeSourceService makeTimeSource(ConfigurationInformation configSnapshot)
     {
@@ -221,7 +228,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         {
             throw new ConfigurationException("Error configuring engine, dependency graph between map aliases is circular: " + e.getMessage(), e);
         }
-        
+
         Map<String, Properties> mapAliases = configSnapshot.getEventTypesMapEvents();
         Map<String, Map<String, Object>> nestableMapAliases = configSnapshot.getEventTypesNestableMapEvents();
         dependentMapOrder.addAll(mapAliases.keySet());

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view;
 
 import com.espertech.esper.epl.join.PollResultIndexingStrategy;
@@ -30,12 +37,12 @@ public interface HistoricalEventViewable extends Viewable, ValidatedView, StopCa
 
     /**
      * Historical views are expected to provide a thread-local data cache
-     * for use in keeping row ({@see EventBean} references) returned during iteration
+     * for use in keeping row ({@link EventBean} references) returned during iteration
      * stable, since the concept of a primary key does not exist.
      * @return thread-local cache, can be null for any thread to indicate no caching
      */
     public ThreadLocal<DataCache> getDataCacheThreadLocal();
-        
+
     /**
      * Poll for stored historical or reference data using events per stream and
      * returing for each event-per-stream row a separate list with events
@@ -43,8 +50,8 @@ public interface HistoricalEventViewable extends Viewable, ValidatedView, StopCa
      * @param lookupEventsPerStream is the events per stream where the
      * first dimension is a number of rows (often 1 depending on windows used) and
      * the second dimension is the number of streams participating in a join.
-     * @param indexingStrategy the strategy to use for converting poll results into a indexed table for fast lookup 
-     * @return array of lists with one list for each event-per-stream row  
+     * @param indexingStrategy the strategy to use for converting poll results into a indexed table for fast lookup
+     * @return array of lists with one list for each event-per-stream row
      */
     public EventTable[] poll(EventBean[][] lookupEventsPerStream, PollResultIndexingStrategy indexingStrategy);
 }

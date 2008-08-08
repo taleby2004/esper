@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.event.EventBean;
@@ -10,7 +17,7 @@ import java.util.Iterator;
  * <p>
  * Does not allow iteration, adding and removing events. Does allow clearing all tables and asking for
  * filled or empty tables. All tables are expected to be filled and empty at the same time,
- * reflecting multiple indexes on a single set of data. 
+ * reflecting multiple indexes on a single set of data.
  */
 public class MultiIndexEventTable implements EventTable
 {

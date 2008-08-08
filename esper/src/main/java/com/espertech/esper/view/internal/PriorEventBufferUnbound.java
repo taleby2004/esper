@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.internal;
 
 import com.espertech.esper.event.EventBean;
@@ -10,7 +17,7 @@ import com.espertech.esper.collection.RollingEventBuffer;
  * up one or more prior events in the insert stream based on an index.
  * <p>
  * Does not expect or care about the remove stream and simple keeps a rolling buffer of new data events
- * up to the maximum prior event we are asking for. 
+ * up to the maximum prior event we are asking for.
  */
 public class PriorEventBufferUnbound implements ViewUpdatedCollection, RandomAccessByIndex
 {
@@ -59,5 +66,5 @@ public class PriorEventBufferUnbound implements ViewUpdatedCollection, RandomAcc
     public void destroy()
     {
         // No action required
-    }    
+    }
 }

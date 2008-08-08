@@ -22,6 +22,8 @@ import java.util.LinkedList;
  */
 public abstract class StreamSpecBase implements MetaDefItem
 {
+    private static final long serialVersionUID = 0L;
+
     private String optionalStreamName;
     private List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
     private boolean isUnidirectional;

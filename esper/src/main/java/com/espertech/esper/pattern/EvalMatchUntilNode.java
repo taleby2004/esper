@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -68,7 +75,7 @@ public final class EvalMatchUntilNode extends EvalNode
         }
 
         // if the high and low are bounded to the same value, there should be no until
-        if ((spec.getLowerBounds() != null) && (spec.getLowerBounds() == spec.getUpperBounds()))
+        if ((spec.getLowerBounds() != null) && (spec.getLowerBounds().equals(spec.getUpperBounds())))
         {
             if (getChildNodes().size() > 2)
             {

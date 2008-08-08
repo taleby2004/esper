@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.event.EventBean;
@@ -5,7 +12,7 @@ import com.espertech.esper.event.EventPropertyGetter;
 import com.espertech.esper.util.NullableObject;
 
 /**
- * Strategy for merging update properties using only existing property's values. 
+ * Strategy for merging update properties using only existing property's values.
  */
 public class UpdateStrategyExists extends UpdateStrategyBase
 {
@@ -46,7 +53,7 @@ public class UpdateStrategyExists extends UpdateStrategyBase
             {
                 continue;
             }
-            
+
             Object value = getters[i].get(underlyingEvent);
             changeSetValues[index] = new NullableObject<Object>(value);
         }

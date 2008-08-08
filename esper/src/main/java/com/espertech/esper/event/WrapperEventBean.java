@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.collection.Pair;
@@ -27,11 +34,11 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean {
     public WrapperEventBean(EventBean event, Map<String, Object> properties, EventType eventType)
 	{
 		this.event = event;
-		this.map = properties;		
+		this.map = properties;
 		this.eventType = eventType;
     }
-	
-	public Object get(String property) throws PropertyAccessException 
+
+	public Object get(String property) throws PropertyAccessException
 	{
         EventPropertyGetter getter = eventType.getGetter(property);
         if (getter == null)
@@ -41,14 +48,14 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean {
         return eventType.getGetter(property).get(this);
 	}
 
-	public EventType getEventType() 
+	public EventType getEventType()
 	{
 		return eventType;
 	}
 
-	public Object getUnderlying() 
+	public Object getUnderlying()
 	{
-        // If wrapper is simply for the underlyingg with no additional properties, then return the underlying type 
+        // If wrapper is simply for the underlyingg with no additional properties, then return the underlying type
         if (map.isEmpty())
         {
             return event.getUnderlying();
@@ -85,7 +92,7 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean {
     public String toString()
 	{
         return "WrapperEventBean " +
-        "[event=" + event + "] " + 
+        "[event=" + event + "] " +
         "[properties=" + map + "]";
 	}
 }

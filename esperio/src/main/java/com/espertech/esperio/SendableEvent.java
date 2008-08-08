@@ -12,7 +12,7 @@ public interface SendableEvent
 {
 	/**
 	 * Send the event into the runtime.
-	 * @param runtime - the runtime to send the event into
+	 * @param sender - the sender to send an event
 	 */
 	public void send(AbstractSender sender);
 

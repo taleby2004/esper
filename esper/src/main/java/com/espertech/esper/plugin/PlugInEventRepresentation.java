@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.plugin;
 
 /**
@@ -29,7 +36,7 @@ package com.espertech.esper.plugin;
  * allows dynamic reflection on an incoming event object. At the time such an event
  * sender is obtained and a matching URI specified, the {@link #acceptsEventBeanResolution} method
  * indicates that the event representation can or cannot inspect events, and the {@link PlugInEventBeanFactory}
- * returned is used by the event sender to wrap event objects for processing. 
+ * returned is used by the event sender to wrap event objects for processing.
  */
 public interface PlugInEventRepresentation
 {

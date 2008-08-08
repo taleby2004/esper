@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.epl.spec.OnTriggerDesc;
@@ -14,7 +21,7 @@ import java.util.List;
 
 /**
  * An instance of this class is associated with a specific named window. The processor
- * provides the views to create-window, on-delete statements and statements selecting from a named window. 
+ * provides the views to create-window, on-delete statements and statements selecting from a named window.
  */
 public class NamedWindowProcessor
 {

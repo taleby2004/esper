@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.view.*;
@@ -11,7 +18,7 @@ import com.espertech.esper.core.StatementContext;
 import java.util.List;
 
 /**
- * Factory for {@link TimeWindowView}. 
+ * Factory for {@link TimeWindowView}.
  */
 public class TimeWindowViewFactory implements DataWindowViewFactory
 {
@@ -29,7 +36,7 @@ public class TimeWindowViewFactory implements DataWindowViewFactory
      * Flag to indicate that the view must handle the removed events from a parent view.
      */
     protected boolean isRemoveStreamHandling;
-    
+
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
@@ -126,7 +133,7 @@ public class TimeWindowViewFactory implements DataWindowViewFactory
             randomAccess = new IStreamRandomAccess(randomAccessGetterImpl);
             randomAccessGetterImpl.updated(randomAccess);
         }
-        
+
         return new TimeWindowView(statementContext, this, millisecondsBeforeExpiry, randomAccess, isRemoveStreamHandling);
     }
 

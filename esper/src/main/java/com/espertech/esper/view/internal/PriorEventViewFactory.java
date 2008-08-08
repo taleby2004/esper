@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.internal;
 
 import com.espertech.esper.event.EventType;
@@ -19,7 +26,7 @@ public class PriorEventViewFactory implements ViewFactory
      * Map of prior-index and callback to expressions.
      */
     protected TreeMap<Integer, List<ViewResourceCallback>> callbacksPerIndex = new TreeMap<Integer, List<ViewResourceCallback>>();
-    
+
     private EventType eventType;
 
     /**
@@ -27,7 +34,7 @@ public class PriorEventViewFactory implements ViewFactory
      * views) therefore must use a different buffer.
      */
     protected boolean isUnbound;
-   
+
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {
         if (viewParameters.size() != 1)

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.property;
 
 import com.espertech.esper.event.EventPropertyGetter;
@@ -8,7 +15,7 @@ import com.espertech.esper.event.MapEventBean;
 import java.util.Map;
 
 /**
- * A getter that interrogates a given property in a map which may itself contain nested maps or indexed entries.  
+ * A getter that interrogates a given property in a map which may itself contain nested maps or indexed entries.
  */
 public class MapPropertyGetter implements EventPropertyGetter
 {
@@ -48,11 +55,6 @@ public class MapPropertyGetter implements EventPropertyGetter
         }
 
         Map valueTop = (Map) valueTopObj;
-        if (valueTop == null)
-        {
-            return null;
-        }
-
         // Obtains for the inner map the property value
         EventBean event = new MapEventBean(valueTop, null);
         return getter.get(event);
@@ -74,11 +76,6 @@ public class MapPropertyGetter implements EventPropertyGetter
         }
 
         Map valueTop = (Map) valueTopObj;
-        if (valueTop == null)
-        {
-            return false;
-        }
-
         // Obtains for the inner map the property value
         EventBean event = new MapEventBean(valueTop, null);
         return getter.isExistsProperty(event);

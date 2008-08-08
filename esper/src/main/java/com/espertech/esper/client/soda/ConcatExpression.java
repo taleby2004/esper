@@ -14,6 +14,8 @@ import java.io.StringWriter;
  */
 public class ConcatExpression extends ExpressionBase
 {
+    private static final long serialVersionUID = 0L;
+
     /**
      * Add a constant to include in the computation.
      * @param object constant to add

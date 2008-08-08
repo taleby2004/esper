@@ -56,18 +56,13 @@ public class TestStaticFunctions extends TestCase
 	public void testRuntimeException()
 	{
 		String className = SupportStaticMethodLib.class.getName();
-		statementText = "select price, " + className + ".throwException() " + stream;
-		try
-		{
-			createStatementAndGetProperty(true,"price");
-			fail();
-		}
-		catch(EPException e)
-		{
-            // Expected
-            assertEquals("com.espertech.esper.client.EPException: Method 'throwException' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib' reported an exception: java.lang.Exception: throwException text here", e.getMessage());
-		}
-	}
+		statementText = "select price, " + className + ".throwException() as value " + stream;
+        statement = epService.getEPAdministrator().createEPL(statementText);
+        listener = new SupportUpdateListener();
+        statement.addListener(listener);
+        sendEvent("IBM", 10d, 4l);
+        assertNull(listener.assertOneGetNewAndReset().get("value"));
+    }
 
 	public void testAutoImports()
 	{
@@ -277,14 +272,14 @@ public class TestStaticFunctions extends TestCase
         epService.initialize();
 
         String text = "select " +
-                "SupportStaticMethodLib.appendPipe(SupportStaticMethodLib.delimitPipe('POLYGON ((100 100, \", 100 100, 400 400))'),temp.geom) as val" +
+                "SupportStaticMethodLib.appendPipe(SupportStaticMethodLib.delimitPipe('POLYGON ((100.0 100, \", 100 100, 400 400))'),temp.geom) as val" +
                 " from Temperature as temp";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportTemperatureBean("a"));
-        assertEquals("|POLYGON ((100 100, \", 100 100, 400 400))||a", listener.assertOneGetNewAndReset().get("val"));
+        assertEquals("|POLYGON ((100.0 100, \", 100 100, 400 400))||a", listener.assertOneGetNewAndReset().get("val"));
     }
 
     public void testPassthru()

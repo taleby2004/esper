@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.client.ConfigurationException;
@@ -12,7 +19,7 @@ import java.util.*;
 /**
  * Service for handling revision event types.
  * <p>
- * Each named window instance gets a dedicated revision processor. 
+ * Each named window instance gets a dedicated revision processor.
  */
 public class ValueAddEventServiceImpl implements ValueAddEventService
 {
@@ -133,7 +140,7 @@ public class ValueAddEventServiceImpl implements ValueAddEventService
         RevisionSpec spec = specificationsByRevisionAlias.get(alias);
         return spec.getBaseEventType();
     }
-    
+
     public boolean isRevisionTypeAlias(String revisionTypeAlias)
     {
         return specificationsByRevisionAlias.containsKey(revisionTypeAlias);
@@ -319,7 +326,7 @@ public class ValueAddEventServiceImpl implements ValueAddEventService
             // Compile changeset
             return new RevisionSpec(config.getPropertyRevision(), baseEventType, deltaTypes, deltaAliases, keyPropertyNames, changesetProperties, new String[0], hasContributedByDelta, contributedByDelta);
         }
-    }    
+    }
 
     private static void checkKeysExist(EventType baseEventType, String alias, String[] keyProperties, String revisionEventTypeAlias)
     {

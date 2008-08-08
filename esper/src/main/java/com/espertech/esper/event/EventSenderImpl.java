@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.EPException;
@@ -14,7 +21,7 @@ import java.util.List;
  * <p>
  * The implementation asks a list of event bean factoryies originating from plug-in event representations
  * to each reflect on the event and generate an event bean. The first one to return an event bean
- * wins. 
+ * wins.
  */
 public class EventSenderImpl implements EventSender
 {

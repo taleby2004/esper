@@ -24,7 +24,7 @@ public final class ShortValue extends PrimitiveValueBase
      * @param value to parse
      * @return short value
      */
-    public final static short parseString(String value)
+    public static short parseString(String value)
     {
         return Short.parseShort(value);
     }

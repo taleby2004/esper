@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.collection.ArrayEventIterator;
@@ -60,7 +67,7 @@ public class ResultSetProcessorHandThrough extends ResultSetProcessorBaseSimple
     public UniformPair<EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize)
     {
         EventBean[] selectOldEvents = null;
-        
+
         if (isSelectRStream)
         {
             selectOldEvents = getSelectEventsNoHaving(selectExprProcessor, oldData, false, isSynthesize);
@@ -153,5 +160,5 @@ public class ResultSetProcessorHandThrough extends ResultSetProcessorBaseSimple
         // Process join results set as a regular join, includes sorting and having-clause filter
         UniformPair<EventBean[]> result = processJoinResult(joinSet, emptyRowSet, true);
         return new ArrayEventIterator(result.getFirst());
-    }    
+    }
 }

@@ -92,6 +92,7 @@ public final class EPServicesContext
      * @param metricsReportingService - for metric reporting
      */
     public EPServicesContext(String engineURI,
+                             String engineInstanceId,
                              SchedulingService schedulingService,
                              EventAdapterService eventAdapterService,
                              EngineImportService engineImportService,
@@ -115,6 +116,7 @@ public final class EPServicesContext
                              MetricReportingService metricsReportingService)
     {
         this.engineURI = engineURI;
+        this.engineInstanceId = engineInstanceId;
         this.schedulingService = schedulingService;
         this.eventAdapterService = eventAdapterService;
         this.engineImportService = engineImportService;

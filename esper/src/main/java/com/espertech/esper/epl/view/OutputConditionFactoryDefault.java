@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.view;
 
 import org.apache.commons.logging.Log;
@@ -49,13 +56,13 @@ public class OutputConditionFactoryDefault implements OutputConditionFactory
                 throw new IllegalArgumentException("Variable named '" + outputLimitSpec.getVariableName() + "' has not been declared");
             }
         }
-        
+
         if(outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.FIRST)
 		{
 			log.debug(".createCondition creating OutputConditionFirst");
 			return new OutputConditionFirst(outputLimitSpec, statementContext, outputCallback);
 		}
-        
+
         if(outputLimitSpec.getRateType() == OutputLimitRateType.CRONTAB)
         {
             return new OutputConditionCrontab(outputLimitSpec.getCrontabAtSchedule(), statementContext, outputCallback);
@@ -75,7 +82,7 @@ public class OutputConditionFactoryDefault implements OutputConditionFactory
             {
                 throw new IllegalArgumentException("Variable named '" + outputLimitSpec.getVariableName() + "' must be type integer, long or short");
             }
-            
+
             int rate = -1;
             if (outputLimitSpec.getRate() != null)
             {

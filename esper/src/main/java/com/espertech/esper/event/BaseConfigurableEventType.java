@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import java.util.Collection;
@@ -10,7 +17,7 @@ import java.util.Map;
  * @author pablo
  */
 public abstract class BaseConfigurableEventType implements EventType {
-	
+
     private Class underlyngType;
 	private Map<String,TypedEventPropertyGetter> explicitProperties;
 
@@ -39,7 +46,7 @@ public abstract class BaseConfigurableEventType implements EventType {
 		return doResolvePropertyType(property);
 	}
 
-	
+
 	public Class getUnderlyingType() {
 		return underlyngType;
 	}
@@ -51,30 +58,30 @@ public abstract class BaseConfigurableEventType implements EventType {
 		return doResolvePropertyGetter(property);
 	}
 
-	
+
 	public String[] getPropertyNames() {
 		Collection<String> propNames = new LinkedList<String>(explicitProperties.keySet());
 		Collections.addAll(propNames,doListPropertyNames());
 		return propNames.toArray(new String[propNames.size()]);
 	}
-	
+
 	public boolean isProperty(String property) {
 		return (getGetter(property) != null);
 	}
-	
+
 	/**
 	 * Subclasses must implement this to supply a list of valid property names.
 	 * @return list of properties
 	 */
 	protected abstract String[] doListPropertyNames();
-	
+
 	/**
 	 * Subclasses must implement this and supply a getter to a given property.
      * @param property is the property name
 	 * @return getter for property
 	 */
 	protected abstract EventPropertyGetter doResolvePropertyGetter(String property);
-	
+
 	/**
 	 * Subclasses must implement this and return a type for a property.
      * @param property is the property name
@@ -82,4 +89,5 @@ public abstract class BaseConfigurableEventType implements EventType {
 	 */
 	protected abstract Class doResolvePropertyType(String property);
 }
+
 

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.xml;
 
 import javax.xml.namespace.QName;
@@ -19,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Getter for properties of DOM xml events.
- * 
+ *
  * @author pablo
  */
 public class XPathPropertyGetter implements TypedEventPropertyGetter {
@@ -134,12 +141,12 @@ public class XPathPropertyGetter implements TypedEventPropertyGetter {
 			return Double.class;
 		if (resultType.equals(XPathConstants.STRING))
 			return String.class;
-		
+
 		return String.class;
 	}
 
     public boolean isExistsProperty(EventBean eventBean)
     {
         return true; // Property exists as the property is not dynamic (unchecked)
-    }    
+    }
 }

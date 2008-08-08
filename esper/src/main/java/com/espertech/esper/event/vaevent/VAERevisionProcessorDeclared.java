@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
 import org.apache.commons.logging.Log;
@@ -16,7 +23,7 @@ import com.espertech.esper.core.EPStatementHandle;
 import java.util.*;
 
 /**
- * Provides overlay strategy for property group-based versioning. 
+ * Provides overlay strategy for property group-based versioning.
  */
 public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase implements ValueAddEventProcessor
 {
@@ -37,7 +44,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
     public VAERevisionProcessorDeclared(String revisionEventTypeAlias, RevisionSpec spec, StatementStopService statementStopService, EventAdapterService eventAdapterService)
     {
         super(spec, revisionEventTypeAlias, eventAdapterService);
-        
+
         // on statement stop, remove versions
         statementStopService.addSubscriber(new StatementStopCallback() {
             public void statementStopped()

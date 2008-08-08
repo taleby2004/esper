@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.plugin;
 
 import java.net.URI;
@@ -12,7 +19,7 @@ public class PlugInEventBeanReflectorContext
 
     /**
      * Ctor.
-     * @param uri is the resolution URI provided as part of {@link com.espertech.esper.client.EPRuntime#getEventSender(java.net.URI[])} 
+     * @param uri is the resolution URI provided as part of {@link com.espertech.esper.client.EPRuntime#getEventSender(java.net.URI[])}
      */
     public PlugInEventBeanReflectorContext(URI uri)
     {

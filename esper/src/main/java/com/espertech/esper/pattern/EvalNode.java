@@ -21,6 +21,8 @@ import java.util.List;
  */
 public abstract class EvalNode implements MetaDefItem
 {
+    private static final long serialVersionUID = 0L;
+
     private final List<EvalNode> childNodes;
     private EvalNodeNumber nodeNumber;
 

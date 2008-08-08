@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.epl.join.table.EventTable;
@@ -16,7 +23,7 @@ import java.util.*;
  * may use the indexes to correlate triggering events with indexed events of the named window.
  * <p>
  * Maintains index tables and keeps a reference count for user. Allows reuse of indexes for multiple
- * deleting statements. 
+ * deleting statements.
  */
 public class NamedWindowIndexRepository
 {
@@ -81,7 +88,7 @@ public class NamedWindowIndexRepository
 
         // add index, reference counted
         tableIndexes.put(indexPropKey, new Pair<PropertyIndexedEventTable, Integer>(table, 1));
-        
+
         return table;
     }
 

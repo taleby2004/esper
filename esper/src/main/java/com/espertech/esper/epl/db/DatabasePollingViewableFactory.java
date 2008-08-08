@@ -13,13 +13,8 @@ import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.epl.spec.DBStatementStreamSpec;
-import com.espertech.esper.epl.join.PollResultIndexingStrategy;
-import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.join.table.UnindexedEventTable;
-import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.*;
 import com.espertech.esper.view.HistoricalEventViewable;
 import org.antlr.runtime.CharStream;
@@ -628,7 +623,7 @@ public class DatabasePollingViewableFactory
 
             DatabaseTypeBinding binding = null;
             String javaTypeBinding = null;
-            if ((columnSettings != null) && (columnSettings.getJavaSqlTypeBinding() != null))
+            if (columnSettings.getJavaSqlTypeBinding() != null)
             {
                 javaTypeBinding = columnSettings.getJavaSqlTypeBinding().get(columnType);
             }

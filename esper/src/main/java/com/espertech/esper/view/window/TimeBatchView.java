@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.window;
 
 import java.util.Iterator;
@@ -237,7 +244,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
             }
         }
 
-        // Only if forceOutput is enabled or 
+        // Only if forceOutput is enabled or
         // there have been any events in this or the last interval do we schedule a callback,
         // such as to not waste resources when no events arrive.
         if ((!currentBatch.isEmpty()) || ((lastBatch != null) && (!lastBatch.isEmpty()))

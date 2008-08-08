@@ -2,6 +2,9 @@ package com.espertech.esperio;
 
 import java.util.Map;
 
+/**
+ * Sender that sends without a threadpool.
+ */
 public class DirectSender extends AbstractSender {
 
 	public void sendEvent(AbstractSendableEvent event, Object beanToSend) {

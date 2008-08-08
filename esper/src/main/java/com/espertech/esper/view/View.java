@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view;
 
 import com.espertech.esper.event.EventBean;
@@ -32,7 +39,7 @@ import com.espertech.esper.event.EventBean;
  *
  * To feed views that are registered with it, a view should only call the update method on its child views when its own
  * data has changed. If it receives an update which results in no change to its data, it should not update any children
- * views. 
+ * views.
  */
 public interface View extends EventCollection, Viewable
 {

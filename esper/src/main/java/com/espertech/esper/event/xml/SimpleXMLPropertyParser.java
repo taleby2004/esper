@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.xml;
 
 import com.espertech.esper.antlr.NoCaseSensitiveStream;
@@ -118,7 +125,7 @@ public class SimpleXMLPropertyParser
         CommonTokenStream tokens = new CommonTokenStream(lex);
         EsperEPL2GrammarParser g = new EsperEPL2GrammarParser(tokens);
         EsperEPL2GrammarParser.startEventPropertyRule_return r;
-        
+
         try
         {
              r = g.startEventPropertyRule();

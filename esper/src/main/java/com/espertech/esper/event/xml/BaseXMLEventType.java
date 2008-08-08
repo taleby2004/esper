@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.xml;
 
 import javax.xml.xpath.*;
@@ -15,9 +22,9 @@ import java.util.*;
 
 /**
  * Base class for XMLEventTypes.
- * Using this class as EventType only allow preconfigured properties 
+ * Using this class as EventType only allow preconfigured properties
  * (normally via {@link com.espertech.esper.event.xml.XPathPropertyGetter XPathPropertyGetter} ).
- * 
+ *
  * For "on the fly" property resolvers, use either
  * {@link com.espertech.esper.event.xml.SimpleXMLEventType SimpleXMLEventType} or
  * {@link com.espertech.esper.event.xml.SchemaXMLEventType SchemaXMLEventType}
@@ -32,7 +39,7 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
     private final ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM;
 
     /**
-     * XPath namespace context. 
+     * XPath namespace context.
      */
     protected XPathNamespaceContext namespaceContext;
 

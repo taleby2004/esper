@@ -150,7 +150,11 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		finishInitialization(epService, adapterSpec);
 	}
 
-	public void setCoercer(AbstractTypeCoercer coercer) {
+    /**
+     * Sets the coercing provider.
+     * @param coercer to use for coercing
+     */
+    public void setCoercer(AbstractTypeCoercer coercer) {
 		this.coercer = coercer;
 	}
 
@@ -467,7 +471,11 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 		}
 	}
 
-	public int getRowCount() {
+    /**
+     * Returns row count.
+     * @return row count
+     */
+    public int getRowCount() {
 		return rowCount;
 	}
 }

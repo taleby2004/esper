@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.epl.agg.AggregationMethod;
@@ -16,7 +23,7 @@ public class ExprPlugInAggFunctionNode extends ExprAggregateNode
      * Ctor.
      * @param distinct - flag indicating unique or non-unique value aggregation
      * @param aggregationSupport - is the base class for plug-in aggregation functions
-     * @param functionName is the aggregation function name 
+     * @param functionName is the aggregation function name
      */
     public ExprPlugInAggFunctionNode(boolean distinct, AggregationSupport aggregationSupport, String functionName)
     {

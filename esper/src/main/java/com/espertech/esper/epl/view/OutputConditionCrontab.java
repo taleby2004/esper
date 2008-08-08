@@ -29,7 +29,6 @@ public final class OutputConditionCrontab implements OutputCondition
     private Long currentReferencePoint;
     private StatementContext context;
     private boolean isCallbackScheduled;
-    private EPStatementHandleCallback handle;
     private ScheduleSpec scheduleSpec;
 
     /**
@@ -114,7 +113,7 @@ public final class OutputConditionCrontab implements OutputCondition
                 scheduleCallback();
             }
         };
-        handle = new EPStatementHandleCallback(context.getEpStatementHandle(), callback);
+        EPStatementHandleCallback handle = new EPStatementHandleCallback(context.getEpStatementHandle(), callback);
         context.getSchedulingService().add(scheduleSpec, handle, scheduleSlot);
     }
 

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.collection.OneEventCollection;
@@ -60,7 +67,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
             newData = passFilter(newData, true);
             oldData = passFilter(oldData, false);
         }
-        
+
         if ((newData != null) || (oldData != null))
         {
             updateChildren(newData, oldData);
@@ -73,7 +80,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         {
             return null;
         }
-        
+
         OneEventCollection filtered = null;
         for (EventBean event : eventData)
         {
@@ -113,7 +120,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
 
     public Iterator<EventBean> iterator()
     {
-        return new FilteredEventIterator(filterList, tailView.iterator()); 
+        return new FilteredEventIterator(filterList, tailView.iterator());
     }
 
     public void statementStopped()

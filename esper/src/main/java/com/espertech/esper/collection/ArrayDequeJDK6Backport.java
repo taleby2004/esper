@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.collection;
 
 import java.io.*;
@@ -8,7 +15,7 @@ import java.util.*;
  * <p>
  * Faster for adding, removing and iterating over elements when compared to LinkedList.
  * More expensive for toArray() then LinkedList.
- * Slightly more expensive for construction then LinkedList. 
+ * Slightly more expensive for construction then LinkedList.
  *
  * Resizable-array implementation of the JDK6 Deque interface.  Array
  * deques have no capacity restrictions; they grow as necessary to support
@@ -55,7 +62,7 @@ import java.util.*;
  * @param <E> the type of elements held in this collection
  */
 public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
-        implements Cloneable, Serializable
+        implements Serializable
 {
     /**
      * The array in which the elements of the deque are stored.
@@ -852,5 +859,6 @@ public class ArrayDequeJDK6Backport<E> extends AbstractCollection<E>
             elements[i] = (E)s.readObject();
     }
 }
+
 
 

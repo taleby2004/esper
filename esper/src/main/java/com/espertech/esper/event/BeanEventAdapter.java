@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.ConfigurationEventTypeLegacy;
@@ -11,7 +18,7 @@ import java.util.HashMap;
 
 /**
  * A fcatory for {@link BeanEventType} instances based on Java class information and using configured
- * settings for 
+ * settings for
  */
 public class BeanEventAdapter implements BeanEventTypeFactory
 {
@@ -53,7 +60,7 @@ public class BeanEventAdapter implements BeanEventTypeFactory
     }
 
     /**
-     * Gets the default property resolution style for Java class properties. 
+     * Gets the default property resolution style for Java class properties.
      * @return resolution style
      */
     public Configuration.PropertyResolutionStyle getDefaultPropertyResolutionStyle()

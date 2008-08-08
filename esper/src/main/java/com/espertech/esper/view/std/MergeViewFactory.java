@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.std;
 
 import com.espertech.esper.view.*;
@@ -9,7 +16,7 @@ import java.util.List;
 import java.util.Arrays;
 
 /**
- * Factory for {@link MergeView} instances. 
+ * Factory for {@link MergeView} instances.
  */
 public class MergeViewFactory implements ViewFactory
 {
@@ -61,7 +68,7 @@ public class MergeViewFactory implements ViewFactory
             if (!(parentEventType.isProperty(fieldNames[i])))
             {
                 parentContainsMergeKeys = false;
-            }            
+            }
         }
 
         // If the parent view contains the fields to group by, the event type after merging stays the same

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.std;
 
 import com.espertech.esper.view.ViewFactory;
@@ -13,7 +20,7 @@ import java.util.List;
 import java.util.Arrays;
 
 /**
- * Factory for {@link UniqueByPropertyView} instances. 
+ * Factory for {@link UniqueByPropertyView} instances.
  */
 public class UniqueByPropertyViewFactory implements DataWindowViewFactory
 {
@@ -21,12 +28,12 @@ public class UniqueByPropertyViewFactory implements DataWindowViewFactory
      * Property name to evaluate unique values.
      */
     protected String[] propertyNames;
-    
+
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
     {
-        propertyNames = GroupByViewFactory.getFieldNameParams(viewParameters, "Unique");         
+        propertyNames = GroupByViewFactory.getFieldNameParams(viewParameters, "Unique");
     }
 
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view;
 
 import org.apache.commons.logging.Log;
@@ -46,7 +53,7 @@ public final class ViewServiceImpl implements ViewService
             {
                 factoryToAttach.attach(parentEventType, context, parentViewFactory, attachedViewFactories);
                 attachedViewFactories.add(viewFactories.get(i));
-                parentEventType = factoryToAttach.getEventType(); 
+                parentEventType = factoryToAttach.getEventType();
             }
             catch (ViewAttachException ex)
             {
@@ -55,7 +62,7 @@ public final class ViewServiceImpl implements ViewService
                 {
                     text = "Error attaching view to event stream";
                 }
-                throw new ViewProcessingException(text + ": " + ex.getMessage(), ex); 
+                throw new ViewProcessingException(text + ": " + ex.getMessage(), ex);
             }
         }
 
@@ -128,6 +135,6 @@ public final class ViewServiceImpl implements ViewService
             ViewSupport.dumpChildViews("EventStream ", eventStream);
         }
     }
-    
+
     private static final Log log = LogFactory.getLog(ViewServiceImpl.class);
 }

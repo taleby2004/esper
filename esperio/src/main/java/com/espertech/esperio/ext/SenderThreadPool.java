@@ -14,14 +14,26 @@ public class SenderThreadPool extends DirectSender {
 
 	private ExecutorService executorService;
 
-	public SenderThreadPool(int threadPoolSize) {
+    /**
+     * Ctor.
+     * @param threadPoolSize size of pool
+     */
+    public SenderThreadPool(int threadPoolSize) {
 		executorService = Executors.newFixedThreadPool(threadPoolSize);
 	}
 
+    /**
+     * Ctor.
+     * @param executorService threadpool to use
+     */
     public SenderThreadPool(ExecutorService executorService) {
         this.executorService = executorService;
     }
 
+    /**
+     * Send an event.
+     * @param beanToSend event to send
+     */
     public void sendEvent(final Object beanToSend) {
 		executorService.execute(new Runnable() {
 			public void run() {
@@ -30,7 +42,12 @@ public class SenderThreadPool extends DirectSender {
 		});
 	}
 
-	public void sendEvent(final Map mapToSend, final String eventTypeAlias) {
+    /**
+     * Send an event.
+     * @param mapToSend event to send
+     * @param eventTypeAlias alias of event
+     */
+    public void sendEvent(final Map mapToSend, final String eventTypeAlias) {
 		executorService.execute(new Runnable() {
 			public void run() {
 				runtime.sendEvent(mapToSend, eventTypeAlias);

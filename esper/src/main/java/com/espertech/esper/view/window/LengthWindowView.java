@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
@@ -25,7 +32,7 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.
      * @param size is the specified number of elements into the past
-     * @param viewUpdatedCollection is a collection that the view must update when receiving events  
+     * @param viewUpdatedCollection is a collection that the view must update when receiving events
      * @param lengthWindowViewFactory for copying this view in a group-by
      */
     public LengthWindowView(LengthWindowViewFactory lengthWindowViewFactory, int size, ViewUpdatedCollection viewUpdatedCollection)
@@ -107,7 +114,7 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         {
             viewUpdatedCollection.update(newData, expiredArr);
         }
-        
+
         // If there are child views, call update method
         if (this.hasViews())
         {

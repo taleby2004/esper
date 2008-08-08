@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.collection.Pair;
@@ -37,7 +44,7 @@ public class CompositeEventType implements EventType, TaggedCompositeEventType
     /**
      * Ctor.
      * @param alias is the event type alias
-     * @param taggedEventTypes is a map of name tags and event type per tag 
+     * @param taggedEventTypes is a map of name tags and event type per tag
      * @param arrayEventTypes is a map of name tags and event type per tag for repeat-expressions that generate an array of events
      */
     public CompositeEventType(String alias,
@@ -65,7 +72,7 @@ public class CompositeEventType implements EventType, TaggedCompositeEventType
 
     /**
      * Returns the event type alias.
-     * @return event type alias 
+     * @return event type alias
      */
     public String getAlias()
     {
@@ -127,7 +134,7 @@ public class CompositeEventType implements EventType, TaggedCompositeEventType
                 IndexedProperty indexProp = (IndexedProperty) nestedProp.getProperties().get(0);
                 String name = indexProp.getPropertyNameAtomic();
                 result = arrayEventTypes.get(name);
-                return result.getFirst().getPropertyType(propertyNested);                
+                return result.getFirst().getPropertyType(propertyNested);
             }
         }
 
@@ -265,7 +272,7 @@ public class CompositeEventType implements EventType, TaggedCompositeEventType
                         {
                             return true; // Property exists as the property is not dynamic (unchecked)
                         }
-                    };                    
+                    };
                 }
             }
 

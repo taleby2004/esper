@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.collection.*;
@@ -574,7 +581,7 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      */
     protected static void getSelectEventsNoHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
     {
-        int length = events.size();
+        int length = (events != null) ? events.size() : 0;
         if (length == 0)
         {
             return;
@@ -647,6 +654,10 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
      */
     protected static void getSelectEventsHaving(SelectExprProcessor exprProcessor, OrderByProcessor orderByProcessor, Set<MultiKey<EventBean>> events, ExprNode optionalHavingNode, boolean isNewData, boolean isSynthesize, List<EventBean> result, List<MultiKeyUntyped> optSortKeys)
     {
+        if (events == null)
+        {
+            return;
+        }
         for (MultiKey<EventBean> key : events)
         {
             EventBean[] eventsPerStream = key.getArray();

@@ -344,11 +344,19 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		}
 	}
 
-	public EPRuntime getRuntime() {
+    /**
+     * Returns the runtime.
+     * @return runtime
+     */
+    public EPRuntime getRuntime() {
 		return runtime;
 	}
 
-	public void setSender(AbstractSender sender) {
+    /**
+     * Sets a new sender to use.
+     * @param sender for sending
+     */
+    public void setSender(AbstractSender sender) {
 		this.sender = sender;
 		this.sender.setRuntime(this.runtime);
 	}

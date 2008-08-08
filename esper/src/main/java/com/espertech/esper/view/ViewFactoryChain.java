@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view;
 
 import com.espertech.esper.event.EventType;
@@ -26,7 +33,7 @@ public class ViewFactoryChain
     /**
      * Returns the final event type which is the event type of the last view factory in the chain,
      * or if the chain is empty then the stream's event type.
-     * @return final event type of the last view or stream 
+     * @return final event type of the last view or stream
      */
     public EventType getEventType()
     {

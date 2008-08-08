@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
@@ -16,7 +23,7 @@ public abstract class AggregationSupport implements AggregationMethod
      * Implemented by plug-in aggregation functions to allow such functions to validate the
      * type of value passed to the function at statement compile time.
      * @param childNodeType is the class of result of the expression sub-node within the aggregation function, or
-     * null if a statement supplies no expression within the aggregation function 
+     * null if a statement supplies no expression within the aggregation function
      */
     public abstract void validate(Class childNodeType);
 

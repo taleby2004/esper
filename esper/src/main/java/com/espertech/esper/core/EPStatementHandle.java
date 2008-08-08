@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.util.MetaDefItem;
@@ -8,20 +15,22 @@ import com.espertech.esper.epl.metric.StatementMetricHandle;
  * Class exists once per statement and hold statement resource lock(s).
  * <p>
  * Use by {@link EPRuntimeImpl} for determining callback-statement affinity and locking of statement
- * resources. 
+ * resources.
  */
 public class EPStatementHandle implements MetaDefItem
 {
+    private static final long serialVersionUID = 0L;
+
     private final String statementId;
-    private ManagedLock statementLock;
+    private transient ManagedLock statementLock;
     private final int hashCode;
-    private EPStatementDispatch optionalDispatchable;
+    private transient EPStatementDispatch optionalDispatchable;
     // handles self-join (ie. statement where from-clause lists the same event type or a super-type more then once)
     // such that the internal dispatching must occur after both matches are processed
     private boolean canSelfJoin;
     private boolean hasVariables;
-    private InsertIntoLatchFactory insertIntoLatchFactory;
-    private StatementMetricHandle metricsHandle;
+    private transient InsertIntoLatchFactory insertIntoLatchFactory;
+    private transient StatementMetricHandle metricsHandle;
 
     /**
      * Ctor.
@@ -63,7 +72,7 @@ public class EPStatementHandle implements MetaDefItem
 
     /**
      * Returns the factory for latches in insert-into guaranteed order of delivery.
-     * @return latch factory for the statement if it performs insert-into (route) of events 
+     * @return latch factory for the statement if it performs insert-into (route) of events
      */
     public InsertIntoLatchFactory getInsertIntoLatchFactory()
     {
@@ -100,7 +109,7 @@ public class EPStatementHandle implements MetaDefItem
     /**
      * Provides a callback for use when statement processing for filters and schedules is done,
      * for use by join statements that require an explicit indicator that all
-     * joined streams results have been processed. 
+     * joined streams results have been processed.
      * @param optionalDispatchable is the instance for calling onto after statement callback processing
      */
     public void setOptionalDispatchable(EPStatementDispatch optionalDispatchable)

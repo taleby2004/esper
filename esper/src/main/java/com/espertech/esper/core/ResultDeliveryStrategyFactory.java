@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPSubscriberException;
@@ -12,7 +19,7 @@ import java.util.Map;
  * Factory for creating a dispatch strategy based on the subscriber object
  * and the columns produced by a select-clause.
  */
-public class ResultDeliveryStrategyFactory 
+public class ResultDeliveryStrategyFactory
 {
     /**
      * Creates a strategy implementation that indicates to subscribers

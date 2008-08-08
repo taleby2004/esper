@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPStatementException;
@@ -840,7 +847,7 @@ public class EPStatementStartMethod
                 StreamTypeService typeServiceOutputWhen = new StreamTypeServiceImpl(new EventType[] {outputLimitType}, new String[]{null}, statementContext.getEngineURI(), new String[]{null});
                 outputLimitWhenNode = outputLimitWhenNode.getValidatedSubtree(typeServiceOutputWhen, methodResolutionService, null, statementContext.getSchedulingService(), statementContext.getVariableService());
                 statementSpec.getOutputLimitSpec().setWhenExpressionNode(outputLimitWhenNode);
-                
+
                 if (JavaClassHelper.getBoxedType(outputLimitWhenNode.getType()) != Boolean.class)
                 {
                     throw new ExprValidationException("The when-trigger expression in the OUTPUT WHEN clause must return a boolean-type value");
@@ -1054,7 +1061,7 @@ public class EPStatementStartMethod
             {
                 subselectEventTypeAlias = ((NamedWindowConsumerStreamSpec) filterStreamSpec).getWindowName();
             }
-                
+
             ViewFactoryChain viewFactoryChain = subSelectStreamDesc.getViewFactoryChain(subselect);
             EventType eventType = viewFactoryChain.getEventType();
 
@@ -1176,7 +1183,7 @@ public class EPStatementStartMethod
             final EventTable eventIndex;
             // Under aggregation conditions, there is no lookup/corelated subquery strategy, and
             // the view-supplied events are simply aggregated, a null-event supplied to the stream for the select-clause, and not kept in index.
-            // Note that "var1 + max(var2)" is not allowed as some properties are not under aggregation (which event to use?). 
+            // Note that "var1 + max(var2)" is not allowed as some properties are not under aggregation (which event to use?).
             if (aggregationService != null)
             {
                 SubselectAggregatorView aggregatorView = new SubselectAggregatorView(aggregationService, filterExpr);

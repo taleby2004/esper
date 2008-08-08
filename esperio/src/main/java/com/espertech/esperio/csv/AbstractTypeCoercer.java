@@ -11,17 +11,37 @@ import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastConstructor;
 
+/**
+ * Coercer for type conversion.
+ */
 public abstract class AbstractTypeCoercer {
 
-	protected static final Log log = LogFactory.getLog(AbstractTypeCoercer.class);
-	
-	protected Map<String, FastConstructor> propertyConstructors;
+    /**
+     * For logging.
+     */
+    protected static final Log log = LogFactory.getLog(AbstractTypeCoercer.class);
 
-	public void setPropertyTypes(Map<String, Class> propertyTypes) {
+    /**
+     * Constructors for coercion.
+     */
+    protected Map<String, FastConstructor> propertyConstructors;
+
+    /**
+     * Ctor.
+     * @param propertyTypes the type conversion to be done
+     */
+    public void setPropertyTypes(Map<String, Class> propertyTypes) {
 		this.propertyConstructors = createPropertyConstructors(propertyTypes);
 	}
-	
-	abstract Object coerce(String property, String source) throws Exception; 
+
+    /**
+     * Convert a value.
+     * @param property property name
+     * @param source value to convert
+     * @return object value
+     * @throws Exception if coercion failed
+     */
+    abstract Object coerce(String property, String source) throws Exception;
 	
 	private Map<String, FastConstructor> createPropertyConstructors(Map<String, Class> propertyTypes)
 	{

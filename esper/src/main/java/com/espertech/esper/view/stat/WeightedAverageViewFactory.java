@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.stat;
 
 import com.espertech.esper.view.ViewFactory;
@@ -11,7 +18,7 @@ import com.espertech.esper.core.StatementContext;
 import java.util.List;
 
 /**
- * Factory for {@link WeightedAverageView} instances. 
+ * Factory for {@link WeightedAverageView} instances.
  */
 public class WeightedAverageViewFactory implements ViewFactory
 {
@@ -23,7 +30,7 @@ public class WeightedAverageViewFactory implements ViewFactory
      * Property name of weight field.
      */
     protected String fieldNameWeight;
-    
+
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException

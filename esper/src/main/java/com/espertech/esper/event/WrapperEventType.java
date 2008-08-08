@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.EPException;
@@ -31,7 +38,7 @@ public class WrapperEventType implements EventType
      * The map event type that provides the additional properties.
      */
     protected final MapEventType underlyingMapType;
-    
+
     private final String[] propertyNames;
     private final int hashCode;
     private final boolean isNoMapProperties;
@@ -39,7 +46,7 @@ public class WrapperEventType implements EventType
 
     /**
      * Ctor.
-     * @param typeName is the event type alias name 
+     * @param typeName is the event type alias name
      * @param eventType is the event type of the wrapped events
      * @param properties is the additional properties this wrapper adds
      * @param eventAdapterService is the ser
@@ -47,7 +54,7 @@ public class WrapperEventType implements EventType
     public WrapperEventType(String typeName, EventType eventType, Map<String, Object> properties, EventAdapterService eventAdapterService)
 	{
 		checkForRepeatedPropertyNames(eventType, properties);
-		
+
 		this.underlyingEventType = eventType;
 		this.underlyingMapType = new MapEventType(typeName, eventAdapterService, properties, null, null);
         this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
@@ -65,8 +72,8 @@ public class WrapperEventType implements EventType
 		this.propertyNames = propertyNames.toArray(new String[0]);
         this.typeName = typeName;
     }
-	
-	public Iterator<EventType> getDeepSuperTypes() 
+
+	public Iterator<EventType> getDeepSuperTypes()
 	{
 		return null;
 	}
@@ -131,12 +138,12 @@ public class WrapperEventType implements EventType
 		}
 	}
 
-	public String[] getPropertyNames() 
+	public String[] getPropertyNames()
 	{
 		return propertyNames;
 	}
 
-	public Class getPropertyType(String property) 
+	public Class getPropertyType(String property)
 	{
 		if(underlyingEventType.isProperty(property))
 		{
@@ -152,12 +159,12 @@ public class WrapperEventType implements EventType
 		}
 	}
 
-	public EventType[] getSuperTypes() 
+	public EventType[] getSuperTypes()
 	{
 		return null;
 	}
 
-	public Class getUnderlyingType() 
+	public Class getUnderlyingType()
 	{
         // If the additional properties are empty, such as when wrapping a native event by means of wildcard-only select
         // then the underlying type is simply the wrapped type.
@@ -191,13 +198,13 @@ public class WrapperEventType implements EventType
 
     public boolean isProperty(String property)
 	{
-		return underlyingEventType.isProperty(property) || 
+		return underlyingEventType.isProperty(property) ||
 			underlyingMapType.isProperty(property);
 	}
-		
+
 	public String toString()
 	{
-		return "WrapperEventType " + 
+		return "WrapperEventType " +
 		"underlyingEventType=" + underlyingEventType + " " +
 		"underlyingMapType=" + underlyingMapType;
 	}
@@ -217,7 +224,7 @@ public class WrapperEventType implements EventType
         WrapperEventType other = (WrapperEventType) obj;
 
         if ((other.underlyingEventType.equals(this.underlyingEventType)) &&
-            (other.underlyingMapType.equals(this.underlyingMapType)))                
+            (other.underlyingMapType.equals(this.underlyingMapType)))
         {
             return true;
         }
@@ -238,5 +245,5 @@ public class WrapperEventType implements EventType
 				throw new EPException("Property " + property + " occurs in both the underlying event and in the additional properties");
 			}
 		}
-	}    
+	}
 }

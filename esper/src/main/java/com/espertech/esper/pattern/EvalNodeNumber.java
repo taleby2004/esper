@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.util.MetaDefItem;
@@ -57,7 +64,7 @@ public class EvalNodeNumber implements MetaDefItem
         }
         short[] num = new short[number.length - 1];
         System.arraycopy(number, 0, num, 0, number.length - 1);
-        return new EvalNodeNumber(num);        
+        return new EvalNodeNumber(num);
     }
 
     /**

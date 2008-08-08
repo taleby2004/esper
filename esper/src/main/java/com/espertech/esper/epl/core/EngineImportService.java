@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.epl.agg.AggregationSupport;
@@ -79,5 +86,5 @@ public interface EngineImportService
      * @return method this resolves to
      * @throws EngineImportException if the method cannot be resolved to a visible static or instance method
      */
-    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;    
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;
 }

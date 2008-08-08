@@ -99,6 +99,16 @@ public class TestExprNode extends TestCase
         assertEquals("b", result.getMethodName());
         assertEquals("c", result.getArgString());
 
+        result = ExprNode.parseMappedProperty("SupportStaticMethodLib.delimitPipe('POLYGON ((100.0 100, \", 100 100, 400 400))')");
+        assertEquals("SupportStaticMethodLib", result.getClassName());
+        assertEquals("delimitPipe", result.getMethodName());
+        assertEquals("POLYGON ((100.0 100, \", 100 100, 400 400))", result.getArgString());
+
+        result = ExprNode.parseMappedProperty("a.b.c.d.e('f.g.h,u.h')");
+        assertEquals("a.b.c.d", result.getClassName());
+        assertEquals("e", result.getMethodName());
+        assertEquals("f.g.h,u.h", result.getArgString());
+
         result = ExprNode.parseMappedProperty("a.b.c.d.E(\"hfhf f f f \")");
         assertEquals("a.b.c.d", result.getClassName());
         assertEquals("E", result.getMethodName());

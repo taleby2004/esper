@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.xml;
 
 import java.util.HashMap;
@@ -14,10 +21,10 @@ public class XPathNamespaceContext implements NamespaceContext {
 
 	//namespace to prefix
 	private Map<String,String> namespaces;
-	
+
 	//prefix to namespace
 	private Map<String,String> prefix;
-	
+
 	private String defaultNamespace;
 
     /**
@@ -46,7 +53,7 @@ public class XPathNamespaceContext implements NamespaceContext {
         String namespace = namespaces.get(prefix);
 		if (namespace == null)
 			return XMLConstants.NULL_NS_URI;
-		
+
 		return namespace;
 	}
 
@@ -75,7 +82,7 @@ public class XPathNamespaceContext implements NamespaceContext {
 
     /**
      * Sets the default namespace.
-     * @param defaultNamespace is the default namespace 
+     * @param defaultNamespace is the default namespace
      */
     public void setDefaultNamespace(String defaultNamespace) {
 		this.defaultNamespace = defaultNamespace;

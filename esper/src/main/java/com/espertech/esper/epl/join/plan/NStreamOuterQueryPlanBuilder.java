@@ -210,7 +210,7 @@ public class NStreamOuterQueryPlanBuilder
                 }
                 else
                 {
-                    plans[i] = NStreamQueryPlanBuilder.createLookupPlan(queryGraph, fromStream, toStream, indexSpecs[toStream], typesPerStream);;
+                    plans[i] = NStreamQueryPlanBuilder.createLookupPlan(queryGraph, fromStream, toStream, indexSpecs[toStream], typesPerStream);
                 }
             }
 

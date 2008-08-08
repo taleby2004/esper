@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 /**
@@ -28,8 +35,9 @@ public interface EventPropertyGetter
      * For non-dynamic properties, this method always returns true since a getter would not be available
      * unless
      * @param eventBean is the event to check if the dynamic property exists
-     * @return indictor whether the property exists, always true for non-dynamic (default) properties 
+     * @return indictor whether the property exists, always true for non-dynamic (default) properties
      */
     public boolean isExistsProperty(EventBean eventBean);
 }
+
 

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.collection.MultiKey;
@@ -39,7 +46,7 @@ public class PropertyUtility
             propertyNames[i] = property;
         }
     }
-    
+
     /**
      * Returns a multi-key for an event and key property getters
      * @param event to get keys for
@@ -107,7 +114,7 @@ public class PropertyUtility
                     copy[value.length] = group.getGroupNum();
                     Arrays.sort(copy);
                     groupsNumsPerProp.put(property, copy);
-                }                
+                }
             }
         }
         return groupsNumsPerProp;
@@ -160,7 +167,7 @@ public class PropertyUtility
 
         if (log.isDebugEnabled())
         {
-            log.debug(".analyzeGroups " + Arrays.toString(array));            
+            log.debug(".analyzeGroups " + Arrays.toString(array));
         }
         return array;
     }
@@ -215,7 +222,7 @@ public class PropertyUtility
      * Remove from values all removeValues and build a unique sorted result array.
      * @param values to consider
      * @param removeValues values to remove from values
-     * @return sorted unique 
+     * @return sorted unique
      */
     protected static String[] uniqueExclusiveSort(String[] values, String[] removeValues)
     {

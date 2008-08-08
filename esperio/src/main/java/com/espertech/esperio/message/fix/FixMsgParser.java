@@ -24,7 +24,13 @@ public class FixMsgParser
         soh = new String(sohCh, 0, 1);
     }
 
-	public static Map<String, String> parse(String fixMsg)
+    /**
+     * Parses a fix message.
+     * @param fixMsg message to parse
+     * @return map of tags
+     * @throws FixMsgParserException if the parse failed
+     */
+    public static Map<String, String> parse(String fixMsg)
             throws FixMsgParserException
     {
 		Map<String, String> parsedMessage = internalParse(fixMsg);
@@ -68,6 +74,12 @@ public class FixMsgParser
         return parsedMessage;
     }
 
+    /**
+     * Validate the Fix message.
+     * @param fix tags to validate
+     * @param fixMsg the message text in native form
+     * @throws FixMsgInvalidException if validation fails
+     */
     public static void validate(Map<String, String> fix, String fixMsg) throws FixMsgInvalidException
     {
         for (String required : new String[] {"8", "9", "35", "10"})

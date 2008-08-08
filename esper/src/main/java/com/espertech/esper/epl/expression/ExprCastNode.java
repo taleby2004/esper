@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
@@ -19,7 +26,6 @@ public class ExprCastNode extends ExprNode
     private final String classIdentifier;
     private Class targetType;
     private CasterParserComputer casterParserComputer;
-    private boolean isNumeric;
 
     /**
      * Ctor.
@@ -52,23 +58,24 @@ public class ExprCastNode extends ExprNode
         // try the primitive names including "string"
         SimpleTypeCaster caster;
         targetType = JavaClassHelper.getPrimitiveClassForName(classIdentifier.trim());
+        boolean numeric;
         if (targetType != null)
         {
             targetType = JavaClassHelper.getBoxedType(targetType);
             caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
-            isNumeric = caster.isNumericCast();
+            numeric = caster.isNumericCast();
         }
         else if (classIdentifier.trim().toLowerCase().equals("BigInteger".toLowerCase()))
         {
             targetType = BigInteger.class;
             caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
-            isNumeric = true;
+            numeric = true;
         }
         else if (classIdentifier.trim().toLowerCase().equals("BigDecimal".toLowerCase()))
         {
             targetType = BigDecimal.class;
             caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
-            isNumeric = true;
+            numeric = true;
         }
         else
         {
@@ -80,7 +87,15 @@ public class ExprCastNode extends ExprNode
             {
                 throw new ExprValidationException("Class as listed in cast function by name '" + classIdentifier + "' cannot be loaded", e);
             }
-            caster = new SimpleTypeCasterAnyType(targetType);
+            numeric = JavaClassHelper.isNumeric(targetType);
+            if (numeric)
+            {
+                caster = SimpleTypeCasterFactory.getCaster(fromType, targetType);
+            }
+            else
+            {
+                caster = new SimpleTypeCasterAnyType(targetType);
+            }
         }
 
         // to-string
@@ -95,7 +110,7 @@ public class ExprCastNode extends ExprNode
             casterParserComputer = new StringParserComputer(parser);
         }
         // numeric cast with check
-        else if (isNumeric)
+        else if (numeric)
         {
             casterParserComputer = new NumberCasterComputer(caster);
         }

@@ -86,7 +86,7 @@ public class PatternMatchUntilExpr extends PatternExprBase
             writer.write("[");
             if ((low != null) && (high != null))
             {
-                if (low == high)
+                if (low.equals(high))
                 {
                     writer.write(Integer.toString(low));
                 }

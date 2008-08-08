@@ -5,6 +5,9 @@ import com.espertech.esper.event.EventBean;
 import java.io.StringWriter;
 import java.text.DecimalFormat;
 
+/**
+ * Marshaller for Fix message.
+ */
 public class FixMsgMarshaller
 {
     private static final String DEFAULT_FIX_VERSION = "FIX4.2";
@@ -19,6 +22,11 @@ public class FixMsgMarshaller
         soh = new String(sohCh, 0, 1);
     }
 
+    /**
+     * Marshals a fix event.
+     * @param event the event to marshal
+     * @return marshalled fix message
+     */
     public static String marshalFix(EventBean event)
     {
         if (fixVersion == null)
@@ -80,6 +88,11 @@ public class FixMsgMarshaller
         return writer.toString();
     }
 
+    /**
+     * Compute a checksum of a fix message.
+     * @param s fix message
+     * @return checksum
+     */
     protected static int checkSum(String s) {
         int sum = 0;
         for (int i = 0; i < s.length(); i++) {

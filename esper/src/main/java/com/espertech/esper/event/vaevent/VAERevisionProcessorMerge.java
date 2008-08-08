@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
@@ -142,7 +149,7 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
         else if (spec.getPropertyRevision() == ConfigurationRevisionEventType.PropertyRevision.MERGE_NON_NULL)
         {
             updateStrategy = new UpdateStrategyNonNull(spec);
-        }         
+        }
         else if (spec.getPropertyRevision() == ConfigurationRevisionEventType.PropertyRevision.MERGE_EXISTS)
         {
             updateStrategy = new UpdateStrategyExists(spec);
@@ -379,7 +386,7 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
                     }
                 }
             }
-            
+
             if (getter != null)
             {
                 listOfGetters.add(getter);
@@ -395,5 +402,5 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
         }
 
         return new RevisionTypeDesc(keyPropertyGetters, changesetPropertyGetters, changesetPropertyIndex);
-    }    
+    }
 }

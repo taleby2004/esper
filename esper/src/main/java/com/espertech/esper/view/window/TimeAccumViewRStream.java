@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.client.EPException;
@@ -24,7 +31,7 @@ import java.util.Set;
  * A data window view that holds events in a stream and only removes events from a stream (rstream) if
  * no more events arrive for a given time interval, also handling the remove stream
  * by keeping set-like semantics. See {@link TimeAccumView} for the same behavior without
- * remove stream handling. 
+ * remove stream handling.
  */
 public final class TimeAccumViewRStream extends ViewSupport implements CloneableView, DataWindowView
 {

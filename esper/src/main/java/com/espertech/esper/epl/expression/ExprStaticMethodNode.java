@@ -7,7 +7,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
@@ -16,6 +15,8 @@ import com.espertech.esper.event.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,6 +27,8 @@ import java.util.List;
  */
 public class ExprStaticMethodNode extends ExprNode
 {
+    private static final Log log = LogFactory.getLog(ExprStaticMethodNode.class);
+
 	private final String className;
 	private final String methodName;
 	private Class[] paramTypes;
@@ -204,7 +207,8 @@ public class ExprStaticMethodNode extends ExprNode
                     "' of class '" + className +
                     "' reported an exception: " +
                     e.getTargetException();
-            throw new EPException(message, e.getTargetException());
+            log.error(message, e.getTargetException());
 		}
-	}
+        return null;
+    }
 }

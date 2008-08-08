@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.event.EventType;
@@ -5,9 +12,19 @@ import com.espertech.esper.type.TimePeriodParameter;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.ViewParameterException;
 
+/**
+ * Parameters for batch views that provides common data flow parameter parsing.
+ */
 public class TimeBatchViewFactoryParams {
 
+    /**
+     * Keyword for force update, i.e. update if no data.
+     */
     protected static final String FORCE_UPDATE_KEYWORD = "force_update";
+
+    /**
+     * Keyword for starting eager, i.e. start early.
+     */
     protected static final String START_EAGER_KEYWORD = "start_eager";
 
     /**
@@ -19,7 +36,7 @@ public class TimeBatchViewFactoryParams {
      * Number of msec before batch fires (either interval or number of events).
      */
     protected long millisecondsBeforeExpiry;
-    
+
     /**
      * Indicate whether to output only if there is data, or to keep outputting empty batches.
      */
@@ -32,10 +49,10 @@ public class TimeBatchViewFactoryParams {
 
     /**
      * Process view expiry parameter
-     * @param parameter
-     * @param errorMessage
-     * @param errorMessage2
-     * @throws ViewParameterException
+     * @param parameter the parameter to parse
+     * @param errorMessage error text
+     * @param errorMessage2 error text
+     * @throws ViewParameterException if validation failed
      */
 	protected void processExpiry(Object parameter, String errorMessage, String errorMessage2) throws ViewParameterException {
 		if (parameter instanceof TimePeriodParameter)
@@ -68,9 +85,9 @@ public class TimeBatchViewFactoryParams {
 
 	/**
 	 * Convert keywords into isForceUpdate and isStartEager members
-	 * @param keywords
-	 * @param errorMessage
-	 * @throws ViewParameterException
+	 * @param keywords flow control keyword string
+	 * @param errorMessage error message
+	 * @throws ViewParameterException if parsing failed
 	 */
 	protected void processKeywords(Object keywords, String errorMessage) throws ViewParameterException {
 

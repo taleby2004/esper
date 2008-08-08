@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.type.MinMaxTypeEnum;
@@ -29,7 +36,7 @@ public interface MethodResolutionService
      * @param paramTypes is parameter types match expression sub-nodes
      * @return method this resolves to
      * @throws EngineImportException if the method cannot be resolved to a visible static method
-     */    
+     */
     public Method resolveMethod(String classNameAlias, String methodName, Class[] paramTypes) throws EngineImportException;
 
     /**

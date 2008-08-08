@@ -1,9 +1,18 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.pattern;
+
+import com.espertech.esper.util.MetaDefItem;
 
 /**
  * Specification for a range for the pattern-repeat operator.
  */
-public class EvalMatchUntilSpec
+public class EvalMatchUntilSpec implements MetaDefItem
 {
     private final Integer lowerBounds;
     private final Integer upperBounds;
@@ -23,7 +32,7 @@ public class EvalMatchUntilSpec
         }
         if ((upperBounds != null) && (upperBounds < 0))
         {
-            throw new IllegalArgumentException("Upper bounds in match-until cannot be a negative value");            
+            throw new IllegalArgumentException("Upper bounds in match-until cannot be a negative value");
         }
 
         this.lowerBounds = lowerBounds;
@@ -45,7 +54,7 @@ public class EvalMatchUntilSpec
                 throw new IllegalArgumentException("Lower bounds in match-until cannot be greater then the upper bounds");
             }
 
-            if (lowerBounds == upperBounds)
+            if (lowerBounds.equals(upperBounds))
             {
                 isTightlyBound = true;
             }

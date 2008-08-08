@@ -540,7 +540,7 @@ public class ConfigurationEngineDefaults implements Serializable
     /**
      * Time source configuration, the default in MILLI (millisecond resolution from System.currentTimeMillis).
      */
-    public class TimeSource implements Serializable
+    public static class TimeSource implements Serializable
     {
         private TimeSourceType timeSourceType;
 

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import java.util.Map;
@@ -5,7 +12,7 @@ import java.util.Map;
 /**
  * A getter for use with Map-based events simply returns the value for the key.
  */
-public class MapEventPropertyGetter implements EventPropertyGetter 
+public class MapEventPropertyGetter implements EventPropertyGetter
 {
     private final String propertyName;
 

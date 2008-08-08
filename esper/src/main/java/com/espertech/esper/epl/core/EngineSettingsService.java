@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.ConfigurationEngineDefaults;
@@ -29,7 +36,7 @@ public class EngineSettingsService
      */
     public ConfigurationEngineDefaults getEngineSettings()
     {
-        return config;   
+        return config;
     }
 
     /**
@@ -42,7 +49,7 @@ public class EngineSettingsService
     }
 
     /**
-     * Sets URIs for resolving the event name against plug-in event representations, if any.  
+     * Sets URIs for resolving the event name against plug-in event representations, if any.
      * @param plugInEventTypeResolutionURIs URIs
      */
     public void setPlugInEventTypeResolutionURIs(URI[] plugInEventTypeResolutionURIs)

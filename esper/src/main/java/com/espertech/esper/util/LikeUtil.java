@@ -42,12 +42,7 @@ public class LikeUtil implements Serializable
      * @param compareString is the string to compare
      * @return true if pattern matches, or false if not
      */
-    public Boolean compare(String compareString) {
-
-        if (compareString == null)
-        {
-            return null;
-        }
+    public boolean compare(String compareString) {
 
         if (isIgnoreCase)
         {

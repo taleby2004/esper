@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.ext;
 
 import org.apache.commons.logging.Log;
@@ -65,7 +72,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         Comparator<MultiKeyUntyped> comparator = new MultiKeyComparator(isDescendingValues);
         sortedEvents = new TreeMap<MultiKeyUntyped, LinkedList<EventBean>>(comparator);
     }
-    
+
     public void setParent(Viewable parent)
     {
         super.setParent(parent);
@@ -88,7 +95,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
     {
         return sortFieldNames;
     }
-    
+
     /**
      * Returns the flags indicating whether to sort in descending order on each property.
      * @return the isDescending value for each sort property

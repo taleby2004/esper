@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view;
 
 import com.espertech.esper.core.StatementContext;
@@ -18,7 +25,7 @@ public interface ViewCapability
      * @param viewFactories is a list of view factories that originate the final views
      * @param statementContext is the statement-level services
      * @return true to indicate inspection success, or false to indicate inspection failure
-     * @throws ExprValidationException to indicate the inspect operation failed and a capability is not provided 
+     * @throws ExprValidationException to indicate the inspect operation failed and a capability is not provided
      */
     public boolean inspect(int streamNumber, List<ViewFactory> viewFactories, StatementContext statementContext)
         throws ExprValidationException;

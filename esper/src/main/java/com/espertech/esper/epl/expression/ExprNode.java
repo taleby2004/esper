@@ -26,6 +26,8 @@ import java.lang.reflect.Modifier;
  */
 public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefItem
 {
+    private static final long serialVersionUID = 0L;
+
     private final LinkedList<ExprNode> childNodes;
 
     /**
@@ -485,12 +487,23 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             return null;
         }
 
-        String method = splitDots[splitDots.length - 1];
-        int indexParan = method.indexOf("(");
-        if (indexParan == -1)
+        // find which element represents the method, its the element with the parenthesis
+        int indexMethod = -1;
+        for (int i = 0; i < splitDots.length; i++)
+        {
+            if (splitDots[i].contains("("))
+            {
+                indexMethod = i;
+                break;
+            }
+        }
+        if (indexMethod == -1)
         {
             return null;
         }
+
+        String method = splitDots[indexMethod];
+        int indexParan = method.indexOf("(");
         method = method.substring(0, indexParan);
         if (method.length() == 0)
         {
@@ -506,7 +519,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
 
         // get class
         StringBuffer clazz = new StringBuffer();
-        for (int i = 0; i < splitDots.length - 1; i++)
+        for (int i = 0; i < indexMethod; i++)
         {
             if (i > 0)
             {

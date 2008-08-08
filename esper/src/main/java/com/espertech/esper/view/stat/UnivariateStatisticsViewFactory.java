@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view.stat;
 
 import com.espertech.esper.view.ViewFactory;
@@ -11,7 +18,7 @@ import com.espertech.esper.core.StatementContext;
 import java.util.List;
 
 /**
- * Factory for {@link UnivariateStatisticsView} instances. 
+ * Factory for {@link UnivariateStatisticsView} instances.
  */
 public class UnivariateStatisticsViewFactory implements ViewFactory
 {
@@ -81,5 +88,5 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         }
 
         return true;
-    }    
+    }
 }

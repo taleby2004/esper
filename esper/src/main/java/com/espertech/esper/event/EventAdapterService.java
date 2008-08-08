@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.Configuration;
@@ -69,18 +76,18 @@ public interface EventAdapterService
      * @throws EventAdapterException if alias already exists and doesn't match property type info
      */
     public EventType addNestableMapType(String eventTypeAlias, Map<String, Object> propertyTypes, Set<String> optionalSupertype) throws EventAdapterException;
-    
+
     /**
-     * Add an event type with the given alias and the given underlying event type, 
+     * Add an event type with the given alias and the given underlying event type,
      * as well as the additional given properties.
      * @param eventTypeAlias is the alias name for the event type
      * @param underlyingEventType is the event type for the event type that this wrapper wraps
-     * @param propertyTypes is the names and types of any additional properties 
+     * @param propertyTypes is the names and types of any additional properties
      * @return eventType is the type added
      * @throws EventAdapterException if alias already exists and doesn't match this type's info
      */
     public EventType addWrapperType(String eventTypeAlias, EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException;
-    
+
     /**
      * Creates a new anonymous EventType instance for an event type that contains a map of name value pairs.
      * The method accepts a Map that contains the property names as keys and Class objects as the values.
@@ -101,7 +108,7 @@ public interface EventAdapterService
      * @return EventBean instance
      */
     public EventBean createMapFromValues(Map<String, Object> properties, EventType eventType);
-    
+
     /**
      * Creata a wrapper around an event and some additional properties
      * @param event is the wrapped event
@@ -121,7 +128,7 @@ public interface EventAdapterService
      * If the alias does not already exists, adds the alias and constructs a new {@link com.espertech.esper.event.BeanEventType}.
      * <p>
      * Takes into account all event-type-auto-alias-package names supplied and
-     * attempts to resolve the class name via the packages if the direct resolution failed. 
+     * attempts to resolve the class name via the packages if the direct resolution failed.
      * @param eventTypeAlias is the alias name for the event type
      * @param fullyQualClassName is the fully qualified class name
      * @param considerAutoAlias whether auto-alias by Java packages should be considered
@@ -199,10 +206,10 @@ public interface EventAdapterService
     public EventBean adapterForCompositeEvent(EventType eventType, Map<String, Object> taggedEvents);
 
     /**
-     * Create a new anonymous event type with the given underlying event type, 
+     * Create a new anonymous event type with the given underlying event type,
      * as well as the additional given properties.
      * @param underlyingEventType is the event type for the event type that this wrapper wraps
-     * @param propertyTypes is the names and types of any additional properties 
+     * @param propertyTypes is the names and types of any additional properties
      * @return eventType is the type createdStatement
      * @throws EventAdapterException if alias already exists and doesn't match this type's info
      */
@@ -218,14 +225,14 @@ public interface EventAdapterService
 
     /**
      * Sets the configured legacy Java class information.
-     * @param classLegacyInfo is configured legacy 
+     * @param classLegacyInfo is configured legacy
      */
     public void setClassLegacyConfigs(Map<String, ConfigurationEventTypeLegacy> classLegacyInfo);
 
     /**
      * Sets the resolution style for case-sentitivity.
      * @param classPropertyResolutionStyle for resolving properties.
-     */    
+     */
     public void setDefaultPropertyResolutionStyle(Configuration.PropertyResolutionStyle classPropertyResolutionStyle);
 
     /**
@@ -277,7 +284,7 @@ public interface EventAdapterService
      * Update a given Map  event type.
      * @param mapEventTypeAlias alias to update
      * @param typeMap additional properties to add, nesting allowed
-     * @throws EventAdapterException when the type is not found or is not a Map 
+     * @throws EventAdapterException when the type is not found or is not a Map
      */
     public void updateMapEventType(String mapEventTypeAlias, Map<String, Object> typeMap) throws EventAdapterException;
 

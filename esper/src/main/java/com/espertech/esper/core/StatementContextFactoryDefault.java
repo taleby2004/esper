@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPStatementException;
@@ -59,7 +66,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         // Create a lock for the statement
         ManagedLock statementResourceLock = null;
 
-        // For on-delete statements, use the create-named-window statement lock 
+        // For on-delete statements, use the create-named-window statement lock
         if ((optOnTriggerDesc != null) && (optOnTriggerDesc instanceof OnTriggerWindowDesc))
         {
             String windowName = ((OnTriggerWindowDesc) optOnTriggerDesc).getWindowName();

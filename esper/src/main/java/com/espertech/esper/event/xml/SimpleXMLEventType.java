@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.xml;
 
 
@@ -20,9 +27,9 @@ import java.util.Map;
  * Because no type information is given, all property are resolved to String.
  * No namespace support.
  * Cannot access to xml attributes, only elements content.
- * 
+ *
  * If an xsd is present, then use {@link com.espertech.esper.event.xml.SchemaXMLEventType SchemaXMLEventType }
- * 
+ *
  * @author pablo
  *
  */

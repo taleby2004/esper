@@ -7,21 +7,18 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.util.CoercionException;
-import com.espertech.esper.event.EventBean;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.event.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.CoercionException;
+import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.List;
 import java.util.LinkedList;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
 
 /**
  * Represents the case-when-then-else control flow function is an expression tree.
@@ -81,7 +78,7 @@ public class ExprCaseNode extends ExprNode
 
         // Determine common denominator type
         try {
-            resultType = JavaClassHelper.getCommonCoercionType(childTypes.toArray(new Class[0]));
+            resultType = JavaClassHelper.getCommonCoercionType(childTypes.toArray(new Class[childTypes.size()]));
             if (JavaClassHelper.isNumeric(resultType))
             {
                 isNumericResult = true;
@@ -156,7 +153,7 @@ public class ExprCaseNode extends ExprNode
         // Case 1 expression example:
         //      case when a=b then x [when c=d then y...] [else y]
         //
-        ExprNode[] children = this.getChildNodes().toArray(new ExprNode[0]);
+        ExprNode[] children = this.getChildNodes().toArray(new ExprNode[this.getChildNodes().size()]);
         if (children.length < 2)
         {
             throw new ExprValidationException("Case node must have at least 2 child nodes");
@@ -186,7 +183,7 @@ public class ExprCaseNode extends ExprNode
         // Case 2 expression example:
         //      case p when p1 then x [when p2 then y...] [else z]
         //
-        ExprNode[] children = this.getChildNodes().toArray(new ExprNode[0]);
+        ExprNode[] children = this.getChildNodes().toArray(new ExprNode[this.getChildNodes().size()]);
         if (children.length < 3)
         {
             throw new ExprValidationException("Case node must have at least 3 child nodes");
@@ -215,7 +212,7 @@ public class ExprCaseNode extends ExprNode
 
         // Determine common denominator type
         try {
-            coercionType = JavaClassHelper.getCommonCoercionType(comparedTypes.toArray(new Class[0]));
+            coercionType = JavaClassHelper.getCommonCoercionType(comparedTypes.toArray(new Class[comparedTypes.size()]));
 
             // Determine if we need to coerce numbers when one type doesn't match any other type
             if (JavaClassHelper.isNumeric(coercionType))
@@ -317,7 +314,7 @@ public class ExprCaseNode extends ExprNode
         }
         if (rightResult == null)
         {
-            return (leftResult == null);
+            return false;
         }
 
         if (!mustCoerce)
@@ -331,7 +328,6 @@ public class ExprCaseNode extends ExprNode
             return left.equals(right);
         }
     }
-
-    private static final Log log = LogFactory.getLog(ExprCaseNode.class);
 }
+
 

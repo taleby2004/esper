@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.db;
 
 import com.espertech.esper.epl.join.table.EventTable;
@@ -9,7 +16,7 @@ import java.util.HashMap;
 /**
  * For use in iteration over historical joins, a {@link DataCache} implementation
  * that serves to hold EventBean rows generated during a join evaluation
- * involving historical streams stable for the same cache lookup keys. 
+ * involving historical streams stable for the same cache lookup keys.
  */
 public class DataCacheClearableMap implements DataCache
 {

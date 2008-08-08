@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.epl.core.StreamTypeService;
@@ -19,13 +26,15 @@ import com.espertech.esper.schedule.TimeProvider;
  */
 public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
 {
+    private static final long serialVersionUID = 0L;
+
     private Class resultType;
     private int streamNumber;
     private Integer constantIndexNumber;
     private boolean isConstantIndex;
 
-    private RandomAccessByIndexGetter randomAccessGetter;
-    private RelativeAccessByEventNIndexGetter relativeAccessGetter;
+    private transient RandomAccessByIndexGetter randomAccessGetter;
+    private transient RelativeAccessByEventNIndexGetter relativeAccessGetter;
 
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
     {
@@ -79,7 +88,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
     public boolean isConstantResult()
     {
         return false;
-    }        
+    }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
     {

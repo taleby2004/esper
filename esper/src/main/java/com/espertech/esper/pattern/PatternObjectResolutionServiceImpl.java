@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.collection.Pair;
@@ -10,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Map;
 
 /**
- * Resolves pattern object namespace and name to guard or observer factory class, using configuration. 
+ * Resolves pattern object namespace and name to guard or observer factory class, using configuration.
  */
 public class PatternObjectResolutionServiceImpl implements PatternObjectResolutionService
 {
@@ -140,6 +147,6 @@ public class PatternObjectResolutionServiceImpl implements PatternObjectResoluti
             throw new PatternObjectException(message, e);
         }
 
-        return result;        
+        return result;
     }
 }

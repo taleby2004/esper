@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.type;
 
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
@@ -51,7 +58,7 @@ public class CronParameter implements NumberSetParameter {
         this.operator = assignOperator(cronOperator);
         if (day != null) {
             this.day = IntValue.parseString(day);
-        }        
+        }
         calendar = Calendar.getInstance();
         calendar.setTimeInMillis(engineTime);
         calendar.setFirstDayOfWeek(FIRST_DAY_OF_WEEK);
@@ -99,7 +106,7 @@ public class CronParameter implements NumberSetParameter {
                 values.add(determineLastWeekDayOfMonth());
                 break;
             case w:
-                values.add(determineLastWeekDayOfMonth());                
+                values.add(determineLastWeekDayOfMonth());
                 break;
             default:
                     throw new IllegalArgumentException("Invalid special operator for observer");

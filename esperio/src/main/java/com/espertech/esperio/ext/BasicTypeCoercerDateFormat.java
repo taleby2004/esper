@@ -6,6 +6,9 @@ import java.util.Map;
 
 import com.espertech.esperio.csv.BasicTypeCoercer;
 
+/**
+ * Date format coercion.
+ */
 public class BasicTypeCoercerDateFormat extends BasicTypeCoercer {
 
 	private Map<String, DateFormat> dateFormats = new HashMap<String, DateFormat>();
@@ -18,8 +21,13 @@ public class BasicTypeCoercerDateFormat extends BasicTypeCoercer {
 		}
 		return super.coerce(property, source);
 	}
-	
-	public void addDateFormat(String propertyName, DateFormat df) {
+
+    /**
+     * Add a date format.
+     * @param propertyName property to add
+     * @param df the date format
+     */
+    public void addDateFormat(String propertyName, DateFormat df) {
 		this.dateFormats.put(propertyName, df);
 	}
 }

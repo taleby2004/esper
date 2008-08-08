@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
@@ -107,7 +114,7 @@ public class AggregationServiceFactory
         {
             aggregateNode.setAggregationResultFuture(service, column);
 
-            // hand to all equivalent-to 
+            // hand to all equivalent-to
             List<ExprAggregateNode> equivalentAggregators = equivalencyList.get(aggregateNode);
             if (equivalentAggregators != null)
             {
@@ -153,7 +160,7 @@ public class AggregationServiceFactory
                 }
                 return prototype;
             }
-        };        
+        };
     }
 
     private static void addEquivalent(ExprAggregateNode aggNodeToAdd, Map<ExprAggregateNode, List<ExprAggregateNode>> equivalencyList)
@@ -180,7 +187,7 @@ public class AggregationServiceFactory
         if (!foundEquivalent)
         {
             equivalencyList.put(aggNodeToAdd, null);
-        }        
+        }
     }
 
 }

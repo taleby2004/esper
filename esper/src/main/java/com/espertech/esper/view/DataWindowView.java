@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.view;
 
 /**
@@ -20,7 +27,7 @@ package com.espertech.esper.view;
  * Certain views may decide to attach only to data window views directly. One reason for this is that
  * window limit the number of event instances kept in a collection. Without this limitation some views may
  * not work correctly over time as events accumulate but are not removed from the view by means old data updates
- * received from a parent data window. 
+ * received from a parent data window.
  */
 public interface DataWindowView extends View
 {

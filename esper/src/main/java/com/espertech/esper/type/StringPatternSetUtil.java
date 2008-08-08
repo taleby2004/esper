@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.type;
 
 import com.espertech.esper.collection.Pair;
@@ -15,7 +22,7 @@ public class StringPatternSetUtil
      * @param defaultValue the default value if there are no patterns or no matches change the value
      * @param patterns to match against, true in the pair for include, false for exclude
      * @param literal to match
-     * @return true for included, false for excluded 
+     * @return true for included, false for excluded
      */
     public static Boolean evaluate(boolean defaultValue, List<Pair<StringPatternSet, Boolean>> patterns, String literal)
     {

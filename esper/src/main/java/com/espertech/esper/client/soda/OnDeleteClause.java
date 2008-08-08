@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
@@ -16,7 +23,7 @@ public class OnDeleteClause extends OnClause
      * Creates an on-delete clause.
      * @param windowName is the named window name
      * @param optionalAsName is the optional alias
-     * @return on-delete clause 
+     * @return on-delete clause
      */
     public static OnDeleteClause create(String windowName, String optionalAsName)
     {

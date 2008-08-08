@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2007 Thomas Bernhardt. All rights reserved.                          *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.event.xml;
 
 import javax.xml.xpath.XPathExpressionException;
@@ -24,7 +31,7 @@ import java.net.URL;
  * Mapped and Indexed properties are supported.
  * All property types resolved via the declared xsd types.
  * Can access attributes.
- * Validates the property string at construction time. 
+ * Validates the property string at construction time.
  * @author pablo
  *
  */
