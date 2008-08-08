@@ -89,9 +89,9 @@ public class TestStockTickerSimple extends TestCase
         LimitAlert alert = (LimitAlert) listener.getMatchEvents().get(0);
         listener.clearMatched();
         assertTrue(alert.getInitialPrice() == STOCK_PRICE);
-        assertTrue(alert.getLimit().getUserId().equals(USER_ID_ONE));
-        assertTrue(alert.getLimit().getStockSymbol().equals(STOCK_NAME));
-        assertTrue(alert.getLimit().getLimitPct() == LIMIT_PERCENT);
+        assertTrue(alert.getPriceLimit().getUserId().equals(USER_ID_ONE));
+        assertTrue(alert.getPriceLimit().getStockSymbol().equals(STOCK_NAME));
+        assertTrue(alert.getPriceLimit().getLimitPct() == LIMIT_PERCENT);
         assertTrue(alert.getTick().getStockSymbol().equals(STOCK_NAME));
         assertTrue(alert.getTick().getPrice() == STOCK_PRICE_OUTSIDE_LIMIT_HIGH);
 

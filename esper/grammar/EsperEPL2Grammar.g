@@ -403,6 +403,8 @@ tokens
 	parserTokenParaphases.put(BOOLEAN_TRUE, "'true'");
 	parserTokenParaphases.put(BOOLEAN_FALSE, "'false'");
 	parserTokenParaphases.put(VALUE_NULL, "'null'");
+	parserTokenParaphases.put(ROW_LIMIT_EXPR, "'limit'");
+	parserTokenParaphases.put(OFFSET, "'offset'");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }

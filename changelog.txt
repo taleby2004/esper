@@ -5,6 +5,7 @@ Changes in version 2.2.0
 ------------------------
 
 Major API changes
+ - two new reserved keywords: limit and offset
     
 New Features
   - Support for repeat and repeat-until in pattern matching

@@ -52,8 +52,8 @@ public class TestUnidirectionalStreamJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 3L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"E1", 3L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E1", 1L});
+        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"E1", 2L});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E1", 0L});
         listener.reset();
 
         sendEvent("E2", 40);

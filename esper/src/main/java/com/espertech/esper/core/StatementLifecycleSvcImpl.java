@@ -395,6 +395,14 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         {
             pair = desc.getStartMethod().start(isNewStatement);
         }
+        catch (EPStatementException ex)
+        {
+            stmtIdToDescMap.remove(statementId);
+            stmtNameToIdMap.remove(statement.getName());
+            stmtNameToStmtMap.remove(statement.getName());
+            log.debug(".start Error starting view", ex);
+            throw ex;
+        }
         catch (ExprValidationException ex)
         {
             stmtIdToDescMap.remove(statementId);

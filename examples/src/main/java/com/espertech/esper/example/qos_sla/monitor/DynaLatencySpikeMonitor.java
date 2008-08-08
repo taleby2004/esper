@@ -17,12 +17,12 @@ public class DynaLatencySpikeMonitor
         admin = EPServiceProviderManager.getDefaultProvider().getEPAdministrator();
 
         String event = LatencyLimit.class.getName();
-        EPStatement latencyAlert = admin.createPattern("every limit=" + event);
+        EPStatement latencyAlert = admin.createPattern("every newlimit=" + event);
 
         latencyAlert.addListener(new UpdateListener() {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)
             {
-                LatencyLimit limitEvent = (LatencyLimit) newEvents[0].get("limit");
+                LatencyLimit limitEvent = (LatencyLimit) newEvents[0].get("newlimit");
                 new DynaLatencySpikeMonitor(limitEvent);
             }
         });

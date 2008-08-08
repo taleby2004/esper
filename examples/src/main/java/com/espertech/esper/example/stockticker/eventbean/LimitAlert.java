@@ -18,7 +18,7 @@ public class LimitAlert
         return tick;
     }
 
-    public PriceLimit getLimit()
+    public PriceLimit getPriceLimit()
     {
         return limit;
     }

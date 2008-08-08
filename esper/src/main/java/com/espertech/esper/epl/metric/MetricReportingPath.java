@@ -28,16 +28,14 @@ public class MetricReportingPath
      */
     public static void setMetricsEnabled(boolean metricsEnabled)
     {
-        String message;
         if (metricsEnabled)
         {
-            message = "enabled";
+            log.info("Metrics reporting has been enabled, this setting takes affect for all engine instances at engine initialization time.");
         }
         else
         {
-            message = "disabled";
+            log.debug("Metrics reporting has been disabled, this setting takes affect for all engine instances at engine initialization time.");
         }
-        log.info("Metrics reporting has been " + message + ", this setting takes affect for all engine instances at engine initialization time.");
         isMetricsEnabled = metricsEnabled;
     }
 }

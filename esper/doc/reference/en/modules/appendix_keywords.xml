@@ -86,6 +86,7 @@ select insert from MyEvent]]></programlisting>
 				<row><entry>last</entry><entry>yes</entry></row>
 				<row><entry>lastweekday</entry><entry>yes</entry></row>
 				<row><entry>left</entry><entry>yes</entry></row>
+				<row><entry>limit</entry><entry>-</entry></row>
 				<row><entry>like</entry><entry>-</entry></row>
 				<row><entry>max</entry><entry>yes</entry></row>
 				<row><entry>median</entry><entry>yes</entry></row>
@@ -98,6 +99,7 @@ select insert from MyEvent]]></programlisting>
 				<row><entry>milliseconds</entry><entry>yes</entry></row>
 				<row><entry>not</entry><entry>-</entry></row>
 				<row><entry>null</entry><entry>-</entry></row>
+				<row><entry>offset</entry><entry>-</entry></row>
 				<row><entry>on</entry><entry>-</entry></row>
 				<row><entry>or</entry><entry>-</entry></row>
 				<row><entry>order</entry><entry>-</entry></row>
