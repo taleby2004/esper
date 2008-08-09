@@ -16,6 +16,7 @@ a {
 	background: inherit;
 }
 a:hover {
+	text-decoration: underline;
 	color: #A00;
 	background: inherit;
 }
@@ -73,6 +74,7 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 	}
 
 	#dmenu a:hover {
+	text-decoration: underline;
 	color: #A00;
 	}
 
@@ -121,7 +123,7 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 			#wrap #pic #slogan h1 { font: bold 1.5em Arial, Sans-Serif; color: #000099; letter-spacing: 1px; margin:0 }
 			#wrap #pic #slogan h2 { font:  1.5em Arial, Sans-Serif; color: #000099; letter-spacing: 0px; margin:0; padding: 0px 0}
 			#wrap #pic #slogan a { color: #A00; text-decoration: none; font: bold 2.0em}
-			#wrap #pic #slogan a:hover { color: #A00; }
+			#wrap #pic #slogan a:hover { color: #A00; text-decoration: underline;}
 			
 		#wrap #menu { padding: 0; margin:0; background: inherit; }
 		#wrap #menu a { padding-left: 25px; font:  0.9em Arial, Sans-Serif; text-decoration: none; background: #F6F6F6 url(/images/lm-li.gif) no-repeat left;  }
@@ -137,7 +139,7 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 /*  Advertising #FFF url(/images/download.jpg) no-repeat left; min-height: 80px;*/
 #ad { background: #FFF; padding-left: 0px; margin-bottom: 15px;}
 #ad a, #left_side a { background: #FFF; text-decoration: none }
-#ad a:hover, #left_side a:hover { color: #A00 }
+#ad a:hover, #left_side a:hover { color: #A00; text-decoration: underline; }
 		
 /* main area */
 #main { }
@@ -147,10 +149,13 @@ pre {font-size: 1.2em; font-weight: bold; color:#000099;}
 	background: #F6F6F6;
 	padding: 5px 10px 5px 10px;
 	margin-bottom: 10px;
+	min-height: 700px;
+	height: auto;
 }
 		#right_side ul { padding: 3px 0 8px 0 } 
 		#right_side li { line-height: 18px; color: #000099; background: #F6F6F6 url(/images/cat-li.gif) no-repeat left; list-style: none; padding-left: 20px; }
 		#right_side a { background: #F6F6F6; text-decoration:  none }
+		#right_side a:hover { text-decoration: underline; }
 		#right_side h3 { color: #404040; font:  bold 1.2em Arial, Sans-Serif; }
 		#right_side p { background: #F6F6F6; color: #000099; padding: 3px 0px 8px 0px; }
 	
