@@ -1,14 +1,11 @@
 /**************************************************************************************
- * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * Copyright (C) 2008 EsperTech, Inc. All rights reserved.                            *
  * http://esper.codehaus.org                                                          *
+ * http://www.espertech.com                                                           *
  * ---------------------------------------------------------------------------------- *
  * The software in this package is published under the terms of the GPL license       *
  * a copy of which has been included with this distribution in the license.txt file.  *
  **************************************************************************************/
-/*
- * Created on Apr 22, 2006
- *
- */
 package com.espertech.esper.example.transaction.sim;
 
 import com.espertech.esper.client.EPServiceProviderManager;
