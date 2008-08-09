@@ -381,7 +381,8 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 	{
 		if(adapterSpec.getTimestampColumn() != null)
 		{
-			return (Long) map.get(adapterSpec.getTimestampColumn());
+			Object value = map.get(adapterSpec.getTimestampColumn());
+            return Long.parseLong(value.toString()) ;
 		}
 		else
 		{
