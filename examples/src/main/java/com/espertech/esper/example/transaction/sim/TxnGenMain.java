@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 /*
  * Created on Apr 22, 2006
  *
@@ -17,7 +24,7 @@ import java.util.LinkedHashMap;
 
 
 /** Runs the generator.
- * 
+ *
  * @author Hans Gilde
  *
  */
@@ -37,14 +44,14 @@ public class TxnGenMain {
 
     /**
      * @param args
-     * @throws IOException 
+     * @throws IOException
      */
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
             System.out.println("Arguments are: <bucket_size> <num_transactions>");
             System.exit(-1);
         }
-        
+
         int bucketSize;
         try {
             bucketSize = BUCKET_SIZES.get(args[0]);
@@ -53,7 +60,7 @@ public class TxnGenMain {
             for(String key:BUCKET_SIZES.keySet()) {
                 System.out.println("\t"+key+" -> "+BUCKET_SIZES.get(key));
             }
-            
+
             System.exit(-2);
             return;
         }

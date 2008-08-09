@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esperio.representation.axiom;
 
 import com.espertech.esper.client.*;
@@ -137,7 +144,7 @@ public class TestAxiom extends TestCase
         sender.sendEvent(documentElement);
         event = updateListener.assertOneGetNewAndReset();
         assertEquals("hype", event.get("type"));
-        assertEquals("hype", event.get("element1"));        
+        assertEquals("hype", event.get("element1"));
     }
 
     public void testDotEscapeSyntax() throws Exception
@@ -262,7 +269,7 @@ public class TestAxiom extends TestCase
 
         String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";
         sendXMLEvent(epService, "StockQuote", xml);
-        
+
         EventBean event = updateListener.assertOneGetNewAndReset();
         assertEquals("IBM", event.get("symbol_a"));
         assertEquals("IBM", event.get("symbol_c"));
@@ -312,7 +319,7 @@ public class TestAxiom extends TestCase
         // register new representation of events
         config.addPlugInEventRepresentation(new URI(AXIOM_URI),
                 AxiomEventRepresentation.class.getName(), null);
-                
+
         return config;
     }
 }

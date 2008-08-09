@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.example.servershell;
 
 import org.apache.commons.logging.Log;
@@ -23,7 +30,7 @@ import com.espertech.esper.client.EPStatement;
 public class ServerShellConstants
 {
     public static final String CONFIG_FILENAME = "servershell_config.properties";
-    
+
     public static final String JMS_CONTEXT_FACTORY = "jms-context-factory";
     public static final String JMS_PROVIDER_URL = "jms-provider-url";
     public static final String JMS_CONNECTION_FACTORY_NAME = "jms-connection-factory-name";

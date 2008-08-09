@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esperio.regression.adapter;
 
 import com.espertech.esper.client.Configuration;
@@ -18,7 +25,7 @@ public class TestCSVAdapterUseCasesBean extends TestCSVAdapterUseCases {
 	public TestCSVAdapterUseCasesBean() {
 		super(true);
 	}
-	
+
     public void testReadWritePropsBean()
     {
         Configuration configuration = new Configuration();
@@ -37,5 +44,5 @@ public class TestCSVAdapterUseCasesBean extends TestCSVAdapterUseCases {
         EventBean eb = listener.getNewDataList().get(0)[0];
         assertTrue(ExampleMarketDataBeanReadWrite.class == eb.getUnderlying().getClass());
         assertEquals(55.5 * 1000, eb.get("value"));
-    }    
+    }
 }

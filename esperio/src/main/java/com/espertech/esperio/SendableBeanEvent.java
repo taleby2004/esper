@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esperio;
 
 import java.util.Map;
@@ -15,7 +22,7 @@ public class SendableBeanEvent extends AbstractSendableEvent
 	private final Object beanToSend;
 
 	/**
-	 * Converts mapToSend to an instance of beanClass 
+	 * Converts mapToSend to an instance of beanClass
 	 * @param mapToSend - the map containing data to send into the runtime
 	 * @param beanClass  - type of the bean to create from mapToSend
 	 * @param eventTypeAlias - the event type alias for the map event
@@ -28,7 +35,7 @@ public class SendableBeanEvent extends AbstractSendableEvent
 
 		try {
 			beanToSend = beanClass.newInstance();
-			// this method silently ignores read only properties on the dest bean but we should 
+			// this method silently ignores read only properties on the dest bean but we should
 			// have caught them in CSVInputAdapter.constructPropertyTypes.
 			BeanUtils.copyProperties(beanToSend, mapToSend);
 		} catch (Exception e) {

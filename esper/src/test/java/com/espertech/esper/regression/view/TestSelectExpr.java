@@ -53,6 +53,7 @@ public class TestSelectExpr extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL("select " + fields + " from Keywords");
         stmt.addListener(testListener);
         epService.getEPRuntime().sendEvent(new SupportBeanKeywords());
+        ArrayAssertionUtil.assertEqualsExactOrder(fields.split(","), stmt.getEventType().getPropertyNames());
 
         EventBean event = testListener.assertOneGetNewAndReset();
         String[] fieldsArr = fields.split(",");

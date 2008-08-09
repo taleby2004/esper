@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 /*
  * Created on Apr 22, 2006
  *
@@ -19,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 /** Generates events for a continuous stream of transactions.
  * Rules for generating events are coded in {@link #createNextTransaction()}.
- * 
+ *
  * @author Hans Gilde
  *
  */
@@ -28,10 +35,10 @@ public class TransactionEventSource extends EventSource {
     protected Random random = RandomUtil.getNewInstance();
     protected List<TxnEventBase> transactionEvents;
     protected Iterator<TxnEventBase> transactionIterator;
-    
+
     protected int maxTrans;
     protected int numTrans;
-    
+
     protected FieldGenerator fieldGenerator = new FieldGenerator();
 
     /**
@@ -40,24 +47,24 @@ public class TransactionEventSource extends EventSource {
     public TransactionEventSource(int howManyTransactions) {
         maxTrans = howManyTransactions;
     }
-    
+
     protected List<TxnEventBase> createNextTransaction() {
         List<TxnEventBase> t = new ArrayList<TxnEventBase>();
-        
+
         long beginningStamp = System.currentTimeMillis();
         //skip event 1 with probability 1 in 5000
         if (random.nextInt(5000) < 4998) {
             TxnEventA txnEventA = new TxnEventA(null, beginningStamp, fieldGenerator.getRandomCustomer());
             t.add(txnEventA);
         }
-        
+
         long e2Stamp = fieldGenerator.randomLatency(beginningStamp);
         //skip event 2 with probability 1 in 1000
         if (random.nextInt(1000) < 9998) {
             TxnEventB txnEventB = new TxnEventB(null, e2Stamp);
             t.add(txnEventB);
         }
-        
+
         long e3Stamp = fieldGenerator.randomLatency(e2Stamp);
         //skip event 3 with probability 1 in 10000
         if (random.nextInt(10000) < 9998) {

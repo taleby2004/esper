@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.example.terminal.jse.simulate;
 
 import com.espertech.esper.example.terminal.jse.event.*;
@@ -24,7 +31,7 @@ public class EventGenerator {
 
     private static final int TERMINAL_COUNT = 100;
 
-    private static final int TERMINAL_OUTOFORDER_LIKELYHOOD_PER_CHECKIN = 10;//max 1000    
+    private static final int TERMINAL_OUTOFORDER_LIKELYHOOD_PER_CHECKIN = 10;//max 1000
 
     private static final int TERMINAL_EVENT_LIKELYHOOD_PER_BATCH = 100;//max 100
 

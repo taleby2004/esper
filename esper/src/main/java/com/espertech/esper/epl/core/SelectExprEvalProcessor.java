@@ -127,7 +127,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         // Get column names
         if ((insertIntoDesc != null) && (!insertIntoDesc.getColumnNames().isEmpty()))
         {
-            columnNames = insertIntoDesc.getColumnNames().toArray(new String[0]);
+            columnNames = insertIntoDesc.getColumnNames().toArray(new String[insertIntoDesc.getColumnNames().size()]);
         }
         else
         {
@@ -213,7 +213,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
         }
 
         // Build event type
-        Map<String, Object> selPropertyTypes = new HashMap<String, Object>();
+        Map<String, Object> selPropertyTypes = new LinkedHashMap<String, Object>();
         for (int i = 0; i < expressionNodes.length; i++)
         {
             Object expressionReturnType = expressionReturnTypes[i];

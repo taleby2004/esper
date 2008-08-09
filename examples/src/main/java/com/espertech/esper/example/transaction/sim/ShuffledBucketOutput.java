@@ -1,7 +1,10 @@
-/*
- * Created on Apr 23, 2006
- *
- */
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.example.transaction.sim;
 
 import com.espertech.esper.example.transaction.TxnEventBase;
@@ -14,17 +17,17 @@ import java.util.Map;
 import java.util.Random;
 
 /** Outputs events using a bucket, whose contents are shuffled.
- * 
+ *
  * @author Hans Gilde
  *
  */
 public class ShuffledBucketOutput {
     private static final Random random = RandomUtil.getNewInstance();
-    
+
     private EventSource eventSource;
     private OutputStream outputStream;
     private int bucketSize;
-    
+
     /**
      * @param eventSource
      * @param outputStream
@@ -35,17 +38,17 @@ public class ShuffledBucketOutput {
         this.outputStream = outputStream;
         this.bucketSize = bucketSize;
     }
-    
+
     public void output() throws IOException {
         List<TxnEventBase> bucket = new ArrayList<TxnEventBase>(bucketSize);
-                
+
         for (TxnEventBase e:eventSource) {
             bucket.add(e);
             if (bucket.size() == bucketSize) {
                 outputBucket(bucket);
             }
         }
-        
+
         if (bucket.size() > 0) {
             outputBucket(bucket);
         }

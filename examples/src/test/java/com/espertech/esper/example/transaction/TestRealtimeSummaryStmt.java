@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.example.transaction;
 
 import com.espertech.esper.example.support.SupportUpdateListener;
@@ -103,7 +110,7 @@ public class TestRealtimeSummaryStmt extends TestStmtBase
         assertTotalsByCustomer("cA", 1000L, 3000L, 2000D);
         assertTotalsBySupplier("sA", 2000L, 3000L, 2500D);
     }
-    
+
     private void assertTotals(Long minAC, Long maxAC, Double avgAC,
                               Long minBC, Long maxBC, Double avgBC,
                               Long minAB, Long maxAB, Double avgAB)

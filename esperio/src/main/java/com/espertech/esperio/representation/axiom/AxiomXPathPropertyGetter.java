@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esperio.representation.axiom;
 
 import com.espertech.esper.event.EventBean;
@@ -33,7 +40,7 @@ public class AxiomXPathPropertyGetter implements TypedEventPropertyGetter
      * @param propertyName    is the name of the event property for which this getter gets values
      * @param resultType      is the resulting type
      * @param xPath           the Axiom xpath expression
-     * @param optionalCastToType null if no cast, or the type to cast to  
+     * @param optionalCastToType null if no cast, or the type to cast to
      */
     public AxiomXPathPropertyGetter(String propertyName, AXIOMXPath xPath, QName resultType, Class optionalCastToType)
     {

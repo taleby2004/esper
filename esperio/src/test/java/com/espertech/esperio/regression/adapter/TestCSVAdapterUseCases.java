@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esperio.regression.adapter;
 
 import com.espertech.esper.client.*;
@@ -31,12 +38,12 @@ public class TestCSVAdapterUseCases extends TestCase
     public TestCSVAdapterUseCases() {
 		this(false);
 	}
-    
+
 
     public TestCSVAdapterUseCases(boolean ub) {
 		useBean = ub;
 	}
-    
+
 	/**
      * Play a CSV file using an existing event type definition (no timestamps).
      *
@@ -278,15 +285,15 @@ public class TestCSVAdapterUseCases extends TestCase
         feed.start();
         assertEquals(1, listener.getNewDataList().size());
     }
-    
+
     /**
-     * Bean with same properties as map type used in this test 
+     * Bean with same properties as map type used in this test
      */
     public static class ExampleMarketDataBean {
-    	private String symbol; 
-    	private double price; 
+    	private String symbol;
+    	private double price;
     	private Integer volume;
-    	
+
 		public String getSymbol() {
 			return symbol;
 		}
@@ -304,6 +311,6 @@ public class TestCSVAdapterUseCases extends TestCase
 		}
 		public void setVolume(Integer volume) {
 			this.volume = volume;
-		} 
+		}
     }
 }

@@ -212,7 +212,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
         }
 
         // Build event type that reflects all selected properties
-        Map<String, Object> selPropertyTypes = new HashMap<String, Object>();
+        Map<String, Object> selPropertyTypes = new LinkedHashMap<String, Object>();
         int count = 0;
         for (ExprNode expressionNode : expressionNodes)
         {

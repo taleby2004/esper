@@ -5,33 +5,50 @@ Changes in version 2.2.0
 ------------------------
 
 Major API changes
- - two new reserved keywords: limit and offset
-    
+ - Two new reserved keywords: LIMIT and OFFSET: Added for support of the SQL-standard row limit clause.
+ - Bug fix for ESPER-264 that impacts joins that utilize the "unidirectional" keyword and that perform aggregation
+ 
 New Features
   - Support for repeat and repeat-until in pattern matching
-  - named windows allow constants and table-like definition syntax
-  - plug-in aggregation functions accept multiple parameters
-  - allow inner join and outer join mixed
-  - allow variables used in SQL join and method join
-  - allow polling via iterator a from a statement that contains only an SQL query or a method invocation
-  - fix for ESPER-xxx which is support for iterator on an SQL join or a method join
-  - "as" not required in create window
-  - removed limitation on historical data joins, now supporting an unlimited number of streams in join and iterator
-  - support for Map inheritance
-  - support for adding properties at runtime
-  - optimization for simple filter-only statements that filter using a where-clause
-  - allow create window model after another create window, allow populate from another named window
-  - instrumentation
+  - Enhancements for the create-syntax for named windows:
+      - Allows an additional SQL table-like definition syntax
+      - Allows constants in the model-after syntax
+      - Allows the window to be modelled after another named window, and populated from another named window at creation time
+      - Changed "as" to become an optional keyword
+  - Added support for BigDecimal and BigInteger in all aspects of EPL
+  - Added metrics reporting: Instrumentation to provide key engine and statement-level performance indicators as event streams
+  - Added support for row limiting
+  - Added four new views for retaining first-event: std:firstevent, std:firstunique, win:firstlength, win:firsttime
+  - Enhanced output limit clause to support absolute crontab-like times
+  - Enhanced output limit clause to support output when a variable expression turns true
+  - Enhanced plug-in aggregation functions to accept multiple parameters
+  - Support for the "inner" keyword for use in outer joins
+  - Support for variables to be parameters to an SQL join and method join
+  - Support for polling via iterator from a statement that contains only SQL queries or method invocations (alone or in a join, aka. no-stream pull API)
+  - Removed limitation on the number of historical streams (SQL and method) in joins, now supporting an unlimited number of historical streams, full iterator support
+  - Support for Map inheritance: map event types may now be declared to inherit from one or more Map supertypes
+  - Support for changing Map event types at runtime by adding properties to an existing type
+  - Optimization for certain filter-only statements to more efficiently process
+  - Added JMS text message marshaller and unmarshallers for Fix (Fix is a standard financial interchange format)
   
-Minor changes	    		
+Minor changes
+  - Fixed issue ESPER-270 Property name order not always reflecting select clause order for getPropertyNames
+  - Fixed issue ESPER-269 User-define method with dot in parameter generates property not found 	
+  - Fixed issue ESPER-268 User-defined function reports runtime errors through the stack 	
+  - Fixed issue ESPER-264 Unidirectional keyword with aggregation posts lifetime-cumulative results rather then join-current cumulative results 	
+  - Fixed issue ESPER-263 Add boolean ConfigurationOperations.isVariantStreamExists(String variantStreamName) 	
+  - Fixed issue ESPER-258 Extension points for esperio 	
+  - Fixed issue ESPER-257 Esperio beans input to support subset of beans properties in input CSV 	
+  - Fixed issue ESPER-256 It would be really useful for CSVInputAdapter to have a row count so we can tell how many rows it has processed 	
+  - Fixed issue ESPER-254 Iterating over joins that join by polling execution (database or method joins) 	
+  - Fixed issue ESPER-250 Custom aggregation function provided by static inner class not possible 	
+  - Fixed issue ESPER-249 Enhance TimeBatchView with FORCE_UPDATE, START_EAGER keywords 	
+  - Fixed issue ESPER-247 Cast function for String to Int conversion returns null 	
+  - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions 	
+  - Fixed issue ESPER-243 Swallowing InterruptedException in EPServiceProviderImpl 	
+  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types 	
+  - Fixed issue ESPER-239 Esperio - memory leak in AdapterCoordinatorImpl 	
 
-  - Fixed issue ESPER-247 Cast function for String to Int conversion returns null
-  - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
-  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
-  - Fixed issue ESPER-246 Unique-view incorrectly posts remove stream data for shared state under view sharing conditions
-  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
-  - Fixed issue ESPER-241 Predefined variant types not supporting dynamic event types
-  - Fixed issue ESPER-239 esperio - memory leak in AdapterCoordinatorImpl  
 
 Changes in version 2.1.0
 ------------------------

@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esper.example.rfid;
 
 import com.espertech.esper.client.EPServiceProvider;
@@ -11,7 +18,7 @@ import java.net.URL;
 
 import javax.swing.*;
 
-public class DisplayCanvas extends JPanel 
+public class DisplayCanvas extends JPanel
 {
     private static final int NUM_IMAGES = 3;
 
@@ -22,12 +29,12 @@ public class DisplayCanvas extends JPanel
     private final BufferedImage bi;
     private final int imageWidth;
     private final int imageHeight;
-    
+
     private int currentImage;
 
     protected DisplayCanvas(EPServiceProvider engine, int width, int height) {
         this.engine = engine;
-        
+
         setBackground(Color.white);
         setSize(width, height);
         addMouseMotionListener(new MouseMotionHandler());
@@ -41,7 +48,7 @@ public class DisplayCanvas extends JPanel
         mt.addImage(image, 1);
         try {
             mt.waitForAll();
-        } 
+        }
         catch (Exception e) {
             System.out.println("Exception while loading image.");
         }
@@ -118,7 +125,7 @@ public class DisplayCanvas extends JPanel
             repaint();
         }
     }
-    
+
     class MouseListenerHandler implements MouseListener
     {
         private JPanel panel;
@@ -150,7 +157,7 @@ public class DisplayCanvas extends JPanel
          * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
          */
         public void mousePressed(MouseEvent e) {
-            
+
             int imageNum = -1;
             for (int i = 0; i < NUM_IMAGES; i++)
             {
@@ -159,8 +166,8 @@ public class DisplayCanvas extends JPanel
                     if ((e.getY() >= y[i]) && (e.getY() <= (y[i] + imageHeight)))
                     {
                         imageNum = i;
-                        break;                
-                    }                            
+                        break;
+                    }
                 }
             }
             currentImage = imageNum;
@@ -195,6 +202,6 @@ public class DisplayCanvas extends JPanel
                 engine.getEPRuntime().sendEvent(report);
             }
         }
-        
+
     }
 }

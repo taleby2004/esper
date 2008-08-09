@@ -1,3 +1,10 @@
+/**************************************************************************************
+ * Copyright (C) 2006 Esper Team. All rights reserved.                                *
+ * http://esper.codehaus.org                                                          *
+ * ---------------------------------------------------------------------------------- *
+ * The software in this package is published under the terms of the GPL license       *
+ * a copy of which has been included with this distribution in the license.txt file.  *
+ **************************************************************************************/
 package com.espertech.esperio;
 
 import com.espertech.esper.client.EPRuntime;
@@ -21,13 +28,13 @@ public abstract class AbstractSendableEvent implements SendableEvent {
 		{
 			throw new NullPointerException("ScheduleSlot cannot be null");
 		}
-		
+
 		this.timestamp = timestamp;
 		this.scheduleSlot = scheduleSlot;
 	}
 
 	public abstract void send(AbstractSender sender);
-	
+
 	/* (non-Javadoc)
 	 * @see com.espertech.esperio.SendableEvent#getScheduleSlot()
 	 */
