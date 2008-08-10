@@ -42,11 +42,11 @@ public final class MetricScheduleService implements MetricTimeSource
     }
 
     /**
-     * Destroys the schedule.
+     * Clears the schedule.
      */
-    public void destroy()
+    public void clear()
     {
-        log.debug("Destroying scheduling service");
+        log.debug("Clearing scheduling service");
         timeHandleMap.clear();
         nearestTime = null;
     }

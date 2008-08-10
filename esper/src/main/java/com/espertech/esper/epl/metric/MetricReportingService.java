@@ -64,4 +64,26 @@ public interface MetricReportingService
      * @param newInterval new interval, or zero or negative value to disable reporting
      */
     public void setMetricsReportingInterval(String stmtGroupName, long newInterval);
+
+    /**
+     * Disable metrics reporting for statement.
+     * @param statementName statement name
+     */
+    public void setMetricsReportingStmtDisabled(String statementName);
+
+    /**
+     * Enable metrics reporting for statement.
+     * @param statementName statement name
+     */
+    public void setMetricsReportingStmtEnabled(String statementName);
+
+    /**
+     * Enables metrics reporting globally.
+     */
+    public void setMetricsReportingEnabled();
+
+    /**
+     * Disables metrics reporting globally.
+     */
+    public void setMetricsReportingDisabled();
 }

@@ -10,6 +10,7 @@ package com.espertech.esper.epl.metric;
 
 import com.espertech.esper.client.ConfigurationMetricsReporting;
 import com.espertech.esper.client.EPRuntime;
+import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.metric.MetricEvent;
 import com.espertech.esper.core.EPServicesContext;
 import com.espertech.esper.core.StatementLifecycleObserver;
@@ -19,10 +20,7 @@ import com.espertech.esper.util.MetricUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Metrics reporting.
@@ -41,7 +39,12 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
     private boolean isScheduled;
     private final MetricScheduleService schedule;
     private final StatementMetricRepository stmtMetricRepository;
-    private final Map<String, MetricExecStatement> statementGroupExecutions;
+
+    private MetricExecEngine metricExecEngine;
+    private MetricExecStatement metricExecStmtGroupDefault;
+    private Map<String, MetricExecStatement> statementGroupExecutions;
+
+    private final Map<String, StatementMetricHandle> statementMetricHandles;
     private final MetricsExecutor metricsExecutor;
 
     /**
@@ -60,7 +63,8 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
         schedule = new MetricScheduleService();
 
         stmtMetricRepository = new StatementMetricRepository(engineUri, specification);
-        statementGroupExecutions = new HashMap<String, MetricExecStatement>();
+        statementGroupExecutions = new LinkedHashMap<String, MetricExecStatement>();
+        statementMetricHandles = new HashMap<String, StatementMetricHandle>(); 
 
         if (specification.isThreading())
         {
@@ -75,6 +79,19 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
     public void setContext(EPRuntime runtime, EPServicesContext servicesContext)
     {
         executionContext = new MetricExecutionContext(servicesContext, runtime, stmtMetricRepository);
+
+        // create all engine and statement executions
+        metricExecEngine = new MetricExecEngine(this, engineUri, schedule, specification.getEngineInterval());
+        metricExecStmtGroupDefault = new MetricExecStatement(this, schedule, specification.getStatementInterval(), 0);
+
+        int countGroups = 1;
+        for (Map.Entry<String, ConfigurationMetricsReporting.StmtGroupMetrics> entry : specification.getStatementGroups().entrySet())
+        {
+            ConfigurationMetricsReporting.StmtGroupMetrics config = entry.getValue();
+            MetricExecStatement metricsExecution = new MetricExecStatement(this, schedule, config.getInterval(), countGroups);
+            this.statementGroupExecutions.put(entry.getKey(), metricsExecution);
+            countGroups++;
+        }
     }
 
     public void processTimeEvent(long timeEventTime)
@@ -92,7 +109,7 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
         schedule.setTime(timeEventTime);
         if (!isScheduled)
         {
-            scheduleInitial();
+            scheduleExecutions();
             isScheduled = true;
         }
 
@@ -126,51 +143,13 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
 
     public void destroy()
     {
-        schedule.destroy();
+        schedule.clear();
         metricsExecutor.destroy();
     }
 
     public void route(MetricEvent metricEvent)
     {
         executionContext.getRuntime().sendEvent(metricEvent);
-    }
-
-    private void scheduleInitial()
-    {
-        if (!specification.isEnableMetricsReporting())
-        {
-            return;
-        }
-
-        if (isConsiderSchedule(specification.getEngineInterval()))
-        {
-            MetricExecEngine metrics = new MetricExecEngine(this, engineUri, schedule, specification.getEngineInterval());
-            schedule.add(specification.getEngineInterval(), metrics);
-        }
-
-        // schedule each statement group, count the "default" group as the first group  
-        int countGroups = 0;
-        if (isConsiderSchedule(specification.getStatementInterval()))
-        {
-            MetricExecStatement metrics = new MetricExecStatement(this, schedule, specification.getStatementInterval(), countGroups);
-            schedule.add(specification.getStatementInterval(), metrics);
-        }
-        countGroups++;
-
-        // schedule each group, counting a group even if not active (0 or negative interval)
-        // matches the statement repositpry understanding of group and order
-        for (Map.Entry<String, ConfigurationMetricsReporting.StmtGroupMetrics> entry : specification.getStatementGroups().entrySet())
-        {
-            ConfigurationMetricsReporting.StmtGroupMetrics config = entry.getValue();
-            MetricExecStatement metricsExecution = new MetricExecStatement(this, schedule, config.getInterval(), countGroups);
-            this.statementGroupExecutions.put(entry.getKey(), metricsExecution);
-
-            if (isConsiderSchedule(config.getInterval()))
-            {
-                schedule.add(config.getInterval(), metricsExecution);
-            }
-            countGroups++;
-        }
     }
 
     public void accountTime(StatementMetricHandle metricsHandle, long deltaCPU, long deltaWall)
@@ -206,6 +185,12 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
 
     public void setMetricsReportingInterval(String stmtGroupName, long newInterval)
     {
+        if (stmtGroupName == null)
+        {
+            metricExecStmtGroupDefault.setInterval(newInterval);
+            return;
+        }
+        
         MetricExecStatement exec = this.statementGroupExecutions.get(stmtGroupName);
         if (exec == null)
         {
@@ -221,5 +206,68 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
             return true;
         }
         return false;
+    }
+
+    public void setMetricsReportingStmtDisabled(String statementName) throws ConfigurationException
+    {
+        StatementMetricHandle handle = statementMetricHandles.get(statementName);
+        if (handle == null)
+        {
+            throw new ConfigurationException("Statement by name '" + statementName + "' not found in metrics collection");
+        }
+        handle.setEnabled(false);
+    }
+
+    public void setMetricsReportingStmtEnabled(String statementName) throws ConfigurationException
+    {
+        StatementMetricHandle handle = statementMetricHandles.get(statementName);
+        if (handle == null)
+        {
+            throw new ConfigurationException("Statement by name '" + statementName + "' not found in metrics collection");
+        }
+        handle.setEnabled(false);
+    }
+
+    public void setMetricsReportingEnabled()
+    {
+        if (!specification.isEnableMetricsReporting())
+        {
+            throw new ConfigurationException("Metrics reporting must be enabled through initialization-time configuration");
+        }
+        scheduleExecutions();
+        MetricReportingPath.setMetricsEnabled(true);
+    }
+
+    public void setMetricsReportingDisabled()
+    {
+        schedule.clear();
+        MetricReportingPath.setMetricsEnabled(false);
+    }
+
+    private void scheduleExecutions()
+    {
+        if (!specification.isEnableMetricsReporting())
+        {
+            return;
+        }
+
+        if (isConsiderSchedule(metricExecEngine.getInterval()))
+        {
+            schedule.add(metricExecEngine.getInterval(), metricExecEngine);
+        }
+
+        // schedule each statement group, count the "default" group as the first group
+        if (isConsiderSchedule(metricExecStmtGroupDefault.getInterval()))
+        {
+            schedule.add(metricExecStmtGroupDefault.getInterval(), metricExecStmtGroupDefault);
+        }
+
+        for (MetricExecStatement metricsExecution : statementGroupExecutions.values())
+        {
+            if (isConsiderSchedule(metricsExecution.getInterval()))
+            {
+                schedule.add(metricsExecution.getInterval(), metricsExecution);
+            }
+        }
     }
 }

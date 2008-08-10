@@ -362,7 +362,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             Object[] handleArray = handles.getArray();
             EPStatementHandleCallback handle = (EPStatementHandleCallback) handleArray[0];
 
-            if (MetricReportingPath.isMetricsEnabled)
+            if ((MetricReportingPath.isMetricsEnabled) && (handle.getEpStatementHandle().getMetricsHandle().isEnabled()))
             {
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
@@ -427,7 +427,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             EPStatementHandle handle = entry.getKey();
             Object callbackObject = entry.getValue();
 
-            if (MetricReportingPath.isMetricsEnabled)
+            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))
             {
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
@@ -617,7 +617,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 continue;
             }
 
-            if (MetricReportingPath.isMetricsEnabled)
+            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))            
             {
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
@@ -646,7 +646,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             EPStatementHandle handle = entry.getKey();
             List<FilterHandleCallback> callbackList = (List<FilterHandleCallback>) entry.getValue();
 
-            if (MetricReportingPath.isMetricsEnabled)
+            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))            
             {
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();

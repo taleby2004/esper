@@ -1394,15 +1394,15 @@ config.getEngineDefaults().getTimeSource().
 			</para>
 
 			<para>
-			 Here is a further example of a possible statement group definition, which includes statements whose statement name have the characters <literal>Fraud</literal> or <literal>Trade</literal>, and excludes statements whose statement name have the characters <literal>test</literal> or <literal>metrics</literal> inside.
+			 Here is a further example of a possible statement group definition, which includes statements whose statement name have the characters <literal>@REPORT</literal> or <literal>@STREAM</literal>, and excludes statements whose statement name have the characters <literal>@IGNORE</literal> or <literal>@METRICS</literal> inside.
 			</para>
 
 			<programlisting><![CDATA[<metrics-reporting enabled="true">
   <stmtgroup name="MyStmtGroup" interval="1000">
-    <include-like>%Fraud%</include-like>
-    <include-regex>.*Trade.*</include-like>
-    <exclude-like>%test%</exclude-like>
-    <exclude-regex>.*metrics.*</exclude-regex>
+    <include-like>%@REPORT%</include-like>
+    <include-regex>.*@STREAM.*</include-like>
+    <exclude-like>%@IGNORE%</exclude-like>
+    <exclude-regex>.*@METRICS.*</exclude-regex>
   </stmtgroup>
 </metrics-reporting>]]></programlisting>
 		</sect2>

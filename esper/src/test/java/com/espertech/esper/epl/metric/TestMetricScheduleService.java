@@ -63,7 +63,7 @@ public class TestMetricScheduleService extends TestCase
         ArrayAssertionUtil.assertEqualsExactOrder(executions.iterator(), new Object[] {execs[0], execs[2]});
         assertEquals(3100, (long) svc.getNearestTime());
 
-        svc.destroy();
+        svc.clear();
         assertNull(svc.getNearestTime());
 
         executions.clear();

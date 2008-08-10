@@ -15,6 +15,7 @@ public class StatementMetricHandle
 {
     private final int groupNum;
     private final int index;
+    private boolean isEnabled;
 
     /**
      * Ctor.
@@ -25,6 +26,7 @@ public class StatementMetricHandle
     {
         this.groupNum = groupNum;
         this.index = index;
+        this.isEnabled = true;
     }
 
     /**
@@ -43,5 +45,23 @@ public class StatementMetricHandle
     public int getIndex()
     {
         return index;
+    }
+
+    /**
+     * Returns true if enabled for statement.
+     * @return enabled flag
+     */
+    public boolean isEnabled()
+    {
+        return isEnabled;
+    }
+
+    /**
+     * Set to true if statement metric reporting is enabled, false for disabled.
+     * @param enabled flag
+     */
+    public void setEnabled(boolean enabled)
+    {
+        isEnabled = enabled;
     }
 }

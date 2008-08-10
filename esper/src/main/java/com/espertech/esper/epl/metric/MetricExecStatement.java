@@ -73,4 +73,9 @@ public class MetricExecStatement implements MetricExec
             metricScheduleService.add(interval, this);
         }
     }
+
+    public long getInterval()
+    {
+        return interval;
+    }
 }

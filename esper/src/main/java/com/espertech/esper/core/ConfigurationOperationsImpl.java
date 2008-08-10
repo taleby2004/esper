@@ -309,6 +309,55 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
+
+    public void setMetricsReportingStmtEnabled(String statementName)
+    {
+        try
+        {
+            metricReportingService.setMetricsReportingStmtEnabled(statementName);
+        }
+        catch (RuntimeException e)
+        {
+            throw new ConfigurationException("Error enabling metric reporting for statement: " + e.getMessage(), e);
+        }
+    }
+
+    public void setMetricsReportingStmtDisabled(String statementName)
+    {
+        try
+        {
+            metricReportingService.setMetricsReportingStmtDisabled(statementName);
+        }
+        catch (RuntimeException e)
+        {
+            throw new ConfigurationException("Error enabling metric reporting for statement: " + e.getMessage(), e);
+        }
+    }
+
+    public void setMetricsReportingEnabled()
+    {
+        try
+        {
+            metricReportingService.setMetricsReportingEnabled();
+        }
+        catch (RuntimeException e)
+        {
+            throw new ConfigurationException("Error enabling metric reporting: " + e.getMessage(), e);
+        }
+    }
+
+    public void setMetricsReportingDisabled()
+    {
+        try
+        {
+            metricReportingService.setMetricsReportingDisabled();
+        }
+        catch (RuntimeException e)
+        {
+            throw new ConfigurationException("Error enabling metric reporting: " + e.getMessage(), e);
+        }
+    }
+
     public boolean isVariantStreamExists(String name)
     {
         return valueAddEventService.getValueAddProcessor(name).getValueAddEventType() instanceof VariantEventType;

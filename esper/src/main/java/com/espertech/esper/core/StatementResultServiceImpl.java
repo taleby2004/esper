@@ -147,7 +147,7 @@ public class StatementResultServiceImpl implements StatementResultService
     {
         if (results != null)
         {
-            if (MetricReportingPath.isMetricsEnabled)
+            if ((MetricReportingPath.isMetricsEnabled) && (statementMetricHandle.isEnabled()))            
             {
                 int numIStream = (results.getFirst() != null) ? results.getFirst().length : 0;
                 int numRStream = (results.getSecond() != null) ? results.getSecond().length : 0;

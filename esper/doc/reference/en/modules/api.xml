@@ -1286,6 +1286,14 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 			The default configuration performs the publishing of metric events in an Esper daemon thread under the control of the engine instance. Metrics reporting honors externally-supplied time, if using external timer events. 
         </para>        
 
+        <para>
+			Via runtime configuration options provided by <literal>ConfigurationOperations</literal>, your application may enable and disable metrics reporting globally, provided that metrics reporting was enabled at initialization time. Your application may also enable and disable metrics reporting for individual statements by statement name.
+        </para>        
+
+        <para>
+			Statement groups is a configuration feature that allows to assign reporting intervals to statements. Statement groups are described further in the <xref linkend="config-engine-instrumentation"/> section. Statement groups cannot be added or removed at runtime. 
+        </para>        
+
 		<para>
 			The following limitations apply:
 		</para>
@@ -1298,7 +1306,7 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 			</listitem>
 			<listitem>
 				<para>
-					Your Java VM may not provide high resolution time via <literal>System.nanoTime</literal>. In such case wall time may be be inaccurate and inprecise.
+					Your Java VM may not provide high resolution time via <literal>System.nanoTime</literal>. In such case wall time may be inaccurate and inprecise.
 				</para>
 			</listitem>
 			<listitem>

@@ -630,6 +630,26 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         this.getEngineDefaults().getMetricsReporting().setStatementGroupInterval(stmtGroupName, newInterval);
     }
 
+    public void setMetricsReportingStmtEnabled(String statementName)
+    {
+        throw new UnsupportedOperationException("Statement metric reporting can only be enabled or disabled at runtime");
+    }
+
+    public void setMetricsReportingStmtDisabled(String statementName)
+    {
+        throw new UnsupportedOperationException("Statement metric reporting can only be enabled or disabled at runtime");
+    }
+
+    public void setMetricsReportingEnabled()
+    {
+        this.getEngineDefaults().getMetricsReporting().setEnableMetricsReporting(true);
+    }
+
+    public void setMetricsReportingDisabled()
+    {
+        this.getEngineDefaults().getMetricsReporting().setEnableMetricsReporting(false);
+    }
+
     /**
 	 * Use the configuration specified in an application
 	 * resource named <tt>esper.cfg.xml</tt>.

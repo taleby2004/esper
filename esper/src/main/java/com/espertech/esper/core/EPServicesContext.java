@@ -70,6 +70,7 @@ public final class EPServicesContext
     /**
      * Constructor - sets up new set of services.
      * @param engineURI is the engine URI
+     * @param engineInstanceId is the engine URI
      * @param schedulingService service to get time and schedule callbacks
      * @param eventAdapterService service to resolve event types
      * @param databaseConfigService service to resolve a database name to database connection factory and configs
