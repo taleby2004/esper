@@ -19,6 +19,8 @@ public class TestMetricsReporting extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
+    private SupportUpdateListener listenerStmtMetric;
+    private SupportUpdateListener listenerEngineMetric;
     private SupportUpdateListener listenerTwo;
 
     private final long cpuGoalOneNano = 80 * 1000 * 1000;
@@ -30,6 +32,9 @@ public class TestMetricsReporting extends TestCase
     {
         listener = new SupportUpdateListener(); 
         listenerTwo = new SupportUpdateListener();
+
+        listenerStmtMetric = new SupportUpdateListener();
+        listenerEngineMetric = new SupportUpdateListener();
     }
 
     public void tearDown()
@@ -218,6 +223,100 @@ public class TestMetricsReporting extends TestCase
         }
         sendTimer(31000);
         assertFalse(listener.isInvoked());
+    }
+
+    public void testEnabledDisableRuntime()
+    {
+        EPStatement[] statements = new EPStatement[5];
+        Configuration config = getConfig(10000, 10000);
+        epService = EPServiceProviderManager.getProvider("MyURI", config);
+        epService.initialize();
+
+        sendTimer(1000);
+
+        statements[0] = epService.getEPAdministrator().createEPL("select * from " + StatementMetric.class.getName(),"stmtmetric");
+        statements[0].addListener(listenerStmtMetric);
+
+        statements[1] = epService.getEPAdministrator().createEPL("select * from " + EngineMetric.class.getName(),"enginemetric");
+        statements[1].addListener(listenerEngineMetric);
+
+        statements[2] = epService.getEPAdministrator().createEPL("select * from SupportBean(intPrimitive=1).win:keepall() where MyMetricFunctions.takeCPUTime(longPrimitive)");
+        sendEvent("E1", 1, cpuGoalOneNano);
+
+        sendTimer(11000);
+        assertTrue(listenerStmtMetric.getAndClearIsInvoked());
+        assertTrue(listenerEngineMetric.getAndClearIsInvoked());
+
+        epService.getEPAdministrator().getConfiguration().setMetricsReportingDisabled();
+        sendEvent("E2", 2, cpuGoalOneNano);
+        sendTimer(21000);
+        assertFalse(listenerStmtMetric.getAndClearIsInvoked());
+        assertFalse(listenerEngineMetric.getAndClearIsInvoked());
+
+        sendTimer(31000);
+        sendEvent("E3", 3, cpuGoalOneNano);
+        assertFalse(listenerStmtMetric.getAndClearIsInvoked());
+        assertFalse(listenerEngineMetric.getAndClearIsInvoked());
+
+        epService.getEPAdministrator().getConfiguration().setMetricsReportingEnabled();
+        sendEvent("E4", 4, cpuGoalOneNano);
+        sendTimer(41000);
+        assertTrue(listenerStmtMetric.getAndClearIsInvoked());
+        assertTrue(listenerEngineMetric.getAndClearIsInvoked());
+
+        statements[2].destroy();
+        sendTimer(51000);
+        assertTrue(listenerStmtMetric.isInvoked()); // metrics statements reported themselves
+        assertTrue(listenerEngineMetric.isInvoked());
+    }
+
+    public void testEnabledDisableStatement()
+    {
+        String[] fields = new String[] {"statementName"};
+        EPStatement[] statements = new EPStatement[5];
+        Configuration config = getConfig(-1, 10000);
+
+        ConfigurationMetricsReporting.StmtGroupMetrics configOne = new ConfigurationMetricsReporting.StmtGroupMetrics();
+        configOne.setInterval(-1);
+        configOne.addIncludeLike("%@METRIC%");
+        config.getEngineDefaults().getMetricsReporting().addStmtGroup("metrics", configOne);
+
+        epService = EPServiceProviderManager.getProvider("MyURI", config);
+        epService.initialize();
+
+        sendTimer(1000);
+
+        statements[0] = epService.getEPAdministrator().createEPL("select * from " + StatementMetric.class.getName(),"MyStatement@METRIC");
+        statements[0].addListener(listenerStmtMetric);
+
+        statements[1] = epService.getEPAdministrator().createEPL("select * from SupportBean(intPrimitive=1).win:keepall() where 2=2", "stmtone");
+        sendEvent("E1", 1, cpuGoalOneNano);
+        statements[2] = epService.getEPAdministrator().createEPL("select * from SupportBean(intPrimitive>0).std:lastevent() where 1=1", "stmttwo");
+        sendEvent("E2", 1, cpuGoalOneNano);
+
+        sendTimer(11000);
+        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmtone"}, {"stmttwo"}});
+        listenerStmtMetric.reset();
+
+        sendEvent("E1", 1, cpuGoalOneNano);
+        sendTimer(21000);
+        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmtone"}, {"stmttwo"}});
+        listenerStmtMetric.reset();
+
+        epService.getEPAdministrator().getConfiguration().setMetricsReportingStmtDisabled("stmtone");
+
+        sendEvent("E1", 1, cpuGoalOneNano);
+        sendTimer(31000);
+        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmttwo"}});
+        listenerStmtMetric.reset();
+
+        epService.getEPAdministrator().getConfiguration().setMetricsReportingStmtEnabled("stmtone");
+        epService.getEPAdministrator().getConfiguration().setMetricsReportingStmtDisabled("stmttwo");
+
+        sendEvent("E1", 1, cpuGoalOneNano);
+        sendTimer(41000);
+        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmtone"}});
+        listenerStmtMetric.reset();
     }
 
     private void runAssertion(long timestamp)

@@ -164,7 +164,9 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
 
     public StatementMetricHandle getStatementHandle(String statementId, String statementName)
     {
-        return stmtMetricRepository.addStatement(statementName);
+        StatementMetricHandle handle = stmtMetricRepository.addStatement(statementName);
+        statementMetricHandles.put(statementName, handle);
+        return handle;
     }
 
     public void observe(StatementLifecycleEvent event)
@@ -179,6 +181,7 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
             if (event.getStatement().isDestroyed())
             {
                 stmtMetricRepository.removeStatement(event.getStatement().getName());
+                statementMetricHandles.remove(event.getStatement().getName());
             }
         }
     }
@@ -225,7 +228,7 @@ public class MetricReportingServiceImpl implements MetricReportingService, Metri
         {
             throw new ConfigurationException("Statement by name '" + statementName + "' not found in metrics collection");
         }
-        handle.setEnabled(false);
+        handle.setEnabled(true);
     }
 
     public void setMetricsReportingEnabled()
