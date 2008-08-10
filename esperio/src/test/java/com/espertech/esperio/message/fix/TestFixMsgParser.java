@@ -17,7 +17,7 @@ public class TestFixMsgParser extends TestCase
     private final String SAMPLE = "8=FIX4.2<SOH>9=222<SOH>35=S<SOH>49=Broker<SOH>56=Institution\n" +
             "<SOH>34=251<SOH>52=2000072814:06:22<SOH>117=XXX<SOH>131=YYY\n" +
             "<SOH>55=AA<SOH>200=199901<SOH>202=25.00<SOH>201=1<SOH>132=5.00\n" +
-            "<SOH>133=5.25<SOH>134=10<SOH>135=10<SOH>10=123<SOH>";
+            "<SOH>133=5.25<SOH>134=10<SOH>135=10<SOH>10=243<SOH>";
 
     public void testParse() throws Exception
     {
@@ -26,7 +26,7 @@ public class TestFixMsgParser extends TestCase
         assertEquals("222", msg.get("9"));
         assertEquals("S", msg.get("35"));
         assertEquals("Broker", msg.get("49"));
-        assertEquals("123", msg.get("10"));
+        assertEquals("243", msg.get("10"));
     }
 
     public void testInvalidParse() throws Exception

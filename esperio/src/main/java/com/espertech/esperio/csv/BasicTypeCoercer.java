@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esperio.csv;
 
+import net.sf.cglib.reflect.FastConstructor;
+
 /**
  * Coercer for using the constructor to perform the coercion.
  */
@@ -15,7 +17,18 @@ public class BasicTypeCoercer extends AbstractTypeCoercer {
 
     public Object coerce(String property, String source) throws Exception {
 		Object[] parameters = new Object[] { source };
-		Object value = propertyConstructors.get(property).newInstance(parameters);
-		return value;
+
+        FastConstructor ctor = propertyConstructors.get(property);
+        Object value;
+        if (ctor != null)
+        {
+            value = ctor.newInstance(parameters);
+        }
+        else
+        {
+            value = Long.parseLong(source);
+        }
+
+        return value;
 	}
 }

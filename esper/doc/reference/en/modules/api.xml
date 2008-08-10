@@ -1319,6 +1319,11 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 					There is a performance cost to collecting and reporting metrics.
 				</para>
 			</listitem>
+			<listitem>
+				<para>
+					Not all statements may report metrics: The engine performs certain runtime optimizations sharing resources between similar statements, thereby not reporting on certain statements unless resource sharing is disabled through configuration.
+				</para>
+			</listitem>
 		</itemizedlist>
 		
 		<sect2 id="api-instrumentation-enginemetrics">

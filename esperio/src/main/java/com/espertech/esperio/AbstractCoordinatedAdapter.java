@@ -73,6 +73,7 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		this.usingEngineThread = usingEngineThread;
 		this.usingExternalTimer = usingExternalTimer;
 
+        this.setSender(new DirectSender());
 		if(epService == null)
 		{
 			return;
@@ -84,7 +85,6 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
         this.epService = epService;
 		this.runtime = epService.getEPRuntime();
 		this.schedulingService = ((EPServiceProviderSPI)epService).getSchedulingService();
-		this.setSender(new DirectSender());
 	}
 
 	public AdapterState getState()
@@ -108,7 +108,8 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
             log.debug(".start startTime==" + startTime);
         }
         stateManager.start();
-		continueSendingEvents();
+        sender.setRuntime(runtime);
+        continueSendingEvents();
 	}
 
 	public void pause() throws EPException
@@ -192,7 +193,8 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		EPServiceProviderSPI spi = (EPServiceProviderSPI)epService;
 		runtime = spi.getEPRuntime();
 		schedulingService = spi.getSchedulingService();
-	}
+        sender.setRuntime(runtime);
+    }
 
 	/**
 	 * Perform any actions specific to this Adapter that should
@@ -316,7 +318,8 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		    log.debug(".sendFirstEvent currentTime==" + currentTime);
 		    log.debug(".sendFirstEvent sending event " + eventsToSend.first() + ", its sendTime==" + eventsToSend.first().getSendTime());
 		}
-		eventsToSend.first().send(sender);
+        sender.setRuntime(runtime);
+        eventsToSend.first().send(sender);
 		replaceFirstEventToSend();
 	}
 

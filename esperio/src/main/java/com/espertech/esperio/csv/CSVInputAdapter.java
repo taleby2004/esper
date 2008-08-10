@@ -258,8 +258,10 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 			{
 				// Skip properties that are in the title row but not
 				// part of the map to send
-				if(propertyTypes != null && !propertyTypes.containsKey(property))
-				{
+				if ((propertyTypes != null) &&
+                    (!propertyTypes.containsKey(property)) &&
+                    (!property.equals(adapterSpec.getTimestampColumn())))
+                {
 					count++;
 					continue;
 				}
