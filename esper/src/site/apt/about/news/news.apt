@@ -1,5 +1,56 @@
 News
 
+* August 10, 2008  -  Esper 2.2.0
+
+  * Support for repeat and repeat-until in pattern matching
+  
+  * Enhancements for the create-syntax for named windows:
+  
+      * Allows an additional SQL table-like definition syntax
+      
+      * Allows constants in the model-after syntax
+      
+      * Allows the window to be modelled after another named window, and populated from another named window at creation time
+      
+      * Changed "as" to become an optional keyword
+      
+      []
+      
+  * Added support for BigDecimal and BigInteger in all aspects of EPL
+  
+  * Added metrics reporting: Instrumentation to provide key engine and statement-level performance indicators as event streams
+  
+  * Added support for row limiting
+  
+  * Added four new data window views for first-event type expiry policies: std:firstevent, std:firstunique, win:firstlength, win:firsttime
+  
+  * Enhanced output limit clause to support crontab-like schedule
+  
+  * Enhanced output limit clause to support output when an variable or expression turns true
+  
+  * Enhanced plug-in aggregation functions to accept multiple parameters
+  
+  * Support for the "inner" keyword for use in outer joins
+  
+  * Support for variables to be parameters to an SQL join and method join
+  
+  * Support for polling via iterator from a statement that contains only SQL queries or method invocations (alone or in a join, aka. no-stream pull API)
+  
+  * Removed limitation on the number of historical streams (SQL and method) in joins, now supporting an unlimited number of historical streams, full iterator support
+  
+  * Support for Map inheritance: map event types may now be declared to inherit from one or more Map supertypes
+  
+  * Support for changing Map event types at runtime by adding properties to an existing type
+  
+  * Optimization for certain filter-only statements to more efficiently process
+  
+  * Added JMS text message marshaller and unmarshallers for Fix (Fix is a standard financial interchange format)
+  
+  * Many bug fixes to issues reported, see JIRA closed issues for release 2.2
+
+  []
+  
+
 * June 3, 2008  -  NEsper 1.12.0 Release Candidate 2
 
   * Feature equivalent with Esper 1.12.0

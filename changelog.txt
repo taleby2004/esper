@@ -5,7 +5,7 @@ Changes in version 2.2.0
 ------------------------
 
 Major API changes
- - Two new reserved keywords: LIMIT and OFFSET: Added for support of the SQL-standard row limit clause.
+ - Two new reserved keywords: LIMIT and OFFSET; Added for support of the SQL-standard row limit clause.
  - Bug fix for ESPER-264 that impacts joins that utilize the "unidirectional" keyword and that perform aggregation
  
 New Features
@@ -18,9 +18,9 @@ New Features
   - Added support for BigDecimal and BigInteger in all aspects of EPL
   - Added metrics reporting: Instrumentation to provide key engine and statement-level performance indicators as event streams
   - Added support for row limiting
-  - Added four new views for retaining first-event: std:firstevent, std:firstunique, win:firstlength, win:firsttime
-  - Enhanced output limit clause to support absolute crontab-like times
-  - Enhanced output limit clause to support output when a variable expression turns true
+  - Added four new data window views for for first-event type expiry policies: std:firstevent, std:firstunique, win:firstlength, win:firsttime
+  - Enhanced output limit clause to support crontab-like schedule
+  - Enhanced output limit clause to support output when an variable or expression turns true
   - Enhanced plug-in aggregation functions to accept multiple parameters
   - Support for the "inner" keyword for use in outer joins
   - Support for variables to be parameters to an SQL join and method join

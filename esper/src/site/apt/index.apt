@@ -56,7 +56,7 @@ Features
 
 	* Crontab-like timer <'at'> operator
 
-	* Lifecycle of pattern can be controlled by timer and via operators
+	* Lifecycle of pattern can be controlled by timer and via operators, repeat-number and repeat-until
 
         * Pattern-matched events provided to listeners
 
@@ -160,9 +160,12 @@ Features
     
     	* Benchmark kit available for download; Performance testing results and tips see page in menu
     	
+    	[]
+
     * <<Unmatched event listener>> receives a callback if an event does not match any started statement
     
-    	[]
+    * Support for all Java data types including BigInteger and BigDecimal
+    
             
     []		
     
