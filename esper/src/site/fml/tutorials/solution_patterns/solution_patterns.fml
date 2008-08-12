@@ -588,7 +588,7 @@ select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPr
     </faq>    
 
     <faq id="window_contents">
-      <question>I there a way to receive the list of all events that participated in a window? I'm looking for a way to show the user the cause of the alert.</question>
+      <question>Is there a way to receive the list of all events that participated in a window? I'm looking for a way to show the user the cause of the alert.</question>
       <answer>
 		<p>
 			The pull API is a convenient way to retrieve data from a data window. The safeIterator method on EPStatement provides the events in a data window.
@@ -599,6 +599,31 @@ select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPr
       </answer>
     </faq>    
 
+    <faq id="unmatched_matched">
+      <question>I want to know if an event hits at least one registered query?</question>
+      <answer>
+	<p>
+	  Esper has an UnmatchedListener interface that one can register with the engine via epRuntime.setUnmatchedListener(UnmatchedListener).
+	  The UnmatchedListener receives any event that has not been processed by any statement, 
+	  i.e. events where no statements stream filter matches (where-clause however counts as a match since the event enters a data window with a where clause, i.e. only stream filters count).
+	</p>
+      </answer>
+    </faq>   
+    
+    <faq id="object_model_uses">
+      <question>I want to know what streams an EPL statement references but don't want to parse the EPL string? I want to programmatically inspect and change the select clause columns when a user enters an EPL query, how to do this?</question>
+      <answer>
+	<p>
+	  The statement object model is designed to handle this case. 
+	  Your application could compile (epAdministrator.compile) each statement and get an EPStatementObjectModel object representation 
+	  of the statement and then interrogate the from-clause or select-clause.
+	</p>
+	<p>
+	  The statement object model also allows EPL query to be composed from scratch via normal Java POJO objects. A statement object model
+	  can be rendered back into an EPL string, and it is also possible to create a statement directly from a statement object model.
+	</p>
+      </answer>
+    </faq>    
   </part>
 
 </faqs>

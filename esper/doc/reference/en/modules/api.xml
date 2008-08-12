@@ -515,7 +515,7 @@ finally {
 				</listitem>
 				<listitem>
 					<para>
-						Since the <literal>safeIterator</literal> and <literal>iterator</literal> methods return events to the application immediately, the iterator does not honor an output rate limiting clause, if present. That is, the iterator returns results as if there is no output-rate clause for the statement. Use a separate statement and the <literal>insert into</literal> clause to control the output rate for iteration.
+						Since the <literal>safeIterator</literal> and <literal>iterator</literal> methods return events to the application immediately, the iterator does not honor an output rate limiting clause, if present. That is, the iterator returns results as if there is no output-rate clause for the statement in statements without grouping or aggregation. For statements with grouping or aggregation, the iterator in combintion with an output clause returns last output group and aggregation results. Use a separate statement and the <literal>insert into</literal> clause to control the output rate for iteration, if so required.
 					</para>
 				</listitem>
 			</orderedlist>

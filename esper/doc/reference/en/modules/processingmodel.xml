@@ -6,7 +6,7 @@
         <title>Introduction</title>
         
         <para>
-			The Esper processing model is continuous:  Update listeners to statements receive updated data as soon as the engine processes events for that statement, according to the statement's choice of event streams, views, filters and output rates.
+			The Esper processing model is continuous:  Update listeners and/or subscribers to statements receive updated data as soon as the engine processes events for that statement, according to the statement's choice of event streams, views, filters and output rates.
         </para>
 			
         <para>
@@ -21,6 +21,11 @@
 				<imagedata fileref="../shared/images/refdoc_outputmodel_updatelistener.gif" format="GIF" align="center"/>
 			</imageobject>
 		</mediaobject>
+
+		<para>
+		  A second, strongly-typed and native, highly-performant method of result delivery is provided: A subscriber object is a direct binding of query results to a Java object. The object, a POJO, receives statement
+results via method invocation. The subscriber class need not implement an interface or extend a superclass. Please see <xref linkend="api-admin-subscriber"/>. 
+		</para>
 
 		<indexterm><primary>EventBean interface</primary></indexterm>
         <para>

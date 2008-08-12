@@ -25,12 +25,12 @@
 		<orderedlist spacing="compact">
 			<listitem>
 				<para>
-					Data window views: <literal>win:length</literal>, <literal>win:length_batch</literal>, <literal>win:time</literal>, <literal>win:time_batch</literal>, <literal>win:time_length_batch</literal>, <literal>win:time_accum</literal>, <literal>win:ext_timed</literal>, <literal>ext:sort_window</literal>, <literal>ext:time_order</literal>, <literal>std:unique</literal>, <literal>std:groupby</literal>, <literal>std:lastevent</literal>
+					Data window views: <literal>win:length</literal>, <literal>win:length_batch</literal>, <literal>win:time</literal>, <literal>win:time_batch</literal>, <literal>win:time_length_batch</literal>, <literal>win:time_accum</literal>, <literal>win:ext_timed</literal>, <literal>ext:sort_window</literal>, <literal>ext:time_order</literal>, <literal>std:unique</literal>, <literal>std:groupby</literal>, <literal>std:lastevent</literal>, <literal>std:firstevent</literal>, <literal>std:firstunique</literal>, <literal>win:firstlength</literal>,  <literal>win:firsttime</literal>.
 				</para>
 			</listitem>
 			<listitem>
 				<para>
-					Views that derive statistics: <literal>std:size</literal>, <literal>stat:uni</literal>, <literal>stat:linest</literal>, <literal>stat:correl</literal>, <literal>stat:weighted_avg</literal>, <literal>stat:cube</literal>
+					Views that derive statistics: <literal>std:size</literal>, <literal>stat:uni</literal>, <literal>stat:linest</literal>, <literal>stat:correl</literal>, <literal>stat:weighted_avg</literal>, <literal>stat:cube</literal>.
 				</para>
 			</listitem>
 		</orderedlist>
@@ -174,7 +174,48 @@ select insert from MyEvent]]></programlisting>
 			</para>
 
 			<para>
-				EPL also follows Java standards in terms of widening, performing widening automatically in cases where widening type conversion is allowed without loss of precision. In cases where loss of precision is possible because of narrowing requirements, EPL compilation outputs a compilation error.
+				EPL also follows Java standards in terms of widening, performing widening automatically in cases where widening type conversion is allowed without loss of precision, for both boxed and primitive types and including <literal>BigInteger</literal> and <literal>BigDecimal</literal>:
+			</para>
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						byte to short, int, long, float, double, BigInteger or BigDecimal
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						short to int, long, float, or double, BigInteger or BigDecimal
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						char to int, long, float, or double, BigInteger or BigDecimal
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						int to long, float, or double, BigInteger or BigDecimal
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						long to float or double, BigInteger or BigDecimal
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						float to double or BigDecimal
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						double to BigDecimal
+					</para>
+				</listitem>
+			</orderedlist>
+
+			<para>
+				In cases where loss of precision is possible because of narrowing requirements, EPL compilation outputs a compilation error.
 			</para>
 
 			<para>
@@ -601,7 +642,7 @@ select default.MyEvent.myProperty from MyEvent</programlisting>
 				For filter-based event streams, the event stream definition <emphasis>stream_def</emphasis> as shown in the <literal>from</literal> clause syntax consists of an event type, optional filter expressions and an optional list of views that derive data from a stream. The syntax for a filter-based event stream is as below:
 			</para>
 	
-			<synopsis><emphasis>event_type</emphasis> ( [<emphasis>filter_criteria</emphasis>] ) [.<emphasis>view_spec</emphasis>] [.<emphasis>view_spec</emphasis>] [...]</synopsis>
+			<synopsis><emphasis>event_type</emphasis> [(<emphasis>filter_criteria</emphasis>)] [.<emphasis>view_spec</emphasis>] [.<emphasis>view_spec</emphasis>] [...]</synopsis>
 	
 			<para>
 				The following EPL statement shows event type, filter criteria and views combined in one statement. It selects all event properties for the last 100 events of IBM stock ticks for volume. In the example, the event type is the fully qualified Java class name <literal>org.esper.example.StockTick</literal>. The expression filters for events where the property <literal>symbol</literal> has a value of "IBM". The optional view specifications for deriving data from the StockTick events are a length window and a view for computing statistics on volume. The name for the event stream is "volumeStats".
@@ -2430,6 +2471,10 @@ select orderId, orderAmount from
 		</para>
 			
 		<para>
+			The results of such a method invocation in the <literal>from</literal> clause plays the same role as a relational database table in an inner and outer join in SQL. The role is thus dissimilar to the role of a user-defined function, which may occur in any expression such as in the <literal>select</literal> clause or the <literal>where</literal> clause. Both are backed by one or more static methods provided by your class library.
+		</para>
+
+		<para>
 			Esper can join and outer join an unlimited number and all types of event streams to the data returned by your method invocation. In addition, Esper can be configured to cache the data returned by your method invocations.
 		</para>
 		
@@ -2720,7 +2765,7 @@ where asset.assetid = desc.assetid]]></programlisting>
 				</para>
 					
 				<para>
-					The <emphasis>view_specifications</emphasis> are one or more data window views that define the expiry policy for removing events from the data window. Named windows must explicitly declare a data window view. This is required to ensure that the policy for retaining events in the data window is well defined. To keep all events, use the keep-all view: It indicates that the named window should keep all events and only remove events from the named window that are deleted via the <literal>on delete</literal> clause. The view specification can only list data window views, derived-value views are not allowed since these don't represent an expiry policy. 					
+					The <emphasis>view_specifications</emphasis> are one or more data window views that define the expiry policy for removing events from the data window. Named windows must explicitly declare a data window view. This is required to ensure that the policy for retaining events in the data window is well defined. To keep all events, use the keep-all view: It indicates that the named window should keep all events and only remove events from the named window that are deleted via the <literal>on delete</literal> clause. The view specification can only list data window views, derived-value views are not allowed since these don't represent an expiry policy. Data window views are listed in <xref linkend="epl-views"/>.
 				</para>
 					
 				<para>				

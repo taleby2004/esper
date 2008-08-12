@@ -117,7 +117,7 @@
       <answer>
         <p>
           Esper uses the JUnit testing framework to automate regression testing of the system.
-          Esper's build process runs the currently around 2055 unit test methods, many running multiple test scenarios, in 550 JUnit test classes when a build occurs.
+          Esper's build process runs the currently around 2300 unit test methods, many running multiple test scenarios, in 600 JUnit test classes when a build occurs.
           The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
           individual classes and components. Tests are very detailed in asserting the expected results allowing us
           to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
@@ -500,6 +500,7 @@
   </part>
 
 </faqs>
+
 
 
 
