@@ -1998,6 +1998,10 @@ from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as ser
        on rfid.itemId = orderList.itemId and rfid.assetId = orderList.assetId]]></programlisting>
 
 		<para>
+			Patterns as streams in a join follow this rule: If no data window view is declared for the pattern then the pattern stream retains the last match. Thus a pattern must have matched at least once for the last row to become available in a join. Multiple rows from a pattern stream may be retained by declaring a data window view onto a pattern using the <literal>pattern [...].</literal><emphasis>view_specification</emphasis> syntax.
+		</para>
+
+		<para>
 			Finally, this example outer joins multiple streams. Here the RfidEvent stream is outer joined to both ProductName and LocationDescription via left outer join:
 		</para>
 
