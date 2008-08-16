@@ -91,6 +91,22 @@ select * from MarketData(ticker='$')]]></programlisting>
 		</sect2>
 
 		<sect2 id="perf-tips-3">
+			<title>Input and Output Bottlenecks</title>
+			<para>
+				Your application receives output events from Esper statements through the <literal>UpdateListener</literal> interface or via the strongly-typed subscriber POJO object. Such output events are delivered by the application or timer thread(s) that sends an input event into the engine instance.
+			</para>
+			<para>
+				The processing of output events that your listener or subscriber performs temporarily blocks the thread until the processing completes, and may thus reduce throughput. It can therefore be beneficial for your application to process output events asynchronously and not block the Esper engine while an output event is being processed by your listener, especially if your listener code performs blocking IO operations.
+			</para>
+			<para>
+				For example, your application may want to send output events to a JMS destination or write output event data to a relational database. For optimal throughput, consider performing such blocking operations in a separate thread.
+			</para>
+			<para>
+				Additionally, when reading input events from a store or network in a performance test, you may find that Esper processes events faster then you are able to feed events into Esper. In such case you may want to consider an in-memory driver for use in performance testing. Also consider decoupling your read operation from the event processing operation (sendEvent method) by having multiple readers or by pre-fetching your data from the store.
+			</para>
+		</sect2>
+
+		<sect2 id="perf-tips-4">
 			<title>Select the underlying event rather than individual fields</title>
 			
 			<para>
@@ -114,7 +130,7 @@ select * from RFIDEvent]]></programlisting>
 select assetId, zone, xlocation, ylocation from RFIDEvent ]]></programlisting>
 		</sect2>
 		
-		<sect2 id="perf-tips-4">
+		<sect2 id="perf-tips-5">
 			<title>Prefer stream-level filtering over post-data-window filtering</title>
 
 			<para>
