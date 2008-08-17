@@ -3,10 +3,12 @@
 	<!-- Name of project and version, used to create filenames -->
 	<property name="Name" value="Esper"/>
 	<property name="name" value="esper"/>
+	<property name="nameio" value="esperio"/>
 	<property name="version" value="2.2.0"/>
 	<property name="patchlevel" value=""/>
 	<property name="fullversion" value="${version}${patchlevel}"/>
 	<property name="fullname" value="${name}-${fullversion}"/>
+	<property name="fullnameio" value="${nameio}-${fullversion}"/>
 
 	<property name="dist.dir" value=".."/>
 	<property name="lib.dir" value="lib"/>
@@ -72,11 +74,13 @@
 
 	<target name="source_zip" description="Zip up source distribution">
 		<echo message="Building a zip for distribution" />
-		<property name="zip-file" value="${dist.dir}/${fullname}-src.zip"/>
-		<zip zipfile="${zip-file}">
-            		<zipfileset prefix="${name}-${version}/esper/src/main/java" dir="esper/src/main/java" includes="**"/>
-            		<zipfileset prefix="${name}-${version}/esper/target/generated" dir="esper/target/generated-sources" includes="**"/>
-            		<zipfileset prefix="${name}-${version}/esperio/src/main/java" dir="esper/src/main/java" includes="**"/>
+		<property name="zip-file" value=""/>
+		<zip zipfile="${dist.dir}/${fullname}-src.zip">
+            		<zipfileset dir="esper/src/main/java" includes="**"/>
+            		<zipfileset dir="esper/target/generated-sources/antlr" includes="**"/>
+        	</zip>
+		<zip zipfile="${dist.dir}/${fullnameio}-src.zip">
+            		<zipfileset dir="esperio/src/main/java" includes="**"/>
         	</zip>
         </target>
 

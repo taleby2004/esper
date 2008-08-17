@@ -130,7 +130,7 @@
 		</para>
 
 		<programlisting><![CDATA[public void attach(EventType parentEventType, 
-		StatementServiceContext statementServiceContext, 
+		StatementContext statementContext, 
 		ViewFactory optionalParentFactory, 
 		List<ViewFactory> parentViewFactories) 
 		    throws ViewAttachException {

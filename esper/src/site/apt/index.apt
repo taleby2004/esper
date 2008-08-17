@@ -25,6 +25,12 @@ Technology Introduction
 	
 	[]
 
+~~ COMMENT
+~~
+~~ Philosophy
+~~ Event are rich domain objects that are best represented using a rich object-oriented model; Many existing CEP products force a flat column-set
+~~ While a CEP application by nature needs to listen to events occuring in real-time, it is also often of great value to ask questions of the event data held by an engine;
+~~ For example, current data window contents can be useful to know (pull API) when a continuous query statement detects a threshold is overstepped (push)
 
 Features
 
@@ -33,7 +39,7 @@ Features
 
 	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing)
 
-	* Tumbling windows: time, length and multi-policy
+	* Tumbling windows: time, length and multi-policy; first-event
 
 	* Grouping, aggregation, sorting, filtering and merging of event streams
 
@@ -119,6 +125,8 @@ Features
     	* Keyed cache entries for fast cache lookup
     	
     	* Engine indexes cached rows for fast filtering within a large number of SQL-query result rows
+    	
+    	* Multiple SQL-queries in one statement transparently integrates multiple autonomous database systems
     	
     	[]
     	

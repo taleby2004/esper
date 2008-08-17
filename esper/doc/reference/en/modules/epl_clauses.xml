@@ -2344,13 +2344,26 @@ where price > (select max(price) from MarketData(symbol='GOOG').std:lastevent())
 			</para>
 
 			<para>
-				If your application enables caching, the SQL query fires only at the arrival of the first <literal>OrderEvent</literal> event. When the second <literal>OrderEvent</literal> arrives, the join execution uses the cached query result. If the caching policy that you specified in the Esper database configuration evicts the SQL query result from cache, then the engine fires the SQL query again to obtain a new result and places the result in cache. 
+				If your application enables caching, the SQL query fires only at the arrival of the first <literal>OrderEvent</literal> event. When the second <literal>OrderEvent</literal> arrives, the join execution uses the cached query result. If the caching policy that you specified in the Esper database configuration evicts the SQL query result from cache, then the engine fires the SQL query again to obtain a new result and places the result in cache.
 			</para>
 			
 			<para>
 				If SQL result caching is enabled and your EPL <literal>where</literal> clause, as show in the above example, provides the properties to join, then the engine indexes the SQL query results in cache and retains the index together with the query result in cache. Thus your application can benefit from high performance index-based lookups as long as the SQL query results are found in cache. 
 			</para>
 
+			<para>
+				The SQL result caches operate on the level of all result rows for a given parameter set. For example, if your query returns 10 rows for a certain set of parameter values then the cache treats all 10 rows as a single entry keyed by the parameter values, and the expiry policy applies to all 10 rows and not to each individual row.
+			</para>
+
+			<para>
+				It is also possible to join multiple autonomous database systems in a single query, for example:
+			</para>
+
+			<programlisting><![CDATA[select symbol, symbolDesc from OrderEvent as orders,
+  sql:My_Oracle_DB ['select symbolDesc from SymbolReference'] as reference,
+  sql:My_MySQL_DB ['select orderList from orderHistory'] as history
+  where reference.symbol = orders.symbol
+  and history.symbol = orders.symbol ]]></programlisting>
 		</sect2>
 
 		<sect2 id="histdata_outerjoin" revision="1">

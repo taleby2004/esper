@@ -901,6 +901,14 @@ Connection connection = dataSource.getConnection();]]></programlisting>
 				</para>
 
 				<para>
+					In the <literal>pooled</literal> setting, the engine obtains a database connection from the data source or driver manager for every query, and closes the connection when done, returning the database connection to the pool if using a pooling data source.
+				</para>
+
+				<para>
+					In the <literal>retain</literal> setting, the engine retains a separate dedicated database connection for each statement and does not close the connection between uses.
+				</para>
+
+				<para>
 					The XML for this option is below. The connection lifecycle allows the following values: <literal>pooled</literal> and <literal>retain</literal>.
 				</para>
 				
