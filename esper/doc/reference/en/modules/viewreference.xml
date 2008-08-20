@@ -1,9 +1,12 @@
 <chapter id="epl-views">
     <title>EPL Reference: Views</title>
         
+		<indexterm><primary>views</primary><secondary>overview</secondary></indexterm>
+		<indexterm><primary>data window views</primary><secondary>overview</secondary></indexterm>
+
         <para>
             This chapter outlines the views that are built into Esper. All views can be arbitrarily combined as many of the examples below show. 
-			The section on <xref linkend="processingmodel"/> provides additional information on the relationship of views, filtering and aggregation.
+			The section on <xref linkend="processingmodel"/> provides additional information on the relationship of views, filtering and aggregation. Please also see <xref linkend="epl-from-clause-view-spec"/> for the use of views in the <literal>from</literal> clause with streams, patterns and named windows.
         </para>
         
         <para>
@@ -11,11 +14,12 @@
         </para>
 
         <para>
-            Esper distinguishes between data window views and derived-value views. Data windows, or data window views, are views that retain incoming events until an expiry policy indicates to release events.             
+            Esper distinguishes between data window views and derived-value views. Data windows, or data window views, are views that retain incoming events until an expiry policy indicates to release events. Derived-value views derive a new value from event streams and post the result as events of a new type.
         </para>
-
-		<indexterm><primary>views</primary><secondary>overview</secondary></indexterm>
-		<indexterm><primary>data window views</primary><secondary>overview</secondary></indexterm>
+                
+        <para>
+			The keep-all data window counts as a data window but has no expiry policy: it retains all events received. The group-by data window allocates a new data window per group and thereby counts as a data window, but cannot appear alone.
+        </para>
 
         <para>
             The next table summarizes data window views:
@@ -127,7 +131,7 @@
 		<indexterm><primary>derived-value views</primary><secondary>overview</secondary></indexterm>
 
         <para>
-			The table below summarizes views that derive information from received events and present the derived information as an insert and remove stream: 
+			The table below summarizes views that derive information from received events and present the derived information as an insert and remove stream of events that are typed specifically to carry the result of the computations: 
         </para>
 
 	   <table frame="topbot">

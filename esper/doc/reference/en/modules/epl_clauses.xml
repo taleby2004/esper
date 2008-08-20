@@ -873,7 +873,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
         <sect2 id="epl-from-clause-view-spec" >
            <title>Specifying Views</title>
 			<para>
-				Views are used to derive or aggregate data. Views can be staggered onto each other. See the section <xref linkend="epl-views"/> on the views available.
+				Views are used to derive or aggregate data. Views can be staggered onto each other. See the section <xref linkend="epl-views"/> on the views available that also outlines the different types of views: Data Window views and Derived-Value views.
 			</para>
 						
 			<para>
@@ -884,12 +884,35 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 				The below example serves to show views and staggering of views. It uses a car location event that contains information about the location of a car on a highway. 
 			</para>
 				
+         <programlisting><![CDATA[select * from CarLocEvent.std:groupby(carId).win:length(4).
+  std:groupby(expressway, direction, segment).std:size()]]></programlisting>
+
 			<para>
 				The first view <literal>std:groupby(carId)</literal> groups car location events by car id. The second view <literal>win:length(4)</literal> keeps a length window of the 4 last events, with one length window for each car id. The next view <literal>std:groupby(expressway, direction, segment)</literal> groups each event by its expressway, direction and segment property values. Again, the grouping is done for each car id considering the last 4 events only. The last view <literal>std:size()</literal> is used to report the number of events. Thus the below example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. 
 			</para>
+			
+			<para>
+				When views are staggered onto each other as a chain of views, then the insert and remove stream received by each view is the insert and remove stream made available by the view (or stream) earlier in the chain. 
+			</para>
 
-         <programlisting><![CDATA[select * from CarLocEvent.std:groupby(carId).win:length(4).
-  std:groupby(expressway, direction, segment).std:size()]]></programlisting>
+			<para>
+				The special keep-all view keeps all events: It does not provide a remove stream, i.e. events are not removed from the keep-all view unless by means of the <literal>on-delete</literal> syntax or by revision events.
+			</para>
+
+  			<sect3 id="epl-from-clause-view-spec-staggering" >
+			   <title>For Advanced Users: Staggered Data Window Views</title>
+			   <para>
+				   Data window views provide an expiry policy that indicates when to remove events from the data window, with the exception of the keep-all data window which has no expiry policy and the group-by view for allocating a new data window per group.
+			   </para>
+			   
+			   <para>
+				   EPL allows the freedom to use multiple data window views onto a stream, i.e. to stagger data windows and thus combine expiry policies. This is an advanced feature that must be used with care. For example, combining a keep-all data window with a unique data window via <literal>win:keepall().std:unique(id)</literal> keeps all arriving events in memory, however when queried will only return the last event by id. In this example, use the <literal>std:unique</literal> view alone to retain the last event per id.
+			   </para>
+
+			   <para>
+				   Combining data windows with different expiry policies may not produce the expected result. This feature is therefore for advanced users that may also utilize custom plug-in application-provided views to implement new expiry policies or refine existing expiry policies.
+			   </para>
+			</sect3>
 		</sect2>
 		
         <sect2 id="epl-from-clause-stream-name" >
@@ -2782,7 +2805,7 @@ where asset.assetid = desc.assetid]]></programlisting>
 				</para>
 					
 				<para>
-					The <emphasis>view_specifications</emphasis> are one or more data window views that define the expiry policy for removing events from the data window. Named windows must explicitly declare a data window view. This is required to ensure that the policy for retaining events in the data window is well defined. To keep all events, use the keep-all view: It indicates that the named window should keep all events and only remove events from the named window that are deleted via the <literal>on delete</literal> clause. The view specification can only list data window views, derived-value views are not allowed since these don't represent an expiry policy. Data window views are listed in <xref linkend="epl-views"/>.
+					The <emphasis>view_specifications</emphasis> are one or more data window views that define the expiry policy for removing events from the data window. Named windows must explicitly declare a data window view. This is required to ensure that the policy for retaining events in the data window is well defined. To keep all events, use the keep-all view: It indicates that the named window should keep all events and only remove events from the named window that are deleted via the <literal>on delete</literal> clause. The view specification can only list data window views, derived-value views are not allowed since these don't represent an expiry policy. Data window views are listed in <xref linkend="epl-views"/>. View parameterization and staggering are described in <xref linkend="epl-from-clause-view-spec"/>.
 				</para>
 					
 				<para>				
