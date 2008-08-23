@@ -8,12 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import com.espertech.esper.core.EPQueryResult;
-import com.espertech.esper.core.EPPreparedQuery;
-
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
-import java.net.URI;
 
 /**
  * Interface to event stream processing runtime services.
@@ -23,7 +20,8 @@ public interface EPRuntime
     /**
      * Send an event represented by a plain Java object to the event stream processing runtime.
      * <p>
-     * Use the route method for sending events into the runtime from within UpdateListener code.
+     * Use the route method for sending events into the runtime from within UpdateListener code,
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
      *
      * @param object is the event to sent to the runtime
      * @throws EPException is thrown when the processing of the event lead to an error
@@ -34,6 +32,7 @@ public interface EPRuntime
      * Send a map containing event property values to the event stream processing runtime.
      * <p>
      * Use the route method for sending events into the runtime from within UpdateListener code.
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
      *
      * @param map - map that contains event property values. Keys are expected to be of type String while values
      * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeAlias. 
@@ -46,6 +45,7 @@ public interface EPRuntime
      * Send an event represented by a DOM node to the event stream processing runtime.
      * <p>
      * Use the route method for sending events into the runtime from within UpdateListener code.
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
      *
      * @param node is the DOM node as an event
      * @throws EPException is thrown when the processing of the event lead to an error
@@ -102,7 +102,8 @@ public interface EPRuntime
     public void clearEmittedListeners();
 
     /**
-     * Route the event object back to the event stream processing runtime for internal dispatching.
+     * Route the event object back to the event stream processing runtime for internal dispatching,
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
      * The route event is processed just like it was sent to the runtime, that is any
      * active expressions seeking that event receive it. The routed event has priority over other
      * events sent to the runtime. In a single-threaded application the routed event is

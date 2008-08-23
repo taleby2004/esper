@@ -610,8 +610,8 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
         </para>
 
         <para>
-			Another important method in the runtime interface is the <literal>route</literal> method. This method is designed for use by <literal>UpdateListener</literal> implementations that
-			need to send events into an engine instance.
+			Another important method in the runtime interface is the <literal>route</literal> method. This method is designed for use by <literal>UpdateListener</literal> and subscriber implementations that
+			need to send events into an engine instance to avoid the possibility of a stack overflow due to nested calls to <literal>sendEvent</literal>.
         </para>
 
 	    <sect2 id="api-runtime-eventsender">		
