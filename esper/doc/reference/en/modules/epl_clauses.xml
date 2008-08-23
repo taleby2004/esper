@@ -174,6 +174,10 @@ select insert from MyEvent]]></programlisting>
 			</para>
 
 			<para>
+				EPL follows Java rules for integer arithmetic: When dividing an integer numerator by an integer denominator, the result is an integer number. Thus the expression <literal>1 / 4</literal> results in an integer zero. Convert at least one of the numbers to a double value before the division, for example by specifying <literal>1.0 / 4</literal> or by using <literal>cast(myint, double)</literal>.
+			</para>
+
+			<para>
 				EPL also follows Java standards in terms of widening, performing widening automatically in cases where widening type conversion is allowed without loss of precision, for both boxed and primitive types and including <literal>BigInteger</literal> and <literal>BigDecimal</literal>:
 			</para>
 			<orderedlist spacing="compact">
@@ -910,7 +914,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 			   </para>
 
 			   <para>
-				   Combining data windows with different expiry policies may not produce the expected result. This feature is therefore for advanced users that may also utilize custom plug-in application-provided views to implement new expiry policies or refine existing expiry policies.
+				   Combining data windows with different expiry policies may not produce the expected result unless you have a good understanding of the expiry policies and their interaction. This feature is therefore for advanced users that may also utilize custom plug-in application-provided views to implement new expiry policies or refine existing expiry policies.
 			   </para>
 			</sect3>
 		</sect2>

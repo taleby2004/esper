@@ -734,7 +734,7 @@ config.addImport("com.mycompany.mypackage.MyLib");   // class import]]></program
 		</sect2>
 
 		<sect2 id="config-method-invocations" revision="1">
-			<title>Cache Settings for Method Invocations</title>
+			<title>Cache Settings for From-Clause Method Invocations</title>
 			
 			<para>
 				Method invocations are allowed in the <literal>from</literal> clause in EPL, such that your application may join event streams to the data returned by a web service, or to data read from a distributed cache or object-oriented database, or obtain data by other means. A local cache may be placed in front of such method invocations through the configuration settings described herein.
@@ -846,6 +846,14 @@ else {
 }
 DataSource dataSource = (DataSource) initialContext.lookup(lookupName);
 Connection connection = dataSource.getConnection();]]></programlisting>
+
+				<para>
+					In order to plug-in your own implementation of the <literal>DataSource</literal> interface, your application may use an existing JNDI provider as provided by an application server if running in a J2EE environment.
+				</para>
+
+				<para>
+					In case your application does not have an existing JNDI implementation to register a <literal>DataSource</literal> to provide connections, you may set the <literal>java.naming.factory.initial</literal> property in the configuration to point to your application's own implementation of the <literal>javax.naming.spi.InitialContextFactory</literal> interface that can return your application <literal>DataSource</literal> though the <literal>javax.naming.Context</literal> provided by the factory implementation. Please see Java Naming and Directory Interface (JNDI) API documentation for further information.
+				</para>
 			</sect3>
 
 			<sect3 id="config-database-drivermanager" revision="1">
