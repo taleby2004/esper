@@ -356,8 +356,7 @@ win:time(125)</programlisting>
 
 				<para>
 					The FORCE_UPDATE flow control keyword instructs the view to post an empty result set to listeners if there is no
-					data to post for an interval. The view begins posting no later then after one time interval passed after the first
-					event arrives.
+					data to post for an interval. When using this keyword the <literal>irstream</literal> keyword should be used in the <literal>select</literal> clause to ensure the remove stream is also output. 
 				</para>
 				
 				<para>
@@ -413,7 +412,7 @@ following conditions occurs, whichever occurs first: the data window has collect
     "<emphasis>flow control keyword [, keyword...]</emphasis>")</synopsis>
 
 				<para>
-					The <literal>FORCE_UPDATE</literal> flow control keyword instructs the view to post an empty result set to listeners if there is no data to post for an interval. The view begins posting no later then after one time interval passed after the first event arrives.
+					The <literal>FORCE_UPDATE</literal> flow control keyword instructs the view to post an empty result set to listeners if there is no data to post for an interval. The view begins posting no later then after one time interval passed after the first event arrives. When using this keyword the <literal>irstream</literal> keyword should be used in the <literal>select</literal> clause to ensure the remove stream is also output. 
 				</para>				
 
 				<para>

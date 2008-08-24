@@ -329,6 +329,23 @@ select insert from MyEvent]]></programlisting>
 				<para>
 					Note that since <literal>BigDecimal.valueOf(1.0)</literal> is not the same as <literal>BigDecimal.valueOf(1)</literal> (in terms of equality through <literal>equals</literal>), care should be taken towards the consistent use of scale.
 				</para>
+				
+				<para>
+					When using aggregation functions for <literal>BigInteger</literal> and <literal>BigDecimal</literal> values, please note these limitations:
+				</para>
+				<orderedlist spacing="compact">
+					<listitem>
+						<para>
+							The <literal>median</literal>, <literal>stddev</literal> and <literal>avedev</literal> aggregation functions operate on the double value of the object and return a double value.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							All other aggregation functions return <literal>BigDecimal</literal> or <literal>BigInteger</literal> values (except <literal>count</literal>).
+						</para>
+					</listitem>
+				</orderedlist>
+
 			</sect3>
 
 		</sect2>
