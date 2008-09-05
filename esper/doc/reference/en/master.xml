@@ -18,6 +18,12 @@
     <!ENTITY appendix_outputspec SYSTEM "modules/appendix_outputspec.xml">
     <!ENTITY appendix_keywords SYSTEM "modules/appendix_keywords.xml">
 ]>
+<!-- Terminology notes
+
+- We write "an A event" to mean an event of type A.
+  
+
+-->
 <book lang="en">
 	<bookinfo>
 		<title>Esper - Event Stream and Complex Event Processing for Java</title>

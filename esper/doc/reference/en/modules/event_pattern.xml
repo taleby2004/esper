@@ -498,8 +498,7 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
             </para>
 
             <para>
-				Thus the <literal>every</literal> operator works like a factory for the pattern subexpression contained within. When the pattern subexpression within it 
-				fires and thus quits checking for events, the <literal>every</literal> causes the start of a new pattern subexpression listening for more occurances of the same
+				Thus the <literal>every</literal> operator works like a factory for the pattern subexpression contained within. When the pattern subexpression within it fires and thus quits checking for events, the <literal>every</literal> causes the start of a new pattern subexpression listening for more occurrences of the same
 				event or set of events.
             </para>				
 
@@ -510,15 +509,19 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
             </para>
             
             <para>
-				This pattern fires when encountering event A and then stops looking.
+				This pattern fires when encountering an A event and then stops looking.
             </para>
 			<programlisting><![CDATA[A]]></programlisting>
 
             <para>
-				This pattern keeps firing when encountering event A, and doesn't stop looking.
+				This pattern keeps firing when encountering A events, and doesn't stop looking.
             </para>
 			<programlisting><![CDATA[every A]]></programlisting>
 			
+            <para>
+				When using <literal>every</literal> operator with the <literal>-></literal> followed-by operator, each time the <literal>every</literal> operator restarts it also starts a new subexpression instance looking for events in the followed-by subexpression.
+            </para>				
+
             <para>
 				Let's consider an example event sequence as follows.
             </para>
@@ -554,8 +557,8 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 							<entry><programlisting><![CDATA[every ( A -> B )]]></programlisting></entry>
 							<entry>
 								<para>
-									Detect event A followed by event B. 
-									At the time when B occurs the pattern matches, then the pattern matcher restarts and looks for event A again.
+									Detect an A event followed by a B event. 
+									At the time when B occurs the pattern matches, then the pattern matcher restarts and looks for the next A event.
 								</para>
 								<orderedlist spacing="compact">
 									<listitem>
@@ -580,7 +583,7 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 							<entry><programlisting><![CDATA[every A -> B]]></programlisting></entry>
 							<entry>
 								<para>
-									The pattern fires for every event A followed by an event B.
+									The pattern fires for every A event followed by a B event.
 								</para>
 								<orderedlist spacing="compact">
 									<listitem>
@@ -606,7 +609,7 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 							<entry><programlisting><![CDATA[A -> every B]]></programlisting></entry>
 							<entry>
 								<para>
-									The pattern fires for an event A followed by every event B.
+									The pattern fires for an A event followed by every B event.
 								</para>
 								<orderedlist spacing="compact">
 									<listitem>
@@ -636,7 +639,7 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 							<entry><programlisting><![CDATA[every A -> every B]]></programlisting></entry>
 							<entry>
 								<para>
-									The pattern fires for every event A followed by every event B.
+									The pattern fires for every A event followed by every B event.
 								</para>
 								<orderedlist spacing="compact">
 									<listitem>
@@ -680,11 +683,11 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 			<programlisting><![CDATA[every (A -> B -> C)]]></programlisting>
   
             <para>
-				The pattern first looks for event A. When event A arrives, it looks for event B. After event B arrives, the pattern looks for event C. Finally when event C arrives the pattern fires. The engine then starts looking for event A again.
+				The pattern first looks for A events. When an A event arrives, it looks for a B event. After the B event arrives, the pattern looks for a C event. Finally, when the C event arrives the pattern fires. The engine then starts looking for an A event again.
             </para>
 
             <para>
-				Assume that between event B and event C a second event A<subscript>2</subscript> arrives. The pattern would ignore the A<subscript>2</subscript> entirely since it's then looking for event C.
+				Assume that between the B event and the C event a second A<subscript>2</subscript> event arrives. The pattern would ignore the A<subscript>2</subscript> event entirely since it's then looking for a C event.
 				As observed in the prior example, the <literal>every</literal> operator restarts the subexpression <literal>A -> B -> C</literal> only when the subexpression fires.
             </para>
 
@@ -694,15 +697,65 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 			<programlisting><![CDATA[every A -> B -> C]]></programlisting>
  
             <para>
-				This pattern now matches for any event A that is followed by an event B and then event C, regardless of when the event A arrives. Oftentimes this can be practical in combination with the <literal>and not</literal> syntax and the <literal>timer:within</literal> syntax as the
-				next example shows. 
+				This pattern now matches for each A event that is followed by a B event and then a C event, regardless of when the A event arrives. Note that for each A event that arrives the pattern engine starts a new subexpression looking for a B event and then a C event, outputting each combination of matching events.
             </para>
 			
+			<sect3 id="pattern-every-ending-subexp">
+				<title>Limiting Subexpression Lifetime</title>
+				
+				<para>
+					As the introduction of the <literal>every</literal> operator states, the operator starts new subexpression instances and can cause multiple matches to occur for a single arriving event.
+				</para>
+
+				<para>
+					New subexpressions also take a very small amount of system resources and thereby your application should carefully consider when subexpressions must end when designing patterns. Use the <literal>timer:within</literal> construct and the <literal>and not</literal> constructs to end active subexpressions. The data window onto a pattern stream does not serve to limit pattern subexpression lifetime.
+				</para>
+
+				<para>
+					Lets look at a concrete example. Consider the following sequence of events arriving:
+				</para>
+				<para>
+					A<subscript>1</subscript> &nbsp;
+					A<subscript>2</subscript> &nbsp;  
+					B<subscript>1</subscript> &nbsp;
+				</para>
+
+				<para>
+					This pattern matches on arrival of B<subscript>1</subscript> and outputs two events (an array of length 2 if using a listener). The two events are the combinations {A<subscript>1</subscript>, B<subscript>1</subscript>} and {A<subscript>2</subscript>, B<subscript>1</subscript>}:
+				</para>
+				<programlisting><![CDATA[every a=A -> b=B]]></programlisting>
+				
+				<para>
+					The <literal>and not</literal> operators are used to end an active subexpression.
+				</para>
+				
+				<para>
+					The next pattern matches on arrival of B<subscript>1</subscript> and outputs only the last A event which is the combination {A<subscript>2</subscript>, B<subscript>1</subscript>}:
+				</para>
+				<programlisting><![CDATA[every a=A -> (b=B and not A)]]></programlisting>
+
+				<para>
+					The <literal>and not</literal> operators cause the subexpression looking for {A<subscript>1</subscript>, B?} to end when A<subscript>2</subscript> arrives.
+				</para>
+
+				<para>
+					Similarly, in the pattern below the engine starts a new subexpression looking for a B event every 1 second. After 5 seconds there are 5 subexpressions active looking for a B event and 5 matches occur at once if a B event arrives after 5 seconds.
+				</para>
+				<programlisting><![CDATA[every timer:interval(1 sec) -> b=B]]></programlisting>
+
+				<para>
+					Again the <literal>and not</literal> operators can end subexpressions that are not intended to match any longer:
+				</para>
+				<programlisting><![CDATA[every timer:interval(1 sec) -> (b=B and not timer:interval(1 sec))
+// equivalent to
+every timer:interval(1 sec) -> (b=B where timer:within(1 sec))]]></programlisting>
+			</sect3>
+
 			<sect3 id="pattern-every-sample1">
 				<title><literal>Every</literal> Operator Example</title>
 
 				<para>
-					In this example we consider a generic pattern in which the pattern must match for each A event followed by a B and followed by a C event, in which both B and C must arrive within 1 hour of the A event. The first approach to the pattern is as follows:
+					In this example we consider a generic pattern in which the pattern must match for each A event followed by a B event and followed by a C event, in which both the B event and the C event must arrive within 1 hour of the A event. The first approach to the pattern is as follows:
 				</para>
 
 				<programlisting><![CDATA[every A  -> (B -> C) where timer:within(1 hour)]]></programlisting>
@@ -738,17 +791,17 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 				<orderedlist spacing="compact">
 					<listitem>
 						<para>
-							The first active subexpression with A<subscript>1</subscript> in memory, looking for any B event
+							The first active subexpression with A<subscript>1</subscript> in memory, looking for any B event.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							The second active subexpression with A<subscript>2</subscript> in memory, looking for any B event
+							The second active subexpression with A<subscript>2</subscript> in memory, looking for any B event.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							A third active subexpression, looking for the next A event
+							A third active subexpression, looking for the next A event.
 						</para>
 					</listitem>
 				</orderedlist>
@@ -1018,12 +1071,12 @@ from pattern [ every [2] a=A ] ]]></programlisting>
 					</listitem>
 					<listitem>
 						<para>
-							The tag as an indexed property returns the underlying event at that index. For instance, the 'a[0]' expression returns the first underlying event A, or null if no such event A was matched by the repeat operator.
+							The tag as an indexed property returns the underlying event at that index. For instance, the 'a[0]' expression returns the first underlying A event, or null if no such A event was matched by the repeat operator.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							The tag as a nested, indexed property returns a property of the underlying event at that index. For example, the 'a[1].id' expression returns the 'id' property value of the second A event, or null if no such second event A was matched by the repeat operator.
+							The tag as a nested, indexed property returns a property of the underlying event at that index. For example, the 'a[1].id' expression returns the 'id' property value of the second A event, or null if no such second A event was matched by the repeat operator.
 						</para>
 					</listitem>
 				</itemizedlist>
@@ -1043,7 +1096,7 @@ from pattern [ every [2] a=A ] ]]></programlisting>
             </para>
             
             <para>
-				Pattern matches when both event A and event B are found.
+				Pattern matches when both an A event and a B event are found.
             </para>
 			<programlisting><![CDATA[A and B]]></programlisting>
 
@@ -1080,7 +1133,7 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
             </para>
             
            <para>
-			   Look for either event A or event B. As always, A and B can itself be nested expressions as well.
+			   Look for either an A event or a B event. As always, A and B can itself be nested expressions as well.
             </para>
 			<programlisting><![CDATA[A or B]]></programlisting>
 
@@ -1107,12 +1160,12 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
             </para>
 
            <para>
-				This pattern matches only when an event A is encountered followed by event B but only if no event C was encountered before either event A and B, counting from the time the pattern is started:
+				This pattern matches only when an A event is encountered followed by a B event but only if no C event was encountered before either an A event and a B event, counting from the time the pattern is started:
             </para>
 			<programlisting><![CDATA[(A -> B) and not C]]></programlisting>
 			            
             <para>
-				Assume we'd like to detect when an event A is followed by event D, without any B or C events between the A and D events:
+				Assume we'd like to detect when an A event is followed by a D event, without any B or C events between the A and D events:
             </para>
 			<programlisting><![CDATA[A -> (D and not (B or C))]]></programlisting>
 
@@ -1139,7 +1192,7 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
             </para>
             
             <para>
-				Look for event A and if encountered, look for event B. As always, A and B can itself be nested event pattern expressions.
+				Look for an A event and if encountered, look for a B event. As always, A and B can itself be nested event pattern expressions.
             </para>
 			<programlisting><![CDATA[A -> B]]></programlisting>
 
@@ -1273,7 +1326,7 @@ timer:within(125)</programlisting>
 				</para>
 	
 				<para>
-					After event A arrived wait 10 seconds then indicate that the pattern matches.
+					After an A event arrived wait 10 seconds then indicate that the pattern matches.
 				</para>
 				<programlisting><![CDATA[A -> timer:interval(10 seconds) ]]></programlisting>
 	
@@ -1283,8 +1336,8 @@ timer:within(125)</programlisting>
 				<programlisting><![CDATA[every timer:interval(20 sec)]]></programlisting>
 	
 				<para>
-					The next example pattern fires for every event A that is not followed by an event B within 60 seconds after event A arrived. B must have the same "id" property
-					value as A.
+					The next example pattern fires for every A event that is not followed by a B event within 60 seconds after the A event arrived. The B event must have the same "id" property
+					value as the A event.
 				</para>
 				<programlisting><![CDATA[every a=A -> (timer:interval(60 sec) and not B(id=a.id)) ]]></programlisting>
 			</sect3>
@@ -1397,7 +1450,33 @@ timer:within(125)</programlisting>
 				<para>
 					The keyword <literal>lastweekday</literal> is a combination of two parameters, the <literal>last</literal> and the <literal>weekday</literal> keywords. A typical example could be: <literal>timer:at(*, *, *, lastweekday, 9, *)</literal> which will define Friday September 28th (example year is 2007).
 				</para>
+				
+				<sect4 id="pattern-timer-at-every" >
+				   <title>timer:at and the <literal>every</literal> Operator</title>
 	
+					<para>
+						When using <literal>timer:at</literal> with the <literal>every</literal> operator the crontab-like timer computes the next time at which the timer should fire based on the specification and the current time. When using <literal>every</literal>, the current time is the time the timer fired or the statement start time if the timer has not fired once.
+					</para>
+
+					<para>
+						For example, this pattern fires every 1 minute starting at 1:00pm and ending at 1:59pm, every day:
+					</para>
+					<programlisting><![CDATA[every timer:at(*, 13, *, *, *)]]></programlisting>
+
+					<para>
+						Assume the above statement gets started at 1:05pm and 20 seconds. In such case the above pattern fires every 1 minute starting at 1:06pm and ending at 1:59pm for that day and 1:00pm to 1:59pm every following day.
+					</para>
+
+					<para>
+						To get the pattern to fire only once at 1pm every day, explicitly specify the minute to start. The pattern below fires every day at 1:00pm:
+					</para>
+					<programlisting><![CDATA[every timer:at(0, 13, *, *, *)]]></programlisting>
+
+					<para>
+						By specifying a second resolution the timer can be made to fire every second, for instance:
+					</para>
+					<programlisting><![CDATA[every timer:at(*, *, *, *, *, *)]]></programlisting>
+				</sect4>
 			</sect3>
 		</sect2>
    </sect1>

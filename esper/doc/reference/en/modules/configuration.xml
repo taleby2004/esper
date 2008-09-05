@@ -1017,7 +1017,7 @@ Connection connection = dataSource.getConnection();]]></programlisting>
 				</para>
 				
 				<para>
-					A sample XML configuration entry for this setting is shown next. The sample maps <literal>Types.NUMERIC</literal> (of value <literal>2</literal>) to the Java <literal>int</literal> type.
+					A sample XML configuration entry for this setting is shown next. The sample maps <literal>Types.NUMERIC</literal> which is a constant value of <literal>2</literal> per JDBC API to the Java <literal>int</literal> type.
 				</para>
 				<programlisting><![CDATA[<sql-types-mapping sql-type="2" java-type="int" />]]></programlisting>				
 			</sect3>
