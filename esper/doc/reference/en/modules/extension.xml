@@ -315,9 +315,46 @@
 			<programlisting><![CDATA[select * from StockTick.custom:trendspotter(price)]]></programlisting>
 
 			<para>
-				Note that the view must implement the <literal>copyView</literal> method to enable the view to work in a grouping context as shown in the next statement:
+				Note that the view must implement additional interfaces if it acts as a data window view, or works in a grouping context, as discussed in more detail below.
+			</para>		
+		</sect2>
+
+		<sect2 id="custom-views-datawin" revision="1">
+			<title>Requirement for Data Window Views</title>
+			
+			<para>
+				Your custom view may represent an expiry policy and may retain events and thus act as a data window view. In order to allow the engine to validate that your view can be used with named windows, which allow only data window views,
+				this section documents any additional requirement that your classes must fulfill.
+			</para>
+		
+			<para>
+				Your view factory class must implement the <literal>com.espertech.esper.view.DataWindowViewFactory</literal> interface. This marker interface (no methods required) indicates that your view factory provides only data window views.  
+			</para>		
+
+			<para>
+				Your view class must implement the <literal>com.espertech.esper.view.DataWindowView</literal> interface. This marker interface indicates that your view is a data window view and therefore eligible to be used in any construct that requires a data window  view.
+			</para>
+		</sect2>
+
+		<sect2 id="custom-views-grouped" revision="1">
+			<title>Requirement for Grouped Views</title>
+			
+			<para>
+				Grouped views are views that operate under the <literal>std:groupby</literal> view. When operating under one or more <literal>std:groupby</literal> views, the engine instantiates a single view instance when the statement starts, and a new view instance per group criteria dynamically as new group criteria become known. 
+			</para>
+		
+			<para>
+				The next statement shows EPL for using a view instance per grouping criteria:
 			</para>		
 			<programlisting><![CDATA[select * from StockTick.std:groupby(symbol).custom:trendspotter(price)]]></programlisting>
+
+			<para>
+				Your view must implement the <literal>com.espertech.esper.view.CloneableView</literal> interface to indicate your view may create new views. This code snippet shows a sample implementation of the <literal>cloneView</literal> method required by the interface:
+			</para>		
+			
+			<programlisting><![CDATA[public View cloneView(StatementContext statementContext) {
+  return new MyPlugInView(statementContext);	// pass any parameters along where
+}]]></programlisting>
 
 		</sect2>
     </sect1>
