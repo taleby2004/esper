@@ -50,8 +50,8 @@
 		</para>
 
 		<programlisting><![CDATA[
-                       Input                                  Output
------------------------------------------------  ----------------------------------
+                       Input                                 
+-----------------------------------------------  
  Time Symbol  Volume   Price
   0.2                          
           S1     100    25.0   Event E1 arrives
