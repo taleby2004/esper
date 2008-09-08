@@ -3236,6 +3236,17 @@ order by symbol]]></programlisting>
 			<para>
 				 The above statement outputs the total volume per symbol for those groups where the sum of the volume is greater then zero, ordered by symbol ascending. The engine computes and posts the output based on the current contents of the 'OrdersNamedWindow' named window considering all events in the named window, since the query does not have a <literal>where</literal> clause.
 			 </para>
+
+			<para>
+				 When using wildcard (*) to select from streams in an on-select clause, each stream, that is the the triggering stream and the selected-upon named window, are selected, similar to a join. Therefore your wildcard select
+				 returns two columns: the triggering event and the selection result event, for each row.
+			</para>
+			<programlisting><![CDATA[on QueryEvent as queryEvent
+select * from OrdersNamedWindow as win]]></programlisting>
+			
+			<para>
+				 The query above returns a <literal>queryEvent</literal> column and a <literal>win</literal> column for each event. If only a single stream's event is desired in the result, use <literal>select win.*</literal> instead.
+			 </para>
 		</sect2>
 
 		<sect2 id="named_playback" revision="1">
