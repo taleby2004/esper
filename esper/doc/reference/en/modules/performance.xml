@@ -310,7 +310,7 @@ config.getEngineDefaults().getViewResources().setShareViews(false);]]></programl
 		</sect2>
 
 		<sect2 id="perf-tips-11">
-			<title>Disable delivery order guarantees</title>
+			<title>Tune or disable delivery order guarantees</title>
 
 			<para>
 				If your application is not a multithreaded application, or you application is not sensitive to the order of delivery of result events to your application listeners, then consider disabling the delivery order guarantees the engine makes towards ordered delivery of results to listeners:
@@ -325,6 +325,18 @@ config.getEngineDefaults().getThreading().setListenerDispatchPreserveOrder(false
 <programlisting><![CDATA[Configuration config = new Configuration();
 config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(false);]]></programlisting>
 
+			<para>
+				Additional configuration options are available and described in the configuration section that specify timeout values and spin or thread context switching.
+			</para>
+
+			<para>
+				Esper logging will log the following informational message when guaranteed delivery order to listeners is enabled and spin lock times exceed the default or configured timeout : <literal>Spin wait timeout exceeded in listener dispatch</literal>.
+				The respective message for delivery from <literal>insert into</literal> statements to consuming statements is <literal>Spin wait timeout exceeded in insert-into dispatch</literal>.
+			</para>
+
+			<para>
+				If your application sees messages that spin lock times are exceeded, your application has several options: First, disabling preserve order is an option. Second, ensure your listener does not perform (long-running) blocking operations before returning, for example by performing output event processing in a separate thread. Third, change the timeout value to a larger number to block longer without logging the message.
+			</para>
 		</sect2>
 		
 		<sect2 id="perf-tips-12">
