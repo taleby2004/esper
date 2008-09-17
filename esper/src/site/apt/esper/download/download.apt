@@ -10,7 +10,12 @@ Download Esper
 *------------------------+----------------------------------------------------------------------------+-----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------+---------------------------+
 | Esper 2.2.0 (zip)      | {{{http://dist.codehaus.org/esper/esper-2.2.0.zip}esper-2.2.0.zip}}        | {{{http://dist.codehaus.org/esper/esper-2.2.0.zip.md5}esper-2.2.0.zip.md5}}       | {{{http://dist.codehaus.org/esper/esper-2.2.0.zip.asc}esper-2.2.0.zip.asc}}          | {{{http://www.opensource.org/licenses/gpl-2.0.php}GNU GPL}} (GPL v2)
 *------------------------+----------------------------------------------------------------------------+-----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------+---------------------------+
+
+
+* Bug Fix Service Packs
 	
+	Please navigate to {{{http://jira.codehaus.org/browse/ESPER}JIRA}} and select Resolved on the right hand side to see resolved issues for the current release.
+	When service packs are issued they are cumulative and can be downloaded from {{{http://dist.codehaus.org/esper}here}}.	
 
 * Previous Releases
 	
