@@ -49,8 +49,33 @@
 		<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getProvider("RFIDProcessor1");]]></programlisting>
       
         <para>
-			An existing Esper engine instance can be reset via the <literal>initialize</literal> method on the <literal>EPServiceProvider</literal> instance. This stops and removes all statements in the Engine.
+			Since the <literal>getProvider</literal> methods return the same cached engine instance for each URI, there is no need to statically cache an engine instance in your application.
         </para>
+
+        <para>
+			An existing Esper engine instance can be reset via the <literal>initialize</literal> method on the <literal>EPServiceProvider</literal> instance. This operation stops and removes all statements in the Engine as well as restores the engine to the original configuration supplied when the engine instance for that URI was obtained. If no configuration is provided, an empty configuration applies.
+        </para>
+
+        <para>
+			The next code snippet outlines a typical sequence of use: 
+        </para>
+		<programlisting><![CDATA[// Configure the engine, this is optional
+Configuration config = new Configuration();
+config.configure("configuration.xml");	// load a configuration from file
+config.set....(...);    // make additional configuration settings
+
+// Obtain an engine instance
+EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+
+// Optionally, use initialize if the same engine instance has been used before to start clean
+epService.initialize();
+
+// Optionally, make runtime configuration changes
+epService.getEPAdministrator().getConfiguration().add...(...);
+
+// Destroy the engine instance when no longer needed, frees up resources
+epService.destroy();]]></programlisting>
+
     </sect1>
 
     <sect1 id="api-administrative">
