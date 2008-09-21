@@ -2881,6 +2881,18 @@ where asset.assetid = desc.assetid]]></programlisting>
     (ipAddress string, userId String, numAttempts int)]]></programlisting>	
 			</sect3>
 
+			<sect3 id="named_create_drop" revision="1">
+				<title>Dropping or Removing Named Windows</title>
+
+				<para>
+					There is no syntax to drop or remove a named window.
+				</para>
+
+				<para>
+					The <literal>destroy</literal> method on the <literal>EPStatement</literal> that created the named window removes the named window. However the implicit event type associated with the named window remains active since further statements may continue to use that type. Therefore a named window of the same name can only be created again if the type information matches the prior declaration for a named window.
+				</para>
+			</sect3>
+
 		</sect2>
 
 		<sect2 id="named_delete" revision="1">
