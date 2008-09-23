@@ -692,6 +692,10 @@ following conditions occurs, whichever occurs first: the data window has collect
 				</para>
 	
 				<programlisting><![CDATA[select * from StockTickEvent(symbol='IBM').stat:uni(price).std:lastevent()]]></programlisting>
+
+				<para>
+					If you want to output the last event within a sliding window, please see <xref linkend="epl-single-row-function-ref-previous"/>. That function accepts a relative (count) or absolute index and returns event properties or an event in the context of the specified data window.
+				</para>
 			</sect2>
 
 			<sect2 id="view-std-first" >
@@ -718,6 +722,10 @@ following conditions occurs, whichever occurs first: the data window has collect
 				</para>
 	
 				<programlisting><![CDATA[select * from ReferenceData.std:firstevent()]]></programlisting>
+
+				<para>
+					If you want to output the first event within a sliding window, please see <xref linkend="epl-single-row-function-ref-previous"/>. That function accepts a relative (count) or absolute index and returns event properties or an event in the context of the specified data window.
+				</para>
 			</sect2>
 
 			<sect2 id="view-std-firstunique" >

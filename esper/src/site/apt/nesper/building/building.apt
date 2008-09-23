@@ -46,11 +46,11 @@ MSBuild Nesper.sln
       
       * MySQL Database (required for test cases testing database access)
       
-      		* Create a user "nesper" and password "password"
-      		
-      		* Grant access to all to user
+      		* Create a user "nesper" and password "password" (via "create user nesper identified by 'password'")
       		
       		* Create test table from esper/etc/regression/create_testdb.sql
+      		
+      		* Grant access to all to user (via "grant all on test to nesper; grant all on mytesttable to nesper; grant all on mytesttable_large to nesper;")
       		
       		* Install ODBC adapter (http://dev.mysql.com/downloads/connector/odbc/3.51.html)
       		
