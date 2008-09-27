@@ -25,13 +25,17 @@ Technology Introduction
 	
 	[]
 
-~~ COMMENT
-~~
-~~ Philosophy
-~~ Event are rich domain objects that are best represented using a rich object-oriented model; Many existing CEP products force a flat column-set
-~~ While a CEP application by nature needs to listen to events occuring in real-time, it is also often of great value to ask questions of the event data held by an engine;
-~~ For example, current data window contents can be useful to know (pull API) when a continuous query statement detects a threshold is overstepped (push)
 
+Commonly Asked Questions 
+
+	{{{tutorials/faq_esper/faq.html#how-does-it-work-overview}How does it work?}}
+	{{{tutorials/faq_esper/faq.html#comparison}How does it compare with other CEP products?}}
+	{{{tutorials/faq_esper/faq.html#testing}How has this been tested?}}
+	{{{tutorials/faq_esper/faq.html#performance}What is the performance?}}
+	{{{about/license/license.html}What is the license?}}
+	{{{http://www.espertech.com/support}Can I get support?}}
+	
+	
 Features
 
 	

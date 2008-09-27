@@ -24,8 +24,8 @@ Guiding Philosophy
 
 Features
 
-	All of the features found in Esper are also available in Nesper. NEsper version 1.10 is
-	feature-equivalent to Esper version 1.10. 
+	All of the features found in Esper are also available in NEsper. NEsper version 2.1.0 is
+	feature-equivalent to Esper version 2.1.0 
 
 Summary
 	
@@ -37,7 +37,7 @@ Summary
 Note on ADO.NET and ODBC Support
 
 	NEsper has been tested with both ADO.NET and ODBC drivers to relational database access.
-	As part of the regular build, NEsper tests against a MySQL database.
+	As part of the regular build, NEsper tests against a MySQL database and Microsoft SQL Server 2005.
 	
 	The ADO.NET database model has one huge quirk: In ADO.NET parameters and their format are dictated by the driver.  
 	As such, you can end up with a driver like the MySQL driver which is a named-parameter driver. 

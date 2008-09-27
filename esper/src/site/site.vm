@@ -352,8 +352,8 @@ behavior: url($relativePath/css/csshover.htc);
 	<div id="pic">
 		<div id="slogan">
 			Where <b>Complex Event Processing meets Open Source</b>: <a href="http://www.espertech.com/products/">Esper & NEsper</a></b><br/>
-			<b>Make no compromise</b> on enterprise readiness: discover <a href="http://www.espertech.com/products/esperha.php">EsperHA</a>, <a href="http://www.espertech.com/products/esperjdbc.php">EsperJDBC</a> and our <a href="http://www.espertech.com/support/">support services</a>.
-			Embed mainstream CEP in your products and deployments: Learn about our <a href="http://www.espertech.com/partners/embedded.php">licensing options</a>.<br/>
+			Highly-available via <a href="http://www.espertech.com/products/esperha.php">EsperHA</a>. Reporting, charting and query by <a href="http://www.espertech.com/products/esperjdbc.php">EsperJDBC</a>.
+			<br/>Embed mainstream CEP in your products and deployments: Learn about our <a href="http://www.espertech.com/partners/embedded.php">licensing options</a>.<br/>
 		</div>
 	</div>
 #end

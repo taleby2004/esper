@@ -1,5 +1,15 @@
 News
 
+
+* September 27, 2008  -  NEsper 2.1.0
+
+  * Esper for .NET - feature equivalent to Esper 2.1
+  
+  * When migrating from NEsper 1.x to NEsper 2.1, please follow {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+1.x+to+Esper+2.x}Migrating Esper 1.x to Esper 2.x}}
+
+  []
+  
+
 * August 10, 2008  -  Esper 2.2.0
 
   * Support for repeat and repeat-until in pattern matching

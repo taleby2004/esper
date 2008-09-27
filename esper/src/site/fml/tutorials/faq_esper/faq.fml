@@ -2,6 +2,234 @@
 <faqs id="General FAQ">
 
   <part id="general">
+  	<title>General</title>
+     <faq id="comparison">
+      <question>How does Esper compare to other CEP products?</question>
+      <answer>
+        <p>
+          Esper is an entirely free open-source component available under the 
+          GNU GPL license (GPL also known as GPL v2). The open-source nature of Esper helps in tailoring the event processing language and other 
+          community driven features.
+        </p>
+        <p>
+	  Esper and NEsper are embeddable components written in Java and C# and are therefore suitable for integration into any Java process 
+	  or .NET-based process including J2EE application servers or standalone Java applications. Esper and NEsper are not a server by itself but are designed to hook into any sort of server, 
+	  ranging from market standard JEE server (weblogic, websphere, jboss etc), service bus, or lightweight solutions (OSGi based, grid etc) 
+	  and also Microsoft based .Net technologies. NEsper is suitable for use in desktop end-user stations.
+        </p>
+        <p>
+          The other advantages this model offers is that the components can run standalone in your development environment making development 
+          and testing much easier, while for the target production environment this makes it much more tailored to what you really need, 
+          or possibly have already in place. End to end performance and latency is also enhanced as your application may then not need to 
+          transport events to a dedicated remote server process, but can process events at the event source saving marshalling/unmarshalling/network.
+        </p>
+        <p>
+	  Esper's pull query API is noteworthy, one of our customers recently remarked "Indeed one of the important feature of a Real-Time analytics is to be able to connect to 
+	  CEP on-demand, basically if the analytic is off-line, the server is continuing to calculate.". Most CEP products support a subscribe-only 
+	  model and for other products no state snapshot queries are possible against a running engine.
+        </p>
+        <p>
+          Events in Esper allow for a rich domain object representation since Esper supports all aspects of object-oriented design as well as dynamic
+          typing. Many other CEP products force a flat Map-like tuple-set definition of events which we think is not rich enough. Esper can thus handle schema
+          evolution well.
+        </p>
+        <p>
+          Esper features a Statement Object Model API, which is a set of classes to directly construct, manipulate or interrogate EPL statements. 
+        </p>
+        <p>
+          Esper does not currently have a GUI management, editor or portal application. Esper also does not currently have a server.
+          Esper provides only a small number of key input and output adapters through EsperIO, and provides an adapter framework.
+        </p>
+      </answer>
+    </faq>
+    <faq id="advantages_epl">
+      <question>What are the advantages of Esper's Event Processing Language (EPL)?</question>
+      <answer>
+        <p>
+		  The Esper event processing language (EPL) converges event stream processing (filtering, joins, aggregation) 
+		  and complex event processing (causality) into one single language. 
+		  The core language is SQL-like ensuring rapid learning, but is also highly oriented toward support of modern technologies 
+		  so it is for example object oriented (more than table oriented), enabling for simple extension. The language, of course, 
+		  includes event windows and causality patterns as first citizens. 
+		  We natively support several types of event formats, from Java/.Net object, maps, to XML documents.
+        </p>
+      </answer>
+    </faq>
+    <faq id="problems-suited">
+      <question>What business areas/problems is Esper best suited for?</question>
+      <answer>
+        <p>
+          Esper is best suited for real-time event driven applications. Typical application areas are business process management and 
+          automation, finance, network and application monitoring and sensor network applications. Esper take much of the complexity 
+          out of developing applications that detect patterns among events, filter events, aggregate time or length windows of events, 
+          join event streams, trigger based on absence of events etc. 
+        </p>
+        <p>          
+          A primary difference with system relying on classical SQL 
+          databases is that we do not query a repository for events matching some conditions, but instead trigger customized 
+          actions as the flow of events come in matching event conditions - hence drastically reducing the latency.
+        </p>
+      </answer>
+    </faq>
+    <faq id="problems-misuses">
+      <question>What might be some misuses for it?</question>
+      <answer>
+        <p>		
+			Esper is not designed for storing and retrieval of fairly static data - that is better left to conventional databases. 
+			In-memory databases may be better suited to CEP applications than traditional relational databases as they generally have 
+			good query performance. Yet they are not optimized to provide immediate, real-time query results required for CEP and event 
+			stream analysis.
+        </p>
+      </answer>
+    </faq>
+    <faq id="audience">
+      <question>What is the intended audience and what is their interface?</question>
+      <answer>
+        <p>
+          Esper doesn't have a GUI and access is via API only, currently. 
+          The intended audience is developers of CEP or ESP applications.
+        </p>
+      </answer>
+    </faq>
+    <faq id="other-solutions">
+      <question>How would you position Esper next to existing solutions (or hacks) in the industry?</question>
+      <answer>
+        <p>
+        	Esper is the only open source Event Stream Processing out there - and this is not to be confused with 
+        	classical rules engines. Compared to commercial ESP engines implementations, 
+        	Esper may lack high availability options in the 1.0 release, but its open source nature is a driver to get the 
+        	Event processing language right, and get the Java community up to speed on those concepts - 
+        	before tackling enterprise grade requirements in upcoming versions.			
+		</p>
+		<p>
+			Generally Rete-based production rule engines can indeed be used to address part of what CEP coins, 
+			especially triggering by correlating events, possibly including a temporal relationship between events.
+			That said the ESP side - Event Stream Processing - is a different beast, where what matters is the "S" for Stream. 
+			In this side of the Esper engine we provide several language facilities to build expressions using time not 
+			for temporal relationship (happened before etc) but for sliding window. As an example, this makes it very valuable 
+			for computing things like volume weighted average price (VWAP) of ticks -
+			which would possibly be awful using something Rete-based like a classical rule engine.
+		</p>
+      </answer>
+    </faq>
+     <faq id="philosophy">
+      <question>What is the concept or philosophy behind the design?</question>
+      <answer>
+        <p>
+          Esper was developed using test-driven development and excellent automated test coverage.
+          Esper design evolved by re-factoring with courage towards higher design quality. 
+          Favorite patterns are dependency injection/inversion of control by context injection, 
+          Immutable, Specification, GOF patterns (except Singleton :).
+        </p>
+      </answer>
+    </faq>
+    <faq id="background">
+      <question>What is the history? Where did it start and come from?</question>
+      <answer>
+        <p>
+		  Thomas Bernhardt is the project founder and project lead. He works as a software architect for a major financial institution. 
+		  On a project in 2004 Thomas had been asked to evaluate different rules engines for use in an application for monitoring a 
+		  trading system. The rules engines proved cumbersome and slow. There was no budget for a CEP product, thus a custom application 
+		  to solve the monitoring problem was developed. The project lead's interest in CEP and ESP technologies lead to further 
+		  independent research into the knowledge space followed by prototypes build for no particular organization or purpose. 
+		  The prototypes evolved and the Esper project started.
+        </p>
+      </answer>
+    </faq>
+    <faq id="testing">
+      <question>How has this been tested? What guarantees do I have that the next release works just as well?</question>
+      <answer>
+        <p>
+          Esper uses the JUnit testing framework to automate regression testing of the system.
+          Esper's build process runs the currently around 2300 unit test methods, many running multiple test scenarios, in 600 JUnit test classes when a build occurs.
+          The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
+          individual classes and components. Tests are very detailed in asserting the expected results allowing us
+          to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
+          tests that assert performance of statements and configurability of the engine.
+          See the package "com.espertech.esper.regression" in the test source folder as the entry point for
+		  end-to-end testing against the client API.
+        </p>
+        <p>          
+          We certify that every minor release (for example 2.x to 2.y) does not break the public interface of the engine.
+          In the public interface we include the 
+        </p>
+        <p>          
+          The Esper team follows the practice of test-driven development (TDD) rigorously, ensuring that each feature added has automated test coverage.
+          We develop and evolve the tests for each feature along with the feature that is currently being developed.
+        </p>
+        <p>          
+		  We have received a recent test coverage result that we quote here:         
+			"I used Cobertura for this, the line coverage is 85% and the branch coverage is 93%. This gives me a good feeling, but one concern is that the tests take long time to run, but I can live with that."
+        </p>
+      </answer>
+    </faq>
+    <faq id="tested-on-OS">
+      <question>What operating systems has it been tested on?</question>
+      <answer>
+        <p>
+          We test the engine each release on Windows XP and on Redhat Linux. Please see the change history notes
+          that indicate what JDK version(s) are used for building the release, and which we certified to pass all tests.
+        </p>
+      </answer>
+    </faq>    
+    <faq id="performance">
+      <question>It claims to be fast...how does it do that? Has this claim been tested?</question>
+      <answer>
+        <p>
+	  We have published benchmark kit results and have the benchmark kit itself available for download. The results are summarized with further links on the <a href="../../esper/performance/performance.html">performance page</a>.
+        </p>
+        <p>
+          Esper builds and maintains all data structures in memory. It does not use or require any internal or external database or disk drive to run. 
+          The internal data structures are optimized for minimal locking and high write speed thereby allowing the engine to process events at the speed of arrival
+          for most applications.
+        </p>
+        <p>
+	  Esper is fully multi-thread safe and typically able to leverage all available CPUs. 
+        </p>
+        <p>
+	  Esper does not provide any transports or protocols to bring events into the engine or to handle outgoing events. Most applications find event input and event output a bottleneck. 
+        </p>
+        <p>
+	  Esper internally builds all the indexes and uses many optimization techniques hidden to your application.
+          These techniques are verified as part of the performance-asserting regression tests that are part of the source code, and that are executed as part of our build process.
+        </p>
+        <p>
+          There is a chapter in the documentation dedicated to performance tips.
+        </p>
+        <p>
+          Currently no standard performance test exists for CEP engines.          
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="benchmarks">
+      <question>Do you have any benchmarks available for Esper?  Such as results from Linear Road?</question>
+      <answer>
+        <p>
+		  We have published benchmark kit results and have the benchmark kit itself available for download. The results are summarized with further links on the <a href="../../esper/performance/performance.html">performance page</a>.
+        </p>
+        <p>
+			There is no benchmark industry-wide that would allow easy comparison. 
+        </p>
+        <p>
+			We also have an RIFD demo example that is designed to do performance 
+			testing (we can for example run about 100 000 event per second against 2000 statements on a single dual core CPU 
+			of a commodity hardware - but one would argue this does not mean a lot if we don't look at event, statement complexity, 
+			underlying resiliency etc.). 
+        </p>
+        <p>
+			Compared to other software in the CEP space, (N)Esper can run on a very large number of platforms - 
+			basically any platforms that has a Java or .Net runtime, either 32bit or 64bit, with no lock-in with any operating system 
+			(slightly more true for Esper than NEsper of course). 
+			It is also possible to run Esper on modern compute appliances such as from Azul(R) technologies in the field of high performance 
+			computing (hundreds of core, real time capabilities, etc). This is strictly not possible for other CEP engines.
+        </p>
+      </answer>
+    </faq>    
+
+  </part>
+
+  <part id="howdoesitwork">
   	<title>How does it work?</title>
      <faq id="how-does-it-work-overview">
       <question>How does Esper work? How does Esper allow you to search and match patterns on temporal events?</question>
@@ -48,6 +276,37 @@
         </p>
       </answer>
     </faq>
+    <faq id="keep_in_memory">
+      <question>What or how many events does Esper keep in memory? Does Esper keep matching events of a query in memory?</question>
+      <answer>
+
+        <p>
+        	Esper offers built-in data windows as part of the event processing language that instruct the engine how many or how long events must be considered. For example, a time window with an interval length of 10 seconds instructs the engine to retain the last 10 seconds of events as a moving data window. 
+        </p>
+        <p>
+        	There is quite a few different eviction policies for different situations. Most are row-count based or time-based but there is also multi-policy. A sort-based eviction policy is also possible, as is combining different data windows. And the engine can process events without any data windows as well.
+        </p>
+
+		<p>
+			The policy for holding events in memory depends on your statement, especially the data window used (sliding, tumbling and time or length etc), and whether it uses patterns, output rate limiting or is a join. 
+		</p>
+
+        <p>
+			For example, if your statement employs no data window, Esper keeps no events in memory. This is a sample query that keeps no events in memory:
+		</p>	  			
+		<div class="source"><pre>select * from Quote(price>100)</pre></div>  
+
+        <p>
+			Or if your statement uses a unique window on a property then Esper will keep the last event per property value in memory. Here the last event per 'assetId' is kept in memory:
+		</p>	  			
+		<div class="source"><pre>select * from RfidEvent.std:unique(assetId)</pre></div>  
+
+        <p>
+			Note that Esper also re-uses (shares) data windows between statements, if possible. For views that derive values from an event stream, no events are kept in memory. For aggregations, only the aggregation values are kept in memory. For patterns, the events that participate in the pattern are kept in memory only if tagged. For output rate limiting, events are buffered unless you use the "snapshot" keyword - There is a section in the output limiting doc explaining what is buffered and when for output rate limiting. For joins, if no data window is specified, the keep-all data window applies.
+		</p>	  			
+      </answer>
+    </faq>    
+
      <faq id="engine-start-state">
       <question>What happens on engine start? I assume that if I have a time based query, since there's no history within the engine, there's no way to get any events to fire until the time and events have been consumed?</question>
       <answer>
@@ -99,8 +358,8 @@
     </faq>
   </part>
 
-  <part id="technical">
-  	<title>Technical</title>
+  <part id="integration">
+  	<title>Integration</title>
 
     <faq id="deployment-dependencies">
       <question>What additional components does Esper require to run?</question>
@@ -109,33 +368,32 @@
           Please see the feature list for this information. And the "lib" folder in the source distribution contains a readme file
           that describes the dependencies.
         </p>
+        <p>
+          Esper builds and maintains all data structures in memory. It does not use or require any relational database or disk drive to run.
+        </p>
       </answer>
     </faq>    
-
-    <faq id="testing">
-      <question>How has this been tested? What guarantees do I have that the next release works just as well?</question>
+    
+    <faq id="hook-into-existing">
+      <question>How does Esper hook into an existing event-based system?</question>
       <answer>
         <p>
-          Esper uses the JUnit testing framework to automate regression testing of the system.
-          Esper's build process runs the currently around 2300 unit test methods, many running multiple test scenarios, in 600 JUnit test classes when a build occurs.
-          The test classes test the Esper engine from an end-to-end perspective as well as perform tests against
-          individual classes and components. Tests are very detailed in asserting the expected results allowing us
-          to detect most problems before they can reach you. There is also a good set of tests for multithread-safety as well as
-          tests that assert performance of statements and configurability of the engine.
-          See the package "com.espertech.esper.regression" in the test source folder as the entry point for
-		  end-to-end testing against the client API.
-        </p>
-        <p>          
-          The Esper team follows the practice of test-driven development (TDD) rigorously, ensuring that each feature added has automated test coverage.
-          We develop and evolve the tests for each feature along with the feature that is currently being developed.
-        </p>
-        <p>          
-		  We have received a recent test coverage result that we quote here:         
-			"I used Cobertura for this, the line coverage is 85% and the branch coverage is 93%. This gives me a good feeling, but one concern is that the tests take long time to run, but I can live with that."
+		Today, event based system are often confused with message based system such as JMS and alike back-ends or 
+	  	Enterprise Service Bus (ESB). Messaging system are event based but usually do not correlate events or 
+	  	process event streams at all. They simply process unitary events - and it becomes quickly complex if you 
+	  	need to correlate messages.
+	</p>
+        <p>
+		  Esper can hook into any Java based system as a message consumer - whose main purpose would be to listen 
+		  efficiently to everything whilst sending back other events when a matching condition has occurred. On the 
+		  other hand, hooking Esper in a classic messaging system allows having it correlate events even if those 
+		  come from non-Java based systems. This is just an example. Esper is completely container agnostic, can run 
+		  as a standalone component, and the 1.0 release simply assumes events to be POJO. We are currently working on 
+		  providing native XML format support as well.
         </p>
       </answer>
     </faq>
-
+    
     <faq id="multithread-safety">
       <question>Can I run it with multiple threads? What, if anything, is multithread-safe?</question>
       <answer>
@@ -144,28 +402,18 @@
           Applications can perform multithreaded sends of events into the engine as well as 
           create, start and stop statements during operation, while retaining full control over threading and 
           efficiently sharing resources between statements.
-		</p>
+	</p>
         <p>
           Additionally, Esper supports multiple independent Esper engines per Java VM. Thus applications can 
           segregate work to multiple engine instances allocating one or more threads to each engine instance.
-		</p>
+	</p>
         <p>
 		  Iterating (pull-model) of result data by using a statement's safeIterator method concurrently to the statement's
 		  processing of events is also thread-safe.
-		</p>
+	</p>
         <p>
 		  Not thread-safe are the following: iterating via iterator method (use safeIterator instead), configuration API, SODA API when sharing a statement object model instance between threads.
-		</p>
-      </answer>
-    </faq>    
-
-    <faq id="tested-on-OS">
-      <question>What operating systems has it been tested on?</question>
-      <answer>
-        <p>
-          We test the engine each release on Windows XP and on Redhat Linux. Please see the change history notes
-          that indicate what JDK version(s) are used for building the release, and which we certified to pass all tests.
-        </p>
+	</p>
       </answer>
     </faq>    
 
@@ -253,232 +501,30 @@
       </answer>
     </faq>    
 
-    <faq id="performance">
-      <question>It claims to be fast...how does it do that? Has this claim been tested?</question>
-      <answer>
-        <p>
-		  We have published benchmark kit results and have the benchmark kit itself available for download. The results are summarized with further links on the <a href="../../esper/performance/performance.html">performance page</a>.
-        </p>
-        <p>
-		  Esper internally builds all the indexes and uses many optimization techniques hidden to your application.
-          These techniques are verified as part of the performance-asserting regression tests that are part of the source code, and that are executed as part of our build process.
-        </p>
-        <p>
-          There is also currently no standard performance test for CEP/ESP engines out there.          
-        </p>
-      </answer>
-    </faq>    
-    <faq id="benchmarks">
-      <question>Do you have any benchmarks available for Esper?  Such as results from Linear Road?</question>
-      <answer>
-        <p>
-		  We have published benchmark kit results and have the benchmark kit itself available for download. The results are summarized with further links on the <a href="../../esper/performance/performance.html">performance page</a>.
-        </p>
-        <p>
-			There is no benchmark industry-wide that would allow easy comparison. 
-        </p>
-        <p>
-			We also have an RIFD demo example that is designed to do performance 
-			testing (we can for example run about 100 000 event per second against 2000 statements on a single dual core CPU 
-			of a commodity hardware - but one would argue this does not mean a lot if we don't look at event, statement complexity, 
-			underlying resiliency etc.). 
-        </p>
-        <p>
-			Compared to other software in the CEP space, (N)Esper can run on a very large number of platforms - 
-			basically any platforms that has a Java or .Net runtime, either 32bit or 64bit, with no lock-in with any operating system 
-			(slightly more true for Esper than NEsper of course). 
-			It is also possible to run Esper on modern compute appliances such as from Azul(R) technologies in the field of high performance 
-			computing (hundreds of core, real time capabilities, etc). This is strictly not possible for other CEP engines.
-        </p>
-      </answer>
-    </faq>    
-
-    <faq id="keep_in_memory">
-      <question>What or how many events does Esper keep in memory? Does Esper keep matching events of a query in memory?</question>
-      <answer>
-
-        <p>
-        	Esper offers built-in data windows as part of the event processing language that instruct the engine how many or how long events must be considered. For example, a time window with an interval length of 10 seconds instructs the engine to retain the last 10 seconds of events as a moving data window. 
-        </p>
-        <p>
-        	There is quite a few different eviction policies for different situations. Most are row-count based or time-based but there is also multi-policy. A sort-based eviction policy is also possible, as is combining different data windows. And the engine can process events without any data windows as well.
-        </p>
-
-		<p>
-			The policy for holding events in memory depends on your statement, especially the data window used (sliding, tumbling and time or length etc), and whether it uses patterns, output rate limiting or is a join. 
-		</p>
-
-        <p>
-			For example, if your statement employs no data window, Esper keeps no events in memory. This is a sample query that keeps no events in memory:
-		</p>	  			
-		<div class="source"><pre>select * from Quote(price>100)</pre></div>  
-
-        <p>
-			Or if your statement uses a unique window on a property then Esper will keep the last event per property value in memory. Here the last event per 'assetId' is kept in memory:
-		</p>	  			
-		<div class="source"><pre>select * from RfidEvent.std:unique(assetId)</pre></div>  
-
-        <p>
-			Note that Esper also re-uses (shares) data windows between statements, if possible. For views that derive values from an event stream, no events are kept in memory. For aggregations, only the aggregation values are kept in memory. For patterns, the events that participate in the pattern are kept in memory only if tagged. For output rate limiting, events are buffered unless you use the "snapshot" keyword - There is a section in the output limiting doc explaining what is buffered and when for output rate limiting. For joins, if no data window is specified, the keep-all data window applies.
-		</p>	  			
-      </answer>
-    </faq>    
-
   </part>
 
-  <part id="general">
-  	<title>General</title>
-     <faq id="advantage">
-      <question>What's the advantage of using Esper over other products?</question>
+  <part id="epl">
+  	<title>Questions to EPL and Patterns</title>
+     <faq id="merge_streams">
+      <question>How do I merge streams?</question>
       <answer>
         <p>
-          Comparing Esper to some of the leading commercial products out there, we think there are several unique features of Esper:
-          Esper's pull API is noteworthy, one of our customers recently remarked "Indeed one of the important feature of a Real-Time analytics is to be able to connect to 
-          CEP on-demand, basically if the analytic is off-line, the server is continuing to calculate."
+	  The insert-into clause is designed to merge streams. When using insert-into, make sure the type of properties or events inserted into the same streams matches.
+	  A stream does not need to be declared first, since insert-into itself creates a new stream if none existed.
         </p>
         <p>
-          Other unique features are the Statement Object Model API, which is a set of classes to directly construct, manipulate or interrogate EPL statements. We think
-          we are feature equivalent if not ahead of many commercial products, also considering performance.
+	  EPL has the concept of variant streams for streams that can hold multiple types of events among a predefined set, or any type of event.
         </p>
         <p>
-          Esper can easily be embedded in any Java runtime including J2EE application servers or standalone Java applications. 
-          Events in Esper can be represented as plain Java objects (POJO) eliminating the need to format, feed and receive events 
-          into a separate possibly remote engine process. Esper is an entirely free open-source component available under the 
-          GNU GPL license (GPL also known as GPL v2). The open-source nature of Esper helps in tailoring the event processing language and other 
-          community driven features.
-        </p>
-        <p>
-        	Esper and NEsper are embeddable components written in Java and C# and are therefore suitable for integration into any Java process 
-        	or .NET-based process. Esper and NEsper are not a server by itself but are designed to hook into any sort of server, 
-        	ranging from market standard JEE server (weblogic, websphere, jboss etc), service bus, or lightweight solutions (OSGi based, grid etc) 
-        	and also Microsoft based .Net technologies. NEsper is suitable for use in desktop end-user stations.
-        </p>
-        <p>
-            The other advantages this model offers is that the components can run standalone in your development environment making development 
-            and testing much easier, while for the target production environment this makes it much more tailored to what you really need, 
-            or possibly have already in place. End to end performance and latency is also enhanced as your application may then not need to 
-            transport events to a dedicated remote server process, but can process events at the event source saving marshalling/unmarshalling/network.
+	  Its also possible to attach the same listener instance to multiple statements to achieve a merge.
         </p>
       </answer>
     </faq>
-    <faq id="advantages_epl">
-      <question>What are the advantages of Esper's Event Processing Language (EPL)?</question>
-      <answer>
-        <p>
-		  The Esper event processing language (EPL) converges event stream processing (filtering, joins, aggregation) 
-		  and complex event processing (causality) into one single language. 
-		  The core language is SQL-like ensuring rapid learning, but is also highly oriented toward support of modern technologies 
-		  so it is for example object oriented (more than table oriented), enabling for simple extension. The language, of course, 
-		  includes event windows and causality patterns as first citizens. 
-		  We natively support several types of event formats, from Java/.Net object, maps, to XML documents.
-        </p>
-      </answer>
-    </faq>
-    <faq id="problems-suited">
-      <question>What business areas/problems is Esper best suited for?</question>
-      <answer>
-        <p>
-          Esper is best suited for real-time event driven applications. Typical application areas are business process management and 
-          automation, finance, network and application monitoring and sensor network applications. Esper take much of the complexity 
-          out of developing applications that detect patterns among events, filter events, aggregate time or length windows of events, 
-          join event streams, trigger based on absence of events etc. 
-        </p>
-        <p>          
-          A primary difference with system relying on classical SQL 
-          databases is that we do not query a repository for events matching some conditions, but instead trigger customized 
-          actions as the flow of events come in matching event conditions - hence drastically reducing the latency.
-        </p>
-      </answer>
-    </faq>
-    <faq id="problems-misuses">
-      <question>What might be some misuses for it?</question>
-      <answer>
-        <p>		
-			Esper is not designed for storing and retrieval of fairly static data - that is better left to conventional databases. 
-			In-memory databases may be better suited to CEP applications than traditional relational databases as they generally have 
-			good query performance. Yet they are not optimized to provide immediate, real-time query results required for CEP and event 
-			stream analysis.
-        </p>
-      </answer>
-    </faq>
-    <faq id="audience">
-      <question>What is the intended audience and what is their interface?</question>
-      <answer>
-        <p>
-          Esper doesn't have a GUI and access is via API only, currently. 
-          The intended audience is developers of CEP or ESP applications.
-        </p>
-      </answer>
-    </faq>
-    <faq id="hook-into-existing">
-      <question>How does Esper hook into an existing event-based system?</question>
-      <answer>
-        <p>
-		  Today, event based system are often confused with message based system such as JMS and alike back-ends or 
-		  Enterprise Service Bus (ESB). Messaging system are event based but usually do not correlate events or 
-		  process event streams at all. They simply process unitary events - and it becomes quickly complex if you 
-		  need to correlate messages.
-		</p>
-        <p>
-		  Esper can hook into any Java based system as a message consumer - whose main purpose would be to listen 
-		  efficiently to everything whilst sending back other events when a matching condition has occurred. On the 
-		  other hand, hooking Esper in a classic messaging system allows having it correlate events even if those 
-		  come from non-Java based systems. This is just an example. Esper is completely container agnostic, can run 
-		  as a standalone component, and the 1.0 release simply assumes events to be POJO. We are currently working on 
-		  providing native XML format support as well.
-        </p>
-      </answer>
-    </faq>
-    <faq id="other-solutions">
-      <question>How would you position Esper next to existing solutions (or hacks) in the industry?</question>
-      <answer>
-        <p>
-        	Esper is the only open source Event Stream Processing out there - and this is not to be confused with 
-        	classical rules engines. Compared to commercial ESP engines implementations, 
-        	Esper may lack high availability options in the 1.0 release, but its open source nature is a driver to get the 
-        	Event processing language right, and get the Java community up to speed on those concepts - 
-        	before tackling enterprise grade requirements in upcoming versions.			
-		</p>
-		<p>
-			Generally Rete-based production rule engines can indeed be used to address part of what CEP coins, 
-			especially triggering by correlating events, possibly including a temporal relationship between events.
-			That said the ESP side - Event Stream Processing - is a different beast, where what matters is the "S" for Stream. 
-			In this side of the Esper engine we provide several language facilities to build expressions using time not 
-			for temporal relationship (happened before etc) but for sliding window. As an example, this makes it very valuable 
-			for computing things like volume weighted average price (VWAP) of ticks -
-			which would possibly be awful using something Rete-based like a classical rule engine.
-		</p>
-      </answer>
-    </faq>
-     <faq id="philosophy">
-      <question>What is the concept or philosophy behind the design?</question>
-      <answer>
-        <p>
-          Esper was developed using test-driven development and excellent automated test coverage.
-          Esper design evolved by re-factoring with courage towards higher design quality. 
-          Favorite patterns are dependency injection/inversion of control by context injection, 
-          Immutable, Specification, GOF patterns (except Singleton :).
-        </p>
-      </answer>
-    </faq>
-    <faq id="background">
-      <question>What is the history? Where did it start and come from?</question>
-      <answer>
-        <p>
-		  Thomas Bernhardt is the project founder and project lead. He works as a software architect for a major financial institution. 
-		  On a project in 2004 Thomas had been asked to evaluate different rules engines for use in an application for monitoring a 
-		  trading system. The rules engines proved cumbersome and slow. There was no budget for a CEP product, thus a custom application 
-		  to solve the monitoring problem was developed. The project lead's interest in CEP and ESP technologies lead to further 
-		  independent research into the knowledge space followed by prototypes build for no particular organization or purpose. 
-		  The prototypes evolved and the Esper project started.
-        </p>
-      </answer>
-    </faq>
-    <faq id="background">
+    <faq id="modify_epl">
       <question>How difficult is modification to the Esper Event Processing Language (EPL)? For example adding aggregate functions, or modifying the language all together?</question>
       <answer>
         <p>
-			Esper allows plug-in of aggregation functions, views, pattern objects and user functions as described in the documentation.
+			Esper allows plug-in of aggregation functions, views, pattern objects and user functions as well as event representations and event type resolution as described in the documentation.
 			Extending the language is thus easy and custom extensions directly surface in the EPL.
         </p>
         <p>
@@ -492,11 +538,6 @@
         </p>
       </answer>
     </faq>
-    
-
-
-	
-
   </part>
 
 </faqs>
