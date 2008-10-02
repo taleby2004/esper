@@ -573,7 +573,7 @@ finally {
 	    </sect2>
 
 	    <sect2 id="api-admin-runtime-config">		
-			<title>Runtime Engine Configuration</title>
+			<title>Runtime Configuration</title>
 
 			<indexterm><primary>configuration</primary><secondary>runtime</secondary></indexterm>
 			<para>
@@ -582,23 +582,52 @@ finally {
 			</para>
 
 			<para>
-				The  configuration operations available on a running engine instance are as follows. Please see <xref linkend="configuration"/> for more information. 
+				Please refer to the JavaDoc documentation for <literal>ConfigurationOperations</literal> for additional details.
+			</para>
+
+			<para>
+				In summary, the configuration operations available on a running engine instance are as follows:
 			</para>
 
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Add an new event type for a JavaBean class, legacy Java class or custom Java class
+						Add new event types for all event representations, check if an event type exists, or update an existing Map event type.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						Add an new DOM XML event type
+						Add a variant stream.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						Add an new Map-based event type
+						Add a revision event type.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Add, set and interrogate variables.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Add auto-aliases for events in a given Java package.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Add import for user-defined functions.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Add a plug-in aggregation function, plug-in event type, plug-in type resolution URIs.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Control metrics reporting.
 					</para>
 				</listitem>
 			</itemizedlist>				

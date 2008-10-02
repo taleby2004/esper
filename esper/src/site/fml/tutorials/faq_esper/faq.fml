@@ -280,6 +280,11 @@
       <question>What or how many events does Esper keep in memory? Does Esper keep matching events of a query in memory?</question>
       <answer>
 
+	<p>
+	  Memory use depends on the statements and the memory used by events. 
+	  Esper keeps pretty much the minimal information needed to satisfy a statement in memory, and also can share data windows between statements.
+	</p>
+
         <p>
         	Esper offers built-in data windows as part of the event processing language that instruct the engine how many or how long events must be considered. For example, a time window with an interval length of 10 seconds instructs the engine to retain the last 10 seconds of events as a moving data window. 
         </p>
@@ -304,6 +309,15 @@
         <p>
 			Note that Esper also re-uses (shares) data windows between statements, if possible. For views that derive values from an event stream, no events are kept in memory. For aggregations, only the aggregation values are kept in memory. For patterns, the events that participate in the pattern are kept in memory only if tagged. For output rate limiting, events are buffered unless you use the "snapshot" keyword - There is a section in the output limiting doc explaining what is buffered and when for output rate limiting. For joins, if no data window is specified, the keep-all data window applies.
 		</p>	  			
+
+        <p>
+		Consider a test harness that generates an unlimited number of events as fast as an Esper engine can process each event. Since engine throughput is rather large, it is easily possible to populate for example a time window of 1 second with possibly hundreds of thousands of events. Therefore test design may need to throttle to realistic maxiumum rates.
+		</p>	  			
+
+        <p>
+		If unsure how many events are kept by a data window, consider adding a "count(*)" and use safeIterator to get the first row.
+		</p>	  			
+
       </answer>
     </faq>    
 
