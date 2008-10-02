@@ -115,7 +115,7 @@
 		<indexterm><primary>dynamic event properties</primary></indexterm>
 		<indexterm><primary>event</primary><secondary>dynamic properties</secondary></indexterm>
 		<para>
-			Dynamic (unchecked) properties are event properties that need not be known at statement compilation time. Such properties are resolved during runtime.
+			Dynamic (unchecked) properties are event properties that need not be known at statement compilation time. Such properties are resolved during runtime: they provide duck typing functionality.
 		</para>
 			
 		<para>

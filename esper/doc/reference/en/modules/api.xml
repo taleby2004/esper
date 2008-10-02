@@ -607,7 +607,7 @@ finally {
 				</listitem>
 				<listitem>
 					<para>
-						Add, set and interrogate variables.
+						Add variables (get and set variable values is done via the runtime API).
 					</para>
 				</listitem>
 				<listitem>
