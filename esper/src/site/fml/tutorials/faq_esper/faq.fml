@@ -40,6 +40,12 @@
           Esper does not currently have a GUI management, editor or portal application. Esper also does not currently have a server.
           Esper provides only a small number of key input and output adapters through EsperIO, and provides an adapter framework.
         </p>
+        <p>
+          One customer remarked "Many products expose just a GUI to input simple event definitions. EPL provides a way to express complex events."
+        </p>
+        <p>
+          Another user stated "Esper can detect all kinds of event patterns, from simple and/or/not to complicated state machines."
+        </p>        
       </answer>
     </faq>
     <faq id="advantages_epl">

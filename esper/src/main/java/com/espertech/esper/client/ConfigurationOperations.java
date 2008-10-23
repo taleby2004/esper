@@ -257,7 +257,9 @@ public interface ConfigurationOperations
      * Each entry in the type mapping must contain the String property name of the additional property
      * and either a Class or further Map<String, Object> value for nested properties.
      * <p>
-     * Map event types can only be updated at runtime, at configuration time updates are not allowed. 
+     * Map event types can only be updated at runtime, at configuration time updates are not allowed.
+     * <p>
+     * The type Map may list previously declared properties or can also contain only the new properties to be added. 
      * @param mapEventTypeAlias the name of the map event type to update
      * @param typeMap a Map of string property name and type
      * @throws ConfigurationException if the event type alias could not be found or is not a Map

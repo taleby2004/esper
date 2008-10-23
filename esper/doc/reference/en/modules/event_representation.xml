@@ -421,7 +421,7 @@ where address('work').streetName = 'Park Ave'
 		</para>
 
 		<para>
-			Your application can add properties to an existing Map event type during runtime using the configuration operation <literal>updateMapEventType</literal>. Properties may not be updated or deleted - properties can only be added, and nested properties can be added as well.
+			Your application can add properties to an existing Map event type during runtime using the configuration operation <literal>updateMapEventType</literal>. Properties may not be updated or deleted - properties can only be added, and nested properties can be added as well. The method accepts a Map structure that may include previously listed properties or can also contain only the newly added fields.
 		</para>
 
 		<para>
