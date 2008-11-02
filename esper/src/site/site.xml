@@ -34,7 +34,7 @@
 				<item name="Quick Start" href="/tutorials/tutorial/quickstart.html"/>
 				<item name="Short Case Study" href="/tutorials/tutorial/feedmonitor_casestudy.html"/>
 				<item name="Longer Case Study" href="/tutorials/tutorial/transaction_casestudy.html"/>
-				<item name="Data Fusion Example (by DFRC AG)" href="http://www.dfrc.ch/esper/"/>
+				<item name="Data Fusion Example (by DFRC AG)" href="http://avasseur.blogspot.com/2008/10/complex-event-processing-and-data.html"/>
 				<item name="Solution Patterns" href="/tutorials/solution_patterns/solution_patterns.html"/>
 				<item name="OnJava Article" href="http://www.onjava.com/pub/a/onjava/2007/03/07/esper-event-stream-processing-and-correlation.html"/>
 				<item name="TheServerSide Article" href="http://www.theserverside.com/tt/articles/article.tss?l=ComplexEventProcessing"/>				

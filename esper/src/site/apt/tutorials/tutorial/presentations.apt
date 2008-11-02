@@ -4,6 +4,11 @@ Past Presentation Material
 *------------------------+----------------------------------------------------------------------------+
 | Presentation                       | Date
 *------------------------+----------------------------------------------------------------------------+
+| {{{http://www.ociweb.com/jnb/jnbOct2008.html}Complex Event Processing with Esper}} | October 2008 
+*------------------------+----------------------------------------------------------------------------+
+| {{{http://www.slideshare.net/prabathsiriwardena/complex-event-processing-with-esper-and-wso2-esb/}Complex Event Processing with Esper and WSO2 ESB}}
+and {{{http://www.slideshare.net/pizak/fast-soa-with-apache-synapse}Fast SOA With Apache Synapse}} | July, 2008
+*------------------------+----------------------------------------------------------------------------+
 | {{{http://dist.codehaus.org/esper/TSSJS_Event_Processing_in_Java_A_Financial_Services_Case_Study.pdf}The Server-Side Java Symposium 2008 - Event Processing in Java - A Financial Services Case Study (PDF)}} {{{http://dist.codehaus.org/esper/TSSJS_Event_Processing_in_Java_A_Financial_Services_Case_Study.zip}source (ZIP)}} | March, 2008
 *------------------------+----------------------------------------------------------------------------+
 | {{{http://www.zepheira.com/presentations/2008/esper/esper.pdf}What's Going On? : Complex Event Processing with Esper by Brian Sletten from Zepheira}}, for {{{http://www.nofluffjuststuff.com}NoFluffJustStuff}} | March, 2008
@@ -28,6 +33,17 @@ Articles and Presentations in Other Languages then English
 *-------------------------------------------+----------------------------------------------------------------------------+-----------------+
 | {{{http://adminsight.de/2008/04/17/article-esper-als-eda-plattfrom}Esper als EDA-Plattform, Java Magazin }} | May 2008 | German
 *-------------------------------------------+----------------------------------------------------------------------------+-----------------+
+
+Books with information on Esper
+~~~~~~~~~~~~~~~~~~~~~~
+	
+*-------------------------------------------+
+| Book                              
+*-------------------------------------------+
+| {{{http://www.amazon.com/o/ASIN/1847191525/105-2169855-7435661}OSWorkflow: A guide for Java developers and architects to integrating open-source Business Process Management by Diego Adrian Naya Lazo}}
+*-------------------------------------------+
+| {{{http://www.amazon.com/Open-Source-SOA-Jeff-Davis/dp/1933988541/ref=sr_1_1?ie=UTF8&s=books&qid=1225630649&sr=8-1}Open Source SOA by Jeff Davis}}
+*-------------------------------------------+
 
 Specifically for NEsper and .NET
 ~~~~~~~~~~~~~~~~~~~~~~

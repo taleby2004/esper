@@ -30,10 +30,12 @@ mvn javadoc:javadoc
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	<!--
 	<scm>
 		<url>http://svn.codehaus.org/esper</url>
 		<connection>http://xircles.codehaus.org/projects/esper/repo</connection>
 	</scm>
+	-->
 	<repositories>
 		<repository>
 			<id>central</id>
