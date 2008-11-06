@@ -31,6 +31,12 @@ public interface StatementLifecycleSvc
     public void addObserver(StatementLifecycleObserver observer);
 
     /**
+     * Remove an observer to be called back when statement-state or listener/subscriber changes are registered.
+     * @param observer to remove
+     */
+    public void removeObserver(StatementLifecycleObserver observer);
+
+    /**
      * Dispatch event to observers.
      * @param event to dispatch
      */
@@ -43,9 +49,10 @@ public interface StatementLifecycleSvc
      * @param isPattern is an indicator on whether this is a pattern statement and thus the iterator must return the last result,
      * versus for non-pattern statements the iterator returns view content.
      * @param optStatementName is an optional statement name, null if none was supplied
+     * @param userObject the application define user object associated to each statement, if supplied
      * @return started statement
      */
-    public EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName);
+    public EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, Object userObject);
 
     /**
      * Start statement by statement id.

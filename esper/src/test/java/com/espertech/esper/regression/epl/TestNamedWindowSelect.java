@@ -9,6 +9,8 @@ import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.EPStatementSPI;
 
 public class TestNamedWindowSelect extends TestCase
 {
@@ -45,6 +47,7 @@ public class TestNamedWindowSelect extends TestCase
         String stmtTextSelect = "on " + SupportBean_A.class.getName() + " insert into MyStream select mywin.* from MyWindow as mywin order by string asc";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
         stmtSelect.addListener(listenerSelect);
+        assertEquals(StatementType.ON_INSERT, ((EPStatementSPI) stmtSelect).getStatementMetadata().getStatementType());
 
         // create consuming statement
         String stmtTextConsumer = "select * from default.MyStream";
@@ -99,6 +102,14 @@ public class TestNamedWindowSelect extends TestCase
         assertTrue(onSelectType.getPropertyNames().length > 10);
         assertEquals(SupportBean.class, onSelectType.getUnderlyingType());
 
+        // delete all from named window
+        String stmtTextDelete = "on " + SupportBean_B.class.getName() + " delete from MyWindow";
+        epService.getEPAdministrator().createEPL(stmtTextDelete);
+        sendSupportBean_B("B1");
+
+        // fire trigger - nothing to insert
+        sendSupportBean_A("A3");
+
         stmtConsumer.destroy();
         stmtSelect.destroy();
         stmtCreate.destroy();
@@ -109,6 +120,9 @@ public class TestNamedWindowSelect extends TestCase
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select * from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextCreate);
+
+        tryInvalid("on " + SupportBean_A.class.getName() + " select * from MyWindow where sum(intPrimitive) > 100",
+                   "Error validating expression: An aggregate function may not appear in a WHERE clause (use the HAVING clause) [on com.espertech.esper.support.bean.SupportBean_A select * from MyWindow where sum(intPrimitive) > 100]");
 
         tryInvalid("on " + SupportBean_A.class.getName() + " insert into MyStream select * from DUMMY",
                    "Named window 'DUMMY' has not been declared [on com.espertech.esper.support.bean.SupportBean_A insert into MyStream select * from DUMMY]");
@@ -143,6 +157,7 @@ public class TestNamedWindowSelect extends TestCase
         String stmtTextSelect = "on " + SupportBean_A.class.getName() + " select mywin.*, id from MyWindow as mywin where MyWindow.b < 3 order by a asc";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
         stmtSelect.addListener(listenerSelect);
+        assertEquals(StatementType.ON_SELECT, ((EPStatementSPI) stmtSelect).getStatementMetadata().getStatementType());
 
         // create insert into
         String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();

@@ -1,16 +1,20 @@
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.core.StatementType;
+import com.espertech.esper.epl.named.NamedWindowLifecycleEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_B;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.epl.SupportNamedWindowObserver;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
+
+import java.util.Set;
 
 public class TestNamedWindowStartStop extends TestCase
 {
@@ -31,14 +35,26 @@ public class TestNamedWindowStartStop extends TestCase
 
     public void testStartStopDeleter()
     {
+        SupportNamedWindowObserver observer = new SupportNamedWindowObserver();
+        ((EPServiceProviderSPI) epService).getNamedWindowService().addObserver(observer);
+
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        assertEquals(StatementType.CREATE_WINDOW, ((EPStatementSPI) stmtCreate).getStatementMetadata().getStatementType());
         stmtCreate.addListener(listenerWindow);
+        NamedWindowLifecycleEvent event = observer.getFirstAndReset();
+        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.CREATE, event.getEventType());
+        assertEquals("MyWindow", event.getName());
 
         // stop and start, no consumers or deleters
         stmtCreate.stop();
+        event = observer.getFirstAndReset();
+        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.DESTROY, event.getEventType());
+        assertEquals("MyWindow", event.getName());
+
         stmtCreate.start();
+        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.CREATE, observer.getFirstAndReset().getEventType());
 
         // create delete stmt
         String stmtTextDelete = "on " + SupportBean_A.class.getName() + " delete from MyWindow";
@@ -78,6 +94,7 @@ public class TestNamedWindowStartStop extends TestCase
 
         // Start the deleting statement
         stmtDelete.start();
+
         sendSupportBean_A("A3");
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2", 2});
         ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[] {"E2", 2});
@@ -141,6 +158,80 @@ public class TestNamedWindowStartStop extends TestCase
         assertFalse(listenerSelect.isInvoked());
     }
 
+    public void testAddRemoveType()
+    {
+        ConfigurationOperations configOps = epService.getEPAdministrator().getConfiguration();
+
+        // test remove type with statement used (no force)
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyWindowEventType.win:keepall() (a int, b string)", "stmtOne");
+        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtOne"}, configOps.getEventTypeAliasUsedBy("MyWindowEventType").toArray());
+
+        try {
+            configOps.removeEventType("MyWindowEventType", false);
+        }
+        catch (ConfigurationException ex) {
+            assertTrue(ex.getMessage().contains("MyWindowEventType"));
+        }
+
+        // destroy statement and type
+        stmt.destroy();
+        assertTrue(configOps.getEventTypeAliasUsedBy("MyWindowEventType").isEmpty());
+        assertTrue(configOps.isEventTypeAliasExists("MyWindowEventType"));
+        assertTrue(configOps.removeEventType("MyWindowEventType", false));
+        assertFalse(configOps.removeEventType("MyWindowEventType", false));    // try double-remove
+        assertFalse(configOps.isEventTypeAliasExists("MyWindowEventType"));
+        try {
+            epService.getEPAdministrator().createEPL("select a from MyWindowEventType");
+            fail();
+        }
+        catch (EPException ex) {
+            // expected
+        }
+
+        // add back the type
+        stmt = epService.getEPAdministrator().createEPL("create window MyWindowEventType.win:keepall() (c int, d string)", "stmtOne");
+        assertTrue(configOps.isEventTypeAliasExists("MyWindowEventType"));
+        assertFalse(configOps.getEventTypeAliasUsedBy("MyWindowEventType").isEmpty());
+
+        // compile
+        epService.getEPAdministrator().createEPL("select d from MyWindowEventType", "stmtTwo");
+        Object[] usedBy = configOps.getEventTypeAliasUsedBy("MyWindowEventType").toArray();
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtOne", "stmtTwo"}, usedBy);
+        try {
+            epService.getEPAdministrator().createEPL("select a from MyWindowEventType");
+            fail();
+        }
+        catch (EPException ex) {
+            // expected
+        }
+
+        // remove with force
+        try {
+            configOps.removeEventType("MyWindowEventType", false);
+        }
+        catch (ConfigurationException ex) {
+            assertTrue(ex.getMessage().contains("MyWindowEventType"));
+        }
+        assertTrue(configOps.removeEventType("MyWindowEventType", true));
+        assertFalse(configOps.isEventTypeAliasExists("MyWindowEventType"));
+        assertTrue(configOps.getEventTypeAliasUsedBy("MyWindowEventType").isEmpty());
+
+        // add back the type
+        stmt.destroy();
+        stmt = epService.getEPAdministrator().createEPL("create window MyWindowEventType.win:keepall() (f int)", "stmtOne");
+        assertTrue(configOps.isEventTypeAliasExists("MyWindowEventType"));
+
+        // compile
+        epService.getEPAdministrator().createEPL("select f from MyWindowEventType");
+        try {
+            epService.getEPAdministrator().createEPL("select c from MyWindowEventType");
+            fail();
+        }
+        catch (EPException ex) {
+            // expected
+        }
+    }
+
     public void testStartStopInserter()
     {
         // create window
@@ -191,21 +282,21 @@ public class TestNamedWindowStartStop extends TestCase
     {
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
-        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate, "stmtCreateFirst");
         stmtCreate.addListener(listenerWindow);
 
         // create delete stmt
         String stmtTextDelete = "on " + SupportBean_A.class.getName() + " delete from MyWindow";
-        EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete);
+        EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete, "stmtDelete");
 
         // create insert into
         String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
-        epService.getEPAdministrator().createEPL(stmtTextInsertOne);
+        EPStatement stmtInsert = epService.getEPAdministrator().createEPL(stmtTextInsertOne, "stmtInsert");
 
         // create consumer
         String[] fields = new String[] {"a", "b"};
         String stmtTextSelect = "select a, b from MyWindow as s1";
-        EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
+        EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect, "stmtSelect");
         stmtSelect.addListener(listenerSelect);
 
         // send 1 event
@@ -252,7 +343,7 @@ public class TestNamedWindowStartStop extends TestCase
 
         // create window anew
         stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
-        stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate, "stmtCreate");
         stmtCreate.addListener(listenerWindow);
 
         sendSupportBean("E6", 6);
@@ -260,31 +351,64 @@ public class TestNamedWindowStartStop extends TestCase
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E6", 6}});
         assertFalse(listenerSelect.isInvoked());
         ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
+
+        // create select stmt
+        String stmtTextOnSelect = "on " + SupportBean_A.class.getName() + " insert into A select * from MyWindow";
+        EPStatement stmtOnSelect = epService.getEPAdministrator().createEPL(stmtTextOnSelect, "stmtOnSelect");
+
+        // assert statement-type reference
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse("MyWindow"));
+        Set<String> stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("MyWindow");
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate", "stmtSelect", "stmtInsert", "stmtDelete", "stmtOnSelect"},stmtNames.toArray());
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate", "stmtInsert"}, stmtNames.toArray());
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean_A.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtDelete", "stmtOnSelect"}, stmtNames.toArray());
+
+        stmtInsert.destroy();
+        stmtDelete.destroy();
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse("MyWindow"));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("MyWindow");
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate", "stmtSelect", "stmtOnSelect"},stmtNames.toArray());
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate"}, stmtNames.toArray());
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean_A.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtOnSelect"}, stmtNames.toArray());
+
+        stmtCreate.destroy();
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse("MyWindow"));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("MyWindow");
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtSelect", "stmtOnSelect"},stmtNames.toArray());
+
+        assertFalse(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
+
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean_A.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtOnSelect"}, stmtNames.toArray());
+
+        stmtOnSelect.destroy();
+        stmtSelect.destroy();
+
+        assertFalse(spi.getStatementEventTypeRef().isInUse("MyWindow"));
+        assertFalse(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
+        assertFalse(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
     }
 
     private SupportBean_A sendSupportBean_A(String id)
     {
         SupportBean_A bean = new SupportBean_A(id);
-        epService.getEPRuntime().sendEvent(bean);
-        return bean;
-    }
-
-    private SupportBean_B sendSupportBean_B(String id)
-    {
-        SupportBean_B bean = new SupportBean_B(id);
-        epService.getEPRuntime().sendEvent(bean);
-        return bean;
-    }
-
-    private SupportBean sendSupportBean(String string, int intPrimitive, Integer intBoxed,
-                                        double doublePrimitive, Double doubleBoxed)
-    {
-        SupportBean bean = new SupportBean();
-        bean.setString(string);
-        bean.setIntPrimitive(intPrimitive);
-        bean.setIntBoxed(intBoxed);
-        bean.setDoublePrimitive(doublePrimitive);
-        bean.setDoubleBoxed(doubleBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }

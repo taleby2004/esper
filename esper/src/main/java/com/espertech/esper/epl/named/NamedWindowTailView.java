@@ -38,6 +38,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     private final EPStatementHandle createWindowStmtHandle;
     private final StatementResultService statementResultService;
     private final ValueAddEventProcessor revisionProcessor;
+    private volatile long numberOfEvents;
 
     /**
      * Ctor.
@@ -78,6 +79,12 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         if (oldData != null)
         {
             namedWindowRootView.removeOldData(oldData);
+            numberOfEvents -= oldData.length;
+        }
+
+        if (newData != null)
+        {
+            numberOfEvents += newData.length;
         }
 
         // Post to child views, only if there are listeners or subscribers
@@ -222,5 +229,14 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     public void destroy()
     {
         consumers.clear();
+    }
+
+    /**
+     * Returns the number of events held.
+     * @return number of events
+     */
+    public long getNumberOfEvents()
+    {
+        return numberOfEvents;
     }
 }

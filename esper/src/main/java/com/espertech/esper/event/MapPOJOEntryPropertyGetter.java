@@ -62,6 +62,3 @@ public class MapPOJOEntryPropertyGetter implements EventPropertyGetter {
         return true; // Property exists as the property is not dynamic (unchecked)
     }
 }
-
-
-

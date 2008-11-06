@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import java.net.URI;
 import java.util.Map;
 import java.util.Set;
+import java.net.URI;
 
 /**
  * Interface to event stream processing runtime services.
@@ -27,7 +27,7 @@ public interface EPRuntime
      * @throws EPException is thrown when the processing of the event lead to an error
      */
     public void sendEvent(Object object) throws EPException;
-    
+
     /**
      * Send a map containing event property values to the event stream processing runtime.
      * <p>
@@ -35,7 +35,7 @@ public interface EPRuntime
      * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
      *
      * @param map - map that contains event property values. Keys are expected to be of type String while values
-     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeAlias. 
+     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeAlias.
      * @param eventTypeAlias - the alias for the (property name, property type) information for this map
      * @throws EPException - when the processing of the event leads to an error
      */
@@ -53,8 +53,8 @@ public interface EPRuntime
     public void sendEvent(org.w3c.dom.Node node) throws EPException;
 
     /**
-     * Number of events received over the lifetime of the event stream processing runtime,
-     * or since the last resetStats() call
+     * Number of events evaluated over the lifetime of the event stream processing runtime,
+     * or since the last resetStats() call.
      * @return number of events received
      */
     public long getNumEventsReceived();
@@ -112,6 +112,34 @@ public interface EPRuntime
      * @param event to route internally for processing by the event stream processing runtime
      */
     public void route(final Object event);
+
+    /**
+     * Route the event object back to the event stream processing runtime for internal dispatching,
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
+     * The route event is processed just like it was sent to the runtime, that is any
+     * active expressions seeking that event receive it. The routed event has priority over other
+     * events sent to the runtime. In a single-threaded application the routed event is
+     * processed before the next event is sent to the runtime through the
+     * EPRuntime.sendEvent method.
+     * @param map - map that contains event property values. Keys are expected to be of type String while values
+     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeAlias.
+     * @param eventTypeAlias - the alias for the (property name, property type) information for this map
+     * @throws EPException - when the processing of the event leads to an error
+     */
+    public void route(Map map, String eventTypeAlias) throws EPException;
+
+    /**
+     * Route the event object back to the event stream processing runtime for internal dispatching,
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
+     * The route event is processed just like it was sent to the runtime, that is any
+     * active expressions seeking that event receive it. The routed event has priority over other
+     * events sent to the runtime. In a single-threaded application the routed event is
+     * processed before the next event is sent to the runtime through the
+     * EPRuntime.sendEvent method.
+     * @param node is the DOM node as an event
+     * @throws EPException is thrown when the processing of the event lead to an error
+     */
+    public void route(org.w3c.dom.Node node) throws EPException;
 
     /**
      * Sets a listener to receive events that are unmatched by any statement.
@@ -198,7 +226,7 @@ public interface EPRuntime
      * For events backed by a org.w3c.Node (XML DOM events), the sender checks that the root element name
      * indeed does match the root element name for the event type alias.
      * @param eventTypeAlias is the name of the event type
-     * @return sender for fast-access processing of event objects of known type (and content) 
+     * @return sender for fast-access processing of event objects of known type (and content)
      * @throws EventTypeException thrown to indicate that the alias does not exist
      */
     public EventSender getEventSender(String eventTypeAlias) throws EventTypeException;

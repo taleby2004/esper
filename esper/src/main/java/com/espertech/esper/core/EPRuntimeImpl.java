@@ -14,11 +14,11 @@ import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.ThreadWorkQueue;
-import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
-import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.metric.MetricReportingPath;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.epl.spec.StatementSpecCompiled;
+import com.espertech.esper.epl.spec.StatementSpecRaw;
+import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
@@ -29,8 +29,9 @@ import com.espertech.esper.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
 import java.net.URI;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implements runtime interface. Also accepts timer callbacks for synchronizing time events with regular events
@@ -42,6 +43,8 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private boolean isLatchStatementInsertStream;
     private boolean isUsingExternalClocking;
     private volatile UnmatchedListener unmatchedListener;
+    private AtomicLong routedInternal;
+    private AtomicLong routedExternal;
 
     private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
     {
@@ -86,6 +89,18 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         this.services = services;
         isLatchStatementInsertStream = this.services.getEngineSettingsService().getEngineSettings().getThreading().isInsertIntoDispatchPreserveOrder();
         isUsingExternalClocking = !this.services.getEngineSettingsService().getEngineSettings().getThreading().isInternalTimerEnabled();
+        routedInternal = new AtomicLong();
+        routedExternal = new AtomicLong();
+    }
+
+    public long getRoutedInternal()
+    {
+        return routedInternal.get();
+    }
+
+    public long getRoutedExternal()
+    {
+        return routedExternal.get();
     }
 
     public void timerCallback()
@@ -135,6 +150,24 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         processEvent(eventBean);
     }
 
+    public void route(org.w3c.dom.Node document) throws EPException
+    {
+        if (document == null)
+        {
+            log.fatal(".sendEvent Null object supplied");
+            return;
+        }
+
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".sendEvent Processing DOM node event " + document);
+        }
+
+        // Get it wrapped up, process event
+        EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
+        ThreadWorkQueue.add(eventBean);
+    }
+
     public void sendEvent(Map map, String eventTypeAlias) throws EPException
     {
         if (map == null)
@@ -152,6 +185,23 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         processEvent(eventBean);
     }
 
+    public void route(Map map, String eventTypeAlias) throws EPException
+    {
+        if (map == null)
+        {
+            throw new IllegalArgumentException("Invalid null event object");
+        }
+
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".route Processing event " + map);
+        }
+
+        // Process event
+        EventBean event = services.getEventAdapterService().adapterForMap(map, eventTypeAlias);
+        ThreadWorkQueue.add(event);
+    }
+
     public long getNumEventsReceived()
     {
         return services.getFilterService().getNumEventsEvaluated();
@@ -165,16 +215,26 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     public void resetStats() {
         services.getFilterService().resetStats();
         services.getEmitService().resetStats();
+        routedInternal.set(0);
+        routedExternal.set(0);
+    }
+
+    public void routeEventBean(EventBean event)
+    {
+        ThreadWorkQueue.add(event);
     }
 
     public void route(Object event)
     {
+        routedExternal.incrementAndGet();
         ThreadWorkQueue.add(event);
     }
 
     // Internal route of events via insert-into, holds a statement lock
     public void route(EventBean event, EPStatementHandle epStatementHandle)
     {
+        routedInternal.incrementAndGet();
+        
         if (isLatchStatementInsertStream)
         {
             InsertIntoLatchFactory insertIntoLatchFactory = epStatementHandle.getInsertIntoLatchFactory();
@@ -897,6 +957,28 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         return values;
     }
 
+    public Map<String, Class> getVariableTypeAll()
+    {
+        Map<String, VariableReader> variables = services.getVariableService().getVariables();
+        Map<String, Class> values = new HashMap<String, Class>();
+        for (Map.Entry<String, VariableReader> entry : variables.entrySet())
+        {
+            Class type = entry.getValue().getType();
+            values.put(entry.getValue().getVariableName(), type);
+        }
+        return values;
+    }
+
+    public Class getVariableType(String variableName)
+    {
+        VariableReader reader = services.getVariableService().getReader(variableName);
+        if (reader == null)
+        {
+            return null;
+        }
+        return reader.getType();
+    }
+
     public EPQueryResult executeQuery(String epl)
     {
         try
@@ -939,8 +1021,8 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     private EPPreparedExecuteMethod getExecuteMethod(String epl)
     {
-        String stmtName = UuidGenerator.generate(epl);
-        String stmtId = UuidGenerator.generate(epl + " ");
+        String stmtName = UuidGenerator.generate();
+        String stmtId = UuidGenerator.generate();
 
         try
         {

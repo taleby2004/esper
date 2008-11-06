@@ -37,16 +37,18 @@ public interface Property
     /**
      * Returns the property type for use with Map event representations.
      * @param optionalMapPropTypes a map-within-map type definition, if supplied, or null if not supplied
+     * @param eventAdapterService for resolving further map event types that are property types
      * @return property type @param optionalMapPropTypes
      */
-    public Class getPropertyTypeMap(Map optionalMapPropTypes);
+    public Class getPropertyTypeMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService);
 
     /**
      * Returns the getter-method for use with Map event representations.
      * @param optionalMapPropTypes a map-within-map type definition, if supplied, or null if not supplied
+     * @param eventAdapterService for resolving further map event types that are property types
      * @return getter for maps @param optionalMapPropTypes
      */
-    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes);
+    public EventPropertyGetter getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService);
 
     /**
      * Write the EPL-representation of the property.

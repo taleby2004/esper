@@ -200,6 +200,7 @@ public class EPStatementStartMethod
             OnTriggerWindowDesc onTriggerDesc = (OnTriggerWindowDesc) statementSpec.getOnTriggerDesc();
             NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(onTriggerDesc.getWindowName());
             EventType namedWindowType = processor.getNamedWindowType();
+            statementContext.getDynamicReferenceEventTypes().add(onTriggerDesc.getWindowName());
 
             String namedWindowAlias = onTriggerDesc.getOptionalAsName();
             if (namedWindowAlias == null)
@@ -219,6 +220,9 @@ public class EPStatementStartMethod
             ExprNode validatedJoin = validateJoinNamedWindow(statementSpec.getFilterRootNode(),
                     namedWindowType, namedWindowAlias, namedWindowTypeAlias,
                     streamEventType, streamAlias, triggerEventTypeAlias);
+
+            // validate filter, output rate limiting
+            validateNodes(statementSpec, statementContext, typeService, null);
 
             // Construct a processor for results; for use in on-select to process selection results
             // Use a wildcard select if the select-clause is empty, such as for on-delete.
@@ -279,7 +283,7 @@ public class EPStatementStartMethod
         EventType windowType = filterStreamSpec.getFilterSpec().getEventType();
 
         ValueAddEventProcessor optionalRevisionProcessor = statementContext.getValueAddEventService().getValueAddProcessor(windowName);
-        services.getNamedWindowService().addProcessor(windowName, windowType, statementContext.getEpStatementHandle(), statementContext.getStatementResultService(), optionalRevisionProcessor);
+        services.getNamedWindowService().addProcessor(windowName, windowType, statementContext.getEpStatementHandle(), statementContext.getStatementResultService(), optionalRevisionProcessor, statementContext.getExpression(), statementContext.getStatementName());
 
         // Create streams and views
         Viewable eventStreamParentViewable;
@@ -307,7 +311,7 @@ public class EPStatementStartMethod
 
         // request remove stream capability from views
         ViewResourceDelegate viewResourceDelegate = new ViewResourceDelegateImpl(new ViewFactoryChain[] {unmaterializedViewChain}, statementContext);
-        if (!viewResourceDelegate.requestCapability(0, new RemoveStreamViewCapability(), null))
+        if (!viewResourceDelegate.requestCapability(0, new RemoveStreamViewCapability(false), null))
         {
             throw new ExprValidationException(NamedWindowService.ERROR_MSG_DATAWINDOWS);
         }
@@ -597,6 +601,18 @@ public class EPStatementStartMethod
         // Construct type information per stream
         StreamTypeService typeService = new StreamTypeServiceImpl(streamEventTypes, streamNames, services.getEngineURI(), eventTypeAliases);
         ViewResourceDelegate viewResourceDelegate = new ViewResourceDelegateImpl(unmaterializedViewChain, statementContext);
+
+        // boolean multiple expiry policy
+        for (int i = 0; i < unmaterializedViewChain.length; i++)
+        {
+            if (unmaterializedViewChain[i].getDataWindowViewFactoryCount() > 1)
+            {
+                if (!viewResourceDelegate.requestCapability(i, new RemoveStreamViewCapability(true), null))
+                {
+                    log.warn("Combination of multiple data window expiry policies with views that do not support remove streams is not allowed");
+                }
+            }
+        }
 
         // create stop method using statement stream specs
         EPStatementStopMethod stopMethod = new EPStatementStopMethod()

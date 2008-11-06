@@ -12,6 +12,7 @@ import com.espertech.esper.event.EventType;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.StatementLifecycleObserver;
 import com.espertech.esper.view.ViewProcessingException;
 import com.espertech.esper.util.ManagedLock;
 
@@ -53,10 +54,12 @@ public interface NamedWindowService
      * @param createWindowStmtHandle is the handle and lock of the create-named-window statement
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      * @param revisionProcessor handles update events
+     * @param eplExpression is the expression
+     * @param statementName the name of the statement
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.
@@ -103,4 +106,18 @@ public interface NamedWindowService
      * Clear out the service.
      */
     public void destroy();
+
+    /**
+     * Add an observer to be called back when named window state changes occur.
+     * <p>
+     * Observers have set-semantics: the same Observer cannot be added twice
+     * @param observer to add
+     */
+    public void addObserver(NamedWindowLifecycleObserver observer);
+
+    /**
+     * Remove an observer to be called back when named window state changes occur.
+     * @param observer to remove
+     */
+    public void removeObserver(NamedWindowLifecycleObserver observer);
 }

@@ -17,6 +17,7 @@ import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.EventType;
 import com.espertech.esper.event.MapEventType;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecParam;
 import com.espertech.esper.pattern.EvalFilterNode;
@@ -87,6 +88,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         observers.add(observer);
     }
 
+    public void removeObserver(StatementLifecycleObserver observer)
+    {
+        observers.remove(observer);
+    }
+
     public void destroy()
     {
         this.destroyAllStatements();
@@ -97,11 +103,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // called after services are activated, to begin statement loading from store
     }
 
-    public synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName)
+    public synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, Object userObject)
     {
         // Generate statement id
-        String statementId = UuidGenerator.generate(expression);
-        return createAndStart(statementSpec, expression, isPattern, optStatementName, statementId, null);
+        String statementId = UuidGenerator.generate();
+        return createAndStart(statementSpec, expression, isPattern, optStatementName, statementId, null, userObject);
     }
 
     /**
@@ -112,9 +118,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param optStatementName is the optional statement name
      * @param statementId is the statement id
      * @param optAdditionalContext additional context for use by the statement context
+     * @param userObject the application define user object associated to each statement, if supplied
      * @return started statement
      */
-    protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId, Map<String, Object> optAdditionalContext)
+    protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
     {
         // Determine a statement name, i.e. use the id or use/generate one for the name passed in
         String statementName = statementId;
@@ -123,7 +130,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             statementName = getUniqueStatementName(optStatementName, statementId);
         }
 
-        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext);
+        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject);
         start(statementId, desc, true);
         return desc.getEpStatement();
     }
@@ -136,15 +143,16 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param statementName is the statement name
      * @param statementId is the statement id
      * @param optAdditionalContext additional context for use by the statement context
+     * @param userObject the application define user object associated to each statement, if supplied
      * @return statement
      */
-    protected synchronized EPStatement createStarted(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext)
+    protected synchronized EPStatement createStarted(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
     {
         if (log.isDebugEnabled())
         {
             log.debug(".start Creating and starting statement " + statementId);
         }
-        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext);
+        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject);
         start(statementId, desc, true);
         return desc.getEpStatement();
     }
@@ -157,9 +165,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param statementName is the statement name assigned or given
      * @param statementId is the statement id
      * @param optAdditionalContext additional context for use by the statement context
+     * @param userObject the application define user object associated to each statement, if supplied
      * @return stopped statement
      */
-    protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext)
+    protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
     {
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
@@ -193,6 +202,43 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         boolean canSelfJoin = isPotentialSelfJoin(compiledSpec.getStreamSpecs());
         statementContext.getEpStatementHandle().setCanSelfJoin(canSelfJoin);
 
+        // add statically typed event type references: those in the from clause; Dynamic (created) types collected by statement context and added on start 
+        services.getStatementEventTypeRefService().addReferences(statementName, compiledSpec.getEventTypeReferences());
+
+        // determine statement type
+        StatementType statementType = null;
+        if (statementSpec.getCreateVariableDesc() != null) {
+            statementType = StatementType.CREATE_VARIABLE;
+        }
+        else if (statementSpec.getCreateWindowDesc() != null) {
+            statementType = StatementType.CREATE_WINDOW;
+        }
+        else if (statementSpec.getOnTriggerDesc() != null) {
+            if (statementSpec.getOnTriggerDesc().getOnTriggerType() == OnTriggerType.ON_DELETE) {
+                statementType = StatementType.ON_DELETE;
+            }
+            else if (statementSpec.getOnTriggerDesc().getOnTriggerType() == OnTriggerType.ON_SELECT) {
+                if (statementSpec.getInsertIntoDesc() != null) {
+                    statementType = StatementType.ON_INSERT;
+                }
+                else {
+                    statementType = StatementType.ON_SELECT;
+                }
+            }
+            else if (statementSpec.getOnTriggerDesc().getOnTriggerType() == OnTriggerType.ON_SET) {
+                statementType = StatementType.ON_SET;
+            }
+        }
+        else if (statementSpec.getInsertIntoDesc() != null) {
+            statementType = StatementType.INSERT_INTO;
+        }
+        else if (isPattern) {
+            statementType = StatementType.PATTERN;
+        }
+        if (statementType == null) {
+            statementType = StatementType.SELECT;
+        }
+
         eventProcessingRWLock.acquireWriteLock();
         try
         {
@@ -204,7 +250,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, isPattern,
                     services.getDispatchService(), this, timeLastStateChange, preserveDispatchOrder, isSpinLocks, blockingTimeout,
                     statementContext.getEpStatementHandle(), statementContext.getVariableService(), statementContext.getStatementResultService(),
-                    services.getTimeSource());
+                    services.getTimeSource(), new StatementMetadata(statementType), userObject);
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
             statementContext.getStatementResultService().setContext(statement, epServiceProvider,
@@ -221,7 +267,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeAlias();
             }
 
-            statementDesc = new EPStatementDesc(statement, startMethod, null, insertIntoStreamName, statementContext.getEpStatementHandle());
+            statementDesc = new EPStatementDesc(statement, startMethod, null, insertIntoStreamName, statementContext.getEpStatementHandle(), statementContext);
             stmtIdToDescMap.put(statementId, statementDesc);
             stmtNameToStmtMap.put(statementName, statement);
             stmtNameToIdMap.put(statementName, statementId);
@@ -428,6 +474,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             throw new EPStatementException("Error starting view: " + ex.getMessage(), statement.getText());
         }
 
+        // add statically typed event type references: those in the from clause; Dynamic (created) types collected by statement context and added on start
+        services.getStatementEventTypeRefService().addReferences(desc.getEpStatement().getName(), desc.getStatementContext().getDynamicReferenceEventTypes());
+
+        // hook up
         Viewable parentView = pair.getFirst();
         EPStatementStopMethod stopMethod = pair.getSecond();
         desc.setStopMethod(stopMethod);
@@ -497,6 +547,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 return;
             }
 
+            // remove referenced event types
+            services.getStatementEventTypeRefService().removeReferencesStatement(desc.getEpStatement().getName());
+        
             EPStatementSPI statement = desc.getEpStatement();
             if (statement.getState() == EPStatementState.STARTED)
             {
@@ -650,6 +703,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     protected static StatementSpecCompiled compile(StatementSpecRaw spec, String eplStatement, StatementContext statementContext, boolean isSubquery) throws EPStatementException
     {
         List<StreamSpecCompiled> compiledStreams;
+        Set<String> eventTypeReferences = new HashSet<String>();
 
         // If not using a join and not specifying a data window, make the where-clause, if present, the filter of the stream
         // if selecting using filter spec, and not subquery in where clause
@@ -688,7 +742,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService(), statementContext.getSchedulingService(), statementContext.getNamedWindowService(), statementContext.getValueAddEventService(), statementContext.getVariableService(), statementContext.getEngineURI(), statementContext.getPlugInTypeResolutionURIs());
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService(), statementContext.getSchedulingService(), statementContext.getNamedWindowService(), statementContext.getValueAddEventService(), statementContext.getVariableService(), statementContext.getEngineURI(), statementContext.getPlugInTypeResolutionURIs(), eventTypeReferences);
                 compiledStreams.add(compiled);
             }
         }
@@ -740,6 +794,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     spec.getCreateWindowDesc().setInsertFromWindow(consumerStreamSpec.getWindowName());
                 }
                 Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, selectFromTypeAlias, spec, eplStatement, statementContext);
+                eventTypeReferences.add(((EventTypeSPI)newFilter.getFirst().getEventType()).getMetadata().getPrimaryName());
 
                 // view must be non-empty list
                 if (spec.getCreateWindowDesc().getViewSpecs().isEmpty())
@@ -797,7 +852,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext, true);
             subselect.setStatementSpecCompiled(compiled);
         }
-
+        
         return new StatementSpecCompiled(
                 spec.getOnTriggerDesc(),
                 spec.getCreateWindowDesc(),
@@ -814,7 +869,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 spec.getOrderByList(),
                 visitor.getSubselects(),
                 spec.isHasVariables(),
-                spec.getRowLimitSpec()
+                spec.getRowLimitSpec(),
+                eventTypeReferences
                 );
     }
 
@@ -861,11 +917,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             if ((selectFromType instanceof MapEventType) && (properties.size() ==0))
             {
                 MapEventType mapType = (MapEventType) selectFromType;
-                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes(), null);
+                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes(), null, false, true, false);
             }
             else
             {
-                targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, properties);
+                targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, properties, true, false);
             }
         }
         else
@@ -873,7 +929,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             // Some columns selected, use the types of the columns
             if (spec.getSelectClauseSpec().getSelectExprList().size() > 0)
             {
-                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, properties, null);
+                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, properties, null, false, true, false);
             }
             else
             {
@@ -881,12 +937,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 if (selectFromType instanceof MapEventType)
                 {
                     MapEventType mapType = (MapEventType) selectFromType;
-                    targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes(), null);
+                    targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes(), null, false, true, false);
                 }
                 else
                 {
                     Map<String, Object> addOnTypes = new HashMap<String, Object>();
-                    targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, addOnTypes);
+                    targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, addOnTypes, true, false);
                 }
             }
         }
@@ -907,7 +963,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 continue;
             }
             SelectClauseExprRawSpec exprSpec = (SelectClauseExprRawSpec) raw;
-            ExprNode validatedExpression = null;
+            ExprNode validatedExpression;
             try
             {
                 validatedExpression = exprSpec.getSelectExpression().getValidatedSubtree(streams, null, null, null, null);
@@ -949,6 +1005,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         private EPStatementStopMethod stopMethod;
         private String optInsertIntoStream;
         private EPStatementHandle statementHandle;
+        private StatementContext statementContext;
 
         /**
          * Ctor.
@@ -957,14 +1014,16 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
          * @param stopMethod the stop method
          * @param optInsertIntoStream is the insert-into stream name, or null if not using insert-into
          * @param statementHandle is the locking handle for the statement
+         * @param statementContext statement context
          */
-        public EPStatementDesc(EPStatementSPI epStatement, EPStatementStartMethod startMethod, EPStatementStopMethod stopMethod, String optInsertIntoStream, EPStatementHandle statementHandle)
+        public EPStatementDesc(EPStatementSPI epStatement, EPStatementStartMethod startMethod, EPStatementStopMethod stopMethod, String optInsertIntoStream, EPStatementHandle statementHandle, StatementContext statementContext)
         {
             this.epStatement = epStatement;
             this.startMethod = startMethod;
             this.stopMethod = stopMethod;
             this.optInsertIntoStream = optInsertIntoStream;
             this.statementHandle = statementHandle;
+            this.statementContext = statementContext;
         }
 
         /**
@@ -1019,6 +1078,15 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         public EPStatementHandle getStatementHandle()
         {
             return statementHandle;
+        }
+
+        /**
+         * Returns the statement context.
+         * @return statement context
+         */
+        public StatementContext getStatementContext()
+        {
+            return statementContext;
         }
     }
 }

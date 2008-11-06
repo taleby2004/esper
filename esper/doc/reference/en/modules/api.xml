@@ -50,6 +50,8 @@
       
         <para>
 			Since the <literal>getProvider</literal> methods return the same cached engine instance for each URI, there is no need to statically cache an engine instance in your application.
+			An existing Esper engine instance can be reset via the <literal>initialize</literal> method on the <literal>EPServiceProvider</literal> instance. This operation stops and removes all statements and 
+			resets the engine to the configuration provided when the engine instance was originally obtained. After an <literal>initialize</literal> the engine is ready for use.
         </para>
 
         <para>
@@ -76,6 +78,10 @@ epService.getEPAdministrator().getConfiguration().add...(...);
 // Destroy the engine instance when no longer needed, frees up resources
 epService.destroy();]]></programlisting>
 
+        <para>
+			An existing Esper engine instance can be destroyed via the <literal>destroy</literal> method on the <literal>EPServiceProvider</literal> instance. This stops and removes all statements
+			as well as frees all resources held by the instance. After a <literal>destroy</literal> the engine can no longer be used.
+        </para>
     </sect1>
 
     <sect1 id="api-administrative">
@@ -118,6 +124,12 @@ EPStatement countStmt = admin.createEPL(
 			<programlisting><![CDATA[countStmt.stop();
 countStmt.start();]]></programlisting>
 	
+			<para>
+				The <literal>create</literal> methods on <literal>EPAdministrator</literal> also accept a user object.  
+				The user object is associated with a statement at time of statement creation and is a single, unnamed field that is stored with every statement.
+				Applications may put arbitrary objects in this field. Use the <literal>getUserObject</literal> method on <literal>EPStatement</literal> to obtain the user object of a statement
+				and <literal>StatementAwareUpdateListener</literal> for listeners.
+			</para>
 	  </sect2>
 
 	  <sect2 id="api-receive-results">		
@@ -578,11 +590,11 @@ finally {
 			<indexterm><primary>configuration</primary><secondary>runtime</secondary></indexterm>
 			<para>
 				Certain configuration changes are available to perform on an engine instance while in operation. Such configuration operations are available via the <literal>getConfiguration</literal> method on <literal>EPAdministrator</literal>,
-				which returns an <literal>ConfigurationOperations</literal> object.
+				which returns a <literal>ConfigurationOperations</literal> object.
 			</para>
 
 			<para>
-				Please refer to the JavaDoc documentation for <literal>ConfigurationOperations</literal> for additional details.
+				Please consult the JavaDoc of <literal>ConfigurationOperations</literal> for further information. The section <xref linkend="configuration-runtime"/> provides a summary of available configurations.
 			</para>
 
 			<para>
@@ -741,6 +753,24 @@ sender.sendEvent(myEvent);]]></programlisting>
 		</sect2>
     </sect1>
 
+    <sect1 id="api-serviceprovider">
+        <title>The Service Provider Interface</title>
+
+		<indexterm><primary>EPServiceProvider class</primary></indexterm>
+
+        <para>
+			The <literal>EPServiceProvider</literal> interface represents an engine instance. The interface makes it possible to receive a callback when, for example, a new statement has been created or a engine instance is about to be destroyed.
+        </para>
+
+        <para>
+			The <literal>EPServiceStateListener</literal> interface is used to receive callbacks when an engine instance is about to be destroyed and after an engine instance has been initialized. Listeners are registered via <literal>addServiceStateListener</literal>.
+        </para>
+
+        <para>
+			The <literal>EPStatementStateListener</literal> interface is used to receives callbacks when a new statement gets created and when a statement gets started, stopped or destroyed. Listeners are registered via <literal>addStatementStateListener</literal>.
+        </para>
+    </sect1>
+
     <sect1 id="api-events-received">
         <title>Events Received from the Engine</title>
 
@@ -762,15 +792,12 @@ EPStatement priceStatsView = epService.getEPAdministrator().createEPL(stmt);
 priceStatsView.addListener(testListener);
 ]]></programlisting>
 		<programlisting><![CDATA[// Example listener code
-public class MyUpdateListener implements UpdateListener
-{
-    public void update(EventBean[] newData, EventBean[] oldData)
-    {
-        // Interrogate events
-        System.out.println("new average price=" + newData[0].get("average");
-	}
-}
-]]></programlisting>
+public class MyUpdateListener implements UpdateListener {
+  public void update(EventBean[] newData, EventBean[] oldData) {
+    // Interrogate events
+    System.out.println("new average price=" + newData[0].get("average")
+  }
+}]]></programlisting>
 
         <para>
 			Composite events are events that aggregate one or more other events. Composite events are typically created by the engine for statements that join two event streams, and for event patterns in which the causal events are retained and reported in a composite event. The example below shows such an event pattern.

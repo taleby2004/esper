@@ -18,6 +18,7 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecCompiler;
@@ -27,6 +28,7 @@ import com.espertech.esper.util.MetaDefItem;
 import com.espertech.esper.core.EPServiceProviderSPI;
 
 import java.util.List;
+import java.util.Set;
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
@@ -78,7 +80,8 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
                                       ValueAddEventService valueAddEventService,
                                       VariableService variableService,
                                       String engineURI,
-                                      URI[] optionalPlugInTypeResolutionURIS)
+                                      URI[] optionalPlugInTypeResolutionURIS,
+                                      Set<String> eventTypeReferences)
             throws ExprValidationException
     {
         // Determine the event type
@@ -92,7 +95,8 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
 
             List<ExprNode> validatedNodes = FilterSpecCompiler.validateDisallowSubquery(rawFilterSpec.getFilterExpressions(),
                 streamTypeService, methodResolutionService, timeProvider, variableService);
-            
+
+            eventTypeReferences.add(((EventTypeSPI) namedWindowType).getMetadata().getPrimaryName());
             return new NamedWindowConsumerStreamSpec(eventName, this.getOptionalStreamName(), this.getViewSpecs(), validatedNodes, this.isUnidirectional());
         }
 
@@ -101,11 +105,15 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         if (valueAddEventService.isRevisionTypeAlias(eventName))
         {
             eventType = valueAddEventService.getValueAddUnderlyingType(eventName);
+            eventTypeReferences.add(((EventTypeSPI) eventType).getMetadata().getPrimaryName());
         }
 
         if (eventType == null)
         {
             eventType = resolveType(engineURI, eventName, eventAdapterService, optionalPlugInTypeResolutionURIS);
+            if (eventType instanceof EventTypeSPI) {
+                eventTypeReferences.add(((EventTypeSPI) eventType).getMetadata().getPrimaryName());                
+            }
         }
 
         // Validate all nodes, make sure each returns a boolean and types are good;
@@ -175,7 +183,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         }
         catch (EventAdapterException ex)
         {
-            log.info(".resolveType Event type alias '" + eventName + "' not resolved as POJO event");
+            log.info(".resolveType Event type alias '" + eventName + "' not resolved as Java-Class event");
             message = "Failed to resolve event type: " + ex.getMessage();
         }
 

@@ -53,6 +53,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(ConfigurationEngineDefaults.TimeSourceType.MILLI, config.getEngineDefaults().getTimeSource().getTimeSourceType());
 
         assertEquals(StreamSelector.ISTREAM_ONLY, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
+        assertFalse(config.getEngineDefaults().getLanguage().isSortUsingCollator());
     }
 
     protected static void assertFileConfig(Configuration config) throws Exception
@@ -124,7 +125,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(Configuration.PropertyResolutionStyle.CASE_INSENSITIVE, legacy.getPropertyResolutionStyle());
 
         // assert database reference - data source config
-        assertEquals(2, config.getDatabaseReferences().size());
+        assertEquals(3, config.getDatabaseReferences().size());
         ConfigurationDBRef configDBRef = config.getDatabaseReferences().get("mydb1");
         ConfigurationDBRef.DataSourceConnection dsDef = (ConfigurationDBRef.DataSourceConnection) configDBRef.getConnectionFactoryDesc();
         assertEquals("java:comp/env/jdbc/mydb", dsDef.getContextLookupName());
@@ -163,6 +164,16 @@ public class TestConfigurationParser extends TestCase
         assertEquals(ConfigurationDBRef.MetadataOriginEnum.METADATA, configDBRef.getMetadataRetrievalEnum());
         assertEquals(1, configDBRef.getSqlTypesMapping().size());
         assertEquals("java.lang.String", configDBRef.getSqlTypesMapping().get(99));
+
+        // assert database reference - data source factory and DBCP config
+        configDBRef = config.getDatabaseReferences().get("mydb3");
+        ConfigurationDBRef.DataSourceFactory dsFactory = (ConfigurationDBRef.DataSourceFactory) configDBRef.getConnectionFactoryDesc();
+        assertEquals("org.apache.commons.dbcp.BasicDataSourceFactory", dsFactory.getFactoryClassname());
+        assertEquals("jdbc:mysql://localhost/test", dsFactory.getProperties().getProperty("url"));
+        assertEquals("myusername", dsFactory.getProperties().getProperty("username"));
+        assertEquals("mypassword", dsFactory.getProperties().getProperty("password"));
+        assertEquals("com.mysql.jdbc.Driver", dsFactory.getProperties().getProperty("driverClassName"));
+        assertEquals("2", dsFactory.getProperties().getProperty("initialSize"));
 
         // assert custom view implementations
         List<ConfigurationPlugInView> configViews = config.getPlugInViews();
@@ -264,6 +275,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(100, def.getNumStatements());
         assertFalse(def.isReportInactive());
         assertEquals(0, def.getPatterns().size());
+        assertTrue(config.getEngineDefaults().getLanguage().isSortUsingCollator());
 
         // variables
         assertEquals(2, config.getVariables().size());

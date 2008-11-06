@@ -10,12 +10,19 @@ import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.util.SerializableObjectCopier;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.EPStatementSPI;
 
 import java.util.Map;
+import java.util.Set;
 
 public class TestInsertInto extends TestCase
 {
@@ -55,6 +62,18 @@ public class TestInsertInto extends TestCase
         EPStatementObjectModel modelTwo = epService.getEPAdministrator().compileEPL(model.toEPL());
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(epl, modelTwo.toEPL());
+
+        // assert statement-type reference
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+        assertTrue(spi.getStatementEventTypeRef().isInUse("Event_1"));
+        Set<String> stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
+        assertTrue(stmtNames.contains("s1"));
+
+        stmt.destroy();
+
+        assertFalse(spi.getStatementEventTypeRef().isInUse("Event_1"));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
+        assertFalse(stmtNames.contains("s1"));
     }
 
     public void testVariantOneOMToStmt() throws Exception
@@ -111,6 +130,10 @@ public class TestInsertInto extends TestCase
         {
         	// Expected
         }
+
+        // assert statement-type reference
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+        assertFalse(spi.getStatementEventTypeRef().isInUse("Event_1"));
     }
 
     public void testVariantOneJoin()
@@ -157,10 +180,11 @@ public class TestInsertInto extends TestCase
         String otherText = "select * from default.event1.win:length(10)";
 
         // Attach listener to feed
-        EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtText, "stmt1");
+        assertEquals(StatementType.INSERT_INTO, ((EPStatementSPI) stmtOne).getStatementMetadata().getStatementType());
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
-        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(otherText);
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(otherText, "stmt2");
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
 
@@ -178,6 +202,24 @@ public class TestInsertInto extends TestCase
         assertEquals(11, listenerTwo.getLastNewData()[0].get("intBoxed"));
         assertEquals(19, listenerTwo.getLastNewData()[0].getEventType().getPropertyNames().length);
         assertSame(event, listenerTwo.getLastNewData()[0].getUnderlying());
+
+        // assert statement-type reference
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+        assertTrue(spi.getStatementEventTypeRef().isInUse("event1"));
+        Set<String> stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("event1");
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmtNames.toArray(), new String[] {"stmt1", "stmt2"});
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmtNames.toArray(), new String[] {"stmt1"});
+
+        stmtOne.destroy();
+        assertTrue(spi.getStatementEventTypeRef().isInUse("event1"));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("event1");
+        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmt2"}, stmtNames.toArray());
+        assertFalse(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
+
+        stmtTwo.destroy();
+        assertFalse(spi.getStatementEventTypeRef().isInUse("event1"));
     }
 
     public void testVariantTwoJoin()
@@ -189,6 +231,16 @@ public class TestInsertInto extends TestCase
                         " where s0.string = s1.id";
 
         runAsserts(stmtText, null);
+
+        // assert type metadata
+        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByAlias("Event_1");
+        assertEquals(null, type.getMetadata().getOptionalApplicationType());
+        assertEquals(null, type.getMetadata().getOptionalSecondaryNames());
+        assertEquals("Event_1", type.getMetadata().getPrimaryName());
+        assertEquals("Event_1", type.getMetadata().getPublicName());
+        assertEquals("Event_1", type.getName());
+        assertEquals(EventTypeMetadata.TypeClass.STREAM, type.getMetadata().getTypeClass());
+        assertEquals(false, type.getMetadata().isApplicationConfigured());
     }
 
     public void testVariantTwoJoinWildcard()

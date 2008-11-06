@@ -389,6 +389,12 @@ class ConfigurationParser {
                 Properties properties = handleProperties(subElement, "env-property");
                 configDBRef.setDataSourceConnection(lookup, properties);
             }
+            if (subElement.getNodeName().equals("datasourcefactory-connection"))
+            {
+                String className = subElement.getAttributes().getNamedItem("class-name").getTextContent();
+                Properties properties = handleProperties(subElement, "env-property");
+                configDBRef.setDataSourceFactory(properties, className);
+            }
             else if (subElement.getNodeName().equals("drivermanager-connection"))
             {
                 String className = subElement.getAttributes().getNamedItem("class-name").getTextContent();
@@ -827,6 +833,10 @@ class ConfigurationParser {
             {
                 handleMetricsReporting(configuration, subElement);
             }
+            if (subElement.getNodeName().equals("language"))
+            {
+                handleLanguage(configuration, subElement);
+            }
         }
     }
 
@@ -1059,6 +1069,13 @@ class ConfigurationParser {
                 handleMetricsReportingPatterns(metrics, subElement);
             }
         }
+    }
+
+    private static void handleLanguage(Configuration configuration, Element parentElement)
+    {
+        String sortUsingCollator = getRequiredAttribute(parentElement, "sort-using-collator");
+        boolean isSortUsingCollator = Boolean.parseBoolean(sortUsingCollator);
+        configuration.getEngineDefaults().getLanguage().setSortUsingCollator(isSortUsingCollator);
     }
 
     private static void handleMetricsReportingPatterns(ConfigurationMetricsReporting.StmtGroupMetrics groupDef, Element parentElement)

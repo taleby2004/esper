@@ -29,6 +29,8 @@ public class NamedWindowProcessor
     private final NamedWindowTailView tailView;
     private final NamedWindowRootView rootView;
     private final EventType eventType;
+    private final String eplExpression;
+    private final String statementName;
 
     /**
      * Ctor.
@@ -38,10 +40,14 @@ public class NamedWindowProcessor
      * @param createWindowStmtHandle the statement handle of the statement that created the named window
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      * @param revisionProcessor for revision processing
+     * @param eplExpression epl expression
+     * @param statementName statement name
      */
-    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor)
+    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName)
     {
         this.eventType = eventType;
+        this.eplExpression = eplExpression;
+        this.statementName = statementName;
 
         rootView = new NamedWindowRootView(revisionProcessor);
         tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle, statementResultService, revisionProcessor);
@@ -95,6 +101,15 @@ public class NamedWindowProcessor
     }
 
     /**
+     * Returns the number of events held.
+     * @return number of events
+     */
+    public long getCountDataWindow()
+    {
+        return tailView.getNumberOfEvents();
+    }
+
+    /**
      * Adds a consuming (selecting) statement to the named window.
      * @param statementHandle is the statement's handle for locking
      * @param statementStopService for indicating the consuming statement is stopped or destroyed
@@ -104,6 +119,24 @@ public class NamedWindowProcessor
     public NamedWindowConsumerView addConsumer(List<ExprNode> filterList, EPStatementHandle statementHandle, StatementStopService statementStopService)
     {
         return tailView.addConsumer(filterList, statementHandle, statementStopService);
+    }
+
+    /**
+     * Returns the EPL expression.
+     * @return epl
+     */
+    public String getEplExpression()
+    {
+        return eplExpression;
+    }
+
+    /**
+     * Returns the statement name.
+     * @return name
+     */
+    public String getStatementName()
+    {
+        return statementName;
     }
 
     /**

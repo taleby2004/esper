@@ -176,4 +176,13 @@ public class ExprLikeNode extends ExprNode
 
         return buffer.toString();
     }
+
+    /**
+     * Returns true if this is a "not like", or false if just a like
+     * @return indicator whether negated or not
+     */
+    public boolean isNot()
+    {
+        return isNot;
+    }
 }

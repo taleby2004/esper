@@ -267,12 +267,19 @@ public class ResultSetProcessorFactory
         boolean hasGroupBy = !groupByNodes.isEmpty();
         AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, stmtContext.getMethodResolutionService());
 
+        boolean useCollatorSort = false;
+        if (stmtContext.getConfigSnapshot() != null)
+        {
+            useCollatorSort = stmtContext.getConfigSnapshot().getEngineDefaults().getLanguage().isSortUsingCollator();
+        }
+
         // Construct the processor for sorting output events
         OrderByProcessor orderByProcessor = OrderByProcessorFactory.getProcessor(namedSelectionList,
-                groupByNodes, orderByList, aggregationService, statementSpecCompiled.getRowLimitSpec(), stmtContext.getVariableService());
+                groupByNodes, orderByList, aggregationService, statementSpecCompiled.getRowLimitSpec(), stmtContext.getVariableService(),useCollatorSort);
 
         // Construct the processor for evaluating the select clause
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService(), stmtContext.getValueAddEventService());
+        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(stmtContext.getDynamicReferenceEventTypes());
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService(), stmtContext.getValueAddEventService(), selectExprEventTypeRegistry);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);

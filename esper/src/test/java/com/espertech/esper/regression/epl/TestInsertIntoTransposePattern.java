@@ -38,20 +38,24 @@ public class TestInsertIntoTransposePattern extends TestCase
         // TODO - http://jira.codehaus.org/browse/ESPER-251
         //
         epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().createEPL("create window Alert7Window.win:time(1 day) as select string as alertId, this from SupportBean");
+        EPStatement createStmt = epService.getEPAdministrator().createEPL("create window Alert7Window.win:time(1 day) as select string as alertId, this from SupportBean");
 
-        epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote.this as this " +
-                " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
-                     " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
-                " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
-
-        // this should also work:
         /*
-        epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote as this " +
+        EPStatement insertStmt = epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote.this as this " +
                 " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
                      " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
                 " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
         */
+
+        for (String name : createStmt.getEventType().getPropertyNames())
+        {
+            System.out.println("Property " + name + " typed " + createStmt.getEventType().getPropertyType(name));
+        }
+
+        epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote as this " +
+                " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
+                     " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
+                " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
     }
 
     public void testTransposePOJOEventPattern()

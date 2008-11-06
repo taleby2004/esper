@@ -33,6 +33,4 @@ public interface NumberSetParameter extends MetaDefItem, EPLParameterType
      * @return set of integer
      */
     public Set<Integer> getValuesInRange(int min, int max);
-
-    public void toEPL(StringWriter writer);
 }

@@ -22,8 +22,10 @@ import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewResolutionService;
+import com.espertech.esper.client.ConfigurationInformation;
 
 import java.net.URI;
+import java.util.HashSet;
 
 /**
  * Contains handles to the implementation of the the scheduling service for use in view evaluation.
@@ -53,6 +55,8 @@ public final class StatementContext
     private final StatementResultService statementResultService;
     private final URI[] plugInTypeResolutionURIs;
     private final ValueAddEventService valueAddEventService;
+    private final HashSet<String> dynamicReferenceEventTypes;
+    private final ConfigurationInformation configSnapshot;
 
     /**
      * Constructor.
@@ -79,6 +83,7 @@ public final class StatementContext
      * @param statementResultService handles awareness of listeners/subscriptions for a statement customizing output produced
      * @param plugInTypeResolutionURIs is URIs for resolving the event name against plug-inn event representations, if any
      * @param valueAddEventService - service that handles update events
+     * @param configSnapshot configuration snapshot
      */
     public StatementContext(String engineURI,
                             String engineInstanceId,
@@ -102,7 +107,8 @@ public final class StatementContext
                               VariableService variableService,
                               StatementResultService statementResultService,
                               URI[] plugInTypeResolutionURIs,
-                              ValueAddEventService valueAddEventService)
+                              ValueAddEventService valueAddEventService,
+                              ConfigurationInformation configSnapshot)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -127,6 +133,8 @@ public final class StatementContext
         this.statementResultService = statementResultService;
         this.plugInTypeResolutionURIs = plugInTypeResolutionURIs;
         this.valueAddEventService = valueAddEventService;
+        this.dynamicReferenceEventTypes = new HashSet<String>();
+        this.configSnapshot = configSnapshot;
     }
 
     /**
@@ -334,6 +342,33 @@ public final class StatementContext
     public ValueAddEventService getValueAddEventService()
     {
         return valueAddEventService;
+    }
+
+    /**
+     * Add an event type name created during statement start and not available through static analysis.
+     * @param eventTypeAlias to add
+     */
+    public void addDynamicReferenceEventType(String eventTypeAlias)
+    {
+        dynamicReferenceEventTypes.add(eventTypeAlias);
+    }
+
+    /**
+     * Returns event type names created during statement start and not available through static analysis.
+     * @return event type names
+     */
+    public HashSet<String> getDynamicReferenceEventTypes()
+    {
+        return dynamicReferenceEventTypes;
+    }
+
+    /**
+     * Returns the configuration.
+     * @return configuration
+     */
+    public ConfigurationInformation getConfigSnapshot()
+    {
+        return configSnapshot;
     }
 
     public String toString()

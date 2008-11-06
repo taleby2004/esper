@@ -42,6 +42,8 @@ public class EPStatementImpl implements EPStatementSPI
     private com.espertech.esper.event.EventType eventType;
     private EPStatementHandle epStatementHandle;
     private StatementResultService statementResultService;
+    private StatementMetadata statementMetadata;
+    private Object userObject;
 
     /**
      * Ctor.
@@ -59,6 +61,8 @@ public class EPStatementImpl implements EPStatementSPI
      * @param variableService provides access to variable values
      * @param statementResultService handles statement result generation
      * @param timeSourceService time source provider
+     * @param statementMetadata statement metadata
+     * @param userObject the application define user object associated to each statement, if supplied
      */
     public EPStatementImpl(String statementId,
                               String statementName,
@@ -73,7 +77,9 @@ public class EPStatementImpl implements EPStatementSPI
                               EPStatementHandle epStatementHandle,
                               VariableService variableService,
                               StatementResultService statementResultService,
-                              TimeSourceService timeSourceService)
+                              TimeSourceService timeSourceService,
+                              StatementMetadata statementMetadata,
+                              Object userObject)
     {
         this.isPattern = isPattern;
         this.statementId = statementId;
@@ -101,6 +107,8 @@ public class EPStatementImpl implements EPStatementSPI
         this.epStatementHandle = epStatementHandle;
         this.variableService = variableService;
         this.statementResultService = statementResultService;
+        this.statementMetadata = statementMetadata;
+        this.userObject = userObject;
         statementResultService.setUpdateListeners(statementListenerSet);
     }
 
@@ -360,5 +368,15 @@ public class EPStatementImpl implements EPStatementSPI
 
     public boolean isPattern() {
         return isPattern;
+    }
+
+    public StatementMetadata getStatementMetadata()
+    {
+        return statementMetadata;
+    }
+
+    public Object getUserObject()
+    {
+        return userObject;
     }
 }

@@ -35,6 +35,7 @@ public class OrderByProcessorFactory {
      * @param aggregationService is the service for aggregation, ie. building sums and averages per group or overall
      * @param rowLimitSpec specification for row limit, or null if no row limit is defined
      * @param variableService for retrieving variable state for use with row limiting
+     * @param isSortUsingCollator for string value sorting using compare or Collator 
      * @return ordering processor instance
      * @throws com.espertech.esper.epl.expression.ExprValidationException when validation of expressions fails
      */
@@ -43,7 +44,8 @@ public class OrderByProcessorFactory {
 											   List<OrderByItem> orderByList,
 											   AggregationService aggregationService,
                                                RowLimitSpec rowLimitSpec,
-                                               VariableService variableService)
+                                               VariableService variableService,
+                                               boolean isSortUsingCollator)
 	throws ExprValidationException
 	{
 		// Get the order by expression nodes
@@ -92,7 +94,7 @@ public class OrderByProcessorFactory {
     	boolean needsGroupByKeys = !selectionList.isEmpty() && !orderAggNodes.isEmpty();
 
         log.debug(".getProcessor Using OrderByProcessorImpl");
-        OrderByProcessorImpl orderByProcessor = new OrderByProcessorImpl(orderByList, groupByNodes, needsGroupByKeys, aggregationService);
+        OrderByProcessorImpl orderByProcessor = new OrderByProcessorImpl(orderByList, groupByNodes, needsGroupByKeys, aggregationService, isSortUsingCollator);
         if (rowLimitSpec == null)
         {
             return orderByProcessor;

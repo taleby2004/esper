@@ -18,6 +18,7 @@ import com.espertech.esper.pattern.PatternObjectResolutionService;
 import com.espertech.esper.schedule.TimeProvider;
 
 import java.net.URI;
+import java.util.Set;
 
 /**
  * An uncompiled, unoptimize for of stream specification created by a parser.
@@ -36,6 +37,7 @@ public interface StreamSpecRaw extends StreamSpec
      * @param engineURI the engine URI
      * @param optionalPlugInTypeResolutionURIS is URIs for resolving the event name against plug-inn event representations, if any  
      * @param valueAddEventService service that handles update events
+     * @param eventTypeReferences event type names used by the statement 
      * @return compiled stream
      * @throws ExprValidationException to indicate validation errors
      */
@@ -47,7 +49,8 @@ public interface StreamSpecRaw extends StreamSpec
                                       ValueAddEventService valueAddEventService,
                                       VariableService variableService,
                                       String engineURI,
-                                      URI[] optionalPlugInTypeResolutionURIS)
+                                      URI[] optionalPlugInTypeResolutionURIS,
+                                      Set<String> eventTypeReferences)
         throws ExprValidationException;
 
 }

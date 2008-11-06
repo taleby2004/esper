@@ -167,4 +167,13 @@ public class ExprRegexpNode extends ExprNode
 
         return buffer.toString();
     }
+
+    /**
+     * Returns true if this is a "not regexp", or false if just a regexp
+     * @return indicator whether negated or not
+     */
+    public boolean isNot()
+    {
+        return isNot;
+    }
 }

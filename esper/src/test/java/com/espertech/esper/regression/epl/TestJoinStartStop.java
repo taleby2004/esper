@@ -6,10 +6,14 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.core.EPServiceProviderSPI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Set;
 
 public class TestJoinStartStop extends TestCase
 {
@@ -32,7 +36,7 @@ public class TestJoinStartStop extends TestCase
             " where s0.volume=s1.volume";
         log.info(".setUp statement=" + joinStatement);
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        joinView = epService.getEPAdministrator().createEPL(joinStatement, "MyJoin");
         joinView.addListener(updateListener);
 
         long[] volumesOne = new long[] { 10, 20, 20, 40, 50 };
@@ -69,6 +73,19 @@ public class TestJoinStartStop extends TestCase
         joinView.start();
         sendEvent(setTwo[4]);
         assertFalse(updateListener.isInvoked());
+
+        // assert type-statement reference
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+        assertTrue(spi.getStatementEventTypeRef().isInUse(SupportMarketDataBean.class.getName()));
+        Set<String> stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportMarketDataBean.class.getName());
+        assertTrue(stmtNames.contains("MyJoin"));
+
+        joinView.destroy();
+
+        assertFalse(spi.getStatementEventTypeRef().isInUse(SupportMarketDataBean.class.getName()));
+        stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportMarketDataBean.class.getName());
+        ArrayAssertionUtil.assertEqualsAnyOrder(null, stmtNames.toArray());
+        assertFalse(stmtNames.contains("MyJoin"));
     }
 
     private void sendEvent(Object event)

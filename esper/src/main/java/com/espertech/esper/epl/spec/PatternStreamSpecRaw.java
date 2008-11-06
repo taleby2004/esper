@@ -17,6 +17,7 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecCompiler;
@@ -69,7 +70,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
                                       ValueAddEventService valueAddEventService,
                                       VariableService variableService,
                                       String engineURI,
-                                      URI[] plugInTypeResolutionURIs)
+                                      URI[] plugInTypeResolutionURIs,
+                                      Set<String> eventTypeReferences)
             throws ExprValidationException
     {
         // Determine all the filter nodes used in the pattern
@@ -137,6 +139,10 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             String eventName = filterNode.getRawFilterSpec().getEventTypeAlias();
             EventType eventType = FilterStreamSpecRaw.resolveType(engineURI, eventName, eventAdapterService, plugInTypeResolutionURIs);
             String optionalTag = filterNode.getEventAsName();
+            if (eventType instanceof EventTypeSPI)
+            {
+                eventTypeReferences.add(((EventTypeSPI) eventType).getMetadata().getPrimaryName());
+            }
 
             // If a tag was supplied for the type, the tags must stay with this type, i.e. a=BeanA -> b=BeanA -> a=BeanB is a no
             if (optionalTag != null)
@@ -181,7 +187,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             String selfStreamName = optionalTag;
             if (selfStreamName == null)
             {
-                selfStreamName = "s_" + UuidGenerator.generate(filterNode);
+                selfStreamName = "s_" + UuidGenerator.generate();
             }
             LinkedHashMap<String, Pair<EventType, String>> filterTypes = new LinkedHashMap<String, Pair<EventType, String>>();
             Pair<EventType, String> typePair = new Pair<EventType, String>(eventType, eventName);

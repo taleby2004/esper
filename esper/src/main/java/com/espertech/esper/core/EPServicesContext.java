@@ -30,6 +30,7 @@ import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.view.ViewService;
 import com.espertech.esper.view.ViewServiceProvider;
 import com.espertech.esper.view.stream.StreamFactoryService;
+import com.espertech.esper.client.ConfigurationInformation;
 
 /**
  * Convenience class to hold implementations for all services.
@@ -62,6 +63,8 @@ public final class EPServicesContext
     private TimeSourceService timeSourceService;
     private ValueAddEventService valueAddEventService;
     private MetricReportingService metricsReportingService;
+    private StatementEventTypeRef statementEventTypeRef;
+    private ConfigurationInformation configSnapshot;
 
     // Supplied after construction to avoid circular dependency
     private StatementLifecycleSvc statementLifecycleSvc;
@@ -92,6 +95,8 @@ public final class EPServicesContext
      * @param valueAddEventService handles update events
      * @param timeSourceService time source provider class
      * @param metricsReportingService - for metric reporting
+     * @param statementEventTypeRef - statement to event type reference holding
+     * @param configSnapshot configuration snapshot
      */
     public EPServicesContext(String engineURI,
                              String engineInstanceId,
@@ -115,7 +120,9 @@ public final class EPServicesContext
                              VariableService variableService,
                              TimeSourceService timeSourceService,
                              ValueAddEventService valueAddEventService,
-                             MetricReportingService metricsReportingService)
+                             MetricReportingService metricsReportingService,
+                             StatementEventTypeRef statementEventTypeRef,
+                             ConfigurationInformation configSnapshot)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -143,6 +150,8 @@ public final class EPServicesContext
         this.timeSourceService = timeSourceService;
         this.valueAddEventService = valueAddEventService;
         this.metricsReportingService = metricsReportingService;
+        this.statementEventTypeRef = statementEventTypeRef;
+        this.configSnapshot = configSnapshot;
     }
 
     /**
@@ -388,6 +397,7 @@ public final class EPServicesContext
         this.namedWindowService = null;
         this.valueAddEventService = null;
         this.metricsReportingService = null;
+        this.statementEventTypeRef = null;
     }
 
     /**
@@ -478,5 +488,23 @@ public final class EPServicesContext
     public MetricReportingService getMetricsReportingService()
     {
         return metricsReportingService;
+    }
+
+    /**
+     * Returns service for statement to event type mapping.
+     * @return statement-type mapping
+     */
+    public StatementEventTypeRef getStatementEventTypeRefService()
+    {
+        return statementEventTypeRef;
+    }
+
+    /**
+     * Returns the configuration.
+     * @return configuration
+     */
+    public ConfigurationInformation getConfigSnapshot()
+    {
+        return configSnapshot;
     }
 }

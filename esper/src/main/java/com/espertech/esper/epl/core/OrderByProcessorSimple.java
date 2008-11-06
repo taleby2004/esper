@@ -11,9 +11,9 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OrderByItem;
 import com.espertech.esper.event.EventBean;
-import com.espertech.esper.util.MultiKeyComparator;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,18 +48,22 @@ public class OrderByProcessorSimple implements OrderByProcessor {
 	 * @param aggregationService -
 	 *            used to evaluate aggregate functions in the group-by and
 	 *            sort-by clauses
+     * @param isSortUsingCollator for string value sorting using compare or Collator
+     * @throws ExprValidationException when order-by items don't divulge a type
 	 */
 	public OrderByProcessorSimple(final List<OrderByItem> orderByList,
 								  List<ExprNode> groupByNodes,
 								  boolean needsGroupByKeys,
-								  AggregationService aggregationService)
-	{
+								  AggregationService aggregationService,
+                                  boolean isSortUsingCollator)
+            throws ExprValidationException
+    {
 		this.orderByList = orderByList;
 		this.groupByNodes = groupByNodes;
 		this.needsGroupByKeys = needsGroupByKeys;
 		this.aggregationService = aggregationService;
 
-        this.comparator = new MultiKeyComparator(getIsDescendingValues());
+        comparator = OrderByProcessorImpl.getComparator(orderByList, isSortUsingCollator);
     }
 
     public MultiKeyUntyped getSortKey(EventBean[] eventsPerStream, boolean isNewData)
