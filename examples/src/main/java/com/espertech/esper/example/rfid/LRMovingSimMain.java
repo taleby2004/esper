@@ -184,7 +184,7 @@ public class LRMovingSimMain
                     "from LocationReport(assetId in (" + assetIdList + ")).std:unique(assetId) " +
                     "group by zone";
             EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
-            // stmtOne.addListener(new AssetGroupCountListener());  for debugging
+            if (log.isDebugEnabled()) stmtOne.addListener(new AssetGroupCountListener());//for debugging
 
             String textTwo = "select * from pattern [" +
                     "  every a=" + streamName + "(cnt in [1:2]) ->" +

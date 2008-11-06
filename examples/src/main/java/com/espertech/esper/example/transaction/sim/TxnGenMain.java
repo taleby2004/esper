@@ -15,7 +15,6 @@ import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.example.transaction.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.LinkedHashMap;
 
@@ -121,7 +120,6 @@ public class TxnGenMain {
 
         // Generate transactions
         TransactionEventSource source = new TransactionEventSource(numTransactions);
-        PrinterOutputStream printer = new PrinterOutputStream(System.out);  // Use this to print stream without feeding
         ShuffledBucketOutput output = new ShuffledBucketOutput(source, feeder, bucketSize);
 
         // Feed events

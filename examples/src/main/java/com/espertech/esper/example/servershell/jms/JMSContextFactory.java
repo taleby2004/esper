@@ -37,6 +37,7 @@ public abstract class JMSContextFactory
 		return new JMSContext(factory, connection, session, destination);
 	}
 
+	@SuppressWarnings("unchecked")
 	private static ConnectionFactory getConnectionFactory(String ctxFactory, String url, String connectionFactoryName, String user, String pwd) throws NamingException
     {
 		Hashtable env = new Hashtable();

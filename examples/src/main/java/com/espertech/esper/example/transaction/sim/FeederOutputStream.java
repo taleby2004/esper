@@ -11,8 +11,6 @@ package com.espertech.esper.example.transaction.sim;
 import com.espertech.esper.example.transaction.TxnEventBase;
 import com.espertech.esper.example.transaction.FindMissingEventStmt;
 import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.time.CurrentTimeEvent;
-
 import java.util.List;
 import java.io.IOException;
 

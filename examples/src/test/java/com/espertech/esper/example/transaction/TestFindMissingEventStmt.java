@@ -1,11 +1,9 @@
 package com.espertech.esper.example.transaction;
 
-import com.espertech.esper.example.support.SupportUpdateListener;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.espertech.esper.client.time.TimerControlEvent;
+import com.espertech.esper.event.EventBean;
+import com.espertech.esper.example.support.SupportUpdateListener;
 
 public class TestFindMissingEventStmt extends TestStmtBase
 {
@@ -117,6 +115,4 @@ public class TestFindMissingEventStmt extends TestStmtBase
         assertSame(expectedB, combinedEvent.get("B"));
         assertNull(combinedEvent.get("C"));
     }
-
-    private static final Log log = LogFactory.getLog(TestFindMissingEventStmt.class);
 }

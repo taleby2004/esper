@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.example.rsi;
 
-import org.apache.commons.logging.*;
-
 import junit.framework.TestCase;
 
 import com.espertech.esper.client.Configuration;
@@ -23,9 +21,7 @@ public class TestRSI extends TestCase implements StockTickerRegressionConstants 
 
 	private static String SYMBOL = "GOOG";
 	private int PERIOD = 4;
-	private static final Log _log = LogFactory.getLog(TestRSI.class);
-
-    private RSIStockTickerListener _stockListener;
+	private RSIStockTickerListener _stockListener;
     private RSIListener _rsiListener;
     private EPServiceProvider _epService;
     EPStatement _factory;

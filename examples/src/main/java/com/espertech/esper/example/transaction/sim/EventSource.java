@@ -11,7 +11,6 @@ package com.espertech.esper.example.transaction.sim;
 import com.espertech.esper.example.transaction.TxnEventBase;
 
 import java.util.Iterator;
-import java.util.Map;
 
 /** An Iterable source of events.
  *
