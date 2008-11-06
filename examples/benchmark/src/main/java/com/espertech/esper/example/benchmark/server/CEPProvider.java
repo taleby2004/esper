@@ -57,6 +57,8 @@ public class CEPProvider {
         public void init(final int _sleepListenerMillis) {
             sleepListenerMillis = _sleepListenerMillis;
             Configuration configuration;
+            
+            // EsperHA enablement - if available
             try {
                 Class configurationHAClass = Class.forName("com.espertech.esperha.client.ConfigurationHA");
                 configuration = (Configuration) configurationHAClass.newInstance();
@@ -69,6 +71,21 @@ public class CEPProvider {
                 configuration = new Configuration();
             }
             configuration.addEventTypeAlias("Market", MarketData.class);
+			
+            
+            // EsperJMX enablement - if available
+			try {
+				Class.forName("com.espertech.esper.jmx.client.EsperJMXPlugin");
+	            configuration.addPluginLoader(
+	                    "EsperJMX",
+	                    "com.espertech.esper.jmx.client.EsperJMXPlugin",
+	    				null);// will use platform mbean - should enable platform mbean connector in startup command line
+                System.out.println("=== EsperJMX is available, using platform mbean ===");
+			} catch (ClassNotFoundException e) {
+				;
+			}
+
+			
             EPServiceProvider epService = EPServiceProviderManager.getProvider("benchmark", configuration);
             epAdministrator = epService.getEPAdministrator();
             updateListener = new MyUpdateListener();
