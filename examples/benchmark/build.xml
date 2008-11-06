@@ -17,13 +17,6 @@
 
     <target name="build">
         <mkdir dir="${build.dir}"/>
-        <javac classpathref="lib.classpath" destdir="${build.dir}" excludes="**/*BEA*">
-            <src path="${src.dir}"/>
-        </javac>
-    </target>
-
-    <target name="buildbea">
-        <mkdir dir="${build.dir}"/>
         <javac classpathref="lib.classpath" destdir="${build.dir}">
             <src path="${src.dir}"/>
         </javac>
@@ -41,14 +34,6 @@
         <echo message="***"/>
         <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.server.Server" fork="true">
             <arg line="-rate 4x10000 -mode STP"/>
-            <classpath location="etc"/><!-- for etc/log4j.xml and statement discovery -->
-        </java>
-    </target>
-
-    <target name="runbea" depends="buildbea">
-        <java classpathref="lib.classpath" classname="com.espertech.esper.example.benchmark.server.Server" fork="true">
-            <jvmarg line="-Desper.benchmark.provider=com.espertech.esper.example.benchmark.server.BEACEPProvider"/>
-            <arg line="-rate 4x10000 -mode BEA_STP"/>
             <classpath location="etc"/><!-- for etc/log4j.xml and statement discovery -->
         </java>
     </target>
