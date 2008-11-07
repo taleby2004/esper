@@ -1,7 +1,7 @@
 package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.core.EPQueryResult;
+import com.espertech.esper.client.EPOnDemandQueryResult;
 import com.espertech.esper.core.EPRuntimeSPI;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import junit.framework.Assert;
@@ -35,7 +35,7 @@ public class StmtNamedWindowQueryCallable implements Callable
                 total++;
 
                 String selectQuery = "select * from MyWindow where string='" + threadKey + "' and longPrimitive=" + loop;
-                EPQueryResult queryResult = engine.executeQuery(selectQuery);
+                EPOnDemandQueryResult queryResult = engine.executeQuery(selectQuery);
                 Assert.assertEquals(1, queryResult.getArray().length);
                 Assert.assertEquals(threadKey, queryResult.getArray()[0].get("string"));
                 Assert.assertEquals((long)loop, queryResult.getArray()[0].get("longPrimitive"));

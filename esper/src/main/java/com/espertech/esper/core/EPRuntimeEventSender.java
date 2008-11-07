@@ -21,5 +21,9 @@ public interface EPRuntimeEventSender
      */
     public void processWrappedEvent(EventBean eventBean);
 
+    /**
+     * For processing a routed event.
+     * @param event routed event
+     */
     public void routeEventBean(EventBean event);
 }

@@ -6,7 +6,7 @@
  * The software in this package is published under the terms of the GPL license       *
  * a copy of which has been included with this distribution in the license.txt file.  *
  **************************************************************************************/
-package com.espertech.esper.core;
+package com.espertech.esper.client;
 
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
@@ -14,9 +14,9 @@ import com.espertech.esper.event.EventType;
 import java.util.Iterator;
 
 /**
- * Results of a fire-and-forget, non-continuous query.
+ * Results of an on-demand (fire-and-forget non-continuous) query.
  */
-public interface EPQueryResult
+public interface EPOnDemandQueryResult
 {
     /**
      * Returns an array representing query result rows.
@@ -26,7 +26,7 @@ public interface EPQueryResult
 
     /**
      * Returns the event type of the result.
-     * @return type
+     * @return event type of result row
      */
     public EventType getEventType();
 

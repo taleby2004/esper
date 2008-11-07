@@ -67,7 +67,7 @@ public class TestConfigurationOperations extends TestCase
         }
         catch (Exception ex)
         {
-            assertEquals("Failed to resolve event type: Failed to load class XXXX [select * from XXXX]", ex.getMessage());
+            assertEquals("Failed to resolve event type: Event type or class named 'XXXX' was not found [select * from XXXX]", ex.getMessage());
         }
     }
 

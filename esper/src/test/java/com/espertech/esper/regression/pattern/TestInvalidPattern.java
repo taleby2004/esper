@@ -54,7 +54,7 @@ public class TestInvalidPattern extends TestCase
 
         // class not found
         exceptionText = getStatementExceptionPattern("dummypkg.dummy()");
-        assertEquals("Failed to resolve event type: Failed to load class dummypkg.dummy [dummypkg.dummy()]", exceptionText);
+        assertEquals("Failed to resolve event type: Event type or class named 'dummypkg.dummy' was not found [dummypkg.dummy()]", exceptionText);
 
         // simple property not found
         exceptionText = getStatementExceptionPattern(EVENT_NUM + "(dummy=1)");

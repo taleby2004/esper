@@ -304,7 +304,8 @@ public class EventAdapterServiceImpl implements EventAdapterService
             }
 
             throw new EventAdapterException("Event type named '" + eventTypeAlias +
-                    "' has already been declared with differing column name or type information");
+                    "' has already been declared with differing underlying type information:" + existingType.getUnderlyingType().getName() +
+                    " versus " + clazz.getName());
         }
 
         EventType eventType = beanEventAdapter.createBeanType(eventTypeAlias, clazz, isConfigured);
@@ -356,7 +357,8 @@ public class EventAdapterServiceImpl implements EventAdapterService
             }
 
             throw new EventAdapterException("Event type named '" + eventTypeAlias +
-                    "' has already been declared with differing column name or type information");
+                    "' has already been declared with differing underlying type information: Class " + existingType.getUnderlyingType().getName() +
+                    " versus " + fullyQualClassName);
         }
 
         // Try to resolve as a fully-qualified class name first
@@ -370,7 +372,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         {
             if (!considerAutoAlias)
             {
-                throw new EventAdapterException("Failed to load class " + fullyQualClassName, ex);
+                throw new EventAdapterException("Event type or class named '" + fullyQualClassName + "' was not found", ex);
             }
 
             // Attempt to resolve from auto-alias packages
@@ -396,7 +398,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             }
             if (clazz == null)
             {
-                throw new EventAdapterException("Failed to load class " + fullyQualClassName, ex);
+                throw new EventAdapterException("Event type or class named '" + fullyQualClassName + "' was not found", ex);
             }
         }
 
@@ -418,8 +420,9 @@ public class EventAdapterServiceImpl implements EventAdapterService
             // The existing type must be the same as the type createdStatement
             if (!newEventType.equals(existingType))
             {
+                String message = newEventType.getEqualsMessage(existingType);
                 throw new EventAdapterException("Event type named '" + eventTypeAlias +
-                        "' has already been declared with differing column name or type information");
+                        "' has already been declared with differing column name or type information: " + message);
             }
 
             // Since it's the same, return the existing type
@@ -443,8 +446,9 @@ public class EventAdapterServiceImpl implements EventAdapterService
             // The existing type must be the same as the type createdStatement
             if (!newEventType.equals(existingType))
             {
+                String message = newEventType.getEqualsMessage(existingType);
                 throw new EventAdapterException("Event type named '" + eventTypeAlias +
-                        "' has already been declared with differing column name or type information");
+                        "' has already been declared with differing column name or type information: " + message);
             }
 
             // Since it's the same, return the existing type
@@ -577,13 +581,14 @@ public class EventAdapterServiceImpl implements EventAdapterService
 	        if (!newEventType.equals(existingType))
 	        {
                 // It is possible that the wrapped event type is compatible: a child type of the desired type
-                if (isCompatibleWrapper(existingType, underlyingEventType, propertyTypes))
+                String message = isCompatibleWrapper(existingType, underlyingEventType, propertyTypes); 
+                if (message == null)
                 {
                     return existingType;
                 }
 
                 throw new EventAdapterException("Event type named '" + eventTypeAlias +
-	                    "' has already been declared with differing column name or type information");
+	                    "' has already been declared with differing column name or type information: " + message);
 	        }
 
 	        // Since it's the same, return the existing type
@@ -603,33 +608,34 @@ public class EventAdapterServiceImpl implements EventAdapterService
      * @param propertyTypes is the additional properties
      * @return true for compatible, or false if not
      */
-    public static boolean isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Object> propertyTypes)
+    public static String isCompatibleWrapper(EventType existingType, EventType underlyingType, Map<String, Object> propertyTypes)
     {
         if (!(existingType instanceof WrapperEventType))
         {
-            return false;
+            return "Type '" + existingType.getName() + "' is not compatible";
         }
         WrapperEventType existingWrapper = (WrapperEventType) existingType;
 
-        if (!(MapEventType.isDeepEqualsProperties(existingWrapper.getUnderlyingMapType().getTypes(), propertyTypes)))
+        String message = MapEventType.isDeepEqualsProperties(existingType.getName(), existingWrapper.getUnderlyingMapType().getTypes(), propertyTypes); 
+        if (message != null)
         {
-            return false;
+            return message;
         }
         EventType existingUnderlyingType = existingWrapper.getUnderlyingEventType();
 
         // If one of the supertypes of the underlying type is the existing underlying type, we are compatible
         if (underlyingType.getSuperTypes() == null)
         {
-            return false;
+            return "Type '" + existingType.getName() + "' is not compatible";
         }
         for (EventType superUnderlying : underlyingType.getSuperTypes())
         {
             if (superUnderlying == existingUnderlyingType)
             {
-                return true;
+                return null;
             }
         }
-        return false;
+        return "Type '" + existingType.getName() + "' is not compatible";
     }
 
     public final EventType createAnonymousMapType(Map<String, Object> propertyTypes) throws EventAdapterException

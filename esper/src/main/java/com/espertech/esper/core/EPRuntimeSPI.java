@@ -9,6 +9,8 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPRuntime;
+import com.espertech.esper.client.EPOnDemandPreparedQuery;
+import com.espertech.esper.client.EPOnDemandQueryResult;
 
 import java.util.Map;
 
@@ -17,20 +19,6 @@ import java.util.Map;
  */
 public interface EPRuntimeSPI extends EPRuntime
 {
-    /**
-     * Execute a free-form EPL dynamically, non-continuously, in a fire-and-forget fashion, against named windows.
-     * @param epl is the EPL to execute
-     * @return query result
-     */
-    public EPQueryResult executeQuery(String epl);
-
-    /**
-     * Prepare a non-continuous, fire-and-forget query for repeated execution.
-     * @param epl to prepare
-     * @return proxy to execute upon, that also provides the event type of the returned results
-     */
-    public EPPreparedQuery prepareQuery(String epl);
-
     /**
      * Returns all declared variable names and their types.
      * @return variable names and types

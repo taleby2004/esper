@@ -166,6 +166,81 @@ The pattern is to match only if all 3 events have a different user. The time win
       </answer>
     </faq>    
 
+    <faq id="window-policy-removeall">
+      <question>How do I remove all events from a window and start over?</question>
+      <answer>
+        <p>
+          You have a need for a data window that can detect a certain situation, and if that situation occurs you want to start fresh and remove all events?
+        </p>
+        <p>
+          Named windows and the on-delete clause address this need. This sample declares a named window to hold MyEvent events:
+        </p>
+		<div class="source"><pre>create window MyWindow.win:keepall() as select * from MyEvent</pre></div>      
+        <p>
+          Populate the named window from all arriving MyEvent events:
+        </p>
+		<div class="source"><pre>insert into MyWindow select * from MyEvent</pre></div>      
+        <p>
+          Detect the situation, in the below example the query looks at the average wait time per train station:
+        </p>
+		<div class="source"><pre>insert into WarningStream 
+select trainStation, avg(waitTime) as avgWait
+from MyWindow 
+group by trainStation 
+having avg(waitTime) > 60</pre></div>
+        <p>
+          Use the WarningStream events to remove from the named window:
+        </p>
+		<div class="source"><pre>on WarningStream delete from MyWindow</pre></div>      
+      </answer>
+    </faq>    
+
+    <faq id="window-expiry-multiple-or-custom">
+      <question>How do I combine data windows and their expiry polices? Or define custom logic for removing events?</question>
+      <answer>
+        <p>
+          The documentation outlines the built-in views, some of which combine length and time based expiry. 
+        </p>
+        <p>
+          We recommend a named window as the place to start. Named windows provide an on-delete clause that helps to build or combine a custom stategy for when to remove events.
+        </p>
+        <p>
+          Lets start with a named window that keeps the last 1 minute of events:
+        </p>
+		<div class="source"><pre>create window MyWindow.win:time(1 min) select * from MyEvent</pre></div>
+        <p>
+          This example EPL removes from the named window those that have the same id:
+        </p>
+		<div class="source"><pre>on MyDeleteEvent as d delete from MyWindow as w where w.id = d.id</pre></div>
+        <p>
+          This example EPL removes non-unique rows by category, so that only the last event for each category stays in the named window. It therefore selects the remove stream (rstream) of the unique window:
+        </p>
+		<div class="source"><pre>insert into MyNonUnique select rstream id from MyEvent.std:unique(category)
+		
+on MyNonUnique as d delete from MyWindow as w where w.id = d.id</pre></div>
+        <p>
+          Variables can also be a useful way to parameterize an expiry policy. The next sample EPL assumes that a variable by name CURRENT_THRESHOLD was declared and employs a pattern to execute every 20 seconds:
+        </p>
+		<div class="source"><pre>on pattern[every timer:interval(20 sec)] 
+delete from MyWindow where threshold > CURRENT_THRESHOLD</pre></div>
+        <p>
+          Last, a plug-in view implementation may be the right way to go if you want to parameterize it special ways or need integration into the EPL language or want to use the Esper scheduling APIs.
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="window-seeding">
+      <question>How do I seed an empty data window from a filled data window?</question>
+      <answer>
+        <p>
+          This is a feature of named windows. When a named window is filled already, and a new statement gets created on a filled named window, that statement's aggregation does not start empty. 
+        </p>
+        <p>
+          Also, named window may be initialized from other named windows. Look up the "insert" keyword in the create window clause.
+        </p>
+      </answer>
+    </faq>    
+
     <faq id="window-per-category">
       <question>How do I keep a separate window of events per category and compute aggregates for each category's window?</question>
       <answer>
@@ -624,41 +699,6 @@ select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPr
 	</p>
       </answer>
     </faq>    
-
-     <faq id="merge_streams">
-      <question>How do I merge streams?</question>
-      <answer>
-        <p>
-	  The insert-into clause is designed to merge streams. When using insert-into, make sure the type of properties or events inserted into the same streams matches.
-	  A stream does not need to be declared first, since insert-into itself creates a new stream if none existed.
-        </p>
-        <p>
-	  EPL has the concept of variant streams for streams that can hold multiple types of events among a predefined set, or any type of event.
-        </p>
-        <p>
-	  Its also possible to attach the same listener instance to multiple statements to achieve a merge.
-        </p>
-      </answer>
-    </faq>
-
-    <faq id="modify_epl">
-      <question>How difficult is modification to the Esper Event Processing Language (EPL)? For example adding aggregate functions, or modifying the language all together?</question>
-      <answer>
-        <p>
-			Esper allows plug-in of aggregation functions, views, pattern objects and user functions as well as event representations and event type resolution as described in the documentation.
-			Extending the language is thus easy and custom extensions directly surface in the EPL.
-        </p>
-        <p>
-			For even more flexibility, it is also possible to contribute your own extensions to the project in other areas if you comply 
-			with the open source GPL terms. The grammar is specified in ANTLR and the well-componentized code constructs an internal representation of statements that 
-			allows for easy extension.
-        </p>
-        <p>
-			The statement object model API also deserves a mention here since that allows an application to compile, interrogate and build EPL statements not jus as strings
-			but as comprehensive object representations.
-        </p>
-      </answer>
-    </faq>
   </part>
 
 </faqs>

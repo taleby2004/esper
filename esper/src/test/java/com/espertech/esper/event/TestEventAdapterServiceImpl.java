@@ -143,7 +143,7 @@ public class TestEventAdapterServiceImpl extends TestCase
         }
         catch (EventAdapterException ex)
         {
-            // expected
+            assertEquals("Event type named 'latencyEvent' has already been declared with differing underlying type information: Class " + SupportBean.class.getName() + " versus " + SupportBean_A.class.getName(), ex.getMessage());
         }
     }
 
@@ -164,7 +164,7 @@ public class TestEventAdapterServiceImpl extends TestCase
         }
         catch (EventAdapterException ex)
         {
-            // expected
+            assertEquals("Event type named 'latencyEvent' has already been declared with differing underlying type information: Class " + SupportBean.class.getName() + " versus " + SupportBean_A.class.getName(), ex.getMessage());
         }
     }
 

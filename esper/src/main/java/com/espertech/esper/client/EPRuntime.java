@@ -244,4 +244,20 @@ public interface EPRuntime
      * @throws EventTypeException thrown to indicate that the URI list was invalid
      */
     public EventSender getEventSender(URI[] uris) throws EventTypeException;
+
+    /**
+     * Execute an on-demand query.
+     * <p>
+     * On-demand queries are EPL queries that execute non-continuous fire-and-forget queries against named windows.
+     * @param epl is the EPL to execute
+     * @return query result
+     */
+    public EPOnDemandQueryResult executeQuery(String epl);
+
+    /**
+     * Prepare an on-demand query before execution and for repeated execution.
+     * @param epl to prepare
+     * @return proxy to execute upon, that also provides the event type of the returned results
+     */
+    public EPOnDemandPreparedQuery prepareQuery(String epl);
 }

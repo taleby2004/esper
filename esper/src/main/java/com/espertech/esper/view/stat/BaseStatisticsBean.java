@@ -356,16 +356,28 @@ public class BaseStatisticsBean implements Cloneable, Serializable
         this.dataPoints = dataPoints;
     }
 
+    /**
+     * Returns sum of x.
+     * @return sum of x
+     */
     public double getSumX()
     {
         return sumX;
     }
 
+    /**
+     * Returns sum of y.
+     * @return sum of y
+     */
     public double getSumY()
     {
         return sumY;
     }
 
+    /**
+     * Returns the number of datapoints.
+     * @return datapoints
+     */
     public long getDataPoints()
     {
         return dataPoints;

@@ -8,15 +8,15 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.core.EPQueryResult;
+import com.espertech.esper.client.EPOnDemandQueryResult;
 import com.espertech.esper.client.EPStatementException;
-import com.espertech.esper.core.EPPreparedQuery;
+import com.espertech.esper.client.EPOnDemandPreparedQuery;
 import com.espertech.esper.event.EventType;
 
 /**
  * Provides prepared query functionality.
  */
-public class EPPreparedQueryImpl implements EPPreparedQuery
+public class EPPreparedQueryImpl implements EPOnDemandPreparedQuery
 {
     private final EPPreparedExecuteMethod executeMethod;
     private final String epl;
@@ -32,7 +32,7 @@ public class EPPreparedQueryImpl implements EPPreparedQuery
         this.epl = epl;
     }
 
-    public EPQueryResult execute()
+    public EPOnDemandQueryResult execute()
     {
         try
         {

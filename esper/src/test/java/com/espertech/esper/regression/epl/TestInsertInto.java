@@ -299,7 +299,7 @@ public class TestInsertInto extends TestCase
         catch (EPStatementException ex)
         {
             // expected
-            assertEquals("Error starting view: Event type named 'Event_1' has already been declared with differing column name or type information [insert into Event_1(delta) select (intPrimitive - intBoxed) as deltaTag from com.espertech.esper.support.bean.SupportBean.win:length(100)]", ex.getMessage());
+            assertEquals("Error starting view: Event type named 'Event_1' has already been declared with differing column name or type information: Type by name 'Event_1' expects 2 properties but receives 1 properties [insert into Event_1(delta) select (intPrimitive - intBoxed) as deltaTag from com.espertech.esper.support.bean.SupportBean.win:length(100)]", ex.getMessage());
         }
     }
 

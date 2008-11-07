@@ -55,7 +55,7 @@ public class TestInvalidView extends TestCase
 
         // class not found
         exceptionText = getStatementExceptionView("select * from dummypkg.dummy().win:length(10)");
-        assertEquals("Failed to resolve event type: Failed to load class dummypkg.dummy [select * from dummypkg.dummy().win:length(10)]", exceptionText);
+        assertEquals("Failed to resolve event type: Event type or class named 'dummypkg.dummy' was not found [select * from dummypkg.dummy().win:length(10)]", exceptionText);
 
         // invalid view
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".dummy:dummy(10)");

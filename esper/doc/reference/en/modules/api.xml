@@ -740,6 +740,94 @@ sender.sendEvent(myEvent);]]></programlisting>
 			</para>
 		</sect2>
 
+	    <sect2 id="api-runtime-ondemand">		
+			<title>On-Demand Query Execution</title>
+			<para>
+				As your application may not require streaming results and may not know each query in advance, the on-demand query facility provides for ad-hoc execution of an EPL expression.
+			</para>
+	
+			<para>
+				On-demand queries are not continuous in nature: The query engine executes the query once and returns all result rows to the application. On-demand query execution is very lightweight as the engine performs no statement creation
+				and the query leaves no traces within the engine.
+			</para>
+
+			<para>
+				The following limitations apply:
+			</para>
+
+			<itemizedlist>
+				<listitem>
+					<para>
+						An on-demand EPL expression only evaluates against the named windows that your application creates. On-demand queries may not specify any other streams or application event types.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The following clauses are not allowed in on-demand EPL: <literal>insert into</literal> and <literal>output</literal>.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Views and patterns are not allowed to appear in on-demand queries.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						On-demand EPL may not perform subqueries.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The <literal>previous</literal> and <literal>prior</literal> functions may not be used.
+					</para>
+				</listitem>
+			</itemizedlist>
+		
+			<sect3 id="api-runtime-ondemand-use">		
+				<title>On-Demand Query API</title>
+				<para>
+					The <literal>EPRuntime</literal> provides two ways to run on-demand queries:
+				</para>
+				
+				<orderedlist>
+					<listitem>
+						<para>
+							Dynamic on-demand queries are executed once through the <literal>executeQuery</literal> method.
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							Prepared on-demand queries: The <literal>prepareQuery</literal> method returns an <literal>EPOnDemandPreparedQuery</literal> representing the query, and the query can be performed repeatedly via the <literal>execute</literal> method.
+						</para>
+					</listitem>
+				</orderedlist>
+
+				<para>
+					Prepared on-demand queries are designed for repeated execution and may perform better then the dynamic queries if running the same query multiple times. Placeholders are not allowed in prepared on-demand queries.
+				</para>				
+
+				<para>
+					The next program listing runs an on-demand query against a named window <literal>MyNamedWindow</literal> and prints a column of each row result of the query:
+				</para>
+
+			<programlisting><![CDATA[String query = "select * from MyNamedWindow";
+EPOnDemandQueryResult result = epRuntime.executeQuery(query);
+for (EventBean row : result.getArray()) {
+  System.out.println("name=" + row.get("name"));
+}]]></programlisting>
+
+				<para>
+					The next code snippet demonstrates prepared on-demand queries:
+				</para>				
+
+			<programlisting><![CDATA[EPOnDemandPreparedQuery prepared = epRuntime.prepareQuery(query);
+EPOnDemandQueryResult result = prepared.execute();
+// ...later ...
+prepared.execute();	// execute a second time]]></programlisting>
+
+			</sect3>
+		</sect2>
+
 	    <sect2 id="api-runtime-emit">		
 			<title>Emit Facility for Publish-Subscribe</title>
 			<para>

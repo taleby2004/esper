@@ -3,17 +3,42 @@ Esper Changelog
 
 Changes in version 2.3
 ------------------------
-- Fixed issue ESPER-286 Map inheritance event type processes first derived event only for queries against supertype events
-- Fixed issue ESPER-282	Memory leak in grouped data window when combined with weighted-avg view
-- Fixed issue ESPER-281	On-Select with Insert-Into throws NPE if no data selected from named window
-- Fixed issue ESPER-280	isVariantStreamExists throws nptr
-- Fixed issue ESPER-277	Add route methods for routing Maps, XML and plug-in event representation events
-- Fixed issue ESPER-276	NullPointerException reported when enabling metrics reporting but still working
-- Fixed issue ESPER-275	Identifiers that are scientific notation numbers don't cause a parser error
-- Fixed issue ESPER-274	Strange exception using median collection
-- Performance improvement in group-by view.
-- Array map properties and Map type name as property name in map, one-to-many
-- ESPER-273 Send event before EPServiceProvider.destroy()
+
+Major API changes
+  - Added API for on-demand queries
+ 
+New Features
+  - Support for array-type properties in Maps; Support for map type name as a property type
+  - Listener API for receiving callbacks upon statement creation and state change as well as service state
+  - Allow event types to be removed at runtime; Allow detection of which statements reference types
+  - Added OSGi manifest to jar files
+  - Support for language-locale dependent sorting of String value
+  - Event type name added to EventType interface
+  - Added route methods for other event representations
+  - Added user object support to EPStatement
+  
+Minor changes
+  - Fixed issue ESPER-270 Property name order not always reflecting select clause order for getPropertyNames
+  - Fixed issue ESPER-274 Strange exception using median collection
+  - Fixed issue ESPER-275 Identifiers that are scientific notation numbers don't cause a parser error
+  - Fixed issue ESPER-276 NullPointerException reported when enabling metrics reporting but still working
+  - Fixed issue ESPER-280 isVariantStreamExists throws nptr
+  - Fixed issue ESPER-281 On-Select with Insert-Into throws NPE if no data selected from named window
+  - Fixed issue ESPER-282 Memory leak in grouped data window when combined with weighted-avg view
+  - Fixed issue ESPER-285 Correlation and Linest stats view within groupby problem
+  - Fixed issue ESPER-286 Map inheritance event type processes first derived event only for queries against supertype events
+  - Fixed issue ESPER-287 Improve startup performance for large numbers of statements with the same filter property
+  - Fixed issue ESPER-288 Write-only property of POJO event shows up in property name list
+  - Fixed issue ESPER-290 FIX adapter not documented
+  - Fixed issue ESPER-291 Delivery to observer failes with NPE if custom view posts null insert and remove stream
+  - Fixed issue ESPER-292 esper_reference.pdf : Figure 3.4. is incorrect
+  - Fixed issue ESPER-294 Pattern problem in 'every' operator not restarting a false sub-expression.
+  - Fixed issue ESPER-295 Time window onto a unique window not working
+  - Fixed issue ESPER-296 EPL 'not like' expressions in prepared statements lose negation
+  - Fixed issue ESPER-297 Detect dead database connection and retry
+  - Fixed issue ESPER-299 Need to pass context classloader to CGLib
+  - Fixed issue ESPER-300 IndexOutOfBoundsException in TimeBatchViewFactory
+  - Fixed issue ESPER-301 Time batch view documentation incorrectly shows reference point as optional with flow control keywords
 
 
 Changes in version 2.2.0
@@ -418,6 +443,7 @@ This enabled event patterns and EQL to use short event names not requiring makin
 version 0.7.0
 -------------
 Initial alpha version
+
 
 
 

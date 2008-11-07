@@ -8,17 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.client.SafeIterator;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.event.EventBean;
 import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EPOnDemandQueryResult;
 
 import java.util.Iterator;
 
 /**
  * Query result.
  */
-public class EPQueryResultImpl implements EPQueryResult
+public class EPQueryResultImpl implements EPOnDemandQueryResult
 {
     private EPPreparedQueryResult queryResult;
 

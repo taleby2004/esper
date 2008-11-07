@@ -601,20 +601,13 @@ public class MapEventType implements EventTypeSPI
             return true;
         }
 
-        if (!(obj instanceof MapEventType))
+        if (!(obj instanceof EventType))
         {
             return false;
         }
 
-        MapEventType other = (MapEventType) obj;
-
-        // Should have the same type name
-        if (!other.typeName.equals(this.typeName))
-        {
-            return false;
-        }
-
-        return isDeepEqualsProperties(other.nestableTypes, this.nestableTypes);
+        String message = getEqualsMessage((EventType)obj);
+        return message == null;
     }
 
     public int hashCode()
@@ -724,25 +717,27 @@ public class MapEventType implements EventTypeSPI
      * boxed/unboxed types, and nested map types.
      * @param setOne is the first set of properties
      * @param setTwo is the second set of properties
-     * @return true if the property set is equivalent, false if not
+     * @param otherName name of the type compared to
+     * @return null if the property set is equivalent or message if not
      */
-    public static boolean isDeepEqualsProperties(Map<String, Object> setOne, Map<String, Object> setTwo)
+    public static String isDeepEqualsProperties(String otherName, Map<String, Object> setOne, Map<String, Object> setTwo)
     {
         // Should have the same number of properties
         if (setOne.size() != setTwo.size())
         {
-            return false;
+            return "Type by name '" + otherName + "' expects " + setOne.size() + " properties but receives " + setTwo.size() + " properties";
         }
 
         // Compare property by property
         for (Map.Entry<String, Object> entry : setOne.entrySet())
         {
+            String propName = entry.getKey();
             Object setTwoType = setTwo.get(entry.getKey());
             Object setOneType = entry.getValue();
             if (((setTwoType == null) && (setOneType != null)) ||
                  (setTwoType != null) && (setOneType == null))
             {
-                return false;
+                return "Type by name '" + otherName + "' in property '" + propName + "' incompatible with null-type";
             }
             if (setTwoType == null)
             {
@@ -755,31 +750,52 @@ public class MapEventType implements EventTypeSPI
                 Class boxedThis = JavaClassHelper.getBoxedType((Class)setOneType);
                 if (!boxedOther.equals(boxedThis))
                 {
-                    return false;
+                    return "Type by name '" + otherName + "' in property '" + propName + "' expected " + boxedThis + " but receives " + boxedOther;
                 }
             }
             else if ((setTwoType instanceof Map) && (setOneType instanceof Map))
             {
-                boolean isDeepEqual = isDeepEqualsProperties((Map<String, Object>)setOneType, (Map<String, Object>)setTwoType);
-                if (!isDeepEqual)
+                String messageIsDeepEquals = isDeepEqualsProperties(propName, (Map<String, Object>)setOneType, (Map<String, Object>)setTwoType);
+                if (messageIsDeepEquals != null)
                 {
-                    return false;
+                    return messageIsDeepEquals;
                 }
             }
             else if ((setTwoType instanceof EventType) && (setOneType instanceof EventType))
             {
                 if (!setOneType.equals(setTwoType))
                 {
-                    return false;
+                    EventType setOneEventType = (EventType) setOneType;
+                    EventType setTwoEventType = (EventType) setTwoType;
+                    return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType.getName() + "' but receives event type '" + setTwoEventType.getName() + "'";
                 }
             }
             else
             {
-                return false;
+                String typeOne = getTypeName(setOneType);
+                String typeTwo = getTypeName(setTwoType);
+                return "Type by name '" + otherName + "' in property '" + propName + "' expected " + typeOne + " but receives " + typeTwo;
             }
         }
 
-        return true;
+        return null;
+    }
+
+    private static String getTypeName(Object setOneType)
+    {
+        if (setOneType == null)
+        {
+            return "null";
+        }
+        if (setOneType instanceof Class)
+        {
+            return ((Class) setOneType).getName();
+        }
+        if (setOneType instanceof EventType)
+        {
+            return "event type '" + ((EventType)setOneType).getName() + "'";
+        }
+        return setOneType.getClass().getName();
     }
 
     private static void generateExceptionNestedProp(String name, Object value) throws EPException
@@ -922,6 +938,23 @@ public class MapEventType implements EventTypeSPI
     public static String getPropertyRemoveArray(String name)
     {
         return name.replaceAll("\\[", "").replaceAll("\\]", "");
+    }
+
+    public String getEqualsMessage(EventType otherType)
+    {
+        if (!(otherType instanceof MapEventType))
+        {
+            return "Type by name '" + otherType.getName() + "' is not a compatible type";
+        }
+
+        MapEventType other = (MapEventType) otherType;
+
+        if (!other.typeName.equals(this.typeName))
+        {
+            return "Type by name '" + otherType.getName() + "' is not the same name";
+        }
+
+        return isDeepEqualsProperties(otherType.getName(), other.nestableTypes, this.nestableTypes);
     }
 
     /**

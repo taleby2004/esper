@@ -979,7 +979,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         return reader.getType();
     }
 
-    public EPQueryResult executeQuery(String epl)
+    public EPOnDemandQueryResult executeQuery(String epl)
     {
         try
         {
@@ -1000,7 +1000,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     }
 
 
-    public EPPreparedQuery prepareQuery(String epl)
+    public EPOnDemandPreparedQuery prepareQuery(String epl)
     {
         try
         {
