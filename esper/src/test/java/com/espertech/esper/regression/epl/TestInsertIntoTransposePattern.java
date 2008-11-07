@@ -52,10 +52,12 @@ public class TestInsertIntoTransposePattern extends TestCase
             System.out.println("Property " + name + " typed " + createStmt.getEventType().getPropertyType(name));
         }
 
+        /*
         epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote as this " +
                 " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
                      " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
                 " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
+        */
     }
 
     public void testTransposePOJOEventPattern()

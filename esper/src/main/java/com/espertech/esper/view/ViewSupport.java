@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -36,14 +36,14 @@ public abstract class ViewSupport implements View
      */
     protected Viewable parent;
 
-    private final LinkedList<View> children;
+    private final ArrayList<View> children;
 
     /**
      * Constructor.
      */
     protected ViewSupport()
     {
-        children = new LinkedList<View>();
+        children = new ArrayList<View>();
     }
 
     public final Viewable getParent()
@@ -94,12 +94,17 @@ public abstract class ViewSupport implements View
 
         // Provide a shortcut for a single child view since this is a very common case.
         // No iteration required here.
+        if (size == 0)
+        {
+            return;
+        }
         if (size == 1)
         {
-            children.getFirst().update(newData, oldData);
+            children.get(0).update(newData, oldData);
         }
         else
         {
+            // since there often is zero or one view underneath, the iteration case is slower
             for (View child : children)
             {
                 child.update(newData, oldData);

@@ -627,6 +627,31 @@ following conditions occurs, whichever occurs first: the data window has collect
 
 				<programlisting><![CDATA[select * from StockTickEvent.std:groupby(symbol, feed)
     .win:time(1 minute).stat:uni(price)]]></programlisting>
+    
+				<para>
+					For advanced users: There is an optional view that can control how the group-by view gets evaluated and that view is the <literal>std:merge</literal> view. 
+					The merge view can only occur after a group-by view in a view chain and controls
+					at what point in the view chain the merge of the data stream occurs from view-instance-per-criteria to single view.
+				</para>
+
+				<para>
+					Compare the following statements:
+				</para>
+				
+				<programlisting><![CDATA[select * from Market.std:groupby(ticker).win:length(1000000)
+    .stat:weighted_avg(price, volume).std:merge(ticker)
+// ... and ...
+select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
+    .stat:weighted_avg(price, volume)]]></programlisting>
+
+				<para>
+					If your statement does not specify the optional <literal>std:merge</literal> view, the semantics are the same as the first statement.
+				</para>
+
+				<para>
+					The first statement, in which the merge-view is added to the end (same as no merge view), computes weighted average per ticker, considering, per-ticker, the last 1M Market events for each ticker.
+					The second statement, in which the merge view is added to the middle, computes weighted average considering, per-ticker, the last 1M Market events, computing the weighted average for all such events using a single view rather then multiple view instances with one view per ticker. 
+				</para>
 			</sect2>
 
 			<sect2 id="view-std-size" >

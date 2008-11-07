@@ -203,6 +203,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     {
         // This setting applies to all engines in a given VM
         ExecutionPathDebugLog.setDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableExecutionDebug());
+        ExecutionPathDebugLog.setTimerDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableTimerDebug());
 
         // This setting applies to all engines in a given VM
         MetricReportingPath.setMetricsEnabled(configSnapshot.getEngineDefaults().getMetricsReporting().isEnableMetricsReporting());

@@ -20,6 +20,7 @@ public class TestMapEventType extends TestCase
     {
         eventAdapterService = SupportEventAdapterService.getService();
 
+        EventTypeMetadata metadata = EventTypeMetadata.createMapType("typename", true, false, false);
         Map<String, Class> testTypesMap = new HashMap<String, Class>();
         testTypesMap.put("myInt", int.class);
         testTypesMap.put("myString", String.class);
@@ -28,7 +29,7 @@ public class TestMapEventType extends TestCase
         testTypesMap.put("myComplexBean", SupportBeanComplexProps.class);
         testTypesMap.put("myNullableSupportBean", SupportBean.class);
         testTypesMap.put("myNullType", null);
-        eventType = new MapEventType(null, "", testTypesMap, eventAdapterService, null, null);
+        eventType = new MapEventType(metadata, "", testTypesMap, eventAdapterService, null, null);
     }
 
     public void testGetPropertyNames()

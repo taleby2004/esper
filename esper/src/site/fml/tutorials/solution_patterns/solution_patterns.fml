@@ -699,6 +699,34 @@ select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPr
 	</p>
       </answer>
     </faq>    
+
+    <faq id="storing">
+      <question>How do I store statements in a file? Is there a standard file storage?</question>
+      <answer>
+        <p>
+          Esper does not prescribe any particular way of storing EPL queries. Some applications prefer XML files and some prefer properties files. Your application may use a table in a relational database to store queries if so desired.
+        </p>
+        <p>
+          We present below an example of storing statements in a property file. This is not a recommendation and is merely one possible way among many of storing EPL queries in a file.
+        </p>
+        <p>
+          Here is the example:
+        </p>
+	<div class="source"><pre>
+#Alert12
+esper.statement.alert12.0=create window Alert12Window.win:time(1 hour) as select ticker as alertId, this from LastTickEvent
+esper.statement.alert12.0.ha.prefix=resilient
+esper.statement.alert12.1=insert into MaxPrice:alertId:(lastPx) select max(lastPx) as lastPx from LastTickEvent(ticker=':ticker:')
+esper.statement.alert12.1.ha.prefix=resilient
+esper.statement.alert12.2=insert into Alert:alertId:Event select * from LastTickEvent(ticker=':ticker:') where lastPx &lt;= (1-(:value:/100.0))*(select lastPx from MaxPrice:alertId:.std:lastevent())
+esper.statement.alert12.2.ha.prefix=durable
+esper.statement.alert12.3=insert into Alert12Window select ':alertId:' as alertId, quote.this as this from pattern [quote=Alert:alertId:Event]
+esper.statement.alert12.3.ha.prefix=durable</pre></div>      
+        <p>
+			 This way of storing EPL assignes an alert name and a suffix that represents the statement number for all EPL statements for the alert. It uses the <pre>:replaceme:</pre> format as a parameter placeholder that the application itself replaces with a value before creating a statement. This example does not use prepared statements.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
 </faqs>

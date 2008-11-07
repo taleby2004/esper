@@ -49,6 +49,7 @@ public class TestConfigurationParser extends TestCase
 
         assertTrue(config.getEngineDefaults().getViewResources().isShareViews());
         assertFalse(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
+        assertTrue(config.getEngineDefaults().getLogging().isEnableTimerDebug());
         assertEquals(15000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
         assertEquals(ConfigurationEngineDefaults.TimeSourceType.MILLI, config.getEngineDefaults().getTimeSource().getTimeSourceType());
 
@@ -247,6 +248,7 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getViewResources().isShareViews());
         assertEquals(Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertTrue(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
+        assertFalse(config.getEngineDefaults().getLogging().isEnableTimerDebug());
         assertEquals(30000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
         assertEquals(StreamSelector.RSTREAM_ISTREAM_BOTH, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
 

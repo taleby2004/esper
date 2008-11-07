@@ -44,7 +44,7 @@ public class DispatchServiceImpl implements DispatchService
 
     private static void dispatchFromQueue(ArrayDequeJDK6Backport<Dispatchable> dispatchQueue)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()) && (ExecutionPathDebugLog.isTimerDebugEnabled))
         {
             log.debug(".dispatchFromQueue Dispatch queue is " + dispatchQueue.size() + " elements");
         }

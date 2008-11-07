@@ -31,7 +31,7 @@ public class TestFilterSpecCompiled extends TestCase
         FilterSpecCompiled spec = SupportFilterSpecBuilder.build(eventType, new Object[] { "intPrimitive", FilterOperator.EQUAL, 2,
                                                                  "intBoxed", FilterOperator.EQUAL, 3 });
 
-        int expectedHash = eventType.hashCode() ^ "intPrimitive".hashCode() ^ "intBoxed".hashCode();
+        int expectedHash = eventType.hashCode() ^ "intPrimitive".hashCode() ^ 31*Integer.valueOf(2).hashCode() ^ "intBoxed".hashCode() ^ 31*Integer.valueOf(3).hashCode();
         assertEquals(expectedHash, spec.hashCode());
     }
 

@@ -423,6 +423,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class Logging implements Serializable
     {
         private boolean enableExecutionDebug;
+        private boolean enableTimerDebug;
 
         /**
          * Ctor - sets up defaults.
@@ -430,6 +431,7 @@ public class ConfigurationEngineDefaults implements Serializable
         protected Logging()
         {
             enableExecutionDebug = false;
+            enableTimerDebug = true;
         }
 
         /**
@@ -452,6 +454,28 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setEnableExecutionDebug(boolean enableExecutionDebug)
         {
             this.enableExecutionDebug = enableExecutionDebug;
+        }
+
+        /**
+         * Returns true if timer debug level logging is enabled (true by default).
+         * <p>
+         * Set this value to false to reduce the debug-level logging output for the timer thread(s).
+         * For use only when debug-level logging is enabled.
+         * @return indicator whether timer execution is noisy in debug or not
+         */
+        public boolean isEnableTimerDebug()
+        {
+            return enableTimerDebug;
+        }
+
+        /**
+         * Set this value to false to reduce the debug-level logging output for the timer thread(s).
+         * For use only when debug-level logging is enabled.
+         * @param enableTimerDebug indicator whether timer execution is noisy in debug or not (true is noisy)
+         */
+        public void setEnableTimerDebug(boolean enableTimerDebug)
+        {
+            this.enableTimerDebug = enableTimerDebug;
         }
     }
 

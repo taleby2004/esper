@@ -649,6 +649,21 @@ public class EventAdapterServiceImpl implements EventAdapterService
     {
         String alias = UuidGenerator.generate();
         EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(alias);
+
+        // If we are wrapping an underlying type that is itself a wrapper, then this is a special case: unwrap
+        if (underlyingEventType instanceof WrapperEventType)
+        {
+            WrapperEventType underlyingWrapperType = (WrapperEventType) underlyingEventType;
+
+            // the underlying type becomes the type already wrapped
+            // properties are a superset of the wrapped properties and the additional properties
+            underlyingEventType = underlyingWrapperType.getUnderlyingEventType();
+            Map<String, Object> propertiesSuperset = new HashMap<String, Object>();
+            propertiesSuperset.putAll(underlyingWrapperType.getUnderlyingMapType().getTypes());
+            propertiesSuperset.putAll(propertyTypes);
+            propertyTypes = propertiesSuperset;
+        }
+
     	return new WrapperEventType(metadata, alias, underlyingEventType, propertyTypes, this);
     }
 

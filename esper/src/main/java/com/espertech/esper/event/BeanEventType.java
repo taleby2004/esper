@@ -42,6 +42,8 @@ public class BeanEventType implements EventTypeSPI
     private Map<String, List<SimplePropertyInfo>> indexedSmartPropertyTable;
     private Map<String, List<SimplePropertyInfo>> mappedSmartPropertyTable;
 
+    private final Map<String, EventPropertyGetter> propertyGetterCache;
+
     /**
      * Constructor takes a java bean class as an argument.
      * @param clazz is the class of a java bean or other POJO
@@ -69,6 +71,7 @@ public class BeanEventType implements EventTypeSPI
         {
             this.propertyResolutionStyle = beanEventTypeFactory.getDefaultPropertyResolutionStyle();
         }
+        propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
         initialize(false);
     }
@@ -120,10 +123,18 @@ public class BeanEventType implements EventTypeSPI
 
     public EventPropertyGetter getGetter(String propertyName)
     {
+        EventPropertyGetter cachedGetter = propertyGetterCache.get(propertyName);
+        if (cachedGetter != null)
+        {
+            return cachedGetter; 
+        }
+
         SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyName);
         if ((simpleProp != null) && ( simpleProp.getter != null ))
         {
-            return simpleProp.getGetter();
+            EventPropertyGetter getter = simpleProp.getGetter();
+            propertyGetterCache.put(propertyName, getter);
+            return getter;
         }
 
         Property prop = PropertyParser.parse(propertyName, beanEventTypeFactory, false);
@@ -132,7 +143,10 @@ public class BeanEventType implements EventTypeSPI
             // there is no such property since it wasn't in simplePropertyGetters
             return null;
         }
-        return prop.getGetter(this);
+
+        EventPropertyGetter getter = prop.getGetter(this);
+        propertyGetterCache.put(propertyName, getter);
+        return getter;
     }
 
     /**

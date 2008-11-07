@@ -11,10 +11,7 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.Pair;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An event type that adds zero or more fields to an existing event type.
@@ -49,6 +46,7 @@ public class WrapperEventType implements EventTypeSPI
     private final int hashCode;
     private final boolean isNoMapProperties;
     private final String typeName;
+    private final Map<String, EventPropertyGetter> propertyGetterCache;
 
     /**
      * Ctor.
@@ -68,6 +66,7 @@ public class WrapperEventType implements EventTypeSPI
         this.underlyingMapType = new MapEventType(metadataMapType, typeName, eventAdapterService, properties, null, null);
         this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
         this.isNoMapProperties = properties.isEmpty();
+        propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
         List<String> propertyNames = new ArrayList<String>();
 		for(String eventProperty : underlyingEventType.getPropertyNames())
@@ -103,9 +102,15 @@ public class WrapperEventType implements EventTypeSPI
 
     public EventPropertyGetter getGetter(final String property)
 	{
+        EventPropertyGetter cachedGetter = propertyGetterCache.get(property);
+        if (cachedGetter != null)
+        {
+            return cachedGetter;
+        }
+
 		if(underlyingEventType.isProperty(property))
 		{
-            return new EventPropertyGetter()
+            EventPropertyGetter getter = new EventPropertyGetter()
             {
                 public Object get(EventBean event)
                 {
@@ -124,10 +129,12 @@ public class WrapperEventType implements EventTypeSPI
                     return true; // Property exists as the property is not dynamic (unchecked)
                 }
             };
-		}
+            propertyGetterCache.put(property, getter);
+            return getter;
+        }
 		else if (underlyingMapType.isProperty(property))
 		{
-            return new EventPropertyGetter()
+            EventPropertyGetter getter = new EventPropertyGetter()
             {
                 public Object get(EventBean event)
                 {
@@ -145,7 +152,9 @@ public class WrapperEventType implements EventTypeSPI
                     return true; // Property exists as the property is not dynamic (unchecked)
                 }
             };
-		}
+            propertyGetterCache.put(property, getter);
+            return getter;
+        }
 		else
 		{
 			return null;

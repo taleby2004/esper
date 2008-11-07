@@ -1305,10 +1305,16 @@ config.getEngineDefaults().getViewResources().setShareViews(false);]]></programl
 				</para>
 
 				<para>
-					The API to use to enable debug logging is shown here:
+				   When debug-level logging is enabled by setting the flag as below and by setting DEBUG in the Log4j configuration file, then the timer processing may produce extensive debug output that
+				   you may not want to have in the log file. The <literal>timer-debug</literal> setting in the XML or via API as below disables timer debug output which is enabled by default.
+				</para>
+
+				<para>
+					The API to use to enable debug logging and disable timer event output is shown here:
 				</para>
 				<programlisting><![CDATA[Configuration config = new Configuration();
-config.getEngineDefaults().getLogging().setEnableExecutionDebug(true);]]></programlisting>
+config.getEngineDefaults().getLogging().setEnableExecutionDebug(true);
+config.getEngineDefaults().getLogging().setEnableTimerDebug(false);]]></programlisting>
 
 				<para>
 					Note: this is a configuration option that applies to all engine instances of a given Java module or VM.

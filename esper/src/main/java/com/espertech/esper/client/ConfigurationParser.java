@@ -925,6 +925,12 @@ class ConfigurationParser {
                 Boolean value = Boolean.parseBoolean(valueText);
                 configuration.getEngineDefaults().getLogging().setEnableExecutionDebug(value);
             }
+            if (subElement.getNodeName().equals("timer-debug"))
+            {
+                String valueText = subElement.getAttributes().getNamedItem("enabled").getTextContent();
+                Boolean value = Boolean.parseBoolean(valueText);
+                configuration.getEngineDefaults().getLogging().setEnableTimerDebug(value);
+            }
         }
     }
 

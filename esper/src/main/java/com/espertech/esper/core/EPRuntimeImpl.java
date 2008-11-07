@@ -105,7 +105,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public void timerCallback()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled() && (ExecutionPathDebugLog.isTimerDebugEnabled)))
         {
             log.debug(".timerCallback Evaluating scheduled callbacks");
         }
@@ -125,7 +125,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
-            log.debug(".sendEvent Processing event " + event);
+            if ((!(event instanceof CurrentTimeEvent)) || (ExecutionPathDebugLog.isTimerDebugEnabled))
+            {
+                log.debug(".sendEvent Processing event " + event);
+            }
         }
 
         // Process event
@@ -337,7 +340,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
 
         // Evaluation of all time events is protected from statement management
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()) && (ExecutionPathDebugLog.isTimerDebugEnabled))
         {
             log.debug(".processTimeEvent Setting time and evaluating schedules");
         }

@@ -27,11 +27,25 @@ public class ExecutionPathDebugLog
     public static boolean isDebugEnabled = false;
 
     /**
+     * Public access.
+     */
+    public static boolean isTimerDebugEnabled = true;
+
+    /**
      * Sets execution path debug logging.
      * @param debugEnabled true for allowing Log4j debug log messages to be generated for the execution path
      */
     public static void setDebugEnabled(Boolean debugEnabled)
     {
         isDebugEnabled = debugEnabled;
+    }
+
+    /**
+     * Sets debug logging for timer.
+     * @param timerDebugEnabled true for allowing Log4j debug log messages for regular timer execution
+     */
+    public static void setTimerDebugEnabled(Boolean timerDebugEnabled)
+    {
+        isTimerDebugEnabled = timerDebugEnabled;
     }
 }

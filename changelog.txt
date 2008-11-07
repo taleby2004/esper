@@ -3,6 +3,7 @@ Esper Changelog
 
 Changes in version 2.3
 ------------------------
+- on-demand query
 
 Major API changes
   - Added API for on-demand queries
@@ -443,6 +444,7 @@ This enabled event patterns and EQL to use short event names not requiring makin
 version 0.7.0
 -------------
 Initial alpha version
+
 
 
 

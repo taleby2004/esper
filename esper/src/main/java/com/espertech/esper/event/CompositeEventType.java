@@ -19,6 +19,7 @@ import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Event type for events that itself have event properties that are event wrappers.
@@ -43,6 +44,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
 
     private String alias;
     private String[] propertyNames;
+    private final Map<String, EventPropertyGetter> propertyGetterCache;
 
     /**
      * Ctor.
@@ -60,6 +62,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
         this.taggedEventTypes = taggedEventTypes;
         this.arrayEventTypes = arrayEventTypes;
         this.alias = alias;
+        propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
         LinkedHashSet<String> propertySet = new LinkedHashSet<String>();
         propertySet.addAll(taggedEventTypes.keySet());
@@ -159,6 +162,12 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
 
     public EventPropertyGetter getGetter(String propertyName)
     {
+        EventPropertyGetter cachedGetter = propertyGetterCache.get(propertyName);
+        if (cachedGetter != null)
+        {
+            return cachedGetter;
+        }
+
         // see if this is a nested property
         int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
         if (index == -1)
@@ -169,7 +178,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
             {
                 // Not a nested property, return tag's underlying value
                 final String tag = propertyName;
-                return new EventPropertyGetter() {
+                EventPropertyGetter getter = new EventPropertyGetter() {
                     public Object get(EventBean obj)
                     {
                         // The underlying is expected to be a map
@@ -196,6 +205,8 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                         return true; // Property exists as the property is not dynamic (unchecked)
                     }
                 };
+                propertyGetterCache.put(propertyName, getter);
+                return getter;
             }
 
             // check for array property
@@ -205,7 +216,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                 // Return tag's array of underlyings
                 final String tag = propertyName;
                 final Class underlyingType = result.getFirst().getUnderlyingType();
-                return new EventPropertyGetter() {
+                EventPropertyGetter getter = new EventPropertyGetter() {
                     public Object get(EventBean obj)
                     {
                         // The underlying is expected to be a map
@@ -237,6 +248,8 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                         return true; // Property exists as the property is not dynamic (unchecked)
                     }
                 };
+                propertyGetterCache.put(propertyName, getter);
+                return getter;                
             }
 
             Property prop = PropertyParser.parse(propertyName, null, false);
@@ -250,7 +263,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                     // Return tag's underlyings within the array index
                     final String tag = indexProp.getPropertyNameAtomic();
                     final int arrayIndex = indexProp.getIndex();
-                    return new EventPropertyGetter() {
+                    EventPropertyGetter getter = new EventPropertyGetter() {
                         public Object get(EventBean obj)
                         {
                             // The underlying is expected to be a map
@@ -284,6 +297,8 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                             return true; // Property exists as the property is not dynamic (unchecked)
                         }
                     };
+                    propertyGetterCache.put(propertyName, getter);
+                    return getter;
                 }
             }
 
@@ -301,7 +316,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
             final EventPropertyGetter getterNested = result.getFirst().getGetter(propertyNested);
             if (getterNested != null)
             {
-                return new EventPropertyGetter() {
+                EventPropertyGetter getter = new EventPropertyGetter() {
                     public Object get(EventBean obj)
                     {
                         // The underlying is expected to be a map
@@ -327,6 +342,9 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                         return true; // Property exists as the property is not dynamic (unchecked)
                     }
                 };
+
+                propertyGetterCache.put(propertyName, getter);
+                return getter;
             }
         }
 
@@ -346,7 +364,7 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                     final EventPropertyGetter getterNested = result.getFirst().getGetter(propertyNested);
                     if (getterNested != null)
                     {
-                        return new EventPropertyGetter() {
+                        EventPropertyGetter getter = new EventPropertyGetter() {
                             public Object get(EventBean obj)
                             {
                                 // The underlying is expected to be a map
@@ -378,6 +396,8 @@ public class CompositeEventType implements EventTypeSPI, TaggedCompositeEventTyp
                                 return true; // Property exists as the property is not dynamic (unchecked)
                             }
                         };
+                        propertyGetterCache.put(propertyName, getter);
+                        return getter;
                     }
                 }
             }
