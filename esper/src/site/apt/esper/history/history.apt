@@ -12,6 +12,48 @@ Change History
 	[]
 
 
+Version 2.3.0
+
+	Released November 9, 2008
+	
+	Built using Sun JDK 5.0 Update 16; Tested and certified for JDK 6 Update 10
+
+* API changes
+
+  * Added API for on-demand queries
+	
+  * Listener API for receiving callbacks upon statement creation and state change as well as service state
+
+  * Event type name added to EventType interface
+
+  * Added route methods for other event representations
+
+  * Added user object support to EPStatement
+
+  * Allow event types to be removed at runtime; Allow detection of which statements reference types
+
+  []
+    
+* Major changes
+    
+  * Support for array-type properties in Maps; Support for map type name as a property type
+
+  * Added OSGi manifest to jar files
+
+  * Support for language-locale dependent sorting of String value
+  
+  []
+
+* Minor changes	    	
+
+  * Documentation and performance enhancements
+
+  * Bug fixes see JIRA list of resolved for release 2.3
+
+  []
+
+
+
 Version 2.2.0
 
 	Released August 10, 2008

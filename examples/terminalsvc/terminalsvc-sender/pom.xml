@@ -14,7 +14,7 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>esper</groupId>
+			<groupId>com.espertech</groupId>
 			<artifactId>example-terminalsvc-common</artifactId>
 			<version>1.0</version>
 		</dependency>		

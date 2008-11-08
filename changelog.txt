@@ -3,7 +3,6 @@ Esper Changelog
 
 Changes in version 2.3
 ------------------------
-- on-demand query
 
 Major API changes
   - Added API for on-demand queries

@@ -19,9 +19,10 @@ public class TestOpentickAdapter extends TestCase
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);   // automated tests run usually without timer
 
         Properties pluginProperties = new Properties();
-        pluginProperties.put("classpath-app-context","esperio-opentickadapter-config-play.xml");
+        pluginProperties.put("classpath-app-context","esperio-opentickadapter-config.xml");
         config.addPluginLoader("OpentickPluginLoader", OpentickPluginLoader.class.getName(), pluginProperties);
-        
+
+        /**
         EPServiceProvider provider = EPServiceProviderManager.getDefaultProvider(config);
         provider.initialize();
 
@@ -38,12 +39,15 @@ public class TestOpentickAdapter extends TestCase
         }
 
         provider.destroy();
+        */
     }
 
     public void testAdapterStart()
     {
         Configuration config = new Configuration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);   // automated tests run usually without timer
+
+         /*
         EPServiceProvider provider = EPServiceProviderManager.getDefaultProvider(config);
         provider.initialize();
 
@@ -65,7 +69,8 @@ public class TestOpentickAdapter extends TestCase
         catch (InterruptedException e)
         {
         }
+         provider.destroy();
+         */
 
-        provider.destroy();
     }
 }

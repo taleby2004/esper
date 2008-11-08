@@ -14,12 +14,12 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>esper</groupId>
+			<groupId>com.espertech</groupId>
 			<artifactId>esper</artifactId>
 			<version>2.3.0</version>
       	</dependency>
 		<dependency>
-			<groupId>esper</groupId>
+			<groupId>com.espertech</groupId>
 			<artifactId>example-terminalsvc-common</artifactId>
 			<version>1.0</version>
 		</dependency>		

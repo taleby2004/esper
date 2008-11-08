@@ -1,7 +1,32 @@
 News
 
 
-* September 27, 2008  -  NEsper 2.1.0
+* November 8, 2008  -  Esper 2.3.0
+      
+  * Added API for on-demand queries 
+
+  * Support for array-type properties in Maps; Support for map type name as a property type
+
+  * Listener API for receiving callbacks upon statement creation and state change as well as service state
+
+  * Allow event types to be removed at runtime; Allow detection of which statements reference types
+
+  * Added OSGi manifest to jar files
+
+  * Support for language-locale dependent sorting of String value
+
+  * Event type name added to EventType interface
+
+  * Added route methods for other event representations
+
+  * Added user object support to EPStatement
+  
+  * Many performance and documentation enhancements
+  
+  []
+  
+
+* September 27, 2008  -  NEsper 2.1.0 for .NET
 
   * Esper for .NET - feature equivalent to Esper 2.1
   
