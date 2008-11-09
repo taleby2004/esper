@@ -136,6 +136,8 @@ Features
     	
     * <<Joins to method invocation results>> allows easy integration with distributed caches, web services and object-oriented databases 
 
+    * <<On-demand queries>> are fire-and-forget EPL queries against named windows for non-continuous query execution
+
     * <<Variables>> can occur in any expression and can dynamically control output rate
 
         * Guarantees of consistency and atomicity of variable updates

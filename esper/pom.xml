@@ -174,10 +174,6 @@ mvn javadoc:javadoc
 		</testResources>
 	</build>
 	<distributionManagement>
-		<site>
-			<id>Esper</id>
-			<url>webdav://dav.codehaus.org/esper</url>
-		</site>
 		<repository>
 		  <id>codehaus.org</id>
 		  <name>XFire Central Repository</name>
@@ -188,5 +184,9 @@ mvn javadoc:javadoc
 		  <name>XFire Central Development Repository</name>
 		  <url>dav:https://dav.codehaus.org/snapshots.repository/xfire/</url>
 		</snapshotRepository>
-	</distributionManagement>
+		<site>
+		  <id>codehaus.org</id>
+		  <url>dav:https://dav.codehaus.org/xfire/</url>
+		</site>
+	  </distributionManagement>
 </project>

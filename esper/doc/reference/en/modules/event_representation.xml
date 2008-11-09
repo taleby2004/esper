@@ -397,6 +397,15 @@ where address('work').streetName = 'Park Ave'
 		<programlisting><![CDATA[select * from MyEvent where enumProp=EnumClass.valueOf('ENUM_VALUE_1')]]></programlisting>
 
 		<para>
+			If your application does not import, through configuration, the package that contains the enumeration class, then it must also specify the package name of the class. Enumeration
+			classes that are inner classes must be qualified with <literal>$</literal> following Java conventions.
+		</para>
+		<para>
+			For example, the Color enumeration as an inner class to <literal>MyEvent</literal> in package <literal>org.myorg</literal> can be referenced as shown:
+		</para>
+		<programlisting><![CDATA[select * from MyEvent(enumProp=org.myorg.MyEvent$Color.GREEN).std:firstevent()]]></programlisting>
+
+		<para>
 			Instance methods may also be invoked on event instances by specifying a stream name, as shown below:
 		</para>
 		<programlisting><![CDATA[select myevent.computeSomething() as result from MyEvent as myevent]]></programlisting>
