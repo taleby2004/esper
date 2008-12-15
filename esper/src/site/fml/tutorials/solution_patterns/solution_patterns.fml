@@ -797,6 +797,52 @@ esper.statement.alert12.3.ha.prefix=durable</pre></div>
         </p>
       </answer>
     </faq>    
+
+    <faq id="custom-aggregate-function-view">
+      <question>When to use a plug-in aggregation function and when to use a plug-in custom view?</question>
+      <answer>
+        <p>
+          If you are not sure how to choose between custom plug-in aggregation functions and custom plug-in views, this entry explains the 
+          differences or advantages of one over the other in more detail.
+        </p>
+        <p>
+          A plug-in custom aggregation function works like other aggregation functions such as count, sum, average or standard deviation
+          and may appear in the select-clause and in the having-clause in EPL.
+        </p>
+        <p>
+          A plug-in custom view can be a data window providing an expiry policy like a time window or length window, for example. 
+          Or instead a custom view can derive new information from a stream of events such as the results of a linear regression function (aka. derived-value view).
+        </p>
+        <p>
+          A plug-in view is always attached to a certain type of event that is provided by a filtered event stream or a pattern or by another view.
+          Plug-in views can receive only one type of input event (input stream). If the view is a data window view, 
+          the output event type is always the same event type as the input event type.
+          For derived-value views the output event type can be an entirely different type of events with new and often computed property values and types,
+          including events that are from a different event representation such as for example XML-DOM.
+        </p>
+        <p>
+          If your application wants to provide a data window then use a plug-in view. If it needs to provide multiple computed values for each row of output, 
+          such as the slope-value and y-intercept value for a linear regression function for example, use a plug-in view.
+        </p>
+        <p>
+          The input values to a plug-in aggregation function are the result of one or more expressions (as compared to views which have events as input),
+          and the output value of a plug-in aggregation function is always a single value, usually a primitive value such as a double-typed value 
+          but can be any object. If your application only needs to return a single value, more likely an aggregation function is appropriate. 
+        </p>
+        <p>
+          The group-by clause acts only on aggregation functions (and not view output), providing an aggregation value per-group. Also output-rate-limiting can 
+          provide the last value per such group when the output condition occurs.
+        </p>
+        <p>
+          Views can also compute one or more output values per group by means of the "std:groupby()" view. These view output events are 
+          not grouped by the group-by or output-rate clauses, if present.          
+        </p>
+        <p>
+          A view's output event properties become available in the select-clause, where-clause, group-by-clause, having-clause and order-by clause, while
+          aggregation functions output values are only available in the select-clause and having-clause.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
 </faqs>
