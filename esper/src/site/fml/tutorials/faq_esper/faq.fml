@@ -541,7 +541,7 @@
     </faq>    
 
     <faq id="classloader">
-      <question>What ClassLoader does it use? How does it behave in OSGI containers?</question>
+      <question>What ClassLoader does it use? How do I get the class loading right in OSGI, Apache Axis or other containers?</question>
       <answer>
         <p>
 		We have users that use Esper in an OSGi container and therefore consistently use the thread's context classloader
@@ -555,7 +555,24 @@ Class.forName(name, true, Thread.currentThread().getContextClassLoader()); // Ja
 		We recommend that you use the same classloader with all entry points to Esper: Creating and configuring the Esper engine instance,
 		creating a statement and supplying a subscriber or listener to it and sending data to the esper runtime via sendEvent() and route().
 	</p>
-      </answer>
+	<p>
+		One user is using Esper inside an Axis2 web-service. The class defining the service compiles and loads just fine; 
+		but the user got a runtime error from Esper "Error configuring engine:  Event type .. was not found".
+		For reasons the user didn't completely understand, Axis2 changes the classloader when starting the service.
+		The user didn't know why, but expected that it would be critical for other Axis2 processing.
+		So, he copied a solution used by a collegue working on this project with a similar class loader issue:
+	</p>
+	<div class="source"><pre>
+// get current context classloader                                                                                                                                  
+ClassLoader contextClassloader = Thread.currentThread().getContextClassLoader();
+
+// then alter the class-loader (but which one ? the one used to load this class itself) with:
+Thread.currentThread().setContextClassLoader(this.class.getClassLoader());
+
+// create my Esper statement, and finally restore the class loader to its original value:
+ Thread.currentThread().setContextClassLoader(contextClassloader);</pre></div>      
+
+	</answer>
     </faq>    
   </part>
 
