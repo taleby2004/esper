@@ -521,6 +521,42 @@
       </answer>
     </faq>    
 
+    <faq id="classloader">
+      <question>Have you tested Esper in an OSGI container?</question>
+      <answer>
+        <p>
+		Yes we have tested in Equinox and Felix containers. The Esper and EsperIO jar files ship with OSGI-compliant manifests that 
+		can be used as they are or modified if necessary. Esper dependencies are available for download from an
+		OSGi bundle repository thus each dependent jar file can itself be a bundle and resolved by the OSGi container.
+	</p>
+        <p>
+		The next FAQ entry answers the ClassLoader question. If using Java classes as events in an OSGi container
+		then such event classes may need to be on the system classpath or the thread's ClassLoader may need to be set
+		explicitly by your application.
+	</p>
+        <p>
+		When using nested-Map or XML DOM as events then a regular import of the exported Esper packages should suffice.
+	</p>
+      </answer>
+    </faq>    
+
+    <faq id="classloader">
+      <question>What ClassLoader does it use? How does it behave in OSGI containers?</question>
+      <answer>
+        <p>
+		We have users that use Esper in an OSGi container and therefore consistently use the thread's context classloader
+		as the following examples show:
+	</p>
+	<div class="source"><pre>
+FastClass.create(Thread.currentThread().getContextClassLoader(), class); // CGLIB
+Class.forName(name, true, Thread.currentThread().getContextClassLoader()); // Java Reflection</pre></div>      
+	
+        <p>
+		We recommend that you use the same classloader with all entry points to Esper: Creating and configuring the Esper engine instance,
+		creating a statement and supplying a subscriber or listener to it and sending data to the esper runtime via sendEvent() and route().
+	</p>
+      </answer>
+    </faq>    
   </part>
 
 </faqs>
