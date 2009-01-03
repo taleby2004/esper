@@ -55,7 +55,8 @@ Features
 
 	* Output rate limiting and stabilizing, snapshot output
 	
-	* Named windows allow sharing data windows between statements; Define multiple explicit entry and exit criteria for events
+	* Named windows allow sharing data windows between statements; Define multiple explicit entry and exit criteria for events;
+	  Snapshot queries with live updates
 
 	[]
 		

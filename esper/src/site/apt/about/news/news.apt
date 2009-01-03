@@ -3,7 +3,7 @@ News
 
 * November 8, 2008  -  Esper 2.3.0
       
-  * Added API for on-demand queries 
+  * Added API for on-demand, snapshot queries 
 
   * Support for array-type properties in Maps; Support for map type name as a property type
 

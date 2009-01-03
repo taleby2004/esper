@@ -20,7 +20,7 @@ Version 2.3.0
 
 * API changes
 
-  * Added API for on-demand queries
+  * Added API for on-demand, snapshot queries
 	
   * Listener API for receiving callbacks upon statement creation and state change as well as service state
 

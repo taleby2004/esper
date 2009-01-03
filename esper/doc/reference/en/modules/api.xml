@@ -741,7 +741,8 @@ sender.sendEvent(myEvent);]]></programlisting>
 		</sect2>
 
 	    <sect2 id="api-runtime-ondemand">		
-			<title>On-Demand Query Execution</title>
+			<title>On-Demand Snapshot Query Execution</title>
+
 			<para>
 				As your application may not require streaming results and may not know each query in advance, the on-demand query facility provides for ad-hoc execution of an EPL expression.
 			</para>
