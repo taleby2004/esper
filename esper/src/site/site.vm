@@ -289,7 +289,7 @@
 #end
 <html>
   <head>
-    <title>$title</title>
+    <title>Esper - Complex Event Processing</title>
     <!-- $alignedFileName -->
     <style type="text/css" media="all">
       @import url("$relativePath/css/esper.css");
@@ -297,7 +297,7 @@
     #foreach( $author in $authors )
       <meta name="author" content="$author" />
     #end
-    <META NAME="keywords" content="Esper, NEsper, eda, open source, source, esp, cep, event stream, complex event, soa, services, support, free, event server">    
+    <META NAME="keywords" content="Esper, NEsper, eda, open source, source, esp, cep, event stream, complex event, soa, services, support, free, event server, continuous query">
     <meta name="author" content="David Herreman (www.free-css-templates.com)" />
     <meta http-equiv="Content-Type" content="text/html; charset=${outputEncoding}" />
     <meta http-equiv="Pragma" content="no-cache"/>

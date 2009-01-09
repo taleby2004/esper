@@ -10,7 +10,7 @@ Technology Introduction
 
 	Complex Event Processing, or CEP, is technology to process events and discover complex patterns among multiple streams of event data.
 	ESP stands for Event Stream Processing and deals with the task of processing multiple streams of event data with the goal of identifying the meaningful events within those streams,
-	and deriving meaningful information from them. Real-time OLAP (online analytical processing) is also a term used frequently for this technology.
+	and deriving meaningful information from them. Real-time OLAP (online analytical processing) and continuous query are also terms used frequently for this technology.
 		
 
 	The Esper engine has been developed to address the requirements of applications that analyze and react to events. Some typical examples of applications are:
@@ -55,9 +55,15 @@ Features
 
 	* Output rate limiting and stabilizing, snapshot output
 	
-	* Named windows allow sharing data windows between statements; Define multiple explicit entry and exit criteria for events;
-	  Snapshot queries with live updates
+	* Named windows
 
+		* Explicit sharing of data windows between statements
+		
+		* Multiple and custom entry and exit criteria for events
+		
+		* Support for predefined query execution optimized by indexed access, via on-select
+		
+		[]
 	[]
 		
         

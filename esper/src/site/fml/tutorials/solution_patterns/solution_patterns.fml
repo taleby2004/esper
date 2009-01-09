@@ -474,6 +474,18 @@ insert into TickWindow select price, prior(1, price) as priorprice from StockTic
 	This question posed at 11:00am via snapshot EPL query against the named window:
         </p>
 	<div class="source"><pre>select * from TickWindow where price > 70 or priorprice > 70</pre></div>
+        <p>
+	Alternative solutions are as follows. One could use the on-select instead of a fire-and-forget query, as on-select is able to 
+	compile and maintain the proper index to speed up repeated execution. A second solution may change the queries to keep only the maximum,
+	instead of each datapoint, however then the on-demand queries must be limited to questions towards the max value.
+        </p>
+        <p>
+	Here is the syntax to use a predefine query via on-select instead of a fire-and-forget query:
+        </p>
+	<div class="source"><pre>on MyMaxQueryEvent as limit select * from TickWindow where price > limit.pricelimit or priorprice > limit.pricelimit </pre></div>
+        <p>
+	When the question is posed at 11am one can send in a MyMaxQueryEvent with the pricelimit property set to 70 and the listener to the on-select statement gets the result.
+        </p>
       </answer>
     </faq>    
 
@@ -488,7 +500,7 @@ insert into TickWindow select price, prior(1, price) as priorprice from StockTic
         <p>
 	Every one hour, we would like to know when one of those known tuples is not present in the event stream. The pattern EPL might look like:	
 	</p>
-	<div class="source"><pre>select * from pattern [every (timer:interval(1 hours) and not IPEvent(ip=’192.168.1.1’))]</pre></div>      
+	<div class="source"><pre>select * from pattern [every (timer:interval(1 hours) and not IPEvent(ip=Â’192.168.1.1Â’))]</pre></div>      
         <p>
 	We would like to simplify this so hundreds or thousands of similar statements are reduced to one global statement, and send in a primer event to initialize each IP address looked for.
 	</p>
@@ -916,6 +928,182 @@ esper.statement.alert12.3.ha.prefix=durable</pre></div>
           A view's output event properties become available in the select-clause, where-clause, group-by-clause, having-clause and order-by clause, while
           aggregation functions output values are only available in the select-clause and having-clause.
         </p>
+      </answer>
+    </faq>    
+
+    <faq id="fire-and-forget-versus-on-select">
+      <question>When to use on-demand fire-and-forget queries versus on-select predefined queries?</question>
+      <answer>
+        <p>
+          Sometimes user requirements are such that a query against data maintained by the engine must be fired.
+          Sometimes such intra-day queries are well-defined and known upfront, sometimes not.
+        </p>
+        <p>
+	  Via named windows Esper allows predefined queries based on the on-select clause.
+        </p>
+        <p>
+	  Via named windows Esper also allows fire-and-forget queries that leave no trace. Fire-and-forget queries can also be 
+	  compiled for repeated execution.
+        </p>
+        <p>
+	  Here is a sample code snippet to prepare and call a fire-and-forget query:
+        </p>
+	<div class="source"><pre>String stmtText = "select * from SensorWindow where temperature = 80";
+EPOnDemandPreparedQuery onDemandQuery = epService.getEPRuntime().prepareQuery(stmtText);
+EPOnDemandQueryResult result = onDemandQuery.execute();
+System.out.println(result.getArray()[0].get("sensor"));</pre></div>
+        <p>
+	  A on-demand fire-and-forget query has the penalty of compiling the query and executing the query against an un-indexed data set,
+	  making the query slower to execute compared to pre-defined queries. The advantage is that it allows any type of query.
+        </p>
+        <p>
+	  Compare this to a predefined query based on the on-select clause. The next code snippet creates and executes a pre-defined query:
+        </p>
+	<div class="source"><pre>String stmtText = "on SensorQueryEvent select sensor from SensorWindow where temperature = querytemp";
+EPStatement onSelectStmt = epService.getEPAdministrator().createEPL(stmtText);
+onSelectStmt.setSubscriber(this);	// make sure you have an update(String sensor) method for the class
+
+// Execute query, results are delivered via call to the update method.
+// The SensorQueryEvent is expected to have a "querytemp" property as used in the on-select.
+epService.getEPRuntime().sendEvent(new SensorQueryEvent(80));</pre></div>
+        <p>
+	  A predefined query allows the Esper engine to inspect the query conditions and thus maintain a proper index on named window contents 
+	  to evaluate each query in a very efficient fashion. Thereby a predefined query can exhibt much better performance then a fire-and-forget query.
+	  See also the named window query benchmark for performance tests of both approaches.
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="spring-framework">
+      <question>How do I integrate with the Spring framework? How to use Spring support for Groovy or other scripting languages with EPL?</question>
+      <answer>
+        <p>
+          The Spring Framework (or Spring for short) is an open source application framework. This FAQ entry describes how
+          a Spring XML file can hold EPL statements and inject listeners. It also shows how the Groovy dynamic scripting language can provide
+          inlined scripts that acts as listeners to EPL continuous-query statements.
+        </p>
+        <p>
+	  This solution requires Spring and Java 6.
+        </p>
+        <p>
+	  A sample XML file for use with Spring follows. The XML relies on two classes in your classpath: EsperBean and StatementBean. These classes
+	  are NOT part of the Esper distribution. They are instead listed below as examples.
+        </p>
+	<div class="source"><pre>&lt;beans&gt;
+    &lt;bean id=&quot;esperBean&quot; class=&quot;EsperBean&quot;&gt;
+	&lt;property name=&quot;statements&quot;&gt;
+	    &lt;bean class=&quot;StatementBean&quot;&gt;
+		&lt;constructor-arg value=&quot;select * from java.lang.String&quot;/&gt;
+		&lt;property name=&quot;listeners&quot;&gt;
+		    &lt;list&gt;
+			&lt;bean class=&quot;MyUpdateListener&quot;/&gt;
+			&lt;ref bean=&quot;groovyListener&quot;/&gt;
+		    &lt;/list&gt;
+		&lt;/property&gt;
+	    &lt;/bean&gt;
+	&lt;/property&gt;
+    &lt;/bean&gt;
+
+    &lt;!--sample groovy listener--&gt;
+    &lt;lang:groovy id=&quot;groovyListener&quot;&gt;
+	&lt;lang:inline-script&gt;
+	    package org.springframework.scripting.groovy;
+	    import com.espertech.esper.client.UpdateListener
+	    import com.espertech.esper.event.EventBean;
+
+	    class GroovyMessenger implements UpdateListener {
+		public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {
+		    System.out.println(Arrays.toString(eventBeans) + &quot;from groovy&quot;);
+		}
+	    }
+	&lt;/lang:inline-script&gt;
+    &lt;/lang:groovy&gt;
+
+&lt;/beans&gt;</pre></div>
+        <p>
+	  The EsperBean class below represents a thin wrapper for an EPServiceProvider:
+        </p>
+	<div class="source"><pre>public class EsperBean implements BeanNameAware, InitializingBean, DisposableBean {
+    private EPServiceProvider epServiceProvider;
+    private EPRuntime epRuntime;
+    private String name;
+    private Set&lt;StatementBean&gt; statementBeans = new LinkedHashSet&lt;StatementBean&gt;();
+
+    public void setStatements(StatementBean... statementBeans) {
+	for (StatementBean statementBean : statementBeans) {
+	    addStatement(statementBean);
+	}
+    }
+
+    public void addStatement(StatementBean statementBean) {
+	statementBeans.add(statementBean);
+    }
+
+    public void sendEvent(Object event) {
+	epRuntime.sendEvent(event);
+    }
+
+    public void setBeanName(String name) {
+	this.name = name;
+    }
+
+    public void afterPropertiesSet() throws Exception {
+	epServiceProvider = EPServiceProviderManager.getProvider(name);
+	epRuntime = epServiceProvider.getEPRuntime();
+	for (StatementBean statementBean : statementBeans) {
+	    EPStatement epStatement = epServiceProvider.getEPAdministrator().createEPL(statementBean.getEPL());
+	    statementBean.setEPStatement(epStatement);
+	}
+    }
+
+    public void destroy() throws Exception {
+	epServiceProvider.destroy();
+    }
+}</pre></div>
+        <p>
+	  The StatementBean class is a thin wrapper for an EPStatement, and is also required for the example:
+        </p>
+	<div class="source"><pre>public class StatementBean {
+    private String epl;
+    private EPStatement epStatement;
+    private Set&lt;UpdateListener&gt; listeners = new LinkedHashSet&lt;UpdateListener&gt;();
+
+    public StatementBean(String epl) {
+        this.epl = epl;
+    }
+
+    public String getEPL(){
+        return epl;
+    }
+
+    public void setListeners(UpdateListener... listeners) {
+        for (UpdateListener listener : listeners) {
+            addListener(listener);
+        }
+    }
+    public void addListener(UpdateListener listener) {
+        listeners.add(listener);
+        if (epStatement != null) {
+            epStatement.addListener(listener);
+        }
+    }
+
+    void setEPStatement(EPStatement epStatement) {
+        this.epStatement = epStatement;
+        for (UpdateListener listener : listeners) {
+            epStatement.addListener(listener);
+        }
+    }
+}</pre></div>
+        <p>
+	  Finally, next is a sample code snippet for loading the XML file in Spring, which will automatically hook up the statements
+	  and listeners as defined in the XML:
+        </p>
+	<div class="source"><pre>ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext(new String[]{"esperspring.xml"});
+EsperBean esperBean = (EsperBean) appContext.getBean("esperBean", EsperBean.class);
+esperBean.sendEvent("Test Event");
+// ...when done, destroy the context...
+appContext.destroy();</pre></div>
       </answer>
     </faq>    
   </part>
