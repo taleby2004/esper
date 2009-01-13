@@ -315,6 +315,52 @@ behavior: url($relativePath/css/csshover.htc);
 }
 </style>
 <![endif]-->
+<!-- google search widget -->
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+var searchControl;
+
+google.load('search', '1');
+
+function OnComplete(searchControl, searcher) {
+	document.getElementById("left_main").style.visibility = 'hidden';
+}
+	
+function OnLoad() {
+	// Create a search control
+	searchControl = new google.search.SearchControl();
+	searchControl.setSearchCompleteCallback(this, OnComplete);
+			
+	//Esper
+	var siteSearch = new google.search.WebSearch();
+	siteSearch.setUserDefinedLabel("Esper & NEsper");
+	siteSearch.setSiteRestriction("esper.codehaus.org");
+	searchControl.addSearcher(siteSearch);
+
+	//EsperTech
+	var etSearch = new google.search.WebSearch();
+	etSearch.setUserDefinedLabel("EsperTech");
+	etSearch.setSiteRestriction("espertech.com");
+	searchControl.addSearcher(etSearch);
+
+	// Nabble search
+	var mlSearch = new google.search.WebSearch();
+	mlSearch.setUserDefinedLabel("Lists");
+	mlSearch.setSiteRestriction("nabble.com");
+	mlSearch.setQueryAddition("'Esper User list' OR 'Esper Dev list'");
+	searchControl.addSearcher(mlSearch);
+	
+	// draw in tabbed layout mode and split form from results
+	var drawOptions = new google.search.DrawOptions();
+	drawOptions.setDrawMode(google.search.SearchControl.DRAW_MODE_TABBED);
+	drawOptions.setSearchFormRoot(document.getElementById("google_searchForm"));
+	searchControl.draw(document.getElementById("google_searchResult"), drawOptions);
+}
+
+google.setOnLoadCallback(OnLoad, true);
+//]]>
+</script>
   </head>
 <body>
 <div id="top">
@@ -323,12 +369,14 @@ behavior: url($relativePath/css/csshover.htc);
 				<a href="http://www.espertech.com/index.php" title="Home page"><img src="$relativePath/images/home.gif" alt="Home" /></a>
 				<a href="http://www.espertech.com/company/contact.php" title="Contact us"><img src="$relativePath/images/contact.gif" alt="Contact" /></a>
 			</div>
-			<table border="0">
-				<tr><td>
+			<table border="0" width="95%">
+				<tr><td width="203px">
 					<img src="$relativePath/images/espertech_logo_transparent.png"/>
-				</td><td>
+				</td><td width="380px">
 					<h2>Event Stream Intelligence: <small>Esper & NEsper</small></h2>
-				</td></tr>
+				</td>
+				<td><div id="google_searchForm"/></td>
+				</tr>
 			</table>
 	</div>
 </div><!-- top -->
@@ -354,15 +402,20 @@ behavior: url($relativePath/css/csshover.htc);
 <div class="content">
 	<div id="main">
 		<div id="left_side">
+			<div id="google_searchResult" style="width:660px;"></div>
+			<div id="left_main">
 		        $bodyContent
+			</div><!-- left_main -->
     		</div><!-- right_side -->
 		<div id="right_side">
 			<a href="$relativePath/index.html"><img src="$relativePath/images/home.gif" alt="Esper and NEsper at Codehaus"/></a>
-		       #mainMenu( $decoration.body.menus )
-		       <h3>&nbsp;</h3>
-		       <a href="http://www.codehaus.org"><img src="$relativePath/images/logos/codehaus-small.gif" alt="" width="100"/></a>
-		       <h3>&nbsp;</h3>
-		       #myPublishDate( $decoration.publishDate $decoration.version )
+			<div id="google_searchFormContainer"/>
+			<div id="google_search"/>
+			#mainMenu( $decoration.body.menus )
+			<h3>&nbsp;</h3>
+			<a href="http://www.codehaus.org"><img src="$relativePath/images/logos/codehaus-small.gif" alt="" width="100"/></a>
+			<h3>&nbsp;</h3>
+			#myPublishDate( $decoration.publishDate $decoration.version )
 		</div>
     	</div><!-- main -->
     	
