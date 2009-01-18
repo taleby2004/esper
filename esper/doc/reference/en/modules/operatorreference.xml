@@ -258,6 +258,11 @@
 				 For example, and assuming a property named 'mySpecialCmdList'  exists that contains a list of command strings:
 			</para>
 			<programlisting><![CDATA[select * from RFIDEvent where command in ( 'OBSERVATION', 'SIGNAL', mySpecialCmdList)]]></programlisting>
+
+			<para>
+				 When using prepared statements and substitution parameters with the <literal>in</literal> keyword, make sure to retain the parenthesis. Substitution values may also be arrays, <literal>Collection</literal> and <literal>Map</literal> values:
+			</para>
+			<synopsis><emphasis>test_expression</emphasis> [not] in (? [,?...] )</synopsis>
 		</sect1>		
 
 		<sect1 id="epl-operator-ref-keyword-between">
