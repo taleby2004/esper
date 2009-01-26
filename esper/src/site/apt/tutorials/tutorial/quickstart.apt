@@ -6,12 +6,12 @@ Quick Start
 
 * Installation
 
-	Esper is very easy to install and run. The first step is to download and unpack the distribution zip or tar file.
+	Esper is easy to install and run: The first step is to download and unpack the distribution zip or tar file. Provided
+	you have a Java VM installed, you may then run an example as described in the online documentation
 	
 	Esper consists of a jar file named "esper-version.jar" that can be found in the root directory of the distribution. 
 	
-	Dependent libraries to Esper are in the "lib" folder and include the following:
- 	antlr-runtime-3.0.1.jar (ANTLR parser runtime), commons-logging-1.1.1.jar (Logging) and cglib-nodep-2.1_3.jar (bytecode generator).
+	Dependent libraries to Esper are in the "lib" folder.
 
 	Esper includes several examples and a benchmark kit that are documented in the reference manual. These can be run from the command line.
 	Esper does not include a GUI or a server middleware itself, other then the benchmark client and server components.
