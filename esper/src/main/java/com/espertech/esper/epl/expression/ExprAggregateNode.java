@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.agg.AggregationMethod;
@@ -97,7 +97,7 @@ public abstract class ExprAggregateNode extends ExprNode
         }
     }
 
-    public Class getType() throws ExprValidationException
+    public Class getType()
     {
         if (aggregationMethod == null)
         {

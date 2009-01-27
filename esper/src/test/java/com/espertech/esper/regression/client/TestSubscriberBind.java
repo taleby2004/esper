@@ -1,14 +1,12 @@
 package com.espertech.esper.regression.client;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
 
 import java.util.Map;
 
@@ -20,11 +18,34 @@ public class TestSubscriberBind extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         String pkg = SupportBean.class.getPackage().getName();
-        config.addEventTypeAutoAlias(pkg);
+        config.addEventTypeAutoName(pkg);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+    }
+
+    public void testSubscriberandListener()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("insert into A1 select s.*, 1 as a from SupportBean as s");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select a1.* from A1 as a1");
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        MySubscriberRowByRowObjectArr subscriber = new MySubscriberRowByRowObjectArr();
+
+        stmt.addListener(listener);
+        stmt.setSubscriber(subscriber);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals("E1", event.get("string"));
+        assertEquals(1, event.get("intPrimitive"));
+
+        for (String property : stmt.getEventType().getPropertyNames())
+        {
+            EventPropertyGetter getter = stmt.getEventType().getGetter(property);
+            getter.get(event);
+        }
     }
 
     public void testOutputLimitNoJoin()
@@ -42,7 +63,7 @@ public class TestSubscriberBind extends TestCase
     public void testOutputLimitJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean, SupportMarketDataBean where symbol = string output every 2 events");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean.win:keepall(), SupportMarketDataBean.win:keepall() where symbol = string output every 2 events");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("E1", 0, 1L, ""));
@@ -86,7 +107,7 @@ public class TestSubscriberBind extends TestCase
     public void testStreamSelectJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select null, s1, s0 from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select null, s1, s0 from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.string = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -100,7 +121,7 @@ public class TestSubscriberBind extends TestCase
     public void testStreamWildcardJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string || '<', s1.* as s1, s0.* as s0 from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select string || '<', s1.* as s1, s0.* as s0 from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.string = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -114,7 +135,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindWildcardJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean as s0, SupportMarketDataBean as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.string = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event

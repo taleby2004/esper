@@ -9,12 +9,11 @@
 package com.espertech.esper.client.soda;
 
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.type.EPLParameterType;
 
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An output limit clause defines how to limit output of statements and consists of
@@ -30,52 +29,70 @@ public class OutputLimitClause implements Serializable
     private OutputLimitUnit unit;
     private Expression whenExpression;
     private List<Pair<String, Expression>> thenAssignments;
-    private Object[] crontabAtParameters;
+    private Expression[] crontabAtParameters;
+    private TimePeriodExpression timePeriodExpression;
 
     /**
      * Creates an output limit clause.
-     * @param selector is the events to select
-     * @param frequency a frequency to output at
-     * @param unit the unit for the frequency
+     * @param timePeriodExpression a frequency to output at
      * @return clause
      */
-    public static OutputLimitClause create(OutputLimitSelector selector, double frequency, OutputLimitUnit unit)
+    public static OutputLimitClause create(TimePeriodExpression timePeriodExpression)
     {
-        return new OutputLimitClause(selector, frequency, unit);
+        return new OutputLimitClause(OutputLimitSelector.DEFAULT, timePeriodExpression);
     }
 
     /**
      * Creates an output limit clause.
      * @param selector is the events to select
-     * @param unit the unit for the frequency
+     * @param timePeriodExpression a frequency to output at
+     * @return clause
+     */
+    public static OutputLimitClause create(OutputLimitSelector selector, TimePeriodExpression timePeriodExpression)
+    {
+        return new OutputLimitClause(selector, timePeriodExpression);
+    }
+
+    /**
+     * Creates an output limit clause.
+     * @param selector is the events to select
+     * @param frequency a frequency to output at
+     * @return clause
+     */
+    public static OutputLimitClause create(OutputLimitSelector selector, double frequency)
+    {
+        return new OutputLimitClause(selector, frequency);
+    }
+
+    /**
+     * Creates an output limit clause.
+     * @param selector is the events to select
      * @param frequencyVariable is the variable providing the output limit frequency
      * @return clause
      */
-    public static OutputLimitClause create(OutputLimitSelector selector, String frequencyVariable, OutputLimitUnit unit)
+    public static OutputLimitClause create(OutputLimitSelector selector, String frequencyVariable)
     {
-        return new OutputLimitClause(selector, frequencyVariable, unit);
+        return new OutputLimitClause(selector, frequencyVariable);
     }
 
     /**
      * Creates an output limit clause.
      * @param frequency a frequency to output at
-     * @param unit the unit for the frequency
      * @return clause
      */
-    public static OutputLimitClause create(double frequency, OutputLimitUnit unit)
+    public static OutputLimitClause create(double frequency)
     {
-        return new OutputLimitClause(OutputLimitSelector.DEFAULT, frequency, unit);
+        return new OutputLimitClause(OutputLimitSelector.DEFAULT, frequency);
     }
 
     /**
      * Creates an output limit clause.
      * @param frequencyVariable is the variable name providing output rate frequency values
-     * @param unit the unit for the frequency
      * @return clause
      */
-    public static OutputLimitClause create(String frequencyVariable, OutputLimitUnit unit)
+    public static OutputLimitClause create(String frequencyVariable)
     {
-        return new OutputLimitClause(OutputLimitSelector.DEFAULT, frequencyVariable, unit);
+        return new OutputLimitClause(OutputLimitSelector.DEFAULT, frequencyVariable);
     }
 
     /**
@@ -93,7 +110,7 @@ public class OutputLimitClause implements Serializable
      * @param scheduleParameters the crontab schedule parameters
      * @return clause
      */
-    public static OutputLimitClause create(Object[] scheduleParameters)
+    public static OutputLimitClause createSchedule(Expression[] scheduleParameters)
     {
         return new OutputLimitClause(OutputLimitSelector.DEFAULT, scheduleParameters);
     }
@@ -102,26 +119,36 @@ public class OutputLimitClause implements Serializable
      * Ctor.
      * @param selector is the events to select
      * @param frequency a frequency to output at
-     * @param unit the unit for the frequency
      */
-    public OutputLimitClause(OutputLimitSelector selector, Double frequency, OutputLimitUnit unit)
+    public OutputLimitClause(OutputLimitSelector selector, Double frequency)
     {
         this.selector = selector;
         this.frequency = frequency;
-        this.unit = unit;
+        this.unit = OutputLimitUnit.EVENTS;
     }
 
     /**
      * Ctor.
      * @param selector is the events to select
-     * @param unit the unit for the frequency
+     * @param timePeriodExpression the unit for the frequency
+     */
+    public OutputLimitClause(OutputLimitSelector selector, TimePeriodExpression timePeriodExpression)
+    {
+        this.selector = selector;
+        this.timePeriodExpression = timePeriodExpression;
+        this.unit = OutputLimitUnit.TIME_PERIOD;
+    }
+
+    /**
+     * Ctor.
+     * @param selector is the events to select
      * @param frequencyVariable is the variable name providing output rate frequency values
      */
-    public OutputLimitClause(OutputLimitSelector selector, String frequencyVariable, OutputLimitUnit unit)
+    public OutputLimitClause(OutputLimitSelector selector, String frequencyVariable)
     {
         this.selector = selector;
         this.frequencyVariable = frequencyVariable;
-        this.unit = unit;
+        this.unit = OutputLimitUnit.EVENTS;
     }
 
     /**
@@ -144,7 +171,7 @@ public class OutputLimitClause implements Serializable
      * @param selector is the events to select
      * @param crontabAtParameters the crontab schedule parameters
      */
-    public OutputLimitClause(OutputLimitSelector selector, Object[] crontabAtParameters)
+    public OutputLimitClause(OutputLimitSelector selector, Expression[] crontabAtParameters)
     {
         this.selector = selector;
         this.crontabAtParameters = crontabAtParameters;
@@ -247,6 +274,15 @@ public class OutputLimitClause implements Serializable
     }
 
     /**
+     * Returns the time period, or null if none provided.
+     * @return time period
+     */
+    public TimePeriodExpression getTimePeriodExpression()
+    {
+        return timePeriodExpression;
+    }
+
+    /**
      * Returns the list of optional then-keyword variable assignments, if any
      * @return list of variable assignments or null if none
      */
@@ -271,7 +307,7 @@ public class OutputLimitClause implements Serializable
      * Returns the crontab parameters, or null if not using crontab-like schedule.
      * @return parameters
      */
-    public Object[] getCrontabAtParameters()
+    public Expression[] getCrontabAtParameters()
     {
         return crontabAtParameters;
     }
@@ -314,38 +350,28 @@ public class OutputLimitClause implements Serializable
             for (int i = 0; i < crontabAtParameters.length; i++)
             {
                 writer.write(delimiter);
-                ((EPLParameterType) crontabAtParameters[i]).toEPL(writer);
+                crontabAtParameters[i].toEPL(writer);
                 delimiter = ", ";
             }
             writer.write(")");
         }
+        else if (unit == OutputLimitUnit.TIME_PERIOD)
+        {
+            writer.write("every ");
+            timePeriodExpression.toEPL(writer);
+        }
         else
         {
             writer.write("every ");
-            if (unit != OutputLimitUnit.EVENTS)
+            if (frequencyVariable == null)
             {
-                if (frequencyVariable == null)
-                {
-                    writer.write(Double.toString(frequency));
-                }
-                else
-                {
-                    writer.write(frequencyVariable);
-                }
+                writer.write(Integer.toString(frequency.intValue()));
             }
             else
             {
-                if (frequencyVariable == null)
-                {
-                    writer.write(Integer.toString(frequency.intValue()));
-                }
-                else
-                {
-                    writer.write(frequencyVariable);
-                }
+                writer.write(frequencyVariable);
             }
-            writer.write(' ');
-            writer.write(unit.getText());
+            writer.write(" events");
         }
     }
 }

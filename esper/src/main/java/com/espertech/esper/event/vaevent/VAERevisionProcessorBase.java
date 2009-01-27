@@ -10,6 +10,7 @@ package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.event.*;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.client.EventType;
 
 import java.util.*;
 
@@ -24,9 +25,9 @@ public abstract class VAERevisionProcessorBase implements ValueAddEventProcessor
     protected final RevisionSpec revisionSpec;
 
     /**
-     * Alias of type.
+     * Name of type.
      */
-    protected final String revisionEventTypeAlias;
+    protected final String revisionEventTypeName;
 
     /**
      * Revision event type.
@@ -46,13 +47,13 @@ public abstract class VAERevisionProcessorBase implements ValueAddEventProcessor
     /**
      * Ctor.
      * @param revisionSpec specification
-     * @param revisionEventTypeAlias alias of event type
+     * @param revisioneventTypeName name of event type
      * @param eventAdapterService for nested property handling
      */
-    protected VAERevisionProcessorBase(RevisionSpec revisionSpec, String revisionEventTypeAlias, EventAdapterService eventAdapterService)
+    protected VAERevisionProcessorBase(RevisionSpec revisionSpec, String revisioneventTypeName, EventAdapterService eventAdapterService)
     {
         this.revisionSpec = revisionSpec;
-        this.revisionEventTypeAlias = revisionEventTypeAlias;
+        this.revisionEventTypeName = revisioneventTypeName;
         this.eventAdapterService = eventAdapterService;
         this.typeDescriptors = new HashMap<EventType, RevisionTypeDesc>();
     }
@@ -105,6 +106,6 @@ public abstract class VAERevisionProcessorBase implements ValueAddEventProcessor
     private String getMessage()
     {
         return "Selected event type is not a valid base or delta event type of revision event type '"
-                + revisionEventTypeAlias + "'";
+                + revisionEventTypeName + "'";
     }
 }

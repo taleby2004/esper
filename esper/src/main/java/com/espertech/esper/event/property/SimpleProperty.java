@@ -9,7 +9,17 @@
 package com.espertech.esper.event.property;
 
 import com.espertech.esper.event.*;
-import com.espertech.esper.client.EPException;
+import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.bean.InternalEventPropDescriptor;
+import com.espertech.esper.event.xml.*;
+import com.espertech.esper.event.xml.DOMSimpleAttributeGetter;
+import com.espertech.esper.event.xml.DOMComplexElementGetter;
+import com.espertech.esper.event.xml.DOMAttributeAndElementGetter;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.PropertyAccessException;
 
 import java.util.Map;
 import java.io.StringWriter;
@@ -28,9 +38,14 @@ public class SimpleProperty extends PropertyBase
         super(propertyName);
     }
 
-    public EventPropertyGetter getGetter(BeanEventType eventType)
+    public String[] toPropertyArray()
     {
-        EventPropertyDescriptor propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
+        return new String[] {this.getPropertyNameAtomic()};
+    }    
+
+    public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        InternalEventPropDescriptor propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             return null;
@@ -42,9 +57,9 @@ public class SimpleProperty extends PropertyBase
         return eventType.getGetter(propertyNameAtomic);
     }
 
-    public Class getPropertyType(BeanEventType eventType)
+    public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
-        EventPropertyDescriptor propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
+        InternalEventPropDescriptor propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             return null;
@@ -80,7 +95,7 @@ public class SimpleProperty extends PropertyBase
                 propertyName = MapEventType.getPropertyRemoveArray(propertyName);
             }
 
-            EventType eventType = eventAdapterService.getExistsTypeByAlias(propertyName);
+            EventType eventType = eventAdapterService.getExistsTypeByName(propertyName);
             if (eventType instanceof MapEventType)
             {
                 if (isArray)
@@ -125,11 +140,61 @@ public class SimpleProperty extends PropertyBase
                 Map map = (Map) eventBean.getUnderlying();
                 return map.containsKey(propertyName);
             }
+
+            public Object getFragment(EventBean eventBean)
+            {
+                return null;
+            }
         };
     }
 
     public void toPropertyEPL(StringWriter writer)
     {
         writer.append(propertyNameAtomic);
+    }
+
+    public EventPropertyGetter getGetterDOM()
+    {
+        return new DOMAttributeAndElementGetter(propertyNameAtomic);
+    }
+
+    public EventPropertyGetter getGetterDOM(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService, BaseXMLEventType xmlEventType, String propertyExpression)
+    {
+        for (SchemaItemAttribute attribute : complexProperty.getAttributes())
+        {
+            if (attribute.getName().equals(propertyNameAtomic))
+            {
+                return new DOMSimpleAttributeGetter(propertyNameAtomic);
+            }
+        }
+
+        for (SchemaElementSimple simple : complexProperty.getSimpleElements())
+        {
+            if (simple.getName().equals(propertyNameAtomic))
+            {
+                return new DOMComplexElementGetter(propertyNameAtomic, null, simple.isArray());
+            }
+        }
+
+        for (SchemaElementComplex complex : complexProperty.getChildren())
+        {
+            FragmentFactoryDOMGetter complexFragmentFactory = new FragmentFactoryDOMGetter(eventAdapterService, xmlEventType, propertyExpression);
+            if (complex.getName().equals(propertyNameAtomic))
+            {
+                return new DOMComplexElementGetter(propertyNameAtomic, complexFragmentFactory, complex.isArray());
+            }
+        }
+
+        return null;
+    }
+
+    public SchemaItem getPropertyTypeSchema(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService)
+    {
+        return SchemaUtil.findPropertyMapping(complexProperty, propertyNameAtomic);
+    }
+
+    public boolean isDynamic()
+    {
+        return false;
     }
 }

@@ -11,11 +11,12 @@ package com.espertech.esper.view;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Arrays;
 
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.collection.NullIterator;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.SingleEventIterator;
+import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ public final class ZeroDepthStream implements EventStream
     private final LinkedList<View> children = new LinkedList<View>();
     private final EventType eventType;
     private EventBean lastInsertedEvent;
+    private EventBean[] lastInsertedEvents;
 
     /**
      * Ctor.
@@ -36,6 +38,21 @@ public final class ZeroDepthStream implements EventStream
     public ZeroDepthStream(EventType eventType)
     {
         this.eventType = eventType;
+    }
+
+    public void insert(EventBean[] events)
+    {
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".insert Received event, updating child views, events=" + Arrays.toString(events));
+        }
+
+        for (View childView : children)
+        {
+            childView.update(events, null);
+        }
+
+        lastInsertedEvents = events;
     }
 
     public final void insert(EventBean event)
@@ -63,6 +80,10 @@ public final class ZeroDepthStream implements EventStream
 
     public final Iterator<EventBean> iterator()
     {
+        if (lastInsertedEvents != null)
+        {
+            return new ArrayEventIterator(lastInsertedEvents);
+        }
         return new SingleEventIterator(lastInsertedEvent);
     }
 
@@ -90,6 +111,12 @@ public final class ZeroDepthStream implements EventStream
         return (!children.isEmpty());
     }
 
+    public void removeAllViews()
+    {
+        children.clear();
+    }
+
     private static final Log log = LogFactory.getLog(ZeroDepthStream.class);
 }
+
 

@@ -3,8 +3,7 @@ package com.espertech.esper.regression.epl;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
@@ -18,18 +17,15 @@ public class TestSubselectUnfiltered extends TestCase {
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("S0", SupportBean_S0.class);
-        config.addEventTypeAlias("S1", SupportBean_S1.class);
-        config.addEventTypeAlias("S2", SupportBean_S2.class);
-        config.addEventTypeAlias("S3", SupportBean_S3.class);
-        config.addEventTypeAlias("S4", SupportBean_S4.class);
-        config.addEventTypeAlias("S5", SupportBean_S5.class);
+        config.addEventType("S0", SupportBean_S0.class);
+        config.addEventType("S1", SupportBean_S1.class);
+        config.addEventType("S2", SupportBean_S2.class);
+        config.addEventType("S3", SupportBean_S3.class);
+        config.addEventType("S4", SupportBean_S4.class);
+        config.addEventType("S5", SupportBean_S5.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
-
-        // Use external clocking for the test, reduces logging
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
     public void testSelfSubselect()
@@ -104,7 +100,7 @@ public class TestSubselectUnfiltered extends TestCase {
 
     public void testJoinUnfiltered()
     {
-        String stmtText = "select (select id from S3.win:length(1000)) as idS3, (select id from S4.win:length(1000)) as idS4 from S0 as s0, S1 as s1 where s0.id = s1.id";
+        String stmtText = "select (select id from S3.win:length(1000)) as idS3, (select id from S4.win:length(1000)) as idS4 from S0.win:keepall() as s0, S1.win:keepall() as s1 where s0.id = s1.id";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -159,10 +155,10 @@ public class TestSubselectUnfiltered extends TestCase {
     public void testInvalidSubselect()
     {
         tryInvalid("select (select id from S1) from S0",
-                   "Error starting view: Subqueries require one or more views to limit the stream, consider declaring a length or time window [select (select id from S1) from S0]");
+                   "Error starting statement: Subqueries require one or more views to limit the stream, consider declaring a length or time window [select (select id from S1) from S0]");
 
         tryInvalid("select (select dummy from S1.std:lastevent()) as idS1 from S0",
-                   "Error starting view: Property named 'dummy' is not valid in any stream [select (select dummy from S1.std:lastevent()) as idS1 from S0]");
+                   "Error starting statement: Property named 'dummy' is not valid in any stream [select (select dummy from S1.std:lastevent()) as idS1 from S0]");
 
         tryInvalid("select (select id, id from S1) as idS1 from S0",
                    "Incorrect syntax near ',' expecting 'from' but found a comma ',' at line 1 column 17, please check the subquery within the select clause [select (select id, id from S1) as idS1 from S0]");
@@ -174,35 +170,35 @@ public class TestSubselectUnfiltered extends TestCase {
                    "Incorrect syntax near 'id' at line 1 column 51, please check the subquery within the select clause near reserved keyword 'from' [select (select (select id from S1.std:lastevent()) id from S1.std:lastevent()) as idS1 from S0]");
 
         tryInvalid("select (select id from S1.std:lastevent() where (sum(id) = 5)) as idS1 from S0",
-                   "Error starting view: Aggregation functions are not supported within subquery filters, consider using insert-into instead [select (select id from S1.std:lastevent() where (sum(id) = 5)) as idS1 from S0]");
+                   "Error starting statement: Aggregation functions are not supported within subquery filters, consider using insert-into instead [select (select id from S1.std:lastevent() where (sum(id) = 5)) as idS1 from S0]");
 
         tryInvalid("select * from S0(id=5 and (select id from S1))",
                    "Subselects not allowed within filters [select * from S0(id=5 and (select id from S1))]");
 
         tryInvalid("select * from S0 group by id + (select id from S1)",
-                   "Error starting view: Subselects not allowed within group-by [select * from S0 group by id + (select id from S1)]");
+                   "Error starting statement: Subselects not allowed within group-by [select * from S0 group by id + (select id from S1)]");
 
         tryInvalid("select * from S0 group by id having (select id from S1)",
-                   "Error starting view: Subselects not allowed within having-clause [select * from S0 group by id having (select id from S1)]");
+                   "Error starting statement: Subselects not allowed within having-clause [select * from S0 group by id having (select id from S1)]");
 
         tryInvalid("select * from S0 order by (select id from S1) asc",
-                   "Error starting view: Subselects not allowed within order-by clause [select * from S0 order by (select id from S1) asc]");
+                   "Error starting statement: Subselects not allowed within order-by clause [select * from S0 order by (select id from S1) asc]");
 
         tryInvalid("select (select id from S1.std:lastevent() where 'a') from S0",
-                   "Error starting view: Subselect filter expression must return a boolean value [select (select id from S1.std:lastevent() where 'a') from S0]");
+                   "Error starting statement: Subselect filter expression must return a boolean value [select (select id from S1.std:lastevent() where 'a') from S0]");
 
         tryInvalid("select (select id from S1.std:lastevent() where id = p00) from S0",
-                   "Error starting view: Property named 'p00' must be prefixed by a stream name, use the as-clause to name the stream [select (select id from S1.std:lastevent() where id = p00) from S0]");
+                   "Error starting statement: Property named 'p00' must be prefixed by a stream name, use the as-clause to name the stream [select (select id from S1.std:lastevent() where id = p00) from S0]");
 
         tryInvalid("select id in (select * from S1.win:length(1000)) as value from S0",
-                   "Error starting view: Implicit conversion from datatype 'SupportBean_S1' to 'Integer' is not allowed [select id in (select * from S1.win:length(1000)) as value from S0]");
+                   "Error starting statement: Implicit conversion from datatype 'SupportBean_S1' to 'Integer' is not allowed [select id in (select * from S1.win:length(1000)) as value from S0]");
     }
 
     public void testUnfilteredStreamPrior_OM() throws Exception
     {
         EPStatementObjectModel subquery = new EPStatementObjectModel();
         subquery.setSelectClause(SelectClause.create().add(Expressions.prior(0, "id")));
-        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView("win", "length", 1000)));
+        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView("win", "length", Expressions.constant(1000))));
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create().add(Expressions.subquery(subquery), "idS1"));

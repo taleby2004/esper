@@ -1,13 +1,12 @@
 package com.espertech.esper.event.property;
 
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.BeanEventType;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.event.SupportEventAdapterService;
 import junit.framework.TestCase;
-
-import java.util.Map;
 
 public class TestMappedProperty extends TestCase
 {
@@ -30,13 +29,13 @@ public class TestMappedProperty extends TestCase
         Object[] expected = new String[] {"valueOne", "valueTwo"};
         for (int i = 0; i < mapped.length; i++)
         {
-            EventPropertyGetter getter = mapped[i].getGetter(eventType);
+            EventPropertyGetter getter = mapped[i].getGetter(eventType, SupportEventAdapterService.getService());
             assertEquals(expected[i], getter.get(event));
         }
 
         // try invalid case
         MappedProperty mpd = new MappedProperty("dummy", "dummy");
-        assertNull(mpd.getGetter(eventType));
+        assertNull(mpd.getGetter(eventType, SupportEventAdapterService.getService()));
     }
 
     public void testGetPropertyType()
@@ -44,13 +43,13 @@ public class TestMappedProperty extends TestCase
         Class[] expected = new Class[] {String.class, String.class};
         for (int i = 0; i < mapped.length; i++)
         {
-            assertEquals(expected[i], mapped[i].getPropertyType(eventType));
+            assertEquals(expected[i], mapped[i].getPropertyType(eventType, SupportEventAdapterService.getService()));
         }
 
         // try invalid case
         MappedProperty mpd = new MappedProperty("dummy", "dummy");
-        assertNull(mpd.getPropertyType(eventType));
+        assertNull(mpd.getPropertyType(eventType, SupportEventAdapterService.getService()));
         mpd = new MappedProperty("mapProperty", "dummy");
-        assertNull(mpd.getPropertyType(eventType));
+        assertNull(mpd.getPropertyType(eventType, SupportEventAdapterService.getService()));
     }
 }

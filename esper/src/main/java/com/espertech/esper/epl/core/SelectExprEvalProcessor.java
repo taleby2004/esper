@@ -8,7 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import com.espertech.esper.collection.Pair;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.InsertIntoDesc;
 import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
@@ -40,6 +43,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
     private SelectExprJoinWildcardProcessor joinWildcardProcessor;
     private boolean isRevisionEvent;
     private ValueAddEventProcessor vaeProcessor;
+    private boolean isEmptyExpressionNodes;
 
     /**
      * Ctor.
@@ -142,8 +146,15 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             }
         }
 
-        // Find if there is any tagged event types:
-        // This is a special case for patterns: select a, b from pattern [a=A -> b=B]
+        // Find if there is any fragments selected
+        EventType targetType= null;
+        if (insertIntoDesc != null)
+        {
+            targetType = eventAdapterService.getExistsTypeByName(insertIntoDesc.getEventTypeName());
+        }
+
+        // Find if there is any fragment event types:
+        // This is a special case for fragments: select a, b from pattern [a=A -> b=B]
         // We'd like to maintain 'A' and 'B' EventType in the Map type, and 'a' and 'b' EventBeans in the event bean
         for (int i = 0; i < selectionList.size(); i++)
         {
@@ -157,36 +168,73 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             final int streamNum = identNode.getStreamId();
 
             EventType eventTypeStream = typeService.getEventTypes()[streamNum];
-            if (!(eventTypeStream instanceof TaggedCompositeEventType))
+            if (eventTypeStream instanceof NativeEventType)
             {
-                continue;
+                continue;   // we do not transpose the native type for performance reasons
+            }
+            
+            FragmentEventType fragmentType = eventTypeStream.getFragmentType(propertyName);
+            if ((fragmentType == null) || (fragmentType.isNative()))
+            {
+                continue;   // we also ignore native Java classes as fragments for performance reasons
             }
 
-            TaggedCompositeEventType comp = (TaggedCompositeEventType) eventTypeStream;
-            Pair<EventType, String> pair = comp.getTaggedEventTypes().get(propertyName);
-            if (pair == null)
+            // may need to unwrap the fragment if the target type has this underlying type
+            FragmentEventType targetFragment = null;
+            if (targetType != null)
             {
-                continue;
+                targetFragment = targetType.getFragmentType(columnNames[i]);
             }
+            if ((targetType != null) &&
+                (fragmentType.getFragmentType().getUnderlyingType() == expressionReturnTypes[i]) &&
+                ((targetFragment == null) || (targetFragment != null && targetFragment.isNative())) )
+            {
+                ExprEvaluator evaluatorFragment;
 
-            // A match was found, we replace the expression
-            final String tagName = propertyName;
-            ExprEvaluator evaluator = new ExprEvaluator() {
-
-                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
-                {
-                    EventBean streamEvent = eventsPerStream[streamNum];
-                    if (streamEvent == null)
+                // A match was found, we replace the expression
+                final EventPropertyGetter getter = eventTypeStream.getGetter(propertyName);
+                evaluatorFragment = new ExprEvaluator() {
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
                     {
-                        return null;
+                        EventBean streamEvent = eventsPerStream[streamNum];
+                        if (streamEvent == null)
+                        {
+                            return null;
+                        }
+                        return getter.get(streamEvent);
                     }
-                    TaggedCompositeEventBean taggedComposite = (TaggedCompositeEventBean) streamEvent;
-                    return taggedComposite.getEventBean(tagName);
-                }
-            };
+                };
+                expressionNodes[i] = evaluatorFragment;
+            }
+            else
+            {
+                ExprEvaluator evaluatorFragment;
+                final EventPropertyGetter getter =  eventTypeStream.getGetter(propertyName);
 
-            expressionNodes[i] = evaluator;
-            expressionReturnTypes[i] = pair.getFirst();
+                // A match was found, we replace the expression
+                evaluatorFragment = new ExprEvaluator() {
+
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+                    {
+                        EventBean streamEvent = eventsPerStream[streamNum];
+                        if (streamEvent == null)
+                        {
+                            return null;
+                        }
+                        return getter.getFragment(streamEvent);
+                    }
+                };
+
+                expressionNodes[i] = evaluatorFragment;
+                if (!fragmentType.isIndexed())
+                {
+                    expressionReturnTypes[i] = fragmentType.getFragmentType();
+                }
+                else
+                {
+                    expressionReturnTypes[i] = new EventType[] {fragmentType.getFragmentType()};
+                }
+            }
         }
 
         // Find if there is any stream expression (ExprStreamNode) :
@@ -224,12 +272,12 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             selPropertyTypes.put(columnNames[i], expressionReturnType);
         }
 
-        // If we have an alias for this type, add it
+        // If we have an name for this type, add it
         if (insertIntoDesc != null)
         {
             try
             {
-                vaeProcessor = valueAddEventService.getValueAddProcessor(insertIntoDesc.getEventTypeAlias());
+                vaeProcessor = valueAddEventService.getValueAddProcessor(insertIntoDesc.getEventTypeName());
                 if (isUsingWildcard)
                 {
                     if (vaeProcessor != null)
@@ -240,7 +288,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                     }
                     else
                     {
-                        resultEventType = eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeAlias(), eventType, selPropertyTypes, false, true);                        
+                        resultEventType = eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeName(), eventType, selPropertyTypes, false, true);
                     }
                 }
                 else
@@ -248,7 +296,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                     resultEventType = null;
                     if ((columnNames.length == 1) && (insertIntoDesc.getColumnNames().size() == 0))
                     {
-                        EventType existingType = eventAdapterService.getExistsTypeByAlias(insertIntoDesc.getEventTypeAlias());
+                        EventType existingType = eventAdapterService.getExistsTypeByName(insertIntoDesc.getEventTypeName());
                         if (existingType != null)
                         {
                             // check if the existing type and new type are compatible
@@ -273,7 +321,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                         }
                         else
                         {
-                            resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes, null, false, false, true);
+                            resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, true);
                         }
                     }
                     if (vaeProcessor != null)
@@ -305,6 +353,8 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             }
         }
 
+        isEmptyExpressionNodes = expressionNodes.length == 0;
+
         if (log.isDebugEnabled())
         {
             log.debug(".init resultEventType=" + resultEventType);
@@ -314,11 +364,20 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
     {
         // Evaluate all expressions and build a map of name-value pairs
-        Map<String, Object> props = new HashMap<String, Object>();
-        for (int i = 0; i < expressionNodes.length; i++)
+        Map<String, Object> props;
+
+        if (isEmptyExpressionNodes)
         {
-            Object evalResult = expressionNodes[i].evaluate(eventsPerStream, isNewData);
-            props.put(columnNames[i], evalResult);
+            props = Collections.EMPTY_MAP;
+        }
+        else
+        {
+            props = new HashMap<String, Object>();
+            for (int i = 0; i < expressionNodes.length; i++)
+            {
+                Object evalResult = expressionNodes[i].evaluate(eventsPerStream, isNewData);
+                props.put(columnNames[i], evalResult);
+            }
         }
 
         if(isUsingWildcard)
@@ -335,8 +394,16 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                     {
         			    log.debug(".process additional properties=" + map);
                     }
-                    props.putAll(map);
-        		}
+
+                    if ((isEmptyExpressionNodes) && (!map.isEmpty()))
+                    {
+                        props = new HashMap<String, Object>(map);
+                    }
+                    else
+                    {
+                        props.putAll(map);
+                    }
+                }
         	}
 
             EventBean event;
@@ -357,7 +424,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             {
                 // Using a wrapper bean since we cannot use the same event type else same-type filters match.
                 // Wrapping it even when not adding properties is very inexpensive.
-                return eventAdapterService.createWrapper(event, props, resultEventType);
+                return eventAdapterService.adaptorForWrapper(event, props, resultEventType);
             }
         }
         else
@@ -368,7 +435,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                 EventBean wrappedEvent;
                 if (result instanceof Map)
                 {
-                    wrappedEvent = eventAdapterService.createMapFromValues((Map)result, resultEventType);
+                    wrappedEvent = eventAdapterService.adaptorForTypedMap((Map)result, resultEventType);
                 }
                 else
                 {
@@ -377,22 +444,22 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                 props.clear();
                 if (!isRevisionEvent)
                 {
-                    return eventAdapterService.createWrapper(wrappedEvent, props, resultEventType);
+                    return eventAdapterService.adaptorForWrapper(wrappedEvent, props, resultEventType);
                 }
                 else
                 {
-                    return vaeProcessor.getValueAddEventBean(eventAdapterService.createWrapper(wrappedEvent, props, vaeInnerEventType));
+                    return vaeProcessor.getValueAddEventBean(eventAdapterService.adaptorForWrapper(wrappedEvent, props, vaeInnerEventType));
                 }
             }
             else
             {
                 if (!isRevisionEvent)
                 {
-                    return eventAdapterService.createMapFromValues(props, resultEventType);
+                    return eventAdapterService.adaptorForTypedMap(props, resultEventType);
                 }
                 else
                 {
-                    return vaeProcessor.getValueAddEventBean(eventAdapterService.createMapFromValues(props, vaeInnerEventType));
+                    return vaeProcessor.getValueAddEventBean(eventAdapterService.adaptorForTypedMap(props, vaeInnerEventType));
                 }
             }
         }

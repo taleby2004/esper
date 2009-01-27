@@ -150,7 +150,7 @@ public class EPAdministratorImpl implements EPAdministrator
     public EPStatement create(EPStatementObjectModel sodaStatement, String statementName, Object userObject) throws EPException
     {
         // Specifies the statement
-        StatementSpecRaw statementSpec = StatementSpecMapper.map(sodaStatement, services.getEngineImportService(), services.getVariableService());
+        StatementSpecRaw statementSpec = StatementSpecMapper.map(sodaStatement, services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot());
         String eplStatement = sodaStatement.toEPL();
 
         EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName, userObject);
@@ -162,7 +162,7 @@ public class EPAdministratorImpl implements EPAdministrator
     public EPStatement create(EPStatementObjectModel sodaStatement, String statementName) throws EPException
     {
         // Specifies the statement
-        StatementSpecRaw statementSpec = StatementSpecMapper.map(sodaStatement, services.getEngineImportService(), services.getVariableService());
+        StatementSpecRaw statementSpec = StatementSpecMapper.map(sodaStatement, services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot());
         String eplStatement = sodaStatement.toEPL();
 
         EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName, null);
@@ -200,7 +200,7 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         EPPreparedStatementImpl impl = (EPPreparedStatementImpl) prepared;
 
-        StatementSpecRaw statementSpec = StatementSpecMapper.map(impl.getModel(), services.getEngineImportService(), services.getVariableService());
+        StatementSpecRaw statementSpec = StatementSpecMapper.map(impl.getModel(), services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot());
         String eplStatement = impl.getModel().toEPL();
 
         return services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName, userObject);
@@ -210,7 +210,7 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         EPPreparedStatementImpl impl = (EPPreparedStatementImpl) prepared;
 
-        StatementSpecRaw statementSpec = StatementSpecMapper.map(impl.getModel(), services.getEngineImportService(), services.getVariableService());
+        StatementSpecRaw statementSpec = StatementSpecMapper.map(impl.getModel(), services.getEngineImportService(), services.getVariableService(), services.getConfigSnapshot());
         String eplStatement = impl.getModel().toEPL();
 
         return services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName, null);
@@ -289,7 +289,7 @@ public class EPAdministratorImpl implements EPAdministrator
         Tree ast = ParseHelper.parse(eplStatement, eplParseRule);
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
 
-        EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService().getTime(), defaultStreamSelector);
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot());
 
         try
         {
@@ -306,8 +306,9 @@ public class EPAdministratorImpl implements EPAdministrator
         }
         catch (RuntimeException ex)
         {
-            log.error(".createEPL Error validating expression", ex);
-            throw new EPStatementException(ex.getMessage(), eplStatement);
+            String message = "Error in expression";
+            log.debug(message, ex);
+            throw new EPStatementException(getNullableErrortext(message, ex.getMessage()), eplStatement);
         }
 
         if (log.isDebugEnabled())
@@ -324,7 +325,7 @@ public class EPAdministratorImpl implements EPAdministrator
         // Parse and walk
         Tree ast = ParseHelper.parse(expression, patternParseRule);
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
-        EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService().getTime(), defaultStreamSelector);
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot());
 
         try
         {
@@ -341,8 +342,9 @@ public class EPAdministratorImpl implements EPAdministrator
         }
         catch (RuntimeException ex)
         {
-            log.debug(".createPattern Error validating expression", ex);
-            throw new EPStatementException(ex.getMessage(), expression);
+            String message = "Error in expression";
+            log.debug(message, ex);
+            throw new EPStatementException(getNullableErrortext(message, ex.getMessage()), expression);
         }
 
         if (log.isDebugEnabled())
@@ -365,6 +367,18 @@ public class EPAdministratorImpl implements EPAdministrator
         statementSpec.getSelectClauseSpec().getSelectExprList().add(new SelectClauseElementWildcard());
 
         return statementSpec;
+    }
+
+    private static String getNullableErrortext(String msg, String cause)
+    {
+        if (cause == null)
+        {
+            return msg;
+        }
+        else
+        {
+            return msg + ": " + cause;
+        }        
     }
 
     private static Log log = LogFactory.getLog(EPAdministratorImpl.class);

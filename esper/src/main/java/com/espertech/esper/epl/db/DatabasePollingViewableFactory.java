@@ -15,7 +15,7 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.epl.spec.DBStatementStreamSpec;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.*;
 import com.espertech.esper.view.HistoricalEventViewable;
 import org.antlr.runtime.CharStream;
@@ -304,6 +304,7 @@ public class DatabasePollingViewableFactory
     protected static String lexSampleSQL(String querySQL)
                 throws ExprValidationException
     {
+        querySQL = querySQL.replaceAll("\\s\\s+|\\n|\\r", " ");
         StringReader reader = new StringReader(querySQL);
         CharStream input;
         try

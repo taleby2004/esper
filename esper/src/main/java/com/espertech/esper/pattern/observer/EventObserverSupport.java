@@ -8,9 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.observer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Abstract class for applications to extend to implement a pattern observer.
  */
 public abstract class EventObserverSupport implements EventObserver
 {
+    private static Log log = LogFactory.getLog(EventObserverSupport.class);
 }

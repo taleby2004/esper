@@ -7,7 +7,7 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 public class TestViewTimeLengthBatch extends TestCase
 {
@@ -19,7 +19,6 @@ public class TestViewTimeLengthBatch extends TestCase
     {
         listener = new SupportUpdateListener();
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 

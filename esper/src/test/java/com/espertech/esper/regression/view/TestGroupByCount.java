@@ -3,12 +3,12 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.SerializableObjectCopier;
 
 import org.apache.commons.logging.Log;
@@ -39,7 +39,7 @@ public class TestGroupByCount extends TestCase
                 .add(Expressions.countStar(), "countAll")
                 .add(Expressions.countDistinct("volume"), "countDistVol")
                 .add(Expressions.count("volume"), "countVol") );
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 3)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(3))));
         model.setWhereClause(Expressions.or()
                 .add(Expressions.eq("symbol", "DELL"))
                 .add(Expressions.eq("symbol", "IBM"))

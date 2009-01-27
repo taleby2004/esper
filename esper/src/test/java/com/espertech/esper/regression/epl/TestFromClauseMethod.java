@@ -19,7 +19,7 @@ public class TestFromClauseMethod extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAliasSimpleName(SupportBean.class);
+        config.addEventType(SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -127,7 +127,7 @@ public class TestFromClauseMethod extends TestCase
 
     public void test2JoinHistoricalOnlyDependent()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().createEPL("create variable int lower");
         epService.getEPAdministrator().createEPL("create variable int upper");
         EPStatement setStmt = epService.getEPAdministrator().createEPL("on SupportBean set lower=intPrimitive,upper=intBoxed");
@@ -149,7 +149,7 @@ public class TestFromClauseMethod extends TestCase
 
     public void test2JoinHistoricalOnlyIndependent()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().createEPL("create variable int lower");
         epService.getEPAdministrator().createEPL("create variable int upper");
         epService.getEPAdministrator().createEPL("on SupportBean set lower=intPrimitive,upper=intBoxed");
@@ -219,7 +219,7 @@ public class TestFromClauseMethod extends TestCase
 
     public void testNoJoinIterateVariables()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().createEPL("create variable int lower");
         epService.getEPAdministrator().createEPL("create variable int upper");
         epService.getEPAdministrator().createEPL("on SupportBean set lower=intPrimitive,upper=intBoxed");
@@ -330,7 +330,7 @@ public class TestFromClauseMethod extends TestCase
         model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("id", "string"));
         model.setFromClause(FromClause.create()
-            .add(FilterStream.create(SupportBean.class.getName(), "s1").addView("win", "length", 3))
+            .add(FilterStream.create(SupportBean.class.getName(), "s1").addView("win", "length", Expressions.constant(3)))
             .add(MethodInvocationStream.create(SupportStaticMethodLib.class.getName(), "fetchArrayNoArg")));
         stmt = epService.getEPAdministrator().create(model);
         assertEquals(joinStatement, model.toEPL());
@@ -376,7 +376,7 @@ public class TestFromClauseMethod extends TestCase
         model.setFromClause(FromClause.create()
             .add(MethodInvocationStream.create(SupportStaticMethodLib.class.getName(), "fetchArrayGen", "s0")
                 .addParameter(Expressions.property("intPrimitive")))
-                .add(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 3))
+                .add(FilterStream.create(SupportBean.class.getName()).addView("win", "length", Expressions.constant(3)))
             );
         stmt = epService.getEPAdministrator().create(model);
         assertEquals(joinStatement, model.toEPL());
@@ -483,43 +483,43 @@ public class TestFromClauseMethod extends TestCase
                    "Incorrect syntax near '.' expecting an identifier but found a dot '.' at line 1 column 34, please check the method invocation join within the from clause [select * from SupportBean, method:.abc where 1=2]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayGen()",
-                   "Error starting view: Method footprint does not match the number or type of expression parameters, expecting no parameters in method: Could not find static method named 'fetchArrayGen' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib'  [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayGen()]");
+                   "Error starting statement: Method footprint does not match the number or type of expression parameters, expecting no parameters in method: Could not find static method named 'fetchArrayGen' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib'  [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayGen()]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchObjectAndSleep(1)",
-                   "Error starting view: Method footprint does not match the number or type of expression parameters, expecting a method where parameters are typed '[class java.lang.Integer]': Could not find static method named 'fetchObjectAndSleep' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib'  [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchObjectAndSleep(1)]");
+                   "Error starting statement: Method footprint does not match the number or type of expression parameters, expecting a method where parameters are typed '[class java.lang.Integer]': Could not find static method named 'fetchObjectAndSleep' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib'  [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchObjectAndSleep(1)]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.sleep(100) where 1=2",
-                   "Error starting view: Invalid return type for static method 'sleep' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib', expecting a Java class [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.sleep(100) where 1=2]");
+                   "Error starting statement: Invalid return type for static method 'sleep' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib', expecting a Java class [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.sleep(100) where 1=2]");
 
         tryInvalid("select * from SupportBean, method:AClass. where 1=2",
                    "Incorrect syntax near 'where' (a reserved keyword) expecting an identifier but found 'where' at line 1 column 42, please check the view specifications within the from clause [select * from SupportBean, method:AClass. where 1=2]");
 
         tryInvalid("select * from SupportBean, method:Dummy.abc where 1=2",
-                   "Error starting view: Could not load class by name 'Dummy'  [select * from SupportBean, method:Dummy.abc where 1=2]");
+                   "Error starting statement: Could not load class by name 'Dummy'  [select * from SupportBean, method:Dummy.abc where 1=2]");
 
         tryInvalid("select * from SupportBean, method:Math where 1=2",
                    "No method name specified for method-based join [select * from SupportBean, method:Math where 1=2]");
 
         tryInvalid("select * from SupportBean, method:Dummy.dummy().win:length(100) where 1=2",
-                   "Error starting view: Method data joins do not allow views onto the data, view 'win:length' is not valid in this context [select * from SupportBean, method:Dummy.dummy().win:length(100) where 1=2]");
+                   "Error starting statement: Method data joins do not allow views onto the data, view 'win:length' is not valid in this context [select * from SupportBean, method:Dummy.dummy().win:length(100) where 1=2]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.dummy where 1=2",
-                   "Error starting view: Could not find static method named 'dummy' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib' [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.dummy where 1=2]");
+                   "Error starting statement: Could not find static method named 'dummy' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib' [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.dummy where 1=2]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.minusOne() where 1=2",
-                   "Error starting view: Invalid return type for static method 'minusOne' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib', expecting a Java class [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.minusOne() where 1=2]");
+                   "Error starting statement: Invalid return type for static method 'minusOne' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib', expecting a Java class [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.minusOne() where 1=2]");
 
         tryInvalid("select * from SupportBean, xyz:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayNoArg() where 1=2",
                    "Expecting keyword 'method', found 'xyz' [select * from SupportBean, xyz:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayNoArg() where 1=2]");
 
         tryInvalid("select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s1.value, s1.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1",
-                   "Error starting view: Circular dependency detected between historical streams [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s1.value, s1.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1]");
+                   "Error starting statement: Circular dependency detected between historical streams [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s1.value, s1.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1]");
 
         tryInvalid("select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1",
-                   "Error starting view: Parameters for historical stream 0 indicate that the stream is subordinate to itself as stream parameters originate in the same stream [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1]");
+                   "Error starting statement: Parameters for historical stream 0 indicate that the stream is subordinate to itself as stream parameters originate in the same stream [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s1]");
 
         tryInvalid("select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0",
-                   "Error starting view: Parameters for historical stream 0 indicate that the stream is subordinate to itself as stream parameters originate in the same stream [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0]");
+                   "Error starting statement: Parameters for historical stream 0 indicate that the stream is subordinate to itself as stream parameters originate in the same stream [select * from method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchBetween(s0.value, s0.value) as s0]");
     }
 
     private void tryInvalid(String stmt, String message)

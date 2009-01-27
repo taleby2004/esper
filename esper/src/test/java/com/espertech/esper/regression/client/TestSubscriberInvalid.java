@@ -14,9 +14,8 @@ public class TestSubscriberInvalid extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         String pkg = SupportBean.class.getPackage().getName();
-        config.addEventTypeAutoAlias(pkg);
+        config.addEventTypeAutoName(pkg);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         epAdmin = epService.getEPAdministrator();

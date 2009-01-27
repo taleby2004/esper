@@ -3,8 +3,8 @@ package com.espertech.esper.regression.view;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -23,7 +23,6 @@ public class TestStreamExpr extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }
@@ -46,9 +45,9 @@ public class TestStreamExpr extends TestCase
     public void testInstanceMethodOuterJoin()
     {
         String textOne = "select symbol, s1.getString() as string from " +
-                            SupportMarketDataBean.class.getName() + " as s0 " +
+                            SupportMarketDataBean.class.getName() + ".win:keepall() as s0 " +
                             "left outer join " +
-                            SupportBean.class.getName() + " as s1 on s0.symbol=s1.string";
+                            SupportBean.class.getName() + ".win:keepall() as s1 on s0.symbol=s1.string";
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
@@ -62,9 +61,9 @@ public class TestStreamExpr extends TestCase
     public void testInstanceMethodStatic()
     {
         String textOne = "select symbol, s1.getSimpleProperty() as simpleprop, s1.makeDefaultBean() as def from " +
-                            SupportMarketDataBean.class.getName() + " as s0 " +
+                            SupportMarketDataBean.class.getName() + ".win:keepall() as s0 " +
                             "left outer join " +
-                            SupportBeanComplexProps.class.getName() + " as s1 on s0.symbol=s1.simpleProperty";
+                            SupportBeanComplexProps.class.getName() + ".win:keepall() as s1 on s0.symbol=s1.simpleProperty";
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
@@ -129,8 +128,8 @@ public class TestStreamExpr extends TestCase
     {
         // try with alias
         String textOne = "select s0 as s0stream, s1 as s1stream from " +
-                            SupportMarketDataBean.class.getName() + " as s0, " +
-                            SupportBean.class.getName() + " as s1";
+                            SupportMarketDataBean.class.getName() + ".win:keepall() as s0, " +
+                            SupportBean.class.getName() + ".win:keepall() as s1";
 
         // Attach listener to feed
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
@@ -156,8 +155,8 @@ public class TestStreamExpr extends TestCase
 
         // try no alias
         textOne = "select s0, s1 from " +
-                            SupportMarketDataBean.class.getName() + " as s0, " +
-                            SupportBean.class.getName() + " as s1";
+                            SupportMarketDataBean.class.getName() + ".win:keepall() as s0, " +
+                            SupportBean.class.getName() + ".win:keepall() as s1";
 
         // Attach listener to feed
         stmtOne = epService.getEPAdministrator().createEPL(textOne);
@@ -224,11 +223,11 @@ public class TestStreamExpr extends TestCase
     public void testStreamSelectConversionFunctionMap()
     {
         // try the same with a map
-        Map<String, Class> types = new HashMap<String, Class>();
+        Map<String, Object> types = new HashMap<String, Object>();
         types.put("one", String.class);
         types.put("two", String.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MapOne", types);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MapTwo", types);
+        epService.getEPAdministrator().getConfiguration().addEventType("MapOne", types);
+        epService.getEPAdministrator().getConfiguration().addEventType("MapTwo", types);
 
         String textOne = "insert into Stream0 select * from MapOne";
         String textTwo = "insert into Stream0 select " + SupportStaticMethodLib.class.getName() + ".convertEventMap(s0) from MapTwo as s0";
@@ -260,7 +259,7 @@ public class TestStreamExpr extends TestCase
     public void testInvalidSelect()
     {
         tryInvalid("select s0.abc() from " + SupportBean.class.getName() + " as s0",
-                   "Error starting view: Could not find a method named 'abc' in class 'com.espertech.esper.support.bean.SupportBean' and matching the required parameter types [select s0.abc() from com.espertech.esper.support.bean.SupportBean as s0]");
+                   "Error starting statement: Could not find a method named 'abc' in class 'com.espertech.esper.support.bean.SupportBean' and matching the required parameter types [select s0.abc() from com.espertech.esper.support.bean.SupportBean as s0]");
 
         tryInvalid("select s0.getString(1,2,3) from " + SupportBean.class.getName() + " as s0", null);
     }

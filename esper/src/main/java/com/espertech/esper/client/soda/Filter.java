@@ -10,6 +10,7 @@ package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.List;
 
 /**
  * Filter defines the event type to be filtered for, and an optional expression that returns true if
@@ -19,66 +20,67 @@ public class Filter implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
-    private String eventTypeAlias;
+    private String eventTypeName;
     private Expression filter;
+    private List<PropertySelect> optionalPropertySelects;
 
     /**
      * Creates a filter to the given named event type.
-     * @param eventTypeAlias is the event type name to filter for
+     * @param eventTypeName is the event type name to filter for
      * @return filter
      */
-    public static Filter create(String eventTypeAlias)
+    public static Filter create(String eventTypeName)
     {
-        return new Filter(eventTypeAlias);
+        return new Filter(eventTypeName);
     }
 
     /**
      * Creates a filter to the given named event type and filter expression.
-     * @param eventTypeAlias is the event type name to filter for
+     * @param eventTypeName is the event type name to filter for
      * @param filter is the expression filtering out events
      * @return filter is the filter expression
      */
-    public static Filter create(String eventTypeAlias, Expression filter)
+    public static Filter create(String eventTypeName, Expression filter)
     {
-        return new Filter(eventTypeAlias, filter);
+        return new Filter(eventTypeName, filter);
     }
 
     /**
      * Ctor.
-     * @param eventTypeAlias is the event type name
+     * @param eventTypeName is the event type name
      */
-    public Filter(String eventTypeAlias)
+    public Filter(String eventTypeName)
     {
-        this.eventTypeAlias = eventTypeAlias;
+        this.eventTypeName = eventTypeName;
     }
 
     /**
      * Ctor.
-     * @param eventTypeAlias is the event type name
+     * @param eventTypeName is the event type name
      * @param filter is the filter expression
      */
-    public Filter(String eventTypeAlias, Expression filter)
+    public Filter(String eventTypeName, Expression filter)
     {
-        this.eventTypeAlias = eventTypeAlias;
+        this.eventTypeName = eventTypeName;
         this.filter = filter;
     }
 
     /**
      * Returns the name of the event type to filter for.
-     * @return event type alias name
+     * @return event type name
      */
-    public String getEventTypeAlias()
+    public String getEventTypeName()
     {
-        return eventTypeAlias;
+        return eventTypeName;
     }
 
     /**
      * Sets the name of the event type to filter for.
-     * @param eventTypeAlias name or alias of the event type to filter for
+     * @param eventTypeName name of the event type to filter for
      */
-    public void setEventTypeAlias(String eventTypeAlias)
+    public void setEventTypeName(String eventTypeName)
     {
-        this.eventTypeAlias = eventTypeAlias;
+        this.eventTypeName = eventTypeName;
     }
 
     /**
@@ -99,18 +101,37 @@ public class Filter implements Serializable
         this.filter = filter;
     }
 
+    public List<PropertySelect> getOptionalPropertySelects()
+    {
+        return optionalPropertySelects;
+    }
+
+    public void setOptionalPropertySelects(List<PropertySelect> optionalPropertySelects)
+    {
+        this.optionalPropertySelects = optionalPropertySelects;
+    }
+
     /**
      * Returns a textual representation of the filter.
      * @param writer to output to
      */
     public void toEPL(StringWriter writer)
     {
-        writer.write(eventTypeAlias);
+        writer.write(eventTypeName);
         if (filter != null)
         {
             writer.write('(');
             filter.toEPL(writer);
             writer.write(')');
+        }
+        if (optionalPropertySelects != null)
+        {
+            for (PropertySelect propertySelect : optionalPropertySelects)
+            {
+                writer.write('[');
+                propertySelect.toEPL(writer);
+                writer.write(']');
+            }
         }
     }
 }

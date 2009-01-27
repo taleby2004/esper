@@ -11,10 +11,15 @@ package com.espertech.esper.epl.view;
 import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.core.ExtensionServicesContext;
 import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.schedule.*;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.List;
 
 /**
  * Output condition handling crontab-at schedule output.
@@ -36,11 +41,13 @@ public final class OutputConditionCrontab implements OutputCondition
      * Constructor.
      * @param context is the view context for time scheduling
      * @param outputCallback is the callback to make once the condition is satisfied
-     * @param scheduleSpecParameterList list of schedule parameters
+     * @param scheduleSpecExpressionList list of schedule parameters
+     * @throws ExprValidationException if the crontab expression failed to validate
      */
-    public OutputConditionCrontab(Object[] scheduleSpecParameterList,
+    public OutputConditionCrontab(List<ExprNode> scheduleSpecExpressionList,
                                    StatementContext context,
                                    OutputCallback outputCallback)
+            throws ExprValidationException
     {
 		if(outputCallback ==  null)
 		{
@@ -56,8 +63,18 @@ public final class OutputConditionCrontab implements OutputCondition
         this.outputCallback = outputCallback;
         this.scheduleSlot = context.getScheduleBucket().allocateSlot();
 
+        // Validate the expression
+        ExprNode[] expressions = new ExprNode[scheduleSpecExpressionList.size()];
+        int count = 0;
+        for (ExprNode parameters : scheduleSpecExpressionList)
+        {
+            ExprNode node = parameters.getValidatedSubtree(new StreamTypeServiceImpl(context.getEngineURI()), context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService());
+            expressions[count++] = node;
+        }
+
         try
         {
+            Object[] scheduleSpecParameterList = evaluate(expressions);
             scheduleSpec = ScheduleSpecUtil.computeValues(scheduleSpecParameterList);
         }
         catch (ScheduleParameterException e)
@@ -118,7 +135,26 @@ public final class OutputConditionCrontab implements OutputCondition
         context.getSchedulingService().add(scheduleSpec, handle, scheduleSlot);
     }
 
-    private static final Log log = LogFactory.getLog(OutputConditionTime.class);
+    private static Object[] evaluate(ExprNode[] parameters)
+    {
+        Object[] results = new Object[parameters.length];
+        int count = 0;
+        for (ExprNode expr : parameters)
+        {
+            try
+            {
+                results[count] = expr.evaluate(null, true);
+                count++;
+            }
+            catch (RuntimeException ex)
+            {
+                String message = "Failed expression evaluation in crontab timer-at for parameter " + count + ": " + ex.getMessage();
+                log.error(message, ex);
+                throw new IllegalArgumentException(message);
+            }
+        }
+        return results;
+    }
 
-
+    private static final Log log = LogFactory.getLog(OutputConditionCrontab.class);
 }

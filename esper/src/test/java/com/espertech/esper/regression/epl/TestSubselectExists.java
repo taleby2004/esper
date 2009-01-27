@@ -6,7 +6,6 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportBean_S2;
@@ -22,15 +21,12 @@ public class TestSubselectExists extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("S0", SupportBean_S0.class);
-        config.addEventTypeAlias("S1", SupportBean_S1.class);
-        config.addEventTypeAlias("S2", SupportBean_S2.class);
+        config.addEventType("S0", SupportBean_S0.class);
+        config.addEventType("S1", SupportBean_S1.class);
+        config.addEventType("S2", SupportBean_S2.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
-
-        // Use external clocking for the test, reduces logging
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
     public void testExistsInSelect()
@@ -46,7 +42,7 @@ public class TestSubselectExists extends TestCase
     {
         EPStatementObjectModel subquery = new EPStatementObjectModel();
         subquery.setSelectClause(SelectClause.createWildcard());
-        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView(View.create("win", "length", 1000))));
+        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView(View.create("win", "length", Expressions.constant(1000)))));
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setFromClause(FromClause.create(FilterStream.create("S0")));
@@ -166,7 +162,7 @@ public class TestSubselectExists extends TestCase
     {
         EPStatementObjectModel subquery = new EPStatementObjectModel();
         subquery.setSelectClause(SelectClause.createWildcard());
-        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView("win", "length", 1000)));
+        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView("win", "length", Expressions.constant(1000))));
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("id"));

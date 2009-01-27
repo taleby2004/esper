@@ -8,10 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
+import com.espertech.esper.client.EventPropertyDescriptor;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
-import com.espertech.esper.event.*;
+import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.property.*;
+import com.espertech.esper.util.JavaClassHelper;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +32,8 @@ public class RevisionEventType implements EventTypeSPI
 {
     private final EventTypeMetadata metadata;
     private String[] propertyNames;
+    private EventPropertyDescriptor[] propertyDescriptors;
+    private Map<String, EventPropertyDescriptor> propertyDescriptorMap;
     private Map<String, RevisionPropertyTypeDesc> propertyDesc;
     private EventAdapterService eventAdapterService;
 
@@ -39,6 +50,18 @@ public class RevisionEventType implements EventTypeSPI
         Set<String> keys = propertyDesc.keySet();
         propertyNames = keys.toArray(new String[keys.size()]);
         this.eventAdapterService = eventAdapterService;
+
+        propertyDescriptors = new EventPropertyDescriptor[propertyDesc.size()];
+        propertyDescriptorMap = new HashMap<String, EventPropertyDescriptor>();
+        int count = 0;
+        for (Map.Entry<String, RevisionPropertyTypeDesc> desc : propertyDesc.entrySet())
+        {
+            Class type = (Class) desc.getValue().getPropertyType();
+            EventPropertyDescriptor descriptor = new EventPropertyDescriptor(desc.getKey(), type, false, false, false, false, JavaClassHelper.isFragmentableType(type));
+            propertyDescriptors[count] = descriptor;
+            propertyDescriptorMap.put(desc.getKey(), descriptor);
+            count++;
+        }
     }
 
     public EventPropertyGetter getGetter(String propertyName)
@@ -59,7 +82,7 @@ public class RevisionEventType implements EventTypeSPI
         int index = ASTFilterSpecHelper.unescapedIndexOfDot(propertyName);
         if (index == -1)
         {
-            Property prop = PropertyParser.parse(propertyName, eventAdapterService.getBeanEventTypeFactory(), false);
+            Property prop = PropertyParser.parse(propertyName, false);
             if (prop instanceof SimpleProperty)
             {
                 // there is no such property since it wasn't found earlier
@@ -87,7 +110,7 @@ public class RevisionEventType implements EventTypeSPI
             }
             Class nestedClass = (Class) desc.getPropertyType();
             BeanEventType complexProperty = (BeanEventType) eventAdapterService.addBeanType(nestedClass.getName(), nestedClass, false);
-            return prop.getGetter(complexProperty);
+            return prop.getGetter(complexProperty, eventAdapterService);
         }
 
         // Map event types allow 2 types of properties inside:
@@ -209,5 +232,20 @@ public class RevisionEventType implements EventTypeSPI
     public EventTypeMetadata getMetadata()
     {
         return metadata;
-    }    
+    }
+
+    public EventPropertyDescriptor[] getPropertyDescriptors()
+    {
+        return propertyDescriptors;
+    }
+
+    public FragmentEventType getFragmentType(String property)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
+    {
+        return propertyDescriptorMap.get(propertyName);
+    }
 }

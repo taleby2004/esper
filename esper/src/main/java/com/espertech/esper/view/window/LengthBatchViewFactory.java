@@ -10,7 +10,8 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 import com.espertech.esper.core.StatementContext;
@@ -39,8 +40,9 @@ public class LengthBatchViewFactory implements DataWindowViewFactory
 
     private EventType eventType;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
+        List<Object> viewParameters = ViewFactorySupport.validateAndEvaluate("Length window view", viewFactoryContext.getStatementContext(), expressionParameters);
         String errorMessage = "Length window view requires a single integer-type parameter";
         if (viewParameters.size() != 1)
         {
@@ -66,7 +68,7 @@ public class LengthBatchViewFactory implements DataWindowViewFactory
         }
     }
 
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
         this.eventType = parentEventType;
     }

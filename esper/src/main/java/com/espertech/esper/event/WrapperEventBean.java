@@ -9,6 +9,10 @@
 package com.espertech.esper.event;
 
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.PropertyAccessException;
 
 import java.util.Map;
 
@@ -20,8 +24,8 @@ import java.util.Map;
  * The event type of such events is always {@link WrapperEventType}. Additional properties are stored in a
  * Map.
  */
-public class WrapperEventBean implements EventBean, DecoratingEventBean {
-
+public class WrapperEventBean implements EventBean, DecoratingEventBean
+{
 	private final EventBean event;
 	private final Map<String, Object> map;
 	private final EventType eventType;
@@ -44,7 +48,7 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean {
         EventPropertyGetter getter = eventType.getGetter(property);
         if (getter == null)
         {
-            throw new IllegalArgumentException("Property named '" + property + "' is not a valid property name for this type");
+            throw new PropertyAccessException("Property named '" + property + "' is not a valid property name for this type");
         }
         return eventType.getGetter(property).get(this);
 	}
@@ -81,10 +85,6 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean {
         return map;
     }
 
-    /**
-     * Returns the wrapped event.
-     * @return wrapped event
-     */
     public EventBean getUnderlyingEvent()
     {
         return event;
@@ -96,4 +96,14 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean {
         "[event=" + event + "] " +
         "[properties=" + map + "]";
 	}
+
+    public Object getFragment(String propertyExpression)
+    {
+        EventPropertyGetter getter = eventType.getGetter(propertyExpression);
+        if (getter == null)
+        {
+            throw new PropertyAccessException("Property named '" + propertyExpression + "' is not a valid property name for this type");
+        }
+        return getter.getFragment(this);
+    }
 }

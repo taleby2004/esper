@@ -8,25 +8,27 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
+import com.espertech.esper.antlr.ASTUtil;
+import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.generated.EsperEPL2Ast;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.epl.generated.EsperEPL2Ast;
 import com.espertech.esper.pattern.*;
+import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.*;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.util.PlaceholderParser;
 import com.espertech.esper.util.PlaceholderParseException;
-import com.espertech.esper.antlr.ASTUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.espertech.esper.util.PlaceholderParser;
 import org.antlr.runtime.tree.Tree;
 import org.antlr.runtime.tree.TreeNodeStream;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -45,38 +47,47 @@ public class EPLTreeWalker extends EsperEPL2Ast
     private FilterSpecRaw filterSpec;
     private final List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
 
-    // Pattern indicator dictates behavior for some AST nodes
-    private boolean isProcessingPattern;
-
     // AST Walk result
     private List<ExprSubstitutionNode> substitutionParamNodes = new ArrayList<ExprSubstitutionNode>();
     private StatementSpecRaw statementSpec;
     private final Stack<StatementSpecRaw> statementSpecStack;
 
+    private List<SelectClauseElementRaw> propertySelectRaw;
+    private PropertyEvalSpec propertyEvalSpec;
+
     private final EngineImportService engineImportService;
     private final VariableService variableService;
-    private final long engineTime;
+    private final TimeProvider timeProvider;
     private final SelectClauseStreamSelectorEnum defaultStreamSelector;
+    private final String engineURI;
+    private final ConfigurationInformation configurationInformation;
 
     /**
      * Ctor.
      * @param engineImportService is required to resolve lib-calls into static methods or configured aggregation functions
      * @param variableService for variable access
      * @param input is the tree nodes to walk
-     * @param engineTime is the current engine time
+     * @param timeProvider providing the current engine time
      * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
+     * @param engineURI engine URI
+     * @param configurationInformation configuration info
      */
     public EPLTreeWalker(TreeNodeStream input,
                          EngineImportService engineImportService,
                          VariableService variableService,
-                         long engineTime,
-                         SelectClauseStreamSelectorEnum defaultStreamSelector)
+                         TimeProvider timeProvider,
+                         SelectClauseStreamSelectorEnum defaultStreamSelector,
+                         String engineURI,
+                         ConfigurationInformation configurationInformation)
     {
         super(input);
         this.engineImportService = engineImportService;
         this.variableService = variableService;
-        this.engineTime = engineTime;
         this.defaultStreamSelector = defaultStreamSelector;
+        this.timeProvider = timeProvider;
+        this.engineURI = engineURI;
+        this.configurationInformation = configurationInformation;
+
         if (defaultStreamSelector == null)
         {
             throw new IllegalArgumentException("Default stream selector is null");
@@ -113,19 +124,6 @@ public class EPLTreeWalker extends EsperEPL2Ast
     }
 
     /**
-     * Set to indicate that we are walking a pattern.
-     * @param isPatternWalk is true if walking a pattern
-     */
-    protected void setIsPatternWalk(boolean isPatternWalk)
-    {
-        if (log.isDebugEnabled())
-        {
-            log.debug(".setIsPatternWalk " + isPatternWalk);
-        }
-        isProcessingPattern = isPatternWalk;
-    }
-
-    /**
      * Leave AST node and process it's type and child nodes.
      * @param node is the node to complete
      * @throws ASTWalkException if the node tree walk operation failed
@@ -143,7 +141,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 leaveStreamExpr(node);
                 break;
             case EVENT_FILTER_EXPR:
-                leaveFilter(node);
+                leaveStreamFilter(node);
+                break;
+            case PATTERN_FILTER_EXPR:
+                leavePatternFilter(node);
                 break;
             case PATTERN_INCL_EXPR:
                 return;
@@ -162,6 +163,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case SELECTION_STREAM:
                 leaveSelectionStream(node);
                 break;
+            case PROPERTY_SELECTION_ELEMENT_EXPR:
+                leavePropertySelectionElement(node);
+                break;
+            case PROPERTY_SELECTION_STREAM:
+                leavePropertySelectionStream(node);
+                break;
+            case PROPERTY_WILDCARD_SELECT:
+            	leavePropertyWildcardSelect();
+            	break;
+            case EVENT_FILTER_PROPERTY_EXPR_ATOM:
+            	leavePropertySelectAtom(node);
+            	break;
             case EVENT_PROP_EXPR:
                 leaveEventPropertyExpr(node);
                 break;
@@ -174,6 +187,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case EVAL_EQUALS_EXPR:
             case EVAL_NOTEQUALS_EXPR:
                 leaveEqualsExpr(node);
+                break;
+            case EVAL_EQUALS_GROUP_EXPR:
+            case EVAL_NOTEQUALS_GROUP_EXPR:
+                leaveEqualsGroupExpr(node);
                 break;
             case WHERE_EXPR:
                 leaveWhereClause();
@@ -213,7 +230,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 leaveCoalesce(node);
                 break;
             case NOT_EXPR:
-                leaveNot(node);
+                leaveExprNot(node);
+                break;
+            case PATTERN_NOT_EXPR:
+                leavePatternNot(node);
                 break;
             case SUM:
             case AVG:
@@ -244,8 +264,6 @@ public class EPLTreeWalker extends EsperEPL2Ast
             	leaveOrderByElement(node);
             	break;
             case EVENT_LIMIT_EXPR:
-            case SEC_LIMIT_EXPR:
-            case MIN_LIMIT_EXPR:
             case TIMEPERIOD_LIMIT_EXPR:
             case CRONTAB_LIMIT_EXPR:
             case WHEN_LIMIT_EXPR:
@@ -353,6 +371,34 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case ON_EXPR:
                 leaveOnExpr(node);
                 break;
+            case TIME_PERIOD:
+                leaveTimePeriod(node);
+                break;
+            case NUMBERSETSTAR:
+                leaveNumberSetStar(node);
+                break;
+            case NUMERIC_PARAM_FREQUENCY:
+                leaveNumberSetFrequency(node);
+                break;
+            case NUMERIC_PARAM_RANGE:
+                leaveNumberSetRange(node);
+                break;
+            case NUMERIC_PARAM_LIST:
+                leaveNumberSetList(node);
+                break;
+            case LAST_OPERATOR:
+            case LAST:
+                leaveLastNumberSetOperator(node);
+                break;
+            case LW:
+                leaveLastWeekdayNumberSetOperator(node);
+                break;
+            case WEEKDAY_OPERATOR:
+                leaveWeekdayNumberSetOperator(node);
+                break;
+            case OBJECT_PARAM_ORDERED_EXPR:
+                leaveObjectParamOrderedExpression(node);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + '\'');
@@ -408,6 +454,23 @@ public class EPLTreeWalker extends EsperEPL2Ast
             eventName = "java.lang.Object";
         }
 
+        boolean isRetainUnion = false;
+        boolean isRetainIntersection = false;
+        for (int i = 0; i < node.getChildCount(); i++)
+        {
+            if (node.getChild(i).getType() == RETAINUNION)
+            {
+                isRetainUnion = true;
+                break;
+            }
+            if (node.getChild(i).getType() == RETAININTERSECTION)
+            {
+                isRetainIntersection = true;
+                break;
+            }
+        }
+        StreamSpecOptions streamSpecOptions = new StreamSpecOptions(false,isRetainUnion,isRetainIntersection);
+
         // handle table-create clause, i.e. (col1 type, col2 type)
         if ((node.getChildCount() > 2) && node.getChild(2).getType() == CREATE_WINDOW_COL_TYPE_LIST)
         {
@@ -434,11 +497,11 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
         }
 
-        CreateWindowDesc desc = new CreateWindowDesc(windowName, viewSpecs, isInsert, insertWhereExpr);
+        CreateWindowDesc desc = new CreateWindowDesc(windowName, viewSpecs, streamSpecOptions, isInsert, insertWhereExpr);
         statementSpec.setCreateWindowDesc(desc);
 
-        FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, new LinkedList<ExprNode>());
-        FilterStreamSpecRaw streamSpec = new FilterStreamSpecRaw(rawFilterSpec, new LinkedList<ViewSpec>(), null, false);
+        FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, new LinkedList<ExprNode>(), null);
+        FilterStreamSpecRaw streamSpec = new FilterStreamSpecRaw(rawFilterSpec, new LinkedList<ViewSpec>(), null, streamSpecOptions);
         statementSpec.getStreamSpecs().add(streamSpec);
     }
 
@@ -513,7 +576,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         StreamSpecRaw streamSpec;
         if (node.getChild(0).getType() == EVENT_FILTER_EXPR)
         {
-            streamSpec = new FilterStreamSpecRaw(filterSpec, new ArrayList<ViewSpec>(), streamAsName, false);
+            streamSpec = new FilterStreamSpecRaw(filterSpec, new ArrayList<ViewSpec>(), streamAsName, new StreamSpecOptions());
         }
         else if (node.getChild(0).getType() == PATTERN_INCL_EXPR)
         {
@@ -523,7 +586,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
             // Get expression node sub-tree from the AST nodes placed so far
             EvalNode evalNode = astPatternNodeMap.values().iterator().next();
-            streamSpec = new PatternStreamSpecRaw(evalNode, viewSpecs, streamAsName, false);
+            streamSpec = new PatternStreamSpecRaw(evalNode, viewSpecs, streamAsName, new StreamSpecOptions());
             astPatternNodeMap.clear();
         }
         else
@@ -663,6 +726,106 @@ public class EPLTreeWalker extends EsperEPL2Ast
         astExprNodeMap.put(node, timeNode);
     }
 
+    private void leaveTimePeriod(Tree node)
+    {
+        log.debug(".leaveTimePeriod");
+
+        ExprNode nodes[] = new ExprNode[5];
+        for (int i = 0; i < node.getChildCount(); i++)
+        {
+            Tree child = node.getChild(i);
+            if (child.getType() == MILLISECOND_PART)
+            {
+                nodes[4] = astExprNodeMap.remove(child.getChild(0));
+            }
+            if (child.getType() == SECOND_PART)
+            {
+                nodes[3] = astExprNodeMap.remove(child.getChild(0));
+            }
+            if (child.getType() == MINUTE_PART)
+            {
+                nodes[2] = astExprNodeMap.remove(child.getChild(0));
+            }
+            if (child.getType() == HOUR_PART)
+            {
+                nodes[1] = astExprNodeMap.remove(child.getChild(0));
+            }
+            if (child.getType() == DAY_PART)
+            {
+                nodes[0] = astExprNodeMap.remove(child.getChild(0));
+            }
+        }
+        ExprTimePeriod timeNode = new ExprTimePeriod(nodes[0] != null, nodes[1]!= null, nodes[2]!= null, nodes[3]!= null, nodes[4]!= null);
+        if (nodes[0] != null) timeNode.addChildNode(nodes[0]);
+        if (nodes[1] != null) timeNode.addChildNode(nodes[1]);
+        if (nodes[2] != null) timeNode.addChildNode(nodes[2]);
+        if (nodes[3] != null) timeNode.addChildNode(nodes[3]);
+        if (nodes[4] != null) timeNode.addChildNode(nodes[4]);
+        astExprNodeMap.put(node, timeNode);
+    }
+
+    private void leaveNumberSetStar(Tree node)
+    {
+        log.debug(".leaveNumberSetStar");
+        ExprNumberSetWildcard exprNode = new ExprNumberSetWildcard();
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveNumberSetFrequency(Tree node)
+    {
+        log.debug(".leaveNumberSetFrequency");
+        ExprNumberSetFrequency exprNode = new ExprNumberSetFrequency();
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveNumberSetRange(Tree node)
+    {
+        log.debug(".leaveNumberSetRange");
+        ExprNumberSetRange exprNode = new ExprNumberSetRange();
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveNumberSetList(Tree node)
+    {
+        log.debug(".leaveNumberSetList");
+        ExprNumberSetList exprNode = new ExprNumberSetList();
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveLastNumberSetOperator(Tree node)
+    {
+        log.debug(".leaveLastNumberSetOperator");        
+        ExprNumberSetCronParam exprNode = new ExprNumberSetCronParam(CronOperatorEnum.LASTDAY);
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveLastWeekdayNumberSetOperator(Tree node)
+    {
+        log.debug(".leaveLastWeekdayNumberSetOperator");
+        ExprNumberSetCronParam exprNode = new ExprNumberSetCronParam(CronOperatorEnum.LASTWEEKDAY);
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveWeekdayNumberSetOperator(Tree node)
+    {
+        log.debug(".leaveWeekdayNumberSetOperator");
+        ExprNumberSetCronParam exprNode = new ExprNumberSetCronParam(CronOperatorEnum.WEEKDAY);
+        astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveObjectParamOrderedExpression(Tree node)
+    {
+        log.debug(".leaveObjectParamOrderedExpression");
+
+        boolean isDescending = false;
+        if ((node.getChildCount() > 1) && (node.getChild(1).getText().toUpperCase().equals("DESC")))
+        {
+            isDescending = true;
+        }
+        ExprOrderedExpr exprNode = new ExprOrderedExpr(isDescending);
+        astExprNodeMap.put(node, exprNode);
+    }
+
     private void leaveArray(Tree node)
     {
         log.debug(".leaveArray");
@@ -749,7 +912,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         // Get expression node sub-tree from the AST nodes placed so far
         EvalNode evalNode = astPatternNodeMap.values().iterator().next();
 
-        PatternStreamSpecRaw streamSpec = new PatternStreamSpecRaw(evalNode, new LinkedList<ViewSpec>(), null, false);
+        PatternStreamSpecRaw streamSpec = new PatternStreamSpecRaw(evalNode, new LinkedList<ViewSpec>(), null, new StreamSpecOptions());
         statementSpec.getStreamSpecs().add(streamSpec);
         statementSpec.setExistsSubstitutionParameters(substitutionParamNodes.size() > 0);
 
@@ -802,13 +965,62 @@ public class EPLTreeWalker extends EsperEPL2Ast
         statementSpec.getSelectClauseSpec().add(new SelectClauseExprRawSpec(exprNode, optionalName));
     }
 
+    private void leavePropertySelectionElement(Tree node) throws ASTWalkException
+    {
+        log.debug(".leavePropertySelectionElement");
+
+        if ((astExprNodeMap.size() > 1) || ((astExprNodeMap.isEmpty())))
+        {
+            throw new ASTWalkException("Unexpected AST tree contains zero or more then 1 child element for root");
+        }
+
+        // Get expression node sub-tree from the AST nodes placed so far
+        ExprNode exprNode = astExprNodeMap.values().iterator().next();
+        astExprNodeMap.clear();
+
+        // Get list element name
+        String optionalName = null;
+        if (node.getChildCount() > 1)
+        {
+            optionalName = node.getChild(1).getText();
+        }
+
+        // Add as selection element
+        if (propertySelectRaw == null)
+        {
+            propertySelectRaw = new ArrayList<SelectClauseElementRaw>();
+        }
+        this.propertySelectRaw.add(new SelectClauseExprRawSpec(exprNode, optionalName));
+    }
+
+    private void leavePropertySelectionStream(Tree node) throws ASTWalkException
+    {
+        log.debug(".leavePropertySelectionStream");
+
+        String streamName = node.getChild(0).getText();
+
+        // Get element name
+        String optionalName = null;
+        if (node.getChildCount() > 1)
+        {
+            optionalName = node.getChild(1).getText();
+        }
+
+        // Add as selection element
+        if (propertySelectRaw == null)
+        {
+            propertySelectRaw = new ArrayList<SelectClauseElementRaw>();
+        }
+        this.propertySelectRaw.add(new SelectClauseStreamRawSpec(streamName, optionalName));
+    }
+
     private void leaveSelectionStream(Tree node) throws ASTWalkException
     {
         log.debug(".leaveSelectionStream");
 
         String streamName = node.getChild(0).getText();
 
-        // Get alias element name
+        // Get element name
         String optionalName = null;
         if (node.getChildCount() > 1)
         {
@@ -825,41 +1037,73 @@ public class EPLTreeWalker extends EsperEPL2Ast
         statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
     }
 
+    private void leavePropertyWildcardSelect()
+    {
+    	log.debug(".leavePropertyWildcardSelect");
+        if (propertySelectRaw == null)
+        {
+            propertySelectRaw = new ArrayList<SelectClauseElementRaw>();
+        }
+        this.propertySelectRaw.add(new SelectClauseElementWildcard());
+    }
+
+    private void leavePropertySelectAtom(Tree node)
+    {
+    	log.debug(".leavePropertySelectAtom");
+
+        // initialize if not set
+        if (propertyEvalSpec == null)
+        {
+            propertyEvalSpec = new PropertyEvalSpec();
+        }
+
+        // get select clause
+        SelectClauseSpecRaw optionalSelectClause = new SelectClauseSpecRaw();
+        if (propertySelectRaw != null)
+        {
+            optionalSelectClause.getSelectExprList().addAll(propertySelectRaw);
+            propertySelectRaw = null;
+        }
+
+        // get where-clause, if any
+        ExprNode optionalWhereClause = null;
+        for (int i = 0; i < node.getChildCount(); i++)
+        {
+            if (node.getChild(i).getType() == WHERE_EXPR)
+            {
+                optionalWhereClause = this.astExprNodeMap.remove(node.getChild(i).getChild(0));
+            }
+        }
+
+        String propertyName = null;
+        for (int i = 0; i < node.getChildCount(); i++)
+        {
+            if (node.getChild(i).getType() == EVENT_PROP_EXPR)
+            {
+                propertyName = ASTFilterSpecHelper.getPropertyName(node.getChild(i), 0);
+            }
+        }
+
+        String optionalAsName = null;
+        for (int i = 0; i < node.getChildCount(); i++)
+        {
+            if (node.getChild(i).getType() == IDENT)
+            {
+               optionalAsName = node.getChild(i).getText();
+            }
+        }
+
+        PropertyEvalAtom atom = new PropertyEvalAtom(propertyName, optionalAsName, optionalSelectClause, optionalWhereClause);
+        propertyEvalSpec.add(atom);
+    }
+
     private void leaveView(Tree node) throws ASTWalkException
     {
         log.debug(".leaveView");
         String objectNamespace = node.getChild(0).getText();
         String objectName = node.getChild(1).getText();
-
-        List<Object> objectParams = new LinkedList<Object>();
-
-        for (int i = 2; i < node.getChildCount(); i++)
-        {
-        	Tree child = node.getChild(i);
-
-            // if there is an expression for this parameter, add the expression to the parameter list
-            if (this.astExprNodeMap.containsKey(child))
-            {
-                ExprNode expr = astExprNodeMap.get(child);
-                if (expr instanceof ExprIdentNode)
-                {
-                    ExprIdentNode property = (ExprIdentNode) expr;
-                    objectParams.add(property.getFullUnresolvedName());
-                }
-                else
-                {
-                    objectParams.add(expr);
-                }
-                astExprNodeMap.remove(child);
-            }
-            else
-            {
-                Object object = ASTParameterHelper.makeParameter(child, engineTime);
-                objectParams.add(object);
-            }
-        }
-
-        viewSpecs.add(new ViewSpec(objectNamespace, objectName, objectParams));
+        List<ExprNode> viewParameters = getExprNodes(node, 2); 
+        viewSpecs.add(new ViewSpec(objectNamespace, objectName, viewParameters));
     }
 
     private void leaveStreamExpr(Tree node)
@@ -886,6 +1130,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         // The first child node may be a "stream" keyword
         boolean isUnidirectional = false;
+        boolean isRetainUnion = false;
+        boolean isRetainIntersection = false;
         for (int i = 0; i < node.getChildCount(); i++)
         {
             if (node.getChild(i).getType() == UNIDIRECTIONAL)
@@ -893,15 +1139,26 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 isUnidirectional = true;
                 break;
             }
+            if (node.getChild(i).getType() == RETAINUNION)
+            {
+                isRetainUnion = true;
+                break;
+            }
+            if (node.getChild(i).getType() == RETAININTERSECTION)
+            {
+                isRetainIntersection = true;
+                break;
+            }
         }
 
         // Convert to a stream specification instance
         StreamSpecRaw streamSpec;
+        StreamSpecOptions options = new StreamSpecOptions(isUnidirectional, isRetainUnion, isRetainIntersection);
 
         // If the first subnode is a filter node, we have a filter stream specification
         if (node.getChild(0).getType() == EVENT_FILTER_EXPR)
         {
-            streamSpec = new FilterStreamSpecRaw(filterSpec, viewSpecs, streamName, isUnidirectional);
+            streamSpec = new FilterStreamSpecRaw(filterSpec, viewSpecs, streamName, options);
         }
         else if (node.getChild(0).getType() == PATTERN_INCL_EXPR)
         {
@@ -913,7 +1170,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             // Get expression node sub-tree from the AST nodes placed so far
             EvalNode evalNode = astPatternNodeMap.values().iterator().next();
 
-            streamSpec = new PatternStreamSpecRaw(evalNode, viewSpecs, streamName, isUnidirectional);
+            streamSpec = new PatternStreamSpecRaw(evalNode, viewSpecs, streamName, options);
             astPatternNodeMap.clear();
         }
         else if (node.getChild(0).getType() == DATABASE_JOIN_EXPR)
@@ -1081,6 +1338,35 @@ public class EPLTreeWalker extends EsperEPL2Ast
         astExprNodeMap.put(node, identNode);
     }
 
+    private void leaveEqualsGroupExpr(Tree node)
+    {
+        log.debug(".leaveEqualsGroupExpr");
+
+        boolean isNot = false;
+        if (node.getType() == EVAL_NOTEQUALS_GROUP_EXPR)
+        {
+            isNot = true;
+        }
+
+        boolean isAll = false;
+        if (node.getChild(1).getType() == ALL)
+        {
+            isAll = true;
+        }
+
+        if ((node.getChildCount() > 2) && (node.getChild(2).getType() == SUBSELECT_GROUP_EXPR))
+        {
+            StatementSpecRaw currentSpec = popStacks();
+            ExprSubselectAllSomeAnyNode subselectNode = new ExprSubselectAllSomeAnyNode(currentSpec, isNot, isAll, null);
+            astExprNodeMap.put(node, subselectNode);               
+        }
+        else
+        {
+            ExprEqualsAllAnyNode groupNode = new ExprEqualsAllAnyNode(isNot, isAll);
+            astExprNodeMap.put(node, groupNode);
+        }
+    }
+
     private void leaveJoinAndExpr(Tree node)
     {
         log.debug(".leaveJoinAndExpr");
@@ -1097,7 +1383,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
     private void leaveConstant(Tree node)
     {
-        log.debug(".leaveConstant");
+        log.debug(".leaveConstant value '" + node.getText() + "'");
         ExprConstantNode constantNode = new ExprConstantNode(ASTConstantHelper.parse(node));
         astExprNodeMap.put(node, constantNode);
     }
@@ -1141,7 +1427,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized math node type");
         }
 
-        ExprMathNode mathNode = new ExprMathNode(mathArithTypeEnum);
+        ExprMathNode mathNode = new ExprMathNode(mathArithTypeEnum,
+                configurationInformation.getEngineDefaults().getExpression().isIntegerDivision(),
+                configurationInformation.getEngineDefaults().getExpression().isDivisionByZeroReturnsNull());
         astExprNodeMap.put(node, mathNode);
     }
 
@@ -1266,8 +1554,36 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized relational op node type");
         }
 
-        ExprRelationalOpNode mathNode = new ExprRelationalOpNode(relationalOpEnum);
-        astExprNodeMap.put(node, mathNode);
+        boolean isAll = false;
+        boolean isAny = false;
+        if (node.getChild(1).getType() == ALL)
+        {
+            isAll = true;
+        }
+        if ((node.getChild(1).getType() == ANY) || (node.getChild(1).getType() == SOME))
+        {
+            isAny = true;
+        }
+
+        ExprNode result;
+        if (isAll || isAny)
+        {
+            if ((node.getChildCount() > 2) && (node.getChild(2).getType() == SUBSELECT_GROUP_EXPR))
+            {
+                StatementSpecRaw currentSpec = popStacks();
+                result = new ExprSubselectAllSomeAnyNode(currentSpec, false, isAll, relationalOpEnum);
+            }
+            else
+            {
+                result = new ExprRelationalOpAllAnyNode(relationalOpEnum, isAll);
+            }
+        }
+        else
+        {
+            result = new ExprRelationalOpNode(relationalOpEnum);
+        }
+        
+        astExprNodeMap.put(node, result);
     }
 
     private void leaveBitWise(Tree node)
@@ -1326,7 +1642,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
     {
         log.debug(".leaveOutputLimit");
 
-        OutputLimitSpec spec = ASTOutputLimitHelper.buildOutputLimitSpec(node, engineTime, astExprNodeMap);
+        OutputLimitSpec spec = ASTOutputLimitHelper.buildOutputLimitSpec(node, astExprNodeMap, variableService, engineURI, timeProvider);
         statementSpec.setOutputLimitSpec(spec);
 
         if (spec.getVariableName() != null)
@@ -1448,9 +1764,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
             child = node.getChild(++count);
         }
 
-        // alias
-        String eventAliasName = child.getText();
-        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(isIStream, eventAliasName);
+        // type name
+        String eventTypeName = child.getText();
+        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(isIStream, eventTypeName);
 
         // optional columns
         child = node.getChild(++count);
@@ -1503,9 +1819,42 @@ public class EPLTreeWalker extends EsperEPL2Ast
         astPatternNodeMap.put(node, everyNode);
     }
 
-    private void leaveFilter(Tree node)
+    private void leaveStreamFilter(Tree node)
     {
-        log.debug(".leaveFilter");
+        log.debug(".leaveStreamFilter");
+
+        int count = 0;
+        Tree startNode = node.getChild(0);
+        if (startNode.getType() == IDENT)
+        {
+            startNode = node.getChild(++count);
+        }
+
+        // Determine event type
+        String eventName = startNode.getText();
+        count++;
+
+        // get property expression if any
+        if ((node.getChildCount() > count) && (node.getChild(count).getType() == EVENT_FILTER_PROPERTY_EXPR))
+        {
+            ++count;
+        }
+
+        List<ExprNode> exprNodes = getExprNodes(node, count);
+
+        FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, exprNodes, propertyEvalSpec);
+        propertyEvalSpec = null;
+        // for event streams we keep the filter spec around for use when the stream definition is completed
+        filterSpec = rawFilterSpec;
+
+        // clear the sub-nodes for the filter since the event property expressions have been processed
+        // by building the spec
+        astExprNodeMap.clear();
+    }
+
+    private void leavePatternFilter(Tree node)
+    {
+        log.debug(".leavePatternFilter");
 
         int count = 0;
         Tree startNode = node.getChild(0);
@@ -1518,25 +1867,20 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         // Determine event type
         String eventName = startNode.getText();
+        count++;
 
-        Tree currentNode = node.getChild(++count);
+        // get property expression if any
+        if ((node.getChildCount() > count) && (node.getChild(count).getType() == EVENT_FILTER_PROPERTY_EXPR))
+        {
+            ++count;
+        }
+
         List<ExprNode> exprNodes = getExprNodes(node, count);
 
-        FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, exprNodes);
-        if (isProcessingPattern)
-        {
-            EvalFilterNode filterNode = new EvalFilterNode(rawFilterSpec, optionalPatternTagName);
-            astPatternNodeMap.put(node, filterNode);
-        }
-        else
-        {
-            // for event streams we keep the filter spec around for use when the stream definition is completed
-            filterSpec = rawFilterSpec;
-
-            // clear the sub-nodes for the filter since the event property expressions have been processed
-            // by building the spec
-            astExprNodeMap.clear();
-        }
+        FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, exprNodes, propertyEvalSpec);
+        propertyEvalSpec = null;
+        EvalFilterNode filterNode = new EvalFilterNode(rawFilterSpec, optionalPatternTagName);
+        astPatternNodeMap.put(node, filterNode);
     }
 
     private void leaveFollowedBy(Tree node)
@@ -1618,20 +1962,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
         astExprNodeMap.put(node, regExpNode);
     }
 
-    private void leaveNot(Tree node)
+    private void leaveExprNot(Tree node)
     {
-        log.debug(".leaveNot");
+        log.debug(".leaveExprNot");
+        ExprNotNode notNode = new ExprNotNode();
+        astExprNodeMap.put(node, notNode);
+    }
 
-        if (isProcessingPattern)
-        {
-            EvalNotNode notNode = new EvalNotNode();
-            astPatternNodeMap.put(node, notNode);
-        }
-        else
-        {
-            ExprNotNode notNode = new ExprNotNode();
-            astExprNodeMap.put(node, notNode);
-        }
+    private void leavePatternNot(Tree node)
+    {
+        log.debug(".leavePatternNot");
+        EvalNotNode notNode = new EvalNotNode();
+        astPatternNodeMap.put(node, notNode);
     }
 
     private void leaveGuard(Tree node) throws ASTWalkException
@@ -1642,16 +1984,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
         Tree startGuard = node.getChild(1);
         String objectNamespace = startGuard.getText();
         String objectName = node.getChild(2).getText();
+        List<ExprNode> obsParameters = getExprNodes(node, 3);
 
-        List<Object> objectParams = new LinkedList<Object>();
-        for (int i = 3; i < node.getChildCount(); i++)
-        {
-        	Tree childNode = node.getChild(i);
-            Object object = ASTParameterHelper.makeParameter(childNode, engineTime);
-            objectParams.add(object);
-        }
-
-        PatternGuardSpec guardSpec = new PatternGuardSpec(objectNamespace, objectName, objectParams);
+        PatternGuardSpec guardSpec = new PatternGuardSpec(objectNamespace, objectName, obsParameters);
         EvalGuardNode guardNode = new EvalGuardNode(guardSpec);
         astPatternNodeMap.put(node, guardNode);
     }
@@ -1684,16 +2019,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
         // Get the object information from AST
         String objectNamespace = node.getChild(0).getText();
         String objectName = node.getChild(1).getText();
+        List<ExprNode> obsParameters = getExprNodes(node, 2);
 
-        List<Object> objectParams = new LinkedList<Object>();
-        for (int i = 2; i < node.getChildCount(); i++)
-        {
-        	Tree child = node.getChild(i);
-            Object object = ASTParameterHelper.makeParameter(child, engineTime);
-            objectParams.add(object);
-        }
-
-        PatternObserverSpec observerSpec = new PatternObserverSpec(objectNamespace, objectName, objectParams);
+        PatternObserverSpec observerSpec = new PatternObserverSpec(objectNamespace, objectName, obsParameters);
         EvalObserverNode observerNode = new EvalObserverNode(observerSpec);
         astPatternNodeMap.put(node, observerNode);
     }
@@ -1798,7 +2126,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             ExprNode exprNode = astExprNodeMap.get(currentNode);
             if (exprNode == null)
             {
-                throw new IllegalStateException("Expression node for AST node not found for type " + currentNode.getType());
+                throw new IllegalStateException("Expression node for AST node not found for type " + currentNode.getType() + " and text " + currentNode.getText());
             }
             exprNodes.add(exprNode);
             astExprNodeMap.remove(currentNode);

@@ -9,7 +9,7 @@ import com.espertech.esper.support.client.SupportStatementStateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.core.StatementLifecycleEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 public class TestEPServiceProvider extends TestCase
 {
@@ -23,9 +23,7 @@ public class TestEPServiceProvider extends TestCase
         listenerTwo = new SupportServiceStateListener();
 
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }
 

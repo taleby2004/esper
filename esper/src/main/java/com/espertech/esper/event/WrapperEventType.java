@@ -8,8 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
-import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.event.map.MapEventType;
 
 import java.util.*;
 
@@ -22,7 +23,7 @@ import java.util.*;
  * If this event type is to add information to another wrapper event type (wrapper to wrapper), then it is the
  * responsibility of the creating logic to use the existing event type and add to it.
  * <p>
- * Uses a the map event type {@link com.espertech.esper.event.MapEventType} to represent the mapped properties. This is because the additional properties
+ * Uses a the map event type {@link com.espertech.esper.event.map.MapEventType} to represent the mapped properties. This is because the additional properties
  * can also be beans or complex types and the Map event type handles these nicely.
  */
 public class WrapperEventType implements EventTypeSPI
@@ -43,14 +44,18 @@ public class WrapperEventType implements EventTypeSPI
     protected final MapEventType underlyingMapType;
 
     private final String[] propertyNames;
+    private final EventPropertyDescriptor[] propertyDesc;
+    private final Map<String, EventPropertyDescriptor> propertyDescriptorMap;
+
     private final int hashCode;
     private final boolean isNoMapProperties;
     private final String typeName;
     private final Map<String, EventPropertyGetter> propertyGetterCache;
+    private final EventAdapterService eventAdapterService;
 
     /**
      * Ctor.
-     * @param typeName is the event type alias name
+     * @param typeName is the event type name
      * @param eventType is the event type of the wrapped events
      * @param properties is the additional properties this wrapper adds
      * @param metadata event type metadata
@@ -66,6 +71,7 @@ public class WrapperEventType implements EventTypeSPI
         this.underlyingMapType = new MapEventType(metadataMapType, typeName, eventAdapterService, properties, null, null);
         this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
         this.isNoMapProperties = properties.isEmpty();
+        this.eventAdapterService = eventAdapterService;
         propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
         List<String> propertyNames = new ArrayList<String>();
@@ -78,6 +84,21 @@ public class WrapperEventType implements EventTypeSPI
 			propertyNames.add(mapProperty);
 		}
 		this.propertyNames = propertyNames.toArray(new String[0]);
+
+        List<EventPropertyDescriptor> propertyDesc = new ArrayList<EventPropertyDescriptor>();
+        propertyDescriptorMap = new HashMap<String, EventPropertyDescriptor>();
+		for(EventPropertyDescriptor eventProperty : underlyingEventType.getPropertyDescriptors())
+		{
+			propertyDesc.add(eventProperty);
+            propertyDescriptorMap.put(eventProperty.getPropertyName(), eventProperty);
+		}
+		for(EventPropertyDescriptor mapProperty : underlyingMapType.getPropertyDescriptors())
+		{
+			propertyDesc.add(mapProperty);
+            propertyDescriptorMap.put(mapProperty.getPropertyName(), mapProperty);
+		}
+		this.propertyDesc = propertyDesc.toArray(new EventPropertyDescriptor[propertyDesc.size()]);
+
         this.typeName = typeName;
     }
 
@@ -89,15 +110,6 @@ public class WrapperEventType implements EventTypeSPI
     public String getName()
     {
         return metadata.getPublicName();
-    }
-
-    /**
-     * Returns the event type alias.
-     * @return event type alias
-     */
-    public String getAlias()
-    {
-        return typeName;
     }
 
     public EventPropertyGetter getGetter(final String property)
@@ -114,12 +126,17 @@ public class WrapperEventType implements EventTypeSPI
             {
                 public Object get(EventBean event)
                 {
-                    if(!(event instanceof WrapperEventBean))
+                    if(!(event instanceof DecoratingEventBean))
                     {
                         throw new PropertyAccessException("Mismatched property getter to EventBean type");
                     }
-                    WrapperEventBean wrapperEvent = (WrapperEventBean) event;
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
                     EventBean wrappedEvent = wrapperEvent.getUnderlyingEvent();
+                    if (wrappedEvent == null)
+                    {
+                        return null;
+                    }
+
                     EventPropertyGetter underlyingGetter = underlyingEventType.getGetter(property);
                     return underlyingGetter.get(wrappedEvent);
                 }
@@ -128,28 +145,57 @@ public class WrapperEventType implements EventTypeSPI
                 {
                     return true; // Property exists as the property is not dynamic (unchecked)
                 }
+
+                public Object getFragment(EventBean event)
+                {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    EventBean wrappedEvent = wrapperEvent.getUnderlyingEvent();
+                    if (wrappedEvent == null)
+                    {
+                        return null;
+                    }
+
+                    EventPropertyGetter underlyingGetter = underlyingEventType.getGetter(property);
+                    return underlyingGetter.getFragment(wrappedEvent);
+                }
             };
             propertyGetterCache.put(property, getter);
             return getter;
         }
 		else if (underlyingMapType.isProperty(property))
 		{
+            final EventPropertyGetter mapGetter = underlyingMapType.getGetter(property);
             EventPropertyGetter getter = new EventPropertyGetter()
             {
                 public Object get(EventBean event)
                 {
-                    if(!(event instanceof WrapperEventBean))
+                    if(!(event instanceof DecoratingEventBean))
                     {
                         throw new PropertyAccessException("Mismatched property getter to EventBean type");
                     }
-                    WrapperEventBean wrapperEvent = (WrapperEventBean) event;
-                    Map map = wrapperEvent.getUnderlyingMap();
-                    return underlyingMapType.getValue(property, map);
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    Map map = wrapperEvent.getDecoratingProperties();
+                    return mapGetter.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
                 }
 
                 public boolean isExistsProperty(EventBean eventBean)
                 {
                     return true; // Property exists as the property is not dynamic (unchecked)
+                }
+
+                public Object getFragment(EventBean event)
+                {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    Map map = wrapperEvent.getDecoratingProperties();
+                    return mapGetter.getFragment(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
                 }
             };
             propertyGetterCache.put(property, getter);
@@ -262,6 +308,26 @@ public class WrapperEventType implements EventTypeSPI
     public EventTypeMetadata getMetadata()
     {
         return metadata;
+    }
+
+    public EventPropertyDescriptor[] getPropertyDescriptors()
+    {
+        return propertyDesc;
+    }
+
+    public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
+    {
+        return propertyDescriptorMap.get(propertyName);
+    }
+
+    public FragmentEventType getFragmentType(String property)
+    {
+        FragmentEventType fragment = underlyingEventType.getFragmentType(property);
+        if (fragment != null)
+        {
+            return fragment;
+        }
+        return underlyingMapType.getFragmentType(property);
     }
 
     private void checkForRepeatedPropertyNames(EventType eventType, Map<String, Object> properties)

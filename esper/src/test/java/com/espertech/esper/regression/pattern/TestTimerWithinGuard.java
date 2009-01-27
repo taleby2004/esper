@@ -1,16 +1,15 @@
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 
 public class TestTimerWithinGuard extends TestCase implements SupportBeanConstants
 {
@@ -20,11 +19,11 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         CaseList testCaseList = new CaseList();
         EventExpressionCase testCase = null;
 
-        testCase = new EventExpressionCase("b=" + EVENT_B_CLASS + "(id=\"B1\") where timer:within(2001 msec)");
-        testCase.add("B1", "b", events.getEvent("B1"));
+        testCase = new EventExpressionCase("b=" + EVENT_B_CLASS + "(id=\"B1\") where timer:within(2 sec)");
         testCaseList.addTest(testCase);
 
-        testCase = new EventExpressionCase("b=" + EVENT_B_CLASS + "(id=\"B1\") where timer:within(2 sec)");
+        testCase = new EventExpressionCase("b=" + EVENT_B_CLASS + "(id=\"B1\") where timer:within(2001 msec)");
+        testCase.add("B1", "b", events.getEvent("B1"));
         testCaseList.addTest(testCase);
 
         testCase = new EventExpressionCase("b=" + EVENT_B_CLASS + "(id=\"B1\") where timer:within(1999 msec)");
@@ -182,31 +181,122 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         util.runTest();
     }
 
-    public void testInterval()
+    public void testInterval10Min()
     {
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        Configuration config = SupportConfigFactory.getConfiguration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
         // External clocking
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         sendTimer(0, epService);
 
         // Set up a timer:within
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from pattern [(every " + SupportBean.class.getName() +
-                ") where timer:within(10 min)]");
+                ") where timer:within(1 days 2 hours 3 minutes 4 seconds 5 milliseconds)]");
 
         SupportUpdateListener testListener = new SupportUpdateListener();
         statement.addListener(testListener);
 
+        runAssertion(epService, testListener);
+    }
+
+    public void testInterval10MinVariable()
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+        epService.getEPAdministrator().getConfiguration().addVariable("D", double.class, 1);
+        epService.getEPAdministrator().getConfiguration().addVariable("H", double.class, 2);
+        epService.getEPAdministrator().getConfiguration().addVariable("M", double.class, 3);
+        epService.getEPAdministrator().getConfiguration().addVariable("S", double.class, 4);
+        epService.getEPAdministrator().getConfiguration().addVariable("MS", double.class, 5);
+
+        // External clocking
+        sendTimer(0, epService);
+
+        // Set up a timer:within
+        String stmtText = "select * from pattern [(every (" + SupportBean.class.getName() +
+                ")) where timer:within(D days H hours M minutes S seconds MS milliseconds)]";
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
+
+        SupportUpdateListener testListener = new SupportUpdateListener();
+        statement.addListener(testListener);
+
+        runAssertion(epService, testListener);
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
+        assertEquals(stmtText, model.toEPL());
+    }
+
+    public void testIntervalPrepared()
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        // External clocking
+        sendTimer(0, epService);
+
+        // Set up a timer:within
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(
+                "select * from pattern [(every " + SupportBean.class.getName() +
+                ") where timer:within(? days ? hours ? minutes ? seconds ? milliseconds)]");
+        prepared.setObject(1, 1);
+        prepared.setObject(2, 2);
+        prepared.setObject(3, 3);
+        prepared.setObject(4, 4);
+        prepared.setObject(5, 5);
+        EPStatement statement = epService.getEPAdministrator().create(prepared);
+
+        SupportUpdateListener testListener = new SupportUpdateListener();
+        statement.addListener(testListener);
+
+        runAssertion(epService, testListener);
+    }
+
+    public void testWithinFromExpression()
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+
+        // External clocking
+        sendTimer(0, epService);
+
+        // Set up a timer:within
+        EPStatement statement = epService.getEPAdministrator().createEPL("select b.string as id from pattern[a=SupportBean -> (every b=SupportBean) where timer:within(a.intPrimitive seconds)]");
+
+        SupportUpdateListener testListener = new SupportUpdateListener();
+        statement.addListener(testListener);
+
+        // seed
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
+
+        sendTimer(2000, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", -1));
+        assertEquals("E2", testListener.assertOneGetNewAndReset().get("id"));
+
+        sendTimer(2999, epService);
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", -1));
+        assertEquals("E3", testListener.assertOneGetNewAndReset().get("id"));
+
+        sendTimer(3000, epService);
+        assertFalse(testListener.isInvoked());
+    }
+
+    private void runAssertion(EPServiceProvider epService, SupportUpdateListener testListener)
+    {
         sendEvent(epService);
         testListener.assertOneGetNewAndReset();
 
-        sendTimer(10*60*1000 - 1, epService);
+        long time = 24*60*60*1000 + 2*60*60*1000 + 3*60*1000 + 4*1000 + 5;
+        sendTimer(time - 1, epService);
         sendEvent(epService);
         testListener.assertOneGetNewAndReset();
 
-        sendTimer(10*60*1000, epService);
+        sendTimer(time, epService);
         sendEvent(epService);
         assertFalse(testListener.isInvoked());
     }

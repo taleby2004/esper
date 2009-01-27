@@ -9,7 +9,7 @@
 package com.espertech.esperio.jms;
 
 import com.espertech.esperio.subscription.*;
-import com.espertech.esper.event.*;
+import com.espertech.esper.client.EventBean;
 
 /**
  * Represents the JMS-aspects of a subscription.
@@ -50,5 +50,10 @@ public class JMSSubscription extends BaseSubscription
             return;
         }
         ((JMSOutputAdapter) (adapter)).send(event, jmsMessageMarshaller);
+    }
+
+    public boolean isSubSelect()
+    {
+        return false; 
     }
 }

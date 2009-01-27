@@ -2,6 +2,7 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
+import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
@@ -10,7 +11,6 @@ import com.espertech.esper.support.epl.SupportPluginAggregationMethodTwo;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
-import com.espertech.esper.epl.agg.AggregationSupport;
 import junit.framework.TestCase;
 
 public class TestAggregationFunctionPlugIn extends TestCase
@@ -25,7 +25,6 @@ public class TestAggregationFunctionPlugIn extends TestCase
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addPlugInAggregationFunction("concatstring", MyConcatAggregationFunction.class.getName());
         configuration.addPlugInAggregationFunction("totalup", MyInnerAggFunction.class.getName());
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getProvider("TestAggregationFunctionPlugIn", configuration);
         epService.initialize();
     }
@@ -42,7 +41,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create().setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
                 .add(Expressions.plugInAggregation("concatstring", Expressions.property("string")), "val"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 10)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", Expressions.constant(10))));
         model.setGroupByClause(GroupByClause.create("intPrimitive"));
         assertEquals(text, model.toEPL());
         SerializableObjectCopier.copy(model);
@@ -238,7 +237,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Plug-in aggregation function 'concat' failed validation: Invalid node type: java.lang.Integer [select * from com.espertech.esper.support.bean.SupportBean group by concat(1)]", ex.getMessage());
+            assertEquals("Error starting statement: Plug-in aggregation function 'concat' failed validation: Invalid node type: java.lang.Integer [select * from com.espertech.esper.support.bean.SupportBean group by concat(1)]", ex.getMessage());
         }
 
         try
@@ -248,7 +247,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Group-by expressions must refer to property names [select * from com.espertech.esper.support.bean.SupportBean group by concat(1, 1)]", ex.getMessage());
+            assertEquals("Error starting statement: Group-by expressions must refer to property names [select * from com.espertech.esper.support.bean.SupportBean group by concat(1, 1)]", ex.getMessage());
         }
     }
 
@@ -267,7 +266,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error resolving aggregation: Aggregation class by name 'java.lang.String' does not subclass AggregationSupport [select * from com.espertech.esper.support.bean.SupportBean group by xxx(1)]", ex.getMessage());
+            assertEquals("Error in expression: Error resolving aggregation: Aggregation class by name 'java.lang.String' does not subclass AggregationSupport [select * from com.espertech.esper.support.bean.SupportBean group by xxx(1)]", ex.getMessage());
         }
 
         try
@@ -277,7 +276,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error resolving aggregation: Could not load aggregation class by name 'com.NoSuchClass' [select * from com.espertech.esper.support.bean.SupportBean group by yyy(1)]", ex.getMessage());
+            assertEquals("Error in expression: Error resolving aggregation: Could not load aggregation class by name 'com.NoSuchClass' [select * from com.espertech.esper.support.bean.SupportBean group by yyy(1)]", ex.getMessage());
         }
     }
 
@@ -313,7 +312,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testInvalid()
     {
-        tryInvalid("select xxx(id) from A ", "Unknown method named 'xxx' could not be resolved [select xxx(id) from A ]");
+        tryInvalid("select xxx(id) from A ", "Error in expression: Unknown method named 'xxx' could not be resolved [select xxx(id) from A ]");
     }
 
     private void tryInvalid(String stmtText, String expectedMsg)

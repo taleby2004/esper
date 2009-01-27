@@ -8,31 +8,38 @@
  **************************************************************************************/
 package com.espertech.esper.view.std;
 
-import com.espertech.esper.view.*;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.view.*;
 
 import java.util.List;
-import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Factory for {@link MergeView} instances.
  */
 public class MergeViewFactory implements ViewFactory
-{
+{  
+    private List<ExprNode> viewParameters;
+
+    private ExprNode[] criteriaExpressions;
     private String[] fieldNames;
     private EventType eventType;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
-        fieldNames = GroupByViewFactory.getFieldNameParams(viewParameters, "Group-by-merge");
+        this.viewParameters = expressionParameters;
     }
 
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
         // Find the group by view matching the merge view
-        ViewFactory groupByViewFactory = null;
+        GroupByViewFactory groupByViewFactory = null;
+        ExprNode[] unvalidated = viewParameters.toArray(new ExprNode[viewParameters.size()]);
         for (ViewFactory parentView : parentViewFactories)
         {
             if (!(parentView instanceof GroupByViewFactory))
@@ -40,7 +47,7 @@ public class MergeViewFactory implements ViewFactory
                 continue;
             }
             GroupByViewFactory candidateGroupByView = (GroupByViewFactory) parentView;
-            if (Arrays.equals(candidateGroupByView.getGroupFieldNames(), this.fieldNames))
+            if (ExprNodeUtility.deepEquals(candidateGroupByView.getCriteriaExpressions(), unvalidated))
             {
                 groupByViewFactory = candidateGroupByView;
             }
@@ -48,14 +55,15 @@ public class MergeViewFactory implements ViewFactory
 
         if (groupByViewFactory == null)
         {
-            throw new ViewAttachException("Group by view for this merge view could not be found among parent views");
+            throw new ViewParameterException("Group by view for this merge view could not be found among parent views");
         }
+        criteriaExpressions = groupByViewFactory.getCriteriaExpressions(); 
 
         // determine types of fields
-        Class[] fieldTypes = new Class[fieldNames.length];
+        Class[] fieldTypes = new Class[criteriaExpressions.length];
         for (int i = 0; i < fieldTypes.length; i++)
         {
-            fieldTypes[i] = groupByViewFactory.getEventType().getPropertyType(fieldNames[i]);
+            fieldTypes[i] = criteriaExpressions[i].getType();
         }
 
         // Determine the final event type that the merge view generates
@@ -64,9 +72,12 @@ public class MergeViewFactory implements ViewFactory
 
         // If the parent event type contains the merge fields, we use the same event type
         boolean parentContainsMergeKeys = true;
-        for (int i = 0; i < fieldNames.length; i++)
+        fieldNames = new String[criteriaExpressions.length];
+        for (int i = 0; i < criteriaExpressions.length; i++)
         {
-            if (!(parentEventType.isProperty(fieldNames[i])))
+            String name = criteriaExpressions[i].toExpressionString();
+            fieldNames[i] = name;
+            if (!(parentEventType.isProperty(name)))
             {
                 parentContainsMergeKeys = false;
             }
@@ -82,8 +93,12 @@ public class MergeViewFactory implements ViewFactory
         // grouped which simply provides a map of calculated values,
         // then we need to add in the merge field as an event property thus changing event types.
         {
-            eventType = statementContext.getEventAdapterService().createAddToEventType(
-                    parentEventType, fieldNames, fieldTypes);
+            Map<String, Object> additionalProps = new HashMap<String, Object>();
+            for (int i = 0; i < fieldNames.length; i++)
+            {
+                additionalProps.put(fieldNames[i], fieldTypes[i]);
+            }
+            eventType = statementContext.getEventAdapterService().createAnonymousWrapperType(parentEventType, additionalProps);
         }
     }
 
@@ -99,7 +114,7 @@ public class MergeViewFactory implements ViewFactory
 
     public View makeView(StatementContext statementContext)
     {
-        return new MergeView(statementContext, fieldNames, eventType);
+        return new MergeView(statementContext, criteriaExpressions, eventType);
     }
 
     public EventType getEventType()
@@ -115,7 +130,7 @@ public class MergeViewFactory implements ViewFactory
         }
 
         MergeView myView = (MergeView) view;
-        if (!Arrays.deepEquals(myView.getGroupFieldNames(), fieldNames))
+        if (!ExprNodeUtility.deepEquals(myView.getGroupFieldNames(), criteriaExpressions))
         {
             return false;
         }

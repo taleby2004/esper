@@ -1,9 +1,9 @@
 package com.espertech.esper.epl.join.table;
 
 import junit.framework.TestCase;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.PropertyAccessException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.event.SupportEventBeanFactory;

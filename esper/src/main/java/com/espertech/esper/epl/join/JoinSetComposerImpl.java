@@ -11,7 +11,7 @@ package com.espertech.esper.epl.join;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -25,6 +25,7 @@ public class JoinSetComposerImpl implements JoinSetComposer
 {
     private final EventTable[][] repositories;
     private final QueryStrategy[] queryStrategies;
+    private final boolean isPureSelfJoin;
 
     // Set semantic eliminates duplicates in result set, use Linked set to preserve order
     private Set<MultiKey<EventBean>> oldResults = new LinkedHashSet<MultiKey<EventBean>>();
@@ -35,10 +36,11 @@ public class JoinSetComposerImpl implements JoinSetComposer
      * @param repositories - for each stream an array of (indexed/unindexed) tables for lookup.
      * @param queryStrategies - for each stream a strategy to execute the join
      */
-    public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies)
+    public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies, boolean isPureSelfJoin)
     {
         this.repositories = repositories;
         this.queryStrategies = queryStrategies;
+        this.isPureSelfJoin = isPureSelfJoin;
     }
 
     public void init(EventBean[][] eventsPerStream)
@@ -114,6 +116,18 @@ public class JoinSetComposerImpl implements JoinSetComposer
             if (newDataPerStream[i] != null)
             {
                 queryStrategies[i].lookup(newDataPerStream[i], newResults);
+            }
+        }
+
+        // on self-joins there can be repositories which are temporary for join execution
+        if (isPureSelfJoin)
+        {
+            for (EventTable[] repository : repositories)
+            {
+                for (EventTable aRepository : repository)
+                {
+                    aRepository.clear();
+                }
             }
         }
 

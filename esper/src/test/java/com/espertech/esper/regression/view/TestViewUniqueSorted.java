@@ -8,7 +8,7 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportSensorEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 import java.util.*;
 
@@ -27,23 +27,35 @@ public class TestViewUniqueSorted extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement top3Prices;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
-        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(true);
+        epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+    }
 
-        // Get the top 3 volumes for each symbol
-        top3Prices = epService.getEPAdministrator().createEPL(
-                "select * from " + SupportMarketDataBean.class.getName() +
-                ".std:unique(symbol).ext:sort(price, true, 3)");
-        top3Prices.addListener(testListener);
+    public void testExpressionParameter()
+    {
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.std:unique(Math.abs(intPrimitive))");
+        sendEvent("E1", 10);
+        sendEvent("E2", -10);
+        sendEvent("E3", -5);
+        sendEvent("E4", 5);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "string".split(","), new Object[][] {{"E2"}, {"E4"}});
     }
     
     public void testWindowStats()
     {
+        // Get the top 3 volumes for each symbol
+        EPStatement top3Prices = epService.getEPAdministrator().createEPL(
+                "select * from " + SupportMarketDataBean.class.getName() +
+                ".std:unique(symbol).ext:sort(3, price desc)");
+        top3Prices.addListener(testListener);
+
         testListener.reset();
 
         Object beans[] = new Object[10];
@@ -90,7 +102,7 @@ public class TestViewUniqueSorted extends TestCase
         String stmtString =
               "SELECT irstream * " +
               "FROM\n " +
-              SupportSensorEvent.class.getName() + ".std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(measurement,true,1) as high ";
+              SupportSensorEvent.class.getName() + ".std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(1, measurement desc) as high ";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtString);
         stmt.addListener(testListener);
@@ -116,7 +128,7 @@ public class TestViewUniqueSorted extends TestCase
 
     public void testReuseUnique()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.std:unique(intBoxed)");
         stmt.addListener(testListener);
 
@@ -142,6 +154,11 @@ public class TestViewUniqueSorted extends TestCase
     {
         SupportMarketDataBean event = new SupportMarketDataBean(symbol, price, 0L, "");
         return event;
+    }
+
+    private void sendEvent(String string, int intPrimitive)
+    {
+        epService.getEPRuntime().sendEvent(new SupportBean(string, intPrimitive));
     }
 
     private Object[] toObjectArray(Iterator<EventBean> it)

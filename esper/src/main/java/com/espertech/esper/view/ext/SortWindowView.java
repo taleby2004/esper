@@ -10,13 +10,16 @@ package com.espertech.esper.view.ext;
 
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.MultiKeyCollatingComparator;
 import com.espertech.esper.util.MultiKeyComparator;
-import com.espertech.esper.view.*;
+import com.espertech.esper.view.CloneableView;
+import com.espertech.esper.view.DataWindowView;
+import com.espertech.esper.view.View;
+import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,19 +42,19 @@ import java.util.*;
 public final class SortWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
     private final SortWindowViewFactory sortWindowViewFactory;
-    private final String[] sortFieldNames;
+    private final ExprNode[] sortCriteriaExpressions;
+    private final EventBean[] eventsPerStream = new EventBean[1];
     private final boolean[] isDescendingValues;
     private final int sortWindowSize;
     private final IStreamSortedRandomAccess optionalSortedRandomAccess;
     private final boolean isSortUsingCollator;
 
-    private EventPropertyGetter[] sortFieldGetters;
     private TreeMap<MultiKeyUntyped, LinkedList<EventBean>> sortedEvents;
     private int eventCount;
 
     /**
      * Ctor.
-     * @param sortFieldNames is the event property names to sort
+     * @param sortCriteriaExpressions is the event property names to sort
      * @param descendingValues indicates whether to sort ascending or descending for each field
      * @param sortWindowSize is the window size
      * @param optionalSortedRandomAccess is the friend class handling the random access, if required by
@@ -60,41 +63,32 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
      * @param isSortUsingCollator for string value sorting using compare or Collator
      */
     public SortWindowView(SortWindowViewFactory sortWindowViewFactory,
-                          String[] sortFieldNames,
+                          ExprNode[] sortCriteriaExpressions,
                           boolean[] descendingValues,
                           int sortWindowSize,
                           IStreamSortedRandomAccess optionalSortedRandomAccess,
                           boolean isSortUsingCollator)
     {
         this.sortWindowViewFactory = sortWindowViewFactory;
-        this.sortFieldNames = sortFieldNames;
+        this.sortCriteriaExpressions = sortCriteriaExpressions;
         this.isDescendingValues = descendingValues;
         this.sortWindowSize = sortWindowSize;
         this.optionalSortedRandomAccess = optionalSortedRandomAccess;
         this.isSortUsingCollator = isSortUsingCollator;
-    }
 
-    public void setParent(Viewable parent)
-    {
-        super.setParent(parent);
-
+        // determine string-type sorting
         boolean hasStringTypes = false;
-        boolean stringTypes[] = new boolean[sortFieldNames.length];
+        boolean stringTypes[] = new boolean[sortCriteriaExpressions.length];
 
-        if (parent != null)
+        int count = 0;
+        for(ExprNode node : sortCriteriaExpressions)
         {
-        	int count = 0;
-        	sortFieldGetters = new EventPropertyGetter[sortFieldNames.length];
-        	for(String name : sortFieldNames)
-        	{
-        		sortFieldGetters[count] = parent.getEventType().getGetter(name);
-                if (parent.getEventType().getPropertyType(name) == String.class)
-                {
-                    hasStringTypes = true;
-                    stringTypes[count] = true;
-                }
-                count++;
+            if (node.getType() == String.class)
+            {
+                hasStringTypes = true;
+                stringTypes[count] = true;
             }
+            count++;
         }
 
         Comparator<MultiKeyUntyped> comparator;
@@ -106,7 +100,6 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         {
             comparator = new MultiKeyCollatingComparator(isDescendingValues, stringTypes);
         }
-
         sortedEvents = new TreeMap<MultiKeyUntyped, LinkedList<EventBean>>(comparator);
     }
 
@@ -114,9 +107,9 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
      * Returns the field names supplying the values to sort by.
      * @return field names to sort by
      */
-    protected final String[] getSortFieldNames()
+    protected final ExprNode[] getSortCriteriaExpressions()
     {
-        return sortFieldNames;
+        return sortCriteriaExpressions;
     }
 
     /**
@@ -245,7 +238,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
     public final String toString()
     {
         return this.getClass().getName() +
-                " sortFieldName=" + Arrays.toString(sortFieldNames) +
+                " sortFieldName=" + Arrays.toString(sortCriteriaExpressions) +
                 " isDescending=" + Arrays.toString(isDescendingValues) +
                 " sortWindowSize=" + sortWindowSize;
     }
@@ -282,11 +275,12 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
 
     private MultiKeyUntyped getSortValues(EventBean event)
     {
-    	Object[] result = new Object[sortFieldGetters.length];
+        eventsPerStream[0] = event;
+    	Object[] result = new Object[sortCriteriaExpressions.length];
     	int count = 0;
-    	for(EventPropertyGetter getter : sortFieldGetters)
+    	for(ExprNode expr : sortCriteriaExpressions)
     	{
-    		result[count++] = getter.get(event);
+            result[count++] = expr.evaluate(eventsPerStream, true);
     	}
     	return new MultiKeyUntyped(result);
     }

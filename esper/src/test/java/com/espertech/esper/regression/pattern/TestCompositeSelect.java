@@ -1,25 +1,23 @@
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.regression.support.*;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
-import java.util.Random;
-import java.util.Arrays;
+import java.util.Map;
 
 public class TestCompositeSelect extends TestCase
 {
     public void testFollowedByFilter()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("A", SupportBean_A.class.getName());
-        config.addEventTypeAlias("B", SupportBean_B.class.getName());
+        config.addEventType("A", SupportBean_A.class.getName());
+        config.addEventType("B", SupportBean_B.class.getName());
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
@@ -35,59 +33,66 @@ public class TestCompositeSelect extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
         EventBean event = listener.assertOneGetNewAndReset();
 
-        System.out.println(Arrays.toString(stmtTwo.getEventType().getPropertyNames()));
         Object[] values = new Object[stmtTwo.getEventType().getPropertyNames().length];
         int count = 0;
         for (String name : stmtTwo.getEventType().getPropertyNames())
         {
             values[count++] = event.get(name);
         }
-        System.out.println(Arrays.toString(values));
+
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("a", SupportBean_A.class, false, false, false, false, true),
+            new EventPropertyDescriptor("b", SupportBean_B.class, false, false, false, false, true)
+           }, ((EPServiceProviderSPI) epService).getEventAdapterService().getExistsTypeByName("StreamOne").getPropertyDescriptors());
     }
 
-    private class MyUpdateListener implements UpdateListener
+    public void testFragment()
     {
-        private int badMatchCount;
-        private int goodMatchCount;
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventType("A", SupportBean_A.class.getName());
+        config.addEventType("B", SupportBean_B.class.getName());
 
-        public void update(EventBean[] newEvents, EventBean[]
-                oldEvents)
-        {
-            if (newEvents != null)
-            {
-                for (EventBean eventBean : newEvents)
-                {
-                    handleEvent(eventBean);
-                }
-            }
-        }
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
 
-        private void handleEvent(EventBean eventBean)
-        {
-            SupportTradeEvent tradeevent1 = (SupportTradeEvent)
-                    eventBean.get("tradeevent1");
-            SupportTradeEvent tradeevent2 = (SupportTradeEvent)
-                    eventBean.get("tradeevent2");
-            SupportTradeEvent tradeevent3 = (SupportTradeEvent)
-                    eventBean.get("tradeevent3");
+        String stmtTxtOne = "select * from pattern [[2] a=A -> b=B]";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTxtOne);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+        
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("a", SupportBean_A[].class, false, false, true, false, true),
+            new EventPropertyDescriptor("b", SupportBean_B.class, false, false, false, false, true)
+           }, stmt.getEventType().getPropertyDescriptors());
 
-            if ((
-                    tradeevent1.getUserId().equals(tradeevent2.getUserId()) ||
-                            tradeevent1.getUserId().equals(tradeevent3.getUserId()) ||
-                            tradeevent2.getUserId().equals(tradeevent3.getUserId())))
-            {
-                /*
-                System.out.println("Bad Match : ");
-                System.out.println(tradeevent1);
-                System.out.println(tradeevent2);
-                System.out.println(tradeevent3 + "\n");
-                */
-                badMatchCount++;
-            }
-            else
-            {
-                goodMatchCount++;
-            }
-        }
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
+        epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
+        
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertTrue(event.getUnderlying() instanceof Map);
+
+        // test fragment B type and event
+        FragmentEventType typeFragB = event.getEventType().getFragmentType("b");
+        assertFalse(typeFragB.isIndexed());
+        assertEquals("B", typeFragB.getFragmentType().getName());
+        assertEquals(String.class, typeFragB.getFragmentType().getPropertyType("id"));
+
+        EventBean eventFragB = (EventBean) event.getFragment("b");
+        assertEquals("B", eventFragB.getEventType().getName());
+
+        // test fragment A type and event
+        FragmentEventType typeFragA = event.getEventType().getFragmentType("a");
+        assertTrue(typeFragA.isIndexed());
+        assertEquals("A", typeFragA.getFragmentType().getName());
+        assertEquals(String.class, typeFragA.getFragmentType().getPropertyType("id"));
+
+        assertTrue(event.getFragment("a") instanceof EventBean[]);
+        EventBean eventFragA1 = (EventBean) event.getFragment("a[0]");
+        assertEquals("A", eventFragA1.getEventType().getName());
+        assertEquals("A1", eventFragA1.get("id"));
+        EventBean eventFragA2 = (EventBean) event.getFragment("a[1]");
+        assertEquals("A", eventFragA2.getEventType().getName());
+        assertEquals("A2", eventFragA2.get("id"));
     }
 }

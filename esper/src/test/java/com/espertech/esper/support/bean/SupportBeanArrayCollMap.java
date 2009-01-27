@@ -12,6 +12,18 @@ public class SupportBeanArrayCollMap
     private Map<Long, String> longMap;
     private Long longBoxed;
     private Object[] objectArr;
+    private Object anyObject;
+    private Map<String, Object> otherMap;
+
+    public SupportBeanArrayCollMap()
+    {
+        this.anyObject = anyObject;
+    }
+
+    public SupportBeanArrayCollMap(Object anyObject)
+    {
+        this.anyObject = anyObject;
+    }
 
     public SupportBeanArrayCollMap(Object[] objectArr)
     {
@@ -95,6 +107,66 @@ public class SupportBeanArrayCollMap
     public Object[] getObjectArr()
     {
         return objectArr;
+    }
+
+    public void setIntArr(int[] intArr)
+    {
+        this.intArr = intArr;
+    }
+
+    public void setIntCol(Collection<Integer> intCol)
+    {
+        this.intCol = intCol;
+    }
+
+    public void setIntMap(Map<Integer, String> intMap)
+    {
+        this.intMap = intMap;
+    }
+
+    public void setLongArr(Long[] longArr)
+    {
+        this.longArr = longArr;
+    }
+
+    public void setLongBoxed(Long longBoxed)
+    {
+        this.longBoxed = longBoxed;
+    }
+
+    public void setLongCol(Collection<Long> longCol)
+    {
+        this.longCol = longCol;
+    }
+
+    public void setLongMap(Map<Long, String> longMap)
+    {
+        this.longMap = longMap;
+    }
+
+    public void setObjectArr(Object[] objectArr)
+    {
+        this.objectArr = objectArr;
+    }
+
+    public Object getAnyObject()
+    {
+        return anyObject;
+    }
+
+    public void setAnyObject(Object anyObject)
+    {
+        this.anyObject = anyObject;
+    }
+
+    public Map<String, Object> getOtherMap()
+    {
+        return otherMap;
+    }
+
+    public void setOtherMap(Map<String, Object> otherMap)
+    {
+        this.otherMap = otherMap;
     }
 
     private static HashMap<Long, String> convertMap(Long[] longArr)

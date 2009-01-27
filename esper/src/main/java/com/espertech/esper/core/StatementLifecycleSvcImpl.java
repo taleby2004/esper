@@ -15,9 +15,9 @@ import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.*;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.MapEventType;
 import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.NativeEventType;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecParam;
 import com.espertech.esper.pattern.EvalFilterNode;
@@ -131,29 +131,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
 
         EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject);
-        start(statementId, desc, true);
-        return desc.getEpStatement();
-    }
-
-    /**
-     * Creates a started statement.
-     * @param statementSpec is the statement def
-     * @param expression is the expression text
-     * @param isPattern is true for patterns,
-     * @param statementName is the statement name
-     * @param statementId is the statement id
-     * @param optAdditionalContext additional context for use by the statement context
-     * @param userObject the application define user object associated to each statement, if supplied
-     * @return statement
-     */
-    protected synchronized EPStatement createStarted(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
-    {
-        if (log.isDebugEnabled())
-        {
-            log.debug(".start Creating and starting statement " + statementId);
-        }
-        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject);
-        start(statementId, desc, true);
+        start(statementId, desc, true, false);
         return desc.getEpStatement();
     }
 
@@ -173,7 +151,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
 
-        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc());
+        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc(), false);
         StatementSpecCompiled compiledSpec;
         try
         {
@@ -189,7 +167,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // Makes the processing between chained statements more predictable.
         if (statementSpec.getInsertIntoDesc() != null)
         {
-            String insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeAlias();
+            String insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeName();
             String latchFactoryName = "insert_stream_" + insertIntoStreamName + "_" + statementId;
             long msecTimeout = services.getEngineSettingsService().getEngineSettings().getThreading().getInsertIntoDispatchTimeout();
             ConfigurationEngineDefaults.Threading.Locking locking = services.getEngineSettingsService().getEngineSettings().getThreading().getInsertIntoDispatchLocking();
@@ -199,10 +177,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
         // In a join statements if the same event type or it's deep super types are used in the join more then once,
         // then this is a self-join and the statement handle must know to dispatch the results together
-        boolean canSelfJoin = isPotentialSelfJoin(compiledSpec.getStreamSpecs());
+        boolean canSelfJoin = isPotentialSelfJoin(compiledSpec);
         statementContext.getEpStatementHandle().setCanSelfJoin(canSelfJoin);
 
-        // add statically typed event type references: those in the from clause; Dynamic (created) types collected by statement context and added on start 
+        // add statically typed event type references: those in the from clause; Dynamic (created) types collected by statement context and added on start
         services.getStatementEventTypeRefService().addReferences(statementName, compiledSpec.getEventTypeReferences());
 
         // determine statement type
@@ -264,7 +242,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             String insertIntoStreamName = null;
             if (statementSpec.getInsertIntoDesc() != null)
             {
-                insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeAlias();
+                insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeName();
             }
 
             statementDesc = new EPStatementDesc(statement, startMethod, null, insertIntoStreamName, statementContext.getEpStatementHandle(), statementContext);
@@ -289,22 +267,26 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return statementDesc;
     }
 
-    private boolean isPotentialSelfJoin(List<StreamSpecCompiled> streamSpecs)
+    private boolean isPotentialSelfJoin(StatementSpecCompiled spec)
     {
-        // not a join (pattern doesn't count)
-        if (streamSpecs.size() == 1)
+        // not a self join (pattern doesn't count)
+        if ((spec.getStreamSpecs().size() <= 1) && (spec.getSubSelectExpressions().isEmpty()))
         {
             return false;
         }
 
         // join - determine types joined
         List<EventType> filteredTypes = new ArrayList<EventType>();
+
+        // consider subqueryes
+        Set<EventType> optSubselectTypes = populateSubqueryTypes(spec.getSubSelectExpressions());
+
         boolean hasFilterStream = false;
-        for (StreamSpecCompiled streamSpec : streamSpecs)
+        for (StreamSpecCompiled streamSpec : spec.getStreamSpecs())
         {
             if (streamSpec instanceof FilterStreamSpecCompiled)
             {
-                EventType type = ((FilterStreamSpecCompiled) streamSpec).getFilterSpec().getEventType();
+                EventType type = ((FilterStreamSpecCompiled) streamSpec).getFilterSpec().getFilterForEventType();
                 filteredTypes.add(type);
                 hasFilterStream = true;
             }
@@ -314,22 +296,23 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 List<EvalFilterNode> filterNodes = evalNodeAnalysisResult.getFilterNodes();
                 for (EvalFilterNode filterNode : filterNodes)
                 {
-                    filteredTypes.add(filterNode.getFilterSpec().getEventType());
+                    filteredTypes.add(filterNode.getFilterSpec().getFilterForEventType());
                 }
             }
         }
 
-        if (filteredTypes.size() == 1)
+        if ((filteredTypes.size() == 1) && (optSubselectTypes.isEmpty()))
         {
             return false;
         }
+        
         // pattern-only streams are not self-joins
         if (!hasFilterStream)
         {
             return false;
         }
 
-        // is type overlap
+        // is type overlap in filters
         for (int i = 0; i < filteredTypes.size(); i++)
         {
             for (int j = i + 1; j < filteredTypes.size(); j++)
@@ -363,7 +346,70 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 }
             }
         }
+
+        // analyze subselect types
+        if (!optSubselectTypes.isEmpty())
+        {
+            for (int i = 0; i < filteredTypes.size(); i++)
+            {
+                EventType typeOne = filteredTypes.get(i);
+                if (optSubselectTypes.contains(typeOne))
+                {
+                    return true;
+                }
+
+                if (typeOne.getSuperTypes() != null)
+                {
+                    for (EventType typeOneSuper : typeOne.getSuperTypes())
+                    {
+                        if (optSubselectTypes.contains(typeOneSuper))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
         return false;
+    }
+
+    private Set<EventType> populateSubqueryTypes(List<ExprSubselectNode> subSelectExpressions)
+    {
+        Set<EventType> set = null;
+        for (ExprSubselectNode subselect : subSelectExpressions)
+        {
+            for (StreamSpecCompiled streamSpec : subselect.getStatementSpecCompiled().getStreamSpecs())
+            {
+                if (streamSpec instanceof FilterStreamSpecCompiled)
+                {
+                    EventType type = ((FilterStreamSpecCompiled) streamSpec).getFilterSpec().getFilterForEventType();
+                    if (set == null)
+                    {
+                        set = new HashSet<EventType>();
+                    }
+                    set.add(type);
+                }
+                else if (streamSpec instanceof PatternStreamSpecCompiled)
+                {
+                    EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(((PatternStreamSpecCompiled)streamSpec).getEvalNode());
+                    List<EvalFilterNode> filterNodes = evalNodeAnalysisResult.getFilterNodes();
+                    for (EvalFilterNode filterNode : filterNodes)
+                    {
+                        if (set == null)
+                        {
+                            set = new HashSet<EventType>();
+                        }
+                        set.add(filterNode.getFilterSpec().getFilterForEventType());
+                    }
+                }
+            }            
+        }
+        if (set == null)
+        {
+            return Collections.EMPTY_SET;
+        }
+        return set;
     }
 
     public synchronized void start(String statementId)
@@ -383,7 +429,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             {
                 throw new IllegalStateException("Cannot start statement, statement is in destroyed state");
             }
-            startInternal(statementId, desc, false);
+            startInternal(statementId, desc, false, false);
         }
         catch (RuntimeException ex)
         {
@@ -400,8 +446,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param statementId is the statement id
      * @param desc is the cached statement info
      * @param isNewStatement indicator whether the statement is new or a stop-restart statement
+     * @param isRecoveringStatement if the statement is recovering or new
      */
-    public void start(String statementId, EPStatementDesc desc, boolean isNewStatement)
+    public void start(String statementId, EPStatementDesc desc, boolean isNewStatement, boolean isRecoveringStatement)
     {
         if (log.isDebugEnabled())
         {
@@ -413,7 +460,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         eventProcessingRWLock.acquireWriteLock();
         try
         {
-            startInternal(statementId, desc, isNewStatement);
+            startInternal(statementId, desc, isNewStatement, isRecoveringStatement);
         }
         catch (RuntimeException ex)
         {
@@ -425,7 +472,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
     }
 
-    private void startInternal(String statementId, EPStatementDesc desc, boolean isNewStatement)
+    private void startInternal(String statementId, EPStatementDesc desc, boolean isNewStatement, boolean isRecoveringStatement)
     {
         if (log.isDebugEnabled())
         {
@@ -447,14 +494,14 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         Pair<Viewable, EPStatementStopMethod> pair;
         try
         {
-            pair = desc.getStartMethod().start(isNewStatement);
+            pair = desc.getStartMethod().start(isNewStatement, isRecoveringStatement);
         }
         catch (EPStatementException ex)
         {
             stmtIdToDescMap.remove(statementId);
             stmtNameToIdMap.remove(statement.getName());
             stmtNameToStmtMap.remove(statement.getName());
-            log.debug(".start Error starting view", ex);
+            log.debug(".start Error starting statement", ex);
             throw ex;
         }
         catch (ExprValidationException ex)
@@ -462,16 +509,16 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             stmtIdToDescMap.remove(statementId);
             stmtNameToIdMap.remove(statement.getName());
             stmtNameToStmtMap.remove(statement.getName());
-            log.debug(".start Error starting view", ex);
-            throw new EPStatementException("Error starting view: " + ex.getMessage(), statement.getText());
+            log.debug(".start Error starting statement", ex);
+            throw new EPStatementException("Error starting statement: " + ex.getMessage(), statement.getText());
         }
         catch (ViewProcessingException ex)
         {
             stmtIdToDescMap.remove(statementId);
             stmtNameToIdMap.remove(statement.getName());
             stmtNameToStmtMap.remove(statement.getName());
-            log.debug(".start Error starting view", ex);
-            throw new EPStatementException("Error starting view: " + ex.getMessage(), statement.getText());
+            log.debug(".start Error starting statement", ex);
+            throw new EPStatementException("Error starting statement: " + ex.getMessage(), statement.getText());
         }
 
         // add statically typed event type references: those in the from clause; Dynamic (created) types collected by statement context and added on start
@@ -549,7 +596,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
             // remove referenced event types
             services.getStatementEventTypeRefService().removeReferencesStatement(desc.getEpStatement().getName());
-        
+
             EPStatementSPI statement = desc.getEpStatement();
             if (statement.getState() == EPStatementState.STARTED)
             {
@@ -742,19 +789,27 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(statementContext.getEventAdapterService(), statementContext.getMethodResolutionService(), statementContext.getPatternResolutionService(), statementContext.getSchedulingService(), statementContext.getNamedWindowService(), statementContext.getValueAddEventService(), statementContext.getVariableService(), statementContext.getEngineURI(), statementContext.getPlugInTypeResolutionURIs(), eventTypeReferences);
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext, eventTypeReferences);
                 compiledStreams.add(compiled);
             }
         }
         catch (ExprValidationException ex)
         {
-            throw new EPStatementException(ex.getMessage(), eplStatement);
+            log.error("Failed to compile statement: " + ex.getMessage(), ex);
+            if (ex.getMessage() == null)
+            {
+                throw new EPStatementException("Unexpected exception compiling statement, please consult the log file and report the exception", eplStatement);
+            }
+            else
+            {
+                throw new EPStatementException(ex.getMessage(), eplStatement);
+            }
         }
         catch (RuntimeException ex)
         {
             String text = "Unexpected error compiling statement";
-            log.error(".compile " + text, ex);
-            throw new EPStatementException(text + ":" + ex.getClass().getName() + ":" + ex.getMessage(), eplStatement);
+            log.error(text, ex);
+            throw new EPStatementException(text + ": " + ex.getClass().getName() + ":" + ex.getMessage(), eplStatement);
         }
 
         // for create window statements, we switch the filter to a new event type
@@ -764,28 +819,28 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             {
                 StreamSpecCompiled createWindowTypeSpec = compiledStreams.get(0);
                 EventType selectFromType;
-                String selectFromTypeAlias;
+                String selectFromTypeName;
                 if (createWindowTypeSpec instanceof FilterStreamSpecCompiled)
                 {
                     FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) createWindowTypeSpec;
-                    selectFromType = filterStreamSpec.getFilterSpec().getEventType();
-                    selectFromTypeAlias = filterStreamSpec.getFilterSpec().getEventTypeAlias();
+                    selectFromType = filterStreamSpec.getFilterSpec().getFilterForEventType();
+                    selectFromTypeName = filterStreamSpec.getFilterSpec().getFilterForEventTypeName();
                 }
                 else
                 {
                     NamedWindowConsumerStreamSpec consumerStreamSpec = (NamedWindowConsumerStreamSpec) createWindowTypeSpec;
-                    selectFromType = statementContext.getEventAdapterService().getExistsTypeByAlias(consumerStreamSpec.getWindowName());
-                    selectFromTypeAlias = consumerStreamSpec.getWindowName();
+                    selectFromType = statementContext.getEventAdapterService().getExistsTypeByName(consumerStreamSpec.getWindowName());
+                    selectFromTypeName = consumerStreamSpec.getWindowName();
 
                     if (spec.getCreateWindowDesc().getInsertFilter() != null)
                     {
                         ExprNode insertIntoFilter = spec.getCreateWindowDesc().getInsertFilter();
-                        String checkMinimal = insertIntoFilter.isMinimalExpression();
+                        String checkMinimal = ExprNodeUtility.isMinimalExpression(insertIntoFilter);
                         if (checkMinimal != null)
                         {
                             throw new ExprValidationException("Create window where-clause may not have " + checkMinimal);
                         }
-                        StreamTypeService streamTypeService = new StreamTypeServiceImpl(selectFromType, selectFromTypeAlias, statementContext.getEngineURI(), selectFromTypeAlias);
+                        StreamTypeService streamTypeService = new StreamTypeServiceImpl(selectFromType, selectFromTypeName, statementContext.getEngineURI());
                         ExprNode insertFilter = spec.getCreateWindowDesc().getInsertFilter().getValidatedSubtree(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService());
                         spec.getCreateWindowDesc().setInsertFilter(insertFilter);
                     }
@@ -793,8 +848,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     // set the window to insert from
                     spec.getCreateWindowDesc().setInsertFromWindow(consumerStreamSpec.getWindowName());
                 }
-                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, selectFromTypeAlias, spec, eplStatement, statementContext);
-                eventTypeReferences.add(((EventTypeSPI)newFilter.getFirst().getEventType()).getMetadata().getPrimaryName());
+                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, selectFromTypeName, spec, eplStatement, statementContext);
+                eventTypeReferences.add(((EventTypeSPI)newFilter.getFirst().getFilterForEventType()).getMetadata().getPrimaryName());
 
                 // view must be non-empty list
                 if (spec.getCreateWindowDesc().getViewSpecs().isEmpty())
@@ -805,7 +860,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 // use the filter specification of the newly created event type and the views for the named window
                 compiledStreams.clear();
                 List<ViewSpec> views = new ArrayList<ViewSpec>(spec.getCreateWindowDesc().getViewSpecs());
-                compiledStreams.add(new FilterStreamSpecCompiled(newFilter.getFirst(), views, null, false));
+                compiledStreams.add(new FilterStreamSpecCompiled(newFilter.getFirst(), views, null, spec.getCreateWindowDesc().getStreamSpecOptions()));
                 spec.setSelectClauseSpec(newFilter.getSecond());
             }
             catch (ExprValidationException e)
@@ -830,7 +885,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             else if (raw instanceof SelectClauseStreamRawSpec)
             {
                 SelectClauseStreamRawSpec rawExpr = (SelectClauseStreamRawSpec) raw;
-                selectElements.add(new SelectClauseStreamCompiledSpec(rawExpr.getStreamAliasName(), rawExpr.getOptionalAsName()));
+                selectElements.add(new SelectClauseStreamCompiledSpec(rawExpr.getStreamName(), rawExpr.getOptionalAsName()));
             }
             else if (raw instanceof SelectClauseElementWildcard)
             {
@@ -852,7 +907,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext, true);
             subselect.setStatementSpecCompiled(compiled);
         }
-        
+
         return new StatementSpecCompiled(
                 spec.getOnTriggerDesc(),
                 spec.getCreateWindowDesc(),
@@ -880,7 +935,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
     // This section expected s single FilterStreamSpecCompiled representing the selected type.
     // It creates a new event type representing the window type and a sets the type selected on the filter stream spec.
     private static Pair<FilterSpecCompiled, SelectClauseSpecRaw> handleCreateWindow(EventType selectFromType,
-                                           String selectFromTypeAlias,
+                                           String selectFromTypeName,
                                            StatementSpecRaw spec,
                                            String eplStatement,
                                            StatementContext statementContext)
@@ -890,16 +945,23 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EventType targetType;
 
         // Validate the select expressions which consists of properties only
-        List<SelectClauseExprCompiledSpec> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType, selectFromTypeAlias, statementContext.getEngineURI());
+        List<NamedWindowSelectedProps> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType, selectFromTypeName, statementContext.getEngineURI());
 
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
         // Build a list of properties
         SelectClauseSpecRaw newSelectClauseSpecRaw = new SelectClauseSpecRaw();
         Map<String, Object> properties = new HashMap<String, Object>();
-        for (SelectClauseExprCompiledSpec selectElement : select)
+        for (NamedWindowSelectedProps selectElement : select)
         {
-            properties.put(selectElement.getAssignedName(), selectElement.getSelectExpression().getType());
+            if (selectElement.getFragmentType() != null)
+            {
+                properties.put(selectElement.getAssignedName(), selectElement.getFragmentType());
+            }
+            else
+            {
+                properties.put(selectElement.getAssignedName(), selectElement.getSelectExpressionType());
+            }
 
             // Add any properties to the new select clause for use by consumers to the statement itself
             newSelectClauseSpecRaw.add(new SelectClauseExprRawSpec(new ExprIdentNode(selectElement.getAssignedName()), null));
@@ -908,21 +970,13 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
         boolean isWildcard = spec.getSelectClauseSpec().isUsingWildcard();
-        if (statementContext.getValueAddEventService().isRevisionTypeAlias(selectFromTypeAlias))
+        if (statementContext.getValueAddEventService().isRevisionTypeName(selectFromTypeName))
         {
-            targetType = statementContext.getValueAddEventService().createRevisionType(typeName, selectFromTypeAlias, statementContext.getStatementStopService(), statementContext.getEventAdapterService());
+            targetType = statementContext.getValueAddEventService().createRevisionType(typeName, selectFromTypeName, statementContext.getStatementStopService(), statementContext.getEventAdapterService());
         }
         else if (isWildcard)
         {
-            if ((selectFromType instanceof MapEventType) && (properties.size() ==0))
-            {
-                MapEventType mapType = (MapEventType) selectFromType;
-                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes(), null, false, true, false);
-            }
-            else
-            {
-                targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, properties, true, false);
-            }
+            targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, properties, true, false);
         }
         else
         {
@@ -947,14 +1001,14 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
         }
 
-        FilterSpecCompiled filter = new FilterSpecCompiled(targetType, typeName, new ArrayList<FilterSpecParam>());
+        FilterSpecCompiled filter = new FilterSpecCompiled(targetType, typeName, new ArrayList<FilterSpecParam>(), null);
         return new Pair<FilterSpecCompiled, SelectClauseSpecRaw>(filter, newSelectClauseSpecRaw);
     }
 
-    private static List<SelectClauseExprCompiledSpec> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType, String selectFromTypeAlias, String engineURI)
+    private static List<NamedWindowSelectedProps> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType, String selectFromTypeName, String engineURI)
     {
-        List<SelectClauseExprCompiledSpec> selectProps = new LinkedList<SelectClauseExprCompiledSpec>();
-        StreamTypeService streams = new StreamTypeServiceImpl(new EventType[] {singleType}, new String[] {"stream_0"}, engineURI, new String[] {selectFromTypeAlias});
+        List<NamedWindowSelectedProps> selectProps = new LinkedList<NamedWindowSelectedProps>();
+        StreamTypeService streams = new StreamTypeServiceImpl(new EventType[] {singleType}, new String[] {"stream_0"}, engineURI);
 
         for (SelectClauseElementRaw raw : spec.getSelectExprList())
         {
@@ -980,7 +1034,20 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 asName = validatedExpression.toExpressionString();
             }
 
-            SelectClauseExprCompiledSpec validatedElement = new SelectClauseExprCompiledSpec(validatedExpression, asName);
+            // check for fragments
+            EventType fragmentType = null;
+            if ((validatedExpression instanceof ExprIdentNode) && (!(singleType instanceof NativeEventType)))
+            {
+                ExprIdentNode identNode = (ExprIdentNode) validatedExpression;
+                String propertyName = identNode.getResolvedPropertyName();
+                FragmentEventType fragmentEventType = singleType.getFragmentType(identNode.getFullUnresolvedName());
+                if ((fragmentEventType != null) && (!fragmentEventType.isNative()))
+                {
+                    fragmentType = fragmentEventType.getFragmentType();
+                }
+            }
+
+            NamedWindowSelectedProps validatedElement = new NamedWindowSelectedProps(validatedExpression.getType(), asName, fragmentType);
             selectProps.add(validatedElement);
         }
 

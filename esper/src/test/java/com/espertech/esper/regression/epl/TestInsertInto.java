@@ -1,25 +1,19 @@
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.core.StatementType;
 import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
+import junit.framework.TestCase;
 
 import java.util.Map;
 import java.util.Set;
@@ -38,9 +32,6 @@ public class TestInsertInto extends TestCase
         feedListener = new SupportUpdateListener();
         resultListenerDelta = new SupportUpdateListener();
         resultListenerProduct = new SupportUpdateListener();
-
-        // Use external clocking for the test
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
     public void testVariantRStreamOMToStmt() throws Exception
@@ -82,7 +73,7 @@ public class TestInsertInto extends TestCase
         model.setInsertInto(InsertIntoClause.create("Event_1", "delta", "product"));
         model.setSelectClause(SelectClause.create().add(Expressions.minus("intPrimitive", "intBoxed"), "deltaTag")
                 .add(Expressions.multiply("intPrimitive", "intBoxed"), "productTag"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView(View.create("win", "length", 100))));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView(View.create("win", "length", Expressions.constant(100)))));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         EPStatement stmt = runAsserts(null, model);
@@ -233,7 +224,7 @@ public class TestInsertInto extends TestCase
         runAsserts(stmtText, null);
 
         // assert type metadata
-        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByAlias("Event_1");
+        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByName("Event_1");
         assertEquals(null, type.getMetadata().getOptionalApplicationType());
         assertEquals(null, type.getMetadata().getOptionalSecondaryNames());
         assertEquals("Event_1", type.getMetadata().getPrimaryName());
@@ -299,7 +290,7 @@ public class TestInsertInto extends TestCase
         catch (EPStatementException ex)
         {
             // expected
-            assertEquals("Error starting view: Event type named 'Event_1' has already been declared with differing column name or type information: Type by name 'Event_1' expects 2 properties but receives 1 properties [insert into Event_1(delta) select (intPrimitive - intBoxed) as deltaTag from com.espertech.esper.support.bean.SupportBean.win:length(100)]", ex.getMessage());
+            assertEquals("Error starting statement: Event type named 'Event_1' has already been declared with differing column name or type information: Type by name 'Event_1' expects 2 properties but receives 1 properties [insert into Event_1(delta) select (intPrimitive - intBoxed) as deltaTag from com.espertech.esper.support.bean.SupportBean.win:length(100)]", ex.getMessage());
         }
     }
 

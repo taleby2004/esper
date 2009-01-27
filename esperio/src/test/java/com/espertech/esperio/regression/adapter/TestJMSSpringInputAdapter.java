@@ -18,7 +18,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.plugin.PluginLoader;
 
@@ -79,10 +79,10 @@ public class TestJMSSpringInputAdapter extends TestCase
         config.addPluginLoader("MyLoader", SpringContextLoader.class.getName(), props);
 
         // define type
-        Map<String, Class> typeProps = new HashMap<String, Class>();
+        Map<String, Object> typeProps = new HashMap<String, Object>();
         typeProps.put("prop1", String.class);
         typeProps.put("prop2", int.class);
-        config.addEventTypeAlias("MyMapType", typeProps);
+        config.addEventType("MyMapType", typeProps);
 
         EPServiceProvider service = EPServiceProviderManager.getProvider(this.getClass().getName() + "_testMap", config);
 

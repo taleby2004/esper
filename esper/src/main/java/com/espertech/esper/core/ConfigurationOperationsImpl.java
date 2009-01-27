@@ -9,24 +9,25 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.epl.core.EngineImportException;
+import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.core.EngineSettingsService;
+import com.espertech.esper.epl.metric.MetricReportingService;
+import com.espertech.esper.epl.variable.VariableExistsException;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.variable.VariableTypeException;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.xml.SchemaModel;
+import com.espertech.esper.event.xml.XSDSchemaMapper;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.VariantEventType;
-import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.epl.core.EngineImportService;
-import com.espertech.esper.epl.core.EngineImportException;
-import com.espertech.esper.epl.core.EngineSettingsService;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.epl.variable.VariableExistsException;
-import com.espertech.esper.epl.variable.VariableTypeException;
-import com.espertech.esper.epl.metric.MetricReportingService;
 
-import java.util.*;
-import java.net.URI;
 import java.io.Serializable;
+import java.net.URI;
+import java.util.*;
 
 /**
  * Provides runtime engine configuration operations.
@@ -68,9 +69,9 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         this.statementEventTypeRef = statementEventTypeRef;
     }
 
-    public void addEventTypeAutoAlias(String javaPackageName)
+    public void addEventTypeAutoName(String javaPackageName)
     {
-        eventAdapterService.addAutoAliasPackage(javaPackageName);
+        eventAdapterService.addAutoNamePackage(javaPackageName);
     }
 
     public void addPlugInAggregationFunction(String functionName, String aggregationClassName)
@@ -97,15 +98,15 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public boolean isEventTypeAliasExists(String eventTypeAlias) {
-        return eventAdapterService.getExistsTypeByAlias(eventTypeAlias) != null;
+    public boolean isEventTypeExists(String eventTypeName) {
+        return eventAdapterService.getExistsTypeByName(eventTypeName) != null;
     }
 
-    public void addEventTypeAlias(String eventTypeAlias, String javaEventClassName)
+    public void addEventType(String eventTypeName, String javaEventClassName)
     {
         try
         {
-            eventAdapterService.addBeanType(eventTypeAlias, javaEventClassName, false);
+            eventAdapterService.addBeanType(eventTypeName, javaEventClassName, false);
         }
         catch (EventAdapterException t)
         {
@@ -113,11 +114,11 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addEventTypeAlias(String eventTypeAlias, Class javaEventClass)
+    public void addEventType(String eventTypeName, Class javaEventClass)
     {
         try
         {
-            eventAdapterService.addBeanType(eventTypeAlias, javaEventClass, true);
+            eventAdapterService.addBeanType(eventTypeName, javaEventClass, true);
         }
         catch (EventAdapterException t)
         {
@@ -125,7 +126,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addEventTypeAliasSimpleName(Class javaEventClass)
+    public void addEventType(Class javaEventClass)
     {
         try
         {
@@ -137,12 +138,12 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addEventTypeAlias(String eventTypeAlias, Properties typeMap)
+    public void addEventType(String eventTypeName, Properties typeMap)
     {
-        Map<String, Class> types = createPropertyTypes(typeMap);
+        Map<String, Object> types = createPropertyTypes(typeMap);
         try
         {
-            eventAdapterService.addMapType(eventTypeAlias, types, null);
+            eventAdapterService.addNestableMapType(eventTypeName, types, null, true, false, false);
         }
         catch (EventAdapterException t)
         {
@@ -150,11 +151,11 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addEventTypeAlias(String eventTypeAlias, Map<String, Class> typeMap)
+    public void addEventType(String eventTypeName, Map<String, Object> typeMap)
     {
         try
         {
-            eventAdapterService.addMapType(eventTypeAlias, typeMap, null);
+            eventAdapterService.addNestableMapType(eventTypeName, typeMap, null, true, false, false);
         }
         catch (EventAdapterException t)
         {
@@ -162,29 +163,17 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap) throws ConfigurationException
+    public void addEventType(String eventTypeName, Map<String, Object> typeMap, String[] superTypes) throws ConfigurationException
     {
-        try
-        {
-            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap, null, true, false, false);
-        }
-        catch (EventAdapterException t)
-        {
-            throw new ConfigurationException(t.getMessage(), t);
-        }
-    }
-
-    public void addEventTypeAliasNestable(String eventTypeAlias, Map<String, Object> typeMap, String[] superTypes) throws ConfigurationException
-    {
-        Set<String> superTypeAliases = null;
+        Set<String> superTypeNames = null;
         if ((superTypes != null) && (superTypes.length > 0))
         {
-            superTypeAliases = new HashSet<String>(Arrays.asList(superTypes));
+            superTypeNames = new HashSet<String>(Arrays.asList(superTypes));
         }
 
         try
         {
-            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap, superTypeAliases, true, false, false);
+            eventAdapterService.addNestableMapType(eventTypeName, typeMap, superTypeNames, true, false, false);
         }
         catch (EventAdapterException t)
         {
@@ -192,11 +181,25 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addNestableEventTypeAlias(String eventTypeAlias, Map<String, Object> typeMap)
+    public void addEventType(String eventTypeName, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
     {
+        SchemaModel schemaModel = null;
+
+        if (xmlDOMEventTypeDesc.getSchemaResource() != null)
+        {
+            try
+            {
+                schemaModel = XSDSchemaMapper.loadAndMap(xmlDOMEventTypeDesc.getSchemaResource(), 2);
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException(ex.getMessage(), ex);
+            }
+        }
+
         try
         {
-            eventAdapterService.addNestableMapType(eventTypeAlias, typeMap, null, true, false, false);
+            eventAdapterService.addXMLDOMType(eventTypeName, xmlDOMEventTypeDesc, schemaModel);
         }
         catch (EventAdapterException t)
         {
@@ -204,21 +207,9 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addEventTypeAlias(String eventTypeAlias, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
+    private static Map<String, Object> createPropertyTypes(Properties properties)
     {
-        try
-        {
-            eventAdapterService.addXMLDOMType(eventTypeAlias, xmlDOMEventTypeDesc);
-        }
-        catch (EventAdapterException t)
-        {
-            throw new ConfigurationException(t.getMessage(), t);
-        }
-    }
-
-    private static Map<String, Class> createPropertyTypes(Properties properties)
-    {
-        Map<String, Class> propertyTypes = new HashMap<String, Class>();
+        Map<String, Object> propertyTypes = new HashMap<String, Object>();
         for(Map.Entry<Object, Object> entry : properties.entrySet())
         {
             String className = (String) entry.getValue();
@@ -264,11 +255,11 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     }
 
 
-    public void addPlugInEventType(String eventTypeAlias, URI[] resolutionURIs, Serializable initializer)
+    public void addPlugInEventType(String eventTypeName, URI[] resolutionURIs, Serializable initializer)
     {
         try
         {
-            eventAdapterService.addPlugInEventType(eventTypeAlias, resolutionURIs, initializer);
+            eventAdapterService.addPlugInEventType(eventTypeName, resolutionURIs, initializer);
         }
         catch (EventAdapterException e)
         {
@@ -276,26 +267,26 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void setPlugInEventTypeAliasResolutionURIs(URI[] urisToResolveAlias)
+    public void setPlugInEventTypeResolutionURIs(URI[] urisToResolveName)
     {
-        engineSettingsService.setPlugInEventTypeResolutionURIs(urisToResolveAlias);
+        engineSettingsService.setPlugInEventTypeResolutionURIs(urisToResolveName);
     }
 
-    public void addRevisionEventType(String revisionEventTypeAlias, ConfigurationRevisionEventType revisionEventTypeConfig)
+    public void addRevisionEventType(String revisioneventTypeName, ConfigurationRevisionEventType revisionEventTypeConfig)
     {
-        valueAddEventService.addRevisionEventType(revisionEventTypeAlias, revisionEventTypeConfig, eventAdapterService);
+        valueAddEventService.addRevisionEventType(revisioneventTypeName, revisionEventTypeConfig, eventAdapterService);
     }
 
-    public void addVariantStream(String variantEventTypeAlias, ConfigurationVariantStream variantStreamConfig)
+    public void addVariantStream(String varianteventTypeName, ConfigurationVariantStream variantStreamConfig)
     {
-        valueAddEventService.addVariantStream(variantEventTypeAlias, variantStreamConfig, eventAdapterService);
+        valueAddEventService.addVariantStream(varianteventTypeName, variantStreamConfig, eventAdapterService);
     }
 
-    public void updateMapEventType(String mapEventTypeAlias, Map<String, Object> typeMap) throws ConfigurationException
+    public void updateMapEventType(String mapeventTypeName, Map<String, Object> typeMap) throws ConfigurationException
     {
         try
         {
-            eventAdapterService.updateMapEventType(mapEventTypeAlias, typeMap);
+            eventAdapterService.updateMapEventType(mapeventTypeName, typeMap);
         }
         catch (EventAdapterException e)
         {
@@ -374,29 +365,29 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         return processor.getValueAddEventType() instanceof VariantEventType;
     }
 
-    public boolean removeEventType(String alias, boolean force) throws ConfigurationException
+    public boolean removeEventType(String name, boolean force) throws ConfigurationException
     {
         if (!force) {
-            Set<String> statements = statementEventTypeRef.getStatementNamesForType(alias);
+            Set<String> statements = statementEventTypeRef.getStatementNamesForType(name);
             if ((statements != null) && (!statements.isEmpty())) {
-                throw new ConfigurationException("Event type '" + alias + "' is in use by one or more statements");
+                throw new ConfigurationException("Event type '" + name + "' is in use by one or more statements");
             }
         }
 
-        EventType type = eventAdapterService.getExistsTypeByAlias(alias);
+        EventType type = eventAdapterService.getExistsTypeByName(name);
         if (type == null)
         {
             return false;
         }
 
-        eventAdapterService.removeType(alias);
-        statementEventTypeRef.removeReferencesType(alias);
+        eventAdapterService.removeType(name);
+        statementEventTypeRef.removeReferencesType(name);
         return true;
     }
 
-    public Set<String> getEventTypeAliasUsedBy(String alias)
+    public Set<String> getEventTypeNameUsedBy(String name)
     {
-        Set<String> statements = statementEventTypeRef.getStatementNamesForType(alias);
+        Set<String> statements = statementEventTypeRef.getStatementNamesForType(name);
         if ((statements == null) || (statements.isEmpty()))
         {
             return Collections.emptySet();

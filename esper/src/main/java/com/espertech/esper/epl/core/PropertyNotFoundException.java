@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.collection.Pair;
+
 /**
  * Exception to indicate that a property name used in a filter doesn't resolve.
  */
@@ -16,9 +18,10 @@ public class PropertyNotFoundException extends StreamTypesException
     /**
      * Ctor.
      * @param msg - message
+     * @param nearestMatchSuggestion - optional suggestion for a matching name
      */
-    public PropertyNotFoundException(String msg)
+    public PropertyNotFoundException(String msg, Pair<Integer, String> nearestMatchSuggestion)
     {
-        super(msg);
+        super(msg, nearestMatchSuggestion);
     }
 }

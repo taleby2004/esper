@@ -8,10 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.PropertyAccessException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.PropertyAccessException;
 
 /**
  * An event bean that represents multiple potentially disparate underlying events and presents a unified face
@@ -62,4 +62,13 @@ public class VariantEventBean implements EventBean, VariantEvent
         return underlyingEventBean;
     }
 
+    public Object getFragment(String propertyExpression)
+    {
+        EventPropertyGetter getter = variantEventType.getGetter(propertyExpression);
+        if (getter == null)
+        {
+            throw new PropertyAccessException("Property named '" + propertyExpression + "' is not a valid property name for this type");
+        }
+        return getter.getFragment(this);
+    }
 }

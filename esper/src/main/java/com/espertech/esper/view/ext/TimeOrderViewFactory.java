@@ -11,8 +11,9 @@ package com.espertech.esper.view.ext;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.type.TimePeriodParameter;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 import com.espertech.esper.view.window.RandomAccessByIndexGetter;
@@ -24,10 +25,12 @@ import java.util.List;
  */
 public class TimeOrderViewFactory implements DataWindowViewFactory
 {
+    private List<ExprNode> viewParameters;
+
     /**
-     * The timestamp field name.
+     * The timestamp expression.
      */
-    protected String timestampFieldName;
+    protected ExprNode timestampExpression;
 
     /**
      * The interval to wait for newer events to arrive.
@@ -46,28 +49,29 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
 
     private EventType eventType;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
-        String errorMessage = "Time order view requires the property name supplying timestamp values, and a numeric or time period parameter for interval size";
+        viewParameters = expressionParameters;
+    }
+
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
+    {
+        ExprNode[] validated = ViewFactorySupport.validate("Time order view", parentEventType, statementContext, viewParameters, true);
+
+        String errorMessage = "Time order view requires the expression supplying timestamp values, and a numeric or time period parameter for interval size";
         if (viewParameters.size() != 2)
         {
             throw new ViewParameterException(errorMessage);
         }
 
-        if (!(viewParameters.get(0) instanceof String))
+        if (!JavaClassHelper.isNumeric(validated[0].getType()))
         {
             throw new ViewParameterException(errorMessage);
         }
-        timestampFieldName = (String) viewParameters.get(0);
+        timestampExpression = validated[0];
 
-
-        Object parameter = viewParameters.get(1);
-        if (parameter instanceof TimePeriodParameter)
-        {
-            TimePeriodParameter param = (TimePeriodParameter) parameter;
-            intervalSize = Math.round(1000d * param.getNumSeconds());
-        }
-        else if (!(parameter instanceof Number))
+        Object parameter = ViewFactorySupport.evaluateAssertNoProperties("Externally-timed window", validated[1], 1);
+        if (!(parameter instanceof Number))
         {
             throw new ViewParameterException(errorMessage);
         }
@@ -87,17 +91,6 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
         if (intervalSize < 1)
         {
             throw new ViewParameterException("Time order view requires a size of at least 1 msec");
-        }
-    }
-
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
-    {
-        // Attaches to parent views where the sort fields exist and implement Comparable
-        String result = PropertyCheckHelper.exists(parentEventType, timestampFieldName);
-
-        if(result != null)
-        {
-            throw new ViewAttachException(result);
         }
 
         eventType = parentEventType;
@@ -147,7 +140,7 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
             randomAccessGetterImpl.updated(sortedRandomAccess);
         }
 
-        return new TimeOrderView(statementContext, this, timestampFieldName, intervalSize, sortedRandomAccess, isRemoveStreamHandling);
+        return new TimeOrderView(statementContext, this, timestampExpression, intervalSize, sortedRandomAccess, isRemoveStreamHandling);
     }
 
     public EventType getEventType()
@@ -169,7 +162,7 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
 
         TimeOrderView other = (TimeOrderView) view;
         if ((other.getIntervalSize() != intervalSize) ||
-            (!other.getTimestampFieldName().equals(timestampFieldName)))
+            (!ExprNodeUtility.deepEquals(other.getTimestampExpression(), timestampExpression)))
         {
             return false;
         }

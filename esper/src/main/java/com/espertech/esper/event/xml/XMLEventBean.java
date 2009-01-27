@@ -8,10 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.event.xml;
 
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.PropertyAccessException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.PropertyAccessException;
 
 import org.w3c.dom.Node;
 
@@ -22,8 +22,8 @@ import org.w3c.dom.Node;
  * @author pablo
  *
  */
-public class XMLEventBean implements EventBean {
-
+public class XMLEventBean implements EventBean
+{
 	private EventType eventType;
 	private Node event;
 
@@ -52,4 +52,13 @@ public class XMLEventBean implements EventBean {
 		return event;
 	}
 
+    public Object getFragment(String propertyExpression)
+    {
+        EventPropertyGetter getter = eventType.getGetter(propertyExpression);
+        if (getter == null)
+        {
+            throw new PropertyAccessException("Property named '" + propertyExpression + "' is not a valid property name for this type");
+        }
+        return getter.getFragment(this);
+    }
 }

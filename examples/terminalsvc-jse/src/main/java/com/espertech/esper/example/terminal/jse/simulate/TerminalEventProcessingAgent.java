@@ -8,11 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.example.terminal.jse.simulate;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.*;
 import com.espertech.esper.example.terminal.jse.event.*;
 import com.espertech.esper.example.terminal.jse.listener.*;
 
@@ -24,15 +20,15 @@ public class TerminalEventProcessingAgent {
     private final EPServiceProvider esperEngine;
 
     public TerminalEventProcessingAgent(ComplexEventListener complexEventListener) {
-        // Register event class alias for simplicity
+        // Register event class name for simplicity
         Configuration config = new Configuration();
-        config.addEventTypeAlias("Checkin", Checkin.class);
-        config.addEventTypeAlias("Cancelled", Cancelled.class);
-        config.addEventTypeAlias("Completed", Completed.class);
-        config.addEventTypeAlias("Status", Status.class);
-        config.addEventTypeAlias("LowPaper", LowPaper.class);
-        config.addEventTypeAlias("OutOfOrder", OutOfOrder.class);
-        config.addEventTypeAlias("BaseTerminalEvent", BaseTerminalEvent.class);
+        config.addEventType("Checkin", Checkin.class);
+        config.addEventType("Cancelled", Cancelled.class);
+        config.addEventType("Completed", Completed.class);
+        config.addEventType("Status", Status.class);
+        config.addEventType("LowPaper", LowPaper.class);
+        config.addEventType("OutOfOrder", OutOfOrder.class);
+        config.addEventType("BaseTerminalEvent", BaseTerminalEvent.class);
 
         // Get an engine instance
         esperEngine = EPServiceProviderManager.getDefaultProvider(config);
@@ -72,7 +68,7 @@ public class TerminalEventProcessingAgent {
         stmt = "insert into VirtualLatency select (b.timestamp - a.timestamp) as latency from pattern [" +
                 " every a=Checkin -> b=BaseTerminalEvent(terminal.id=a.terminal.id, type in ('Completed', 'Cancelled', 'OutOfOrder'))]";
         statement = esperEngine.getEPAdministrator().createEPL(stmt);
-        stmt = "select * from VirtualLatency.win:length_batch(1000).stat:uni('latency')";
+        stmt = "select * from VirtualLatency.win:length_batch(1000).stat:uni(latency)";
         statement = esperEngine.getEPAdministrator().createEPL(stmt);
         statement.addListener(new BaseTerminalListener(complexEventListener) {
             public void update(EventBean[] newEvents, EventBean[] oldEvents) {

@@ -9,6 +9,15 @@
 package com.espertech.esper.event.property;
 
 import com.espertech.esper.event.*;
+import com.espertech.esper.event.bean.DynamicSimplePropertyGetter;
+import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.xml.SchemaElementComplex;
+import com.espertech.esper.event.xml.SchemaItem;
+import com.espertech.esper.event.xml.BaseXMLEventType;
+import com.espertech.esper.event.xml.DOMAttributeAndElementGetter;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.PropertyAccessException;
 
 import java.util.Map;
 import java.io.StringWriter;
@@ -29,12 +38,22 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
         super(propertyName);
     }
 
-    public EventPropertyGetter getGetter(BeanEventType eventType)
+    public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
-        return new DynamicSimplePropertyGetter(propertyNameAtomic);
+        return new DynamicSimplePropertyGetter(propertyNameAtomic, eventAdapterService);
     }
 
-    public Class getPropertyType(BeanEventType eventType)
+    public boolean isDynamic()
+    {
+        return true;
+    }
+
+    public String[] toPropertyArray()
+    {
+        return new String[] {this.getPropertyNameAtomic()};
+    }
+
+    public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         return Object.class;
     }
@@ -60,6 +79,11 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
                 Map map = (Map) eventBean.getUnderlying();
                 return map.containsKey(propertyName);
             }
+
+            public Object getFragment(EventBean eventBean)
+            {
+                return null;
+            }
         };
     }
 
@@ -67,4 +91,19 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
     {
         writer.append(propertyNameAtomic);
     }
+
+    public EventPropertyGetter getGetterDOM(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService, BaseXMLEventType eventType, String propertyExpression)
+    {
+        return new DOMAttributeAndElementGetter(propertyNameAtomic);
+    }
+
+    public EventPropertyGetter getGetterDOM()
+    {
+        return new DOMAttributeAndElementGetter(propertyNameAtomic);
+    }
+
+    public SchemaItem getPropertyTypeSchema(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService)
+    {
+        return null;    // always returns Node
+    }    
 }

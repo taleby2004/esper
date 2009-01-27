@@ -10,7 +10,7 @@ import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 public class Test5StreamOuterJoinCart extends TestCase
 {
@@ -27,7 +27,6 @@ public class Test5StreamOuterJoinCart extends TestCase
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epService.initialize();
         updateListener = new SupportUpdateListener();
     }

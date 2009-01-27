@@ -1,7 +1,7 @@
 package com.espertech.esper.support.util;
 
 import com.espertech.esper.client.UpdateListener;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
 
 import java.util.List;
@@ -75,6 +75,28 @@ public class SupportUpdateListener implements UpdateListener
         EventBean lastNew = lastNewData[0];
         reset();
         return lastNew;
+    }
+
+    public EventBean assertOneGetNew()
+    {
+        Assert.assertTrue(isInvoked);
+
+        Assert.assertEquals(1, newDataList.size());
+        Assert.assertEquals(1, oldDataList.size());
+
+        Assert.assertEquals(1, lastNewData.length);
+        return lastNewData[0];
+    }
+
+    public EventBean assertOneGetOld()
+    {
+        Assert.assertTrue(isInvoked);
+
+        Assert.assertEquals(1, newDataList.size());
+        Assert.assertEquals(1, oldDataList.size());
+
+        Assert.assertEquals(1, lastOldData.length);
+        return lastOldData[0];
     }
 
     public EventBean assertOneGetOldAndReset()

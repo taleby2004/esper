@@ -1,7 +1,7 @@
 package com.espertech.esper.view.std;
 
 import junit.framework.TestCase;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
@@ -10,17 +10,18 @@ import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStreamImpl;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.view.SupportViewDataChecker;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 
 public class TestMergeView extends TestCase
 {
     private MergeView myView;
     private SupportBeanClassView childView;
 
-    public void setUp()
+    public void setUp() throws Exception
     {
         // Set up length window view and a test child view
         myView = new MergeView(SupportStatementContextFactory.makeContext(),
-                new String[] {"symbol"},
+                SupportExprNodeFactory.makeIdentNodesMD("symbol"),
                 SupportEventTypeFactory.createBeanType(SupportBean.class));
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);

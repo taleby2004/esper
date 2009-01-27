@@ -8,17 +8,16 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.event.EventType;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.MetaDefItem;
 
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Interface for range-type filter parameters for type checking and to obtain the filter values for endpoints based
  * on prior results.
  */
-public interface FilterSpecParamRangeValue extends MetaDefItem
+public interface FilterSpecParamRangeValue extends MetaDefItem, Serializable
 {
     /**
      * Returns the filter value representing the endpoint.

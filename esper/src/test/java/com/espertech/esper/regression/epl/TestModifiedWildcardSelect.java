@@ -3,19 +3,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBeanCombinedProps;
 import com.espertech.esper.support.bean.SupportBeanSimple;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -43,7 +40,7 @@ public class TestModifiedWildcardSelect extends TestCase
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.createWildcard().add(Expressions.concat("myString", "myString"), "concat"));
-        model.setFromClause(FromClause.create(FilterStream.create(eventName).addView(View.create("win", "length", 5))));
+        model.setFromClause(FromClause.create(FilterStream.create(eventName).addView(View.create("win", "length", Expressions.constant(5)))));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String text = "select *, myString || myString as concat from " + eventName + ".win:length(5)";
@@ -52,6 +49,12 @@ public class TestModifiedWildcardSelect extends TestCase
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(listener);
         assertSimple();
+
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("myString", String.class, false, false, false, false, false),
+            new EventPropertyDescriptor("myInt", int.class, false, false, false, false, false),
+            new EventPropertyDescriptor("concat", String.class, false, false, false, false, false),
+           }, statement.getEventType().getPropertyDescriptors());
     }
 
 	public void testSingle() throws Exception
@@ -165,11 +168,10 @@ public class TestModifiedWildcardSelect extends TestCase
 	public void testMapEvents()
 	{
 		Configuration configuration = SupportConfigFactory.getConfiguration();
-		Map<String, Class> typeMap = new HashMap<String, Class>();
+		Map<String, Object> typeMap = new HashMap<String, Object>();
 		typeMap.put("int", Integer.class);
 		typeMap.put("string", String.class);
-		configuration.addEventTypeAlias("mapEvent", typeMap);
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+		configuration.addEventType("mapEvent", typeMap);
 		epService = EPServiceProviderManager.getProvider("wildcard map event", configuration);
 
 		String text = "select *, string||string as concat from mapEvent.win:length(5)";

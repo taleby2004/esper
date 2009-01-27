@@ -8,7 +8,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 public class TestLiteralConstants extends TestCase
 {
@@ -18,8 +18,7 @@ public class TestLiteralConstants extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("SupportBean", SupportBean.class.getName());
+        config.addEventType("SupportBean", SupportBean.class.getName());
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         updateListener = new SupportUpdateListener();

@@ -1,8 +1,8 @@
 package com.espertech.esper.support.epl;
 
 import com.espertech.esper.epl.core.*;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
@@ -13,7 +13,7 @@ public class SupportStreamTypeSvc1Stream implements StreamTypeService
 
     public SupportStreamTypeSvc1Stream()
     {
-        impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), "default", new String[] {"SupportBean"});
+        impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), "default");
     }
 
     public PropertyResolutionDescriptor resolveByPropertyName(String propertyName) throws DuplicatePropertyException, PropertyNotFoundException

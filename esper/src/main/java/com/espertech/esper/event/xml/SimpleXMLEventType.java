@@ -11,14 +11,22 @@ package com.espertech.esper.event.xml;
 
 import com.espertech.esper.client.ConfigurationEventTypeXMLDOM;
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.TypedEventPropertyGetter;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.FragmentEventType;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.property.Property;
+import com.espertech.esper.event.property.PropertyParser;
+import org.antlr.runtime.tree.Tree;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.xml.namespace.QName;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +45,8 @@ import java.util.Map;
  */
 public class SimpleXMLEventType extends BaseXMLEventType {
 
-    private final Map<String, TypedEventPropertyGetter> propertyGetterCache;
+    private static final Log log = LogFactory.getLog(SimpleXMLEventType.class);
+    private final Map<String, EventPropertyGetter> propertyGetterCache;
     private String defaultNamespacePrefix;
     private final boolean isResolvePropertiesAbsolute;
 
@@ -45,11 +54,12 @@ public class SimpleXMLEventType extends BaseXMLEventType {
      * Ctor.
      * @param configurationEventTypeXMLDOM configures the event type
      * @param eventTypeMetadata event type metadata
+     * @param eventAdapterService for type looking and registration
      */
-    public SimpleXMLEventType(EventTypeMetadata eventTypeMetadata, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM)
+    public SimpleXMLEventType(EventTypeMetadata eventTypeMetadata, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM, EventAdapterService eventAdapterService)
     {
-        super(eventTypeMetadata, configurationEventTypeXMLDOM);
-        isResolvePropertiesAbsolute = configurationEventTypeXMLDOM.isResolvePropertiesAbsolute();
+        super(eventTypeMetadata, configurationEventTypeXMLDOM, eventAdapterService);
+        isResolvePropertiesAbsolute = configurationEventTypeXMLDOM.isXPathResolvePropertiesAbsolute();
 
         // Set of namespace context for XPath expressions
         XPathNamespaceContext xPathNamespaceContext = new XPathNamespaceContext();
@@ -74,36 +84,81 @@ public class SimpleXMLEventType extends BaseXMLEventType {
             }
         }
         super.setNamespaceContext(xPathNamespaceContext);
-        super.setExplicitProperties(configurationEventTypeXMLDOM.getXPathProperties().values());
+        super.initialize(configurationEventTypeXMLDOM.getXPathProperties().values(), Collections.EMPTY_LIST);
 
-        propertyGetterCache = new HashMap<String, TypedEventPropertyGetter>();
+        propertyGetterCache = new HashMap<String, EventPropertyGetter>();
     }
 
-    protected Class doResolvePropertyType(String property) {
-        return String.class;
+    protected Class doResolvePropertyType(String propertyExpression) {
+        Tree ast = PropertyParser.parse(propertyExpression);
+        if (PropertyParser.isPropertyDynamic(ast))
+        {
+            return org.w3c.dom.Node.class;
+        }
+        else
+        {
+            return String.class;
+        }
     }
 
-    protected EventPropertyGetter doResolvePropertyGetter(String property) {
-        TypedEventPropertyGetter getter = propertyGetterCache.get(property);
+    protected EventPropertyGetter doResolvePropertyGetter(String propertyExpression) {
+        EventPropertyGetter getter = propertyGetterCache.get(propertyExpression);
         if (getter != null) {
             return getter;
         }
 
-        XPathExpression xPathExpression = null;
-        try
+        if (!this.getConfigurationEventTypeXMLDOM().isXPathPropertyExpr())
         {
-            String xPathExpr = SimpleXMLPropertyParser.parse(property,getRootElementName(), defaultNamespacePrefix, isResolvePropertiesAbsolute);
-            XPath xpath = getXPathFactory().newXPath();
-            xpath.setNamespaceContext(namespaceContext);
-            xPathExpression = xpath.compile(xPathExpr);
+            Property prop = PropertyParser.parse(propertyExpression, false);
+            getter = prop.getGetterDOM();
+            if (!prop.isDynamic())
+            {
+                getter = new DOMConvertingGetter(propertyExpression, (DOMPropertyGetter) getter, String.class);
+            }
         }
-        catch (XPathExpressionException e)
+        else
         {
-            throw new EPException("Error constructing XPath expression from property name '" + property + '\'', e);
+            XPathExpression xPathExpression;
+            String xPathExpr;
+            boolean isDynamic;
+            try
+            {
+                Tree ast = PropertyParser.parse(propertyExpression);
+                isDynamic = PropertyParser.isPropertyDynamic(ast);
+
+                xPathExpr = SimpleXMLPropertyParser.parse(ast, propertyExpression,getRootElementName(), defaultNamespacePrefix, isResolvePropertiesAbsolute);
+                XPath xpath = getXPathFactory().newXPath();
+                xpath.setNamespaceContext(namespaceContext);
+                if (log.isInfoEnabled())
+                {
+                    log.info("Compiling XPath expression for property '" + propertyExpression + "' as '" + xPathExpr + "'");
+                }
+                xPathExpression = xpath.compile(xPathExpr);
+            }
+            catch (XPathExpressionException e)
+            {
+                throw new EPException("Error constructing XPath expression from property name '" + propertyExpression + '\'', e);
+            }
+
+            QName xPathReturnType;
+            if (isDynamic)
+            {
+                xPathReturnType = XPathConstants.NODE;
+            }
+            else
+            {
+                xPathReturnType = XPathConstants.STRING;
+            }
+            getter = new XPathPropertyGetter(propertyExpression, xPathExpr, xPathExpression, xPathReturnType, null, null);
         }
 
-        getter = new XPathPropertyGetter(property, xPathExpression, XPathConstants.STRING, null);
-        propertyGetterCache.put(property, getter);
+        // no fragment factory, fragments not allowed
+        propertyGetterCache.put(propertyExpression, getter);
         return getter;
+    }
+
+    protected FragmentEventType doResolveFragmentType(String property)
+    {
+        return null;  // Since we have no type information, the fragments are not allowed unless explicitly configured via XPath getter
     }
 }

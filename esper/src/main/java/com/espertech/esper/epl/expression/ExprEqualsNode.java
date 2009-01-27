@@ -12,11 +12,12 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleNumberCoercer;
 import com.espertech.esper.util.SimpleNumberCoercerFactory;
+import com.espertech.esper.util.CoercionException;
 
 /**
  * Represents an equals (=) comparator in a filter expressiun tree.
@@ -77,7 +78,7 @@ public class ExprEqualsNode extends ExprNode
         {
             coercionType = JavaClassHelper.getCompareToCoercionType(typeOne, typeTwo);
         }
-        catch (IllegalArgumentException ex)
+        catch (CoercionException ex)
         {
             throw new ExprValidationException("Implicit conversion from datatype '" +
                     typeTwo.getSimpleName() +

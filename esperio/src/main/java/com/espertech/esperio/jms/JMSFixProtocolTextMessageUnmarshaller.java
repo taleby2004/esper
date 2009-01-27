@@ -9,9 +9,9 @@
 package com.espertech.esperio.jms;
 
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
 import com.espertech.esperio.message.fix.FixMsgParser;
 import com.espertech.esperio.message.fix.FixMsgParserException;
 import org.apache.commons.logging.Log;
@@ -57,11 +57,11 @@ public class JMSFixProtocolTextMessageUnmarshaller implements JMSMessageUnmarsha
         // Get event type
         if (eventType == null)
         {
-            String alias = "FIX";
-            eventType = eventAdapterService.getExistsTypeByAlias("FIX");
+            String name = "FIX";
+            eventType = eventAdapterService.getExistsTypeByName("FIX");
             if (eventType == null)
             {
-                log.warn(".unmarshal Failed to unmarshal map message, event type alias '" + alias + "' is not a known type");
+                log.warn(".unmarshal Failed to unmarshal map message, event type name '" + name + "' is not a known type");
                 return null;
             }
         }
@@ -76,6 +76,6 @@ public class JMSFixProtocolTextMessageUnmarshaller implements JMSMessageUnmarsha
             throw new EPException("Error unmarshalling message :" + ex.getMessage(), ex);
         }
 
-        return eventAdapterService.createMapFromValues(fixMsg, eventType);
+        return eventAdapterService.adaptorForTypedMap(fixMsg, eventType);
     }
 }

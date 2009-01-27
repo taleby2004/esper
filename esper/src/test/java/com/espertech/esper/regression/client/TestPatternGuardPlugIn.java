@@ -15,7 +15,7 @@ public class TestPatternGuardPlugIn extends TestCase
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addPlugInPatternGuard("myplugin", "count_to", MyCountToPatternGuardFactory.class.getName());
-        configuration.addEventTypeAlias("Bean", SupportBean.class.getName());
+        configuration.addEventType("Bean", SupportBean.class.getName());
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
@@ -72,7 +72,7 @@ public class TestPatternGuardPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Failed to resolve pattern object: Error casting guard factory instance to com.espertech.esper.pattern.guard.GuardFactory interface for guard 'name' [select * from pattern [every com.espertech.esper.support.bean.SupportBean where namespace:name(10)]]", ex.getMessage());
+            assertEquals("Failed to resolve pattern guard: Error casting guard factory instance to com.espertech.esper.pattern.guard.GuardFactory interface for guard 'name' [select * from pattern [every com.espertech.esper.support.bean.SupportBean where namespace:name(10)]]", ex.getMessage());
         }
     }
 }

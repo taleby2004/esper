@@ -2,10 +2,10 @@ package com.espertech.esper.regression.pattern;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.regression.support.EventCollection;
 import com.espertech.esper.regression.support.EventDescriptor;
@@ -17,7 +17,6 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class TestCronParameter extends TestCase implements SupportBeanConstants
@@ -46,7 +45,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,*,*,0 last,*)";
+        expressionText = "timer:at(*, *, *, *, 0 last, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -56,7 +55,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *, last,*,*,*)";
+        expressionText = "timer:at(*, *, last, *, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -70,7 +69,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *, last,8,*,*)";
+        expressionText = "timer:at(*, *, last, 8, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -80,7 +79,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *, last,2,*,*)";
+        expressionText = "timer:at(*, *, last, 2, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -94,7 +93,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,*,*,last,*)";
+        expressionText = "timer:at(*, *, *, *, last, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -104,7 +103,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,*,6,5 last,*)";
+        expressionText = "timer:at(*, *, *, 6, 5 last, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -114,7 +113,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,lastweekday,*,*,*)";
+        expressionText = "timer:at(*, *, lastweekday, *, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -124,7 +123,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,lastweekday,9,*,*)";
+        expressionText = "timer:at(*, *, lastweekday, 9, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -134,7 +133,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,lastweekday,2,*,*)";
+        expressionText = "timer:at(*, *, lastweekday, 2, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -144,7 +143,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,10 weekday,*,*,*)";
+        expressionText = "timer:at(*, *, 10 weekday, *, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -154,7 +153,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,1 weekday,9,*,*)";
+        expressionText = "timer:at(*, *, 1 weekday, 9, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -164,7 +163,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,30 weekday,9,*,*)";
+        expressionText = "timer:at(*, *, 30 weekday, 9, *, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -175,7 +174,7 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         printCurrentTime(calendar);
         baseTime = calendar.getTimeInMillis();
         testData = getEventSet(baseTime, 1000 * 60 * 10);
-        expressionText = "timer:at(*, *,*,*,5 last,*)";
+        expressionText = "timer:at(*, *, *, *, 5 last, *)";
         testCase = new EventExpressionCase(expressionText);
         testCase.add("A1");
         runTestEvent();
@@ -186,7 +185,6 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         int totalEventsReceived = 0;
 
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         EPServiceProvider serviceProvider = EPServiceProviderManager.getDefaultProvider(config);
         serviceProvider.initialize();
 
@@ -260,6 +258,12 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
             TestCase.assertTrue(false);
         }
 
+        // test the object model
+        String epl = "select * from pattern [" + expressionText + "]";
+        EPStatementObjectModel model = serviceProvider.getEPAdministrator().compileEPL(epl);
+        assertEquals(epl, model.toEPL());
+        EPStatement stmt = serviceProvider.getEPAdministrator().create(model);
+        assertEquals(epl, stmt.getText());
     }
 
     private void checkResults(String eventId)

@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.type.RelationalOpEnum;
 import com.espertech.esper.epl.core.MethodResolutionService;
@@ -81,7 +81,7 @@ public class ExprRelationalOpNode extends ExprNode
         computer = relationalOpEnum.getComputer(compareType, typeOne, typeTwo);
     }
 
-    public Class getType() throws ExprValidationException
+    public Class getType()
     {
         return Boolean.class;
     }
@@ -89,11 +89,15 @@ public class ExprRelationalOpNode extends ExprNode
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
     {
         Object valueLeft = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
-        Object valueRight = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
-
-        if ((valueLeft == null) || (valueRight == null))
+        if (valueLeft == null)
         {
-            return false;
+            return null;
+        }
+        
+        Object valueRight = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
+        if (valueRight == null)
+        {
+            return null;
         }
 
         return computer.compare(valueLeft, valueRight);

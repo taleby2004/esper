@@ -18,8 +18,6 @@ public class TestVariablesOutputRate extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -43,7 +41,7 @@ public class TestVariablesOutputRate extends TestCase
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create().add(Expressions.countStar(), "cnt"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
-        model.setOutputLimitClause(OutputLimitClause.create(OutputLimitSelector.LAST, "var_output_limit", OutputLimitUnit.EVENTS));
+        model.setOutputLimitClause(OutputLimitClause.create(OutputLimitSelector.LAST, "var_output_limit"));
 
         String stmtTextSelect = "select count(*) as cnt from " + SupportBean.class.getName() + " output last every var_output_limit events";
         EPStatement stmtSelect = epService.getEPAdministrator().create(model);

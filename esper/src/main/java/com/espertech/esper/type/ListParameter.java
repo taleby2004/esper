@@ -30,6 +30,15 @@ public class ListParameter implements NumberSetParameter
     }
 
     /**
+     * Ctor.
+     * @param parameters parameters in list
+     */
+    public ListParameter(List<NumberSetParameter> parameters)
+    {
+        this.parameters = parameters;
+    }
+
+    /**
      * Add to the list a further parameter.
      * @param numberSetParameter is the parameter to add
      */
@@ -69,18 +78,5 @@ public class ListParameter implements NumberSetParameter
         }
 
         return result;
-    }
-
-    public void toEPL(StringWriter writer)
-    {
-        String delimiter = "";
-        writer.write('[');
-        for (NumberSetParameter param : parameters)
-        {
-            writer.write(delimiter);
-            param.toEPL(writer);
-            delimiter = ", ";
-        }
-        writer.write(']');
     }
 }

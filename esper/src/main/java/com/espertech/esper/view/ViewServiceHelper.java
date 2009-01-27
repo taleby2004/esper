@@ -8,13 +8,16 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
-import java.util.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.spec.ViewSpec;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Utility methods to deal with chains of views, and for merge/group-by views.

@@ -54,6 +54,8 @@ tokens
 	HAVING='having';
 	DISTINCT='distinct';
 	ALL='all';
+	ANY='any';
+	SOME='some';
 	OUTPUT='output';
 	EVENTS='events';
 	FIRST='first';
@@ -67,6 +69,8 @@ tokens
 	ISTREAM='istream';
 	IRSTREAM='irstream';
 	UNIDIRECTIONAL='unidirectional';
+	RETAINUNION='retain-union';
+	RETAININTERSECTION='retain-intersection';
 	PATTERN='pattern';
 	SQL='sql';
 	METADATASQL='metadatasql';
@@ -105,9 +109,17 @@ tokens
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
    	NUMERIC_PARAM_FREQUENCY;   	
+   	OBJECT_PARAM_ORDERED_EXPR;
    	FOLLOWED_BY_EXPR;
    	ARRAY_PARAM_LIST;
+   	PATTERN_FILTER_EXPR;
+   	PATTERN_NOT_EXPR;
    	EVENT_FILTER_EXPR;
+   	EVENT_FILTER_PROPERTY_EXPR;
+   	EVENT_FILTER_PROPERTY_EXPR_ATOM;
+   	PROPERTY_SELECTION_ELEMENT_EXPR;
+   	PROPERTY_SELECTION_STREAM;
+   	PROPERTY_WILDCARD_SELECT;
    	EVENT_FILTER_IDENT;
    	EVENT_FILTER_PARAM;
    	EVENT_FILTER_RANGE;
@@ -129,6 +141,8 @@ tokens
    	EVAL_OR_EXPR;
    	EVAL_EQUALS_EXPR;
    	EVAL_NOTEQUALS_EXPR;
+   	EVAL_EQUALS_GROUP_EXPR;
+   	EVAL_NOTEQUALS_GROUP_EXPR;
    	EVAL_IDENT;
    	SELECTION_EXPR;
    	SELECTION_ELEMENT_EXPR;
@@ -150,8 +164,6 @@ tokens
    	EVENT_PROP_DYNAMIC_INDEXED;
    	EVENT_PROP_DYNAMIC_MAPPED;
    	EVENT_LIMIT_EXPR;
-	SEC_LIMIT_EXPR;
-	MIN_LIMIT_EXPR;
 	TIMEPERIOD_LIMIT_EXPR;
 	CRONTAB_LIMIT_EXPR;
 	CRONTAB_LIMIT_EXPR_PARAM;
@@ -180,6 +192,7 @@ tokens
 	IN_RANGE;
 	NOT_IN_RANGE;
 	SUBSELECT_EXPR;
+	SUBSELECT_GROUP_EXPR;
 	EXISTS_SUBSELECT_EXPR;
 	IN_SUBSELECT_EXPR;
 	NOT_IN_SUBSELECT_EXPR;
@@ -204,6 +217,7 @@ tokens
 	MATCH_UNTIL_RANGE_BOUNDED;
 	CREATE_WINDOW_COL_TYPE_LIST;
 	CREATE_WINDOW_COL_TYPE;
+	NUMBERSETSTAR;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -232,7 +246,7 @@ tokens
     throw recognitionException;
   }
 
-  public void recoverFromMismatchedSet(IntStream intStream, RecognitionException recognitionException, BitSet bitSet) throws RecognitionException {
+  public Object recoverFromMismatchedSet(IntStream intStream, RecognitionException recognitionException, BitSet bitSet) throws RecognitionException {
     throw recognitionException;
   }
 
@@ -366,6 +380,8 @@ tokens
 	parserTokenParaphases.put(HAVING, "'having'");
 	parserTokenParaphases.put(DISTINCT, "'distinct'");
 	parserTokenParaphases.put(ALL, "'all'");
+	parserTokenParaphases.put(ANY, "'any'");
+	parserTokenParaphases.put(SOME, "'some'");
 	parserTokenParaphases.put(OUTPUT, "'output'");
 	parserTokenParaphases.put(EVENTS, "'events'");
 	parserTokenParaphases.put(FIRST, "'first'");
@@ -379,6 +395,8 @@ tokens
 	parserTokenParaphases.put(ISTREAM, "'istream'");
 	parserTokenParaphases.put(IRSTREAM, "'irstream'");
 	parserTokenParaphases.put(UNIDIRECTIONAL, "'unidirectional'");
+	parserTokenParaphases.put(RETAINUNION, "'retain-union'");
+	parserTokenParaphases.put(RETAININTERSECTION, "'retain-intersection'");
 	parserTokenParaphases.put(PATTERN, "'pattern'");
 	parserTokenParaphases.put(SQL, "'sql'");
 	parserTokenParaphases.put(METADATASQL, "'metadatasql'");
@@ -427,12 +445,16 @@ tokens
     throw recognitionException;
   }
 
-  public void recoverFromMismatchedSet(IntStream intStream, RecognitionException recognitionException, BitSet bitSet) throws RecognitionException {
+  public Object recoverFromMismatchedSet(IntStream intStream, RecognitionException recognitionException, BitSet bitSet) throws RecognitionException {
     throw recognitionException;
   }
 
   protected boolean recoverFromMismatchedElement(IntStream intStream, RecognitionException recognitionException, BitSet bitSet) {
     throw new RuntimeException("Error recovering from mismatched element: " + recognitionException.getMessage(), recognitionException);
+  }
+  public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+    throw new RuntimeException(e);
   }
 }
 @rulecatch {
@@ -447,19 +469,14 @@ startPatternExpressionRule
 	;
 	
 startEPLExpressionRule 
-	:	annotations	
-		eplExpression
+	:	eplExpression
 		EOF
-		-> ^(EPL_EXPR annotations eplExpression) 
+		-> ^(EPL_EXPR eplExpression) 
 	;
 
 startEventPropertyRule 
 	:	eventProperty
 		EOF!
-	;
-
-annotations
-	:	(EMAILAT IDENT)*
 	;
 
 //----------------------------------------------------------------------------
@@ -529,15 +546,15 @@ onExprFrom
 	;
 
 createWindowExpr
-	:	CREATE WINDOW i=IDENT (DOT viewExpression (DOT viewExpression)*)? AS? 
+	:	CREATE WINDOW i=IDENT (DOT viewExpression (DOT viewExpression)*)? (ru=RETAINUNION|ri=RETAININTERSECTION)? AS? 
 		  (
 		  	createWindowExprModelAfter		  
 		  |   	LPAREN createWindowColumnList RPAREN
 		  )		
 		  (i1=INSERT (WHERE expression)? )?
-		-> {i1 != null}? ^(CREATE_WINDOW_EXPR $i viewExpression* createWindowExprModelAfter? createWindowColumnList? 
+		-> {i1 != null}? ^(CREATE_WINDOW_EXPR $i viewExpression* $ru? $ri? createWindowExprModelAfter? createWindowColumnList? 
 				^(INSERT expression?))
-		-> ^(CREATE_WINDOW_EXPR $i viewExpression* createWindowExprModelAfter? createWindowColumnList?)
+		-> ^(CREATE_WINDOW_EXPR $i viewExpression* $ru? $ri? createWindowExprModelAfter? createWindowColumnList?)
 	;
 
 createWindowExprModelAfter
@@ -659,9 +676,9 @@ streamSelector
 	
 streamExpression
 	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression)
-		(DOT viewExpression (DOT viewExpression)*)? (AS i=IDENT | i=IDENT)? (u=UNIDIRECTIONAL)?
+		(DOT viewExpression (DOT viewExpression)*)? (AS i=IDENT | i=IDENT)? (u=UNIDIRECTIONAL)? (ru=RETAINUNION|ri=RETAININTERSECTION)?
 		-> ^(STREAM_EXPR eventFilterExpression? patternInclusionExpression? databaseJoinExpression? methodJoinExpression?
-		viewExpression* $i? $u?)
+		viewExpression* $i? $u? $ru? $ri?)
 	;
 			
 patternInclusionExpression
@@ -686,8 +703,8 @@ methodJoinExpression
 viewExpression
 @init  { paraphrases.push("view specifications"); }
 @after { paraphrases.pop(); }
-	:	ns=IDENT COLON nm=IDENT LPAREN parameterSet? RPAREN
-		-> ^(VIEW_EXPR $ns $nm parameterSet?)
+	:	ns=IDENT COLON nm=IDENT LPAREN expressionWithTimeList? RPAREN
+		-> ^(VIEW_EXPR $ns $nm expressionWithTimeList?)
 	;
 
 groupByListExpr
@@ -723,8 +740,8 @@ outputLimit
 	      (
 	        ( ev=EVERY_EXPR 
 		  ( 
-		    (time_period) => time_period
-		  | (number | i=IDENT) (e=EVENTS|sec=TIMEPERIOD_SECONDS|min=TIMEPERIOD_MINUTES)
+		    (timePeriod) => timePeriod
+		  | (number | i=IDENT) (e=EVENTS)
 		  )
 		)
 		|
@@ -733,9 +750,7 @@ outputLimit
 		( wh=WHEN expression (THEN onSetExpr)? )
 	      )
 	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i?)
-	    -> {$ev != null && $sec != null}? ^(SEC_LIMIT_EXPR $k? number? $i?)
-	    -> {$ev != null && $min != null}? ^(MIN_LIMIT_EXPR $k? number? $i?)
-	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? time_period)		
+	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod)		
 	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet)		
 	    -> ^(WHEN_LIMIT_EXPR $k? expression onSetExpr?)		
 	;	
@@ -748,8 +763,8 @@ rowLimit
 	;	
 
 crontabLimitParameterSet
-	:	LPAREN parameter COMMA parameter COMMA parameter COMMA parameter COMMA parameter (COMMA parameter)? RPAREN 
-		-> ^(CRONTAB_LIMIT_EXPR_PARAM parameter*)			
+	:	LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime (COMMA expressionWithTime)? RPAREN 
+		-> ^(CRONTAB_LIMIT_EXPR_PARAM expressionWithTime*)			
 	;			
 
 whenClause
@@ -800,9 +815,16 @@ evalEqualsExpression
 	      |  isnot=IS NOT_EXPR
 	      |  sqlne=SQL_NE
 	      |  ne=NOT_EQUAL
-	     ) evalRelationalExpression)*	     
-	    -> {$eq != null || $is != null}? ^(EVAL_EQUALS_EXPR evalRelationalExpression+)
-	    -> {$isnot != null || $sqlne != null || $ne != null}? ^(EVAL_NOTEQUALS_EXPR evalRelationalExpression+)
+	     ) 
+	       (
+	       	evalRelationalExpression
+	       	|  (a=ANY | a=SOME | a=ALL) ( (LPAREN expressionList? RPAREN) | subSelectGroupExpression )
+	       )
+	     )*	     
+	    -> {$a == null && ($eq != null || $is != null)}? ^(EVAL_EQUALS_EXPR evalRelationalExpression+)
+	    -> {$a != null && ($eq != null || $is != null)}? ^(EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a expressionList? subSelectGroupExpression?)
+	    -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^(EVAL_NOTEQUALS_EXPR evalRelationalExpression+)
+	    -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^(EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a expressionList? subSelectGroupExpression?)
 	    -> evalRelationalExpression+
 	;
 
@@ -811,9 +833,15 @@ evalRelationalExpression
 		( 
 			( 
 			  ( 
-			    (r=LT|r=GT|r=LE|r=GE) concatenationExpr
+			    (r=LT|r=GT|r=LE|r=GE) 
+			    	(
+			    	  concatenationExpr
+			    	  | (g=ANY | g=SOME | g=ALL) ( (LPAREN expressionList? RPAREN) | subSelectGroupExpression )
+			    	)
+			    	
 			  )*
-			  -> {$r != null}? ^({adaptor.create($r)} concatenationExpr+)
+			  -> {$g == null && $r != null}? ^({adaptor.create($r)} concatenationExpr+)
+			  -> {$g != null && $r != null}? ^({adaptor.create($r)} concatenationExpr $g expressionList? subSelectGroupExpression?)
 			  -> concatenationExpr+
 			)  
 			| (n=NOT_EXPR)? 
@@ -885,6 +913,11 @@ subSelectExpression
 		-> ^(SUBSELECT_EXPR subQueryExpr)
 	;
 
+subSelectGroupExpression 
+	:	subQueryExpr
+		-> ^(SUBSELECT_GROUP_EXPR subQueryExpr)
+	;
+
 existsSubSelectExpression 
 	:	EXISTS subQueryExpr
 		-> ^(EXISTS_SUBSELECT_EXPR subQueryExpr)
@@ -904,8 +937,8 @@ subSelectFilterExpr
 @init  { paraphrases.push("subquery filter specification"); }
 @after { paraphrases.pop(); }
 	:	eventFilterExpression
-		(DOT viewExpression (DOT viewExpression)*)? (AS i=IDENT | i=IDENT)?
-		-> ^(STREAM_EXPR eventFilterExpression viewExpression* $i?)
+		(DOT viewExpression (DOT viewExpression)*)? (AS i=IDENT | i=IDENT)? (ru=RETAINUNION|ri=RETAININTERSECTION)?
+		-> ^(STREAM_EXPR eventFilterExpression viewExpression* $i? $ru? $ri?)
 	;
 		
 arrayExpression
@@ -1004,8 +1037,11 @@ matchUntilExpression
 	;
 
 qualifyExpression
-	:	(EVERY_EXPR^ | NOT_EXPR^)?
+	:	(e=EVERY_EXPR | n=NOT_EXPR)?
 		guardPostFix
+		-> {e != null}? ^(EVERY_EXPR guardPostFix)
+		-> {n != null}? ^(PATTERN_NOT_EXPR guardPostFix)
+		-> guardPostFix
 	;
 	
 guardPostFix
@@ -1015,17 +1051,17 @@ guardPostFix
 	;
 
 atomicExpression
-	:	observerExpression | eventFilterExpression
+	:	observerExpression | patternFilterExpression
 	;
 		
 observerExpression
-	:	ns=IDENT COLON (nm=IDENT | a=AT) LPAREN parameterSet? RPAREN
-		-> {$a != null}? ^(OBSERVER_EXPR $ns ^(IDENT[$a.text]) parameterSet?)
-		-> ^(OBSERVER_EXPR $ns $nm parameterSet?)
+	:	ns=IDENT COLON (nm=IDENT | a=AT) LPAREN expressionWithTimeList? RPAREN
+		-> {$a != null}? ^(OBSERVER_EXPR $ns ^(IDENT[$a.text]) expressionWithTimeList?)
+		-> ^(OBSERVER_EXPR $ns $nm expressionWithTimeList?)
 	;
 
 guardExpression
-	:	IDENT COLON! IDENT LPAREN! (parameterSet)? RPAREN!
+	:	IDENT COLON! IDENT LPAREN! (expressionWithTimeList)? RPAREN!
 	;
 	
 // syntax is [a..b]  or [..b]  or  [a..] or [a:b]   wherein a and b may be recognized as double
@@ -1056,64 +1092,6 @@ matchUntilRange
 	;
 	
 //----------------------------------------------------------------------------
-// Parameter Set is used by guards, observers and views
-//----------------------------------------------------------------------------
-parameterSet
-	:	parameter (COMMA! parameter)*
-	;			
-	
-parameter
-	:	(singleParameter) => singleParameter
-	| 	(numericParameterList) => numericParameterList
-	|	(arrayParameterList) => arrayParameterList
-	|	eventProperty
-	;
-
-singleParameter
-	:	rangeOperand	
-	| 	frequencyOperand
-	|	lastOperator
-	|	weekDayOperator
-	|	LAST^
-	|	LW^
-	|	STAR^
-	|	constant
-	|	time_period
-	;
-
-frequencyOperand
-	:	STAR DIV NUM_INT -> ^(NUMERIC_PARAM_FREQUENCY NUM_INT)
-	;
-
-rangeOperand
-	:	l=NUM_INT COLON u=NUM_INT -> ^(NUMERIC_PARAM_RANGE $l $u)
-	;
-
-lastOperator
-	:	l=NUM_INT LAST -> ^(LAST_OPERATOR $l)
-	;
-
-weekDayOperator:
-		wd=NUM_INT WEEKDAY -> ^(WEEKDAY_OPERATOR $wd)
-	;
-
-numericParameterList
-	:	LBRACK numericListParameter (COMMA numericListParameter)* RBRACK
-		-> ^(NUMERIC_PARAM_LIST numericListParameter+)
-	;
-
-numericListParameter
-	:	rangeOperand
-	| 	frequencyOperand
-	|	NUM_INT
-	;
-
-arrayParameterList
-	:	LCURLY (constant (COMMA constant)*)? RCURLY
-		-> ^(ARRAY_PARAM_LIST constant*)
-	;
-
-//----------------------------------------------------------------------------
 // Filter expressions
 //   Operators are the usual bunch =, <, >, =<, >= 
 //	 Ranges such as 'property in [a,b]' are allowed and ([ and )] distinguish open/closed range endpoints
@@ -1124,7 +1102,46 @@ eventFilterExpression
     :   (i=IDENT EQUALS)?
     	classIdentifier
        	(LPAREN expressionList? RPAREN)?
-       	-> ^(EVENT_FILTER_EXPR $i? classIdentifier expressionList?)
+       	propertyExpression?
+       	-> ^(EVENT_FILTER_EXPR $i? classIdentifier propertyExpression? expressionList?)
+    ;
+    
+propertyExpression
+	:	propertyExpressionAtomic (propertyExpressionAtomic)*
+       	-> ^(EVENT_FILTER_PROPERTY_EXPR propertyExpressionAtomic+)
+	;
+
+propertyExpressionAtomic
+	:	LBRACK (SELECT propertySelectionList FROM)? eventProperty (AS IDENT)? (WHERE expression)? RBRACK
+       	-> ^(EVENT_FILTER_PROPERTY_EXPR_ATOM propertySelectionList? eventProperty IDENT? ^(WHERE_EXPR expression?))
+       	;
+	
+propertySelectionList 	
+	:	propertySelectionListElement (COMMA! propertySelectionListElement)*
+	;
+
+propertySelectionListElement
+  @init { String identifier = null; } 
+	:   	s=STAR -> PROPERTY_WILDCARD_SELECT[$s]
+	|	(propertyStreamSelector) => propertyStreamSelector
+	|	expression (AS i=keywordAllowedIdent { identifier = i.getTree().toString(); } )?
+		-> {identifier != null}? ^(PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier])
+		-> ^(PROPERTY_SELECTION_ELEMENT_EXPR expression)
+	;
+	
+propertyStreamSelector
+	:	s=IDENT DOT STAR (AS i=IDENT)?
+		-> ^(PROPERTY_SELECTION_STREAM $s $i?)
+	;
+
+patternFilterExpression
+@init  { paraphrases.push("filter specification"); }
+@after { paraphrases.pop(); }
+    :   (i=IDENT EQUALS)?
+    	classIdentifier
+       	(LPAREN expressionList? RPAREN)?
+       	propertyExpression?
+       	-> ^(PATTERN_FILTER_EXPR $i? classIdentifier propertyExpression? expressionList?)
     ;
 
 classIdentifier
@@ -1147,9 +1164,84 @@ classIdentifierNonGreedy
 	;
 	
 expressionList
-    :   expression (COMMA! expression)*
-    ;
+    	:   	expression (COMMA! expression)*
+    	;
    	
+expressionWithTimeList
+    	:   	expressionWithTime (COMMA! expressionWithTime)*
+    	;
+
+expressionWithTime
+	:   	(lastOperand) => lastOperand
+	|	(lastWeekdayOperand) => lastWeekdayOperand
+	|	(timePeriod) => timePeriod
+	|	(expressionQualifyable) => expressionQualifyable
+	|	(rangeOperand) => rangeOperand
+	| 	(frequencyOperand) => frequencyOperand
+	|	(lastOperator) => lastOperator
+	|	(weekDayOperator) =>  weekDayOperator
+	| 	(numericParameterList) => numericParameterList
+	|	numberSetStar
+	;
+
+expressionQualifyable
+	:	expression (a=ASC|d=DESC|s=TIMEPERIOD_SECONDS|s=TIMEPERIOD_SECOND|s=TIMEPERIOD_SEC)?
+		-> {d != null || a != null}? ^(OBJECT_PARAM_ORDERED_EXPR expression $a? $d?)
+		-> {s != null}? ^(TIME_PERIOD ^(SECOND_PART expression))
+		-> expression
+	;
+	
+
+numberSetStar
+	:	STAR
+		-> ^(NUMBERSETSTAR)
+	;
+	
+lastWeekdayOperand
+	:	LW^
+	;
+	
+lastOperand
+	:	LAST^
+	;
+
+frequencyOperand
+	:	STAR DIV (number|i=IDENT|substitution) 
+		-> {i!= null}? ^(NUMERIC_PARAM_FREQUENCY ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(NUMERIC_PARAM_FREQUENCY number? substitution?)
+	;
+
+rangeOperand
+	:	(number|i1=IDENT|substitution) COLON (number|i2=IDENT|substitution) 
+		-> {i1 != null && i2 != null}? ^(NUMERIC_PARAM_RANGE ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i1)) ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i2)))
+		-> {i1 != null && i2 == null}? ^(NUMERIC_PARAM_RANGE ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i1)) number? substitution?)
+		-> {i1 == null && i2 != null}? ^(NUMERIC_PARAM_RANGE number? substitution? ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i2)))
+		-> ^(NUMERIC_PARAM_RANGE number* substitution*)
+	;
+
+lastOperator
+	:	(number|i=IDENT|substitution) LAST 
+		-> {i!= null}? ^(LAST_OPERATOR ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(LAST_OPERATOR number? substitution?)
+	;
+
+weekDayOperator
+	:	(number|i=IDENT|substitution) WEEKDAY 
+		-> {i!= null}? ^(WEEKDAY_OPERATOR ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(WEEKDAY_OPERATOR number? substitution?)
+	;
+
+numericParameterList
+	:	LBRACK numericListParameter (COMMA numericListParameter)* RBRACK
+		-> ^(NUMERIC_PARAM_LIST numericListParameter+)
+	;
+
+numericListParameter
+	:	rangeOperand
+	| 	frequencyOperand
+	|	numberconstant
+	;
+	    
 eventProperty
 	:	eventPropertyAtomic (DOT eventPropertyAtomic)* 
 		-> ^(EVENT_PROP_EXPR eventPropertyAtomic+)
@@ -1197,11 +1289,11 @@ keywordAllowedIdent
 		|STDDEV { identifier = "stddev"; }
 		|AVEDEV { identifier = "avedev"; }
 		|EVENTS { identifier = "events"; }
-		|TIMEPERIOD_SECONDS { identifier = "seconds"; }
-		|TIMEPERIOD_MINUTES { identifier = "minutes"; }
 		|FIRST { identifier = "first"; }
 		|LAST { identifier = "last"; }
 		|UNIDIRECTIONAL { identifier = "unidirectional"; }
+		|RETAINUNION { identifier = "retain-union"; }
+		|RETAININTERSECTION { identifier = "retain-intersection"; }
 		|UNTIL { identifier = "until"; }
 		|PATTERN { identifier = "pattern"; }
 		|SQL { identifier = "sql"; }
@@ -1223,7 +1315,7 @@ keywordAllowedIdent
 	-> ^(IDENT[identifier])
 	;
 		
-time_period 	
+timePeriod 	
 	:	
 	(	
 		dayPart hourPart? minutePart? secondPart? millisecondPart?
@@ -1236,28 +1328,33 @@ time_period
 	;
 
 dayPart
-	:	number (TIMEPERIOD_DAYS | TIMEPERIOD_DAY)
-		-> ^(DAY_PART number)
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_DAYS | TIMEPERIOD_DAY)
+		-> {i!= null}? ^(DAY_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(DAY_PART number? substitution?)
 	;
 
 hourPart 
-	:	number (TIMEPERIOD_HOURS | TIMEPERIOD_HOUR)
-		-> ^(HOUR_PART number)
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_HOURS | TIMEPERIOD_HOUR)
+		-> {i!= null}? ^(HOUR_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(HOUR_PART number? substitution?)
 	;
 
 minutePart 
-	:	number (TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN)
-		-> ^(MINUTE_PART number)
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN)
+		-> {i!= null}? ^(MINUTE_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(MINUTE_PART number? substitution?)
 	;
 	
 secondPart 
-	:	number (TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC)
-		-> ^(SECOND_PART number)
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC)
+		-> {i!= null}? ^(SECOND_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(SECOND_PART number? substitution?)
 	;
 	
 millisecondPart 
-	:	number (TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC)
-		-> ^(MILLISECOND_PART number)
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC)
+		-> {i!= null}? ^(MILLISECOND_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(MILLISECOND_PART number? substitution?)
 	;
 	
 number
@@ -1374,26 +1471,16 @@ ML_COMMENT
     :   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
     ;
 
-// string literals
-STRING_LITERAL
-	:	'"' (ESC|~('"'|'\\'|'\n'|'\r'))* '"'
-	;
-
 QUOTED_STRING_LITERAL
-	:	'\'' (ESC|~('\''|'\\'|'\n'|'\r'))* '\''
-	;
+    :   '\'' ( EscapeSequence | ~('\''|'\\') )* '\''
+    ;
 
-// escape sequence -- note that this is protected; it can only be called
-//   from another lexer rule -- it will not ever directly return a token to
-//   the parser
-// There are various ambiguities hushed in this rule.  The optional
-// '0'...'9' digit matches should be matched here rather than letting
-// them go back to STRING_LITERAL to be matched.  ANTLR does the
-// right thing by matching immediately; hence, it's ok to shut off
-// the FOLLOW ambig warnings.
+STRING_LITERAL
+    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
+
 fragment
-ESC
-	:	'\\'
+EscapeSequence	:	'\\'
 		(	'n'
 		|	'r'
 		|	't'
@@ -1402,28 +1489,26 @@ ESC
 		|	'"'
 		|	'\''
 		|	'\\'
-		|	('u')+ HEX_DIGIT HEX_DIGIT HEX_DIGIT HEX_DIGIT
-		|	'0'..'3'
-			(
-				'0'..'7'
-				(
-					'0'..'7'
-				)?
-			)?
-		|	'4'..'7'
-			(
-				'0'..'7'
-			)?
+		|	UnicodeEscape
+		|	OctalEscape
+		|	. // unknown, leave as it is
 		)
-	;
+    ;    
 
-
-// hexadecimal digit (again, note it's protected!)
 fragment
-HEX_DIGIT
-	:	('0'..'9'|'a'..'f')
-	;
+OctalEscape
+    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7')
+    ;
 
+fragment
+HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
+
+fragment
+UnicodeEscape
+    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
+    ;
 
 // an identifier.  Note that testLiterals is set to true!  This means
 // that after we match the rule, we look in the literals table to see
@@ -1456,7 +1541,7 @@ NUM_INT
 					// know when to stop: ambig.  ANTLR resolves
 					// it correctly by matching immediately.  It
 					// is therefor ok to hush warning.
-					HEX_DIGIT
+					HexDigit
 				)+
 
 			|	//float or double with leading zero

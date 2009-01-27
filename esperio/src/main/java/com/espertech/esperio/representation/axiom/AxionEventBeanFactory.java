@@ -8,16 +8,14 @@
  **************************************************************************************/
 package com.espertech.esperio.representation.axiom;
 
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
 import com.espertech.esper.plugin.PlugInEventBeanFactory;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMNode;
 
-import java.util.Map;
 import java.net.URI;
+import java.util.Map;
 
 /**
  * A event bean factory implementation that understands Apache Axiom OMNode events
@@ -31,7 +29,7 @@ public class AxionEventBeanFactory implements PlugInEventBeanFactory
 
     /**
      * Ctor.
-     * @param types the currently known event type aliases and their types
+     * @param types the currently known event type name and their types
      */
     public AxionEventBeanFactory(Map<String, AxiomXMLEventType> types)
     {

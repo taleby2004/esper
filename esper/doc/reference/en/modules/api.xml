@@ -5,30 +5,43 @@
         <title>API Overview</title>
 
         <para>
-			Esper has 2 primary interfaces that this section outlines: The administrative interface and the runtime interface.
+			Esper has the following primary interfaces:
+        </para>
+        
+		<itemizedlist>
+			<listitem>
+				<para>
+                    The event and event type interfaces are described in <xref linkend="api-event"/>.
+                </para>
+			</listitem>
+			<listitem>
+				<para>
+                    The administrative interface to create and manage EPL and pattern statements, and set runtime configurations, is described in <xref linkend="api-administrative"/>.
+                </para>
+			</listitem>
+			<listitem>
+				<para>
+			        The runtime interface to send events into the engine, set and get variable values and execute on-demand queries, is described in <xref linkend="api-runtime"/>.
+                </para>
+			</listitem>
+		</itemizedlist>
+        
+        <para>
+          For EPL introductory information please see <xref linkend="epl-intro"/> and patterns are described at <xref linkend="event-pattern-intro"/>.
         </para>
 
-        <para>
-			Use Esper's administrative interface to create and manage EPL  and pattern statements, and set runtime configurations, as discussed in <xref linkend="epl-intro"/> and <xref linkend="event-pattern-intro"/>. 
-        </para>
-        
-        <para>
-			Use Esper's runtime interface to send events into the engine, emit events and get statistics for an engine instance.
-        </para>
-        
 		<para>
 			The JavaDoc documentation is also a great source for API information.
-        </para>
-
+        </para>        
     </sect1>
     
     <sect1 id="api-engine-instances">
-        <title>Engine Instances</title>
+        <title>The Service Provider Interface</title>
 
 		<indexterm><primary>EPServiceProviderManager class</primary></indexterm>
 
         <para>
-			Each instance of an Esper engine is completely independent of other engine instances and has its own administrative and runtime interface.
+			The <literal>EPServiceProvider</literal> interface represents an engine instance. Each instance of an Esper engine is completely independent of other engine instances and has its own administrative and runtime interface.
         </para>
 
         <para>
@@ -82,6 +95,11 @@ epService.destroy();]]></programlisting>
 			An existing Esper engine instance can be destroyed via the <literal>destroy</literal> method on the <literal>EPServiceProvider</literal> instance. This stops and removes all statements
 			as well as frees all resources held by the instance. After a <literal>destroy</literal> the engine can no longer be used.
         </para>
+
+        <para>
+			The <literal>EPServiceStateListener</literal> interface may be implemented by your application to receive callbacks when an engine instance is about to be destroyed and after an engine instance has been initialized. Listeners are registered via the <literal>addServiceStateListener</literal> method. The <literal>EPStatementStateListener</literal> interface is used to receive callbacks when a new statement gets created and when a statement gets started, stopped or destroyed. Listeners are registered via the <literal>addStatementStateListener</literal> method.
+        </para>
+
     </sect1>
 
     <sect1 id="api-administrative">
@@ -326,7 +344,7 @@ countStmt.start();]]></programlisting>
 	
 					<para>
 						Alternatively, your <literal>update</literal> method may simply choose to accept <literal>java.util.Map</literal> as a representation for each row. Each column in the <literal>select</literal> clause is 
-						then made an entry in the resulting <literal>Map</literal>. The <literal>Map</literal> keys are the column alias name if supplied, or the expression string itself for columns without an alias.
+						then made an entry in the resulting <literal>Map</literal>. The <literal>Map</literal> keys are the column name if supplied, or the expression string itself for columns without a name.
 					</para>
 					<para>
 						The <literal>update</literal> method for <literal>Map</literal> delivery is:
@@ -485,6 +503,25 @@ statement.addListener(myListener);]]></programlisting>
 				To indicate results the engine invokes this method on <literal>StatementAwareUpdateListener</literal> listeners: <literal>update(EventBean[] newEvents, EventBean[] oldEvents, EPStatement statement, EPServiceProvider epServiceProvider)</literal>
 			</para>		
 
+		  <sect3 id="api-admin-listeners-replay">		
+				<title>Subscription Snapshot  and Atomic Delivery</title>
+				
+				<para>
+					The <literal>addListenerWithReplay</literal> method provided by <literal>EPStatement</literal> makes it possible to send a snapshot of current statement results to a listener when the listener is added.
+				</para>
+					
+				<para>
+					When using the <literal>addListenerWithReplay</literal> method to register a listener, the listener receives current statement results as the first call to the update method of the listener, passing in the newEvents parameter the current statement results as an array of zero or more events. Subsequent calls to the update method of the listener are statement results.   
+				</para>
+					
+				<para>
+					Current statement results are the events returned by the <literal>iterator</literal> or <literal>safeIterator</literal> methods.
+				</para>
+					
+				<para>
+					Delivery is atomic: Events occurring during delivery of current results to the listener are guaranteed to be delivered in a separate call and not lost. The listener implementation should thus minimize long-running or blocking operations to reduce lock times held on statement-level resources.
+				</para>					
+		  </sect3>
 	  </sect2>
 
 	  <sect2 id="api-admin-iterators">		
@@ -533,6 +570,10 @@ finally {
 
 			<para>
 				For statements without an <literal>order by</literal> clause, the <literal>iterator</literal> method returns events in the order maintained by the data window. For statements that contain an <literal>order by</literal> clause, the <literal>iterator</literal> method returns events in the order indicated by the <literal>order by</literal> clause.
+			</para>
+
+			<para>
+				Consider using the <literal>on-select</literal> clause and a named window if your application requires iterating over a partial result set or requires indexed access for fast iteration; Note that <literal>on-select</literal> requires that you sent a trigger event, which may contain the key values for indexed access.
 			</para>
 
 			<para>
@@ -624,7 +665,7 @@ finally {
 				</listitem>
 				<listitem>
 					<para>
-						Add auto-aliases for events in a given Java package.
+						Add event types for all event classes in a given Java package, using the simple class name as the event name.
 					</para>
 				</listitem>
 				<listitem>
@@ -652,7 +693,7 @@ finally {
 
 		<indexterm><primary>EPRuntime interface</primary></indexterm>
         <para>
-			The <literal>EPRuntime</literal> interface is used to send events for processing into an Esper engine, and to emit Events from an engine instance to the outside world.
+			The <literal>EPRuntime</literal> interface is used to send events for processing into an Esper engine, set and get variable values and execute on-demand queries.
         </para>
         
         <para>
@@ -689,14 +730,14 @@ runtime.sendEvent(new MarketDataBean('IBM', 75.0));
 			</para>
 			
 			<para>
-				Use the method <literal>getEventSender(String eventTypeAlias) </literal> to obtain an event sender for processing events of the named type:
+				Use the method <literal>getEventSender(String eventTypeName) </literal> to obtain an event sender for processing events of the named type:
 			</para>
 			<programlisting><![CDATA[EventSender sender = epService.getEPRuntime().getEventSender("MyEvent");
 sender.sendEvent(myEvent);]]></programlisting>
 			
 			<para>
 				For events backed by a Java class (JavaBean events), the event sender ensures that the event object equals the underlying class, or implements or extends the underlying class
-				for the given event type alias.
+				for the given event type name.
 			</para>
 			
 			<para>
@@ -704,7 +745,7 @@ sender.sendEvent(myEvent);]]></programlisting>
 			</para>
 			
 			<para>
-				For events backed by a org.w3c.Node (XML DOM events), the event sender checks that the root element name equals the root element name for the event type alias.
+				For events backed by a org.w3c.Node (XML DOM events), the event sender checks that the root element name equals the root element name for the event type.
 			</para>
 
 			<para>
@@ -828,95 +869,290 @@ prepared.execute();	// execute a second time]]></programlisting>
 
 			</sect3>
 		</sect2>
-
-	    <sect2 id="api-runtime-emit">		
-			<title>Emit Facility for Publish-Subscribe</title>
-			<para>
-				The <literal>emit</literal> and <literal>addEmittedListener</literal> methods can be used to emit events from a runtime to a registered set of one or more emitted event listeners. 
-				This mechanism is available as a service to enable channel-based publish-subscribe of events emitted from an engine instance via the <literal>emit</literal> method. Emitting events is not integrated with EPL  and is available only via the <literal>EPRuntime</literal> interface.
-			</para>
-	
-			<para>
-				Events are emitted on an event channel identified by a name. Listeners are implementations of the <literal>EmittedListener</literal> interface. Via the <literal>addEmittedListener</literal> method a listener can be added to the specified event channel. The lister receives only those events posted to that channel. The channel parameter to <literal>addEmittedListener</literal> also allows null values. If a null channel value is specified, the listeners receives emitted events posted on any channel.
-			</para>
-		</sect2>
     </sect1>
 
-    <sect1 id="api-serviceprovider">
-        <title>The Service Provider Interface</title>
-
-		<indexterm><primary>EPServiceProvider class</primary></indexterm>
-
+    <sect1 id="api-event">
+        <title>Event and Event Type</title>
+        
+		<indexterm><primary>EventBean interface</primary></indexterm>
+		<indexterm><primary>EventType interface</primary></indexterm>
         <para>
-			The <literal>EPServiceProvider</literal> interface represents an engine instance. The interface makes it possible to receive a callback when, for example, a new statement has been created or a engine instance is about to be destroyed.
-        </para>
-
-        <para>
-			The <literal>EPServiceStateListener</literal> interface is used to receive callbacks when an engine instance is about to be destroyed and after an engine instance has been initialized. Listeners are registered via <literal>addServiceStateListener</literal>.
-        </para>
-
-        <para>
-			The <literal>EPStatementStateListener</literal> interface is used to receives callbacks when a new statement gets created and when a statement gets started, stopped or destroyed. Listeners are registered via <literal>addStatementStateListener</literal>.
-        </para>
-    </sect1>
-
-    <sect1 id="api-events-received">
-        <title>Events Received from the Engine</title>
-
-		<indexterm><primary>UpdateListener interface</primary></indexterm>
-        <para>
-			The Esper engine posts events to registered <literal>UpdateListener</literal> instances ('push' method for receiving events). For all statements events can also be pulled from statements via the <literal>safeIterator</literal> and <literal>iterator</literal> methods. Both pull and push supply <literal>EventBean</literal> instances representing the events generated by the engine or events supplied to the engine. Each <literal>EventBean</literal> instance represents an event, with each event being either an artificial event, composite event or an event supplied to the engine via its runtime interface.
+			An <literal>EventBean</literal> object represents a row (event) in your continuous query's result set. Each <literal>EventBean</literal> object has an associated <literal>EventType</literal> object providing event metadata.
         </para>
 			
         <para>
-			The <literal>getEventType</literal> method supplies an event's event type information represented by an <literal>EventType</literal> instance. The <literal>EventType</literal> supplies event property names and types as well as information about the underlying object to the event.
+			An <literal>UpdateListener</literal> implementation receives one or more <literal>EventBean</literal> events with each invocation. Via the <literal>iterator</literal> method on <literal>EPStatement</literal> your application can poll or read data out of statements. Statement iterators also return <literal>EventBean</literal> instances.
         </para>
-
+        
         <para>
-			The engine may generate artificial events that contain information derived from event streams. A typical example for artificial events is the events posted for a statement to calculate univariate statistics on an event property. The below example shows such a statement and queries the generated events for an average value.
+			Each statement provides the event type of the events it produces, available via the <literal>getEventType</literal> method on <literal>EPStatement</literal>.
         </para>
-		<programlisting><![CDATA[// Derive univariate statistics on price for the last 100 market data events
-String stmt = "select * from MarketDataBean(symbol='IBM').win:length(100).stat:uni(price)";
-EPStatement priceStatsView = epService.getEPAdministrator().createEPL(stmt);
-priceStatsView.addListener(testListener);
-]]></programlisting>
-		<programlisting><![CDATA[// Example listener code
-public class MyUpdateListener implements UpdateListener {
-  public void update(EventBean[] newData, EventBean[] oldData) {
-    // Interrogate events
-    System.out.println("new average price=" + newData[0].get("average")
-  }
-}]]></programlisting>
+        
+		<sect2 id="api-eventtype">
+			<title>Event Type Metadata</title>
 
-        <para>
-			Composite events are events that aggregate one or more other events. Composite events are typically created by the engine for statements that join two event streams, and for event patterns in which the causal events are retained and reported in a composite event. The example below shows such an event pattern.
-        </para>
+			<para>
+				An <literal>EventType</literal> object encapulates all the metadata about a certain type of events. As Esper supports an inheritance hierarchy for event types, it also provides information about super-types to an event type.
+			</para>
 
-		<programlisting><![CDATA[// Look for a pattern where BEvent follows AEvent
+			<para>
+				An <literal>EventType</literal> object provides the following information:
+			</para>
+			
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						For each event property, it lists the property name and type as well as flags for indexed or mapped properties and whether a property is a fragment.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The direct and indirect super-types to the event type.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Value getters for property expressions.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Underlying class of the event representation.
+					</para>
+				</listitem>
+			</itemizedlist>
+
+			<para>
+				For each property of an event type, there is an <literal>EventPropertyDescriptor</literal> object that describes the property.
+				The <literal>EventPropertyDescriptor</literal> contains flags that indicate whether a property is an indexed (array) or a mapped property and whether access to property values require an integer index value (indexed properties only) or string key value (mapped properties only). The descriptor also contains a fragment flag that indicates whether a property value is available as a fragment.
+			</para>
+				
+			<para>
+				The term <emphasis>fragment</emphasis> means an event property value that is itself an event, or a property value that can be represented as an event. The <literal>getFragmentType</literal> on <literal>EventType</literal> may be used to determine a fragment's event type in advance. 
+			</para>
+	
+			<para>
+				A fragment event type and thereby fragment events allow navigation over a statement's results even if the statement result contains nested events or a graph of events. There is no need to use the Java reflection API to navigate events, 
+				since fragments allow the querying of nested event properties or array values, including nested Java classes.
+			</para>
+			
+			<para>
+				When using the Map event representation, any named Map type nested within a Map as a simple or array property is also available as a fragment. When using Java objects either directly or within Map events, any object that is neither a primitive or boxed built-in type, and that is not an enumeration and does not implement the Map interface is also available as a fragment.
+			</para>
+
+			<para>
+				The nested, indexed and mapped property syntax can be combined to a property expression that may query an event property graph. Most of the methods on the <literal>EventType</literal> interface allow a property expression to be passed.
+			</para>
+
+			<para>
+				Your application may use an <literal>EventType</literal> object to obtain special getter-objects. A getter-object is a fast accessor to a property value of an event of a given type. All getter objects implement the <literal>EventPropertyGetter</literal> interface.  Getter-objects work only for events of the same type or sub-types as the <literal>EventType</literal> that provides the <literal>EventPropertyGetter</literal>. The performance section provides additional information and samples on using getter-objects.
+			</para>
+		</sect2>
+
+		<sect2 id="api-eventbean">
+			<title>Event Object</title>
+
+			<para>
+				An event object is an <literal>EventBean</literal> that provides:
+			</para>
+						
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						The property value for a property given a property name or property expression that may include nested, indexed or mapped properties in any combination.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The event type of the event.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Access to the underlying event object.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						The <literal>EventBean</literal> fragment or array of <literal>EventBean</literal> fragments given a property name or property expression.
+					</para>
+				</listitem>
+			</itemizedlist>
+
+			<para>
+				The <literal>getFragment</literal> method on <literal>EventBean</literal> and <literal>EventPropertyGetter</literal> return the fragment <literal>EventBean</literal> or array of <literal>EventBean</literal>, if the property is itself an event
+				or can be represented as an event. Your application may use <literal>EventPropertyDescriptor</literal> to determine which properties are also available as fragments.
+			</para>
+
+			<para>
+				The underlying event object of an <literal>EventBean</literal> can be obtained via the <literal>getUnderlying</literal> method. Please see <xref linkend="event_representation"/>  for more information on different event representations.
+			</para>
+
+			<para>
+				From a threading perspective, it is safe to retain and query <literal>EventBean</literal> and <literal>EventType</literal> objects in multiple threads.
+			</para>
+		</sect2>
+
+		<sect2 id="api-eventtype-query">
+			<title>Query Example</title>
+			
+			<para>
+				Consider a statement that returns the symbol, count of events per symbol and average price per symbol for tick events. Our sample statement may declare a fully-qualified Java class name as the event type: <literal>org.sample.StockTickEvent</literal>. Assume that this class exists and exposes a <literal>symbol</literal> property of type String, and a <literal>price</literal> property of type (Java primitive) double.
+			</para>
+			<programlisting><![CDATA[select symbol, avg(price) as avgprice, count(*) as mycount 
+from org.sample.StockTickEvent 
+group by symbol]]></programlisting>
+	
+			<para>
+				The next table summarizes the property names and types as posted by the statement above:
+			</para>
+			
+			<table frame="topbot">
+				<title>Properties offered by sample statement aggregating price</title>
+				<tgroup cols="4">
+					<colspec colwidth="0.8*"/>
+					<colspec colwidth="1*"/>
+					<colspec colwidth="2*"/>
+					<colspec colwidth="2*"/>
+					<thead>
+						<row>
+							<entry>Name</entry>
+							<entry>Type</entry>
+							<entry>Description</entry>
+							<entry>Java code snippet</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>symbol</literal></entry>
+							<entry>java.lang.String</entry>
+							<entry>Value of symbol event property</entry>
+							<entry><synopsis>eventBean.get("symbol")</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>avgprice</literal></entry>
+							<entry>java.lang.Double</entry>
+							<entry>Average price per symbol</entry>
+							<entry><synopsis>eventBean.get("avgprice")</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>mycount</literal></entry>
+							<entry>java.lang.Long</entry>
+							<entry>Number of events per symbol</entry>
+							<entry><synopsis>eventBean.get("mycount")</synopsis></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table> 
+			
+			<para>
+				A code snippet out of a possible <literal>UpdateListener</literal> implementation to this statement may look as below:
+			</para>
+			<programlisting><![CDATA[String symbol = (String) newEvents[0].get("symbol");
+Double price= (Double) newEvents[0].get("avgprice");
+Long count= (Long) newEvents[0].get("mycount");]]></programlisting>
+	
+			<para>
+				The engine supplies the boxed <literal>java.lang.Double</literal> and <literal>java.lang.Long</literal> types as property values rather then primitive Java types. This is because aggregated values can return a <literal>null</literal> value to indicate that no data is available for aggregation. Also, in a select statement that computes expressions, the underlying event objects to <literal>EventBean</literal> instances are of type <literal>java.util.Map</literal>.
+			</para>
+	
+			<para>
+				Consider the next statement that specifies a wildcard selecting the same type of event:
+			</para>
+			<programlisting><![CDATA[select * from org.sample.StockTickEvent where price > 100]]></programlisting>
+	
+			<para>
+				The property names and types provided by an <literal>EventBean</literal> query result row, as posted by the statement above are as follows:
+			</para>
+			
+			<table frame="topbot">
+				<title>Properties offered by sample wildcard-select statement</title>
+				<tgroup cols="4">
+					<colspec colwidth="1*"/>
+					<colspec colwidth="1*"/>
+					<colspec colwidth="2*"/>
+					<colspec colwidth="2*"/>
+					<thead>
+						<row>
+							<entry>Name</entry>
+							<entry>Type</entry>
+							<entry>Description</entry>
+							<entry>Java code snippet</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>symbol</literal></entry>
+							<entry>java.lang.String</entry>
+							<entry>Value of symbol event property</entry>
+							<entry><synopsis>eventBean.get("symbol")</synopsis></entry>
+						</row>
+						<row>
+							<entry><literal>price</literal></entry>
+							<entry>double</entry>
+							<entry>Value of price event property</entry>
+							<entry><synopsis>eventBean.get("price")</synopsis></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table> 
+	
+			<para>
+				As an alternative to querying individual event properties via the <literal>get</literal> methods, the <literal>getUnderlying</literal> method on <literal>EventBean</literal> returns the underlying object representing the query result.
+				In the sample statement that features a wildcard-select, the underlying event object is of type <literal>org.sample.StockTickEvent</literal>:
+			</para>
+			<programlisting><![CDATA[StockTickEvent tick = (StockTickEvent) newEvents[0].getUnderlying();]]></programlisting>
+		</sect2>
+
+		<sect2 id="api-eventtype-pattern">
+			<title>Pattern Example</title>
+			<para>
+				Composite events are events that aggregate one or more other events. Composite events are typically created by the engine for statements that join two event streams, and for event patterns in which the causal events are retained and reported in a composite event. The example below shows such an event pattern.
+			</para>
+	
+			<programlisting><![CDATA[// Look for a pattern where BEvent follows AEvent
 String pattern = "a=AEvent -> b=BEvent";
 EPStatement stmt = epService.getEPAdministrator().createPattern(pattern);
 stmt.addListener(testListener);
 ]]></programlisting>
-		<programlisting><![CDATA[// Example listener code
-public class MyUpdateListener implements UpdateListener
-{
-    public void update(EventBean[] newData, EventBean[] oldData)
-    {
-        System.out.println("a event=" + newData[0].get("a").getUnderlying());
-        System.out.println("b event=" + newData[0].get("b").getUnderlying());
-	}
-}
-]]></programlisting>
+			<programlisting><![CDATA[// Example listener code
+public class MyUpdateListener implements UpdateListener {
+  public void update(EventBean[] newData, EventBean[] oldData) {
+    System.out.println("a event=" + newData[0].get("a"));
+    System.out.println("b event=" + newData[0].get("b"));
+  }
+}]]></programlisting>
 
-        <para>
-			Note that the <literal>update</literal> method can receive multiple events at once as it accepts an array of <literal>EventBean</literal> instances. For example, a time batch window may post multiple events to listeners representing a batch of events received during a given time period. 
-        </para>
-			
-        <para>
-			Pattern statements can also produce multiple events delivered to update listeners in one invocation. The pattern statement below, for instance, delivers an event for each A event that was not followed by a B event with the same <literal>id</literal> property within 60 seconds of the A event. The engine may deliver all matching A events as an array of events in a single invocation of the <literal>update</literal> method of each listener to the statement:
-        </para>
-		<programlisting><![CDATA[every a=A -> (timer:interval(60 sec) and not B(id=a.id))]]></programlisting>
-        
+			<para>
+				Note that the <literal>update</literal> method can receive multiple events at once as it accepts an array of <literal>EventBean</literal> instances. For example, a time batch window may post multiple events to listeners representing a batch of events received during a given time period. 
+			</para>
+				
+			<para>
+				Pattern statements can also produce multiple events delivered to update listeners in one invocation. The pattern statement below, for instance, delivers an event for each A event that was not followed by a B event with the same <literal>id</literal> property within 60 seconds of the A event. The engine may deliver all matching A events as an array of events in a single invocation of the <literal>update</literal> method of each listener to the statement:
+			</para>
+			<programlisting><![CDATA[select * from pattern[
+  every a=A -> (timer:interval(60 sec) and not B(id=a.id))]]]></programlisting>
+
+			<para>
+				A code snippet out of a possible <literal>UpdateListener</literal> implementation to this statement that retrives the events as fragments may look as below:
+			</para>
+			<programlisting><![CDATA[EventBean a = (EventBean) newEvents[0].getFragment("a");
+// ... or using a nested property expression to get a value out of A event...
+double value = (Double) newEvent[0].get("a.value");]]></programlisting>
+
+			<para>
+				Some pattern objects return an array of events. An example is the unbound repeat operator. Here is a sample pattern that collects all A events until a B event arrives:
+			</para>
+			<programlisting><![CDATA[select * from pattern [a=A until b=B]]]></programlisting>
+
+			<para>
+				A possible code to retrieve different fragments or property values:
+			</para>
+			<programlisting><![CDATA[EventBean[] a = (EventBean[]) newEvents[0].getFragment("a");
+// ... or using a nested property expression to get a value out of A event...
+double value = (Double) newEvent[0].get("a[0].value");]]></programlisting>
+		</sect2>
+
     </sect1>
 
     <sect1 id="api-threading">
@@ -1150,12 +1386,12 @@ model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEv
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Variable names can simply be treated as property names
+						Variable names can simply be treated as property names.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						When selecting from named windows, the name of the named window is the event type alias for us in <literal>FilterStream</literal> instances or patterns
+						When selecting from named windows, the name of the named window is the event type name for use in <literal>FilterStream</literal> instances or patterns.
 					</para>
 				</listitem>
 				<listitem>
@@ -1167,28 +1403,6 @@ model.setFromClause(FromClause.create(FilterStream.create("com.chipmaker.ReadyEv
 				</listitem>
 			</itemizedlist>
 			
-			<para>
-				Notes on usage: 
-			</para>			
-			<itemizedlist spacing="compact">
-				<listitem>
-					<para>
-						Variable names can simply be treated as property names
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						When selecting from named windows, the name of the named window is the event type alias for us in <literal>FilterStream</literal> instances or patterns
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						To compile an arbitrary sub-expression text into an <literal>Expression</literal> object representation, simply add the expression text to a <literal>where</literal> clause,
-						compile the EPL  string into an object model via the <literal>compileEPL</literal> method on <literal>EPAdministrator</literal>, and obtain the compiled <literal>where</literal> clause expression 
-						object from the <literal>EPStatementObjectModel</literal> via the <literal>getWhereClause</literal> method.
-					</para>
-				</listitem>
-			</itemizedlist>
 		</sect2>
 		
 		<sect2 id="api-soda-building-step2">
@@ -1343,8 +1557,8 @@ EPStatement stmtSet = epService.getEPAdministrator().create(model);]]></programl
 			<programlisting><![CDATA[EPStatementObjectModel model = new EPStatementObjectModel();
 model.setCreateWindow(CreateWindowClause.create("OrdersTimeWindow").addView("win", "time", 30));
 model.setSelectClause(SelectClause.create()
-		.addWithAlias("symbol", "sym")
-		.addWithAlias("volume", "vol")
+		.addWithName("symbol", "sym")
+		.addWithName("volume", "vol")
 		.add("price"));
 model.setFromClause(FromClause.create(FilterStream.create("OrderEvent)));]]></programlisting>
 
@@ -1594,4 +1808,91 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 
   </sect1>
 
+	<sect1 id="api-output-rendering">
+		<title>Event Rendering to XML and JSON</title>
+		
+		<para>
+			Your application may use the built-in XML and JSON formatters to render output events into a readable textual format, such as for integration or debugging purposes. This section introduces the utility classes in the client <literal>util</literal> package for rendering events to strings. Further API information can be found in the JavaDocs.
+		</para>
+
+		<para>
+			The <literal>EventRenderer</literal> interface accessible from the runtime interface via the <literal>getEventRenderer</literal> method provides access to JSON and XML rendering. For repeated rendering of events of the same event type or subtypes, it is recommended to obtain a <literal>JSONEventRenderer</literal> or <literal>XMLEventRenderer</literal> instance and use the <literal>render</literal> method provided by the interface. This allows the renderer implementations to cache event type metadata for fast rendering.
+		</para>
+
+		<para>
+			In this example we show how one may obtain a renderer for repeated rendering of events of the same type, assuming that <literal>statement</literal> is an instance of <literal>EPStatement</literal>:
+		</para>
+		<programlisting><![CDATA[JSONEventRenderer jsonRenderer = epService.getEPRuntime().
+    getEventRenderer().getJSONRenderer(statement.getEventType());]]></programlisting>
+
+		<para>
+			Assuming that <literal>event</literal> is an instance of <literal>EventBean</literal>, this code snippet renders an event into the JSON format:
+		</para>
+		<programlisting><![CDATA[String jsonEventText = jsonRenderer.render("MyEvent", event);]]></programlisting>
+
+		<para>
+			The XML renderer works the same:
+		</para>
+		<programlisting><![CDATA[XMLEventRenderer xmlRenderer = epService.getEPRuntime().
+    getEventRenderer().getXMLRenderer(statement.getEventType());]]></programlisting>
+
+		<para>
+			...and...
+		</para>
+		<programlisting><![CDATA[String xmlEventText = xmlRenderer.render("MyEvent", event);]]></programlisting>
+		
+		<para>
+			If the event type is not known in advance or if you application does not want to obtain a renderer instance per event type for fast rendering, your application can use one of the following methods to render an event to a XML or JSON textual format:
+		</para>
+		<programlisting><![CDATA[String json = epService.getEPRuntime().getEventRenderer().renderJSON(event);
+String xml = epService.getEPRuntime().getEventRenderer().renderXML(event);]]></programlisting>
+
+		<para>
+			Use the <literal>JSONRenderingOptions</literal> or <literal>XMLRenderingOptions</literal> classes to control how events are rendered.
+		</para>
+				
+		<sect2 id="api-output-rendering-json">
+			<title>JSON Event Rendering Conventions and Options</title>
+			
+			<para>
+				The JSON renderer produces JSON text according to the standard documented at <literal>http://www.json.org</literal>.
+			</para>
+
+			<para>
+				The renderer formats simple properties as well as nested properties and indexed properties according to the JSON string encoding, array encoding and nested object encoding requirements.
+			</para>
+
+			<para>
+				The renderer does render indexed properties, it does not render indexed properties that require an index, i.e. if your event representation is backed by POJO objects and your getter method is <literal>getValue(int index)</literal>, the indexed property values are not part of the JSON text. This is because the implementation has no way to determine how many index keys there are. A workaround is to have a method such as <literal>Object[] getValue()</literal> instead.
+			</para>
+
+			<para>
+				The same is true for mapped properties that the renderer also renders.  If a property requires a Map key for access, i.e. your getter method is <literal>getValue(String key)</literal>, such property values are not part of the result text as there is no way for the implementation to determine the key set.
+			</para>
+		</sect2>
+
+		<sect2 id="api-output-rendering-xml">
+			<title>XML Event Rendering Conventions and Options</title>
+			
+			<para>
+				The XML renderer produces well-formed XML text according to the XML standard.
+			</para>
+
+			<para>
+				The renderer can be configured to format simple properties as attributes or as elements. Nested properties and indexed properties are always represented as XML sub-elements to the root or parent element.
+			</para>
+
+			<para>
+				The root element name provided to the XML renderer must be the element name of the root in the XML document and may include namespace instructions.
+			</para>
+
+			<para>
+				The renderer does render indexed properties, it does not render indexed properties that require an index, i.e. if your event representation is backed by POJO objects and your getter method is <literal>getValue(int index)</literal>, the indexed property values are not part of the XML text. This is because the implementation has no way to determine how many index keys there are. A workaround is to have a method such as <literal>Object[] getValue()</literal> instead.
+			</para>
+
+			<para>
+				The same is true for mapped properties that the renderer also renders.  If a property requires a Map key for access, i.e. your getter method is <literal>getValue(String key)</literal>, such property values are not part of the result text as there is no way for the implementation to determine the key set.
+			</para>
+		</sect2>
+	</sect1>
 </chapter>

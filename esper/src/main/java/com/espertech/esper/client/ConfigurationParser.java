@@ -109,9 +109,9 @@ class ConfigurationParser {
         {
             Element element = eventTypeNodeIterator.next();
             String nodeName = element.getNodeName();
-            if (nodeName.equals("event-type-auto-alias"))
+            if (nodeName.equals("event-type-auto-name"))
             {
-                handleEventTypeAutoAliases(configuration, element);
+                handleEventTypeAutoNames(configuration, element);
             }
             else if (nodeName.equals("event-type"))
             {
@@ -165,9 +165,9 @@ class ConfigurationParser {
             {
                 handlePlugInEventType(configuration, element);
             }
-            else if (nodeName.equals("plugin-event-type-alias-resolution"))
+            else if (nodeName.equals("plugin-event-type-name-resolution"))
             {
-                handlePlugInEventTypeAliasResolution(configuration, element);
+                handlePlugIneventTypeNameResolution(configuration, element);
             }
             else if (nodeName.equals("revision-event-type"))
             {
@@ -180,28 +180,28 @@ class ConfigurationParser {
         }
     }
 
-    private static void handleEventTypeAutoAliases(Configuration configuration, Element element)
+    private static void handleEventTypeAutoNames(Configuration configuration, Element element)
     {
         String name = element.getAttributes().getNamedItem("package-name").getTextContent();
-        configuration.addEventTypeAutoAlias(name);
+        configuration.addEventTypeAutoName(name);
     }
 
     private static void handleEventTypes(Configuration configuration, Element element)
     {
-        String name = element.getAttributes().getNamedItem("alias").getTextContent();
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
         Node classNode = element.getAttributes().getNamedItem("class");
 
         String optionalClassName = null;
         if (classNode != null)
         {
             optionalClassName = classNode.getTextContent();
-            configuration.addEventTypeAlias(name, optionalClassName);
+            configuration.addEventType(name, optionalClassName);
         }
 
         handleEventTypeDef(name, optionalClassName, configuration, element);
     }
 
-    private static void handleEventTypeDef(String aliasName, String optionalClassName, Configuration configuration, Node parentNode)
+    private static void handleEventTypeDef(String name, String optionalClassName, Configuration configuration, Node parentNode)
     {
         DOMElementIterator eventTypeNodeIterator = new DOMElementIterator(parentNode.getChildNodes());
         while (eventTypeNodeIterator.hasNext())
@@ -210,29 +210,29 @@ class ConfigurationParser {
             String nodeName = eventTypeElement.getNodeName();
             if (nodeName.equals("xml-dom"))
             {
-                handleXMLDOM(aliasName, configuration, eventTypeElement);
+                handleXMLDOM(name, configuration, eventTypeElement);
             }
             else if(nodeName.equals("java-util-map"))
             {
-            	handleMap(aliasName, configuration, eventTypeElement);
+            	handleMap(name, configuration, eventTypeElement);
             }
             else if (nodeName.equals("legacy-type"))
             {
-                handleLegacy(aliasName, optionalClassName, configuration, eventTypeElement);
+                handleLegacy(name, optionalClassName, configuration, eventTypeElement);
             }
         }
     }
 
-    private static void handleMap(String aliasName, Configuration configuration, Element eventTypeElement)
+    private static void handleMap(String name, Configuration configuration, Element eventTypeElement)
     {
-        Node superTypesList = eventTypeElement.getAttributes().getNamedItem("supertype-aliases");
+        Node superTypesList = eventTypeElement.getAttributes().getNamedItem("supertype-names");
         if (superTypesList != null)
         {
             String value = superTypesList.getTextContent();
-            String[] aliases = value.split(",");
-            for (String superTypeAlias : aliases)
+            String[] names = value.split(",");
+            for (String superTypeName : names)
             {
-                configuration.addMapSuperType(aliasName, superTypeAlias.trim());
+                configuration.addMapSuperType(name, superTypeName.trim());
             }
         }
 
@@ -240,22 +240,25 @@ class ConfigurationParser {
 		NodeList propertyList = eventTypeElement.getElementsByTagName("map-property");
 		for (int i = 0; i < propertyList.getLength(); i++)
 	    {
-	        String name = propertyList.item(i).getAttributes().getNamedItem("name").getTextContent();
+	        String nameProperty = propertyList.item(i).getAttributes().getNamedItem("name").getTextContent();
 	        String clazz = propertyList.item(i).getAttributes().getNamedItem("class").getTextContent();
-	        propertyTypeNames.put(name, clazz);
+	        propertyTypeNames.put(nameProperty, clazz);
 	    }
-    	configuration.addEventTypeAlias(aliasName, propertyTypeNames);
+    	configuration.addEventType(name, propertyTypeNames);
     }
 
-    private static void handleXMLDOM(String aliasName, Configuration configuration, Element xmldomElement)
+    private static void handleXMLDOM(String name, Configuration configuration, Element xmldomElement)
     {
         String rootElementName = xmldomElement.getAttributes().getNamedItem("root-element-name").getTextContent();
         String rootElementNamespace = getOptionalAttribute(xmldomElement, "root-element-namespace");
         String schemaResource = getOptionalAttribute(xmldomElement, "schema-resource");
         String defaultNamespace = getOptionalAttribute(xmldomElement, "default-namespace");
-        String resolvePropertiesAbsoluteStr = getOptionalAttribute(xmldomElement, "resolve-properties-absolute");
+        String resolvePropertiesAbsoluteStr = getOptionalAttribute(xmldomElement, "xpath-resolve-properties-absolute");
+        String propertyExprXPathStr = getOptionalAttribute(xmldomElement, "xpath-property-expr");
+        String eventSenderChecksRootStr = getOptionalAttribute(xmldomElement, "event-sender-validates-root");
         String xpathFunctionResolverClass = getOptionalAttribute(xmldomElement, "xpath-function-resolver");
         String xpathVariableResolverClass = getOptionalAttribute(xmldomElement, "xpath-variable-resolver");
+        String autoFragmentStr = getOptionalAttribute(xmldomElement, "auto-fragment");
 
         ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
         xmlDOMEventTypeDesc.setRootElementName(rootElementName);
@@ -266,9 +269,21 @@ class ConfigurationParser {
         xmlDOMEventTypeDesc.setXPathVariableResolver(xpathVariableResolverClass);
         if (resolvePropertiesAbsoluteStr != null)
         {
-            xmlDOMEventTypeDesc.setResolvePropertiesAbsolute(Boolean.parseBoolean(resolvePropertiesAbsoluteStr));
+            xmlDOMEventTypeDesc.setXPathResolvePropertiesAbsolute(Boolean.parseBoolean(resolvePropertiesAbsoluteStr));
         }
-        configuration.addEventTypeAlias(aliasName, xmlDOMEventTypeDesc);
+        if (propertyExprXPathStr != null)
+        {
+            xmlDOMEventTypeDesc.setXPathPropertyExpr(Boolean.parseBoolean(propertyExprXPathStr));
+        }
+        if (eventSenderChecksRootStr != null)
+        {
+            xmlDOMEventTypeDesc.setEventSenderValidatesRoot(Boolean.parseBoolean(eventSenderChecksRootStr));
+        }
+        if (autoFragmentStr != null)
+        {
+            xmlDOMEventTypeDesc.setAutoFragment(Boolean.parseBoolean(autoFragmentStr));            
+        }
+        configuration.addEventType(name, xmlDOMEventTypeDesc);
 
         DOMElementIterator propertyNodeIterator = new DOMElementIterator(xmldomElement.getChildNodes());
         while (propertyNodeIterator.hasNext())
@@ -299,6 +314,14 @@ class ConfigurationParser {
                 {
                     xpathConstantType = XPathConstants.BOOLEAN;
                 }
+                else if (propertyType.toUpperCase().equals("NODE"))
+                {
+                    xpathConstantType = XPathConstants.NODE;
+                }
+                else if (propertyType.toUpperCase().equals("NODESET"))
+                {
+                    xpathConstantType = XPathConstants.NODESET;
+                }
                 else
                 {
                     throw new IllegalArgumentException("Invalid xpath property type for property '" +
@@ -311,12 +334,25 @@ class ConfigurationParser {
                     castToClass = propertyElement.getAttributes().getNamedItem("cast").getTextContent();
                 }
 
-                xmlDOMEventTypeDesc.addXPathProperty(propertyName, xPath, xpathConstantType, castToClass);
+                String optionaleventTypeName = null;
+                if (propertyElement.getAttributes().getNamedItem("event-type-name") != null)
+                {
+                    optionaleventTypeName = propertyElement.getAttributes().getNamedItem("event-type-name").getTextContent();
+                }
+
+                if (optionaleventTypeName != null)
+                {
+                    xmlDOMEventTypeDesc.addXPathPropertyFragment(propertyName, xPath, xpathConstantType, optionaleventTypeName);
+                }
+                else
+                {
+                    xmlDOMEventTypeDesc.addXPathProperty(propertyName, xPath, xpathConstantType, castToClass);
+                }
             }
         }
     }
 
-    private static void handleLegacy(String aliasName, String className, Configuration configuration, Element xmldomElement)
+    private static void handleLegacy(String name, String className, Configuration configuration, Element xmldomElement)
     {
         // Class name is required for legacy classes
         if (className == null)
@@ -341,7 +377,7 @@ class ConfigurationParser {
         {
             legacyDesc.setPropertyResolutionStyle(Configuration.PropertyResolutionStyle.valueOf(propertyResolution.toUpperCase()));
         }
-        configuration.addEventTypeAlias(aliasName, className, legacyDesc);
+        configuration.addEventType(name, className, legacyDesc);
 
         DOMElementIterator propertyNodeIterator = new DOMElementIterator(xmldomElement.getChildNodes());
         while (propertyNodeIterator.hasNext())
@@ -349,15 +385,15 @@ class ConfigurationParser {
             Element propertyElement = propertyNodeIterator.next();
             if (propertyElement.getNodeName().equals("method-property"))
             {
-                String name = propertyElement.getAttributes().getNamedItem("name").getTextContent();
+                String nameProperty = propertyElement.getAttributes().getNamedItem("name").getTextContent();
                 String method = propertyElement.getAttributes().getNamedItem("accessor-method").getTextContent();
-                legacyDesc.addMethodProperty(name, method);
+                legacyDesc.addMethodProperty(nameProperty, method);
             }
             else if (propertyElement.getNodeName().equals("field-property"))
             {
-                String name = propertyElement.getAttributes().getNamedItem("name").getTextContent();
+                String nameProperty = propertyElement.getAttributes().getNamedItem("name").getTextContent();
                 String field = propertyElement.getAttributes().getNamedItem("accessor-field").getTextContent();
-                legacyDesc.addFieldProperty(name, field);
+                legacyDesc.addFieldProperty(nameProperty, field);
             }
             else
             {
@@ -630,7 +666,7 @@ class ConfigurationParser {
     {
         DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
         List<URI> uris = new ArrayList<URI>();
-        String alias = element.getAttributes().getNamedItem("alias").getTextContent();
+        String name = element.getAttributes().getNamedItem("name").getTextContent();
         String initializer = null;
         while (nodeIterator.hasNext())
         {
@@ -654,7 +690,7 @@ class ConfigurationParser {
                 DOMElementIterator nodeIter = new DOMElementIterator(subElement.getChildNodes());
                 if (!nodeIter.hasNext())
                 {
-                    throw new ConfigurationException("Error handling initializer for plug-in event type '" + alias + "', no child node found under initializer element, expecting an element node");
+                    throw new ConfigurationException("Error handling initializer for plug-in event type '" + name + "', no child node found under initializer element, expecting an element node");
                 }
 
                 StringWriter output = new StringWriter();
@@ -664,16 +700,16 @@ class ConfigurationParser {
                 }
                 catch (TransformerException e)
                 {
-                    throw new ConfigurationException("Error handling initializer for plug-in event type '" + alias + "' :" + e.getMessage(), e);
+                    throw new ConfigurationException("Error handling initializer for plug-in event type '" + name + "' :" + e.getMessage(), e);
                 }
                 initializer = output.toString();
             }
         }
 
-        configuration.addPlugInEventType(alias, uris.toArray(new URI[uris.size()]), initializer);
+        configuration.addPlugInEventType(name, uris.toArray(new URI[uris.size()]), initializer);
     }
 
-    private static void handlePlugInEventTypeAliasResolution(Configuration configuration, Element element)
+    private static void handlePlugIneventTypeNameResolution(Configuration configuration, Element element)
     {
         DOMElementIterator nodeIterator = new DOMElementIterator(element.getChildNodes());
         List<URI> uris = new ArrayList<URI>();
@@ -696,13 +732,13 @@ class ConfigurationParser {
             }
         }
 
-        configuration.setPlugInEventTypeAliasResolutionURIs(uris.toArray(new URI[uris.size()]));
+        configuration.setPlugInEventTypeResolutionURIs(uris.toArray(new URI[uris.size()]));
     }
 
     private static void handleRevisionEventType(Configuration configuration, Element element)
     {
         ConfigurationRevisionEventType revEventType = new ConfigurationRevisionEventType();
-        String revTypeAlias = element.getAttributes().getNamedItem("alias").getTextContent();
+        String revTypeName = element.getAttributes().getNamedItem("name").getTextContent();
 
         if (element.getAttributes().getNamedItem("property-revision") != null)
         {
@@ -727,13 +763,13 @@ class ConfigurationParser {
             Element subElement = nodeIterator.next();
             if (subElement.getNodeName().equals("base-event-type"))
             {
-                String alias = subElement.getAttributes().getNamedItem("alias").getTextContent();
-                revEventType.addAliasBaseEventType(alias);
+                String name = subElement.getAttributes().getNamedItem("name").getTextContent();
+                revEventType.addNameBaseEventType(name);
             }
             if (subElement.getNodeName().equals("delta-event-type"))
             {
-                String alias = subElement.getAttributes().getNamedItem("alias").getTextContent();
-                revEventType.addAliasDeltaEventType(alias);
+                String name = subElement.getAttributes().getNamedItem("name").getTextContent();
+                revEventType.addNameDeltaEventType(name);
             }
             if (subElement.getNodeName().equals("key-property"))
             {
@@ -745,13 +781,13 @@ class ConfigurationParser {
         String[] keyProps = keyProperties.toArray(new String[keyProperties.size()]);
         revEventType.setKeyPropertyNames(keyProps);
         
-        configuration.addRevisionEventType(revTypeAlias, revEventType);
+        configuration.addRevisionEventType(revTypeName, revEventType);
     }
 
     private static void handleVariantStream(Configuration configuration, Element element)
     {
         ConfigurationVariantStream variantStream = new ConfigurationVariantStream();
-        String varianceAlias = element.getAttributes().getNamedItem("alias").getTextContent();
+        String varianceName = element.getAttributes().getNamedItem("name").getTextContent();
 
         if (element.getAttributes().getNamedItem("type-variance") != null)
         {
@@ -774,12 +810,12 @@ class ConfigurationParser {
             Element subElement = nodeIterator.next();
             if (subElement.getNodeName().equals("variant-event-type"))
             {
-                String alias = subElement.getAttributes().getNamedItem("alias").getTextContent();
-                variantStream.addEventTypeAlias(alias);
+                String name = subElement.getAttributes().getNamedItem("name").getTextContent();
+                variantStream.addEventTypeName(name);
             }
         }
 
-        configuration.addVariantStream(varianceAlias, variantStream);
+        configuration.addVariantStream(varianceName, variantStream);
     }
 
     private static void handleEngineSettings(Configuration configuration, Element element)
@@ -836,6 +872,10 @@ class ConfigurationParser {
             if (subElement.getNodeName().equals("language"))
             {
                 handleLanguage(configuration, subElement);
+            }
+            if (subElement.getNodeName().equals("expression"))
+            {
+                handleExpression(configuration, subElement);
             }
         }
     }
@@ -909,6 +949,12 @@ class ConfigurationParser {
                 String valueText = subElement.getAttributes().getNamedItem("enabled").getTextContent();
                 Boolean value = Boolean.parseBoolean(valueText);
                 configuration.getEngineDefaults().getViewResources().setShareViews(value);
+            }
+            if (subElement.getNodeName().equals("allow-multiple-expiry-policy"))
+            {
+                String valueText = subElement.getAttributes().getNamedItem("enabled").getTextContent();
+                Boolean value = Boolean.parseBoolean(valueText);
+                configuration.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(value);
             }
         }
     }
@@ -1079,9 +1125,28 @@ class ConfigurationParser {
 
     private static void handleLanguage(Configuration configuration, Element parentElement)
     {
-        String sortUsingCollator = getRequiredAttribute(parentElement, "sort-using-collator");
-        boolean isSortUsingCollator = Boolean.parseBoolean(sortUsingCollator);
-        configuration.getEngineDefaults().getLanguage().setSortUsingCollator(isSortUsingCollator);
+        String sortUsingCollator = getOptionalAttribute(parentElement, "sort-using-collator");
+        if (sortUsingCollator != null)
+        {
+            boolean isSortUsingCollator = Boolean.parseBoolean(sortUsingCollator);
+            configuration.getEngineDefaults().getLanguage().setSortUsingCollator(isSortUsingCollator);
+        }
+    }
+
+    private static void handleExpression(Configuration configuration, Element parentElement)
+    {
+        String integerDivision = getOptionalAttribute(parentElement, "integer-division");
+        if (integerDivision != null)
+        {
+            boolean isIntegerDivision = Boolean.parseBoolean(integerDivision);
+            configuration.getEngineDefaults().getExpression().setIntegerDivision(isIntegerDivision);
+        }
+        String divZero = getOptionalAttribute(parentElement, "division-by-zero-is-null");
+        if (divZero != null)
+        {
+            boolean isDivZero = Boolean.parseBoolean(divZero);
+            configuration.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(isDivZero);
+        }
     }
 
     private static void handleMetricsReportingPatterns(ConfigurationMetricsReporting.StmtGroupMetrics groupDef, Element parentElement)

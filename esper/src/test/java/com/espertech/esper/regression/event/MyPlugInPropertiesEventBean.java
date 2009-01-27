@@ -1,9 +1,9 @@
 package com.espertech.esper.regression.event;
 
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.PropertyAccessException;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.PropertyAccessException;
 
 import java.util.Properties;
 
@@ -26,7 +26,11 @@ public class MyPlugInPropertiesEventBean implements EventBean
     public Object get(String property) throws PropertyAccessException
     {
         EventPropertyGetter getter = eventType.getGetter(property);
-        return getter.get(this);
+        if (getter != null)
+        {
+            return getter.get(this);
+        }
+        return null;
     }
 
     public Object getUnderlying()
@@ -37,5 +41,15 @@ public class MyPlugInPropertiesEventBean implements EventBean
     protected Properties getProperties()
     {
         return properties;
-    }    
+    }
+
+    public Object getFragment(String property)
+    {
+        EventPropertyGetter getter = eventType.getGetter(property);
+        if (getter != null)
+        {
+            return getter.getFragment(this);
+        }
+        return null;
+    }
 }

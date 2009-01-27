@@ -8,17 +8,20 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.InsertIntoDesc;
+import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import com.espertech.esper.event.*;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.collection.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -31,8 +34,8 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
 	private static final Log log = LogFactory.getLog(SelectExprEvalProcessorStreams.class);
 
     private final EventAdapterService eventAdapterService;
-    private final List<SelectClauseStreamCompiledSpec> aliasedStreams;
-    private final List<SelectClauseStreamCompiledSpec> unaliasedStreams;
+    private final List<SelectClauseStreamCompiledSpec> namedStreams;
+    private final List<SelectClauseStreamCompiledSpec> unnamedStreams;
     private boolean singleStreamWrapper;
     private boolean isUsingWildcard;
 
@@ -41,13 +44,13 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
     private EventType resultEventType;
     private EventType underlyingEventType;
     private int underlyingStreamNumber;
-    private boolean underlyingIsTaggedEvent;
+    private boolean underlyingIsFragmentEvent;
     private EventPropertyGetter underlyingPropertyEventGetter;
 
     /**
      * Ctor.
      * @param selectionList - list of select-clause items
-     * @param selectedStreams - list of stream selectors (e.g. select alias.* from Event as alias)
+     * @param selectedStreams - list of stream selectors (e.g. select name.* from Event as name)
      * @param insertIntoDesc - descriptor for insert-into clause contains column names overriding select clause names
      * @param isUsingWildcard - true if the wildcard (*) appears in the select clause
      * @param typeService -service for information about streams
@@ -66,21 +69,21 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
         this.eventAdapterService = eventAdapterService;
         this.isUsingWildcard = isUsingWildcard;
 
-        // Get the un-aliased stream selectors (i.e. select s0.* from S0 as s0)
-        unaliasedStreams = new ArrayList<SelectClauseStreamCompiledSpec>();
-        aliasedStreams = new ArrayList<SelectClauseStreamCompiledSpec>();
+        // Get the un-name stream selectors (i.e. select s0.* from S0 as s0)
+        unnamedStreams = new ArrayList<SelectClauseStreamCompiledSpec>();
+        namedStreams = new ArrayList<SelectClauseStreamCompiledSpec>();
         for (SelectClauseStreamCompiledSpec spec : selectedStreams)
         {
-            if (spec.getOptionalAliasName() == null)
+            if (spec.getOptionalName() == null)
             {
-                unaliasedStreams.add(spec);
+                unnamedStreams.add(spec);
             }
             else
             {
-                aliasedStreams.add(spec);
+                namedStreams.add(spec);
                 if (spec.isProperty())
                 {
-                    throw new ExprValidationException("The property wildcard syntax must be used without alias");
+                    throw new ExprValidationException("The property wildcard syntax must be used without column name");
                 }
             }
         }
@@ -88,42 +91,39 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
         // Verify insert into clause
         if (insertIntoDesc != null)
         {
-            verifyInsertInto(insertIntoDesc, selectionList, aliasedStreams);
+            verifyInsertInto(insertIntoDesc, selectionList, namedStreams);
         }
 
-        // Error if there are more then one un-aliased streams (i.e. select s0.*, s1.* from S0 as s0, S1 as s1)
-        // Thus there is only 1 unaliased stream selector maximum.
-        if (unaliasedStreams.size() > 1)
+        // Error if there are more then one un-named streams (i.e. select s0.*, s1.* from S0 as s0, S1 as s1)
+        // Thus there is only 1 unnamed stream selector maximum.
+        if (unnamedStreams.size() > 1)
         {
-            throw new ExprValidationException("A column alias must be supplied for all but one stream if multiple streams are selected via the stream.* notation");
+            throw new ExprValidationException("A column name must be supplied for all but one stream if multiple streams are selected via the stream.* notation");
         }
 
-        // Resolve underlying event type in the case of wildcard or non-aliased stream select.
+        // Resolve underlying event type in the case of wildcard or non-named stream select.
         // Determine if the we are considering a tagged event or a stream name.
-        if((isUsingWildcard) || (!unaliasedStreams.isEmpty()))
+        if((isUsingWildcard) || (!unnamedStreams.isEmpty()))
         {
-            if (!unaliasedStreams.isEmpty())
+            if (!unnamedStreams.isEmpty())
             {
                 // the tag.* syntax for :  select tag.* from pattern [tag = A]
-                underlyingStreamNumber = unaliasedStreams.get(0).getStreamNumber();
-                if (unaliasedStreams.get(0).isTaggedEvent())
+                underlyingStreamNumber = unnamedStreams.get(0).getStreamNumber();
+                if (unnamedStreams.get(0).isFragmentEvent())
                 {
-                    TaggedCompositeEventType comp = (TaggedCompositeEventType) typeService.getEventTypes()[underlyingStreamNumber];
-                    Pair<EventType, String> pair = comp.getTaggedEventTypes().get(unaliasedStreams.get(0).getStreamAliasName());
-                    if (pair != null)
-                    {
-                        underlyingEventType = pair.getFirst();
-                    }
-                    underlyingIsTaggedEvent = true;
+                    EventType compositeMap = typeService.getEventTypes()[underlyingStreamNumber];
+                    FragmentEventType fragment = compositeMap.getFragmentType(unnamedStreams.get(0).getStreamName());
+                    underlyingEventType = fragment.getFragmentType();
+                    underlyingIsFragmentEvent = true;
                 }
                 // the property.* syntax for :  select property.* from A
-                else if (unaliasedStreams.get(0).isProperty())
+                else if (unnamedStreams.get(0).isProperty())
                 {
-                    String propertyName = unaliasedStreams.get(0).getStreamAliasName();
-                    Class propertyType = unaliasedStreams.get(0).getPropertyType();
-                    int streamNumber = unaliasedStreams.get(0).getStreamNumber();
+                    String propertyName = unnamedStreams.get(0).getStreamName();
+                    Class propertyType = unnamedStreams.get(0).getPropertyType();
+                    int streamNumber = unnamedStreams.get(0).getStreamNumber();
 
-                    if (JavaClassHelper.isJavaBuiltinDataType(unaliasedStreams.get(0).getPropertyType()))
+                    if (JavaClassHelper.isJavaBuiltinDataType(unnamedStreams.get(0).getPropertyType()))
                     {
                         throw new ExprValidationException("The property wildcard syntax cannot be used on built-in types as returned by property '" + propertyName + "'");
                     }
@@ -145,7 +145,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
             }
             else
             {
-                // no un-aliases stream selectors, but a wildcard was specified
+                // no un-named stream selectors, but a wildcard was specified
                 if (typeService.getEventTypes().length == 1)
                 {
                     // not a join, we are using the selected event
@@ -163,11 +163,11 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
             }
         }
 
-        init(selectionList, aliasedStreams, insertIntoDesc, eventAdapterService, typeService, selectExprEventTypeRegistry);
+        init(selectionList, namedStreams, insertIntoDesc, eventAdapterService, typeService, selectExprEventTypeRegistry);
     }
 
     private void init(List<SelectClauseExprCompiledSpec> selectionList,
-                      List<SelectClauseStreamCompiledSpec> aliasedStreams,
+                      List<SelectClauseStreamCompiledSpec> namedStreams,
                       InsertIntoDesc insertIntoDesc,
                       EventAdapterService eventAdapterService,
                       StreamTypeService typeService,
@@ -193,16 +193,16 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
             {
                 numStreamColumnsJoin = typeService.getEventTypes().length;
             }
-            columnNames = new String[selectionList.size() + aliasedStreams.size() + numStreamColumnsJoin];
+            columnNames = new String[selectionList.size() + namedStreams.size() + numStreamColumnsJoin];
             int count = 0;
             for (SelectClauseExprCompiledSpec aSelectionList : selectionList)
             {
                 columnNames[count] = aSelectionList.getAssignedName();
                 count++;
             }
-            for (SelectClauseStreamCompiledSpec aSelectionList : aliasedStreams)
+            for (SelectClauseStreamCompiledSpec aSelectionList : namedStreams)
             {
-                columnNames[count] = aSelectionList.getOptionalAliasName();
+                columnNames[count] = aSelectionList.getOptionalName();
                 count++;
             }
             // for wildcard joins, add the streams themselves
@@ -225,11 +225,10 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
             selPropertyTypes.put(columnNames[count], expressionReturnType);
             count++;
         }
-        for (SelectClauseStreamCompiledSpec element : aliasedStreams)
+        for (SelectClauseStreamCompiledSpec element : namedStreams)
         {
             EventType eventTypeStream = typeService.getEventTypes()[element.getStreamNumber()];
-            Class expressionReturnType = eventTypeStream.getUnderlyingType();
-            selPropertyTypes.put(columnNames[count], expressionReturnType);
+            selPropertyTypes.put(columnNames[count], eventTypeStream);
             count++;
         }
         if (isUsingWildcard && typeService.getEventTypes().length > 1)
@@ -237,24 +236,23 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
             for (int i = 0; i < typeService.getEventTypes().length; i++)
             {
                 EventType eventTypeStream = typeService.getEventTypes()[i];
-                Class expressionReturnType = eventTypeStream.getUnderlyingType();
-                selPropertyTypes.put(columnNames[count], expressionReturnType);
+                selPropertyTypes.put(columnNames[count], eventTypeStream);
                 count++;
             }
         }
 
-        // If we have an alias for this type, add it
+        // If we have an name for this type, add it
         if (insertIntoDesc != null)
         {
             try
             {
                 if (underlyingEventType != null)
                 {
-                    resultEventType = eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeAlias(), underlyingEventType, selPropertyTypes, false, true);
+                    resultEventType = eventAdapterService.addWrapperType(insertIntoDesc.getEventTypeName(), underlyingEventType, selPropertyTypes, false, true);
                 }
                 else
                 {
-                    resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeAlias(), selPropertyTypes, null, false, false, true);
+                    resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, true);
                 }
 
                 // add reference to the type obtained
@@ -294,18 +292,17 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
             props.put(columnNames[count], evalResult);
             count++;
         }
-        for (SelectClauseStreamCompiledSpec element : aliasedStreams)
+        for (SelectClauseStreamCompiledSpec element : namedStreams)
         {
-            Object value = eventsPerStream[element.getStreamNumber()].getUnderlying();
-            props.put(columnNames[count], value);
+            EventBean event = eventsPerStream[element.getStreamNumber()];
+            props.put(columnNames[count], event);
             count++;
         }
         if (isUsingWildcard && eventsPerStream.length > 1)
         {
             for (EventBean anEventsPerStream : eventsPerStream)
             {
-                Object value = anEventsPerStream.getUnderlying();
-                props.put(columnNames[count], value);
+                props.put(columnNames[count], anEventsPerStream);
                 count++;
             }
         }
@@ -329,10 +326,10 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
         	}
 
             EventBean event = null;
-            if (underlyingIsTaggedEvent)
+            if (underlyingIsFragmentEvent)
             {
-                TaggedCompositeEventBean eventBean = (TaggedCompositeEventBean) eventsPerStream[underlyingStreamNumber];
-                event = eventBean.getEventBean(unaliasedStreams.get(0).getStreamAliasName());
+                EventBean eventBean = eventsPerStream[underlyingStreamNumber];
+                event = (EventBean) eventBean.getFragment(unnamedStreams.get(0).getStreamName());
             }
             else if (underlyingPropertyEventGetter != null)
             {
@@ -349,11 +346,11 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
 
             // Using a wrapper bean since we cannot use the same event type else same-type filters match.
             // Wrapping it even when not adding properties is very inexpensive.
-            return eventAdapterService.createWrapper(event, props, resultEventType);
+            return eventAdapterService.adaptorForWrapper(event, props, resultEventType);
         }
         else
         {
-        	return eventAdapterService.createMapFromValues(props, resultEventType);
+        	return eventAdapterService.adaptorForTypedMap(props, resultEventType);
         }
     }
 
@@ -364,7 +361,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
 
     private static void verifyInsertInto(InsertIntoDesc insertIntoDesc,
                                          List<SelectClauseExprCompiledSpec> selectionList,
-                                         List<SelectClauseStreamCompiledSpec> aliasedStreams)
+                                         List<SelectClauseStreamCompiledSpec> namedStreams)
         throws ExprValidationException
     {
         // Verify all column names are unique
@@ -380,7 +377,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
 
         // Verify number of columns matches the select clause
         if ( (!insertIntoDesc.getColumnNames().isEmpty()) &&
-             (insertIntoDesc.getColumnNames().size() != (selectionList.size() + aliasedStreams.size())) )
+             (insertIntoDesc.getColumnNames().size() != (selectionList.size() + namedStreams.size())) )
         {
             throw new ExprValidationException("Number of supplied values in the select clause does not match insert-into clause");
         }

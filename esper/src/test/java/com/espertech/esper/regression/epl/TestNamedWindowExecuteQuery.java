@@ -6,7 +6,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import junit.framework.TestCase;
 
 public class TestNamedWindowExecuteQuery extends TestCase
@@ -18,9 +18,8 @@ public class TestNamedWindowExecuteQuery extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("SupportBean", SupportBean.class.getName());
-        config.addEventTypeAlias("SupportBean_A", SupportBean_A.class.getName());
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.addEventType("SupportBean", SupportBean.class.getName());
+        config.addEventType("SupportBean_A", SupportBean_A.class.getName());
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 

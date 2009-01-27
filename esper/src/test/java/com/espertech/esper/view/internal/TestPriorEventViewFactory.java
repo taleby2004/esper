@@ -2,10 +2,15 @@ package com.espertech.esper.view.internal;
 
 import junit.framework.TestCase;
 import com.espertech.esper.support.epl.SupportViewResourceCallback;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.view.ViewCapPriorEventAccess;
 import com.espertech.esper.view.ViewParameterException;
+import com.espertech.esper.view.TestViewSupport;
+import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
 
 public class TestPriorEventViewFactory extends TestCase
 {
@@ -17,9 +22,9 @@ public class TestPriorEventViewFactory extends TestCase
     public void setUp() throws Exception
     {
         factoryOne = new PriorEventViewFactory();
-        factoryOne.setViewParameters(null, Arrays.asList((Object)(Boolean)false));
+        factoryOne.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprList((Object)(Boolean)false));
         factoryTwo = new PriorEventViewFactory();
-        factoryTwo.setViewParameters(null, Arrays.asList((Object)(Boolean)true));
+        factoryTwo.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprList((Object)(Boolean)true));
         callbackOne = new SupportViewResourceCallback();
         callbackTwo = new SupportViewResourceCallback();
     }
@@ -42,7 +47,7 @@ public class TestPriorEventViewFactory extends TestCase
     {
         try
         {
-            factoryOne.setViewParameters(null, Arrays.asList());
+            factoryOne.setViewParameters(SupportStatementContextFactory.makeViewContext(), new ArrayList<ExprNode>());
             fail();
         }
         catch (ViewParameterException ex)

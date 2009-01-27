@@ -12,6 +12,7 @@ import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Filter definition in an un-validated and un-resolved form.
@@ -19,20 +20,24 @@ import java.util.List;
  * Event type and expression nodes in this filter specification are not yet validated, optimized for resolved
  * against actual streams.
  */
-public class FilterSpecRaw implements MetaDefItem
+public class FilterSpecRaw implements MetaDefItem, Serializable
 {
-    private String eventTypeAlias;
+    private String eventTypeName;
     private List<ExprNode> filterExpressions;
+    private PropertyEvalSpec optionalPropertyEvalSpec;
+    private static final long serialVersionUID = 4316000245281974225L;
 
     /**
      * Ctor.
-     * @param eventTypeAlias is the name of the event type
+     * @param eventTypeName is the name of the event type
      * @param filterExpressions is a list of expression nodes representing individual filter expressions
+     * @param optionalPropertyEvalSpec specification for a property select
      */
-    public FilterSpecRaw(String eventTypeAlias, List<ExprNode> filterExpressions)
+    public FilterSpecRaw(String eventTypeName, List<ExprNode> filterExpressions, PropertyEvalSpec optionalPropertyEvalSpec)
     {
-        this.eventTypeAlias = eventTypeAlias;
+        this.eventTypeName = eventTypeName;
         this.filterExpressions = filterExpressions;
+        this.optionalPropertyEvalSpec = optionalPropertyEvalSpec;
     }
 
     /**
@@ -43,12 +48,12 @@ public class FilterSpecRaw implements MetaDefItem
     }
 
     /**
-     * Returns the event type alias of the events we are looking for.
+     * Returns the event type name of the events we are looking for.
      * @return event name
      */
-    public String getEventTypeAlias()
+    public String getEventTypeName()
     {
-        return eventTypeAlias;
+        return eventTypeName;
     }
 
     /**
@@ -58,5 +63,14 @@ public class FilterSpecRaw implements MetaDefItem
     public List<ExprNode> getFilterExpressions()
     {
         return filterExpressions;
+    }
+
+    /**
+     * Returns the property evaluation specification, if any, or null if no properties evaluated.
+     * @return property eval spec
+     */
+    public PropertyEvalSpec getOptionalPropertyEvalSpec()
+    {
+        return optionalPropertyEvalSpec;
     }
 }

@@ -11,11 +11,11 @@ package com.espertech.esper.filter;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeVariableVisitor;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventBean;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -112,7 +112,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
                 for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
                 {
                     EventType compositeEventType = entry.getValue().getFirst();
-                    events[count] = eventAdapterService.adapterForCompositeEvent(compositeEventType, matchedEvents.getMatchingEvents());
+                    events[count] = eventAdapterService.adaptorForTypedMap(matchedEvents.getMatchingEvents(), compositeEventType);
                     count++;
                 }
             }

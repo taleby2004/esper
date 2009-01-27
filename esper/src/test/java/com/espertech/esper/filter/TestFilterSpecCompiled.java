@@ -1,7 +1,7 @@
 package com.espertech.esper.filter;
 
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
 import com.espertech.esper.support.bean.SupportBean;
@@ -18,12 +18,12 @@ import java.util.Vector;
 public class TestFilterSpecCompiled extends TestCase
 {
     private EventType eventType;
-    private String eventTypeAlias;
+    private String eventTypeName;
 
     public void setUp()
     {
-        eventTypeAlias = SupportBean.class.getName();
-        eventType = SupportEventAdapterService.getService().addBeanType(eventTypeAlias, SupportBean.class, true);
+        eventTypeName = SupportBean.class.getName();
+        eventType = SupportEventAdapterService.getService().addBeanType(eventTypeName, SupportBean.class, true);
     }
 
     public void testHashCode()
@@ -70,7 +70,7 @@ public class TestFilterSpecCompiled extends TestCase
                                     { "intPrimitive", FilterOperator.EQUAL, 2 });
         SimpleNumberCoercer numberCoercer = SimpleNumberCoercerFactory.getCoercer(int.class, Double.class);
         params.add(new FilterSpecParamEventProp("doubleBoxed", FilterOperator.EQUAL, "asName", "doublePrimitive", false, numberCoercer, Double.class));
-        FilterSpecCompiled filterSpec = new FilterSpecCompiled(eventType, "SupportBean", params);
+        FilterSpecCompiled filterSpec = new FilterSpecCompiled(eventType, "SupportBean", params, null);
 
         SupportBean eventBean = new SupportBean();
         eventBean.setDoublePrimitive(999.999);

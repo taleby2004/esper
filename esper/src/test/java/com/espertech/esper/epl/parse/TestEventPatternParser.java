@@ -86,13 +86,9 @@ public class TestEventPatternParser extends TestCase
         assertIsInvalid("every every not f()");
 
         // where a:b
-        assertIsInvalid("a() where a:b(a=b)");
-        assertIsInvalid("a() where a:b(g=5l)");
         assertIsInvalid("a() where a:b(33s)");
-        assertIsInvalid("a() where a:b(m=3.3)");
         assertIsInvalid("a() where a:b('+1E4)");
         assertIsInvalid("a() where a:b(22L2)");
-        assertIsInvalid("a() where a:b(x=2)");
         assertIsInvalid("a() where a:b(2) or b() every where a:b(3)");
         assertIsInvalid("a() where a:b(2) or b() not where a:b(3)");
         assertIsInvalid("where a:b(5) a()");
@@ -101,7 +97,6 @@ public class TestEventPatternParser extends TestCase
         assertIsInvalid("(every a()) (where a:b(1))");
         assertIsInvalid("every ((every a(id=\"A1\")) where a:b(10l) and c()");
 
-        assertIsInvalid("timer:interval(m=10)");
         assertIsInvalid("timer:interval(10) timer:interval(20)");
         assertIsInvalid("a() timer:interval(10)");
         assertIsInvalid("timer:interval(10) b()");
@@ -131,15 +126,12 @@ public class TestEventPatternParser extends TestCase
         assertIsInvalid("timer:at(*,[2,5][2,4],*,*,*)");
         assertIsInvalid("timer:at(*,*,1x:1y,*,*)");
         assertIsInvalid("timer:at(*,*,1:1y,*,*)");
-        assertIsInvalid("timer:at(*,*,1.0:2,*,*)");
         assertIsInvalid("timer:at(*,*,1x:2,*,*)");
         assertIsInvalid("timer:at(*,*,:2,*,*)");
         assertIsInvalid("timer:at(*,*,2:,*,*)");
         assertIsInvalid("timer:at(*,*,:,*,*)");
-        assertIsInvalid("timer:at(*,*,*/a,*,*)");
         assertIsInvalid("timer:at(*,*,0/*,*,*)");
         assertIsInvalid("timer:at(*,*,*/*,*,*)");
-        assertIsInvalid("timer:at(*,*,5/5,*,*)");
         assertIsInvalid("timer:at([2:2x],*,*,*,*)");
         assertIsInvalid("timer:at(3:3],*,*,*,*)");
         assertIsInvalid("timer:at(3:3:3,*,*,*,*)");
@@ -401,15 +393,15 @@ public class TestEventPatternParser extends TestCase
 
         // 2 Children: filter a  and  or-subexpression with the rest
         assertTrue(ast.getChildCount() == 2);
-        assertTrue(ast.getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
+        assertTrue(ast.getChild(0).getType() == EsperEPL2GrammarParser.PATTERN_FILTER_EXPR);
 
         // Assert on or-subexpression
         Tree orExpr = ast.getChild(1);
         assertTrue(orExpr.getType() == EsperEPL2GrammarParser.OR_EXPR);
         assertTrue(orExpr.getChildCount() == 2);
-        assertTrue(orExpr.getChild(0).getType() == EsperEPL2GrammarParser.NOT_EXPR);
+        assertTrue(orExpr.getChild(0).getType() == EsperEPL2GrammarParser.PATTERN_NOT_EXPR);
         assertTrue(orExpr.getChild(0).getChildCount() == 1);
-        assertTrue(orExpr.getChild(0).getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
+        assertTrue(orExpr.getChild(0).getChild(0).getType() == EsperEPL2GrammarParser.PATTERN_FILTER_EXPR);
 
         // Assert on and-subexpression
         Tree andExpr = orExpr.getChild(1);
@@ -417,12 +409,12 @@ public class TestEventPatternParser extends TestCase
         assertTrue(andExpr.getChildCount() == 3);
         assertTrue(andExpr.getChild(0).getType() == EsperEPL2GrammarParser.EVERY_EXPR);
         assertTrue(andExpr.getChild(0).getChildCount() == 1);
-        assertTrue(andExpr.getChild(0).getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
+        assertTrue(andExpr.getChild(0).getChild(0).getType() == EsperEPL2GrammarParser.PATTERN_FILTER_EXPR);
 
         // Assert on where a:b and timer:interval sub-expressions
         Tree guardPostFix = andExpr.getChild(1);
         assertTrue(guardPostFix.getChildCount() == 4);
-        assertTrue(guardPostFix.getChild(0).getType() == EsperEPL2GrammarParser.EVENT_FILTER_EXPR);
+        assertTrue(guardPostFix.getChild(0).getType() == EsperEPL2GrammarParser.PATTERN_FILTER_EXPR);
         assertTrue(guardPostFix.getChild(1).getType() == EsperEPL2GrammarParser.IDENT);
 
         Tree timerIntervalExpr = andExpr.getChild(2);

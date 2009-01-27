@@ -5,7 +5,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
@@ -29,7 +29,7 @@ public class TestEventPropertyDynamicMap extends TestCase
     {
         Properties properties = new Properties();
         properties.put("innermap", Map.class.getName());
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MyLevel2", properties);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyLevel2", properties);
 
         String statementText = "select " +
                                "innermap.int? as t0, " +
@@ -83,7 +83,7 @@ public class TestEventPropertyDynamicMap extends TestCase
     {
         Properties properties = new Properties();
         properties.put("innermap", Map.class.getName());
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MyLevel2", properties);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyLevel2", properties);
 
         String statementText = "select " +
                                "exists(innermap.int?) as t0, " +
@@ -137,7 +137,7 @@ public class TestEventPropertyDynamicMap extends TestCase
     {
         Properties properties = new Properties();
         properties.put("innermap", Map.class.getName());
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MyLevel2", properties);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyLevel2", properties);
 
         String statementText = "select innermap.int as t0 from MyLevel2.win:length(5)";
         try

@@ -3,7 +3,7 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBeanNumeric;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -25,8 +25,8 @@ public class TestBigNumberSupport extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         listener = new SupportUpdateListener();
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanNumeric", SupportBeanNumeric.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanNumeric", SupportBeanNumeric.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 
     public void testEquals()
@@ -273,7 +273,7 @@ public class TestBigNumberSupport extends TestCase
     public void testJoin()
     {
         String[] fieldList = "bigint,bigdec".split(",");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select bigint,bigdec from SupportBeanNumeric, SupportBean " +
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select bigint,bigdec from SupportBeanNumeric.win:keepall(), SupportBean.win:keepall() " +
                 "where intPrimitive = bigint and doublePrimitive = bigdec");
         stmt.addListener(listener);
 

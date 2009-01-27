@@ -11,8 +11,8 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
@@ -24,11 +24,6 @@ import java.util.Iterator;
  * Only the very last event object is kept by this view. The update method invoked by the parent view supplies
  * new data in an object array, of which the view keeps the very last instance as the 'last' or newest event.
  * The view always has the same schema as the parent view and attaches to anything, and accepts no parameters.
- *
- * Useful is the last view for example for "stocks.time_window(100).last()".
- *
- * Notice that "stocks.last().size()" and
- *             "stocks.win:length(10).std:lastevent().std:size()" must always return 0 or 1.
  *
  * Thus if 5 pieces of new data arrive, the child view receives 5 elements of new data
  * and also 4 pieces of old data which is the first 4 elements of new data.

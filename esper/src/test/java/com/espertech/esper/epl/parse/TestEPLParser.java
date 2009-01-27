@@ -13,8 +13,7 @@ public class TestEPLParser extends TestCase
     public void testDisplayAST() throws Exception
     {
         String className = SupportBean.class.getName();
-        //String expression = "select a\\.b\\.c[43]\\.dd('a') from A";
-        String expression = "select count from A limit 1";
+        String expression = "select * from A where exp > ANY (select a from B)";
 
         log.debug(".testDisplayAST parsing: " + expression);
         Tree ast = parse(expression);
@@ -251,7 +250,7 @@ public class TestEPLParser extends TestCase
         assertIsValid(preFill + "().win:lenght(4)");
         assertIsValid(preFill + "().win:lenght(\"\",5)");
         assertIsValid(preFill + "().win:lenght(10.9,1E30,-4.4,\"\",5)");
-        assertIsValid(preFill + "().win:lenght(4).n:c(3.3, -3.3).n:some(\"price\")");
+        assertIsValid(preFill + "().win:lenght(4).n:c(3.3, -3.3).n:other(\"price\")");
         assertIsValid(preFill + "().win:lenght().n:c().n:da().n:e().n:f().n:g().n:xh(2.0)");
         assertIsValid(preFill + "().win:lenght({\"s\"})");
         assertIsValid(preFill + "().win:lenght({\"a\",\"b\"})");
@@ -266,6 +265,13 @@ public class TestEPLParser extends TestCase
         assertIsValid(preFill + "(string != 'test').win:lenght(100)");
         assertIsValid(preFill + "(string in (1:2) or katc=3 or lax like '%e%')");
         assertIsValid(preFill + "(string in (1:2) and dodo=3, lax like '%e%' and oppol / yyy = 5, yunc(3))");
+        assertIsValid(preFill + "()[myprop]");
+        assertIsValid(preFill + "[myprop].win:keepall()");
+        assertIsValid(preFill + "[myprop as orderId][mythirdprop].win:keepall()");
+        assertIsValid(preFill + "[select *, abc, a.b from myprop as orderId where a=s][mythirdprop].win:keepall()");
+        assertIsValid(preFill + "[xyz][select *, abc, a.b from myprop].win:keepall()");
+        assertIsValid(preFill + "[xyz][myprop where a=x].win:keepall()");
+        assertIsValid("select * from A where (select * from B[myprop])");
 
         assertIsValid("select max(intPrimitive, intBoxed) from " + className + "().std:win(20)");
         assertIsValid("select max(intPrimitive, intBoxed, longBoxed) from " + className + "().std:win(20)");
@@ -607,7 +613,7 @@ public class TestEPLParser extends TestCase
         assertIsValid("select a, b from A as y unidirectional, B unidirectional where a.x = b.x");
 
         // expessions and event properties are view/guard/observer parameters
-        assertIsValid("select * from A.win:x(myprop.nested, a.c('s'), 'ss', *, null)");
+        assertIsValid("select * from A.win:x(myprop.nested, a.c('s'), 'ss', abc, null)");
         assertIsValid("select * from pattern[every X where a:b(myprop.nested, a.c('s'), 'ss', *, null)]");
         assertIsValid("select * from pattern[every X:b(myprop.nested, a.c('s'), 'ss', *, null)]");
 
@@ -624,6 +630,16 @@ public class TestEPLParser extends TestCase
         assertIsValid("select count from A limit myvar,myvar2");
         assertIsValid("select count from A limit myvar offset myvar2");
         assertIsValid("select count from A limit -1");
+
+        // any, some, all
+        assertIsValid("select * from A where 1 = ANY (1, exp, 3)");
+        assertIsValid("select * from A where 1 = SOME ({1,2,3}, myvar, 2*2)");
+        assertIsValid("select * from A where exp = ALL ()");
+        assertIsValid("select * from A where 1 != ALL (select a from B)");
+        assertIsValid("select * from A where 1 = SOME (select a from B)");
+        assertIsValid("select * from A where exp > ANY (select a from B)");
+        assertIsValid("select * from A where 1 <= ANY (select a from B)");
+        assertIsValid("select * from A where {1,2,3} > ALL (1,2,3)");
     }
 
     public void testBitWiseCases() throws Exception

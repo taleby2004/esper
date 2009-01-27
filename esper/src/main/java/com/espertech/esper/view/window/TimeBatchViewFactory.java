@@ -10,7 +10,8 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 import com.espertech.esper.core.StatementContext;
@@ -37,8 +38,9 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
      */
     protected boolean isRemoveStreamHandling;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
+        List<Object> viewParameters = ViewFactorySupport.validateAndEvaluate("Time batch view", viewFactoryContext.getStatementContext(), expressionParameters);
         String errorMessage = "Time batch view requires a single numeric or time period parameter, and an optional long-typed reference point in msec, and an optional list of control keywords as a string parameter (please see the documentation)";
         if ((viewParameters.size() < 1) || (viewParameters.size() > 3))
         {
@@ -70,7 +72,7 @@ public class TimeBatchViewFactory extends TimeBatchViewFactoryParams implements 
         }
     }
 
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
         this.eventType = parentEventType;
     }

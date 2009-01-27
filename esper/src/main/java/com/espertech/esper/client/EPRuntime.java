@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import com.espertech.esper.client.util.EventRenderer;
+
 import java.util.Map;
 import java.util.Set;
 import java.net.URI;
@@ -35,11 +37,11 @@ public interface EPRuntime
      * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
      *
      * @param map - map that contains event property values. Keys are expected to be of type String while values
-     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeAlias.
-     * @param eventTypeAlias - the alias for the (property name, property type) information for this map
+     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeName.
+     * @param eventTypeName - the name for the Map event type that was previously configured
      * @throws EPException - when the processing of the event leads to an error
      */
-    public void sendEvent(Map map, String eventTypeAlias) throws EPException;
+    public void sendEvent(Map map, String eventTypeName) throws EPException;
 
     /**
      * Send an event represented by a DOM node to the event stream processing runtime.
@@ -57,49 +59,12 @@ public interface EPRuntime
      * or since the last resetStats() call.
      * @return number of events received
      */
-    public long getNumEventsReceived();
-
-    /**
-     * Number of events emitted over the lifetime of the event stream processing runtime,
-     * or since the last resetStats() call
-     * @return number of events emitted
-     */
-    public long getNumEventsEmitted();
+    public long getNumEventsEvaluated();
 
     /**
      * Reset number of events received and emitted
      */
     public void resetStats();
-
-    /**
-     * Emit an event object to any registered EmittedListener instances listening to the default channel.
-     * @param object to be emitted to the default channel
-     */
-    public void emit(final Object object);
-
-    /**
-     * Emit an event object to any registered EmittedListener instances on the specified channel.
-     * Event listeners listening to all channels as well as those listening to the specific channel
-     * are called. Supplying a null value in the channel has the same result as the emit(Object object) method.
-     * @param object to be emitted
-     * @param channel channel to emit the object to, or null if emitting to the default channel
-     */
-    public void emit(final Object object, final String channel);
-
-    /**
-     * Register an object that listens for events emitted from the event stream processing runtime on the
-     * specified channel. A null value can be supplied for the channel in which case the
-     * emit listener will be invoked for events emitted an any channel.
-     * @param listener called when an event is emitted by the runtime.
-     * @param channel is the channel to add the listener to, a null value can be used to listen to events emitted
-     * on all channels
-     */
-    public void addEmittedListener(EmittedListener listener, String channel);
-
-    /**
-     * Deregister all emitted event listeners.
-     */
-    public void clearEmittedListeners();
 
     /**
      * Route the event object back to the event stream processing runtime for internal dispatching,
@@ -122,11 +87,11 @@ public interface EPRuntime
      * processed before the next event is sent to the runtime through the
      * EPRuntime.sendEvent method.
      * @param map - map that contains event property values. Keys are expected to be of type String while values
-     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeAlias.
-     * @param eventTypeAlias - the alias for the (property name, property type) information for this map
+     * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeName.
+     * @param eventTypeName - the name for Map event type that was previously configured
      * @throws EPException - when the processing of the event leads to an error
      */
-    public void route(Map map, String eventTypeAlias) throws EPException;
+    public void route(Map map, String eventTypeName) throws EPException;
 
     /**
      * Route the event object back to the event stream processing runtime for internal dispatching,
@@ -211,25 +176,25 @@ public interface EPRuntime
     /**
      * Returns a facility to process event objects that are of a known type.
      * <p>
-     * Given an event type alias this method returns a sender that allows to send in
+     * Given an event type name this method returns a sender that allows to send in
      * event objects of that type. The event objects send in via the event sender
      * are expected to match the event type, thus the event sender does
      * not inspect the event object other then perform basic checking.
      * <p>
      * For events backed by a Java class (JavaBean events), the sender ensures that the
      * object send in matches in class, or implements or extends the class underlying the event type
-     * for the given event type alias name.
+     * for the given event type name.
      * <p>
      * For events backed by a java.util.Map (Map events), the sender does not perform any checking other
      * then checking that the event object indeed implements Map.
      * <p>
      * For events backed by a org.w3c.Node (XML DOM events), the sender checks that the root element name
-     * indeed does match the root element name for the event type alias.
-     * @param eventTypeAlias is the name of the event type
+     * indeed does match the root element name for the event type name.
+     * @param eventTypeName is the name of the event type
      * @return sender for fast-access processing of event objects of known type (and content)
-     * @throws EventTypeException thrown to indicate that the alias does not exist
+     * @throws EventTypeException thrown to indicate that the name does not exist
      */
-    public EventSender getEventSender(String eventTypeAlias) throws EventTypeException;
+    public EventSender getEventSender(String eventTypeName) throws EventTypeException;
 
     /**
      * For use with plug-in event representations, returns a facility to process event objects that are of one of a number of types
@@ -260,4 +225,6 @@ public interface EPRuntime
      * @return proxy to execute upon, that also provides the event type of the returned results
      */
     public EPOnDemandPreparedQuery prepareQuery(String epl);
+
+    public EventRenderer getEventRenderer();
 }

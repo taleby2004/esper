@@ -3,13 +3,13 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
 import com.espertech.esper.util.SerializableObjectCopier;
 
 import org.apache.commons.logging.Log;
@@ -36,7 +36,7 @@ public class TestHavingNoGroupBy extends TestCase
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("symbol", "price").setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH).add(Expressions.avg("price"), "avgPrice"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 5)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(5))));
         model.setHavingClause(Expressions.lt(Expressions.property("price"), Expressions.avg("price")));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
@@ -97,6 +97,23 @@ public class TestHavingNoGroupBy extends TestCase
     public void testNoAggregationJoinWhere()
     {
         runNoAggregationJoin("where");
+    }
+
+    public void testSubstreamSelectHaving()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        String stmtText = "insert into MyStream select quote.* from SupportBean.win:length(14) quote having avg(intPrimitive) >= 3\n";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(testListener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("abc", 2));
+        assertFalse(testListener.isInvoked());
+        epService.getEPRuntime().sendEvent(new SupportBean("abc", 2));
+        assertFalse(testListener.isInvoked());
+        epService.getEPRuntime().sendEvent(new SupportBean("abc", 3));
+        assertFalse(testListener.isInvoked());
+        epService.getEPRuntime().sendEvent(new SupportBean("abc", 5));
+        assertTrue(testListener.isInvoked());
     }
 
     private void runNoAggregationJoin(String filterClause)

@@ -8,17 +8,73 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
-import com.espertech.esper.collection.*;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
+import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.*;
 
 /**
  * Method to getSelectListEvents events in collections to other collections or other event types.
  */
 public class EventBeanUtility
 {
+    /**
+     * Resizes an array of events to a new size.
+     * <p>
+     * Returns the same array reference if the size is the same.
+     * @param oldArray array to resize
+     * @param newSize new array size
+     * @return resized array
+     */
+    public static EventBean[] resizeArray(EventBean[] oldArray, int newSize)
+    {
+        if (oldArray == null)
+        {
+            return null;
+        }
+        if (oldArray.length == newSize)
+        {
+            return oldArray;
+        }
+        EventBean[] newArray = new EventBean[newSize];
+        int preserveLength = Math.min(oldArray.length, newSize);
+        if (preserveLength > 0)
+        {
+            System.arraycopy(oldArray, 0, newArray, 0, preserveLength);
+        }
+        return newArray;
+    }
+
+    /**
+     * Creates a fragment event type for the class.
+     * @param propertyType type of property
+     * @param eventAdapterService factory for event beans and event types
+     * @return fragment event type
+     */
+    public static FragmentEventType createNativeFragmentType(Class propertyType, EventAdapterService eventAdapterService)
+    {
+        if (!JavaClassHelper.isFragmentableType(propertyType))
+        {
+            return null;
+        }
+        boolean isIndexed = propertyType.isArray();
+        if (propertyType.isArray())
+        {
+            propertyType = propertyType.getComponentType();
+        }
+        EventType type = eventAdapterService.getBeanEventTypeFactory().createBeanType(propertyType.getName(), propertyType, false);
+        return new FragmentEventType(type, isIndexed, true);
+    }
+
     /**
      * Flatten the vector of arrays to an array. Return null if an empty vector was passed, else
      * return an array containing all the events.
@@ -287,11 +343,6 @@ public class EventBeanUtility
         for (int i = 0; i < properties.length; i++)
         {
             String propName = properties[i];
-            if (propName.contains("[]"))
-            {
-                propName = propName.replace("[]", "");
-            }
-
             Object property = event.get(propName);
             String printProperty;
             if (property == null)
@@ -359,6 +410,25 @@ public class EventBeanUtility
         EventBean[] newArray = new EventBean[array.length + 1];
         System.arraycopy(array, 0, newArray, 0, array.length);
         newArray[newArray.length - 1] = eventToAdd;
+        return newArray;
+    }
+
+    /**
+     * Expand the array passed in by the multiple elements to add.
+     * @param array to expand
+     * @param eventsToAdd elements to add
+     * @return resized array
+     */
+    public static EventBean[] addToArray(EventBean[] array, List<EventBean> eventsToAdd)
+    {
+        EventBean[] newArray = new EventBean[array.length + eventsToAdd.size()];
+        System.arraycopy(array, 0, newArray, 0, array.length);
+
+        int counter = array.length;
+        for (EventBean eventToAdd : eventsToAdd)
+        {
+            newArray[counter++] = eventToAdd;
+        }
         return newArray;
     }
 }

@@ -6,11 +6,8 @@ import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.PrintUpdateListener;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.EventBean;
 
 public class TestOrOperator extends TestCase implements SupportBeanConstants
 {
@@ -124,9 +121,9 @@ public class TestOrOperator extends TestCase implements SupportBeanConstants
     private void tryOrAndNot(String pattern)
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("A", SupportBean_A.class.getName());
-        config.addEventTypeAlias("B", SupportBean_B.class.getName());
-        config.addEventTypeAlias("C", SupportBean_C.class.getName());
+        config.addEventType("A", SupportBean_A.class.getName());
+        config.addEventType("B", SupportBean_B.class.getName());
+        config.addEventType("C", SupportBean_C.class.getName());
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 

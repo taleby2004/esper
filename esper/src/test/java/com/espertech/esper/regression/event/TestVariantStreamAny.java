@@ -7,7 +7,7 @@ import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.EventTypeMetadata;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -22,8 +22,6 @@ public class TestVariantStreamAny extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
         variant.setTypeVariance(ConfigurationVariantStream.TypeVariance.ANY);
         config.addVariantStream("MyVariantStream", variant);
@@ -45,7 +43,10 @@ public class TestVariantStreamAny extends TestCase
 
         EventType[] valueAddTypes = ((EPServiceProviderSPI)epService).getValueAddEventService().getValueAddedTypes();
         assertEquals(1, valueAddTypes.length);
-        assertSame(type, valueAddTypes[0]);        
+        assertSame(type, valueAddTypes[0]);
+
+        assertEquals(0, type.getPropertyNames().length);
+        assertEquals(0, type.getPropertyDescriptors().length);
     }
 
     public void testAnyType()

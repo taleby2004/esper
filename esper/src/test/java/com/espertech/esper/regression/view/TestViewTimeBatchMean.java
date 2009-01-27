@@ -4,17 +4,14 @@ import junit.framework.TestCase;
 
 import java.util.Iterator;
 
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.DoubleValueAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.view.ViewFieldEnum;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 public class TestViewTimeBatchMean extends TestCase
 {
@@ -28,10 +25,11 @@ public class TestViewTimeBatchMean extends TestCase
     {
         testListener = new SupportUpdateListener();
         Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventType("SupportBean", SupportBean.class);
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
         // Set up a 2 second time window
         timeBatchMean = epService.getEPAdministrator().createEPL(

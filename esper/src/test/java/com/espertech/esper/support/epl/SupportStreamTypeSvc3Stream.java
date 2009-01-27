@@ -1,8 +1,8 @@
 package com.espertech.esper.support.epl;
 
 import com.espertech.esper.epl.core.*;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
@@ -14,7 +14,7 @@ public class SupportStreamTypeSvc3Stream implements StreamTypeService
 
     public SupportStreamTypeSvc3Stream()
     {
-        impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), "default", getEventTypeAliases());
+        impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), "default");
     }
 
     public PropertyResolutionDescriptor resolveByPropertyName(String propertyName) throws DuplicatePropertyException, PropertyNotFoundException
@@ -42,12 +42,12 @@ public class SupportStreamTypeSvc3Stream implements StreamTypeService
         EventType[] eventTypes = new EventType[] {
             SupportEventTypeFactory.createBeanType(SupportBean.class),
             SupportEventTypeFactory.createBeanType(SupportBean.class),
-            SupportEventTypeFactory.createBeanType(SupportBeanComplexProps.class)
+            SupportEventTypeFactory.createBeanType(SupportBeanComplexProps.class),
         };
         return eventTypes;
     }
 
-    public String[] getEventTypeAliases()
+    public String[] geteventTypeNamees()
     {
         return new String[] {"SupportBean", "SupportBean", "SupportBeanComplexProps"};
     }

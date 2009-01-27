@@ -7,9 +7,6 @@ import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 public class TestFilterExpressions extends TestCase
 {
     private EPServiceProvider epService;
@@ -20,7 +17,7 @@ public class TestFilterExpressions extends TestCase
         listener = new SupportUpdateListener();
 
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("SupportEvent", SupportTradeEvent.class);
+        config.addEventType("SupportEvent", SupportTradeEvent.class);
 
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
@@ -174,8 +171,8 @@ public class TestFilterExpressions extends TestCase
     public void testEqualsSemanticExpr()
     {
         // Test for Esper-114
-        String text = "select * from " + SupportBeanComplexProps.class.getName() + "(simpleProperty='1') as s0" +
-                ", " + SupportBeanComplexProps.class.getName() + "(simpleProperty='2') as s1" +
+        String text = "select * from " + SupportBeanComplexProps.class.getName() + "(simpleProperty='1').win:keepall() as s0" +
+                ", " + SupportBeanComplexProps.class.getName() + "(simpleProperty='2').win:keepall() as s1" +
                 " where s0.nested = s1.nested";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
@@ -472,10 +469,10 @@ public class TestFilterExpressions extends TestCase
         try3Fields(text, new int[]{1, 1, 1}, new Integer[]{null, 1, null}, new Double[]{null, null, 1d}, new boolean[]{true, false, false});
 
         text = "select * from " + SupportBean.class.getName() + "(intBoxed in (doubleBoxed))";
-        try3Fields(text, new int[]{1, 1, 1}, new Integer[]{null, 1, null}, new Double[]{null, null, 1d}, new boolean[]{true, false, false});
+        try3Fields(text, new int[]{1, 1, 1}, new Integer[]{null, 1, null}, new Double[]{null, null, 1d}, new boolean[]{false, false, false});
 
         text = "select * from " + SupportBean.class.getName() + "(intBoxed not in (doubleBoxed))";
-        try3Fields(text, new int[]{1, 1, 1}, new Integer[]{null, 1, null}, new Double[]{null, null, 1d}, new boolean[]{false, true, true});
+        try3Fields(text, new int[]{1, 1, 1}, new Integer[]{null, 1, null}, new Double[]{null, null, 1d}, new boolean[]{false, false, false});
 
         text = "select * from " + SupportBean.class.getName() + "(intBoxed in [doubleBoxed:10))";
         try3Fields(text, new int[]{1, 1, 1}, new Integer[]{null, 1, 2}, new Double[]{null, null, 1d}, new boolean[]{false, false, true});
@@ -709,17 +706,17 @@ public class TestFilterExpressions extends TestCase
                 "Implicit conversion from datatype 'SupportEnum' to 'String' is not allowed [select * from com.espertech.esper.support.bean.SupportBeanWithEnum(string=com.espertech.esper.support.bean.SupportEnum.ENUM_VALUE_1)]");
 
         tryInvalid("select * from " + SupportBeanWithEnum.class.getName() + "(supportEnum=A.b)",
-                "Failed to resolve property 'A.b' to a stream or nested property in a stream [select * from com.espertech.esper.support.bean.SupportBeanWithEnum(supportEnum=A.b)]");
+                "Failed to find a stream named 'A' (did you mean 's0'?) [select * from com.espertech.esper.support.bean.SupportBeanWithEnum(supportEnum=A.b)]");
 
         tryInvalid("select * from pattern [a=" + SupportBean.class.getName() + " -> b=" +
                 SupportBean.class.getName() + "(doubleBoxed not in (doubleBoxed, x.intBoxed, 9))]",
-                "Failed to resolve property 'x.intBoxed' to a stream or nested property in a stream [select * from pattern [a=com.espertech.esper.support.bean.SupportBean -> b=com.espertech.esper.support.bean.SupportBean(doubleBoxed not in (doubleBoxed, x.intBoxed, 9))]]");
+                "Failed to find a stream named 'x' (did you mean 'b'?) [select * from pattern [a=com.espertech.esper.support.bean.SupportBean -> b=com.espertech.esper.support.bean.SupportBean(doubleBoxed not in (doubleBoxed, x.intBoxed, 9))]]");
 
         tryInvalid("select * from pattern [a=" + SupportBean.class.getName()
-                + " -> b=" + SupportBean.class.getName() + "(c.intPrimitive=a.intPrimitive)"
+                + " -> b=" + SupportBean.class.getName() + "(cluedo.intPrimitive=a.intPrimitive)"
                 + " -> c=" + SupportBean.class.getName()
                 + "]",
-                "Failed to resolve property 'c.intPrimitive' to a stream or nested property in a stream [select * from pattern [a=com.espertech.esper.support.bean.SupportBean -> b=com.espertech.esper.support.bean.SupportBean(c.intPrimitive=a.intPrimitive) -> c=com.espertech.esper.support.bean.SupportBean]]");
+                "Failed to resolve property 'cluedo.intPrimitive' to a stream or nested property in a stream [select * from pattern [a=com.espertech.esper.support.bean.SupportBean -> b=com.espertech.esper.support.bean.SupportBean(cluedo.intPrimitive=a.intPrimitive) -> c=com.espertech.esper.support.bean.SupportBean]]");
     }
 
     private void tryInvalid(String text, String expectedMsg)

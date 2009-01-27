@@ -1,10 +1,12 @@
 package com.espertech.esper.view.std;
 
-import junit.framework.TestCase;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.support.event.SupportEventTypeFactory;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.view.TestViewSupport;
 import com.espertech.esper.view.ViewParameterException;
-
-import java.util.Arrays;
+import junit.framework.TestCase;
 
 public class TestUniqueByPropertyViewFactory extends TestCase
 {
@@ -17,16 +19,17 @@ public class TestUniqueByPropertyViewFactory extends TestCase
 
     public void testSetParameters() throws Exception
     {
-        tryParameter("price", "price");
+        tryParameter("longPrimitive", "longPrimitive");
         tryInvalidParameter(1.1d);
     }
 
     public void testCanReuse() throws Exception
     {
-        factory.setViewParameters(null, Arrays.asList(new Object[] {"a"}));
-        assertFalse(factory.canReuse(new SizeView(SupportStatementContextFactory.makeContext())));
-        assertTrue(factory.canReuse(new UniqueByPropertyView(new String[] {"a"})));
-        assertFalse(factory.canReuse(new UniqueByPropertyView(new String[] {"c"})));
+        factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {"intPrimitive"}));
+        factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
+        assertFalse(factory.canReuse(new FirstElementView()));
+        assertTrue(factory.canReuse(new UniqueByPropertyView(SupportExprNodeFactory.makeIdentNodesBean("intPrimitive"))));
+        assertFalse(factory.canReuse(new UniqueByPropertyView(SupportExprNodeFactory.makeIdentNodesBean("intBoxed"))));
     }
 
     private void tryInvalidParameter(Object param) throws Exception
@@ -34,7 +37,8 @@ public class TestUniqueByPropertyViewFactory extends TestCase
         try
         {
             UniqueByPropertyViewFactory factory = new UniqueByPropertyViewFactory();
-            factory.setViewParameters(null, Arrays.asList(new Object[] {param}));
+            factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {param}));
+            factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
         catch (ViewParameterException ex)
@@ -46,8 +50,9 @@ public class TestUniqueByPropertyViewFactory extends TestCase
     private void tryParameter(Object param, String fieldName) throws Exception
     {
         UniqueByPropertyViewFactory factory = new UniqueByPropertyViewFactory();
-        factory.setViewParameters(null, Arrays.asList(new Object[] {param}));
+        factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {param}));
+        factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
         UniqueByPropertyView view = (UniqueByPropertyView) factory.makeView(SupportStatementContextFactory.makeContext());
-        assertEquals(fieldName, view.getUniqueFieldNames()[0]);
+        assertEquals(fieldName, view.getCriteriaExpressions()[0].toExpressionString());
     }
 }

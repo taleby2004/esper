@@ -9,7 +9,7 @@
 package com.espertech.esper.view;
 
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +68,11 @@ public abstract class ViewSupport implements View
         boolean isRemoved = children.remove(view);
         view.setParent(null);
         return isRemoved;
+    }
+
+    public void removeAllViews()
+    {
+        children.clear();
     }
 
     public final List<View> getViews()

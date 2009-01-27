@@ -10,13 +10,14 @@ package com.espertech.esper.view.ext;
 
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprOrderedExpr;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.*;
 import com.espertech.esper.view.window.RandomAccessByIndexGetter;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,10 +25,14 @@ import java.util.List;
  */
 public class SortWindowViewFactory implements DataWindowViewFactory
 {
+    private final static String NAME = "Sort view";
+
+    private List<ExprNode> viewParameters;
+
     /**
-     * The sort-by field names.
+     * The sort-by expressions.
      */
-    protected String[] sortFieldNames;
+    protected ExprNode[] sortCriteriaExpressions;
 
     /**
      * The flags defining the ascending or descending sort order.
@@ -46,80 +51,48 @@ public class SortWindowViewFactory implements DataWindowViewFactory
 
     private EventType eventType;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> viewParams) throws ViewParameterException
     {
-        String errorMessage = "Sort window view requires a field name, a boolean sort order and a numeric size parameter or parameter list";
-        if (viewParameters.size() == 3)
+        this.viewParameters = viewParams;
+    }
+
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
+    {
+        eventType = parentEventType;
+        String message = NAME + " requires a numeric size parameter and a list of expressions providing sort keys";
+        if (viewParameters.size() < 2)
         {
-            if ((viewParameters.get(0) instanceof String) &&
-                (viewParameters.get(1) instanceof Boolean) &&
-                (viewParameters.get(2) instanceof Number))
+            throw new ViewParameterException(message);
+        }
+
+        ExprNode[] validated = ViewFactorySupport.validate(NAME, parentEventType, statementContext, viewParameters, true);
+        for (int i = 1; i < validated.length; i++)
+        {
+            ViewFactorySupport.assertReturnsNonConstant(NAME, validated[i], i);
+        }
+
+        Object sortSize = ViewFactorySupport.evaluateAssertNoProperties(NAME, validated[0], 0);
+        if ((sortSize == null) || (!(sortSize instanceof Number)))
+        {
+            throw new ViewParameterException(message);
+        }
+        sortWindowSize = ((Number) sortSize).intValue();
+
+        sortCriteriaExpressions = new ExprNode[validated.length - 1];
+        isDescendingValues = new boolean[sortCriteriaExpressions.length];
+
+        for (int i = 1; i < validated.length; i++)
+        {
+            if (validated[i] instanceof ExprOrderedExpr)
             {
-                sortFieldNames = new String[] {(String)viewParameters.get(0)};
-                isDescendingValues = new boolean[] {(Boolean) viewParameters.get(1)};
-                Number sizeParam = (Number) viewParameters.get(2);
-                if (JavaClassHelper.isFloatingPointNumber(sizeParam))
-                {
-                    throw new ViewParameterException(errorMessage);
-                }
-                sortWindowSize = sizeParam.intValue();
+                isDescendingValues[i - 1] = ((ExprOrderedExpr) validated[i]).isDescending();
+                sortCriteriaExpressions[i - 1] = validated[i].getChildNodes().get(0);                
             }
             else
             {
-                throw new ViewParameterException(errorMessage);
+                sortCriteriaExpressions[i - 1] = validated[i];
             }
         }
-        else if (viewParameters.size() == 2)
-        {
-            if ( (!(viewParameters.get(0) instanceof Object[]) ||
-                 (!(viewParameters.get(1) instanceof Integer))) )
-            {
-                throw new ViewParameterException(errorMessage);
-            }
-
-            Object[] ascFieldsArr = (Object[]) viewParameters.get(0);
-            try
-            {
-                setNamesAndIsDescendingValues(ascFieldsArr);
-            }
-            catch (RuntimeException ex)
-            {
-                throw new ViewParameterException(errorMessage + ",reason:" + ex.getMessage());
-            }
-
-            Number sizeParam = (Number) viewParameters.get(1);
-            if (JavaClassHelper.isFloatingPointNumber(sizeParam))
-            {
-                throw new ViewParameterException(errorMessage);
-            }
-            sortWindowSize = sizeParam.intValue();
-        }
-        else
-        {
-            throw new ViewParameterException(errorMessage);
-        }
-
-        if (sortWindowSize < 1)
-        {
-            throw new ViewParameterException("Illegal argument for sort window size of sort window");
-        }
-    }
-
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
-    {
-        // Attaches to parent views where the sort fields exist and implement Comparable
-        String result = null;
-        for(String name : sortFieldNames)
-        {
-            result = PropertyCheckHelper.exists(parentEventType, name);
-
-            if(result != null)
-            {
-                throw new ViewAttachException(result);
-            }
-        }
-
-        eventType = parentEventType;
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)
@@ -171,7 +144,7 @@ public class SortWindowViewFactory implements DataWindowViewFactory
             useCollatorSort = statementContext.getConfigSnapshot().getEngineDefaults().getLanguage().isSortUsingCollator();
         }
 
-        return new SortWindowView(this, sortFieldNames, isDescendingValues, sortWindowSize, sortedRandomAccess, useCollatorSort);
+        return new SortWindowView(this, sortCriteriaExpressions, isDescendingValues, sortWindowSize, sortedRandomAccess, useCollatorSort);
     }
 
     public EventType getEventType()
@@ -194,31 +167,12 @@ public class SortWindowViewFactory implements DataWindowViewFactory
         SortWindowView other = (SortWindowView) view;
         if ((other.getSortWindowSize() != sortWindowSize) ||
             (!compare(other.getIsDescendingValues(), isDescendingValues)) ||
-            (!Arrays.deepEquals(other.getSortFieldNames(), sortFieldNames)) )
+            (!ExprNodeUtility.deepEquals(other.getSortCriteriaExpressions(), sortCriteriaExpressions)) )
         {
             return false;
         }
 
         return other.isEmpty();
-    }
-
-    @SuppressWarnings({"MultiplyOrDivideByPowerOfTwo"})
-    private void setNamesAndIsDescendingValues(Object[] propertiesAndDirections)
-    {
-        if(propertiesAndDirections.length % 2 != 0)
-        {
-            throw new IllegalArgumentException("Each property to sort by must have an isDescending boolean qualifier");
-        }
-
-        int length = propertiesAndDirections.length / 2;
-        sortFieldNames = new String[length];
-        isDescendingValues  = new boolean[length];
-
-        for(int i = 0; i < length; i++)
-        {
-            sortFieldNames[i] = (String)propertiesAndDirections[2*i];
-            isDescendingValues[i] = (Boolean)propertiesAndDirections[2*i + 1];
-        }
     }
 
     private boolean compare(boolean[] one, boolean[] two)

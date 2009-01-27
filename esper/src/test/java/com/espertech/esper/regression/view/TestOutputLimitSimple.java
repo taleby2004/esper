@@ -1,9 +1,9 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.regression.support.ResultAssertExecution;
 import com.espertech.esper.regression.support.ResultAssertTestResult;
 import com.espertech.esper.support.bean.SupportBean;
@@ -27,9 +27,8 @@ public class TestOutputLimitSimple extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("MarketData", SupportMarketDataBean.class);
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
+        config.addEventType("MarketData", SupportMarketDataBean.class);
+        config.addEventType("SupportBean", SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -207,6 +206,33 @@ public class TestOutputLimitSimple extends TestCase
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(deltaMSec));
         assertEquals("E1", listener.assertOneGetNewAndReset().get("symbol"));
+    }
+
+    public void testOutputEveryTimePeriodVariable()
+    {
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
+        epService.getEPAdministrator().getConfiguration().addVariable("D", int.class, 1);
+        epService.getEPAdministrator().getConfiguration().addVariable("H", int.class, 2);
+        epService.getEPAdministrator().getConfiguration().addVariable("M", int.class, 3);
+        epService.getEPAdministrator().getConfiguration().addVariable("S", int.class, 4);
+        epService.getEPAdministrator().getConfiguration().addVariable("MS", int.class, 5);
+
+        String stmtText = "select symbol from MarketData.win:keepall() output snapshot every D days H hours M minutes S seconds MS milliseconds";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(listener);
+        sendMDEvent("E1", 0);
+
+        long deltaSec = 26 * 60 * 60 + 3 * 60 + 4;
+        long deltaMSec = deltaSec * 1000 + 5 + 2000;
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(deltaMSec - 1));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(deltaMSec));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("symbol"));
+
+        // test statement model
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
+        assertEquals(stmtText, model.toEPL());
     }
 
     private void runAssertion34(String stmtText, String outputLimit)
@@ -535,8 +561,6 @@ public class TestOutputLimitSimple extends TestCase
 
     public void testTimeBatchOutputEvents()
     {
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
-
         String stmtText = "select * from " + SupportBean.class.getName() + ".win:time_batch(10 seconds) output every 10 seconds";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -925,9 +949,6 @@ public class TestOutputLimitSimple extends TestCase
     private void timeCallback(String statementString, int timeToCallback) {
     	// clear any old events
         epService.initialize();
-
-    	// turn off external clocking
-    	epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
     	// set the clock to 0
     	currentTime = 0;

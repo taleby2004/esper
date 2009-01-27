@@ -19,8 +19,8 @@ import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.variable.VariableChangeCallback;
 import com.espertech.esper.epl.variable.VariableReadWritePackage;
 import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
@@ -161,7 +161,7 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
             builtinProperties.put("count_insert", totalNewEventsCount);
             builtinProperties.put("count_remove", totalOldEventsCount);
             builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
-            eventsPerStream[0] = context.getEventAdapterService().createMapFromValues(builtinProperties, builtinPropertiesEventType);
+            eventsPerStream[0] = context.getEventAdapterService().adaptorForTypedMap(builtinProperties, builtinPropertiesEventType);
         }
 
         boolean result = false;
@@ -205,7 +205,7 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
                 builtinProperties.put("count_insert", totalNewEventsCount);
                 builtinProperties.put("count_remove", totalOldEventsCount);
                 builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
-                eventsPerStream[0] = context.getEventAdapterService().createMapFromValues(builtinProperties, builtinPropertiesEventType);
+                eventsPerStream[0] = context.getEventAdapterService().adaptorForTypedMap(builtinProperties, builtinPropertiesEventType);
             }
 
             ignoreVariableCallbacks = true;

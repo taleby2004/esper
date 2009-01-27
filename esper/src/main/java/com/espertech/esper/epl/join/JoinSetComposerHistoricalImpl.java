@@ -12,7 +12,7 @@ import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.db.DataCacheClearableMap;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.view.Viewable;
 import com.espertech.esper.view.HistoricalEventViewable;
 
@@ -57,7 +57,7 @@ public class JoinSetComposerHistoricalImpl implements JoinSetComposer
 
         for (int i = 0; i < eventsPerStream.length; i++)
         {
-            if (eventsPerStream[i] != null)
+            if ((eventsPerStream[i] != null) && (repositories[i] != null))
             {
                 for (int j = 0; j < repositories[i].length; j++)
                 {

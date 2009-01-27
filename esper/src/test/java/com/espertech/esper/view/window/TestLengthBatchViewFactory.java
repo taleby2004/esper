@@ -1,12 +1,10 @@
 package com.espertech.esper.view.window;
 
-import junit.framework.TestCase;
-
-import java.util.Arrays;
-
-import com.espertech.esper.view.std.SizeView;
-import com.espertech.esper.view.ViewParameterException;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.view.TestViewSupport;
+import com.espertech.esper.view.ViewParameterException;
+import com.espertech.esper.view.std.FirstElementView;
+import junit.framework.TestCase;
 
 public class TestLengthBatchViewFactory extends TestCase
 {
@@ -22,7 +20,7 @@ public class TestLengthBatchViewFactory extends TestCase
         tryParameter(new Object[] {Short.parseShort("10")}, 10);
         tryParameter(new Object[] {100}, 100);
 
-        tryInvalidParameter("price");
+        tryInvalidParameter("string");
         tryInvalidParameter(true);
         tryInvalidParameter(1.1d);
         tryInvalidParameter(0);
@@ -31,8 +29,8 @@ public class TestLengthBatchViewFactory extends TestCase
 
     public void testCanReuse() throws Exception
     {
-        factory.setViewParameters(null, Arrays.asList(new Object[] {1000}));
-        assertFalse(factory.canReuse(new SizeView(SupportStatementContextFactory.makeContext())));
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000}));
+        assertFalse(factory.canReuse(new FirstElementView()));
         assertFalse(factory.canReuse(new LengthBatchView(factory, 1, null)));
         assertTrue(factory.canReuse(new LengthBatchView(factory, 1000, null)));
     }
@@ -41,7 +39,7 @@ public class TestLengthBatchViewFactory extends TestCase
     {
         try
         {
-            factory.setViewParameters(null, Arrays.asList(new Object[] {param}));
+            factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {param}));
             fail();
         }
         catch (ViewParameterException ex)
@@ -53,7 +51,7 @@ public class TestLengthBatchViewFactory extends TestCase
     private void tryParameter(Object[] param, int size) throws Exception
     {
         LengthBatchViewFactory factory = new LengthBatchViewFactory();
-        factory.setViewParameters(null, Arrays.asList(param));
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(param));
         LengthBatchView view = (LengthBatchView) factory.makeView(SupportStatementContextFactory.makeContext());
         assertEquals(size, view.getSize());
     }

@@ -14,8 +14,8 @@ import com.espertech.esper.collection.NullIterator;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewSupport;
@@ -34,7 +34,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
     private final EventType eventType;
     private final NamedWindowRootView namedWindowRootView;
     private final NamedWindowService namedWindowService;
-    private transient Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;  // handles as copy-on-write
+    private volatile Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers;  // handles as copy-on-write
     private final EPStatementHandle createWindowStmtHandle;
     private final StatementResultService statementResultService;
     private final ValueAddEventProcessor revisionProcessor;

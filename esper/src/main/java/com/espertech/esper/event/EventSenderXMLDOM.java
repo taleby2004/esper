@@ -10,6 +10,7 @@ package com.espertech.esper.event;
 
 import com.espertech.esper.client.EventSender;
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.EPRuntimeEventSender;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.event.xml.XMLEventBean;
@@ -27,6 +28,8 @@ public class EventSenderXMLDOM implements EventSender
 {
     private final EPRuntimeEventSender runtimeEventSender;
     private final BaseXMLEventType baseXMLEventType;
+    private final boolean validateRootElement;
+    private String getNodeName;
 
     /**
      * Ctor.
@@ -37,6 +40,7 @@ public class EventSenderXMLDOM implements EventSender
     {
         this.runtimeEventSender = runtimeEventSender;
         this.baseXMLEventType = baseXMLEventType;
+        this.validateRootElement = baseXMLEventType.getConfigurationEventTypeXMLDOM().isEventSenderValidatesRoot();
     }
 
     public void sendEvent(Object node) throws EPException
@@ -65,15 +69,18 @@ public class EventSenderXMLDOM implements EventSender
             throw new EPException("Unexpected event object type '" + node.getClass().getName() + "' encountered, please supply a org.w3c.dom.Document or Element node");
         }
 
-        String rootElementName = namedNode.getLocalName();
-        if (rootElementName == null)
+        if (validateRootElement)
         {
-            rootElementName = namedNode.getNodeName();
-        }
+            getNodeName = namedNode.getLocalName();
+            if (getNodeName == null)
+            {
+                getNodeName = namedNode.getNodeName();
+            }
 
-        if (!rootElementName.equals(baseXMLEventType.getRootElementName()))
-        {
-            throw new EPException("Unexpected root element name '" + rootElementName + "' encountered, expected a root element name of '" + baseXMLEventType.getRootElementName() + "'");
+            if (!getNodeName.equals(baseXMLEventType.getRootElementName()))
+            {
+                throw new EPException("Unexpected root element name '" + getNodeName + "' encountered, expected a root element name of '" + baseXMLEventType.getRootElementName() + "'");
+            }
         }
 
         EventBean event = new XMLEventBean(namedNode, baseXMLEventType);

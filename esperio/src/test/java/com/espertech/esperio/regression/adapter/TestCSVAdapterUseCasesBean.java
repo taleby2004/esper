@@ -11,7 +11,7 @@ package com.espertech.esperio.regression.adapter;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.support.util.SupportUpdateListener;
@@ -30,7 +30,7 @@ public class TestCSVAdapterUseCasesBean extends TestCSVAdapterUseCases {
     public void testReadWritePropsBean()
     {
         Configuration configuration = new Configuration();
-        configuration.addEventTypeAlias("ReadWrite", ExampleMarketDataBeanReadWrite.class);
+        configuration.addEventType("ReadWrite", ExampleMarketDataBeanReadWrite.class);
 
         epService = EPServiceProviderManager.getProvider("testExistingTypeNoOptions", configuration);
         epService.initialize();

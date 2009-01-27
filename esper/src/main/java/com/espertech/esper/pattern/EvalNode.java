@@ -14,13 +14,14 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Superclass of all nodes in an evaluation tree representing an event pattern expression.
  * Follows the Composite pattern. Child nodes do not carry references to parent nodes, the tree
  * is unidirectional.
  */
-public abstract class EvalNode implements MetaDefItem
+public abstract class EvalNode implements MetaDefItem, Serializable
 {
     private static final long serialVersionUID = 0L;
 
@@ -115,22 +116,14 @@ public abstract class EvalNode implements MetaDefItem
 
     private static void recursiveAnalyzeChildNodes(EvalNodeAnalysisResult evalNodeAnalysisResult, EvalNode currentNode)
     {
-        if (currentNode instanceof EvalFilterNode)
+        if ((currentNode instanceof EvalFilterNode) ||
+            (currentNode instanceof EvalGuardNode) ||
+            (currentNode instanceof EvalObserverNode) ||
+            (currentNode instanceof EvalMatchUntilNode))
         {
-            evalNodeAnalysisResult.add((EvalFilterNode) currentNode);
+            evalNodeAnalysisResult.addNode(currentNode);
         }
-        if (currentNode instanceof EvalGuardNode)
-        {
-            evalNodeAnalysisResult.add((EvalGuardNode) currentNode);
-        }
-        if (currentNode instanceof EvalObserverNode)
-        {
-            evalNodeAnalysisResult.add((EvalObserverNode) currentNode);
-        }
-        if (currentNode instanceof EvalMatchUntilNode)
-        {
-            evalNodeAnalysisResult.add((EvalMatchUntilNode) currentNode);
-        }
+
         for (EvalNode node : currentNode.getChildNodes())
         {
             recursiveAnalyzeChildNodes(evalNodeAnalysisResult, node);

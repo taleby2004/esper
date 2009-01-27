@@ -1,9 +1,6 @@
 package com.espertech.esper.epl.spec;
 
 import junit.framework.TestCase;
-import com.espertech.esper.epl.core.EngineImportServiceImpl;
-import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
-import com.espertech.esper.epl.named.NamedWindowServiceImpl;
 import com.espertech.esper.epl.expression.ExprAndNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.parse.EPLTreeWalker;
@@ -11,8 +8,7 @@ import com.espertech.esper.filter.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
 import com.espertech.esper.support.epl.parse.SupportParserHelper;
-import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.event.SupportValueAddEventService;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +23,7 @@ public class TestFilterStreamSpecRaw extends TestCase
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName());
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(SupportBean.class, spec.getEventType().getUnderlyingType());
+        assertEquals(SupportBean.class, spec.getFilterForEventType().getUnderlyingType());
         assertEquals(0, spec.getParameters().size());
     }
 
@@ -36,7 +32,7 @@ public class TestFilterStreamSpecRaw extends TestCase
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
                 "(intPrimitive-1>2 and intBoxed-5>3)");
         FilterSpecCompiled spec = compile(raw);
-        assertEquals(SupportBean.class, spec.getEventType().getUnderlyingType());
+        assertEquals(SupportBean.class, spec.getFilterForEventType().getUnderlyingType());
         assertEquals(1, spec.getParameters().size());
         // expecting unoptimized expressions to condense to a single boolean expression, more efficient this way
 
@@ -252,7 +248,7 @@ public class TestFilterStreamSpecRaw extends TestCase
 
     private FilterSpecCompiled compile(FilterStreamSpecRaw raw) throws Exception
     {
-        FilterStreamSpecCompiled compiled = (FilterStreamSpecCompiled) raw.compile(SupportEventAdapterService.getService(), new MethodResolutionServiceImpl(new EngineImportServiceImpl()), null, null, new NamedWindowServiceImpl(null, null), new SupportValueAddEventService(), null, "default", null, new HashSet<String>());
+        FilterStreamSpecCompiled compiled = (FilterStreamSpecCompiled) raw.compile(SupportStatementContextFactory.makeContext(), new HashSet<String>());
         return compiled.getFilterSpec();
     }
 

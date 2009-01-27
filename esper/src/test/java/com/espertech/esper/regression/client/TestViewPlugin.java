@@ -16,11 +16,10 @@ public class TestViewPlugin extends TestCase
         testListener = new SupportUpdateListener();
 
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.addEventTypeAlias("A", SupportMarketDataBean.class);
+        configuration.addEventType("A", SupportMarketDataBean.class);
         configuration.addPlugInView("mynamespace", "trendspotter", MyTrendSpotterViewFactory.class.getName());
         configuration.addPlugInView("mynamespace", "flushedsimple", MyFlushedSimpleViewFactory.class.getName());
         configuration.addPlugInView("mynamespace", "invalid", String.class.getName());
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getProvider("TestViewPlugin", configuration);
         epService.initialize();
     }
@@ -87,8 +86,8 @@ public class TestViewPlugin extends TestCase
     public void testInvalid()
     {
         tryInvalid("select * from A.mynamespace:xxx()",
-                "Error starting view: View name 'mynamespace:xxx' is not a known view name [select * from A.mynamespace:xxx()]");
-        tryInvalid("select * from A.mynamespace:invalid()", "Error starting view: Error casting view factory instance to com.espertech.esper.view.ViewFactory interface for view 'invalid' [select * from A.mynamespace:invalid()]");
+                "Error starting statement: View name 'mynamespace:xxx' is not a known view name [select * from A.mynamespace:xxx()]");
+        tryInvalid("select * from A.mynamespace:invalid()", "Error starting statement: Error casting view factory instance to com.espertech.esper.view.ViewFactory interface for view 'invalid' [select * from A.mynamespace:invalid()]");
     }
 
     private void sendEvent(double price)

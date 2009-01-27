@@ -1,11 +1,8 @@
 package com.espertech.esper.regression.view;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportBeanKeywords;
@@ -28,8 +25,7 @@ public class TestSelectExpr extends TestCase
     {
         testListener = new SupportUpdateListener();
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.addEventType("SupportBean", SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }
@@ -48,8 +44,8 @@ public class TestSelectExpr extends TestCase
 
     public void testKeywordsAllowed()
     {
-        String fields = "count,escape,every,sum,avg,max,min,coalesce,median,stddev,avedev,events,seconds,minutes,first,last,unidirectional,pattern,sql,metadatasql,prev,prior,weekday,lastweekday,cast,snapshot,variable,window,left,right,full,outer,join";
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("Keywords", SupportBeanKeywords.class);
+        String fields = "count,escape,every,sum,avg,max,min,coalesce,median,stddev,avedev,events,first,last,unidirectional,pattern,sql,metadatasql,prev,prior,weekday,lastweekday,cast,snapshot,variable,window,left,right,full,outer,join";
+        epService.getEPAdministrator().getConfiguration().addEventType("Keywords", SupportBeanKeywords.class);
         EPStatement stmt = epService.getEPAdministrator().createEPL("select " + fields + " from Keywords");
         stmt.addListener(testListener);
         epService.getEPRuntime().sendEvent(new SupportBeanKeywords());

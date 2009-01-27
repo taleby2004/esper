@@ -25,7 +25,6 @@ public class Test3StreamOuterInnerJoin extends TestCase
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epService.initialize();
         updateListener = new SupportUpdateListener();
     }
@@ -33,7 +32,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
     public void testFullJoinVariantThree()
     {
         String joinStatement = "select * from " +
-                EVENT_S1 + " as s1 inner join " +
+                EVENT_S1 + ".win:keepall() as s1 inner join " +
                 EVENT_S2 + ".win:length(1000) as s2 on s1.p10 = s2.p20 " +
                 " full outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s1.p10";
 
@@ -44,7 +43,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
     {
         String joinStatement = "select * from " +
                 EVENT_S2 + ".win:length(1000) as s2 " +
-               " inner join " + EVENT_S1 + " s1 on s1.p10 = s2.p20" +
+               " inner join " + EVENT_S1 + ".win:keepall() s1 on s1.p10 = s2.p20" +
                " full outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s1.p10";
 
         runAssertionFull(joinStatement);
@@ -63,7 +62,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
     public void testLeftJoinVariantThree()
     {
         String joinStatement = "select * from " +
-                EVENT_S1 + " as s1 left outer join " +
+                EVENT_S1 + ".win:keepall() as s1 left outer join " +
                 EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s1.p10 " +
                 "inner join " + EVENT_S2 + ".win:length(1000) as s2 on s1.p10 = s2.p20";
 
@@ -74,7 +73,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
     {
         String joinStatement = "select * from " +
                 EVENT_S2 + ".win:length(1000) as s2 " +
-               " inner join " + EVENT_S1 + " s1 on s1.p10 = s2.p20" +
+               " inner join " + EVENT_S1 + ".win:keepall() s1 on s1.p10 = s2.p20" +
                " left outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s1.p10";
 
         runAssertionFull(joinStatement);

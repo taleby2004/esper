@@ -4,11 +4,11 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.event.EventBean;
 
 import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.bean.SupportBeanWithEnum;
@@ -52,7 +52,7 @@ public class TestCaseExpr extends TestCase
         model.setSelectClause(SelectClause.create().add(Expressions.caseWhenThen()
                 .add(Expressions.eq("symbol", "GE"), Expressions.property("volume"))
                 .add(Expressions.eq("symbol", "DELL"), Expressions.sum("price")), "p1"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 10)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(10))));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String caseExpr = "select case" +
@@ -125,7 +125,7 @@ public class TestCaseExpr extends TestCase
         model.setSelectClause(SelectClause.create().add(Expressions.caseWhenThen()
                 .setElse(Expressions.property("volume"))
                 .add(Expressions.eq("symbol", "DELL"), Expressions.multiply(Expressions.property("volume"), Expressions.constant(3))), "p1"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 10)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(10))));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String caseExpr = "select case " +
@@ -393,7 +393,7 @@ public class TestCaseExpr extends TestCase
                 .add(Expressions.constant(1), Expressions.constant(null))
                 .add(Expressions.constant(2), Expressions.constant(1.0))
                 .add(Expressions.constant(3), Expressions.constant(null)), "p1"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", 100)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", Expressions.constant(100))));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         assertEquals(caseExpr, model.toEPL());
@@ -525,31 +525,31 @@ public class TestCaseExpr extends TestCase
 
         EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
         selectTestCase.addListener(testListener);
-        assertEquals(Float.class, selectTestCase.getEventType().getPropertyType("p1"));
+        assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendSupportBeanEvent(1, 10L, 3.0f, 4.0);
         EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(10f, event.get("p1"));
+        assertEquals(10d, event.get("p1"));
 
         sendSupportBeanEvent(1, 15L, 3.0f, 4.0);
         event = testListener.getAndResetLastNewData()[0];
-        assertEquals(25f, event.get("p1"));
+        assertEquals(25d, event.get("p1"));
 
         sendSupportBeanEvent(2, 1L, 3.0f, 4.0);
         event = testListener.getAndResetLastNewData()[0];
-        assertEquals(9f, event.get("p1"));
+        assertEquals(9d, event.get("p1"));
 
         sendSupportBeanEvent(2, 1L, 3.0f, 4.0);
         event = testListener.getAndResetLastNewData()[0];
-        assertEquals(12.0F, event.get("p1"));
+        assertEquals(12.0d, event.get("p1"));
 
         sendSupportBeanEvent(5, 1L, 1.0f, 1.0);
         event = testListener.getAndResetLastNewData()[0];
-        assertEquals(11.0F, event.get("p1"));
+        assertEquals(11.0d, event.get("p1"));
 
         sendSupportBeanEvent(5, 1L, 1.0f, 1.0);
         event = testListener.getAndResetLastNewData()[0];
-        assertEquals(16f, event.get("p1"));
+        assertEquals(16d, event.get("p1"));
     }
 
     public void testCaseSyntax2EnumChecks()

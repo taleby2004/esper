@@ -9,9 +9,11 @@
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventSender;
 import com.espertech.esper.core.EPRuntimeEventSender;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.event.bean.BeanEventType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,17 +28,20 @@ public class EventSenderBean implements EventSender
 {
     private final EPRuntimeEventSender runtime;
     private final BeanEventType beanEventType;
+    private final EventAdapterService eventAdapterService;
     private final Set<Class> compatibleClasses;
 
     /**
      * Ctor.
      * @param runtime for processing events
      * @param beanEventType the event type
+     * @param eventAdapterService factory for event beans and event types
      */
-    public EventSenderBean(EPRuntimeEventSender runtime, BeanEventType beanEventType)
+    public EventSenderBean(EPRuntimeEventSender runtime, BeanEventType beanEventType, EventAdapterService eventAdapterService)
     {
         this.runtime = runtime;
         this.beanEventType = beanEventType;
+        this.eventAdapterService = eventAdapterService;
         compatibleClasses = new HashSet<Class>();
     }
 
@@ -69,12 +74,12 @@ public class EventSenderBean implements EventSender
                     {
                         throw new EPException("Event object of type " + event.getClass().getName() +
                                 " does not equal, extend or implement the type " + beanEventType.getUnderlyingType().getName() +
-                                " of event type '" + beanEventType.getAlias() + "'");
+                                " of event type '" + beanEventType.getName() + "'");
                     }
                 }
             }
         }
 
-        return new BeanEventBean(event, beanEventType);        
+        return eventAdapterService.adapterForTypedBean(event, beanEventType);
     }
 }

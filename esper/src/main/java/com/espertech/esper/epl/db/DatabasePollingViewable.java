@@ -10,10 +10,7 @@ package com.espertech.esper.epl.db;
 
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.HistoricalEventViewable;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.PropertyAccessException;
+import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
 import com.espertech.esper.epl.core.StreamTypesException;
@@ -24,7 +21,7 @@ import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.collection.IterablesArrayIterator;
 
@@ -137,6 +134,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
                         return reader.getValue();
                     }
                     public boolean isExistsProperty(EventBean eventBean) {return true;}
+                    public Object getFragment(EventBean eventBean) {return null;}
                 };
             }
 
@@ -147,8 +145,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
     public EventTable[] poll(EventBean[][] lookupEventsPerStream, PollResultIndexingStrategy indexingStrategy)
     {
         DataCache localDataCache = dataCacheThreadLocal.get();
-
-        pollExecStrategy.start();
+        boolean strategyStarted = false;
 
         EventTable[] resultPerInputRow = new EventTable[lookupEventsPerStream.length];
 
@@ -193,6 +190,12 @@ public class DatabasePollingViewable implements HistoricalEventViewable
             {
                 try
                 {
+                    if (!strategyStarted)
+                    {
+                        pollExecStrategy.start();
+                        strategyStarted = true;
+                    }
+
                     // Poll using the polling execution strategy and lookup values
                     List<EventBean> pollResult = pollExecStrategy.poll(lookupValues);
 
@@ -212,13 +215,19 @@ public class DatabasePollingViewable implements HistoricalEventViewable
                 }
                 catch (EPException ex)
                 {
-                    pollExecStrategy.done();
+                    if (strategyStarted)
+                    {
+                        pollExecStrategy.done();
+                    }
                     throw ex;
                 }
             }
         }
 
-        pollExecStrategy.done();
+        if (strategyStarted)
+        {
+            pollExecStrategy.done();
+        }
 
         return resultPerInputRow;
     }
@@ -268,5 +277,10 @@ public class DatabasePollingViewable implements HistoricalEventViewable
     public ThreadLocal<DataCache> getDataCacheThreadLocal()
     {
         return dataCacheThreadLocal;
+    }
+
+    public void removeAllViews()
+    {
+        throw new UnsupportedOperationException("Subviews not supported");
     }
 }

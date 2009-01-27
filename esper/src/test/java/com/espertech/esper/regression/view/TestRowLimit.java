@@ -18,9 +18,8 @@ public class TestRowLimit extends TestCase {
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
-        config.addEventTypeAlias("SupportBeanNumeric", SupportBeanNumeric.class);
+        config.addEventType("SupportBean", SupportBean.class);
+        config.addEventType("SupportBeanNumeric", SupportBeanNumeric.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -172,7 +171,7 @@ public class TestRowLimit extends TestCase {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.createWildcard());
         model.getSelectClause().setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH);
-        model.setFromClause(FromClause.create(FilterStream.create("SupportBean").addView("win", "length_batch", 3)));
+        model.setFromClause(FromClause.create(FilterStream.create("SupportBean").addView("win", "length_batch", Expressions.constant(3))));
         model.setRowLimitClause(RowLimitClause.create(1));
         
         String statementString = "select irstream * from SupportBean.win:length_batch(3) limit 1";
@@ -274,13 +273,13 @@ public class TestRowLimit extends TestCase {
     {
         epService.getEPAdministrator().createEPL("create variable string myrows = 'abc'");
         tryInvalid("select * from SupportBean limit myrows",
-                   "Error starting view: Limit clause requires a variable of numeric type [select * from SupportBean limit myrows]");
+                   "Error starting statement: Limit clause requires a variable of numeric type [select * from SupportBean limit myrows]");
         tryInvalid("select * from SupportBean limit 1, myrows",
-                   "Error starting view: Limit clause requires a variable of numeric type [select * from SupportBean limit 1, myrows]");
+                   "Error starting statement: Limit clause requires a variable of numeric type [select * from SupportBean limit 1, myrows]");
         tryInvalid("select * from SupportBean limit dummy",
-                   "Error starting view: Limit clause variable by name 'dummy' has not been declared [select * from SupportBean limit dummy]");
+                   "Error starting statement: Limit clause variable by name 'dummy' has not been declared [select * from SupportBean limit dummy]");
         tryInvalid("select * from SupportBean limit 1,dummy",
-                   "Error starting view: Limit clause variable by name 'dummy' has not been declared [select * from SupportBean limit 1,dummy]");
+                   "Error starting statement: Limit clause variable by name 'dummy' has not been declared [select * from SupportBean limit 1,dummy]");
     }
 
     private void sendTimer(long timeInMSec)

@@ -12,17 +12,20 @@ import com.espertech.esper.util.MetaDefItem;
 import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Specification for creating a named window.
  */
-public class CreateWindowDesc implements MetaDefItem
+public class CreateWindowDesc implements MetaDefItem, Serializable
 {
     private String windowName;
     private List<ViewSpec> viewSpecs;
     private boolean isInsert;
     private String insertFromWindow;
     private ExprNode insertFilter;
+    private StreamSpecOptions streamSpecOptions;
+    private static final long serialVersionUID = 3889989851649484639L;
 
     /**
      * Ctor.
@@ -30,13 +33,15 @@ public class CreateWindowDesc implements MetaDefItem
      * @param viewSpecs the view definitions
      * @param insert true for insert-info
      * @param insertFilter optional filter expression
+     * @param streamSpecOptions options such as retain-union etc
      */
-    public CreateWindowDesc(String windowName, List<ViewSpec> viewSpecs, boolean insert, ExprNode insertFilter)
+    public CreateWindowDesc(String windowName, List<ViewSpec> viewSpecs, StreamSpecOptions streamSpecOptions, boolean insert, ExprNode insertFilter)
     {
         this.windowName = windowName;
         this.viewSpecs = viewSpecs;
         this.isInsert = insert;
         this.insertFilter = insertFilter;
+        this.streamSpecOptions = streamSpecOptions;
     }
 
     /**
@@ -100,5 +105,14 @@ public class CreateWindowDesc implements MetaDefItem
     public void setInsertFromWindow(String insertFromWindow)
     {
         this.insertFromWindow = insertFromWindow;
+    }
+
+    /**
+     * Returns the options for the stream such as unidirectional, retain-union etc.
+     * @return stream options
+     */
+    public StreamSpecOptions getStreamSpecOptions()
+    {
+        return streamSpecOptions;
     }
 }

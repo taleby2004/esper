@@ -1,13 +1,13 @@
 package com.espertech.esper.client;
 
 import junit.framework.TestCase;
+import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestEPServiceProviderManager extends TestCase
 {
     public void testGetInstance()
     {
-        Configuration configuration = new Configuration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        Configuration configuration = SupportConfigFactory.getConfiguration();
 
         EPServiceProvider runtimeDef1 = EPServiceProviderManager.getDefaultProvider();
         EPServiceProvider runtimeA1 = EPServiceProviderManager.getProvider("A");
@@ -43,7 +43,7 @@ public class TestEPServiceProviderManager extends TestCase
     {
         Configuration configuration = new Configuration();
         configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addEventTypeAlias("x", "xxx.noclass");
+        configuration.addEventType("x", "xxx.noclass");
 
         try
         {

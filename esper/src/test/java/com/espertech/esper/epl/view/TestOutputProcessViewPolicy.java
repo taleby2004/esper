@@ -5,7 +5,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.SupportResultSetProcessor;
 import com.espertech.esper.support.view.SupportSchemaNeutralView;
@@ -27,7 +27,7 @@ public class TestOutputProcessViewPolicy extends TestCase
     {
         OutputStrategy outputStrategy = new OutputStrategySimple();
         resultSetProcessor = new SupportResultSetProcessor();
-        OutputLimitSpec spec = new OutputLimitSpec(1d, null, OutputLimitRateType.EVENTS, OutputLimitLimitType.DEFAULT, null, null, null);
+        OutputLimitSpec spec = new OutputLimitSpec(1d, null, OutputLimitRateType.EVENTS, OutputLimitLimitType.DEFAULT, null, null, null, null);
         outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 1, spec, SupportStatementContextFactory.makeContext());
         outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 2, spec, SupportStatementContextFactory.makeContext());
         

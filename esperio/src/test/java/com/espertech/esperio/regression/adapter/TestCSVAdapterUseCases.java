@@ -185,19 +185,19 @@ public class TestCSVAdapterUseCases extends TestCase
 
     public void testCoordinated() throws Exception
     {
-        Map<String, Class> priceProps = new HashMap<String, Class>();
+        Map<String, Object> priceProps = new HashMap<String, Object>();
         priceProps.put("timestamp", Long.class);
         priceProps.put("symbol", String.class);
         priceProps.put("price", Double.class);
 
-        Map<String, Class> tradeProps = new HashMap<String, Class>();
+        Map<String, Object> tradeProps = new HashMap<String, Object>();
         tradeProps.put("timestamp", Long.class);
         tradeProps.put("symbol", String.class);
         tradeProps.put("notional", Double.class);
 
         Configuration config = new Configuration();
-        config.addEventTypeAlias("TradeEvent", tradeProps);
-        config.addEventTypeAlias("PriceEvent", priceProps);
+        config.addEventType("TradeEvent", tradeProps);
+        config.addEventType("PriceEvent", priceProps);
 
         epService = EPServiceProviderManager.getProvider("testCoordinated", config);
         epService.initialize();
@@ -258,14 +258,14 @@ public class TestCSVAdapterUseCases extends TestCase
     {
         Configuration configuration = new Configuration();
     	if (useBean) {
-            configuration.addEventTypeAlias(typeName, ExampleMarketDataBean.class);
+            configuration.addEventType(typeName, ExampleMarketDataBean.class);
     	}
     	else {
-            Map<String, Class> eventProperties = new HashMap<String, Class>();
+            Map<String, Object> eventProperties = new HashMap<String, Object>();
             eventProperties.put("symbol", String.class);
             eventProperties.put("price", double.class);
             eventProperties.put("volume", Integer.class);
-            configuration.addEventTypeAlias(typeName, eventProperties);
+            configuration.addEventType(typeName, eventProperties);
     	}
 
         return configuration;

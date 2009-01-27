@@ -13,6 +13,8 @@ import com.espertech.esper.view.ext.*;
 import com.espertech.esper.view.window.*;
 import com.espertech.esper.view.stat.*;
 import com.espertech.esper.view.internal.PriorEventViewFactory;
+import com.espertech.esper.view.internal.UnionViewFactory;
+import com.espertech.esper.view.internal.IntersectViewFactory;
 
 /**
  * Enum for all build-in views.
@@ -125,11 +127,6 @@ public enum ViewEnum
     REGRESSION_LINEST("stat", "linest", RegressionLinestViewFactory.class, null),
 
     /**
-     * Cubes.
-     */
-    MULTIDIM_VIEW("stat", "cube", MultiDimStatsViewFactory.class, null),
-
-    /**
      * Sorted window.
      */
     SORT_WINDOW("ext", "sort", SortWindowViewFactory.class, null),
@@ -142,7 +139,17 @@ public enum ViewEnum
     /**
      * Prior event view.
      */
-    PRIOR_EVENT_VIEW("int", "prioreventinternal", PriorEventViewFactory.class, null);
+    PRIOR_EVENT_VIEW("int", "prioreventinternal", PriorEventViewFactory.class, null),
+
+    /**
+     * For retain-union policy.
+     */
+    INTERNAL_UNION("internal", "union", UnionViewFactory.class, null),
+
+    /**
+     * For retain-intersection policy.
+     */
+    INTERNAL_INTERSECT("internal", "intersect", IntersectViewFactory.class, null);
 
     private final String namespace;
     private final String name;

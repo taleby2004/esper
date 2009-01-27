@@ -5,7 +5,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -18,9 +18,8 @@ public class TestSubscriberPerf extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         String pkg = SupportBean.class.getPackage().getName();
-        config.addEventTypeAutoAlias(pkg);
+        config.addEventTypeAutoName(pkg);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }

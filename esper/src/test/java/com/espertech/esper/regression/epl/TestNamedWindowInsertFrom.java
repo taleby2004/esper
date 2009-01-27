@@ -2,8 +2,8 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
@@ -27,8 +27,7 @@ public class TestNamedWindowInsertFrom extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
+        config.addEventType("SupportBean", SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
@@ -156,7 +155,7 @@ public class TestNamedWindowInsertFrom extends TestCase
     public void testInsertWhereOMStaggered()
     {
         Map<String, Object> dataType = makeMap(new Object[][] {{"a", String.class}, {"b", int.class}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyMap", dataType);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMap", dataType);
 
         String stmtTextCreateOne = "create window MyWindow.win:keepall() as select a, b from MyMap";
         EPStatement stmtCreateOne = epService.getEPAdministrator().createEPL(stmtTextCreateOne);
@@ -193,13 +192,13 @@ public class TestNamedWindowInsertFrom extends TestCase
 
     public void testVariantStream()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean_A", SupportBean_A.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean_B", SupportBean_B.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_B", SupportBean_B.class);
 
         ConfigurationVariantStream config = new ConfigurationVariantStream();
         //config.setTypeVariance(ConfigurationVariantStream.TypeVariance.ANY);
-        config.addEventTypeAlias("SupportBean_A");
-        config.addEventTypeAlias("SupportBean_B");
+        config.addEventTypeName("SupportBean_A");
+        config.addEventTypeName("SupportBean_B");
         epService.getEPAdministrator().getConfiguration().addVariantStream("VarStream", config);
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as select * from VarStream");
         EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyWindowTwo.win:keepall() as MyWindow");

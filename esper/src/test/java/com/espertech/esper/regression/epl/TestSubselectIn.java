@@ -1,19 +1,12 @@
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.bean.SupportBean_S1;
-import com.espertech.esper.support.bean.SupportBean_S2;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 
 public class TestSubselectIn extends TestCase
 {
@@ -23,15 +16,33 @@ public class TestSubselectIn extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("S0", SupportBean_S0.class);
-        config.addEventTypeAlias("S1", SupportBean_S1.class);
-        config.addEventTypeAlias("S2", SupportBean_S2.class);
+        config.addEventType("S0", SupportBean_S0.class);
+        config.addEventType("S1", SupportBean_S1.class);
+        config.addEventType("S2", SupportBean_S2.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
+    }
 
-        // Use external clocking for the test, reduces logging
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
+    public void testOrderOfEvaluationSubselectFirst()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+
+        String viewExpr = "select * from SupportBean(intPrimitive<10) where intPrimitive not in (select intPrimitive from SupportBean.std:unique(intPrimitive))";
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(viewExpr);
+        stmtOne.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        stmtOne.destroy();
+
+        String viewExprTwo = "select * from SupportBean where intPrimitive not in (select intPrimitive from SupportBean(intPrimitive<10).std:unique(intPrimitive))";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(viewExprTwo);
+        stmtTwo.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
+        assertFalse(listener.getAndClearIsInvoked());
     }
 
     public void testInSelect()
@@ -48,7 +59,7 @@ public class TestSubselectIn extends TestCase
     {
         EPStatementObjectModel subquery = new EPStatementObjectModel();
         subquery.setSelectClause(SelectClause.create("id"));
-        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView(View.create("win", "length", 1000))));
+        subquery.setFromClause(FromClause.create(FilterStream.create("S1").addView(View.create("win", "length", Expressions.constant(1000)))));
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setFromClause(FromClause.create(FilterStream.create("S0")));
@@ -144,6 +155,27 @@ public class TestSubselectIn extends TestCase
         assertEquals(true, listener.assertOneGetNewAndReset().get("value"));
     }
 
+    public void testInWildcard()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("ArrayBean", SupportBeanArrayCollMap.class);
+        String stmtText = "select s0.anyObject in (select * from S1.win:length(1000)) as value from ArrayBean s0";
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(listener);
+
+        SupportBean_S1 s1 = new SupportBean_S1(100);
+        SupportBeanArrayCollMap arrayBean = new SupportBeanArrayCollMap(s1);
+        epService.getEPRuntime().sendEvent(s1);
+        epService.getEPRuntime().sendEvent(arrayBean);
+        assertEquals(true, listener.assertOneGetNewAndReset().get("value"));
+
+        SupportBean_S2 s2 = new SupportBean_S2(100);
+        arrayBean.setAnyObject(s2);
+        epService.getEPRuntime().sendEvent(s2);
+        epService.getEPRuntime().sendEvent(arrayBean);
+        assertEquals(false, listener.assertOneGetNewAndReset().get("value"));
+    }
+
     public void testInNullable()
     {
         String stmtText = "select id from S0 as s0 where p00 in (select p10 from S1.win:length(1000))";
@@ -166,7 +198,7 @@ public class TestSubselectIn extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(-2, null));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(5, null));
-        assertEquals(5, listener.assertOneGetNewAndReset().get("id"));
+        assertFalse(listener.isInvoked());
     }
 
     public void testInNullableCoercion()
@@ -187,12 +219,12 @@ public class TestSubselectIn extends TestCase
         sendBean("A", 0, 0L);
         assertFalse(listener.isInvoked());
         sendBean("A", null, null);
-        assertEquals(null, listener.assertOneGetNewAndReset().get("longBoxed"));
+        assertFalse(listener.isInvoked());
 
         sendBean("B", 99, null);
 
         sendBean("A", null, null);
-        assertEquals(null, listener.assertOneGetNewAndReset().get("longBoxed"));
+        assertFalse(listener.isInvoked());
         sendBean("A", null, 99l);
         assertEquals(99L, listener.assertOneGetNewAndReset().get("longBoxed"));
 
@@ -222,7 +254,7 @@ public class TestSubselectIn extends TestCase
         sendBean("B", null, null);
 
         sendBean("A", null, null);
-        assertEquals(null, listener.assertOneGetNewAndReset().get("intBoxed"));
+        assertFalse(listener.isInvoked());
 
         sendBean("A", 1, 1l);
         assertEquals(1, listener.assertOneGetNewAndReset().get("intBoxed"));
@@ -240,7 +272,7 @@ public class TestSubselectIn extends TestCase
         sendBean("B", 1, 1l);
 
         sendBean("A", null, null);
-        assertEquals(null, listener.assertOneGetNewAndReset().get("intBoxed"));
+        assertFalse(listener.isInvoked());
 
         sendBean("A", 1, 1l);
         assertFalse(listener.isInvoked());
@@ -297,7 +329,7 @@ public class TestSubselectIn extends TestCase
         sendBean("B", null, null);
 
         sendBean("A", 1, 1L);
-        assertEquals(1L, listener.assertOneGetNewAndReset().get("longBoxed"));
+        assertFalse(listener.isInvoked());
         sendBean("A", null, null);
         assertFalse(listener.isInvoked());
 
@@ -314,7 +346,24 @@ public class TestSubselectIn extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBean("A", null, 97l);
-        assertEquals(97L, listener.assertOneGetNewAndReset().get("longBoxed"));
+        assertFalse(listener.isInvoked());
+    }
+
+    public void testInvalid()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ArrayBean", SupportBeanArrayCollMap.class);
+        try
+        {
+            String stmtText = "select " +
+                          "intArr in (select intPrimitive from SupportBean.win:keepall()) as r1 from ArrayBean";
+            epService.getEPAdministrator().createEPL(stmtText);
+            fail();
+        }
+        catch (EPStatementException ex)
+        {
+            assertEquals("Error starting statement: Collection or array comparison is not allowed for the IN, ANY, SOME or ALL keywords [select intArr in (select intPrimitive from SupportBean.win:keepall()) as r1 from ArrayBean]", ex.getMessage());
+        }
     }
 
     private void sendBean(String string, Integer intBoxed, Long longBoxed)

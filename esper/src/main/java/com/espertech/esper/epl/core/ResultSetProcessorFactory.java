@@ -8,13 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.agg.AggregationServiceFactory;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
-import com.espertech.esper.event.TaggedCompositeEventType;
+import com.espertech.esper.event.NativeEventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -87,9 +88,9 @@ public class ResultSetProcessorFactory
             isUnidirectional |= isUnidirectionalStream[i];
         }
 
-        // Expand any instances of select-clause aliases in the
+        // Expand any instances of select-clause names in the
         // order-by clause with the full expression
-        expandAliases(selectClauseSpec.getSelectExprList(), orderByList);
+        expandColumnNames(selectClauseSpec.getSelectExprList(), orderByList);
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
         List<SelectClauseExprCompiledSpec> namedSelectionList = new LinkedList<SelectClauseExprCompiledSpec>();
@@ -117,6 +118,7 @@ public class ResultSetProcessorFactory
         boolean isUsingWildcard = selectClauseSpec.isUsingWildcard();
 
         // Validate stream selections, if any (such as stream.*)
+        boolean isUsingStreamSelect = false;
         for (SelectClauseElementCompiled compiled : selectClauseSpec.getSelectExprList())
         {
             if (!(compiled instanceof SelectClauseStreamCompiledSpec))
@@ -125,38 +127,38 @@ public class ResultSetProcessorFactory
             }
             SelectClauseStreamCompiledSpec streamSelectSpec = (SelectClauseStreamCompiledSpec) compiled;
             int streamNum = Integer.MIN_VALUE;
-            boolean isTaggedEvent = false;
+            boolean isFragmentEvent = false;
             boolean isProperty = false;
             Class propertyType = null;
+            isUsingStreamSelect = true;
             for (int i = 0; i < typeService.getStreamNames().length; i++)
             {
-                String streamAlias = streamSelectSpec.getStreamAliasName();
-                if (typeService.getStreamNames()[i].equals(streamAlias))
+                String streamName = streamSelectSpec.getStreamName();
+                if (typeService.getStreamNames()[i].equals(streamName))
                 {
                     streamNum = i;
                     break;
                 }
 
-                if (typeService.getEventTypes()[i] instanceof TaggedCompositeEventType)
+                // see if the stream name is known as a nested event type
+                EventType candidateProviderOfFragments = typeService.getEventTypes()[i];
+                // for the native event type we don't need to fragment, we simply use the property itself since all wrappers understand Java objects
+                if (!(candidateProviderOfFragments instanceof NativeEventType) && (candidateProviderOfFragments.getFragmentType(streamName) != null))
                 {
-                    TaggedCompositeEventType compositeType = (TaggedCompositeEventType) typeService.getEventTypes()[i];
-                    if (compositeType.getTaggedEventTypes().get(streamAlias) != null)
-                    {
-                        streamNum = i;
-                        isTaggedEvent = true;
-                        break;
-                    }
+                    streamNum = i;
+                    isFragmentEvent = true;
+                    break;
                 }
             }
 
-            // stream alias not found
+            // stream name not found
             if (streamNum == Integer.MIN_VALUE)
             {
                 // see if the stream name specified resolves as a property
                 PropertyResolutionDescriptor desc = null;
                 try
                 {
-                    desc = typeService.resolveByPropertyName(streamSelectSpec.getStreamAliasName());
+                    desc = typeService.resolveByPropertyName(streamSelectSpec.getStreamName());
                 }
                 catch (StreamTypesException e)
                 {
@@ -165,7 +167,7 @@ public class ResultSetProcessorFactory
 
                 if (desc == null)
                 {
-                    throw new ExprValidationException("Stream selector '" + streamSelectSpec.getStreamAliasName() + ".*' does not match any stream alias name in the from clause");
+                    throw new ExprValidationException("Stream selector '" + streamSelectSpec.getStreamName() + ".*' does not match any stream name in the from clause");
                 }
                 isProperty = true;
                 propertyType = desc.getPropertyType();
@@ -173,7 +175,7 @@ public class ResultSetProcessorFactory
             }
 
             streamSelectSpec.setStreamNumber(streamNum);
-            streamSelectSpec.setTaggedEvent(isTaggedEvent);
+            streamSelectSpec.setFragmentEvent(isFragmentEvent);
             streamSelectSpec.setProperty(isProperty, propertyType);
         }
 
@@ -333,7 +335,7 @@ public class ResultSetProcessorFactory
 
         // (2)
         // A wildcard select-clause has been specified and the group-by is ignored since no aggregation functions are used, and no having clause
-        if ((namedSelectionList.isEmpty()) && (propertiesAggregatedHaving.isEmpty()))
+        if ((namedSelectionList.isEmpty()) && (propertiesAggregatedHaving.isEmpty()) && (havingAggregateExprNodes.isEmpty()))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
             return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isSelectRStream);
@@ -345,7 +347,7 @@ public class ResultSetProcessorFactory
             // (3)
             // There is no group-by clause and there are aggregate functions with event properties in the select clause (aggregation case)
             // or having class, and all event properties are aggregated (all properties are under aggregation functions).
-            if ((nonAggregatedProps.isEmpty()) && (!isUsingWildcard))
+            if ((nonAggregatedProps.isEmpty()) && (!isUsingWildcard) && (!isUsingStreamSelect))
             {
                 log.debug(".getProcessor Using ResultSetProcessorRowForAll");
                 return new ResultSetProcessorRowForAll(selectExprProcessor, aggregationService, orderByProcessor, optionalHavingNode, isSelectRStream, isUnidirectional);
@@ -512,7 +514,7 @@ public class ResultSetProcessorFactory
         return propertiesGroupBy;
     }
 
-    private static void expandAliases(List<SelectClauseElementCompiled> selectionList, List<OrderByItem> orderByList)
+    private static void expandColumnNames(List<SelectClauseElementCompiled> selectionList, List<OrderByItem> orderByList)
     {
     	for(SelectClauseElementCompiled selectElement : selectionList)
     	{
@@ -523,14 +525,14 @@ public class ResultSetProcessorFactory
             }
             SelectClauseExprCompiledSpec selectExpr = (SelectClauseExprCompiledSpec) selectElement;
 
-            String alias = selectExpr.getAssignedName();
-    		if(alias != null)
+            String name = selectExpr.getAssignedName();
+    		if(name != null)
     		{
     			ExprNode fullExpr = selectExpr.getSelectExpression();
     			for(ListIterator<OrderByItem> iterator = orderByList.listIterator(); iterator.hasNext(); )
     			{
     				OrderByItem orderByElement = iterator.next();
-    				ExprNode swapped = AliasNodeSwapper.swap(orderByElement.getExprNode(), alias, fullExpr);
+    				ExprNode swapped = ColumnNamedNodeSwapper.swap(orderByElement.getExprNode(), name, fullExpr);
     				OrderByItem newOrderByElement = new OrderByItem(swapped, orderByElement.isDescending());
     				iterator.set(newOrderByElement);
     			}

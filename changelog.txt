@@ -1,6 +1,52 @@
 Esper Changelog
 ===================
 
+Changes in version 3.0.0
+------------------------
+
+- View parameters and pattern object parameters are now expressions:
+  Prepared statements may parameterize views and pattern object.
+  Variables may be used in such expressions.
+  Pattern objects may be parameterized by prior events.
+  namespace.name('b') or namespace.name({'a', 'b'}) no longer supported, 
+  Seconds and minutes not a keyword allowed for event property names
+- joins require at least one view for filter and pattern event streams
+- Esper 2 performed integer division if both operands to a division were non-fp types. Esper 2 thus followed
+integer division in Java that results in only the whole number part of the result, any fractional part is dropped.
+Thus Esper 2 returns zero for "select 1.0/2 from MyEvent" and Esper 3 returns "0.5d"
+With Esper 3 integer division returns Double values, and Integer division can be enabled through configuration.
+- Upgrade to ANTLR 3.1.1; Maven no longer compiles the grammar
+- Multiple data windows via retain-union and retain-intersection
+- The indicator.jmx package was removed
+- The stat:cube view was removed
+- Public event interfaces moved to client package
+- Change to type system to simplify and support transposing from any type of stream to an event property
+- Removed "emit" and "EmittedListener"
+- Optimization for group-by now using wrapped event
+- Bug fix for ESPER-251 Named window with underlying event as a property and insert-into from pattern requires self-property in select clause
+- Reworked XML DOM events to support
+  - Transposing XPath expression results; including arrays 
+  - Transposing property expression values and arrays 
+  - Correct problem in index[1] being index 0 array element
+  - dynamic properties return Node
+- Removed examples: LinearRoad, RSI, ATM; Added new examples for named window and OHLC, improved doc, restructured directories, added Eclipse projects
+- Added XML and JSON renderers
+- Changes to methods in Configuration and ConfigurationOperations as the term "alias" was replaced by "name"
+- new method on statement addListenerWithReplay
+- property selection
+- new =/> ANY/SOME/ALL; Corrected bug where "1 in (3, null)" yielded false but should be null; null > 1 returned true/false; coercion of float and long returned float not double
+- subselect order of eval well defined (sub-select first)
+  
+Fixed issue ESPER-313 Using last | snapshot in output...when statement causes parsing error
+Fixed issue ESPER-312 NullPointerException in group-by query with only a count(*) in the having-clause and no other agg functions
+Fixed issue ESPER-310 Safe iterator on unidirectional join not releasing lock
+Fixed issue ESPER-309 Named window model-after for Map-event types incompatible with insert of Map type
+Fixed issue ESPER-305 escape char parsing
+Fixed issue ESPER-304 impossible to get properties of events when a listener and a subscriber are added to a statement
+Fixed issue ESPER-303 Pooled DB connection obtained and returned even on cache hit
+Fixed issue ESPER-276 NullPointerException reported when enabling metrics reporting but still working
+
+
 Changes in version 2.3
 ------------------------
 
@@ -443,6 +489,9 @@ This enabled event patterns and EQL to use short event names not requiring makin
 version 0.7.0
 -------------
 Initial alpha version
+
+
+
 
 
 

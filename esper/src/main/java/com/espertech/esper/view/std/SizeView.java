@@ -13,8 +13,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.*;
 import com.espertech.esper.core.StatementContext;
 
@@ -70,7 +70,7 @@ public final class SizeView extends ViewSupport implements CloneableView
         {
             Map<String, Object> postNewData = new HashMap<String, Object>();
             postNewData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), size);
-            EventBean newEvent = statementContext.getEventAdapterService().createMapFromValues(postNewData, eventType);
+            EventBean newEvent = statementContext.getEventAdapterService().adaptorForTypedMap(postNewData, eventType);
 
             if (lastSizeEvent != null)
             {
@@ -80,7 +80,7 @@ public final class SizeView extends ViewSupport implements CloneableView
             {
                 Map<String, Object> postOldData = new HashMap<String, Object>();
                 postOldData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), priorSize);
-                EventBean oldEvent = statementContext.getEventAdapterService().createMapFromValues(postOldData, eventType);
+                EventBean oldEvent = statementContext.getEventAdapterService().adaptorForTypedMap(postOldData, eventType);
 
                 updateChildren(new EventBean[] {newEvent}, new EventBean[] {oldEvent});
             }
@@ -93,7 +93,7 @@ public final class SizeView extends ViewSupport implements CloneableView
     {
         HashMap<String, Object> current = new HashMap<String, Object>();
         current.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), size);
-        return new SingleEventIterator(statementContext.getEventAdapterService().createMapFromValues(current, eventType));
+        return new SingleEventIterator(statementContext.getEventAdapterService().adaptorForTypedMap(current, eventType));
     }
 
     public final String toString()

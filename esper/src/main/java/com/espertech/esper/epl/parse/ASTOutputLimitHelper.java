@@ -8,18 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
-import com.espertech.esper.epl.spec.*;
-import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.type.TimePeriodParameter;
-import com.espertech.esper.type.IntParameter;
+import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.IntValue;
-import com.espertech.esper.schedule.ScheduleSpec;
-import com.espertech.esper.collection.Pair;
 import org.antlr.runtime.tree.Tree;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,10 +33,12 @@ public class ASTOutputLimitHelper
      *
      * @param node - parse node
      * @param astExprNodeMap is the map of current AST tree nodes to their respective expression root node
-     * @param engineTime is current engine time
+     * @param engineURI the engine uri
+     * @param timeProvider provides time
+     * @param variableService provides variable resolution 
      * @return output limit spec
      */
-    public static OutputLimitSpec buildOutputLimitSpec(Tree node, long engineTime, Map<Tree, ExprNode> astExprNodeMap)
+    public static OutputLimitSpec buildOutputLimitSpec(Tree node, Map<Tree, ExprNode> astExprNodeMap, VariableService variableService, String engineURI, TimeProvider timeProvider)
     {
         int count = 0;
         Tree child = node.getChild(count);
@@ -67,14 +70,15 @@ public class ASTOutputLimitHelper
         String variableName = null;
         double rate = -1;
         ExprNode whenExpression = null;
-        Object[] crontabScheduleSpec = null;
+        List<ExprNode> crontabScheduleSpec = null;
         List<OnTriggerSetAssignment> thenExpressions = null;
+        ExprTimePeriod timePeriodExpr = null;
 
         if (node.getType() == EsperEPL2GrammarParser.WHEN_LIMIT_EXPR)
         {
-            Tree expressionNode = node.getChild(0);
+            Tree expressionNode = node.getChild(count);// was 0
             whenExpression = astExprNodeMap.remove(expressionNode);
-            if (node.getChildCount() > 1)
+            if (node.getChildCount() > count+1)//was 1
             {
                 thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(node.getChild(1), astExprNodeMap);
             }
@@ -87,14 +91,11 @@ public class ASTOutputLimitHelper
                 parent = node.getChild(1);
             }
 
-            List<Object> parameters = new ArrayList<Object>(parent.getChildCount());
+            crontabScheduleSpec = new ArrayList<ExprNode>(parent.getChildCount());
             for (int i = 0; i < parent.getChildCount(); i++)
             {
-                Tree childNode = parent.getChild(i);
-                Object object = ASTParameterHelper.makeParameter(childNode, engineTime);
-                parameters.add(object);
+                crontabScheduleSpec.add(astExprNodeMap.remove(parent.getChild(i)));
             }
-            crontabScheduleSpec = parameters.toArray();
         }
         else
         {
@@ -104,8 +105,15 @@ public class ASTOutputLimitHelper
             }
             else if (child.getType() == EsperEPL2GrammarParser.TIME_PERIOD)
             {
-                TimePeriodParameter param = ASTParameterHelper.makeTimePeriod(child, 0L);
-                rate = param.getNumSeconds();
+                ExprNode expression = astExprNodeMap.remove(child);
+
+                try {
+                    timePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI), null, null, timeProvider, variableService);
+                }
+                catch (ExprValidationException ex)
+                {
+                    throw new ASTWalkException("Invalid time period expresion: " + ex.getMessage(), ex);
+                }
             }
             else
             {
@@ -116,16 +124,13 @@ public class ASTOutputLimitHelper
         switch (node.getType())
         {
             case EsperEPL2GrammarParser.EVENT_LIMIT_EXPR:
-                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.EVENTS, displayLimit, null, null, null);
-            case EsperEPL2GrammarParser.SEC_LIMIT_EXPR:
+                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.EVENTS, displayLimit, null, null, null, null);
             case EsperEPL2GrammarParser.TIMEPERIOD_LIMIT_EXPR:
-                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.TIME_SEC, displayLimit, null, null, null);
-            case EsperEPL2GrammarParser.MIN_LIMIT_EXPR:
-                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.TIME_MIN, displayLimit, null, null, null);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.TIME_PERIOD, displayLimit, null, null, null, timePeriodExpr);
             case EsperEPL2GrammarParser.CRONTAB_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.CRONTAB, displayLimit, null, null, crontabScheduleSpec);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.CRONTAB, displayLimit, null, null, crontabScheduleSpec, null);
             case EsperEPL2GrammarParser.WHEN_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.WHEN_EXPRESSION, displayLimit, whenExpression, thenExpressions, null);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.WHEN_EXPRESSION, displayLimit, whenExpression, thenExpressions, null, null);
             default:
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized output limit type");
 		 }

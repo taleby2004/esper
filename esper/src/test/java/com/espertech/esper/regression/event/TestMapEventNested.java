@@ -1,8 +1,7 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -11,23 +10,21 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Arrays;
 
 public class TestMapEventNested extends TestCase
 {
     public void testMapTypeUpdate()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         Map<String, Object> type = makeMap(new Object[][] {
                 {"base1", String.class},
                 {"base2", makeMap(new Object[][] {{"n1", int.class}})}
                 });
-        configuration.addEventTypeAliasNestable("MyEvent", type);
+        configuration.addEventType("MyEvent", type);
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
@@ -69,7 +66,13 @@ public class TestMapEventNested extends TestCase
         // assert event type
         assertEquals("[base1, base2, base3]", Arrays.toString(statementOneSelectAll.getEventType().getPropertyNames()));
         assertEquals("[base1, base2, base3]", Arrays.toString(statementTwoSelectAll.getEventType().getPropertyNames()));
-        
+
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("base3", Long.class, false, false, false, false, false),
+            new EventPropertyDescriptor("base2", Map.class, false, false, false, true, false),
+            new EventPropertyDescriptor("base1", String.class, false, false, false, false, false),
+           }, statementTwoSelectAll.getEventType().getPropertyDescriptors());
+
         try
         {
             epService.getEPAdministrator().getConfiguration().updateMapEventType("dummy", typeNew);
@@ -77,10 +80,10 @@ public class TestMapEventNested extends TestCase
         }
         catch (ConfigurationException ex)
         {
-            assertEquals("Error updating Map event type: Event type alias 'dummy' has not been declared", ex.getMessage());
+            assertEquals("Error updating Map event type: Event type name 'dummy' has not been declared", ex.getMessage());
         }
 
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         try
         {
             epService.getEPAdministrator().getConfiguration().updateMapEventType("SupportBean", typeNew);
@@ -88,25 +91,24 @@ public class TestMapEventNested extends TestCase
         }
         catch (ConfigurationException ex)
         {
-            assertEquals("Error updating Map event type: Event type by alias 'SupportBean' is not a Map event type", ex.getMessage());
+            assertEquals("Error updating Map event type: Event type by name 'SupportBean' is not a Map event type", ex.getMessage());
         }
     }
 
     public void testMapInheritanceInitTime()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
         Map<String, Object> root = makeMap(new Object[][] {{"base", String.class}});
         Map<String, Object> sub1 = makeMap(new Object[][] {{"sub1", String.class}});
         Map<String, Object> sub2 = makeMap(new Object[][] {{"sub2", String.class}});
         Properties suba = makeProperties(new Object[][] {{"suba", String.class}});
         Map<String, Object> subb = makeMap(new Object[][] {{"subb", String.class}});
-        configuration.addEventTypeAliasNestable("RootEvent", root);
-        configuration.addEventTypeAliasNestable("Sub1Event", sub1);
-        configuration.addEventTypeAliasNestable("Sub2Event", sub2);
-        configuration.addEventTypeAlias("SubAEvent", suba);
-        configuration.addEventTypeAliasNestable("SubBEvent", subb);
+        configuration.addEventType("RootEvent", root);
+        configuration.addEventType("Sub1Event", sub1);
+        configuration.addEventType("Sub2Event", sub2);
+        configuration.addEventType("SubAEvent", suba);
+        configuration.addEventType("SubBEvent", subb);
 
         configuration.addMapSuperType("Sub1Event", "RootEvent");
         configuration.addMapSuperType("Sub2Event", "RootEvent");
@@ -117,13 +119,18 @@ public class TestMapEventNested extends TestCase
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("base", String.class, false, false, false, false, false),
+            new EventPropertyDescriptor("sub1", String.class, false, false, false, false, false),
+            new EventPropertyDescriptor("suba", String.class, false, false, false, false, false),
+           }, ((EPServiceProviderSPI) epService).getEventAdapterService().getExistsTypeByName("SubAEvent").getPropertyDescriptors());
+
         runMapInheritanceInitTime(epService);
     }
 
     public void testMapInheritanceRuntime()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
@@ -134,11 +141,11 @@ public class TestMapEventNested extends TestCase
         Map<String, Object> suba = makeMap(new Object[][] {{"suba", String.class}});
         Map<String, Object> subb = makeMap(new Object[][] {{"subb", String.class}});
 
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("RootEvent", root);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("Sub1Event", sub1, new String[] {"RootEvent"});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("Sub2Event", sub2, new String[] {"RootEvent"});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("SubAEvent", suba, new String[] {"Sub1Event"});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("SubBEvent", subb, new String[] {"Sub1Event", "Sub2Event"});
+        epService.getEPAdministrator().getConfiguration().addEventType("RootEvent", root);
+        epService.getEPAdministrator().getConfiguration().addEventType("Sub1Event", sub1, new String[] {"RootEvent"});
+        epService.getEPAdministrator().getConfiguration().addEventType("Sub2Event", sub2, new String[] {"RootEvent"});
+        epService.getEPAdministrator().getConfiguration().addEventType("SubAEvent", suba, new String[] {"Sub1Event"});
+        epService.getEPAdministrator().getConfiguration().addEventType("SubBEvent", subb, new String[] {"Sub1Event", "Sub2Event"});
 
         runMapInheritanceInitTime(epService);
     }
@@ -206,18 +213,18 @@ public class TestMapEventNested extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Property named 'suba' is not valid in any stream [select suba from Sub1Event]",ex.getMessage());
+            assertEquals("Error starting statement: Property named 'suba' is not valid in any stream (did you mean 'sub1'?) [select suba from Sub1Event]",ex.getMessage());
         }
 
         // try supertype not exists
         try
         {
-            epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("Sub1Event", makeMap(""), new String[] {"doodle"});
+            epService.getEPAdministrator().getConfiguration().addEventType("Sub1Event", makeMap(""), new String[] {"doodle"});
             fail();
         }
         catch (ConfigurationException ex)
         {
-            assertEquals("Map supertype by alias 'doodle' could not be found",ex.getMessage());
+            assertEquals("Map supertype by name 'doodle' could not be found",ex.getMessage());
         }
     }
 
@@ -252,7 +259,7 @@ public class TestMapEventNested extends TestCase
     public void testNestedMapRuntime()
     {
         EPServiceProvider epService = getEngineInitialized(null, null);
-        epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("NestedMap", getTestDefinition());
+        epService.getEPAdministrator().getConfiguration().addEventType("NestedMap", getTestDefinition());
         runAssertion(epService);
     }
 
@@ -295,12 +302,12 @@ public class TestMapEventNested extends TestCase
         Map<String, Object> levelZero_2 = makeMap(new Object[][] {{"map", levelOne_2}});
 
         // can add the same nested type twice
-        epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("ABC", levelZero_1);
-        epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("ABC", levelZero_1);
+        epService.getEPAdministrator().getConfiguration().addEventType("ABC", levelZero_1);
+        epService.getEPAdministrator().getConfiguration().addEventType("ABC", levelZero_1);
         try
         {
             // changing the definition however stops the compatibility
-            epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("ABC", levelZero_2);
+            epService.getEPAdministrator().getConfiguration().addEventType("ABC", levelZero_2);
             fail();
         }
         catch (ConfigurationException ex)
@@ -399,7 +406,7 @@ public class TestMapEventNested extends TestCase
 
         // test map containing first-level property that is an array of primitive or Class
         Map<String, Object> arrayDef = makeMap(new Object[][] {{"p0", int[].class}, {"p1", SupportBean[].class }});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyArrayMap", arrayDef);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyArrayMap", arrayDef);
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select p0[0] as a, p0[1] as b, p1[0].intPrimitive as c, p1[1] as d, p0 as e from MyArrayMap");
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -420,7 +427,7 @@ public class TestMapEventNested extends TestCase
 
         // test map at the second level of a nested map that is an array of primitive or Class
         Map<String, Object> arrayDefOuter = makeMap(new Object[][] {{"outer", arrayDef}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyArrayMapOuter", arrayDefOuter);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyArrayMapOuter", arrayDefOuter);
 
         stmt = epService.getEPAdministrator().createEPL("select outer.p0[0] as a, outer.p0[1] as b, outer.p1[0].intPrimitive as c, outer.p1[1] as d, outer.p0 as e from MyArrayMapOuter");
         stmt.addListener(listener);
@@ -442,15 +449,15 @@ public class TestMapEventNested extends TestCase
 
         // create a named map
         Map<String, Object> namedDef = makeMap(new Object[][] {{"n0", int.class}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyNamedMap", namedDef);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyNamedMap", namedDef);
 
         // create a map using the name
         Map<String, Object> eventDef = makeMap(new Object[][] {{"p0", "MyNamedMap"}, {"p1", "MyNamedMap[]"}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyMapWithAMap", eventDef);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMapWithAMap", eventDef);
 
         // test named-map at the second level of a nested map
         Map<String, Object> arrayDefOuter = makeMap(new Object[][] {{"outer", eventDef}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyArrayMapOuter", arrayDefOuter);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyArrayMapOuter", arrayDefOuter);
 
         SupportUpdateListener listener = new SupportUpdateListener();
         EPStatement stmt = epService.getEPAdministrator().createEPL("select outer.p0.n0 as a, outer.p1[0].n0 as b, outer.p1[1].n0 as c, outer.p0 as d, outer.p1 as e from MyArrayMapOuter");
@@ -486,11 +493,11 @@ public class TestMapEventNested extends TestCase
 
         // create a named map
         Map<String, Object> namedDef = makeMap(new Object[][] {{"n0", int.class}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyNamedMap", namedDef);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyNamedMap", namedDef);
 
         // create a map using the name
         Map<String, Object> eventDef = makeMap(new Object[][] {{"p0", "MyNamedMap"}, {"p1", "MyNamedMap[]"}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("MyMapWithAMap", eventDef);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMapWithAMap", eventDef);
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select p0.n0 as a, p1[0].n0 as b, p1[1].n0 as c, p0 as d, p1 as e from MyMapWithAMap");
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -503,7 +510,12 @@ public class TestMapEventNested extends TestCase
         Map<String, Object> event = makeMap(new Object[][] {{"p0", n0_1}, {"p1", n0_2 }});
         epService.getEPRuntime().sendEvent(event, "MyMapWithAMap");
 
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a,b,c,d,e".split(","), new Object[] {1, 2, 3, n0_1, n0_2});
+        EventBean eventResult = listener.assertOneGetNewAndReset();
+        ArrayAssertionUtil.assertProps(eventResult, "a,b,c,d".split(","), new Object[] {1, 2, 3, n0_1});
+        Map[] valueE = (Map[]) eventResult.get("e");
+        assertSame(valueE[0], n0_2[0]);
+        assertSame(valueE[1], n0_2[1]);
+
         assertEquals(int.class, stmt.getEventType().getPropertyType("a"));
         assertEquals(int.class, stmt.getEventType().getPropertyType("b"));
         assertEquals(int.class, stmt.getEventType().getPropertyType("c"));
@@ -572,7 +584,7 @@ public class TestMapEventNested extends TestCase
     {
         try
         {
-            epService.getEPAdministrator().getConfiguration().addNestableEventTypeAlias("NestedMap", config);
+            epService.getEPAdministrator().getConfiguration().addEventType("NestedMap", config);
             fail();
         }
         catch (Exception ex)
@@ -757,11 +769,10 @@ public class TestMapEventNested extends TestCase
     private EPServiceProvider getEngineInitialized(String name, Map<String, Object> definition)
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
         if (name != null)
         {
-            configuration.addNestableEventTypeAlias(name, definition);
+            configuration.addEventType(name, definition);
         }
         
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(configuration);

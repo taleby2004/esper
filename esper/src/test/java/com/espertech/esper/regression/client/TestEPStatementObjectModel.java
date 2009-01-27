@@ -51,14 +51,14 @@ public class TestEPStatementObjectModel extends TestCase
             .add("line")
             .add(Expressions.avg("age"), "avgAge"));
         Filter filter = Filter.create(SupportBean.class.getName(), Expressions.in("line", 1, 8, 10));
-        model.setFromClause(FromClause.create(FilterStream.create(filter, "RS").addView("win", "time", 10)));
+        model.setFromClause(FromClause.create(FilterStream.create(filter, "RS").addView("win", "time", Expressions.constant(10))));
         model.setWhereClause(Expressions.isNotNull("waverId"));
         model.setGroupByClause(GroupByClause.create("line"));
         model.setHavingClause(Expressions.lt(Expressions.avg("age"), Expressions.constant(0)));
-        model.setOutputLimitClause(OutputLimitClause.create(10, OutputLimitUnit.SECONDS));
+        model.setOutputLimitClause(OutputLimitClause.create(Expressions.timePeriod(null, null, null, 10, null)));
         model.setOrderByClause(OrderByClause.create("line"));                
 
-        assertEquals("insert into ReadyStreamAvg(line, avgAge) select line, avg(age) as avgAge from com.espertech.esper.support.bean.SupportBean(line in (1, 8, 10)).win:time(10) as RS where (waverId != null) group by line having (avg(age) < 0) output every 10.0 seconds order by line", model.toEPL());
+        assertEquals("insert into ReadyStreamAvg(line, avgAge) select line, avg(age) as avgAge from com.espertech.esper.support.bean.SupportBean(line in (1, 8, 10)).win:time(10) as RS where (waverId != null) group by line having (avg(age) < 0) output every 10 seconds order by line", model.toEPL());
         SerializableObjectCopier.copy(model);
     }
 

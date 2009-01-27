@@ -16,19 +16,22 @@ import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.pattern.PatternObjectResolutionService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.MetaDefItem;
+import com.espertech.esper.core.StatementContext;
 
 import java.util.List;
 import java.util.Set;
 import java.net.URI;
+import java.io.Serializable;
 
 /**
  * Specification object for historical data poll via database SQL statement.
  */
-public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecRaw, StreamSpecCompiled, MetaDefItem
+public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecRaw, StreamSpecCompiled, MetaDefItem, Serializable
 {
     private String databaseName;
     private String sqlWithSubsParams;
     private String metadataSQL;
+    private static final long serialVersionUID = -4034289101265714058L;
 
     /**
      * Ctor.
@@ -40,7 +43,7 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
      */
     public DBStatementStreamSpec(String optionalStreamName, List<ViewSpec> viewSpecs, String databaseName, String sqlWithSubsParams, String metadataSQL)
     {
-        super(optionalStreamName, viewSpecs, false);
+        super(optionalStreamName, viewSpecs, new StreamSpecOptions());
 
         this.databaseName = databaseName;
         this.sqlWithSubsParams = sqlWithSubsParams;
@@ -74,15 +77,7 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
         return metadataSQL;
     }
 
-    public StreamSpecCompiled compile(EventAdapterService eventAdapterService,
-                                      MethodResolutionService methodResolutionService,
-                                      PatternObjectResolutionService patternObjectResolutionService,
-                                      TimeProvider timeProvider,
-                                      NamedWindowService namedWindowService,
-                                      ValueAddEventService valueAddEventService,
-                                      VariableService variableService,
-                                      String engineURI,
-                                      URI[] plugInTypeResolutionURIs,
+    public StreamSpecCompiled compile(StatementContext statementContext,
                                       Set<String> eventTypeReferences)
     {
         return this;

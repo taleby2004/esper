@@ -1,16 +1,14 @@
 package com.espertech.esper.view.window;
 
-import junit.framework.TestCase;
-import com.espertech.esper.type.TimePeriodParameter;
-import com.espertech.esper.view.ViewParameterException;
-import com.espertech.esper.view.ViewAttachException;
-import com.espertech.esper.view.std.SizeView;
-import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.event.EventType;
-
-import java.util.Arrays;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.view.TestViewSupport;
+import com.espertech.esper.view.ViewParameterException;
+import com.espertech.esper.view.std.FirstElementView;
+import junit.framework.TestCase;
 
 public class TestExternallyTimedWindowViewFactory extends TestCase
 {
@@ -23,52 +21,54 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
 
     public void testSetParameters() throws Exception
     {
-        tryParameter(new Object[] {"a", new TimePeriodParameter(2d)}, "a", 2000);
-        tryParameter(new Object[] {"a", 10L}, "a", 10000);
-        tryParameter(new Object[] {"a", 11}, "a", 11000);
-        tryParameter(new Object[] {"a", 2.2}, "a", 2200);
+        tryParameter(new Object[] {"longPrimitive", 2d}, "longPrimitive", 2000);
+        tryParameter(new Object[] {"longPrimitive", 10L}, "longPrimitive", 10000);
+        tryParameter(new Object[] {"longPrimitive", 11}, "longPrimitive", 11000);
+        tryParameter(new Object[] {"longPrimitive", 2.2}, "longPrimitive", 2200);
 
-        tryInvalidParameter(new Object[] {new TimePeriodParameter(2d)});
         tryInvalidParameter(new Object[] {"a"});
     }
 
     public void testCanReuse() throws Exception
     {
-        factory.setViewParameters(null, Arrays.asList(new Object[] {"price", 1000}));
-        assertFalse(factory.canReuse(new SizeView(SupportStatementContextFactory.makeContext())));
-        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, "volume", 1000, null, false)));
-        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, "price", 999, null, false)));
-        assertTrue(factory.canReuse(new ExternallyTimedWindowView(factory, "price", 1000000, null, false)));
+        EventType parentType = SupportEventTypeFactory.createBeanType(SupportBean.class);
+
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {"longBoxed", 1000}));
+        factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
+        assertFalse(factory.canReuse(new FirstElementView()));
+        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longPrimitive"), 1000, null, false)));
+        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longBoxed"), 999, null, false)));
+        assertTrue(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longBoxed"), 1000000, null, false)));
     }
 
-    public void testAttach() throws Exception
+    public void testInvalid() throws Exception
     {
         EventType parentType = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
-        factory.setViewParameters(null, Arrays.asList(new Object[] {"dummy", 20}));
         try
         {
-            factory.attach(parentType, null, null, null);
+            factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {50, 20}));
+            factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
-        catch (ViewAttachException ex)
+        catch (ViewParameterException ex)
         {
             // expected
         }
 
-        factory.setViewParameters(null, Arrays.asList(new Object[] {"string", 20}));
         try
         {
-            factory.attach(parentType, null, null, null);
+            factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {"string", 20}));
+            factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
-        catch (ViewAttachException ex)
+        catch (ViewParameterException ex)
         {
             // expected
         }
 
-        factory.setViewParameters(null, Arrays.asList(new Object[] {"longPrimitive", 20}));
-        factory.attach(parentType, null, null, null);
+        factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {"longPrimitive", 20}));
+        factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
 
         assertSame(parentType, factory.getEventType());
     }
@@ -78,7 +78,8 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         try
         {
             ExternallyTimedWindowViewFactory factory = new ExternallyTimedWindowViewFactory();
-            factory.setViewParameters(null, Arrays.asList(new Object[] {param}));
+            factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {param}));
+            factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
         catch (ViewParameterException ex)
@@ -90,9 +91,10 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
     private void tryParameter(Object[] params, String fieldName, long msec) throws Exception
     {
         ExternallyTimedWindowViewFactory factory = new ExternallyTimedWindowViewFactory();
-        factory.setViewParameters(null, Arrays.asList(params));
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(params));
+        factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
         ExternallyTimedWindowView view = (ExternallyTimedWindowView) factory.makeView(SupportStatementContextFactory.makeContext());
-        assertEquals(fieldName, view.getTimestampFieldName());
+        assertEquals(fieldName, view.getTimestampExpression().toExpressionString());
         assertEquals(msec, view.getMillisecondsBeforeExpiry());
     }
 }

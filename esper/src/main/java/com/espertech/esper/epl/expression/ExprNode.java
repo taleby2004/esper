@@ -8,28 +8,28 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.util.MetaDefItem;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.MetaDefItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * Superclass for filter nodes in a filter expression tree. Allow
  * validation against stream event types and evaluation of events against filter tree.
  */
-public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefItem
+public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefItem, Serializable
 {
     private static final long serialVersionUID = 0L;
 
-    private final LinkedList<ExprNode> childNodes;
+    private final ArrayList<ExprNode> childNodes;
 
     /**
      * Returns the expression node rendered as a string.
@@ -59,7 +59,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
      */
     public ExprNode()
     {
-        childNodes = new LinkedList<ExprNode>();
+        childNodes = new ArrayList<ExprNode>();
     }
 
     /**
@@ -205,7 +205,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
      * Returns list of child nodes.
      * @return list of child nodes
      */
-    public final LinkedList<ExprNode> getChildNodes()
+    public final ArrayList<ExprNode> getChildNodes()
     {
         return childNodes;
     }
@@ -225,68 +225,6 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
         {
             node.dumpDebug(prefix + "  ");
         }
-    }
-
-    /**
-     * Compare two expression nodes and their children in exact child-node sequence,
-     * returning true if the 2 expression nodes trees are equals, or false if they are not equals.
-     * <p>
-     * Recursive call since it uses this method to compare child nodes in the same exact sequence.
-     * Nodes are compared using the equalsNode method.
-     * @param nodeOne - first expression top node of the tree to compare
-     * @param nodeTwo - second expression top node of the tree to compare
-     * @return false if this or all child nodes are not equal, true if equal
-     */
-    public static boolean deepEquals(ExprNode nodeOne, ExprNode nodeTwo)
-    {
-        if (nodeOne.childNodes.size() != nodeTwo.childNodes.size())
-        {
-            return false;
-        }
-        if (!nodeOne.equalsNode(nodeTwo))
-        {
-            return false;
-        }
-        for (int i = 0; i < nodeOne.childNodes.size(); i++)
-        {
-            ExprNode childNodeOne = nodeOne.childNodes.get(i);
-            ExprNode childNodeTwo = nodeTwo.childNodes.get(i);
-
-            if (!ExprNode.deepEquals(childNodeOne, childNodeTwo))
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check if the expression is minimal: does not have a subselect, aggregation and does not need view resources
-     * @return null if minimal, otherwise name of offending sub-expression
-     */
-    public String isMinimalExpression()
-    {
-        ExprNodeSubselectVisitor subselectVisitor = new ExprNodeSubselectVisitor();
-        this.accept(subselectVisitor);
-        if (subselectVisitor.getSubselects().size() > 0)
-        {
-            return "a subselect";
-        }
-
-        ExprNodeViewResourceVisitor viewResourceVisitor = new ExprNodeViewResourceVisitor();
-        this.accept(viewResourceVisitor);
-        if (viewResourceVisitor.getExprNodes().size() > 0)
-        {
-            return "a function that requires view resources (prior, prev)";
-        }
-
-        List<ExprAggregateNode> aggregateNodes = new LinkedList<ExprAggregateNode>();
-        ExprAggregateNode.getAggregatesBottomUp(this, aggregateNodes);
-        if (!aggregateNodes.isEmpty())
-        {
-            return "an aggregation function";
-        }
-        return null;
     }
 
     // Since static method calls such as "Class.method('a')" and mapped properties "Stream.property('key')"

@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
@@ -85,7 +85,6 @@ public class TestRepeatRouteEvent extends TestCase
 
     public void testRouteTimer()
     {
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
         // define time-based pattern and listener

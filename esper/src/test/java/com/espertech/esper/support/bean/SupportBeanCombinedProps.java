@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 public class SupportBeanCombinedProps implements Serializable
 {
-    public static String[] PROPERTIES = { "indexed[]", "array"};
+    public static String[] PROPERTIES = { "indexed", "array"};
 
 	public static SupportBeanCombinedProps makeDefaultBean()
 	{
@@ -60,7 +60,12 @@ public class SupportBeanCombinedProps implements Serializable
         {
             return map;
         }
-	}
+
+        public String getNestLevOneVal()
+        {
+            return "abc";
+        }
+    }
 
     public static class NestedLevTwo implements Serializable
     {

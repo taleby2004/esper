@@ -22,23 +22,23 @@ public class TestExprMinMaxAggrNode extends TestExprAggregateNodeAdapter
     public void testGetType() throws Exception
     {
         maxNode.addChildNode(new SupportExprNode(Integer.class));
-        SupportExprNodeFactory.validate(maxNode);
+        SupportExprNodeFactory.validate3Stream(maxNode);
         assertEquals(Integer.class, maxNode.getType());
 
         minNode.addChildNode(new SupportExprNode(Float.class));
-        SupportExprNodeFactory.validate(minNode);
+        SupportExprNodeFactory.validate3Stream(minNode);
         assertEquals(Float.class, minNode.getType());
 
         maxNode = new ExprMinMaxAggrNode(false, MinMaxTypeEnum.MAX);
         maxNode.addChildNode(new SupportExprNode(Short.class));
-        SupportExprNodeFactory.validate(maxNode);
+        SupportExprNodeFactory.validate3Stream(maxNode);
         assertEquals(Short.class, maxNode.getType());
     }
 
     public void testToExpressionString() throws Exception
     {
         // Build sum(4-2)
-        ExprMathNode arithNodeChild = new ExprMathNode(MathArithTypeEnum.SUBTRACT);
+        ExprMathNode arithNodeChild = new ExprMathNode(MathArithTypeEnum.SUBTRACT, false, false);
         arithNodeChild.addChildNode(new SupportExprNode(4));
         arithNodeChild.addChildNode(new SupportExprNode(2));
 
@@ -92,7 +92,7 @@ public class TestExprMinMaxAggrNode extends TestExprAggregateNodeAdapter
     {
         ExprMinMaxAggrNode minMaxNode = new ExprMinMaxAggrNode(false, minMaxType);
         minMaxNode.addChildNode(new SupportExprNode(value, type));
-        SupportExprNodeFactory.validate(minMaxNode);
+        SupportExprNodeFactory.validate3Stream(minMaxNode);
         return minMaxNode;
     }
 }

@@ -10,8 +10,9 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.type.TimePeriodParameter;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 import com.espertech.esper.core.StatementContext;
@@ -23,12 +24,14 @@ import java.util.List;
  */
 public class ExternallyTimedWindowViewFactory implements DataWindowViewFactory
 {
+    private List<ExprNode> viewParameters;
+
     private EventType eventType;
 
     /**
      * The timestamp property name.
      */
-    protected String timestampFieldName;
+    protected ExprNode timestampExpression;
 
     /**
      * The number of msec to expire.
@@ -45,27 +48,29 @@ public class ExternallyTimedWindowViewFactory implements DataWindowViewFactory
      */
     protected RandomAccessByIndexGetter randomAccessGetterImpl;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
-        String errorMessage = "Externally-timed window view requires a timestamp field name and a numeric or time period parameter";
+        this.viewParameters = expressionParameters;
+    }
+
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
+    {
+        ExprNode[] validated = ViewFactorySupport.validate("Externally-timed window", parentEventType, statementContext, viewParameters, true);
+        String errorMessage = "Externally-timed window view requires a timestamp expression and a numeric or time period parameter for window size";
         if (viewParameters.size() != 2)
         {
             throw new ViewParameterException(errorMessage);
         }
 
-        if (!(viewParameters.get(0) instanceof String))
+        if (!JavaClassHelper.isNumeric(validated[0].getType()))
         {
             throw new ViewParameterException(errorMessage);
         }
-        timestampFieldName = (String) viewParameters.get(0);
+        timestampExpression = validated[0];
 
-        Object parameter = viewParameters.get(1);
-        if (parameter instanceof TimePeriodParameter)
-        {
-            TimePeriodParameter param = (TimePeriodParameter) parameter;
-            millisecondsBeforeExpiry = Math.round(1000d * param.getNumSeconds());
-        }
-        else if (!(parameter instanceof Number))
+        ViewFactorySupport.assertReturnsNonConstant("Externally-timed window", validated[0], 0);
+        Object parameter = ViewFactorySupport.evaluateAssertNoProperties("Externally-timed window", validated[1], 1);
+        if (!(parameter instanceof Number))
         {
             throw new ViewParameterException(errorMessage);
         }
@@ -81,15 +86,7 @@ public class ExternallyTimedWindowViewFactory implements DataWindowViewFactory
                 millisecondsBeforeExpiry = 1000 * param.longValue();
             }
         }
-    }
 
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
-    {
-        String message = PropertyCheckHelper.checkLong(parentEventType, timestampFieldName);
-        if (message != null)
-        {
-            throw new ViewAttachException(message);
-        }
         this.eventType = parentEventType;
     }
 
@@ -137,7 +134,7 @@ public class ExternallyTimedWindowViewFactory implements DataWindowViewFactory
             randomAccessGetterImpl.updated(randomAccess);
         }
 
-        return new ExternallyTimedWindowView(this, timestampFieldName, millisecondsBeforeExpiry, randomAccess, isRemoveStreamHandling);
+        return new ExternallyTimedWindowView(this, timestampExpression, millisecondsBeforeExpiry, randomAccess, isRemoveStreamHandling);
     }
 
     public EventType getEventType()
@@ -159,7 +156,7 @@ public class ExternallyTimedWindowViewFactory implements DataWindowViewFactory
 
         ExternallyTimedWindowView myView = (ExternallyTimedWindowView) view;
         if ((myView.getMillisecondsBeforeExpiry() != millisecondsBeforeExpiry) ||
-            (!myView.getTimestampFieldName().equals(timestampFieldName)))
+            (!ExprNodeUtility.deepEquals(myView.getTimestampExpression(), timestampExpression)))
         {
             return false;
         }

@@ -8,13 +8,20 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.property.PropertyEvaluator;
+import com.espertech.esper.epl.property.PropertyEvaluatorFactory;
+import com.espertech.esper.epl.spec.PropertyEvalSpec;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.event.property.NestedProperty;
+import com.espertech.esper.event.property.Property;
+import com.espertech.esper.event.property.PropertyParser;
+import com.espertech.esper.event.property.IndexedProperty;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.RelationalOpEnum;
 import com.espertech.esper.util.JavaClassHelper;
@@ -24,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
+import java.io.StringWriter;
 
 /**
  * Helper to compile (validate and optimize) filter expressions as used in pattern and filter-based streams.
@@ -45,7 +53,7 @@ public final class FilterSpecCompiler
      * Factory method for compiling filter expressions into a filter specification
      * for use with filter service.
      * @param eventType is the filtered-out event type
-     * @param eventTypeAlias is the alias name of the event type
+     * @param eventTypeName is the name of the event type
      * @param filterExpessions is a list of filter expressions
      * @param taggedEventTypes is a map of stream names (tags) and event types available
      * @param arrayEventTypes is a map of name tags and event type per tag for repeat-expressions that generate an array of events
@@ -54,19 +62,25 @@ public final class FilterSpecCompiler
      * @param timeProvider - provides engine current time
      * @param variableService - provides access to variables
      * @param eventAdapterService - for event type and bean generation
+     * @param optionalStreamName - the stream name, if provided
+     * @param engineURI - the engine uri
+     * @param optionalPropertyEvalSpec - specification for evaluating properties
      * @return compiled filter specification
      * @throws ExprValidationException if the expression or type validations failed
      */
     public static FilterSpecCompiled makeFilterSpec(EventType eventType,
-                                                    String eventTypeAlias,
+                                                    String eventTypeName,
                                                     List<ExprNode> filterExpessions,
+                                                    PropertyEvalSpec optionalPropertyEvalSpec,
                                                     LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
                                                     LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
                                                     StreamTypeService streamTypeService,
                                                     MethodResolutionService methodResolutionService,
                                                     TimeProvider timeProvider,
                                                     VariableService variableService,
-                                                    EventAdapterService eventAdapterService)
+                                                    EventAdapterService eventAdapterService,
+                                                    String engineURI,
+                                                    String optionalStreamName)
             throws ExprValidationException
     {
         // Validate all nodes, make sure each returns a boolean and types are good;
@@ -74,7 +88,58 @@ public final class FilterSpecCompiler
         List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService, timeProvider, variableService);
 
         // From the constituents make a filter specification
-        FilterSpecCompiled spec = makeFilterSpec(eventType, eventTypeAlias, constituents, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService);
+        FilterParamExprMap filterParamExprMap = new FilterParamExprMap();
+
+        // Make filter parameter for each expression node, if it can be optimized
+        for (ExprNode constituent : constituents)
+        {
+            FilterSpecParam param = makeFilterParam(constituent, taggedEventTypes, arrayEventTypes);
+            filterParamExprMap.put(constituent, param); // accepts null values as the expression may not be optimized
+        }
+
+        // Consolidate entries as possible, i.e. (a != 5 and a != 6) is (a not in (5,6))
+        // Removes duplicates for same property and same filter operator for filter service index optimizations
+        consolidate(filterParamExprMap);
+
+        // Use all filter parameter and unassigned expressions
+        List<FilterSpecParam> filterParams = new ArrayList<FilterSpecParam>();
+        filterParams.addAll(filterParamExprMap.getFilterParams());
+        List<ExprNode> remainingExprNodes = filterParamExprMap.getUnassignedExpressions();
+
+        // any unoptimized expression nodes are put under one AND
+        ExprNode exprNode = null;
+        if (!remainingExprNodes.isEmpty())
+        {
+            if (remainingExprNodes.size() == 1)
+            {
+                exprNode = remainingExprNodes.get(0);
+            }
+            else
+            {
+                ExprAndNode andNode = new ExprAndNode();
+                for (ExprNode unoptimized : remainingExprNodes)
+                {
+                    andNode.addChildNode(unoptimized);
+                }
+                exprNode = andNode;
+            }
+        }
+
+        // if there are boolean expressions, add
+        if (exprNode != null)
+        {
+            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService);
+            filterParams.add(param);
+        }
+
+        PropertyEvaluator optionalPropertyEvaluator = null;
+        if (optionalPropertyEvalSpec != null)
+        {
+            optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(optionalPropertyEvalSpec, eventType, optionalStreamName, eventAdapterService, methodResolutionService, timeProvider, variableService, engineURI);
+        }
+
+        FilterSpecCompiled spec = new FilterSpecCompiled(eventType, eventTypeName, filterParams, optionalPropertyEvaluator);
+
         if (log.isDebugEnabled())
         {
             log.debug(".makeFilterSpec spec=" + spec);
@@ -213,62 +278,6 @@ public final class FilterSpecCompiler
         while(haveConsolidated);
     }
 
-    private static FilterSpecCompiled makeFilterSpec(EventType eventType,
-                                                     String eventTypeAlias,
-                                                     List<ExprNode> constituents,
-                                                     LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
-                                                     LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
-                                                     VariableService variableService,
-                                                     EventAdapterService eventAdapterService)
-            throws ExprValidationException
-    {
-        FilterParamExprMap filterParamExprMap = new FilterParamExprMap();
-
-        // Make filter parameter for each expression node, if it can be optimized
-        for (ExprNode constituent : constituents)
-        {
-            FilterSpecParam param = makeFilterParam(constituent);
-            filterParamExprMap.put(constituent, param); // accepts null values as the expression may not be optimized
-        }
-
-        // Consolidate entries as possible, i.e. (a != 5 and a != 6) is (a not in (5,6))
-        // Removes duplicates for same property and same filter operator for filter service index optimizations
-        consolidate(filterParamExprMap);
-
-        // Use all filter parameter and unassigned expressions
-        List<FilterSpecParam> filterParams = new ArrayList<FilterSpecParam>();
-        filterParams.addAll(filterParamExprMap.getFilterParams());
-        List<ExprNode> remainingExprNodes = filterParamExprMap.getUnassignedExpressions();
-
-        // any unoptimized expression nodes are put under one AND
-        ExprNode exprNode = null;
-        if (!remainingExprNodes.isEmpty())
-        {
-            if (remainingExprNodes.size() == 1)
-            {
-                exprNode = remainingExprNodes.get(0);
-            }
-            else
-            {
-                ExprAndNode andNode = new ExprAndNode();
-                for (ExprNode unoptimized : remainingExprNodes)
-                {
-                    andNode.addChildNode(unoptimized);
-                }
-                exprNode = andNode;
-            }
-        }
-
-        // if there are boolean expressions, add
-        if (exprNode != null)
-        {
-            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService);
-            filterParams.add(param);
-        }
-
-        return new FilterSpecCompiled(eventType, eventTypeAlias, filterParams);
-    }
-
     // consolidate "val != 3 and val != 4 and val != 5"
     // to "val not in (3, 4, 5)"
     private static void handleConsolidateNotEqual(List<FilterSpecParam> params, FilterParamExprMap filterParamExprMap)
@@ -290,6 +299,12 @@ public final class FilterSpecCompiler
                 values.add(new InSetOfValuesEventProp(eventProp.getResultEventAsName(), eventProp.getResultEventProperty(),
                         eventProp.isMustCoerce(), JavaClassHelper.getBoxedType(eventProp.getCoercionType())));
             }
+            else if (param instanceof FilterSpecParamEventPropIndexed)
+            {
+                FilterSpecParamEventPropIndexed eventProp = (FilterSpecParamEventPropIndexed) param;
+                values.add(new InSetOfValuesEventPropIndexed(eventProp.getResultEventAsName(), eventProp.getResultEventIndex(), eventProp.getResultEventProperty(),
+                        eventProp.isMustCoerce(), JavaClassHelper.getBoxedType(eventProp.getCoercionType())));
+            }
             else
             {
                 throw new IllegalArgumentException("Unknown filter parameter:" + param.toString());
@@ -307,17 +322,18 @@ public final class FilterSpecCompiler
      * For a given expression determine if this is optimizable and create the filter parameter
      * representing the expression, or null if not optimizable.
      * @param constituent is the expression to look at
-     * @return filter parameter representing the expression, or null
+     * @param taggedEventTypes
+     *@param arrayEventTypes @return filter parameter representing the expression, or null
      * @throws ExprValidationException if the expression is invalid
      */
-    protected static FilterSpecParam makeFilterParam(ExprNode constituent)
+    protected static FilterSpecParam makeFilterParam(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
             throws ExprValidationException
     {
         // Is this expresson node a simple compare, i.e. a=5 or b<4; these can be indexed
         if ((constituent instanceof ExprEqualsNode) ||
             (constituent instanceof ExprRelationalOpNode))
         {
-            FilterSpecParam param = handleEqualsAndRelOp(constituent);
+            FilterSpecParam param = handleEqualsAndRelOp(constituent, arrayEventTypes);
             if (param != null)
             {
                 return param;
@@ -327,7 +343,7 @@ public final class FilterSpecCompiler
         // Is this expresson node a simple compare, i.e. a=5 or b<4; these can be indexed
         if (constituent instanceof ExprInNode)
         {
-            FilterSpecParam param = handleInSetNode((ExprInNode)constituent);
+            FilterSpecParam param = handleInSetNode((ExprInNode)constituent, arrayEventTypes);
             if (param != null)
             {
                 return param;
@@ -336,7 +352,7 @@ public final class FilterSpecCompiler
 
         if (constituent instanceof ExprBetweenNode)
         {
-            FilterSpecParam param = handleRangeNode((ExprBetweenNode)constituent);
+            FilterSpecParam param = handleRangeNode((ExprBetweenNode)constituent, arrayEventTypes);
             if (param != null)
             {
                 return param;
@@ -346,7 +362,7 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParam handleRangeNode(ExprBetweenNode betweenNode)
+    private static FilterSpecParam handleRangeNode(ExprBetweenNode betweenNode, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
     {
         ExprNode left = betweenNode.getChildNodes().get(0);
         if (left instanceof ExprIdentNode)
@@ -356,8 +372,8 @@ public final class FilterSpecCompiler
             FilterOperator op = FilterOperator.parseRangeOperator(betweenNode.isLowEndpointIncluded(), betweenNode.isHighEndpointIncluded(),
                     betweenNode.isNotBetween());
 
-            FilterSpecParamRangeValue low = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(1));
-            FilterSpecParamRangeValue high = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(2));
+            FilterSpecParamRangeValue low = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(1), arrayEventTypes);
+            FilterSpecParamRangeValue high = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(2), arrayEventTypes);
 
             if ((low != null) && (high != null))
             {
@@ -367,7 +383,7 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParamRangeValue handleRangeNodeEndpoint(ExprNode endpoint)
+    private static FilterSpecParamRangeValue handleRangeNodeEndpoint(ExprNode endpoint, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
     {
         // constant
         if (endpoint instanceof ExprConstantNode)
@@ -385,13 +401,23 @@ public final class FilterSpecCompiler
             {
                 return null;
             }
-            return new RangeValueEventProp(identNodeInner.getResolvedStreamName(), identNodeInner.getResolvedPropertyName());
+
+            if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(identNodeInner.getResolvedStreamName()))
+            {
+                Pair<Integer, String> indexAndProp = getStreamIndex(identNodeInner.getResolvedPropertyName());
+                return new RangeValueEventPropIndexed(identNodeInner.getResolvedStreamName(), indexAndProp.getFirst(), indexAndProp.getSecond());
+            }
+            else
+            {
+                return new RangeValueEventProp(identNodeInner.getResolvedStreamName(), identNodeInner.getResolvedPropertyName());
+            }
+
         }
 
         return null;
     }
 
-    private static FilterSpecParam handleInSetNode(ExprInNode constituent)
+    private static FilterSpecParam handleInSetNode(ExprInNode constituent, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
             throws ExprValidationException
     {
         ExprNode left = constituent.getChildNodes().get(0);
@@ -439,7 +465,21 @@ public final class FilterSpecCompiler
                             isMustCoerce = true;
                         }
                     }
-                    listofValues.add(new InSetOfValuesEventProp(identNodeInner.getResolvedStreamName(), identNodeInner.getResolvedPropertyName(), isMustCoerce, numericCoercionType));
+
+                    FilterSpecParamInValue inValue;
+                    String streamName = identNodeInner.getResolvedStreamName();
+                    if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
+                    {
+                        Pair<Integer, String> indexAndProp = getStreamIndex(identNodeInner.getResolvedPropertyName());
+                        inValue = new InSetOfValuesEventPropIndexed(identNodeInner.getResolvedStreamName(), indexAndProp.getFirst(),
+                                indexAndProp.getSecond(), isMustCoerce, numericCoercionType);
+                    }
+                    else
+                    {
+                        inValue = new InSetOfValuesEventProp(identNodeInner.getResolvedStreamName(), identNodeInner.getResolvedPropertyName(), isMustCoerce, numericCoercionType);
+                    }
+
+                    listofValues.add(inValue);
                 }
             }
 
@@ -452,7 +492,7 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParam handleEqualsAndRelOp(ExprNode constituent)
+    private static FilterSpecParam handleEqualsAndRelOp(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
             throws ExprValidationException
     {
         FilterOperator op;
@@ -520,17 +560,17 @@ public final class FilterSpecCompiler
 
             if ((identNodeLeft.getStreamId() == 0) && (identNodeRight.getStreamId() != 0))
             {
-                return handleProperty(op, identNodeLeft, identNodeRight);
+                return handleProperty(op, identNodeLeft, identNodeRight, arrayEventTypes);
             }
             if ((identNodeRight.getStreamId() == 0) && (identNodeLeft.getStreamId() != 0))
             {
-                return handleProperty(op, identNodeRight, identNodeLeft);
+                return handleProperty(op, identNodeRight, identNodeLeft, arrayEventTypes);
             }
         }
         return null;
     }
 
-    private static FilterSpecParamEventProp handleProperty(FilterOperator op, ExprIdentNode identNodeLeft, ExprIdentNode identNodeRight)
+    private static FilterSpecParam handleProperty(FilterOperator op, ExprIdentNode identNodeLeft, ExprIdentNode identNodeRight, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
             throws ExprValidationException
     {
         String propertyName = identNodeLeft.getResolvedPropertyName();
@@ -551,8 +591,38 @@ public final class FilterSpecCompiler
             }
         }
 
+        String streamName = identNodeRight.getResolvedStreamName();
+        if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
+        {
+            Pair<Integer, String> indexAndProp = getStreamIndex(identNodeRight.getResolvedPropertyName());
+            return new FilterSpecParamEventPropIndexed(propertyName, op, identNodeRight.getResolvedStreamName(), indexAndProp.getFirst(),
+                    indexAndProp.getSecond(), isMustCoerce, numberCoercer, numericCoercionType);
+        }
         return new FilterSpecParamEventProp(propertyName, op, identNodeRight.getResolvedStreamName(), identNodeRight.getResolvedPropertyName(),
                 isMustCoerce, numberCoercer, numericCoercionType);
+    }
+
+    private static Pair<Integer, String> getStreamIndex(String resolvedPropertyName)
+    {
+        Property property = PropertyParser.parse(resolvedPropertyName, false);
+        if (!(property instanceof NestedProperty))
+        {
+            throw new IllegalStateException("Expected a nested property providing an index for array match '" + resolvedPropertyName + "'");
+        }
+        NestedProperty nested = ((NestedProperty) property);
+        if (nested.getProperties().size() < 2)
+        {
+            throw new IllegalStateException("Expected a nested property name for array match '" + resolvedPropertyName + "', none found");
+        }
+        if (!(nested.getProperties().get(0) instanceof IndexedProperty))
+        {
+            throw new IllegalStateException("Expected an indexed property for array match '" + resolvedPropertyName + "', please provide an index");
+        }
+        int index = ((IndexedProperty) nested.getProperties().get(0)).getIndex();
+        nested.getProperties().remove(0);
+        StringWriter writer = new StringWriter();
+        nested.toPropertyEPL(writer);
+        return new Pair<Integer, String>(index, writer.toString());
     }
 
     private static void throwConversionError(Class fromType, Class toType, String propertyName)

@@ -143,6 +143,15 @@ public class ViewFactoryContext
         return viewName;
     }
 
+    /**
+     * Returns the statement context.
+     * @return statement context
+     */
+    public StatementContext getStatementContext()
+    {
+        return statementContext;
+    }
+
     public String toString()
     {
         return  statementContext.toString() +

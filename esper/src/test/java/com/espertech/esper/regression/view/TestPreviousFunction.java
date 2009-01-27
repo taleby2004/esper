@@ -1,13 +1,10 @@
 package com.espertech.esper.regression.view;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -23,7 +20,6 @@ public class TestPreviousFunction extends TestCase
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
-        epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
     }
 
     public void testPrevCountStarWithStaticMethod()
@@ -110,7 +106,7 @@ public class TestPreviousFunction extends TestCase
     {
         // descending sort
         String viewExpr = "select symbol, prev(1, price) as prevPrice, prev(2, price) as prevPrevPrice " +
-                          "from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).ext:sort(price, false, 10) ";
+                          "from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).ext:sort(10, price asc) ";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
@@ -455,7 +451,7 @@ public class TestPreviousFunction extends TestCase
         String viewExpr = "select string as currSymbol, " +
                           " prev(2, symbol) as prevSymbol, " +
                           " prev(1, price) as prevPrice " +
-                          "from " + SupportBean.class.getName() + ", " +
+                          "from " + SupportBean.class.getName() + ".win:keepall(), " +
                           SupportMarketDataBean.class.getName() + ".win:time_batch(1 min)";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -625,7 +621,7 @@ public class TestPreviousFunction extends TestCase
                           " prev(0, price) as prev0Price, " +
                           " prev(1, price) as prev1Price, " +
                           " prev(2, price) as prev2Price " +
-                          "from " + SupportMarketDataBean.class.getName() + ".ext:sort(symbol, false, 100)";
+                          "from " + SupportMarketDataBean.class.getName() + ".ext:sort(100, symbol asc)";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
@@ -659,7 +655,7 @@ public class TestPreviousFunction extends TestCase
     {
         tryInvalid("select prev(0, average) " +
                 "from " + SupportMarketDataBean.class.getName() + ".win:length(100).stat:uni(price)",
-                "Error starting view: Previous function requires a single data window view onto the stream [select prev(0, average) from com.espertech.esper.support.bean.SupportMarketDataBean.win:length(100).stat:uni(price)]");
+                "Error starting statement: Previous function requires a single data window view onto the stream [select prev(0, average) from com.espertech.esper.support.bean.SupportMarketDataBean.win:length(100).stat:uni(price)]");
     }
 
     private void tryInvalid(String statement, String expectedError)

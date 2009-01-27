@@ -2,7 +2,7 @@ package com.espertech.esper.regression.epl;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
@@ -22,8 +22,6 @@ public class TestNamedWindowSelect extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listenerSelect = new SupportUpdateListener();
@@ -128,7 +126,7 @@ public class TestNamedWindowSelect extends TestCase
                    "Named window 'DUMMY' has not been declared [on com.espertech.esper.support.bean.SupportBean_A insert into MyStream select * from DUMMY]");
 
         tryInvalid("on " + SupportBean_A.class.getName() + " select prev(1, string) from MyWindow",
-                   "Error starting view: Previous function cannot be used in this context [on com.espertech.esper.support.bean.SupportBean_A select prev(1, string) from MyWindow]");
+                   "Error starting statement: Previous function cannot be used in this context [on com.espertech.esper.support.bean.SupportBean_A select prev(1, string) from MyWindow]");
     }
 
     private void tryInvalid(String text, String message)

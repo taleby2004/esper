@@ -8,9 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Abstract class for applications to extend to implement pattern guard objects.
  */
 public abstract class GuardFactorySupport implements GuardFactory
 {
+    private static Log log = LogFactory.getLog(GuardFactorySupport.class);
 }

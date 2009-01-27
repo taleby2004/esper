@@ -4,7 +4,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.metric.EngineMetric;
 import com.espertech.esper.client.metric.StatementMetric;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -376,7 +376,6 @@ public class TestMetricsReporting extends TestCase
     {
         Configuration config = getConfig(1000, 1000);
         config.getEngineDefaults().getMetricsReporting().setThreading(true);
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(true);
 
         /*
         epService = EPServiceProviderManager.getProvider("MyURI", config);
@@ -404,16 +403,14 @@ public class TestMetricsReporting extends TestCase
     private Configuration getConfig(long engineMetricInterval, long stmtMetricInterval)
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         configuration.getEngineDefaults().getMetricsReporting().setEnableMetricsReporting(true);
-        configuration.getEngineDefaults().getMetricsReporting().setThreading(false);  // use external timer thread
+        configuration.getEngineDefaults().getMetricsReporting().setThreading(false);
         configuration.getEngineDefaults().getMetricsReporting().setEngineInterval(engineMetricInterval);
         configuration.getEngineDefaults().getMetricsReporting().setStatementInterval(stmtMetricInterval);
 
         configuration.addImport(MyMetricFunctions.class.getName());
 
-        configuration.addEventTypeAlias("SupportBean", SupportBean.class);
+        configuration.addEventType("SupportBean", SupportBean.class);
 
         return configuration;
     }

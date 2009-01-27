@@ -4,9 +4,8 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
@@ -33,7 +32,6 @@ public class TestOrderBySimple extends TestCase {
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         symbols = new LinkedList<String>();
@@ -71,11 +69,10 @@ public class TestOrderBySimple extends TestCase {
         */
 
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         config.getEngineDefaults().getLanguage().setSortUsingCollator(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class.getName());
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class.getName());
 
         // test order by
         String stmtText = "select string from SupportBean.win:keepall() order by string asc";
@@ -86,7 +83,7 @@ public class TestOrderBySimple extends TestCase {
 
         // test sort view
         SupportUpdateListener listener = new SupportUpdateListener();
-        stmtText = "select irstream string from SupportBean.ext:sort(string, false, 2)";
+        stmtText = "select irstream string from SupportBean.ext:sort(2, string asc)";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(stmtText);
         stmtTwo.addListener(listener);
 
@@ -169,8 +166,8 @@ public class TestOrderBySimple extends TestCase {
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("symbol"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 5)));
-        model.setOutputLimitClause(OutputLimitClause.create(6, OutputLimitUnit.EVENTS));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(5))));
+        model.setOutputLimitClause(OutputLimitClause.create(6));
         model.setOrderByClause(OrderByClause.create().add("price", true));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(stmtText, model.toEPL());
@@ -860,9 +857,6 @@ public class TestOrderBySimple extends TestCase {
 
 		epService.initialize();
 
-		// Set manual clocking
-		epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
-
 		// Set start time
 		sendTimeEvent(0);
 
@@ -895,9 +889,6 @@ public class TestOrderBySimple extends TestCase {
 		clearValues();
 
 		epService.initialize();
-
-		// Set manual clocking
-		epService.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
 		// Set start time
 		sendTimeEvent(0);

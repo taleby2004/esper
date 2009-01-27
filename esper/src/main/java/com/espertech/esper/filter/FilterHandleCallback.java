@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 /**
  * Interface for a callback method to be called when an event matches a filter specification. Provided
@@ -22,4 +22,6 @@ public interface FilterHandleCallback extends FilterHandle
      * @param event - the event received that matches the filter specification
      */
     public void matchFound(EventBean event);
+
+    public boolean isSubSelect();
 }

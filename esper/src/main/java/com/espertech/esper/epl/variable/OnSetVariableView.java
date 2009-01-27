@@ -14,8 +14,8 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.spec.OnTriggerSetDesc;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
@@ -90,7 +90,7 @@ public class OnSetVariableView extends ViewSupport
         if (values != null)
         {
             EventBean newDataOut[] = new EventBean[1];
-            newDataOut[0] = eventAdapterService.createMapFromValues(values, eventType);
+            newDataOut[0] = eventAdapterService.adaptorForTypedMap(values, eventType);
             this.updateChildren(newDataOut, null);
         }
     }
@@ -112,7 +112,7 @@ public class OnSetVariableView extends ViewSupport
             count++;
         }
 
-        EventBean event = eventAdapterService.createMapFromValues(values, eventType);
+        EventBean event = eventAdapterService.adaptorForTypedMap(values, eventType);
         return new SingleEventIterator(event);
     }
 }

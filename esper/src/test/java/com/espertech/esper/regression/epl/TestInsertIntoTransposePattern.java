@@ -10,9 +10,8 @@ import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
-import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ public class TestInsertIntoTransposePattern extends TestCase
     public void setUp()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getDefaultProvider();
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -35,35 +33,32 @@ public class TestInsertIntoTransposePattern extends TestCase
 
     public void testThisAsColumn()
     {
-        // TODO - http://jira.codehaus.org/browse/ESPER-251
-        //
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        EPStatement createStmt = epService.getEPAdministrator().createEPL("create window Alert7Window.win:time(1 day) as select string as alertId, this from SupportBean");
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
-        /*
-        EPStatement insertStmt = epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote.this as this " +
-                " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
-                     " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
-                " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
-        */
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window OneWindow.win:time(1 day) as select string as alertId, this from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into OneWindow select '1' as alertId, stream0.quote.this as this " +
+                " from pattern [every quote=SupportBean(string='A')] as stream0");
+        epService.getEPAdministrator().createEPL("insert into OneWindow select '2' as alertId, stream0.quote as this " +
+                " from pattern [every quote=SupportBean(string='B')] as stream0");
 
-        for (String name : createStmt.getEventType().getPropertyNames())
-        {
-            System.out.println("Property " + name + " typed " + createStmt.getEventType().getPropertyType(name));
-        }
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 10));
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"alertId", "this.intPrimitive"}, new Object[][] {{"1", 10}});
 
-        /*
-        epService.getEPAdministrator().createEPL("insert into Alert7Window select '7' as alertId, stream0.quote as this " +
-                " from pattern [(every quote=SupportBean) where timer:within(1 days)].std:lastevent() stream0, " +
-                     " pattern [(every index=SupportBean) where timer:within(1 days)].std:lastevent() stream1 " +
-                " where stream0.quote.intPrimitive > stream1.index.intPrimitive");
-        */
+        epService.getEPRuntime().sendEvent(new SupportBean("B", 20));
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"alertId", "this.intPrimitive"}, new Object[][] {{"1", 10}, {"2", 20}});
+
+        stmt = epService.getEPAdministrator().createEPL("create window TwoWindow.win:time(1 day) as select string as alertId, * from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into TwoWindow select '3' as alertId, quote.* " +
+                " from pattern [every quote=SupportBean(string='C')] as stream0");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 30));
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"alertId", "intPrimitive"}, new Object[][] {{"3", 30}});
     }
 
     public void testTransposePOJOEventPattern()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("AEvent", SupportBean_A.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("BEvent", SupportBean_B.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("AEvent", SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("BEvent", SupportBean_B.class);
 
         String stmtTextOne = "insert into MyStream select a, b from pattern [a=AEvent -> b=BEvent]";
         epService.getEPAdministrator().createEPL(stmtTextOne);
@@ -81,8 +76,8 @@ public class TestInsertIntoTransposePattern extends TestCase
     {
         Map<String, Object> type = makeMap(new Object[][] {{"id", String.class}});
 
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("AEvent", type);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("BEvent", type);
+        epService.getEPAdministrator().getConfiguration().addEventType("AEvent", type);
+        epService.getEPAdministrator().getConfiguration().addEventType("BEvent", type);
 
         String stmtTextOne = "insert into MyStream select a, b from pattern [a=AEvent -> b=BEvent]";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtTextOne);

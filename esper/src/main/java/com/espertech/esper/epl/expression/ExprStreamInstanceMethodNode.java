@@ -12,8 +12,8 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.schedule.TimeProvider;
 import net.sf.cglib.reflect.FastMethod;
 import net.sf.cglib.reflect.FastClass;
@@ -181,7 +181,7 @@ public class ExprStreamInstanceMethodNode extends ExprNode
 		}
 	}
 
-	public Class getType() throws ExprValidationException
+	public Class getType()
 	{
 		if(instanceMethod == null)
 		{

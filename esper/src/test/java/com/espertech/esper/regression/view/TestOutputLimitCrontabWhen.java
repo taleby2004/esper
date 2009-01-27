@@ -9,9 +9,6 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportSubscriber;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.type.FrequencyParameter;
-import com.espertech.esper.type.RangeParameter;
-import com.espertech.esper.type.WildcardParameter;
 import junit.framework.TestCase;
 
 import java.util.Calendar;
@@ -25,12 +22,24 @@ public class TestOutputLimitCrontabWhen extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("MarketData", SupportMarketDataBean.class);
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
+        config.addEventType("MarketData", SupportMarketDataBean.class);
+        config.addEventType("SupportBean", SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
+    }
+
+    public void testOutputCrontabAtVariable() {
+
+        // every 15 minutes 8am to 5pm
+        sendTimeEvent(1, 17, 10, 0, 0);
+        epService.getEPAdministrator().createEPL("create variable int VFREQ = 15");
+        epService.getEPAdministrator().createEPL("create variable int VMIN = 8");
+        epService.getEPAdministrator().createEPL("create variable int VMAX = 17");
+        String expression = "select * from MarketData.std:lastevent() output at (*/VFREQ, VMIN:VMAX, *, *, *)";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expression);
+        stmt.addListener(listener);
+        runAssertionCrontab(1, stmt);
     }
 
     public void testOutputCrontabAt() {
@@ -52,9 +61,14 @@ public class TestOutputLimitCrontabWhen extends TestCase
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.createWildcard());
         model.setFromClause(FromClause.create(FilterStream.create("MarketData").addView("std", "lastevent")));
-        Object[] crontabParams = new Object[] {new FrequencyParameter(15), new RangeParameter(8, 17),
-                new WildcardParameter(), new WildcardParameter(), new WildcardParameter()};
-        model.setOutputLimitClause(OutputLimitClause.create(crontabParams));
+        Expression[] crontabParams = new Expression[] {
+                Expressions.crontabScheduleFrequency(15),
+                Expressions.crontabScheduleRange(8, 17),
+                Expressions.crontabScheduleWildcard(),
+                Expressions.crontabScheduleWildcard(),
+                Expressions.crontabScheduleWildcard()
+            };
+        model.setOutputLimitClause(OutputLimitClause.createSchedule(crontabParams));
 
         String epl = model.toEPL();
         assertEquals(expression, epl);
@@ -134,7 +148,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("symbol"));
-        model.setFromClause(FromClause.create(FilterStream.create("MarketData").addView("win", "length", 2)));
+        model.setFromClause(FromClause.create(FilterStream.create("MarketData").addView("win", "length", Expressions.constant(2))));
         model.setOutputLimitClause(OutputLimitClause.create(Expressions.eq("myvar", 1))
                                     .addThenAssignment("myvar", Expressions.constant(0))
                                     .addThenAssignment("count_insert_var", Expressions.property("count_insert")));
@@ -145,7 +159,11 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         model = epService.getEPAdministrator().compileEPL(expression);
         assertEquals(expression, model.toEPL());
-        runAssertion(3, epService.getEPAdministrator().create(model));        
+        runAssertion(3, epService.getEPAdministrator().create(model));
+
+        String outputLast = "select symbol from MarketData.win:length(2) output last when (myvar = 1) ";
+        model = epService.getEPAdministrator().compileEPL(outputLast);
+        assertEquals(outputLast.trim(), model.toEPL().trim());
     }
 
     private void runAssertion(int days, EPStatement stmt)
@@ -337,7 +355,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
                    "Error validating expression: The when-trigger expression in the OUTPUT WHEN clause must return a boolean-type value [select * from MarketData output when myvardummy]");
 
         tryInvalid("select * from MarketData output when true then set myvardummy = 'b'",
-                   "Error starting view: Variable 'myvardummy' of declared type 'java.lang.Integer' cannot be assigned a value of type 'java.lang.String' [select * from MarketData output when true then set myvardummy = 'b']");
+                   "Error starting statement: Variable 'myvardummy' of declared type 'java.lang.Integer' cannot be assigned a value of type 'java.lang.String' [select * from MarketData output when true then set myvardummy = 'b']");
 
         tryInvalid("select * from MarketData output when true then set myvardummy = sum(myvardummy)",
                    "Error validating expression: An aggregate function may not appear in a OUTPUT LIMIT clause [select * from MarketData output when true then set myvardummy = sum(myvardummy)]");

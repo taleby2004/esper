@@ -3,7 +3,7 @@ package com.espertech.esper.support.event;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.ConfigurationRevisionEventType;
 import com.espertech.esper.client.ConfigurationVariantStream;
 import com.espertech.esper.client.ConfigurationException;
@@ -23,7 +23,7 @@ public class SupportValueAddEventService implements ValueAddEventService
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void addVariantStream(String variantEventTypeAlias, ConfigurationVariantStream variantStreamConfig, EventAdapterService eventAdapterService) throws ConfigurationException
+    public void addVariantStream(String varianteventTypeName, ConfigurationVariantStream variantStreamConfig, EventAdapterService eventAdapterService) throws ConfigurationException
     {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -38,7 +38,7 @@ public class SupportValueAddEventService implements ValueAddEventService
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public boolean isRevisionTypeAlias(String alias)
+    public boolean isRevisionTypeName(String alias)
     {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -50,6 +50,6 @@ public class SupportValueAddEventService implements ValueAddEventService
 
     public EventType[] getValueAddedTypes()
     {
-        return new EventType[0];  
+        return new EventType[0];
     }
 }

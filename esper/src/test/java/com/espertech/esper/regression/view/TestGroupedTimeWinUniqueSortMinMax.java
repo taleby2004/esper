@@ -2,8 +2,8 @@ package com.espertech.esper.regression.view;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +17,7 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
     private Configuration setup()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("Sensor", Sensor.class);
+        config.addEventType("Sensor", Sensor.class);
         return config;
     }
 
@@ -28,8 +28,9 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
     public void testSensorQuery() throws Exception {
         log.info ("testSensorQuery...........");
         Configuration configuration = setup();
-
+        configuration.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(true);
         EPServiceProvider epService = EPServiceProviderManager.getProvider("testSensorQuery", configuration);
+        epService.initialize();
         MatchListener listener = new MatchListener();
 
         String stmtString =
@@ -37,8 +38,8 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
               " max(high.measurement) as highMeasurement, max(high.confidence) as confidenceOfHigh, max(high.device) as deviceOfHigh\n" +
               ",min(low.measurement) as lowMeasurement, min(low.confidence) as confidenceOfLow, min(low.device) as deviceOfLow\n" +
               "FROM\n" +
-              " Sensor.std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(measurement,true,1) as high " +
-              ",Sensor.std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(measurement,false,1) as low ";
+              " Sensor.std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(1, measurement desc) as high " +
+              ",Sensor.std:groupby(type).win:time(1 hour).std:unique(device).ext:sort(1, measurement asc) as low ";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtString);
         log.info(stmtString);

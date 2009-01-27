@@ -8,10 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
+import com.espertech.esper.util.LevenshteinDistance;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,20 +26,27 @@ public class StreamTypeServiceImpl implements StreamTypeService
     private final EventType[] eventTypes;
     private final String[] streamNames;
     private final String engineURIQualifier;
-    private final String[] eventTypeAlias;
     private boolean isStreamZeroUnambigous;
     private boolean requireStreamNames;
+
+    /**
+     * Ctor.
+     * @param engineURI engine URI
+     */
+    public StreamTypeServiceImpl (String engineURI)
+    {
+        this(new EventType[0], new String[0], engineURI);
+    }
 
     /**
      * Ctor.
      * @param eventType a single event type for a single stream
      * @param streamName the stream name of the single stream
      * @param engineURI engine URI
-     * @param eventTypeAlias alias of the event type of the single stream
      */
-    public StreamTypeServiceImpl (EventType eventType, String streamName, String engineURI, String eventTypeAlias)
+    public StreamTypeServiceImpl (EventType eventType, String streamName, String engineURI)
     {
-        this(new EventType[] {eventType}, new String[] {streamName}, engineURI, new String[] {eventTypeAlias});
+        this(new EventType[] {eventType}, new String[] {streamName}, engineURI);
     }
 
     /**
@@ -45,13 +54,11 @@ public class StreamTypeServiceImpl implements StreamTypeService
      * @param eventTypes - array of event types, one for each stream
      * @param streamNames - array of stream names, one for each stream
      * @param engineURI - engine URI
-     * @param eventTypeAlias - alias name of the event type
      */
-    public StreamTypeServiceImpl (EventType[] eventTypes, String[] streamNames, String engineURI, String[] eventTypeAlias)
+    public StreamTypeServiceImpl (EventType[] eventTypes, String[] streamNames, String engineURI)
     {
         this.eventTypes = eventTypes;
         this.streamNames = streamNames;
-        this.eventTypeAlias = eventTypeAlias;
 
         if (engineURI == null)
         {
@@ -83,13 +90,11 @@ public class StreamTypeServiceImpl implements StreamTypeService
         this.engineURIQualifier = engineURI;
         eventTypes = new EventType[namesAndTypes.size()] ;
         streamNames = new String[namesAndTypes.size()] ;
-        eventTypeAlias = new String[namesAndTypes.size()] ;
         int count = 0;
         for (Map.Entry<String, Pair<EventType, String>> entry : namesAndTypes.entrySet())
         {
             streamNames[count] = entry.getKey();
             eventTypes[count] = entry.getValue().getFirst();
-            eventTypeAlias[count] = entry.getValue().getSecond();
             count++;
         }
     }
@@ -114,7 +119,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         PropertyResolutionDescriptor desc = findByPropertyName(propertyName);
         if ((requireStreamNames) && (desc.getStreamNum() != 0))
         {
-            throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by a stream name, use the as-clause to name the stream");
+            throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by a stream name, use the as-clause to name the stream", null);
         }
         return desc;
     }
@@ -216,10 +221,59 @@ public class StreamTypeServiceImpl implements StreamTypeService
 
         if (streamType == null)
         {
-            throw new PropertyNotFoundException("Property named '" + propertyName + "' is not valid in any stream");
+            Pair<Integer, String> possibleMatch = findLevMatch(propertyName);
+            String message = "Property named '" + propertyName + "' is not valid in any stream";
+            throw new PropertyNotFoundException(message, possibleMatch);
         }
 
         return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
+    }
+
+    private Pair<Integer, String> findLevMatch(String propertyName)
+    {
+        String bestMatch = null;
+        int bestMatchDiff = Integer.MAX_VALUE;
+        for (int i = 0; i < eventTypes.length; i++)
+        {
+            EventPropertyDescriptor[] props = eventTypes[i].getPropertyDescriptors();
+            for (int j = 0; j < props.length; j++)
+            {
+                int diff = LevenshteinDistance.computeLevenshteinDistance(propertyName, props[j].getPropertyName());
+                if (diff < bestMatchDiff)
+                {
+                    bestMatchDiff = diff;
+                    bestMatch = props[j].getPropertyName();
+                }
+            }
+        }
+
+        if (bestMatchDiff < Integer.MAX_VALUE)
+        {
+            return new Pair<Integer, String>(bestMatchDiff, bestMatch);
+        }
+        return null;
+    }
+
+    private Pair<Integer, String> findLevMatch(String propertyName, EventType eventType)
+    {
+        String bestMatch = null;
+        int bestMatchDiff = Integer.MAX_VALUE;
+        EventPropertyDescriptor[] props = eventType.getPropertyDescriptors();
+        for (int j = 0; j < props.length; j++)
+        {
+            int diff = LevenshteinDistance.computeLevenshteinDistance(propertyName, props[j].getPropertyName());
+            if (diff < bestMatchDiff)
+            {
+                bestMatchDiff = diff;
+                bestMatch = props[j].getPropertyName();
+            }
+        }
+
+        if (bestMatchDiff < Integer.MAX_VALUE)
+        {
+            return new Pair<Integer, String>(bestMatchDiff, bestMatch);
+        }
+        return null;
     }
 
     private PropertyResolutionDescriptor findByStreamAndEngineName(String propertyName, String streamName)
@@ -277,8 +331,8 @@ public class StreamTypeServiceImpl implements StreamTypeService
         EventType streamType = null;
 
         // Stream name resultion examples:
-        // A)  select A1.price from Event.price as A2  => mismatch stream alias, cannot resolve
-        // B)  select Event1.price from Event2.price   => mismatch event type alias, cannot resolve
+        // A)  select A1.price from Event.price as A2  => mismatch stream name, cannot resolve
+        // B)  select Event1.price from Event2.price   => mismatch event type name, cannot resolve
         // C)  select default.Event2.price from Event2.price   => possible prefix of engine name
         for (int i = 0; i < eventTypes.length; i++)
         {
@@ -288,8 +342,8 @@ public class StreamTypeServiceImpl implements StreamTypeService
                 break;
             }
 
-            // If the stream name is the event type alias, that is also acceptable
-            if ((eventTypeAlias[i] != null) && (eventTypeAlias[i].equals(streamName)))
+            // If the stream name is the event type name, that is also acceptable
+            if ((eventTypes[i].getName() != null) && (eventTypes[i].getName().equals(streamName)))
             {
                 streamType = eventTypes[i];
                 break;
@@ -297,16 +351,51 @@ public class StreamTypeServiceImpl implements StreamTypeService
 
             index++;
         }
-
+        
         if (streamType == null)
         {
-            throw new StreamNotFoundException("Stream named " + streamName + " is not defined");
+            // find a near match, textually
+            String bestMatch = null;
+            int bestMatchDiff = Integer.MAX_VALUE;
+
+            for (int i = 0; i < eventTypes.length; i++)
+            {
+                if (streamNames[i] != null)
+                {
+                    int diff = LevenshteinDistance.computeLevenshteinDistance(streamNames[i], streamName);
+                    if (diff < bestMatchDiff)
+                    {
+                        bestMatchDiff = diff;
+                        bestMatch = streamNames[i];
+                    }
+                }
+
+                // If the stream name is the event type name, that is also acceptable
+                if (eventTypes[i].getName() != null)
+                {
+                    int diff = LevenshteinDistance.computeLevenshteinDistance(eventTypes[i].getName(), streamName);
+                    if (diff < bestMatchDiff)
+                    {
+                        bestMatchDiff = diff;
+                        bestMatch = eventTypes[i].getName();
+                    }
+                }
+            }
+
+            Pair<Integer, String> suggestion = null;
+            if (bestMatchDiff < Integer.MAX_VALUE)
+            {
+                suggestion = new Pair<Integer, String>(bestMatchDiff, bestMatch);
+            }
+            throw new StreamNotFoundException("Failed to find a stream named '" + streamName + "'", suggestion);
         }
 
         Class propertyType = streamType.getPropertyType(propertyName);
         if (propertyType == null)
         {
-            throw new PropertyNotFoundException("Property named '" + propertyName + "' is not valid in stream " + streamName);
+            Pair<Integer, String> possibleMatch = findLevMatch(propertyName, streamType);
+            String message = "Property named '" + propertyName + "' is not valid in stream '" + streamName + "'";
+            throw new PropertyNotFoundException(message, possibleMatch);
         }
 
         return new PropertyResolutionDescriptor(streamName, streamType, propertyName, index, propertyType);

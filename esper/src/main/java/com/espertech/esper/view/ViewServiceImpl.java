@@ -8,15 +8,22 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.epl.spec.StreamSpecOptions;
+import com.espertech.esper.epl.spec.ViewSpec;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.view.internal.UnionViewFactory;
+import com.espertech.esper.view.internal.IntersectViewFactory;
+import com.espertech.esper.view.std.GroupByViewFactory;
+import com.espertech.esper.view.std.MergeViewFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.spec.ViewSpec;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Implementation of the view evaluation service business interface.
@@ -33,6 +40,7 @@ public final class ViewServiceImpl implements ViewService
     public ViewFactoryChain createFactories(int streamNum,
                                             EventType parentEventType,
                                             List<ViewSpec> viewSpecDefinitions,
+                                            StreamSpecOptions options,
                                             StatementContext context)
             throws ViewProcessingException
     {
@@ -46,7 +54,7 @@ public final class ViewServiceImpl implements ViewService
         List<ViewFactory> viewFactories = ViewServiceHelper.instantiateFactories(streamNum, viewSpecList, context);
 
         ViewFactory parentViewFactory = null;
-        List<ViewFactory> attachedViewFactories = new LinkedList<ViewFactory>();
+        List<ViewFactory> attachedViewFactories = new ArrayList<ViewFactory>();
         for (int i = 0; i < viewFactories.size(); i++)
         {
             ViewFactory factoryToAttach = viewFactories.get(i);
@@ -56,7 +64,7 @@ public final class ViewServiceImpl implements ViewService
                 attachedViewFactories.add(viewFactories.get(i));
                 parentEventType = factoryToAttach.getEventType();
             }
-            catch (ViewAttachException ex)
+            catch (ViewParameterException ex)
             {
                 String text = "Error attaching view to parent view";
                 if (i == 0)
@@ -67,7 +75,126 @@ public final class ViewServiceImpl implements ViewService
             }
         }
 
+        // obtain count of data windows
+        int dataWindowCount = 0;
+        int firstNonDataWindowIndex = -1;
+        for (int i = 0; i < viewFactories.size(); i++)
+        {
+            ViewFactory factory = viewFactories.get(i);
+            if (factory instanceof DataWindowViewFactory)
+            {
+                dataWindowCount++;
+                continue;
+            }
+            if ((factory instanceof GroupByViewFactory) || (factory instanceof MergeViewFactory))
+            {
+                continue;
+            }
+            if (firstNonDataWindowIndex == -1)
+            {
+                firstNonDataWindowIndex = i;
+            }
+        }
+
+        boolean isAllowMultipleExpiry = context.getConfigSnapshot().getEngineDefaults().getViewResources().isAllowMultipleExpiryPolicies();
+        boolean isRetainIntersection = options.isRetainIntersection();
+        boolean isRetainUnion = options.isRetainUnion();
+
+        // Set the default to retain-intersection unless allow-multiple-expiry is turned on
+        if ((!isAllowMultipleExpiry) && (!isRetainUnion))
+        {
+            isRetainIntersection = true;
+        }
+
+        // handle multiple data windows with retain union.
+        // wrap view factories into the union view factory and handle a group-by, if present
+        if ((isRetainUnion || isRetainIntersection) && dataWindowCount > 1)
+        {
+            viewFactories = getRetainViewFactories(parentEventType, viewFactories, isRetainUnion,  context);
+        }
+
         return new ViewFactoryChain(parentEventType, viewFactories);
+    }
+
+    private List<ViewFactory> getRetainViewFactories(EventType parentEventType, List<ViewFactory> viewFactories, boolean isUnion, StatementContext context)
+            throws ViewProcessingException
+    {
+        Set<Integer> groupByFactory = new HashSet<Integer>();
+        Set<Integer> mergeFactory = new HashSet<Integer>();
+        List<ViewFactory> derivedValueViews = new ArrayList<ViewFactory>();
+        List<ViewFactory> dataWindowViews = new ArrayList<ViewFactory>();
+        for (int i = 0; i < viewFactories.size(); i++)
+        {
+            ViewFactory factory = viewFactories.get(i);
+            if (factory instanceof GroupByViewFactory)
+            {
+                groupByFactory.add(i);
+            }
+            else if (factory instanceof MergeViewFactory)
+            {
+                mergeFactory.add(i);
+            }
+            else if (factory instanceof DataWindowViewFactory)
+            {
+                dataWindowViews.add(factory);
+            }
+            else
+            {
+                derivedValueViews.add(factory);
+            }
+        }
+
+        if (groupByFactory.size() > 1)
+        {
+            throw new ViewProcessingException("Multiple group-by views are not allowed in conjuntion with multiple data windows");
+        }
+        if ((!groupByFactory.isEmpty()) && (groupByFactory.iterator().next() != 0))
+        {
+            throw new ViewProcessingException("The group-by view must occur in the first position in conjuntion with multiple data windows");
+        }
+        if ((!groupByFactory.isEmpty()) && (mergeFactory.iterator().next() != (viewFactories.size() - 1)))
+        {
+            throw new ViewProcessingException("The merge view cannot be used in conjuntion with multiple data windows");
+        }
+
+        GroupByViewFactory groupByViewFactory = null;
+        MergeViewFactory mergeViewFactory = null;
+        if (!groupByFactory.isEmpty())
+        {
+            groupByViewFactory = (GroupByViewFactory) viewFactories.remove(0);
+            mergeViewFactory = (MergeViewFactory) viewFactories.remove(viewFactories.size() - 1);
+        }
+
+        ViewFactory retainPolicy;
+        if (isUnion)
+        {
+            UnionViewFactory viewFactory = (UnionViewFactory) context.getViewResolutionService().create("internal", "union");
+            viewFactory.setParentEventType(parentEventType);
+            viewFactory.setViewFactories(dataWindowViews);
+            retainPolicy = viewFactory;
+        }
+        else
+        {
+            IntersectViewFactory viewFactory = (IntersectViewFactory) context.getViewResolutionService().create("internal", "intersect");
+            viewFactory.setParentEventType(parentEventType);
+            viewFactory.setViewFactories(dataWindowViews);
+            retainPolicy = viewFactory;
+        }
+
+        List<ViewFactory> nonRetainViewFactories = new ArrayList<ViewFactory>();
+        nonRetainViewFactories.add(retainPolicy);
+        if (groupByViewFactory != null)
+        {
+            nonRetainViewFactories.add(0, groupByViewFactory);
+            nonRetainViewFactories.addAll(derivedValueViews);
+            nonRetainViewFactories.add(mergeViewFactory);
+        }
+        else
+        {
+            nonRetainViewFactories.addAll(derivedValueViews);
+        }
+
+        return nonRetainViewFactories;
     }
 
     public Viewable createViews(Viewable eventStreamViewable,

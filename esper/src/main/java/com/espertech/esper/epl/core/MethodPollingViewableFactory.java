@@ -10,6 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.ConfigurationMethodRef;
 import com.espertech.esper.client.ConfigurationDataCache;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.epl.db.DataCache;
 import com.espertech.esper.epl.db.DataCacheFactory;
@@ -17,7 +18,6 @@ import com.espertech.esper.epl.db.PollExecStrategy;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.MethodStreamSpec;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventType;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.util.JavaClassHelper;
@@ -89,7 +89,7 @@ public class MethodPollingViewableFactory
         }
 
         // If the method returns a Map, look up the map type
-        Map<String, Class> mapType = null;
+        Map<String, Object> mapType = null;
         String mapTypeName = null;
         if ( (JavaClassHelper.isImplementsInterface(staticMethod.getReturnType(), Map.class)) ||
              (staticMethod.getReturnType().isArray() && JavaClassHelper.isImplementsInterface(staticMethod.getReturnType().getComponentType(), Map.class)) )
@@ -119,7 +119,7 @@ public class MethodPollingViewableFactory
                 if ((resultType != null) && (resultType instanceof Map))
                 {
                     mapTypeName = methodStreamSpec.getClassName() + "." + typeGetterMethod.getName();
-                    mapType = (Map<String, Class>) resultType;
+                    mapType = (Map<String, Object>) resultType;
                 }
             }
         }
@@ -128,7 +128,7 @@ public class MethodPollingViewableFactory
         EventType eventType;
         if (mapType != null)
         {
-            eventType = eventAdapterService.addMapType(mapTypeName, mapType, null);
+            eventType = eventAdapterService.addNestableMapType(mapTypeName, mapType, null, true, false, false);
         }
         else
         {

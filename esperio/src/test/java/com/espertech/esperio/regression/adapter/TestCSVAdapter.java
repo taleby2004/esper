@@ -11,7 +11,7 @@ package com.espertech.esperio.regression.adapter;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.AdapterState;
 import com.espertech.esperio.InputAdapter;
@@ -31,25 +31,25 @@ import java.util.Map;
 public class TestCSVAdapter extends TestCase
 {
 	private SupportUpdateListener listener;
-	private String eventTypeAlias;
+	private String eventTypeName;
 	private EPServiceProvider epService;
 	private long currentTime;
 	private InputAdapter adapter;
 	private String[] propertyOrderTimestamps;
 	private String[] propertyOrderNoTimestamps;
-	private Map<String, Class> propertyTypes;
+	private Map<String, Object> propertyTypes;
 
 	protected void setUp()
 	{
-		propertyTypes = new HashMap<String, Class>();
+		propertyTypes = new HashMap<String, Object>();
 		propertyTypes.put("myInt", Integer.class);
 		propertyTypes.put("myDouble", Double.class);
 		propertyTypes.put("myString", String.class);
 
-		eventTypeAlias = "mapEvent";
+		eventTypeName = "mapEvent";
 		Configuration configuration = new Configuration();
-		configuration.addEventTypeAlias(eventTypeAlias, propertyTypes);
-		configuration.addEventTypeAlias("myNonMapEvent", Class.class.getName());
+		configuration.addEventType(eventTypeName, propertyTypes);
+		configuration.addEventType("myNonMapEvent", Class.class.getName());
 
 		epService = EPServiceProviderManager.getProvider("CSVProvider", configuration);
 		epService.initialize();
@@ -74,19 +74,19 @@ public class TestCSVAdapter extends TestCase
 
 	public void testNullEPService()
 	{
-		CSVInputAdapter adapter = new CSVInputAdapter(null, new AdapterInputSource("regression/titleRow.csv"), eventTypeAlias);
+		CSVInputAdapter adapter = new CSVInputAdapter(null, new AdapterInputSource("regression/titleRow.csv"), eventTypeName);
 		runNullEPService(adapter);
 
 		listener.reset();
 
-		adapter = new CSVInputAdapter(new AdapterInputSource("regression/titleRow.csv"), eventTypeAlias);
+		adapter = new CSVInputAdapter(new AdapterInputSource("regression/titleRow.csv"), eventTypeName);
 		runNullEPService(adapter);
 	}
 
 	public void testInputStream()
 	{
 		InputStream stream = this.getClass().getClassLoader().getResourceAsStream("regression/noTimestampOne.csv");
-		CSVInputAdapterSpec adapterSpec  = new CSVInputAdapterSpec(new AdapterInputSource(stream), eventTypeAlias);
+		CSVInputAdapterSpec adapterSpec  = new CSVInputAdapterSpec(new AdapterInputSource(stream), eventTypeName);
 		adapterSpec.setPropertyOrder(propertyOrderNoTimestamps);
 
 		new CSVInputAdapter(epService, adapterSpec);
@@ -219,7 +219,7 @@ public class TestCSVAdapter extends TestCase
 
 	public void testRuntimePropertyTypesInvalid()
 	{
-		Map<String, Class> propertyTypesInvalid = new HashMap<String, Class>(propertyTypes);
+		Map<String, Object> propertyTypesInvalid = new HashMap<String, Object>(propertyTypes);
 		propertyTypesInvalid.put("anotherProperty", String.class);
 		try
 		{
@@ -233,7 +233,7 @@ public class TestCSVAdapter extends TestCase
 			// Expected
 		}
 
-		propertyTypesInvalid = new HashMap<String, Class>(propertyTypes);
+		propertyTypesInvalid = new HashMap<String, Object>(propertyTypes);
 		propertyTypesInvalid.put("myInt", String.class);
 		try
 		{
@@ -247,7 +247,7 @@ public class TestCSVAdapter extends TestCase
 			// Expected
 		}
 
-		propertyTypesInvalid = new HashMap<String, Class>(propertyTypes);
+		propertyTypesInvalid = new HashMap<String, Object>(propertyTypes);
 		propertyTypesInvalid.remove("myInt");
 		propertyTypesInvalid.put("anotherInt", Integer.class);
 		try
@@ -272,13 +272,13 @@ public class TestCSVAdapter extends TestCase
 	public void testRunWrongMapType()
 	{
 		String filename = "regression/differentMap.csv";
-		assertFailedConstruction(filename, eventTypeAlias);
+		assertFailedConstruction(filename, eventTypeName);
 	}
 
 	public void testRunNonexistentFile()
 	{
 		String filename = "someNonexistentFile";
-		assertFailedConstruction(filename, eventTypeAlias);
+		assertFailedConstruction(filename, eventTypeName);
 	}
 
 	public void testRunEmptyFile()
@@ -720,7 +720,7 @@ public class TestCSVAdapter extends TestCase
 
 	private void startAdapter(String filename, int eventsPerSec, boolean isLooping, boolean usingEngineThread, String timestampColumn, String[] propertyOrder)
 	{
-		CSVInputAdapterSpec adapterSpec = new CSVInputAdapterSpec(new AdapterInputSource(filename), eventTypeAlias);
+		CSVInputAdapterSpec adapterSpec = new CSVInputAdapterSpec(new AdapterInputSource(filename), eventTypeName);
 		if(eventsPerSec != -1)
 		{
 			adapterSpec.setEventsPerSec(eventsPerSec);
@@ -734,11 +734,11 @@ public class TestCSVAdapter extends TestCase
 		adapter.start();
 	}
 
-	private void assertFailedConstruction(String filename, String eventTypeAlias)
+	private void assertFailedConstruction(String filename, String eventTypeName)
 	{
 		try
 		{
-			(new CSVInputAdapter(epService, new AdapterInputSource(filename), eventTypeAlias)).start();
+			(new CSVInputAdapter(epService, new AdapterInputSource(filename), eventTypeName)).start();
 			fail();
 		}
 		catch(EPException ex)

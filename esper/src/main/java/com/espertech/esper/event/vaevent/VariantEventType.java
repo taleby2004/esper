@@ -8,15 +8,15 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyDescriptor;
+import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Event type for variant event streams.
@@ -30,6 +30,8 @@ public class VariantEventType implements EventTypeSPI
     private final VariantPropResolutionStrategy propertyResStrategy;
     private final Map<String, VariantPropertyDesc> propertyDesc;
     private final String[] propertyNames;
+    private final EventPropertyDescriptor[] propertyDescriptors;
+    private final Map<String, EventPropertyDescriptor> propertyDescriptorMap;
 
     /**
      * Ctor.
@@ -44,12 +46,10 @@ public class VariantEventType implements EventTypeSPI
         this.propertyResStrategy = propertyResStrategy;
         propertyDesc = new HashMap<String, VariantPropertyDesc>();
 
-        // for each of the properties in each type, attempt to load the property to build a property list
         for (EventType type : variants)
         {
             String[] properties = type.getPropertyNames();
             properties = PropertyUtility.copyAndSort(properties);
-            PropertyUtility.removePropNamePostfixes(properties);
             for (String property : properties)
             {
                 if (!propertyDesc.containsKey(property))
@@ -58,8 +58,21 @@ public class VariantEventType implements EventTypeSPI
                 }
             }
         }
-        Set<String> keySet = propertyDesc.keySet();
-        propertyNames = keySet.toArray(new String[keySet.size()]);
+
+        Set<String> propertyNameKeySet = propertyDesc.keySet();
+        propertyNames = propertyNameKeySet.toArray(new String[propertyNameKeySet.size()]);
+
+        // for each of the properties in each type, attempt to load the property to build a property list
+        propertyDescriptors = new EventPropertyDescriptor[propertyDesc.size()];
+        propertyDescriptorMap = new HashMap<String, EventPropertyDescriptor>();
+        int count = 0;
+        for (Map.Entry<String, VariantPropertyDesc> desc : propertyDesc.entrySet())
+        {
+            Class type = desc.getValue().getPropertyType();
+            EventPropertyDescriptor descriptor = new EventPropertyDescriptor(desc.getKey(), type, false, false, false, false, JavaClassHelper.isFragmentableType(desc.getValue().getPropertyType()));
+            propertyDescriptors[count++] = descriptor;
+            propertyDescriptorMap.put(desc.getKey(), descriptor);
+        }
     }
 
     public Class getPropertyType(String property)
@@ -145,5 +158,20 @@ public class VariantEventType implements EventTypeSPI
     public EventTypeMetadata getMetadata()
     {
         return metadata;
+    }
+
+    public EventPropertyDescriptor[] getPropertyDescriptors()
+    {
+        return propertyDescriptors; 
+    }
+
+    public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
+    {
+        return propertyDescriptorMap.get(propertyName);
+    }    
+
+    public FragmentEventType getFragmentType(String property)
+    {
+        return null;
     }
 }

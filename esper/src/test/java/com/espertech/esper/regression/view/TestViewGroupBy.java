@@ -48,7 +48,7 @@ public class TestViewGroupBy extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Invalid use of the 'std:groupby' view, the view requires one or more child views to group, or consider using the group-by clause [select avg(price), symbol from com.espertech.esper.support.bean.SupportMarketDataBean.win:length(100).std:groupby(symbol)]", ex.getMessage());
+            assertEquals("Error starting statement: Invalid use of the 'std:groupby' view, the view requires one or more child views to group, or consider using the group-by clause [select avg(price), symbol from com.espertech.esper.support.bean.SupportMarketDataBean.win:length(100).std:groupby(symbol)]", ex.getMessage());
         }
     }
 
@@ -146,7 +146,7 @@ public class TestViewGroupBy extends TestCase
     {
         // further math tests can be found in the view unit test
         EPAdministrator admin = epService.getEPAdministrator();
-        admin.getConfiguration().addEventTypeAlias("Market", SupportMarketDataBean.class);
+        admin.getConfiguration().addEventType("Market", SupportMarketDataBean.class);
         EPStatement statement = admin.createEPL("select * from Market.std:groupby(symbol).win:length(1000000).stat:correl(price, volume)");
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -170,7 +170,7 @@ public class TestViewGroupBy extends TestCase
     {
         // further math tests can be found in the view unit test
         EPAdministrator admin = epService.getEPAdministrator();
-        admin.getConfiguration().addEventTypeAlias("Market", SupportMarketDataBean.class);
+        admin.getConfiguration().addEventType("Market", SupportMarketDataBean.class);
         EPStatement statement = admin.createEPL("select * from Market.std:groupby(symbol).win:length(1000000).stat:linest(price, volume)");
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);

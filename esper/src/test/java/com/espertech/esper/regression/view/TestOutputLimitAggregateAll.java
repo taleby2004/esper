@@ -3,7 +3,7 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -27,9 +27,8 @@ public class TestOutputLimitAggregateAll extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("MarketData", SupportMarketDataBean.class);
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
+        config.addEventType("MarketData", SupportMarketDataBean.class);
+        config.addEventType("SupportBean", SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -539,8 +538,8 @@ public class TestOutputLimitAggregateAll extends TestCase
         sendTimer(0);
 
         String viewExpr = "select irstream volume, max(price) as maxVol" +
-                          " from " + SupportMarketDataBean.class.getName() + ".ext:sort(volume, true, 1) as s0," +
-                          SupportBean.class.getName() + " as s1 " +
+                          " from " + SupportMarketDataBean.class.getName() + ".ext:sort(1, volume desc) as s0," +
+                          SupportBean.class.getName() + ".win:keepall() as s1 " +
                           "output every 1 seconds";
         EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);

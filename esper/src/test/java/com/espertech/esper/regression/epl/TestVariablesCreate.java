@@ -5,8 +5,8 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.CreateVariableClause;
 import com.espertech.esper.client.soda.Expressions;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -27,8 +27,6 @@ public class TestVariablesCreate extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -202,17 +200,17 @@ public class TestVariablesCreate extends TestCase
     public void testInvalid()
     {
         String stmt = "create variable somedummy myvar = 10";
-        tryInvalid(stmt, "Error starting view: Cannot create variable 'myvar', type 'somedummy' is not a recognized type [create variable somedummy myvar = 10]");
+        tryInvalid(stmt, "Error starting statement: Cannot create variable 'myvar', type 'somedummy' is not a recognized type [create variable somedummy myvar = 10]");
 
         stmt = "create variable string myvar = 5";
-        tryInvalid(stmt, "Error starting view: Cannot create variable: Variable 'myvar' of declared type 'java.lang.String' cannot be initialized by a value of type 'java.lang.Integer' [create variable string myvar = 5]");
+        tryInvalid(stmt, "Error starting statement: Cannot create variable: Variable 'myvar' of declared type 'java.lang.String' cannot be initialized by a value of type 'java.lang.Integer' [create variable string myvar = 5]");
 
         stmt = "create variable string myvar = 'a'";
         epService.getEPAdministrator().createEPL("create variable string myvar = 'a'");
-        tryInvalid(stmt, "Error starting view: Cannot create variable: Variable by name 'myvar' has already been created [create variable string myvar = 'a']");
+        tryInvalid(stmt, "Error starting statement: Cannot create variable: Variable by name 'myvar' has already been created [create variable string myvar = 'a']");
 
         tryInvalid("select * from " + SupportBean.class.getName() + " output every somevar events",
-            "Error starting view: Error in the output rate limiting clause: Variable named 'somevar' has not been declared [select * from com.espertech.esper.support.bean.SupportBean output every somevar events]");
+            "Error starting statement: Error in the output rate limiting clause: Variable named 'somevar' has not been declared [select * from com.espertech.esper.support.bean.SupportBean output every somevar events]");
     }
 
     private void tryInvalid(String stmtText, String message)

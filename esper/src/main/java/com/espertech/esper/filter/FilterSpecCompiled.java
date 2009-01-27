@@ -8,8 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.pattern.MatchedEventMap;
+import com.espertech.esper.epl.property.PropertyEvaluator;
 
 import java.util.List;
 import java.util.Arrays;
@@ -22,32 +23,36 @@ import java.util.LinkedList;
  */
 public final class FilterSpecCompiled
 {
-    private final EventType eventType;
-    private final String eventTypeAlias;
+    private final EventType filterForEventType;
+    private final String filterForEventTypeName;
     private final List<FilterSpecParam> parameters;
+    private final PropertyEvaluator optionalPropertyEvaluator;
 
     /**
      * Constructor - validates parameter list against event type, throws exception if invalid
      * property names or mismatcing filter operators are found.
      * @param eventType is the event type
      * @param parameters is a list of filter parameters
-     * @param eventTypeAlias is the alias name of the event type
+     * @param eventTypeName is the name of the event type
+     * @param optionalPropertyEvaluator optional if evaluating properties returned by filtered events
      * @throws IllegalArgumentException if validation invalid
      */
-    public FilterSpecCompiled(EventType eventType, String eventTypeAlias, List<FilterSpecParam> parameters)
+    public FilterSpecCompiled(EventType eventType, String eventTypeName, List<FilterSpecParam> parameters,
+                              PropertyEvaluator optionalPropertyEvaluator)
     {
-        this.eventType = eventType;
-        this.eventTypeAlias = eventTypeAlias;
+        this.filterForEventType = eventType;
+        this.filterForEventTypeName = eventTypeName;
         this.parameters = parameters;
+        this.optionalPropertyEvaluator = optionalPropertyEvaluator;
     }
 
     /**
      * Returns type of event to filter for.
      * @return event type
      */
-    public final EventType getEventType()
+    public final EventType getFilterForEventType()
     {
-        return eventType;
+        return filterForEventType;
     }
 
     /**
@@ -60,12 +65,37 @@ public final class FilterSpecCompiled
     }
 
     /**
-     * Returns the event type alias name.
-     * @return event type alias
+     * Returns the event type name.
+     * @return event type name
      */
-    public String getEventTypeAlias()
+    public String getFilterForEventTypeName()
     {
-        return eventTypeAlias;
+        return filterForEventTypeName;
+    }
+
+    /**
+     * Return the evaluator for property value if any is attached, or none if none attached.
+     * @return property evaluator
+     */
+    public PropertyEvaluator getOptionalPropertyEvaluator()
+    {
+        return optionalPropertyEvaluator;
+    }
+
+    /**
+     * Returns the result event type of the filter specification.
+     * @return event type
+     */
+    public EventType getResultEventType()
+    {
+        if (optionalPropertyEvaluator != null)
+        {
+            return optionalPropertyEvaluator.getFragmentEventType();
+        }
+        else
+        {
+            return filterForEventType;
+        }
     }
 
     /**
@@ -87,14 +117,14 @@ public final class FilterSpecCompiled
                     specParam.getFilterOperator(), filterForValue);
             valueList.add(valueParam);
         }
-        return new FilterValueSetImpl(eventType, valueList);
+        return new FilterValueSetImpl(filterForEventType, valueList);
     }
 
     @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
     public final String toString()
     {
         StringBuilder buffer = new StringBuilder();
-        buffer.append("FilterSpecCompiled type=" + this.eventType);
+        buffer.append("FilterSpecCompiled type=" + this.filterForEventType);
         buffer.append(" parameters=" + Arrays.toString(parameters.toArray()));
         return buffer.toString();
     }
@@ -112,8 +142,30 @@ public final class FilterSpecCompiled
         }
 
         FilterSpecCompiled other = (FilterSpecCompiled) obj;
+        if (!equalsTypeAndFilter(other))
+        {
+            return false;
+        }
 
-        if (this.eventType != other.eventType)
+        if ((this.optionalPropertyEvaluator == null) && (other.optionalPropertyEvaluator == null))
+        {
+            return true;
+        }       
+        if ((this.optionalPropertyEvaluator != null) && (other.optionalPropertyEvaluator == null))
+        {
+            return false;
+        }
+        if ((this.optionalPropertyEvaluator == null) && (other.optionalPropertyEvaluator != null))
+        {
+            return false;
+        }
+
+        return this.optionalPropertyEvaluator.compareTo(other.optionalPropertyEvaluator);
+    }
+
+    public boolean equalsTypeAndFilter(FilterSpecCompiled other)
+    {
+        if (this.filterForEventType != other.filterForEventType)
         {
             return false;
         }
@@ -137,7 +189,7 @@ public final class FilterSpecCompiled
 
     public int hashCode()
     {
-        int hashCode = eventType.hashCode();
+        int hashCode = filterForEventType.hashCode();
         for (FilterSpecParam param : parameters)
         {
             hashCode = hashCode ^ param.getPropertyName().hashCode();

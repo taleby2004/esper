@@ -19,25 +19,22 @@ public class TestInsertIntoTransposeStream extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private SupportUpdateListener listenerInsertInto;
 
     public void setUp()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
         listener = new SupportUpdateListener();
-        listenerInsertInto = new SupportUpdateListener();
     }
 
     public void testTransposeEventJoinMap()
     {
         Map<String, Object> metadata = makeMap(new Object[][] {{"id", String.class}});
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("AEvent", metadata);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("BEvent", metadata);
+        epService.getEPAdministrator().getConfiguration().addEventType("AEvent", metadata);
+        epService.getEPAdministrator().getConfiguration().addEventType("BEvent", metadata);
 
-        String stmtTextOne = "insert into MyStream select a, b from AEvent as a, BEvent as b";
+        String stmtTextOne = "insert into MyStream select a, b from AEvent.win:keepall() as a, BEvent.win:keepall() as b";
         epService.getEPAdministrator().createEPL(stmtTextOne);
 
         String stmtTextTwo = "select a.id, b.id from MyStream";
@@ -54,10 +51,10 @@ public class TestInsertIntoTransposeStream extends TestCase
 
     public void testTransposeEventJoinPOJO()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("AEvent", SupportBean_A.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("BEvent", SupportBean_B.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("AEvent", SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("BEvent", SupportBean_B.class);
 
-        String stmtTextOne = "insert into MyStream select a.* as a, b.* as b from AEvent as a, BEvent as b";
+        String stmtTextOne = "insert into MyStream select a.* as a, b.* as b from AEvent.win:keepall() as a, BEvent.win:keepall() as b";
         epService.getEPAdministrator().createEPL(stmtTextOne);
 
         String stmtTextTwo = "select a.id, b.id from MyStream";
@@ -71,7 +68,7 @@ public class TestInsertIntoTransposeStream extends TestCase
 
     public void testTransposePOJOPropertyStream()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("Complex", SupportBeanComplexProps.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("Complex", SupportBeanComplexProps.class);
 
         String stmtTextOne = "insert into MyStream select nested as inneritem from Complex";
         epService.getEPAdministrator().createEPL(stmtTextOne);
@@ -89,7 +86,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         Map<String, Object> metadata = makeMap(new Object[][] {
                 {"nested", makeMap(new Object[][] {{"nestedValue", String.class}}) }
         });
-        epService.getEPAdministrator().getConfiguration().addEventTypeAliasNestable("Complex", metadata);
+        epService.getEPAdministrator().getConfiguration().addEventType("Complex", metadata);
 
         String stmtTextOne = "insert into MyStream select nested as inneritem from Complex";
         epService.getEPAdministrator().createEPL(stmtTextOne);
@@ -101,7 +98,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         }
         catch (Exception ex)
         {
-            assertEquals("Error starting view: Failed to resolve property 'inneritem.nestedValue' to a stream or nested property in a stream [select inneritem.nestedValue as result from MyStream]", ex.getMessage());
+            assertEquals("Error starting statement: Failed to resolve property 'inneritem.nestedValue' to a stream or nested property in a stream [select inneritem.nestedValue as result from MyStream]", ex.getMessage());
         }
     }
 

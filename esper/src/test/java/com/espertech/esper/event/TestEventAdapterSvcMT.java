@@ -5,6 +5,9 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.map.MapEventType;
 
 import java.util.concurrent.*;
 import java.util.Set;
@@ -52,9 +55,9 @@ public class TestEventAdapterSvcMT extends TestCase
 
     public void testAddMapType() throws Exception
     {
-        final Map<String, Class> typeOne = new HashMap<String, Class>();
+        final Map<String, Object> typeOne = new HashMap<String, Object>();
         typeOne.put("f1", Integer.class);
-        final Map<String, Class> typeTwo= new HashMap<String, Class>();
+        final Map<String, Object> typeTwo= new HashMap<String, Object>();
         typeTwo.put("f2", Integer.class);
 
         Callable callables[] = new Callable[2];
@@ -69,11 +72,11 @@ public class TestEventAdapterSvcMT extends TestCase
                     {
                         if (index == 0)
                         {
-                            return service.addMapType("A", typeOne, null);
+                            return service.addNestableMapType("A", typeOne, null, true, false, false);
                         }
                         else
                         {
-                            return service.addMapType("A", typeTwo, null);
+                            return service.addNestableMapType("A", typeTwo, null, true, false, false);
                         }
                     }
                     catch (EventAdapterException ex)

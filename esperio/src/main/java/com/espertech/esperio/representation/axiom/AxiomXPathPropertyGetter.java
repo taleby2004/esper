@@ -8,11 +8,10 @@
  **************************************************************************************/
 package com.espertech.esperio.representation.axiom;
 
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.PropertyAccessException;
-import com.espertech.esper.event.TypedEventPropertyGetter;
 import com.espertech.esper.util.SimpleTypeParser;
 import com.espertech.esper.util.SimpleTypeParserFactory;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.PropertyAccessException;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.xpath.AXIOMXPath;
 import org.apache.commons.logging.Log;
@@ -139,5 +138,10 @@ public class AxiomXPathPropertyGetter implements TypedEventPropertyGetter
     public boolean isExistsProperty(EventBean eventBean)
     {
         return true; // Property always exists as the property is not dynamic
+    }
+
+    public Object getFragment(EventBean eventBean) throws PropertyAccessException
+    {
+        return null; 
     }
 }

@@ -1,7 +1,6 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_G;
 import com.espertech.esper.support.bean.SupportMarkerImplA;
@@ -22,20 +21,17 @@ public class TestEventSenderBuiltin extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private SupportUpdateListener listenerTwo;
 
     public void setUp()
     {
         listener = new SupportUpdateListener();
-        listenerTwo = new SupportUpdateListener();
     }
 
     public void testSenderPOJO() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addEventTypeAlias("SupportBean", SupportBean.class);
-        configuration.addEventTypeAlias("Marker", SupportMarkerInterface.class);
+        configuration.addEventType("SupportBean", SupportBean.class);
+        configuration.addEventType("Marker", SupportMarkerInterface.class);
 
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
@@ -79,9 +75,8 @@ public class TestEventSenderBuiltin extends TestCase
     public void testSenderMap() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         Map<String, Object> myMapType = makeMap(new Object[][] {{"f1", Integer.class}});
-        configuration.addNestableEventTypeAlias("MyMap", myMapType);
+        configuration.addEventType("MyMap", myMapType);
 
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
@@ -111,11 +106,10 @@ public class TestEventSenderBuiltin extends TestCase
     public void testXML() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
-        xmlDOMEventTypeDesc.setRootElementName("a");
-        xmlDOMEventTypeDesc.addXPathProperty("element1", "/a/b/c", XPathConstants.STRING);
-        configuration.addEventTypeAlias("AEvent", xmlDOMEventTypeDesc);
+        ConfigurationEventTypeXMLDOM typeMeta = new ConfigurationEventTypeXMLDOM();
+        typeMeta.setRootElementName("a");
+        typeMeta.addXPathProperty("element1", "/a/b/c", XPathConstants.STRING);
+        configuration.addEventType("AEvent", typeMeta);
 
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
@@ -142,6 +136,7 @@ public class TestEventSenderBuiltin extends TestCase
         {
             assertEquals("Unexpected root element name 'xxxx' encountered, expected a root element name of 'a'", ex.getMessage());
         }
+
         try
         {
             sender.sendEvent(new SupportBean());
@@ -151,13 +146,30 @@ public class TestEventSenderBuiltin extends TestCase
         {
             assertEquals("Unexpected event object type 'com.espertech.esper.support.bean.SupportBean' encountered, please supply a org.w3c.dom.Document or Element node", ex.getMessage());
         }
+
+        // test adding a second type for the same root element
+        configuration = SupportConfigFactory.getConfiguration();
+        typeMeta = new ConfigurationEventTypeXMLDOM();
+        typeMeta.setRootElementName("a");
+        typeMeta.addXPathProperty("element2", "//c", XPathConstants.STRING);
+        typeMeta.setEventSenderValidatesRoot(false);
+        epService.getEPAdministrator().getConfiguration().addEventType("BEvent", typeMeta);
+
+        stmtText = "select element2 from BEvent";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(stmtText);
+
+        // test sender that doesn't care about the root element
+        EventSender senderTwo = epService.getEPRuntime().getEventSender("BEvent");
+        senderTwo.sendEvent(getDocument("<xxxx><b><c>text</c></b></xxxx>"));    // allowed, not checking
+
+        event = stmtTwo.iterator().next();
+        assertEquals("text", event.get("element2"));
     }
 
     public void testInvalid()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        configuration.addEventTypeAlias("SupportBean", SupportBean.class);
+        configuration.addEventType("SupportBean", SupportBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
@@ -203,5 +215,4 @@ public class TestEventSenderBuiltin extends TestCase
         builderFactory.setNamespaceAware(true);
         return builderFactory.newDocumentBuilder().parse(source);
     }
-
 }

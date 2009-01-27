@@ -9,14 +9,16 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprTimePeriod;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Spec for defining an output rate
  */
-public class OutputLimitSpec implements MetaDefItem
+public class OutputLimitSpec implements MetaDefItem, Serializable
 {
 	private final OutputLimitLimitType displayLimit;
     private final OutputLimitRateType rateType;
@@ -24,7 +26,9 @@ public class OutputLimitSpec implements MetaDefItem
     private final String variableName;
     private ExprNode whenExpressionNode;
     private final List<OnTriggerSetAssignment> thenExpressions;    
-    private final Object[] crontabAtSchedule;
+    private final List<ExprNode> crontabAtSchedule;
+    private final ExprTimePeriod timePeriodExpr;
+    private static final long serialVersionUID = 7314871194757342071L;
 
     /**
 	 * Ctor.
@@ -36,8 +40,9 @@ public class OutputLimitSpec implements MetaDefItem
      * @param whenExpressionNode - for controlling output by a boolean expression
      * @param thenExpressions variable assignments, if null if none
      * @param crontabAtSchedule - crontab parameters
+     * @param timePeriodExpr - the time period, or null if none
      */
-    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, Object[] crontabAtSchedule)
+    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, List<ExprNode> crontabAtSchedule, ExprTimePeriod timePeriodExpr)
 	{
 		this.rate = rate;
 		this.displayLimit = displayLimit;
@@ -46,6 +51,7 @@ public class OutputLimitSpec implements MetaDefItem
         this.crontabAtSchedule = crontabAtSchedule;
         this.whenExpressionNode = whenExpressionNode;
         this.thenExpressions = thenExpressions;
+        this.timePeriodExpr = timePeriodExpr;
     }
 
     /**
@@ -97,7 +103,7 @@ public class OutputLimitSpec implements MetaDefItem
      * Returns crontab parameters, or null if not using crontab-at output.
      * @return schedule parameters
      */
-    public Object[] getCrontabAtSchedule()
+    public List<ExprNode> getCrontabAtSchedule()
     {
         return crontabAtSchedule;
     }
@@ -118,5 +124,14 @@ public class OutputLimitSpec implements MetaDefItem
     public List<OnTriggerSetAssignment> getThenExpressions()
     {
         return thenExpressions;
+    }
+
+    /**
+     * Returns time period expression or null if none used.
+     * @return time period
+     */
+    public ExprTimePeriod getTimePeriodExpr()
+    {
+        return timePeriodExpr;
     }
 }

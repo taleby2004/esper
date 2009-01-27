@@ -1,11 +1,12 @@
 package com.espertech.esper.epl.core;
 
 import junit.framework.TestCase;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
+import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.collection.Pair;
 
 import java.util.LinkedHashMap;
@@ -18,22 +19,24 @@ public class TestStreamTypeServiceImpl extends TestCase
 
     public void setUp()
     {
+        SupportEventAdapterService.reset();
+        
         // Prepare regualar test service
         EventType[] eventTypes = new EventType[] {
             SupportEventTypeFactory.createBeanType(SupportBean.class),
             SupportEventTypeFactory.createBeanType(SupportBean.class),
             SupportEventTypeFactory.createBeanType(SupportBean_A.class),
-            SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class)
+            SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class,"SupportMarketDataBean")
             };
-        String[] eventTypeAlias = new String[] {"SupportBean", "SupportBean", "SupportBean_A", "SupportMarketDataBean"};
+        String[] eventTypeName = new String[] {"SupportBean", "SupportBean", "SupportBean_A", "SupportMarketDataBean"};
         String[] streamNames = new String[] {"s1", null, "s3", "s4"};
-        serviceRegular = new StreamTypeServiceImpl(eventTypes, streamNames, "default", eventTypeAlias);
+        serviceRegular = new StreamTypeServiceImpl(eventTypes, streamNames, "default");
 
         // Prepare with stream-zero being unambigous
         LinkedHashMap<String, Pair<EventType, String>> streamTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         for (int i = 0; i < streamNames.length; i++)
         {
-            streamTypes.put(streamNames[i], new Pair<EventType, String>(eventTypes[i], eventTypeAlias[i]));
+            streamTypes.put(streamNames[i], new Pair<EventType, String>(eventTypes[i], eventTypeName[i]));
         }
         serviceStreamZeroUnambigous = new StreamTypeServiceImpl(streamTypes, "default", true, false);
 

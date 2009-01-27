@@ -1,7 +1,6 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.EventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -21,8 +20,6 @@ public class TestVariantStreamDefault extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listenerOne = new SupportUpdateListener();
@@ -30,12 +27,12 @@ public class TestVariantStreamDefault extends TestCase
 
     public void testCoercionBoxedTypeMatch()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanVariantStream", SupportBeanVariantStream.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanVariantStream", SupportBeanVariantStream.class);
 
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
-        variant.addEventTypeAlias("SupportBean");
-        variant.addEventTypeAlias("SupportBeanVariantStream");
+        variant.addEventTypeName("SupportBean");
+        variant.addEventTypeName("SupportBeanVariantStream");
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariantStream", variant);
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select * from MyVariantStream");
@@ -81,7 +78,7 @@ public class TestVariantStreamDefault extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Property named 'charBoxed' is not valid in any stream [select charBoxed from MyVariantStream]", ex.getMessage());
+            assertEquals("Error starting statement: Property named 'charBoxed' is not valid in any stream [select charBoxed from MyVariantStream]", ex.getMessage());
         }
 
         // try dynamic property: should exists but not show up as a declared property
@@ -104,12 +101,12 @@ public class TestVariantStreamDefault extends TestCase
 
     public void testSuperTypesInterfaces()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanVariantOne", SupportBeanVariantOne.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanVariantTwo", SupportBeanVariantTwo.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanVariantOne", SupportBeanVariantOne.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanVariantTwo", SupportBeanVariantTwo.class);
 
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
-        variant.addEventTypeAlias("SupportBeanVariantOne");
-        variant.addEventTypeAlias("SupportBeanVariantTwo");
+        variant.addEventTypeName("SupportBeanVariantOne");
+        variant.addEventTypeName("SupportBeanVariantTwo");
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariantStream", variant);
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from SupportBeanVariantOne");
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from SupportBeanVariantTwo");
@@ -166,16 +163,25 @@ public class TestVariantStreamDefault extends TestCase
             assertNotNull(eventType.getGetter(expectedProp));
             assertTrue(eventType.isProperty(expectedProp));
         }
+
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("string", String.class, false, false, false, false, false),
+            new EventPropertyDescriptor("boolBoxed", Boolean.class, false, false, false, false, false),
+            new EventPropertyDescriptor("intPrimitive", Integer.class, false, false, false, false, false),
+            new EventPropertyDescriptor("longPrimitive", Long.class, false, false, false, false, false),
+            new EventPropertyDescriptor("doublePrimitive", Double.class, false, false, false, false, false),
+            new EventPropertyDescriptor("enumValue", SupportEnum.class, false, false, false, false, false),
+           }, eventType.getPropertyDescriptors());
     }
 
     public void testNamedWin()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanVariantStream", SupportBeanVariantStream.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanVariantStream", SupportBeanVariantStream.class);
 
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
-        variant.addEventTypeAlias("SupportBeanVariantStream");
-        variant.addEventTypeAlias("SupportBean");
+        variant.addEventTypeName("SupportBeanVariantStream");
+        variant.addEventTypeName("SupportBean");
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariantStream", variant);
 
         // test named window
@@ -208,13 +214,13 @@ public class TestVariantStreamDefault extends TestCase
 
     public void testPatternSubquery()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean_A", SupportBean_A.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanVariantStream", SupportBeanVariantStream.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanVariantStream", SupportBeanVariantStream.class);
 
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
-        variant.addEventTypeAlias("SupportBeanVariantStream");
-        variant.addEventTypeAlias("SupportBean");
+        variant.addEventTypeName("SupportBeanVariantStream");
+        variant.addEventTypeName("SupportBean");
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariantStream", variant);
 
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from SupportBeanVariantStream");
@@ -245,15 +251,15 @@ public class TestVariantStreamDefault extends TestCase
 
     public void testDynamicMapType()
     {
-        Map<String, Class> types = new HashMap<String, Class>();
+        Map<String, Object> types = new HashMap<String, Object>();
         types.put("someprop", String.class);
 
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MyEvent", types);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MySecondEvent", types);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyEvent", types);
+        epService.getEPAdministrator().getConfiguration().addEventType("MySecondEvent", types);
 
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
-        variant.addEventTypeAlias("MyEvent");
-        variant.addEventTypeAlias("MySecondEvent");
+        variant.addEventTypeName("MyEvent");
+        variant.addEventTypeName("MySecondEvent");
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariant", variant);
 
         epService.getEPAdministrator().createEPL("insert into MyVariant select * from MyEvent");
@@ -269,12 +275,12 @@ public class TestVariantStreamDefault extends TestCase
 
     public void testInvalidInsertInto()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBeanVariantStream", SupportBeanVariantStream.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanVariantStream", SupportBeanVariantStream.class);
 
         ConfigurationVariantStream variant = new ConfigurationVariantStream();
-        variant.addEventTypeAlias("SupportBean");
-        variant.addEventTypeAlias("SupportBeanVariantStream");
+        variant.addEventTypeName("SupportBean");
+        variant.addEventTypeName("SupportBeanVariantStream");
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariantStream", variant);
 
         try
@@ -284,7 +290,7 @@ public class TestVariantStreamDefault extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Selected event type is not a valid event type of the variant stream 'MyVariantStream' [insert into MyVariantStream select * from com.espertech.esper.support.bean.SupportBean_A]", ex.getMessage());
+            assertEquals("Error starting statement: Selected event type is not a valid event type of the variant stream 'MyVariantStream' [insert into MyVariantStream select * from com.espertech.esper.support.bean.SupportBean_A]", ex.getMessage());
         }
 
         try
@@ -294,18 +300,18 @@ public class TestVariantStreamDefault extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Selected event type is not a valid event type of the variant stream 'MyVariantStream' [insert into MyVariantStream select intPrimitive as k0 from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
+            assertEquals("Error starting statement: Selected event type is not a valid event type of the variant stream 'MyVariantStream' [insert into MyVariantStream select intPrimitive as k0 from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
         }
     }
 
     public void testInvalidConfig()
     {
         ConfigurationVariantStream config = new ConfigurationVariantStream();
-        tryInvalidConfig("abc", config, "Invalid variant stream configuration, no event type alias has been added and default type variance requires at least one type, for name 'abc'");
+        tryInvalidConfig("abc", config, "Invalid variant stream configuration, no event type name has been added and default type variance requires at least one type, for name 'abc'");
 
-        config.addEventTypeAlias("dummy");
+        config.addEventTypeName("dummy");
         tryInvalidConfig("abc", config, "Event type by name 'dummy' could not be found for use in variant stream configuration by name 'abc'");
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("MyEvent", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyEvent", SupportBean.class);
     }
 
     private void tryInvalidConfig(String alias, ConfigurationVariantStream config, String message)

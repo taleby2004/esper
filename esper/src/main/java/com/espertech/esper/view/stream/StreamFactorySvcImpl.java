@@ -12,8 +12,8 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.RefCountedMap;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterSpecCompiled;
@@ -86,7 +86,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      * @param epStatementHandle is the statement resource lock
      * @return newly createdStatement event stream, not reusing existing instances
      */
-    public Pair<EventStream, ManagedLock> createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin)
+    public Pair<EventStream, ManagedLock> createStream(final FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin, final boolean isSubSelect)
     {
         if (log.isDebugEnabled())
         {
@@ -95,7 +95,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
 
         // Check if a stream for this filter already exists
         Pair<EventStream, EPStatementHandleCallback> pair = null;
-        boolean forceNewStream = (isJoin) || (!isReuseViews);
+        boolean forceNewStream = (isJoin) || (!isReuseViews) || (isSubSelect);
         if (forceNewStream)
         {
             pair = eventStreamsIdentity.get(filterSpec);
@@ -122,16 +122,44 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         }
 
         // New event stream
-        EventType eventType = filterSpec.getEventType();
-        final EventStream eventStream = new ZeroDepthStream(eventType);
+        EventType resultEventType = filterSpec.getResultEventType();
+        final EventStream eventStream = new ZeroDepthStream(resultEventType);
 
-        FilterHandleCallback filterCallback = new FilterHandleCallback()
+        FilterHandleCallback filterCallback;
+        if (filterSpec.getOptionalPropertyEvaluator() != null)
         {
-            public void matchFound(EventBean event)
+            filterCallback = new FilterHandleCallback()
             {
-                eventStream.insert(event);
-            }
-        };
+                public void matchFound(EventBean event)
+                {
+                    EventBean[] result = filterSpec.getOptionalPropertyEvaluator().getProperty(event);
+                    if (result == null)
+                    {
+                        return;
+                    }
+                    eventStream.insert(result);
+                }
+
+                public boolean isSubSelect()
+                {
+                    return isSubSelect;
+                }
+            };
+        }
+        else
+        {
+            filterCallback = new FilterHandleCallback()
+            {
+                public void matchFound(EventBean event)
+                {
+                    eventStream.insert(event);
+                }
+                public boolean isSubSelect()
+                {
+                    return isSubSelect;
+                }
+            };
+        }
         EPStatementHandleCallback handle = new EPStatementHandleCallback(epStatementHandle, filterCallback);
 
         // Store stream for reuse
@@ -156,10 +184,10 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      * See the method of the same name in {@link com.espertech.esper.view.stream.StreamFactoryService}.
      * @param filterSpec is the filter definition
      */
-    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin)
+    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect)
     {
         Pair<EventStream, EPStatementHandleCallback> pair = null;
-        boolean forceNewStream = (isJoin) || (!isReuseViews);
+        boolean forceNewStream = (isJoin) || (!isReuseViews) || (isSubSelect);
 
         if (forceNewStream)
         {

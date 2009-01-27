@@ -4,14 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportTemperatureBean;
 import com.espertech.esper.support.bean.SupportBean;
@@ -51,6 +46,16 @@ public class TestStaticFunctions extends TestCase
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean("a", 0));
         assertTrue(listener.isInvoked());
+
+        stmt.destroy();
+        statementText = "select * from pattern [myevent=" + SupportBean.class.getName() + "(" +
+                className + ".delimitPipe(null) = '|<null>|')]";
+        stmt = epService.getEPAdministrator().createEPL(statementText);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("a", 0));
+        assertTrue(listener.isInvoked());
     }
 
 	public void testRuntimeException()
@@ -67,7 +72,6 @@ public class TestStaticFunctions extends TestCase
 	public void testAutoImports()
 	{
 		Configuration configuration = SupportConfigFactory.getConfiguration();
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 		configuration.addImport("mull");
 		epService = EPServiceProviderManager.getProvider("1", configuration);
 
@@ -101,7 +105,7 @@ public class TestStaticFunctions extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Could not load class by name 'SupportStaticMethodLib'  [select SupportStaticMethodLib.minusOne(doublePrimitive) from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
+            assertEquals("Error starting statement: Could not load class by name 'SupportStaticMethodLib'  [select SupportStaticMethodLib.minusOne(doublePrimitive) from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
         }
 
         epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class.getName());
@@ -138,7 +142,7 @@ public class TestStaticFunctions extends TestCase
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create().add(Expressions.staticMethod("Integer", "toBinaryString", 7), "value"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 5)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(5))));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         statementText = "select Integer.toBinaryString(7) as value" + stream;
 
@@ -267,7 +271,7 @@ public class TestStaticFunctions extends TestCase
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addImport(SupportStaticMethodLib.class.getName());
-        configuration.addEventTypeAlias("Temperature", SupportTemperatureBean.class);
+        configuration.addEventType("Temperature", SupportTemperatureBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
@@ -286,7 +290,7 @@ public class TestStaticFunctions extends TestCase
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addImport(SupportStaticMethodLib.class.getName());
-        configuration.addEventTypeAlias("Temperature", SupportTemperatureBean.class);
+        configuration.addEventType("Temperature", SupportTemperatureBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
@@ -308,7 +312,7 @@ public class TestStaticFunctions extends TestCase
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addImport(SupportStaticMethodLib.class.getName());
-        configuration.addEventTypeAlias("Temperature", SupportTemperatureBean.class);
+        configuration.addEventType("Temperature", SupportTemperatureBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
@@ -334,7 +338,7 @@ public class TestStaticFunctions extends TestCase
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addImport(SupportStaticMethodLib.class.getName());
-        configuration.addEventTypeAlias("Temperature", SupportTemperatureBean.class);
+        configuration.addEventType("Temperature", SupportTemperatureBean.class);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 

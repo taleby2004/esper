@@ -17,7 +17,7 @@ public class TestViewTimeWindowUnique extends TestCase
     {
         listener = new SupportUpdateListener();
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }
@@ -48,7 +48,7 @@ public class TestViewTimeWindowUnique extends TestCase
         // Set up a time window with a unique view attached
         EPStatement windowUniqueView = epService.getEPAdministrator().createEPL(
                 "select irstream * from " + SupportMarketDataBean.class.getName() +
-                ".win:time(3.0).std:unique('symbol', 'price')");
+                ".win:time(3.0).std:unique(symbol, price)");
         windowUniqueView.addListener(listener);
         String[] fields = new String[] {"symbol", "price", "volume"};
 

@@ -404,7 +404,7 @@ public class Expressions implements Serializable
      */
     public static InExpression in(Expression value, Expression ...set)
     {
-        return new InExpression(value, false, set);
+        return new InExpression(value, false, (Object) set);
     }
 
     /**
@@ -415,7 +415,7 @@ public class Expressions implements Serializable
      */
     public static InExpression notIn(Expression value, Expression ...set)
     {
-        return new InExpression(value, true, set);
+        return new InExpression(value, true, (Object) set);
     }
 
     /**
@@ -1396,6 +1396,96 @@ public class Expressions implements Serializable
     }
 
     /**
+     * Returns a time period expression for the specified parts.
+     * <p>
+     * Each part can be a null value in which case the part is left out.
+     * @param days day part
+     * @param hours hour part
+     * @param minutes minute part
+     * @param seconds seconds part
+     * @param milliseconds milliseconds part
+     * @return time period expression
+     */
+    public static TimePeriodExpression timePeriod(Double days, Double hours, Double minutes, Double seconds, Double milliseconds)
+    {
+        Expression daysExpr = (days != null) ? constant(days) : null;
+        Expression hoursExpr = (hours != null) ? constant(hours) : null;
+        Expression minutesExpr = (minutes != null) ? constant(minutes) : null;
+        Expression secondsExpr = (seconds != null) ? constant(seconds) : null;
+        Expression millisecondsExpr = (milliseconds != null) ? constant(milliseconds) : null;
+        return new TimePeriodExpression(daysExpr, hoursExpr, minutesExpr, secondsExpr, millisecondsExpr);
+    }
+
+    /**
+     * Returns a time period expression for the specified parts.
+     * <p>
+     * Each part can be a null value in which case the part is left out.
+     * <p>
+     * Each object value may be a String value for an event property, or a number for a constant.
+     * @param days day part
+     * @param hours hour part
+     * @param minutes minute part
+     * @param seconds seconds part
+     * @param milliseconds milliseconds part
+     * @return time period expression
+     */
+    public static TimePeriodExpression timePeriod(Object days, Object hours, Object minutes, Object seconds, Object milliseconds)
+    {
+        Expression daysExpr = convertVariableNumeric(days);
+        Expression hoursExpr = convertVariableNumeric(hours);
+        Expression minutesExpr = convertVariableNumeric(minutes);
+        Expression secondsExpr = convertVariableNumeric(seconds);
+        Expression millisecondsExpr = convertVariableNumeric(milliseconds);
+        return new TimePeriodExpression(daysExpr, hoursExpr, minutesExpr, secondsExpr, millisecondsExpr);
+    }
+
+    /**
+     * Creates a wildcard parameter.
+     * @return parameter
+     */
+    public static CrontabParameterExpression crontabScheduleWildcard()
+    {
+        return new CrontabParameterExpression(CrontabParameterExpression.ScheduleItemType.WILDCARD);
+    }
+
+    /**
+     * Creates a parameter of the given type and parameterized by a number.
+     * @param parameter the constant parameter for the type
+     * @param type the type of crontab parameter
+     * @return crontab parameter
+     */
+    public static CrontabParameterExpression crontabScheduleItem(Integer parameter, CrontabParameterExpression.ScheduleItemType type)
+    {
+        CrontabParameterExpression param = new CrontabParameterExpression(type);
+        if (parameter != null)
+        {
+            param.addChild(Expressions.constant(parameter));
+        }
+        return param;
+    }
+
+    /**
+     * Creates a frequency cron parameter.
+     * @param frequency the constant for the frequency
+     * @return cron parameter
+     */
+    public static CrontabFrequencyExpression crontabScheduleFrequency(int frequency)
+    {
+        return new CrontabFrequencyExpression(constant(frequency));
+    }
+
+    /**
+     * Creates a range cron parameter.
+     * @param lowerBounds the lower bounds
+     * @param upperBounds the upper bounds
+     * @return crontab parameter
+     */
+    public static CrontabRangeExpression crontabScheduleRange(int lowerBounds, int upperBounds)
+    {
+        return new CrontabRangeExpression(constant(lowerBounds), constant(upperBounds));
+    }
+
+    /**
      * Returns a list of expressions returning property values for the property names passed in.
      * @param properties is a list of property names
      * @return list of property value expressions
@@ -1418,5 +1508,22 @@ public class Expressions implements Serializable
     protected static PropertyValueExpression getPropExpr(String propertyName)
     {
         return new PropertyValueExpression(propertyName);
+    }
+
+    private static Expression convertVariableNumeric(Object object)
+    {
+        if (object == null)
+        {
+            return null;
+        }
+        if (object instanceof String)
+        {
+            return property(object.toString());
+        }
+        if (object instanceof Number)
+        {
+            return constant(object);
+        }
+        throw new IllegalArgumentException("Invalid object value, expecting String or numeric value");
     }
 }

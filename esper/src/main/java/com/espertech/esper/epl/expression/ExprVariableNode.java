@@ -11,7 +11,7 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 
 /**
@@ -72,7 +72,7 @@ public class ExprVariableNode extends ExprNode
         variableType = reader.getType();
     }
 
-    public Class getType() throws ExprValidationException
+    public Class getType()
     {
         if (variableType == null)
         {

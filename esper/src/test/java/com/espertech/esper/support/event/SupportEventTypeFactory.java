@@ -1,11 +1,16 @@
 package com.espertech.esper.support.event;
 
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 
 import java.util.Map;
 
 public class SupportEventTypeFactory
 {
+    public static EventType createBeanType(Class clazz, String name)
+    {
+        return SupportEventAdapterService.getService().addBeanType(name, clazz, false);
+    }
+
     public static EventType createBeanType(Class clazz)
     {
         return SupportEventAdapterService.getService().addBeanType(clazz.getName(), clazz, false);

@@ -8,19 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.client.EPStatementState;
-import com.espertech.esper.client.SafeIterator;
-import com.espertech.esper.client.StatementAwareUpdateListener;
-import com.espertech.esper.client.UpdateListener;
+import com.espertech.esper.client.*;
 import com.espertech.esper.collection.SafeIteratorImpl;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.timer.TimeSourceService;
 import com.espertech.esper.view.Viewable;
 
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * Statement implementation for EPL statements.
@@ -39,7 +37,7 @@ public class EPStatementImpl implements EPStatementSPI
     private long timeLastStateChange;
     private Viewable parentView;
     private EPStatementState currentState;
-    private com.espertech.esper.event.EventType eventType;
+    private EventType eventType;
     private EPStatementHandle epStatementHandle;
     private StatementResultService statementResultService;
     private StatementMetadata statementMetadata;
@@ -220,20 +218,28 @@ public class EPStatementImpl implements EPStatementSPI
 
         // Set variable version and acquire the lock first
         epStatementHandle.getStatementLock().acquireLock(null);
-        variableService.setLocalVersion();
+        try
+        {
+            variableService.setLocalVersion();
 
-        // Provide iterator - that iterator MUST be closed else the lock is not released
-        if (isPattern)
-        {
-            return new SafeIteratorImpl<EventBean>(epStatementHandle.getStatementLock(), dispatchChildView.iterator());
+            // Provide iterator - that iterator MUST be closed else the lock is not released
+            if (isPattern)
+            {
+                return new SafeIteratorImpl<EventBean>(epStatementHandle.getStatementLock(), dispatchChildView.iterator());
+            }
+            else
+            {
+                return new SafeIteratorImpl<EventBean>(epStatementHandle.getStatementLock(), parentView.iterator());
+            }
         }
-        else
+        catch (RuntimeException ex)
         {
-            return new SafeIteratorImpl<EventBean>(epStatementHandle.getStatementLock(), parentView.iterator());
+            epStatementHandle.getStatementLock().releaseLock(null);
+            throw ex;
         }
     }
 
-    public com.espertech.esper.event.EventType getEventType()
+    public EventType getEventType()
     {
         return eventType;
     }
@@ -268,6 +274,56 @@ public class EPStatementImpl implements EPStatementSPI
         statementResultService.setUpdateListeners(statementListenerSet);
         statementLifecycleSvc.dispatchStatementLifecycleEvent(
                 new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_ADD, listener));
+    }
+
+    public void addListenerWithReplay(UpdateListener listener)
+    {
+        if (listener == null)
+        {
+            throw new IllegalArgumentException("Null listener reference supplied");
+        }
+
+        if (isDestroyed())
+        {
+            throw new IllegalStateException("Statement is in destroyed state");
+        }
+
+        epStatementHandle.getStatementLock().acquireLock(null);
+        try
+        {
+            // Add listener - listener not receiving events from this statement, as the statement is locked
+            statementListenerSet.addListener(listener);
+            statementResultService.setUpdateListeners(statementListenerSet);
+            statementLifecycleSvc.dispatchStatementLifecycleEvent(
+                    new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_ADD, listener));
+
+            Iterator<EventBean> it = iterator();
+            if (it == null)
+            {
+                listener.update(null, null);
+                return;
+            }
+
+            ArrayList<EventBean> events = new ArrayList<EventBean>();
+            for (; it.hasNext();)
+            {
+                events.add(it.next());
+            }
+
+            if (events.isEmpty())
+            {
+                listener.update(null, null);
+            }
+            else
+            {
+                EventBean[] iteratorResult = events.toArray(new EventBean[events.size()]);
+                listener.update(iteratorResult, null);
+            }
+        }
+        finally
+        {
+            epStatementHandle.getStatementLock().releaseLock(null);
+        }
     }
 
     /**

@@ -10,8 +10,8 @@ package com.espertech.esper.view.std;
 
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
@@ -41,14 +41,14 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
 
     /**
      * Constructor.
-     * @param fieldNames is the name of the field that is added to any events received by this view.
+     * @param propertyNames is the name of the field that is added to any events received by this view.
      * @param mergeValues is the values of the field that is added to any events received by this view.
      * @param mergedResultEventType is the event type that the merge view reports to it's child views
      * @param statementContext contains required view services
      */
-    public AddPropertyValueView(StatementContext statementContext, String[] fieldNames, Object[] mergeValues, EventType mergedResultEventType)
+    public AddPropertyValueView(StatementContext statementContext, String[] propertyNames, Object[] mergeValues, EventType mergedResultEventType)
     {
-        this.propertyNames = fieldNames;
+        this.propertyNames = propertyNames;
         this.propertyValues = mergeValues;
         this.eventType = mergedResultEventType;
         this.statementContext = statementContext;
@@ -197,19 +197,12 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
                                        EventAdapterService eventAdapterService)
     {
         Map<String, Object> values = new HashMap<String, Object>();
-
-        // Copy properties of original event, add property value
-        for (String property : originalEvent.getEventType().getPropertyNames())
-        {
-            values.put(property, originalEvent.get(property));
-        }
-
         for (int i = 0; i < propertyNames.length; i++)
         {
             values.put(propertyNames[i], propertyValues[i]);
         }
 
-        return eventAdapterService.createMapFromValues(values, targetEventType);
+        return eventAdapterService.adaptorForWrapper(originalEvent, values, targetEventType);
     }
 
     public final String toString()

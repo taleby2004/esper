@@ -3,7 +3,7 @@
 	<!-- Name of project and version, used to create filenames -->
 	<property name="Name" value="Esper"/>
 	<property name="name" value="esper"/>
-	<property name="version" value="2.3.0"/>
+	<property name="version" value="3.0.0"/>
 	<property name="patchlevel" value=""/>
 	<property name="fullversion" value="${version}${patchlevel}"/>
 	<property name="fullname" value="${name}-${fullversion}"/>
@@ -11,7 +11,6 @@
 	<property name="dist.dir" value=".."/>
 	<property name="lib.dir" value="lib"/>
 	<property name="src.dir" value="src/main/java"/>
-	<property name="generated.src" value="target/generated-sources/antlr"/>
 	<property name="doc.dir" value="doc"/>
 	<property name="doc.api.dir" value="${doc.dir}/api"/>
 	<property name="dist.api.dir" value="doc/javadoc/api"/>
@@ -53,15 +52,12 @@
 				</script>
 				]]>
 			</footer>
-			<packageset dir="${generated.src}" defaultexcludes="yes">
-				<include name="com/espertech/esper/**"/>
-			</packageset>
 			<packageset dir="${src.dir}" defaultexcludes="yes">
 				<include name="com/espertech/esper/**"/>
 			</packageset>
 
 			<group title="Core API"
-				packages="com.espertech.esper.client,com.espertech.esper.client.time,com.espertech.esper.client.soda,com.espertech.esper.event"/>
+				packages="com.espertech.esper.client,com.espertech.esper.client.time,com.espertech.esper.client.soda"/>
 						
 		</javadoc>
 		<copy file="${doc.api.dir}/package.html" todir="${dist.api.dir}"/>

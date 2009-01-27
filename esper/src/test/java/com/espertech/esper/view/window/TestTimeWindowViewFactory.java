@@ -1,12 +1,9 @@
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.type.TimePeriodParameter;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.view.TestViewSupport;
 import com.espertech.esper.view.ViewParameterException;
-import com.espertech.esper.view.std.SizeView;
-
-import java.util.Arrays;
-
+import com.espertech.esper.view.std.FirstElementView;
 import junit.framework.TestCase;
 
 public class TestTimeWindowViewFactory extends TestCase
@@ -20,19 +17,19 @@ public class TestTimeWindowViewFactory extends TestCase
 
     public void testSetParameters() throws Exception
     {
-        tryParameter(new TimePeriodParameter(2d), 2000);
+        tryParameter(2d, 2000);
         tryParameter(4, 4000);
         tryParameter(3.3d, 3300);
         tryParameter(new Float(1.1f), 1100);
 
-        tryInvalidParameter("price");
+        tryInvalidParameter("string");
         tryInvalidParameter(true);
     }
 
     public void testCanReuse() throws Exception
     {
-        factory.setViewParameters(null, Arrays.asList(new Object[] {1000}));
-        assertFalse(factory.canReuse(new SizeView(SupportStatementContextFactory.makeContext())));
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000}));
+        assertFalse(factory.canReuse(new FirstElementView()));
         assertFalse(factory.canReuse(new TimeBatchView(null, SupportStatementContextFactory.makeContext(), 1000, null, false, false, null)));
         assertTrue(factory.canReuse(new TimeWindowView(SupportStatementContextFactory.makeContext(), factory, 1000000, null, false)));
     }
@@ -42,7 +39,7 @@ public class TestTimeWindowViewFactory extends TestCase
         try
         {
             TimeWindowViewFactory factory = new TimeWindowViewFactory();
-            factory.setViewParameters(null, Arrays.asList(new Object[] {param}));
+            factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {param}));
             fail();
         }
         catch (ViewParameterException ex)
@@ -54,7 +51,7 @@ public class TestTimeWindowViewFactory extends TestCase
     private void tryParameter(Object param, long msec) throws Exception
     {
         TimeWindowViewFactory factory = new TimeWindowViewFactory();
-        factory.setViewParameters(null, Arrays.asList(new Object[] {param}));
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {param}));
         TimeWindowView view = (TimeWindowView) factory.makeView(SupportStatementContextFactory.makeContext());
         assertEquals(msec, view.getMillisecondsBeforeExpiry());
     }

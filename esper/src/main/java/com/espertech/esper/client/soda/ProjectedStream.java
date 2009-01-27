@@ -19,6 +19,8 @@ public abstract class ProjectedStream extends Stream
 {
     private List<View> views;
     private boolean isUnidirectional;
+    private boolean isRetainUnion;
+    private boolean isRetainIntersection;
 
     /**
      * Represent as textual.
@@ -56,7 +58,7 @@ public abstract class ProjectedStream extends Stream
      * @param parameters is a list of view parameters
      * @return stream
      */
-    public ProjectedStream addView(String namespace, String name, List<Object> parameters)
+    public ProjectedStream addView(String namespace, String name, List<Expression> parameters)
     {
         views.add(View.create(namespace, name, parameters));
         return this;
@@ -69,7 +71,7 @@ public abstract class ProjectedStream extends Stream
      * @param parameters is a list of view parameters
      * @return stream
      */
-    public ProjectedStream addView(String namespace, String name, Object ...parameters)
+    public ProjectedStream addView(String namespace, String name, Expression ...parameters)
     {
         views.add(View.create(namespace, name, parameters));
         return this;
@@ -116,6 +118,14 @@ public abstract class ProjectedStream extends Stream
         {
             writer.write(" unidirectional");
         }
+        else if (isRetainUnion)
+        {
+            writer.write(" retain-union");
+        }
+        else if (isRetainIntersection)
+        {
+            writer.write(" retain-intersection");
+        }
     }
 
     /**
@@ -136,6 +146,42 @@ public abstract class ProjectedStream extends Stream
     {
         this.isUnidirectional = isUnidirectional;
         return this;
+    }
+
+    /**
+     * Returns true if multiple data window shall be treated as a union.
+     * @return retain union
+     */
+    public boolean isRetainUnion()
+    {
+        return isRetainUnion;
+    }
+
+    /**
+     * Set to true to have multiple data window be treated as a union.
+     * @param retainUnion indicator to union
+     */
+    public void setRetainUnion(boolean retainUnion)
+    {
+        isRetainUnion = retainUnion;
+    }
+
+    /**
+     * Returns true if multiple data window shall be treated as an intersection.
+     * @return retain intersection
+     */
+    public boolean isRetainIntersection()
+    {
+        return isRetainIntersection;
+    }
+
+    /**
+     * Set to true to have multiple data window be treated as a intersection.
+     * @param retainIntersection indicator to intersection
+     */
+    public void setRetainIntersection(boolean retainIntersection)
+    {
+        isRetainIntersection = retainIntersection;
     }
 
     /**

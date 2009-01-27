@@ -21,9 +21,11 @@ public interface PatternContextFactory
      * @param statementContext is the statement information and services
      * @param streamId is the stream id
      * @param rootNode is the pattern root node
+     * @param hasArrayProperties is the pattern has array properties
      * @return pattern context
      */
     public PatternContext createContext(StatementContext statementContext,
                                         int streamId,
-                                        EvalRootNode rootNode);
+                                        EvalRootNode rootNode,
+                                        boolean hasArrayProperties);
 }

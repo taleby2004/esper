@@ -1,23 +1,21 @@
 package com.espertech.esper.regression.event;
 
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.PropertyAccessException;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.PropertyAccessException;
 
-import java.util.Properties;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 public class MyPlugInPropertiesEventType implements EventType
 {
     private final String name;
     private final Set<String> properties;
+    private final Map<String, EventPropertyDescriptor> descriptors;
 
-    public MyPlugInPropertiesEventType(String name, Set<String> properties)
+    public MyPlugInPropertiesEventType(String name, Set<String> properties, Map<String, EventPropertyDescriptor> descriptors)
     {
         this.name = name;
         this.properties = properties;
+        this.descriptors = descriptors;
     }
 
     public Class getPropertyType(String property)
@@ -50,6 +48,11 @@ public class MyPlugInPropertiesEventType implements EventType
                 MyPlugInPropertiesEventBean propBean = (MyPlugInPropertiesEventBean) eventBean;
                 return propBean.getProperties().getProperty(propertyName) != null;
             }
+
+            public Object getFragment(EventBean eventBean)
+            {
+                return null;
+            }
         };
     }
 
@@ -76,5 +79,21 @@ public class MyPlugInPropertiesEventType implements EventType
     public String getName()
     {
         return name;
+    }
+
+    public EventPropertyDescriptor[] getPropertyDescriptors()
+    {
+        Collection<EventPropertyDescriptor> descriptorColl = descriptors.values();
+        return descriptorColl.toArray(new EventPropertyDescriptor[descriptors.size()]);
+    }
+
+    public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
+    {
+        return descriptors.get(propertyName);
+    }
+
+    public FragmentEventType getFragmentType(String property)
+    {
+        return null;  // sample does not provide any fragments
     }
 }

@@ -9,8 +9,11 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.util.MetaDefItem;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Encapsulates the information required to specify an object identification and construction.
@@ -20,11 +23,12 @@ import java.util.List;
  * A object construction specification can be equal to another specification. This information can be
  * important to determine reuse of any object.
  */
-public abstract class ObjectSpec implements MetaDefItem
+public abstract class ObjectSpec implements MetaDefItem, Serializable
 {
     private final String objectNamespace;
     private final String objectName;
-    private final List<Object> objectParameters;
+    private final List<ExprNode> objectParameters;
+    private static final long serialVersionUID = 8376856305427395086L;
 
     /**
      * Constructor.
@@ -32,7 +36,7 @@ public abstract class ObjectSpec implements MetaDefItem
      * @param objectName is the name of the object
      * @param objectParameters is a list of values representing the object parameters
      */
-    public ObjectSpec(String namespace, String objectName, List<Object> objectParameters)
+    public ObjectSpec(String namespace, String objectName, List<ExprNode> objectParameters)
     {
         this.objectNamespace = namespace;
         this.objectName = objectName;
@@ -59,9 +63,9 @@ public abstract class ObjectSpec implements MetaDefItem
 
     /**
      * Returns the list of object parameters.
-     * @return list of values representing object parameters
+     * @return list of expressions representing object parameters
      */
-    public final List<Object> getObjectParameters()
+    public final List<ExprNode> getObjectParameters()
     {
         return objectParameters;
     }
@@ -96,12 +100,12 @@ public abstract class ObjectSpec implements MetaDefItem
 
         // Compare object parameter by object parameter
         int index = 0;
-        for (Object thisParam : objectParameters)
+        for (ExprNode thisParam : objectParameters)
         {
-            Object otherParam = other.objectParameters.get(index);
+            ExprNode otherParam = other.objectParameters.get(index);
             index++;
 
-            if (!(thisParam.equals(otherParam)))
+            if (!ExprNodeUtility.deepEquals(thisParam, otherParam))
             {
                 return false;
             }
@@ -128,10 +132,10 @@ public abstract class ObjectSpec implements MetaDefItem
 
         if (objectParameters != null)
         {
-            for (Object param : objectParameters)
+            for (ExprNode param : objectParameters)
             {
                 buffer.append(delimiter);
-                buffer.append(param.toString());
+                buffer.append(param.toExpressionString());
                 delimiter = ',';
             }
         }

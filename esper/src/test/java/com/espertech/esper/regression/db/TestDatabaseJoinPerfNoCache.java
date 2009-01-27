@@ -1,19 +1,17 @@
 package com.espertech.esper.regression.db;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
-import java.util.Properties;
-
+import com.espertech.esper.support.epl.SupportDatabaseService;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Properties;
 
 public class TestDatabaseJoinPerfNoCache extends TestCase
 {
@@ -28,7 +26,6 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
         configDB.setConnectionLifecycleEnum(ConfigurationDBRef.ConnectionLifecycleEnum.RETAIN);
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addDatabaseReference("MyDB", configDB);
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
         epServiceRetained = EPServiceProviderManager.getProvider("TestDatabaseJoinRetained", configuration);
         epServiceRetained.initialize();
@@ -38,7 +35,6 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
         configDB.setConnectionLifecycleEnum(ConfigurationDBRef.ConnectionLifecycleEnum.POOLED);
         configuration = SupportConfigFactory.getConfiguration();
         configuration.addDatabaseReference("MyDB", configDB);
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epServicePooled = EPServiceProviderManager.getProvider("TestDatabaseJoinPooled", configuration);
         epServicePooled.initialize();
     }
@@ -92,7 +88,6 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
     public void testSelectIStream()
     {
         // set time to zero
-        epServiceRetained.getEPRuntime().sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
         epServiceRetained.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
         String stmtText = "select istream myvarchar from " +

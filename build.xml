@@ -4,7 +4,7 @@
 	<property name="Name" value="Esper"/>
 	<property name="name" value="esper"/>
 	<property name="nameio" value="esperio"/>
-	<property name="version" value="2.3.0"/>
+	<property name="version" value="3.0.0"/>
 	<property name="patchlevel" value=""/>
 	<property name="fullversion" value="${version}${patchlevel}"/>
 	<property name="fullname" value="${name}-${fullversion}"/>
@@ -24,11 +24,7 @@
 	    esper/doc/site/**,
 	    esper/lib/**, esper/etc/*.*, esper/doc/grammar/**,
 	    esperio/lib/**, esperio/etc/*.*,
-	    examples/*.*,
-	    examples/benchmark/**,
-	    examples/terminalsvc/**,
-        examples/terminalsvc-jse/**,
-        examples/src/**, examples/etc/**, examples/lib/**"/>
+	    examples/**"/>
 	<property name="dist_includes_exceptions" value="examples/terminalsvc/**/target/*.jar"/>
     <!-- examples has specific excludes -->
     <!-- doc is handled separately for folder remapping (remove of build/en) -->
@@ -36,7 +32,7 @@
         **/target/**, **/intellij/**, **/_classes/**,
         examples/benchmark/lib/*.jar,
         examples/terminalsvc-jse/lib/*.jar,
-        **/antlr-3.0.1.jar,
+        **/antlr-3.1.1.jar,
         **/junit-4.4.jar, **/junit.license,
         **/mysql-connector-java-*.jar,**/OTFeed*.jar"/>
 
@@ -56,9 +52,9 @@
 			 <arg value="esper/grammar/EsperEPL2Grammar.g"/>
 			 <arg value="esper/grammar/EsperEPL2Ast.g"/>
 			 <classpath>
-			   <pathelement location="esper/lib/antlr-3.0.1.jar"/>
-			   <pathelement location="../../../../software/antlr-3.0.1/lib/stringtemplate-3.1b1.jar"/>
-			   <pathelement location="../../../../software/antlr-3.0.1/lib/antlr-2.7.7.jar"/>
+			   <pathelement location="esper/lib/antlr-3.1.1.jar"/>
+			   <pathelement location="../../../../software/antlr-3.1.1/lib/stringtemplate-3.1b1.jar"/>
+			   <pathelement location="../../../../software/antlr-3.1.1/lib/antlr-2.7.7.jar"/>
 			 </classpath>
 		       </java>
 		-->
@@ -107,14 +103,14 @@
 	<target name="dist_tar" description="Tar up distribution" depends="touch_all">
 		<property name="tar-file" value="${dist.dir}/${fullname}.tar"/>
 		<echo message="Building a tar for distribution" />
-		<fixcrlf srcdir="examples/etc"
+		<fixcrlf srcdir="examples"
 		       eol="lf"
 		       eof="remove"
 		       includes="**/*.sh"/>
 		<tar longfile="gnu" tarfile="${tar-file}">
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
-			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="examples/etc/*.sh"/>
+			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="examples/**/*.sh" excludes="examples/**/target/**/*.sh"/>
             <tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
             <tarfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
             <tarfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>

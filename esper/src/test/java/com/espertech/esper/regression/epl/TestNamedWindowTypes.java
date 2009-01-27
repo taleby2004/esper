@@ -1,10 +1,7 @@
 package com.espertech.esper.regression.epl;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -25,20 +22,57 @@ public class TestNamedWindowTypes extends TestCase
 
     public void setUp()
     {
-        Map<String, Class> types = new HashMap<String, Class>();
+        Map<String, Object> types = new HashMap<String, Object>();
         types.put("key", String.class);
         types.put("primitive", long.class);
         types.put("boxed", Long.class);
 
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.addEventTypeAlias("MyMap", types);
+        config.addEventType("MyMap", types);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
         listenerWindow = new SupportUpdateListener();
         listenerStmtOne = new SupportUpdateListener();
         listenerStmtDelete = new SupportUpdateListener();
+    }
+
+    public void testMapTranspose()
+    {
+        Map<String, Object> innerTypeOne = new HashMap<String, Object>();
+        innerTypeOne.put("i1", int.class);
+        Map<String, Object> innerTypeTwo = new HashMap<String, Object>();
+        innerTypeTwo.put("i2", int.class);
+        Map<String, Object> outerType = new HashMap<String, Object>();
+        outerType.put("one", "T1");
+        outerType.put("two", "T2");
+        epService.getEPAdministrator().getConfiguration().addEventType("T1", innerTypeOne);
+        epService.getEPAdministrator().getConfiguration().addEventType("T2", innerTypeTwo);
+        epService.getEPAdministrator().getConfiguration().addEventType("OuterType", outerType);
+
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select one, two from OuterType";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.getEventType().getPropertyNames(), new String[] {"one", "two"});
+        EventType eventType = stmtCreate.getEventType();
+        assertEquals("T1", eventType.getFragmentType("one").getFragmentType().getName());
+        assertEquals("T2", eventType.getFragmentType("two").getFragmentType().getName());
+
+        // create insert into
+        String stmtTextInsertOne = "insert into MyWindow select one, two from OuterType";
+        epService.getEPAdministrator().createEPL(stmtTextInsertOne);
+
+        Map<String, Object> innerDataOne = new HashMap<String, Object>();
+        innerDataOne.put("i1", 1);
+        Map<String, Object> innerDataTwo = new HashMap<String, Object>();
+        innerDataTwo.put("i2", 2);
+        Map<String, Object> outerData = new HashMap<String, Object>();
+        outerData.put("one", innerDataOne);
+        outerData.put("two", innerDataTwo);
+
+        epService.getEPRuntime().sendEvent(outerData, "OuterType");
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNew(), "one.i1,two.i2".split(","),new Object[] {1,2});
     }
 
     public void testNoWildcardWithAs()
@@ -53,7 +87,7 @@ public class TestNamedWindowTypes extends TestCase
         assertEquals(Long.class, stmtCreate.getEventType().getPropertyType("c"));
 
         // assert type metadata
-        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByAlias("MyWindow");
+        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByName("MyWindow");
         assertEquals(null, type.getMetadata().getOptionalApplicationType());
         assertEquals(null, type.getMetadata().getOptionalSecondaryNames());
         assertEquals("MyWindow", type.getMetadata().getPrimaryName());
@@ -173,7 +207,7 @@ public class TestNamedWindowTypes extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // assert type metadata
-        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByAlias("MyWindow");
+        EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByName("MyWindow");
         assertEquals(null, type.getMetadata().getOptionalApplicationType());
         assertEquals(null, type.getMetadata().getOptionalSecondaryNames());
         assertEquals("MyWindow", type.getMetadata().getPrimaryName());
@@ -217,6 +251,21 @@ public class TestNamedWindowTypes extends TestCase
         String[] fields = new String[] {"id"};
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
         ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+    }
+
+    public void testModelAfterMap()
+    {
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:keepall() select * from MyMap";
+        epService.getEPAdministrator().createEPL(stmtTextCreate);
+
+        // create insert into
+        String stmtTextInsertOne = "insert into MyWindow select * from MyMap";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTextInsertOne);
+        stmt.addListener(listenerWindow);
+
+        sendMap("k1", 100L, 200L);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), "key,primitive".split(","), new Object[] {"k1", 100L});
     }
 
     public void testWildcardInheritance()

@@ -1,6 +1,6 @@
 package com.espertech.esper.support.filter;
 
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.filter.*;
 
 import java.util.LinkedList;
@@ -10,7 +10,7 @@ public class SupportFilterSpecBuilder
 {
     public static FilterSpecCompiled build(EventType eventType, Object[] objects)
     {
-        return new FilterSpecCompiled(eventType, "SomeAliasNameForType", buildList(objects));
+        return new FilterSpecCompiled(eventType, "SomeAliasNameForType", buildList(objects), null);
     }
 
     public static List<FilterSpecParam> buildList(Object[] objects)

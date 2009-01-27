@@ -9,7 +9,7 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
@@ -48,8 +48,11 @@ public class ExprNotNode extends ExprNode
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
     {
-        Boolean evaluated = (Boolean) this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
-
+        Boolean evaluated = (Boolean) this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);        
+        if (evaluated == null)
+        {
+            return null;
+        }
         return !evaluated;
     }
 

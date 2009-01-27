@@ -2,7 +2,7 @@ package com.espertech.esper.epl.join;
 
 import junit.framework.TestCase;
 
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.epl.SupportExprNode;
@@ -14,6 +14,7 @@ import com.espertech.esper.epl.join.exec.TableLookupExecNode;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.view.Viewable;
+import com.espertech.esper.core.StreamJoinAnalysisResult;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -54,7 +55,7 @@ public class TestJoinSetComposerFactory extends TestCase
     public void testBuildComposer() throws Exception
     {
         List<OuterJoinDesc> outerJoins = new LinkedList<OuterJoinDesc>();
-        JoinSetComposerImpl composer = (JoinSetComposerImpl) (new JoinSetComposerFactoryImpl()).makeComposer(outerJoins, new SupportExprNode(true), streamTypes, new String[]{"a", "b", "c", "d"}, streamViewables, SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH, new boolean[4], new boolean[4], new boolean[4]);
+        JoinSetComposerImpl composer = (JoinSetComposerImpl) (new JoinSetComposerFactoryImpl()).makeComposer(outerJoins, new SupportExprNode(true), streamTypes, new String[]{"a", "b", "c", "d"}, streamViewables, SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH, new StreamJoinAnalysisResult(4));
 
         // verify default indexes build
         assertEquals(2, composer.getTables().length);

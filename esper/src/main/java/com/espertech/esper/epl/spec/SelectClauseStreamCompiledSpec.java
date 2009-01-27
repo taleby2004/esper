@@ -9,48 +9,48 @@
 package com.espertech.esper.epl.spec;
 
 /**
- * Mirror class to {@link SelectClauseStreamRawSpec} but added the stream number for the alias.
+ * Mirror class to {@link SelectClauseStreamRawSpec} but added the stream number for the name.
  */
 public class SelectClauseStreamCompiledSpec implements SelectClauseElementCompiled
 {
-    private final String streamAliasName;
-    private final String optionalAliasName;
+    private final String streamName;
+    private final String optionalColumnName;
     private int streamNumber = -1;
-    private boolean isTaggedEvent = false;
+    private boolean isFragmentEvent = false;
     private boolean isProperty = false;
     private Class propertyType;
 
     /**
      * Ctor.
-     * @param streamAliasName is the stream alias of the stream to select
-     * @param optionalAliasName is the column alias
+     * @param streamName is the stream name of the stream to select
+     * @param optionalColumnName is the column name
      */
-    public SelectClauseStreamCompiledSpec(String streamAliasName, String optionalAliasName)
+    public SelectClauseStreamCompiledSpec(String streamName, String optionalColumnName)
     {
-        this.streamAliasName = streamAliasName;
-        this.optionalAliasName = optionalAliasName;
+        this.streamName = streamName;
+        this.optionalColumnName = optionalColumnName;
     }
 
     /**
-     * Returns the stream alias (e.g. select streamAlias from MyEvent as streamAlias).
-     * @return alias
+     * Returns the stream name (e.g. select streamName from MyEvent as streamName).
+     * @return name
      */
-    public String getStreamAliasName()
+    public String getStreamName()
     {
-        return streamAliasName;
+        return streamName;
     }
 
     /**
-     * Returns the column alias (e.g. select streamAlias as mycol from MyEvent as streamAlias).
-     * @return alias
+     * Returns the column name.
+     * @return name
      */
-    public String getOptionalAliasName()
+    public String getOptionalName()
     {
-        return optionalAliasName;
+        return optionalColumnName;
     }
 
     /**
-     * Returns the stream number of the stream for the stream alias.
+     * Returns the stream number of the stream for the stream name.
      * @return stream number
      */
     public int getStreamNumber()
@@ -67,13 +67,13 @@ public class SelectClauseStreamCompiledSpec implements SelectClauseElementCompil
      * selecting an event from a stream.
      * @return true for tagged event in pattern, false for stream
      */
-    public boolean isTaggedEvent()
+    public boolean isFragmentEvent()
     {
         if (streamNumber == -1)
         {
             throw new IllegalStateException("Not initialized for stream number and tagged event");
         }
-        return isTaggedEvent;
+        return isFragmentEvent;
     }
 
     /**
@@ -88,8 +88,8 @@ public class SelectClauseStreamCompiledSpec implements SelectClauseElementCompil
      * Sets a flag indicating whether the stream wildcard is for a tagged event in a pattern.
      * @param taggedEvent in pattern
      */
-    public void setTaggedEvent(boolean taggedEvent) {
-        isTaggedEvent = taggedEvent;
+    public void setFragmentEvent(boolean taggedEvent) {
+        isFragmentEvent = taggedEvent;
     }
 
     /**

@@ -11,6 +11,8 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.InsertIntoDesc;
 import com.espertech.esper.event.*;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 
 import java.util.*;
 
@@ -46,15 +48,15 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         Map<String, Object> eventTypeMap = new HashMap<String, Object>();
         for (int i = 0; i < streamTypes.length; i++)
         {
-            eventTypeMap.put(streamNames[i], streamTypes[i].getUnderlyingType());
+            eventTypeMap.put(streamNames[i], streamTypes[i]);
         }
 
-        // If we have an alias for this type, add it
+        // If we have an name for this type, add it
         if (insertIntoDesc != null)
         {
         	try
             {
-                resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeAlias(), eventTypeMap, null, false, false, true);
+                resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), eventTypeMap, null, false, false, true);
                 selectExprEventTypeRegistry.add(resultEventType);
             }
             catch (EventAdapterException ex)
@@ -80,7 +82,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
 
             if (eventsPerStream[i] != null)
             {
-                tuple.put(streamNames[i], eventsPerStream[i].getUnderlying());
+                tuple.put(streamNames[i], eventsPerStream[i]);
             }
             else
             {
@@ -88,7 +90,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
             }
         }
 
-        return eventAdapterService.createMapFromValues(tuple, resultEventType);
+        return eventAdapterService.adaptorForTypedMap(tuple, resultEventType);
     }
 
     public EventType getResultEventType()

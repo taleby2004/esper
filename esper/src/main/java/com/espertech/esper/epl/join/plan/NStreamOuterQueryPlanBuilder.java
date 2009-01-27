@@ -14,7 +14,7 @@ import com.espertech.esper.epl.join.assemble.AssemblyStrategyTreeBuilder;
 import com.espertech.esper.epl.join.assemble.BaseAssemblyNode;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.type.OuterJoinType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,7 +31,7 @@ public class NStreamOuterQueryPlanBuilder
     /**
      * Build a query plan based on the stream property relationships indicated in queryGraph.
      * @param queryGraph - navigation info between streams
-     * @param streamNames - stream names or aliases
+     * @param streamNames - stream names
      * @param outerJoinDescList - descriptors for all outer joins
      * @param typesPerStream - event types for each stream
      * @param hasHistorical - indicator if there is one or more historical streams in the join

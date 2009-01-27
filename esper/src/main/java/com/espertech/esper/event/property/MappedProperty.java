@@ -8,16 +8,20 @@
  **************************************************************************************/
 package com.espertech.esper.event.property;
 
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.BeanEventType;
-import com.espertech.esper.event.EventPropertyDescriptor;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.bean.InternalEventPropDescriptor;
+import com.espertech.esper.event.bean.KeyedMethodPropertyGetter;
+import com.espertech.esper.event.bean.KeyedFastPropertyGetter;
+import com.espertech.esper.event.xml.*;
+import com.espertech.esper.event.xml.DOMMapGetter;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.io.StringWriter;
 
 /**
  * Represents a mapped property or array property, ie. an 'value' property with read method getValue(int index)
@@ -47,9 +51,19 @@ public class MappedProperty extends PropertyBase
         return key;
     }
 
-    public EventPropertyGetter getGetter(BeanEventType eventType)
+    public String[] toPropertyArray()
     {
-        EventPropertyDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
+        return new String[] {this.getPropertyNameAtomic()};
+    }
+
+    public boolean isDynamic()
+    {
+        return false;
+    }
+
+    public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             // property not found, is not a property
@@ -61,17 +75,17 @@ public class MappedProperty extends PropertyBase
         if (fastClass != null)
         {
             FastMethod fastMethod = fastClass.getMethod(method);
-            return new KeyedFastPropertyGetter(fastMethod, key);
+            return new KeyedFastPropertyGetter(fastMethod, key, eventAdapterService);
         }
         else
         {
-            return new KeyedMethodPropertyGetter(method, key);
+            return new KeyedMethodPropertyGetter(method, key, eventAdapterService);
         }
     }
 
-    public Class getPropertyType(BeanEventType eventType)
+    public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
-        EventPropertyDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
+        InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
             // property not found, is not a property
@@ -96,5 +110,54 @@ public class MappedProperty extends PropertyBase
         writer.append("('");
         writer.append(key);
         writer.append("')");
+    }
+
+    public EventPropertyGetter getGetterDOM(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService, BaseXMLEventType eventType, String propertyExpression)
+    {
+        for (SchemaElementComplex complex : complexProperty.getChildren())
+        {
+            if (!complex.getName().equals(propertyNameAtomic))
+            {
+                continue;
+            }
+            for (SchemaItemAttribute attribute : complex.getAttributes())
+            {
+                if (!attribute.getName().toLowerCase().equals("id"))
+                {
+                    continue;
+                }
+            }
+
+            return new DOMMapGetter(propertyNameAtomic, key, null);
+        }
+
+        return null;
+    }
+
+    public EventPropertyGetter getGetterDOM()
+    {
+        return new DOMMapGetter(propertyNameAtomic, key, null);
+    }
+
+    public SchemaItem getPropertyTypeSchema(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService)
+    {
+        for (SchemaElementComplex complex : complexProperty.getChildren())
+        {
+            if (!complex.getName().equals(propertyNameAtomic))
+            {
+                continue;
+            }
+            for (SchemaItemAttribute attribute : complex.getAttributes())
+            {
+                if (!attribute.getName().toLowerCase().equals("id"))
+                {
+                    continue;
+                }
+            }
+
+            return complex;
+        }
+
+        return null;
     }
 }

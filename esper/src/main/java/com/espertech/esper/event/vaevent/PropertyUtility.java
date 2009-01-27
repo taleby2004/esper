@@ -10,9 +10,9 @@ package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.event.EventPropertyGetter;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,29 +24,6 @@ import java.util.*;
 public class PropertyUtility
 {
     private static final Log log = LogFactory.getLog(PropertyUtility.class);
-
-    /**
-     * Remove the postfixes for indexed and mapped properties that
-     * provide a clue that a property requires a index or map key parameter to return values,
-     * changing the array elements.
-     * @param propertyNames to remove prefix for
-     */
-    public static void removePropNamePostfixes(String[] propertyNames)
-    {
-        for (int i = 0; i < propertyNames.length; i++)
-        {
-            String property = propertyNames[i];
-            if (property.endsWith("[]"))
-            {
-                property = property.replace("[]", "");
-            }
-            if (property.endsWith("()"))
-            {
-                property = property.replace("()", "");
-            }
-            propertyNames[i] = property;
-        }
-    }
 
     /**
      * Returns a multi-key for an event and key property getters
@@ -125,14 +102,14 @@ public class PropertyUtility
      * Analyze multiple event types and determine common property sets that form property groups.
      * @param allProperties property names to look at
      * @param deltaEventTypes all types contributing
-     * @param aliases names of properies
+     * @param names names of properies
      * @return groups
      */
-    public static PropertyGroupDesc[] analyzeGroups(String[] allProperties, EventType[] deltaEventTypes, String[] aliases)
+    public static PropertyGroupDesc[] analyzeGroups(String[] allProperties, EventType[] deltaEventTypes, String[] names)
     {
-        if (deltaEventTypes.length != aliases.length)
+        if (deltaEventTypes.length != names.length)
         {
-            throw new IllegalArgumentException("Delta event type number and alias number of elements don't match");
+            throw new IllegalArgumentException("Delta event type number and name number of elements don't match");
         }
         allProperties = copyAndSort(allProperties);
 
@@ -144,7 +121,7 @@ public class PropertyUtility
             MultiKey<String> props = getPropertiesContributed(deltaEventTypes[i], allProperties);
             if (props.getArray().length == 0)
             {
-                log.warn("Event type alias '" + aliases[i] + "' does not contribute (or override) any properties of the revision event type");
+                log.warn("Event type name '" + names[i] + "' does not contribute (or override) any properties of the revision event type");
                 continue;
             }
 
@@ -160,7 +137,7 @@ public class PropertyUtility
             {
                 typesForGroup = propertyGroup.getTypes();
             }
-            typesForGroup.put(deltaEventTypes[i], aliases[i]);
+            typesForGroup.put(deltaEventTypes[i], names[i]);
         }
 
         Collection<PropertyGroupDesc> out = result.values();

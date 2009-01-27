@@ -13,6 +13,26 @@ import java.util.*;
 
 public class TestJavaClassHelper extends TestCase
 {
+    public void testIsFragmentableType()
+    {
+        Class[] notFragmentables = new Class[] {
+            String.class, int.class, Character.class, long.class, Map.class, HashMap.class, SupportEnum.class,
+        };
+
+        Class[] yesFragmentables = new Class[] {
+            SupportBeanCombinedProps.class, SupportBeanCombinedProps.NestedLevOne.class, SupportBean.class
+        };
+
+        for (Class notFragmentable : notFragmentables)
+        {
+            assertFalse(JavaClassHelper.isFragmentableType(notFragmentable));
+        }
+        for (Class yesFragmentable : yesFragmentables)
+        {
+            assertTrue(JavaClassHelper.isFragmentableType(yesFragmentable));
+        }
+    }
+
     public void testGetParameterAsString()
     {
         Object[][] testCases = {
@@ -341,8 +361,8 @@ public class TestJavaClassHelper extends TestCase
         assertEquals(Double.class, JavaClassHelper.getArithmaticCoercionType(byte.class, double.class));
         assertEquals(Long.class, JavaClassHelper.getArithmaticCoercionType(byte.class, long.class));
         assertEquals(Long.class, JavaClassHelper.getArithmaticCoercionType(byte.class, long.class));
-        assertEquals(Float.class, JavaClassHelper.getArithmaticCoercionType(float.class, long.class));
-        assertEquals(Float.class, JavaClassHelper.getArithmaticCoercionType(byte.class, float.class));
+        assertEquals(Double.class, JavaClassHelper.getArithmaticCoercionType(float.class, long.class));
+        assertEquals(Double.class, JavaClassHelper.getArithmaticCoercionType(byte.class, float.class));
         assertEquals(Integer.class, JavaClassHelper.getArithmaticCoercionType(byte.class, int.class));
         assertEquals(Integer.class, JavaClassHelper.getArithmaticCoercionType(Integer.class, int.class));
         assertEquals(BigDecimal.class, JavaClassHelper.getArithmaticCoercionType(Integer.class, BigDecimal.class));
@@ -406,11 +426,11 @@ public class TestJavaClassHelper extends TestCase
 
         assertEquals(Double.class, JavaClassHelper.getCompareToCoercionType(int.class, float.class));
         assertEquals(Double.class, JavaClassHelper.getCompareToCoercionType(double.class, byte.class));
-        assertEquals(Double.class, JavaClassHelper.getCompareToCoercionType(float.class, float.class));
+        assertEquals(Float.class, JavaClassHelper.getCompareToCoercionType(float.class, float.class));
         assertEquals(Double.class, JavaClassHelper.getCompareToCoercionType(float.class, Double.class));
 
-        assertEquals(Long.class, JavaClassHelper.getCompareToCoercionType(int.class, int.class));
-        assertEquals(Long.class, JavaClassHelper.getCompareToCoercionType(Short.class, Integer.class));
+        assertEquals(Integer.class, JavaClassHelper.getCompareToCoercionType(int.class, int.class));
+        assertEquals(Integer.class, JavaClassHelper.getCompareToCoercionType(Short.class, Integer.class));
 
         assertEquals(BigDecimal.class, JavaClassHelper.getCompareToCoercionType(BigDecimal.class, int.class));
         assertEquals(BigDecimal.class, JavaClassHelper.getCompareToCoercionType(Double.class, BigDecimal.class));
@@ -424,7 +444,11 @@ public class TestJavaClassHelper extends TestCase
         assertEquals(BigInteger.class, JavaClassHelper.getCompareToCoercionType(short.class, BigInteger.class));
         assertEquals(BigInteger.class, JavaClassHelper.getCompareToCoercionType(Integer.class, BigInteger.class));
 
-        tryInvalidGetRelational(Boolean.class, BigInteger.class);
+        assertEquals(SupportBean.class, JavaClassHelper.getCompareToCoercionType(SupportBean.class, SupportBean.class));
+        assertEquals(Object.class, JavaClassHelper.getCompareToCoercionType(SupportBean.class, SupportBean_A.class));
+
+        assertEquals("Types cannot be compared: java.lang.Boolean and java.math.BigInteger",
+                tryInvalidGetRelational(Boolean.class, BigInteger.class));
         tryInvalidGetRelational(String.class, BigDecimal.class);
         tryInvalidGetRelational(String.class, int.class);
         tryInvalidGetRelational(Long.class, String.class);
@@ -594,18 +618,20 @@ public class TestJavaClassHelper extends TestCase
         {
             assertFalse(JavaClassHelper.isJavaBuiltinDataType(classesNotDataType[i]));
         }
+        assertTrue(JavaClassHelper.isJavaBuiltinDataType(null));
     }
 
-    private void tryInvalidGetRelational(Class classOne, Class classTwo)
+    private String tryInvalidGetRelational(Class classOne, Class classTwo)
     {
         try
         {
             JavaClassHelper.getCompareToCoercionType(classOne, classTwo);
             fail();
+            return null;
         }
-        catch (IllegalArgumentException ex)
+        catch (CoercionException ex)
         {
-            // Expected
+            return ex.getMessage();
         }
     }
 
@@ -636,8 +662,8 @@ public class TestJavaClassHelper extends TestCase
         assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {double.class, byte.class}));
         assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {double.class, byte.class, null}));
         assertEquals(Float.class, JavaClassHelper.getCommonCoercionType(new Class[] {float.class, float.class}));
-        assertEquals(Float.class, JavaClassHelper.getCommonCoercionType(new Class[] {float.class, int.class}));
-        assertEquals(Float.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, int.class, Float.class}));
+        assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {float.class, int.class}));
+        assertEquals(Double.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, int.class, Float.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {Integer.class, int.class, long.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {long.class, int.class}));
         assertEquals(Long.class, JavaClassHelper.getCommonCoercionType(new Class[] {long.class, int.class, int.class, int.class, byte.class, short.class}));
@@ -653,8 +679,9 @@ public class TestJavaClassHelper extends TestCase
         assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, SupportBean.class}));
         assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {null, null, SupportBean.class}));
         assertEquals(SupportBean.class, JavaClassHelper.getCommonCoercionType(new Class[] {SupportBean.class, null, SupportBean.class, SupportBean.class}));
+        assertEquals(Object.class, JavaClassHelper.getCommonCoercionType(new Class[] {SupportBean.class, SupportBean_A.class, null, SupportBean.class, SupportBean.class}));
 
-        tryInvalidGetCommonCoercionType(new Class[] {String.class, Boolean.class});
+        assertEquals("Cannot coerce to String type java.lang.Boolean", tryInvalidGetCommonCoercionType(new Class[] {String.class, Boolean.class}));
         tryInvalidGetCommonCoercionType(new Class[] {String.class, String.class, Boolean.class});
         tryInvalidGetCommonCoercionType(new Class[] {Boolean.class, String.class, Boolean.class});
         tryInvalidGetCommonCoercionType(new Class[] {Boolean.class, Boolean.class, String.class});
@@ -769,16 +796,17 @@ public class TestJavaClassHelper extends TestCase
         assertFalse(JavaClassHelper.isBigNumberType(Double.class));
     }
 
-    private void tryInvalidGetCommonCoercionType(Class[] types)
+    private String tryInvalidGetCommonCoercionType(Class[] types)
     {
         try
         {
             JavaClassHelper.getCommonCoercionType(types);
             fail();
+            return null;
         }
         catch (CoercionException ex)
         {
-            // expected
+            return ex.getMessage();
         }
     }
 

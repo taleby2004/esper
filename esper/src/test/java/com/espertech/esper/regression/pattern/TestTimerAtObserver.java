@@ -1,20 +1,21 @@
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.*;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.*;
+import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.regression.support.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanConstants;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.ArrayList;
-
-import com.espertech.esper.regression.support.*;
-import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.util.SerializableObjectCopier;
 
 public class TestTimerAtObserver extends TestCase implements SupportBeanConstants
 {
@@ -44,17 +45,6 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         EventCollection testData = EventCollectionFactory.getEventSetOne(startTime, 1000 * 60 * 10);
         CaseList testCaseList = new CaseList();
         EventExpressionCase testCase = null;
-
-        String text = "select * from pattern [timer:at(10, 8, *, *, *, *)]";
-        EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.createWildcard());
-        PatternExpr pattern = Patterns.timerAt(10, 8, null, null, null, null);
-        model.setFromClause(FromClause.create(PatternStream.create(pattern)));
-        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        assertEquals(text, model.toEPL());
-        testCase = new EventExpressionCase(model);
-        testCase.add("A1");
-        testCaseList.addTest(testCase);
 
         testCase = new EventExpressionCase("timer:at(10, 8, *, *, *)");
         testCase.add("A1");
@@ -161,6 +151,25 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         testCase.add("C1");
         testCaseList.addTest(testCase);
 
+        testCase = new EventExpressionCase("timer:at(*, 9, *, *, *) and timer:at(55, *, *, *, *)");
+        testCase.add("D1");
+        testCaseList.addTest(testCase);
+
+        testCase = new EventExpressionCase("timer:at(40, 8, *, *, *, 1) and b=" + EVENT_B_CLASS);
+        testCase.add("A2", "b", testData.getEvent("B1"));
+        testCaseList.addTest(testCase);
+
+        String text = "select * from pattern [timer:at(10, 8, *, *, *, *)]";
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setSelectClause(SelectClause.createWildcard());
+        PatternExpr pattern = Patterns.timerAt(10, 8, null, null, null, null);
+        model.setFromClause(FromClause.create(PatternStream.create(pattern)));
+        model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
+        assertEquals(text, model.toEPL());
+        testCase = new EventExpressionCase(model);
+        testCase.add("A1");
+        testCaseList.addTest(testCase);
+
         /**
          * As of release 1.6 this no longer updates listeners when the statement is started.
          * The reason is that the dispatch view only gets attached after a pattern started, therefore
@@ -172,14 +181,6 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         testCaseList.addTest(testCase);
          */
 
-        testCase = new EventExpressionCase("timer:at(*, 9, *, *, *) and timer:at(55, *, *, *, *)");
-        testCase.add("D1");
-        testCaseList.addTest(testCase);
-
-        testCase = new EventExpressionCase("timer:at(40, 8, *, *, *, 1) and b=" + EVENT_B_CLASS);
-        testCase.add("A2", "b", testData.getEvent("B1"));
-        testCaseList.addTest(testCase);
-
         // Run all tests
         PatternTestHarness util = new PatternTestHarness(testData, testCaseList);
         util.runTest();
@@ -190,17 +191,139 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         String expression = "select * from pattern [every timer:at(0,8,*,*,[1,2,3,4,5])]";
 
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
         Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
         cal.set(2008, 7, 3, 10, 0, 0);      // start on a Sunday at 6am, August 3 2008
         sendTimer(cal.getTimeInMillis(), epService);
 
         EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
+
+        runAssertion(epService, listener);
+    }
+
+    public void testAtWeekdaysPrepared()
+    {
+        String expression = "select * from pattern [every timer:at(?,?,*,*,[1,2,3,4,5])]";
+
+        Configuration config = SupportConfigFactory.getConfiguration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2008, 7, 3, 10, 0, 0);      // start on a Sunday at 6am, August 3 2008
+        sendTimer(cal.getTimeInMillis(), epService);
+
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(expression);
+        prepared.setObject(1, 0);
+        prepared.setObject(2, 8);
+        EPStatement statement = epService.getEPAdministrator().create(prepared);
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        runAssertion(epService, listener);
+    }
+
+    public void testAtWeekdaysVariable()
+    {
+        String expression = "select * from pattern [every timer:at(VMIN,VHOUR,*,*,[1,2,3,4,5])]";
+
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addVariable("VMIN", int.class, 0);
+        config.addVariable("VHOUR", int.class, 8);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2008, 7, 3, 10, 0, 0);      // start on a Sunday at 6am, August 3 2008
+        sendTimer(cal.getTimeInMillis(), epService);
+
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(expression);
+        EPStatement statement = epService.getEPAdministrator().create(prepared);
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        runAssertion(epService, listener);
+    }
+
+    public void testExpression()
+    {
+        String expression = "select * from pattern [every timer:at(7+1-8,4+4,*,*,[1,2,3,4,5])]";
+
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addVariable("VMIN", int.class, 0);
+        config.addVariable("VHOUR", int.class, 8);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2008, 7, 3, 10, 0, 0);      // start on a Sunday at 6am, August 3 2008
+        sendTimer(cal.getTimeInMillis(), epService);
+
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(expression);
+        EPStatement statement = epService.getEPAdministrator().create(prepared);
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        runAssertion(epService, listener);
+    }
+
+    public void testExpressionWithProperty()
+    {
+        String expression = "select * from pattern [a=SupportBean -> every timer:at(2*a.intPrimitive,*,*,*,*)]";
+
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventType("SupportBean", SupportBean.class.getName());
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2008, 7, 3, 6, 0, 0);      // start on a Sunday at 6am, August 3 2008
+        sendTimer(cal.getTimeInMillis(), epService);
+
+        EPStatement statement = epService.getEPAdministrator().createEPL(expression);
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 20));
+        
+        cal.set(2008, 7, 3, 6, 39, 59);
+        sendTimer(cal.getTimeInMillis(), epService);
+        assertFalse(listener.isInvoked());
+
+        cal.set(2008, 7, 3, 6, 40, 00);
+        sendTimer(cal.getTimeInMillis(), epService);
+        assertTrue(listener.isInvoked());
+    }
+
+    public void testCrontabParameters()
+    {
+        String expression = "select * from pattern [every (timer:at(*/VFREQ, VMIN:VMAX, 1 last, *, [8, 2:VMAX, */VREQ]))]";
+        Configuration config = SupportConfigFactory.getConfiguration();
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(expression);
+        assertEquals(expression, model.toEPL());
+    }
+
+    private void runAssertion(EPServiceProvider epService, SupportUpdateListener listener)
+    {
+        Calendar cal = GregorianCalendar.getInstance();
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(2008, 7, 3, 10, 0, 0);      // start on a Sunday at 6am, August 3 2008
 
         List<String> invocations = new ArrayList<String>();
         for (int i = 0; i < 24*60*7; i++)   // run for 1 week

@@ -2,7 +2,7 @@ package com.espertech.esper.multithread;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportMTUpdateListener;
@@ -48,7 +48,6 @@ public class TestMTDeterminismListener extends TestCase
     private void trySend(int numThreads, int numEvents, boolean isPreserveOrder, ConfigurationEngineDefaults.Threading.Locking locking) throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         config.getEngineDefaults().getThreading().setListenerDispatchPreserveOrder(isPreserveOrder);
         config.getEngineDefaults().getThreading().setListenerDispatchLocking(locking);
 

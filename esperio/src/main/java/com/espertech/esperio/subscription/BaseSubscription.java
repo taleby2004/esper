@@ -14,8 +14,8 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecParam;
@@ -38,7 +38,7 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
     /**
      * The event type of the events we are subscribing for.
      */
-    protected String eventTypeAlias;
+    protected String eventTypeName;
 
     /**
      * The name of the subscription.
@@ -65,18 +65,18 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
         return subscriptionName;
     }
 
-    public String getEventTypeAlias()
+    public String getEventTypeName()
     {
-        return eventTypeAlias;
+        return eventTypeName;
     }
 
     /**
      * Set the event type name we are looking for.
-     * @param eventTypeAlias is a type name
+     * @param eventTypeName is a type name
      */
-    public void setEventTypeAlias(String eventTypeAlias)
+    public void seteventTypeName(String eventTypeName)
     {
-        this.eventTypeAlias = eventTypeAlias;
+        this.eventTypeName = eventTypeName;
     }
 
     public OutputAdapter getAdapter()
@@ -93,8 +93,8 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
             throw new IllegalArgumentException("Invalid type of EPServiceProvider");
         }
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
-        EventType eventType = spi.getEventAdapterService().getExistsTypeByAlias(eventTypeAlias);
-        FilterValueSet fvs = new FilterSpecCompiled(eventType, null, new LinkedList<FilterSpecParam>()).getValueSet(null);
+        EventType eventType = spi.getEventAdapterService().getExistsTypeByName(eventTypeName);
+        FilterValueSet fvs = new FilterSpecCompiled(eventType, null, new LinkedList<FilterSpecParam>(), null).getValueSet(null);
 
         String name = "subscription:" + subscriptionName;
         StatementMetricHandle metricsHandle = spi.getMetricReportingService().getStatementHandle(name, name);

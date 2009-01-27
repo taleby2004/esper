@@ -23,8 +23,6 @@ public class TestNamedWindowOM extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listenerWindow = new SupportUpdateListener();
@@ -112,8 +110,8 @@ public class TestNamedWindowOM extends TestCase
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setCreateWindow(CreateWindowClause.create("MyWindow").addView("win", "keepall"));
         model.setSelectClause(SelectClause.create()
-                .addWithAlias("string", "key")
-                .addWithAlias("longBoxed", "value"));
+                .addWithAsProvidedName("string", "key")
+                .addWithAsProvidedName("longBoxed", "value"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
 
         EPStatement stmtCreate = epService.getEPAdministrator().create(model);

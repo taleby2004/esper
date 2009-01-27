@@ -10,7 +10,8 @@ package com.espertech.esperio.representation.axiom;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esperio.support.util.ArrayAssertionUtil;
 import com.espertech.esperio.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMElement;
@@ -63,7 +64,7 @@ public class TestAxiom extends TestCase
                 "select element1," +
                        "element4.element41 as nestedElement," +
                        "element2.element21('e21_2') as mappedElement," +
-                       "element2.element21[2] as indexedElement," +
+                       "element2.element21[1] as indexedElement," +
                        "xpathElement1, xpathCountE21, xpathAttrString, xpathAttrNum, xpathAttrBool, " +
                        "invalidelement," +
                        "element3.myattribute as invalidattr " +
@@ -78,6 +79,18 @@ public class TestAxiom extends TestCase
 
         sendEvent(epService, "TestXMLNoSchemaType", "EventB");
         assertData("EventB");
+
+        EventType eventType = ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByName("TestXMLNoSchemaType");
+        assertEquals(5, eventType.getPropertyDescriptors().length);
+        assertEquals(5, eventType.getPropertyNames().length);
+
+        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
+            new EventPropertyDescriptor("xpathElement1", String.class, false, false, false, false, false),
+            new EventPropertyDescriptor("xpathCountE21", Double.class, false, false, false, false, false),
+            new EventPropertyDescriptor("xpathAttrString", String.class, false, false, false, false, false),
+            new EventPropertyDescriptor("xpathAttrNum", Double.class, false, false, false, false, false),
+            new EventPropertyDescriptor("xpathAttrBool", Boolean.class, false, false, false, false, false),
+           }, eventType.getPropertyDescriptors());
     }
 
     public void testConfigurationXML() throws Exception

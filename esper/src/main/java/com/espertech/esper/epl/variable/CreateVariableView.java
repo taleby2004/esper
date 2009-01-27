@@ -11,8 +11,8 @@ package com.espertech.esper.epl.variable;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,11 +64,11 @@ public class CreateVariableView extends ViewSupport implements VariableChangeCal
         {
             Map<String, Object> valuesOld = new HashMap<String, Object>();
             valuesOld.put(variableName, oldValue);
-            EventBean eventOld = eventAdapterService.createMapFromValues(valuesOld, eventType);
+            EventBean eventOld = eventAdapterService.adaptorForTypedMap(valuesOld, eventType);
 
             Map<String, Object> valuesNew = new HashMap<String, Object>();
             valuesNew.put(variableName, newValue);
-            EventBean eventNew = eventAdapterService.createMapFromValues(valuesNew, eventType);
+            EventBean eventNew = eventAdapterService.adaptorForTypedMap(valuesNew, eventType);
 
             this.updateChildren(new EventBean[] {eventNew}, new EventBean[] {eventOld});
         }
@@ -89,7 +89,7 @@ public class CreateVariableView extends ViewSupport implements VariableChangeCal
         Object value = reader.getValue();
         Map<String, Object> values = new HashMap<String, Object>();
         values.put(variableName, value);
-        EventBean event = eventAdapterService.createMapFromValues(values, eventType);
+        EventBean event = eventAdapterService.adaptorForTypedMap(values, eventType);
         return new SingleEventIterator(event);
     }
 }

@@ -10,11 +10,13 @@ package com.espertech.esper.view.stat;
 
 import com.espertech.esper.view.ViewFactory;
 import com.espertech.esper.view.ViewParameterException;
-import com.espertech.esper.view.ViewAttachException;
 import com.espertech.esper.view.*;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.List;
 
@@ -23,35 +25,33 @@ import java.util.List;
  */
 public class UnivariateStatisticsViewFactory implements ViewFactory
 {
+    private List<ExprNode> viewParameters;
+
     /**
      * Property name of data field.
      */
-    protected String fieldName;
+    protected ExprNode fieldExpression;
     private EventType eventType;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
-        String errorMessage = "'Univariate statistics' view require a single field name as a parameter";
+        this.viewParameters = expressionParameters;
+    }
+
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
+    {
+        ExprNode[] validated = ViewFactorySupport.validate("Univariate statistics", parentEventType, statementContext, viewParameters, false);
+        String errorMessage = "Univariate statistics view require a single expression returning a numeric value as a parameter";
         if (viewParameters.size() != 1)
         {
             throw new ViewParameterException(errorMessage);
         }
-
-        if (!(viewParameters.get(0) instanceof String))
+        if (!JavaClassHelper.isNumeric(validated[0].getType()))
         {
             throw new ViewParameterException(errorMessage);
         }
+        fieldExpression = validated[0];
 
-        fieldName = (String) viewParameters.get(0);
-    }
-
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
-    {
-        String result = PropertyCheckHelper.checkNumeric(parentEventType, fieldName);
-        if (result != null)
-        {
-            throw new ViewAttachException(result);
-        }
         eventType = UnivariateStatisticsView.createEventType(statementContext);
     }
 
@@ -67,7 +67,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
 
     public View makeView(StatementContext statementContext)
     {
-        return new UnivariateStatisticsView(statementContext, fieldName);
+        return new UnivariateStatisticsView(statementContext, fieldExpression);
     }
 
     public EventType getEventType()
@@ -83,7 +83,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         }
 
         UnivariateStatisticsView other = (UnivariateStatisticsView) view;
-        if (!other.getFieldName().equals(fieldName))
+        if (!ExprNodeUtility.deepEquals(other.getFieldExpression(), fieldExpression))
         {
             return false;
         }

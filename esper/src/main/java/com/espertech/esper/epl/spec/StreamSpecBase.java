@@ -13,6 +13,7 @@ import com.espertech.esper.util.MetaDefItem;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.io.Serializable;
 
 /**
  * Abstract base specification for a stream, consists simply of an optional stream name and a list of views
@@ -21,25 +22,25 @@ import java.util.LinkedList;
  * Implementation classes for views and patterns add additional information defining the
  * stream of events.
  */
-public abstract class StreamSpecBase implements MetaDefItem
+public abstract class StreamSpecBase implements MetaDefItem, Serializable
 {
     private static final long serialVersionUID = 0L;
 
     private String optionalStreamName;
     private List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
-    private boolean isUnidirectional;
+    private StreamSpecOptions streamSpecOptions;
 
     /**
      * Ctor.
      * @param optionalStreamName - stream name, or null if none supplied
      * @param viewSpecs - specifies what view to use to derive data
-     * @param isUnidirectional - true to indicate a unidirectional stream in a join, applicable for joins
+     * @param streamSpecOptions - indicates additional options such as unidirectional stream or retain-union or retain-intersection
      */
-    public StreamSpecBase(String optionalStreamName, List<ViewSpec> viewSpecs, boolean isUnidirectional)
+    public StreamSpecBase(String optionalStreamName, List<ViewSpec> viewSpecs, StreamSpecOptions streamSpecOptions)
     {
         this.optionalStreamName = optionalStreamName;
         this.viewSpecs.addAll(viewSpecs);
-        this.isUnidirectional = isUnidirectional;
+        this.streamSpecOptions = streamSpecOptions;
     }
 
     /**
@@ -68,11 +69,11 @@ public abstract class StreamSpecBase implements MetaDefItem
     }
 
     /**
-     * Returns true to indicate a unidirectional stream in a join, applicable for joins.
-     * @return indicator whether the stream is unidirectional in a join
+     * Returns the options for the stream such as unidirectional, retain-union etc.
+     * @return stream options
      */
-    public boolean isUnidirectional()
+    public StreamSpecOptions getOptions()
     {
-        return isUnidirectional;
+        return streamSpecOptions;
     }
 }

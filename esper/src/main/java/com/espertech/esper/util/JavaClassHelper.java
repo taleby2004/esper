@@ -11,11 +11,12 @@ package com.espertech.esper.util;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.type.*;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.math.BigInteger;
 import java.math.BigDecimal;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Helper for questions about Java classes such as
@@ -33,6 +34,14 @@ public class JavaClassHelper
      */
     public static Class getBoxedType(Class clazz)
     {
+        if (clazz == null)
+        {
+            return clazz;
+        }
+        if (!clazz.isPrimitive())
+        {
+            return clazz;
+        }
         if (clazz == boolean.class)
         {
             return Boolean.class;
@@ -281,7 +290,10 @@ public class JavaClassHelper
         {
             throw new CoercionException("Cannot coerce types " + typeOne.getName() + " and " + typeTwo.getName());
         }
-
+        if (boxedOne == boxedTwo)
+        {
+            return boxedOne;
+        }
         if ((boxedOne == BigDecimal.class) || (boxedTwo == BigDecimal.class))
         {
             return BigDecimal.class;
@@ -299,9 +311,13 @@ public class JavaClassHelper
         {
             return Double.class;
         }
-        if ((boxedOne == Float.class) || (boxedTwo == Float.class))
+        if ((boxedOne == Float.class) && (!isFloatingPointClass(typeTwo)))
         {
-            return Float.class;
+            return Double.class;
+        }
+        if ((boxedTwo == Float.class) && (!isFloatingPointClass(typeOne)))
+        {
+            return Double.class;
         }
         if ((boxedOne == Long.class) || (boxedTwo == Long.class))
         {
@@ -407,40 +423,31 @@ public class JavaClassHelper
      * @return One of Long.class, Double.class or String.class
      * @throws IllegalArgumentException if the types cannot be compared
      */
-    public static Class getCompareToCoercionType(Class typeOne, Class typeTwo)
+    public static Class getCompareToCoercionType(Class typeOne, Class typeTwo) throws CoercionException
     {
         if ((typeOne == String.class) && (typeTwo == String.class))
         {
             return String.class;
         }
-        if (  ((typeOne == boolean.class) || ((typeOne == Boolean.class))) &&
-              ((typeTwo == boolean.class) || ((typeTwo == Boolean.class))) )
+        if ( ((typeOne == boolean.class) || ((typeOne == Boolean.class))) &&
+             ((typeTwo == boolean.class) || ((typeTwo == Boolean.class))) )
         {
             return Boolean.class;
         }
+        if (!isJavaBuiltinDataType(typeOne) && (!isJavaBuiltinDataType(typeTwo)))
+        {
+            if (typeOne != typeTwo)
+            {
+                return Object.class;
+            }
+            return typeOne;
+        }
         if (!isNumeric(typeOne) || !isNumeric(typeTwo))
         {
-            throw new IllegalArgumentException("Types cannot be compared: " +
+            throw new CoercionException("Types cannot be compared: " +
                     typeOne.getName() + " and " + typeTwo.getName());
         }
-        if ((typeOne == BigDecimal.class) || (typeTwo == BigDecimal.class))
-        {
-            return BigDecimal.class;
-        }
-        if ((isFloatingPointClass(typeOne) && (typeTwo == BigInteger.class)) ||
-            (isFloatingPointClass(typeTwo) && (typeOne == BigInteger.class)))
-        {
-            return BigDecimal.class;
-        }
-        if (isFloatingPointClass(typeOne) || isFloatingPointClass(typeTwo))
-        {
-            return Double.class;
-        }
-        if ((typeOne == BigInteger.class) || (typeTwo == BigInteger.class))
-        {
-            return BigInteger.class;
-        }
-        return Long.class;
+        return getArithmaticCoercionType(typeOne, typeTwo);
     }
 
     /**
@@ -580,12 +587,16 @@ public class JavaClassHelper
     }
 
     /**
-     * Returns true if the class passed in is a Java built-in data type (primitive or wrapper) including String.
+     * Returns true if the class passed in is a Java built-in data type (primitive or wrapper) including String and 'null'.
      * @param clazz to check
      * @return true if built-in data type, or false if not
      */
     public static boolean isJavaBuiltinDataType(Class clazz)
     {
+        if (clazz == null)
+        {
+            return true;
+        }
         Class clazzBoxed = getBoxedType(clazz);
         if (isNumeric(clazzBoxed))
         {
@@ -639,7 +650,7 @@ public class JavaClassHelper
         }
 
         // Reduce to non-null types
-        List<Class> nonNullTypes = new LinkedList<Class>();
+        List<Class> nonNullTypes = new ArrayList<Class>();
         for (int i = 0; i < types.length; i++)
         {
             if (types[i] != null)
@@ -647,7 +658,7 @@ public class JavaClassHelper
                 nonNullTypes.add(types[i]);
             }
         }
-        types = nonNullTypes.toArray(new Class[0]);
+        types = nonNullTypes.toArray(new Class[nonNullTypes.size()]);
 
         if (types.length == 0)
         {
@@ -693,31 +704,50 @@ public class JavaClassHelper
         // Check if all char
         if (types[0] == Character.class)
         {
-            for (int i = 0; i < types.length; i++)
+            for (Class type : types)
             {
-                if (types[i] != Character.class)
+                if (type != Character.class)
                 {
-                    throw new CoercionException("Cannot coerce to Boolean type " + types[i].getName());
+                    throw new CoercionException("Cannot coerce to Boolean type " + type.getName());
                 }
             }
             return Character.class;
         }
 
         // Check if all the same non-Java builtin type, i.e. Java beans etc.
-        if (!isJavaBuiltinDataType(types[0]))
+        boolean isAllBuiltinTypes = true;
+        boolean isAllNumeric = true;
+        for (Class type : types)
         {
-            for (int i = 0; i < types.length; i++)
+            if (isNumeric(type))
             {
-                if (types[i] != types[0])
+                continue;
+            }
+            else if (!isJavaBuiltinDataType(type))
+            {
+                isAllBuiltinTypes = false;
+            }
+        }
+
+        // handle all built-in types
+        if (!isAllBuiltinTypes)
+        {
+            for (Class type : types)
+            {
+                if (isJavaBuiltinDataType(type))
                 {
-                    throw new CoercionException("Cannot coerce to type " + types[0].getName());
+                    throw new CoercionException("Cannot coerce to " + types[0].getName() + " type " + type.getName());
+                }
+                if (type != types[0])
+                {
+                    return Object.class;
                 }
             }
             return types[0];
         }
 
-        // Test for numeric
-        if (!isNumeric(types[0]))
+        // test for numeric
+        if (!isAllNumeric)
         {
             throw new CoercionException("Cannot coerce to numeric type " + types[0].getName());
         }
@@ -1105,6 +1135,45 @@ public class JavaClassHelper
             return true;
         }
         return false;
+    }
+
+    /**
+     * Returns true if the Class is a fragmentable type, i.e. not a primitive or boxed type or
+     * any of the common built-in types or does not implement Map.
+     * @param propertyType type to check
+     * @return true if fragmentable
+     */
+    public static boolean isFragmentableType(Class propertyType)
+    {
+        if (propertyType == null)
+        {
+            return false;
+        }
+        if (propertyType.isArray())
+        {
+            return isFragmentableType(propertyType.getComponentType());
+        }
+        if (JavaClassHelper.isJavaBuiltinDataType(propertyType))
+        {
+            return false;
+        }
+        if (propertyType.isEnum())
+        {
+            return false;
+        }
+        if (JavaClassHelper.isImplementsInterface(propertyType, Map.class))
+        {
+            return false;
+        }
+        if (propertyType == Node.class)
+        {
+            return false;
+        }
+        if (propertyType == NodeList.class)
+        {
+            return false;
+        }
+        return true;
     }
 
     private static void getSuperInterfaces(Class clazz, Set<Class> result)

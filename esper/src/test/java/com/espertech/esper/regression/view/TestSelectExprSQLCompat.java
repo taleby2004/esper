@@ -1,10 +1,7 @@
 package com.espertech.esper.regression.view;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -22,8 +19,7 @@ public class TestSelectExprSQLCompat extends TestCase
     {
         testListener = new SupportUpdateListener();
         config = SupportConfigFactory.getConfiguration();
-        config.addEventTypeAlias("SupportBean", SupportBean.class);
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.addEventType("SupportBean", SupportBean.class);
     }
 
     public void testQualifiedPropertyNamed()

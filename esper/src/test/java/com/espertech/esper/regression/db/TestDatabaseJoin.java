@@ -3,8 +3,8 @@ package com.espertech.esper.regression.db;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportBean_A;
@@ -39,7 +39,6 @@ public class TestDatabaseJoin extends TestCase
 
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addDatabaseReference("MyDB", configDB);
-        configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
         epService = EPServiceProviderManager.getProvider("TestDatabaseJoinRetained", configuration);
         epService.initialize();
@@ -48,7 +47,7 @@ public class TestDatabaseJoin extends TestCase
     public void testTimeBatchEPL()
     {
         String stmtText = "select " + ALL_FIELDS + " from " +
-                " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable where ${intPrimitive} = mytesttable.mybigint'] as s0," +
+                " sql:MyDB ['select " + ALL_FIELDS + " from mytesttable \n\r where ${intPrimitive} = mytesttable.mybigint'] as s0," +
                 SupportBean.class.getName() + ".win:time_batch(10 sec) as s1";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         runtestTimeBatch(stmt);
@@ -83,8 +82,8 @@ public class TestDatabaseJoin extends TestCase
 
     public void testVariables()
     {
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().getConfiguration().addEventTypeAlias("A", SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("A", SupportBean_A.class);
         epService.getEPAdministrator().createEPL("create variable int queryvar");
         epService.getEPAdministrator().createEPL("on SupportBean set queryvar=intPrimitive");
 
@@ -127,7 +126,7 @@ public class TestDatabaseJoin extends TestCase
         model.setSelectClause(SelectClause.create(fields));
         FromClause fromClause = FromClause.create(
                 SQLStream.create("MyDB", sql, "s0"),
-                FilterStream.create(SupportBean.class.getName(), "s1").addView(View.create("win", "time_batch", 10)
+                FilterStream.create(SupportBean.class.getName(), "s1").addView(View.create("win", "time_batch", Expressions.constant(10))
                 ));
         model.setFromClause(fromClause);
         SerializableObjectCopier.copy(model);
@@ -200,7 +199,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Error in statement 'select mychar,, from mytesttable where ', failed to obtain result metadata, consider turning off metadata interrogation via configuration, please check the statement, reason: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ' from mytesttable where' at line 1 [select myvarchar from  sql:MyDB ['select mychar,, from mytesttable where '] as s0,com.espertech.esper.support.bean.SupportBeanComplexProps as s1]", ex.getMessage());
+            assertEquals("Error starting statement: Error in statement 'select mychar,, from mytesttable where ', failed to obtain result metadata, consider turning off metadata interrogation via configuration, please check the statement, reason: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ' from mytesttable where' at line 1 [select myvarchar from  sql:MyDB ['select mychar,, from mytesttable where '] as s0,com.espertech.esper.support.bean.SupportBeanComplexProps as s1]", ex.getMessage());
         }
     }
 
@@ -218,7 +217,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Circular dependency detected between historical streams [select s0.myvarchar as s0Name, s1.mychar as s1Name from sql:MyDB ['select myvarchar from mytesttable where ${mychar} = mytesttable.mybigint'] as s0, sql:MyDB ['select mychar from mytesttable where ${myvarchar} = mytesttable.mybigint']  as s1]", ex.getMessage());
+            assertEquals("Error starting statement: Circular dependency detected between historical streams [select s0.myvarchar as s0Name, s1.mychar as s1Name from sql:MyDB ['select myvarchar from mytesttable where ${mychar} = mytesttable.mybigint'] as s0, sql:MyDB ['select mychar from mytesttable where ${myvarchar} = mytesttable.mybigint']  as s1]", ex.getMessage());
         }
     }
 
@@ -235,7 +234,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Property 's1.xxx[0]' failed to resolve, reason: Property named 'xxx[0]' is not valid in stream s1 [select myvarchar from  sql:MyDB ['select mychar from mytesttable where ${s1.xxx[0]} = mytesttable.mybigint'] as s0,com.espertech.esper.support.bean.SupportBeanComplexProps as s1]", ex.getMessage());
+            assertEquals("Error starting statement: Property 's1.xxx[0]' failed to resolve, reason: Property named 'xxx[0]' is not valid in stream 's1' [select myvarchar from  sql:MyDB ['select mychar from mytesttable where ${s1.xxx[0]} = mytesttable.mybigint'] as s0,com.espertech.esper.support.bean.SupportBeanComplexProps as s1]", ex.getMessage());
         }
     }
 
@@ -252,7 +251,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Invalid property 'myvarchar' resolves to the historical data itself [select myvarchar from  sql:MyDB ['select myvarchar from mytesttable where ${myvarchar} = mytesttable.mybigint'] as s0,com.espertech.esper.support.bean.SupportBeanComplexProps as s1]", ex.getMessage());
+            assertEquals("Error starting statement: Invalid property 'myvarchar' resolves to the historical data itself [select myvarchar from  sql:MyDB ['select myvarchar from mytesttable where ${myvarchar} = mytesttable.mybigint'] as s0,com.espertech.esper.support.bean.SupportBeanComplexProps as s1]", ex.getMessage());
         }
     }
 
@@ -268,7 +267,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Invalid property 'mybigint' resolves to the historical data itself [select myvarchar as s0Name from sql:MyDB ['select myvarchar, mybigint from mytesttable where ${mybigint} = myint'] as s0]", ex.getMessage());
+            assertEquals("Error starting statement: Invalid property 'mybigint' resolves to the historical data itself [select myvarchar as s0Name from sql:MyDB ['select myvarchar, mybigint from mytesttable where ${mybigint} = myint'] as s0]", ex.getMessage());
         }
     }
 
@@ -285,7 +284,7 @@ public class TestDatabaseJoin extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting view: Historical data joins do not allow views onto the data, view 'win:time' is not valid in this context [select myvarchar as s0Name from sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} = mytesttable.myint'].win:time(30 sec) as s0, com.espertech.esper.support.bean.SupportBean as s1]", ex.getMessage());
+            assertEquals("Error starting statement: Historical data joins do not allow views onto the data, view 'win:time' is not valid in this context [select myvarchar as s0Name from sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} = mytesttable.myint'].win:time(30 sec) as s0, com.espertech.esper.support.bean.SupportBean as s1]", ex.getMessage());
         }
     }
 

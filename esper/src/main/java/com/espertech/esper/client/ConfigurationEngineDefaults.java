@@ -25,7 +25,9 @@ public class ConfigurationEngineDefaults implements Serializable
     private StreamSelection streamSelection;
     private TimeSource timeSource;
     private Language language;
+    private Expression expression;
     private ConfigurationMetricsReporting metricsReporting;
+    private static final long serialVersionUID = -528835191586154300L;
 
     /**
      * Ctor.
@@ -41,6 +43,7 @@ public class ConfigurationEngineDefaults implements Serializable
         timeSource = new TimeSource();
         metricsReporting = new ConfigurationMetricsReporting();
         language = new Language();
+        expression = new Expression();
     }
 
     /**
@@ -125,6 +128,15 @@ public class ConfigurationEngineDefaults implements Serializable
     }
 
     /**
+     * Returns the expression-related settings for the engine.
+     * @return expression-related settings
+     */
+    public Expression getExpression()
+    {
+        return expression;
+    }
+
+    /**
      * Holds threading settings.
      */
     public static class Threading implements Serializable
@@ -139,6 +151,7 @@ public class ConfigurationEngineDefaults implements Serializable
 
         private long internalTimerMsecResolution;
         private boolean internalTimerEnabled;
+        private static final long serialVersionUID = 6504606101119059962L;
 
         /**
          * Ctor - sets up defaults.
@@ -349,6 +362,8 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class ViewResources implements Serializable
     {
         private boolean shareViews;
+        private boolean allowMultipleExpiryPolicies;
+        private static final long serialVersionUID = 2527853225433208362L;
 
         /**
          * Ctor - sets up defaults.
@@ -356,6 +371,7 @@ public class ConfigurationEngineDefaults implements Serializable
         protected ViewResources()
         {
             shareViews = true;
+            allowMultipleExpiryPolicies = false;
         }
 
         /**
@@ -379,6 +395,32 @@ public class ConfigurationEngineDefaults implements Serializable
         {
             this.shareViews = shareViews;
         }
+
+        /**
+         * By default this setting is false and thereby multiple expiry policies
+         * provided by views can only be combined if any of the retain-keywords is also specified for the stream.
+         * <p>
+         * If set to true then multiple expiry policies are allowed and the following statement compiles without exception:
+         * "select * from MyEvent.win:time(10).win:time(10)".
+         * @return allowMultipleExpiryPolicies indicator whether to allow combining expiry policies provided by views
+         */
+        public boolean isAllowMultipleExpiryPolicies()
+        {
+            return allowMultipleExpiryPolicies;
+        }
+
+        /**
+         * Set to false (the default) and thereby disallow multiple expiry policies
+         * provided by views and only allow if any of the retain-keywords are also specified for the stream.
+         * <p>
+         * If set to true then multiple expiry policies are allowed and the following statement compiles without exception:
+         * "select * from MyEvent.win:time(10).win:time(10)".
+         * @param allowMultipleExpiryPolicies indicator whether to allow combining expiry policies provided by views
+         */
+        public void setAllowMultipleExpiryPolicies(boolean allowMultipleExpiryPolicies)
+        {
+            this.allowMultipleExpiryPolicies = allowMultipleExpiryPolicies;
+        }
     }
 
     /**
@@ -387,6 +429,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class EventMeta implements Serializable
     {
         private Configuration.PropertyResolutionStyle classPropertyResolutionStyle;
+        private static final long serialVersionUID = -6091772368103140370L;
 
         /**
          * Ctor.
@@ -424,6 +467,7 @@ public class ConfigurationEngineDefaults implements Serializable
     {
         private boolean enableExecutionDebug;
         private boolean enableTimerDebug;
+        private static final long serialVersionUID = -8129836306582810327L;
 
         /**
          * Ctor - sets up defaults.
@@ -485,6 +529,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class Variables implements Serializable
     {
         private long msecVersionRelease;
+        private static final long serialVersionUID = 8276015152830052323L;
 
         /**
          * Ctor - sets up defaults.
@@ -529,6 +574,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class StreamSelection implements Serializable
     {
         private StreamSelector defaultStreamSelector;
+        private static final long serialVersionUID = -7943748323859161674L;
 
         /**
          * Ctor - sets up defaults.
@@ -579,6 +625,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class TimeSource implements Serializable
     {
         private TimeSourceType timeSourceType;
+        private static final long serialVersionUID = 2075039404763313824L;
 
         /**
          * Ctor.
@@ -613,6 +660,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class Language implements Serializable
     {
         private boolean sortUsingCollator;
+        private static final long serialVersionUID = -6237674558477894392L;
 
         /**
          * Ctor.
@@ -642,6 +690,74 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setSortUsingCollator(boolean sortUsingCollator)
         {
             this.sortUsingCollator = sortUsingCollator;
+        }
+    }
+
+    /**
+     * Expression evaluation settings in the engine are for results of expressions.
+     */
+    public static class Expression implements Serializable
+    {
+        private boolean integerDivision;
+        private boolean divisionByZeroReturnsNull;
+        private static final long serialVersionUID = 3192205923560011213L;
+
+        /**
+         * Ctor.
+         */
+        public Expression()
+        {
+            integerDivision = false;
+            divisionByZeroReturnsNull = false;
+        }
+
+        /**
+         * Returns false (the default) for integer division returning double values.
+         * <p>
+         * Returns true to signal that Java-convention integer division semantics
+         * are used for divisions, whereas the division between two non-FP numbers
+         * returns only the whole number part of the result and any fractional part is dropped.
+         * @return indicator
+         */
+        public boolean isIntegerDivision()
+        {
+            return integerDivision;
+        }
+
+        /**
+         * Set to false (default) for integer division returning double values.
+         * Set to true to signal the Java-convention integer division semantics
+         * are used for divisions, whereas the division between two non-FP numbers
+         * returns only the whole number part of the result and any fractional part is dropped.
+         * @param integerDivision true for integer division returning integer, false (default) for
+         */
+        public void setIntegerDivision(boolean integerDivision)
+        {
+            this.integerDivision = integerDivision;
+        }
+
+        /**
+         * Returns false (default) when division by zero returns Double.Infinity.
+         * Returns true when division by zero return null.
+         * <p>
+         * If integer devision is set, then division by zero for non-FP operands also returns null. 
+         * @return indicator for division-by-zero results
+         */
+        public boolean isDivisionByZeroReturnsNull()
+        {
+            return divisionByZeroReturnsNull;
+        }
+
+        /**
+         * Set to false (default) to have division by zero return Double.Infinity.
+         * Set to true to have division by zero return null.
+         * <p>
+         * If integer devision is set, then division by zero for non-FP operands also returns null.
+         * @param divisionByZeroReturnsNull indicator for division-by-zero results
+         */
+        public void setDivisionByZeroReturnsNull(boolean divisionByZeroReturnsNull)
+        {
+            this.divisionByZeroReturnsNull = divisionByZeroReturnsNull;
         }
     }
 

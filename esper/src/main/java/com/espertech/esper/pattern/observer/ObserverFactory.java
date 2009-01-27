@@ -8,9 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.observer;
 
-import com.espertech.esper.pattern.PatternContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.guard.GuardParameterException;
+import com.espertech.esper.pattern.PatternContext;
+import com.espertech.esper.pattern.MatchedEventConvertor;
 
 import java.util.List;
 
@@ -22,9 +23,10 @@ public interface ObserverFactory
     /**
      * Sets the observer object parameters.
      * @param observerParameters is a list of parameters
+     * @param convertor for converting partial pattern matches to event-per-stream for expressions
      * @throws ObserverParameterException thrown to indicate a parameter problem
      */
-    public void setObserverParameters(List<Object> observerParameters) throws ObserverParameterException;
+    public void setObserverParameters(List<ExprNode> observerParameters, MatchedEventConvertor convertor) throws ObserverParameterException;
 
     /**
      * Make an observer instance.

@@ -22,8 +22,8 @@ import com.espertech.esper.epl.spec.NamedWindowConsumerStreamSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StreamSpecCompiled;
-import com.espertech.esper.event.EventBean;
-import com.espertech.esper.event.EventType;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,9 +62,9 @@ public class EPPreparedExecuteMethod
         int numStreams = statementSpec.getStreamSpecs().size();
         EventType[] typesPerStream = new EventType[numStreams];
         String[] namesPerStream = new String[numStreams];
-        boolean[] namedWindow = new boolean[numStreams];
-        Arrays.fill(namedWindow, true);
         processors = new NamedWindowProcessor[numStreams];
+        StreamJoinAnalysisResult streamJoinAnalysisResult = new StreamJoinAnalysisResult(numStreams);
+        Arrays.fill(streamJoinAnalysisResult.getNamedWindow(), true);
 
         for (int i = 0; i < numStreams; i++)
         {
@@ -82,7 +82,7 @@ public class EPPreparedExecuteMethod
             typesPerStream[i] = processors[i].getTailView().getEventType();
         }
 
-        StreamTypeService typeService = new StreamTypeServiceImpl(typesPerStream, namesPerStream, services.getEngineURI(), namesPerStream);
+        StreamTypeService typeService = new StreamTypeServiceImpl(typesPerStream, namesPerStream, services.getEngineURI());
         EPStatementStartMethod.validateNodes(statementSpec, statementContext, typeService, null);
 
         resultSetProcessor = ResultSetProcessorFactory.getProcessor(statementSpec, statementContext, typeService, null, new boolean[0]);
@@ -94,7 +94,8 @@ public class EPPreparedExecuteMethod
             {
                 viewablePerStream[i] = processors[i].getTailView();
             }
-            joinComposer = statementContext.getJoinSetComposerFactory().makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream, viewablePerStream, SelectClauseStreamSelectorEnum.ISTREAM_ONLY, new boolean[numStreams], new boolean[numStreams], namedWindow);
+            boolean[] falseArray = new boolean[numStreams];
+            joinComposer = statementContext.getJoinSetComposerFactory().makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream, viewablePerStream, SelectClauseStreamSelectorEnum.ISTREAM_ONLY, streamJoinAnalysisResult);
         }
         else
         {

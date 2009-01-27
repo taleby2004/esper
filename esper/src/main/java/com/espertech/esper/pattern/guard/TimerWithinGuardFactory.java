@@ -8,57 +8,62 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
-import com.espertech.esper.type.TimePeriodParameter;
 import com.espertech.esper.pattern.PatternContext;
+import com.espertech.esper.pattern.MatchedEventConvertor;
+import com.espertech.esper.pattern.PatternExpressionUtil;
+import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.MetaDefItem;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.client.EPException;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Factory for {@link TimerWithinGuard} instances.
  */
-public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem
+public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Serializable
 {
     /**
      * Number of milliseconds.
      */
-    protected long milliseconds;
+    protected ExprNode millisecondsExpr;
 
-    public void setGuardParameters(List<Object> guardParameters) throws GuardParameterException
+    /**
+     * For converting matched-events maps to events-per-stream.
+     */
+    protected MatchedEventConvertor convertor;
+    private static final long serialVersionUID = -1026320055174163611L;
+
+    public void setGuardParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws GuardParameterException
     {
         String errorMessage = "Timer-within guard requires a single numeric or time period parameter";
-        if (guardParameters.size() != 1)
+        if (params.size() != 1)
         {
             throw new GuardParameterException(errorMessage);
         }
 
-        Object parameter = guardParameters.get(0);
-        if (parameter instanceof TimePeriodParameter)
-        {
-            TimePeriodParameter param = (TimePeriodParameter) parameter;
-            milliseconds = Math.round(1000d * param.getNumSeconds());
-        }
-        else if (!(parameter instanceof Number))
+        if (!JavaClassHelper.isNumeric(params.get(0).getType()))
         {
             throw new GuardParameterException(errorMessage);
         }
-        else
-        {
-            Number param = (Number) parameter;
-            if (JavaClassHelper.isFloatingPointNumber(param))
-            {
-                milliseconds = Math.round(1000d * param.doubleValue());
-            }
-            else
-            {
-                milliseconds = 1000 * param.longValue();
-            }
-        }
+
+        this.convertor = convertor;
+        this.millisecondsExpr = params.get(0);
     }
 
-    public Guard makeGuard(PatternContext context, Quitable quitable, Object stateNodeId, Object guardState)
+    public Guard makeGuard(PatternContext context, MatchedEventMap matchedEventMap, Quitable quitable, Object stateNodeId, Object guardState)
     {
+        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-within guard", matchedEventMap, millisecondsExpr, convertor);
+
+        if (millisecondVal == null)
+        {
+            throw new EPException("Timer-within guard expression returned a null-value");
+        }
+
+        Number param = (Number) millisecondVal;
+        long milliseconds = Math.round(1000d * param.doubleValue());
         return new TimerWithinGuard(milliseconds, context, quitable);
     }
 }

@@ -9,12 +9,12 @@
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.view.*;
-import com.espertech.esper.event.EventType;
-import com.espertech.esper.type.TimePeriodParameter;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.named.RemoveStreamViewCapability;
+import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.List;
 
@@ -40,8 +40,9 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
      */
     protected boolean isRemoveStreamHandling;
 
-    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<Object> viewParameters) throws ViewParameterException
+    public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
+        List<Object> viewParameters = ViewFactorySupport.validateAndEvaluate("Time accumulative batch view", viewFactoryContext.getStatementContext(), expressionParameters);
         String errorMessage = "Time accumulative batch view requires a single numeric parameter or time period parameter";
         if (viewParameters.size() != 1)
         {
@@ -49,12 +50,7 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
         }
 
         Object parameter = viewParameters.get(0);
-        if (parameter instanceof TimePeriodParameter)
-        {
-            TimePeriodParameter param = (TimePeriodParameter) parameter;
-            millisecondsQuietTime = Math.round(1000d * param.getNumSeconds());
-        }
-        else if (!(parameter instanceof Number))
+        if (!(parameter instanceof Number))
         {
             throw new ViewParameterException(errorMessage);
         }
@@ -77,7 +73,7 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
         }
     }
 
-    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewAttachException
+    public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
         this.eventType = parentEventType;
     }

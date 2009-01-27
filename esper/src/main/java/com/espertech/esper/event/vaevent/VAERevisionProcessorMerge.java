@@ -18,7 +18,7 @@ import com.espertech.esper.event.*;
 import com.espertech.esper.view.StatementStopCallback;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.Viewable;
-import com.espertech.esper.client.ConfigurationRevisionEventType;
+import com.espertech.esper.client.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,14 +37,14 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
 
     /**
      * Ctor.
-     * @param revisionEventTypeAlias alias
+     * @param revisioneventTypeName name
      * @param spec specification
      * @param statementStopService for stop handling
      * @param eventAdapterService for nested property handling
      */
-    public VAERevisionProcessorMerge(String revisionEventTypeAlias, RevisionSpec spec, StatementStopService statementStopService, EventAdapterService eventAdapterService)
+    public VAERevisionProcessorMerge(String revisioneventTypeName, RevisionSpec spec, StatementStopService statementStopService, EventAdapterService eventAdapterService)
     {
-        super(spec, revisionEventTypeAlias, eventAdapterService);
+        super(spec, revisioneventTypeName, eventAdapterService);
 
         // on statement stop, remove versions
         statementStopService.addSubscriber(new StatementStopCallback() {
@@ -77,6 +77,11 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
                     public boolean isExistsProperty(EventBean eventBean)
                     {
                         return true;
+                    }
+
+                    public Object getFragment(EventBean eventBean)
+                    {
+                        return null; // fragments no provided by revision events
                     }
                 };
 
@@ -113,6 +118,11 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
                 public boolean isExistsProperty(EventBean eventBean)
                 {
                     return true;
+                }
+
+                public Object getFragment(EventBean eventBean)
+                {
+                    return null;
                 }
             };
 
@@ -160,7 +170,7 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
             throw new IllegalArgumentException("Unknown revision type '" + spec.getPropertyRevision() + "'");
         }
 
-        EventTypeMetadata metadata = EventTypeMetadata.createValueAdd(revisionEventTypeAlias, EventTypeMetadata.TypeClass.REVISION);
+        EventTypeMetadata metadata = EventTypeMetadata.createValueAdd(revisioneventTypeName, EventTypeMetadata.TypeClass.REVISION);
         revisionEventType = new RevisionEventType(metadata, propertyDesc, eventAdapterService);
     }
 
@@ -244,7 +254,7 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
 
             if (key == null)
             {
-                log.warn("Ignoring event of event type '" + underyingEventType + "' for revision processing type '" + revisionEventTypeAlias);
+                log.warn("Ignoring event of event type '" + underyingEventType + "' for revision processing type '" + revisionEventTypeName);
                 return;
             }
         }

@@ -8,7 +8,7 @@ import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventBean;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.SerializableObjectCopier;
 
 import org.apache.commons.logging.Log;
@@ -59,8 +59,8 @@ public class TestGroupByMedianAndDeviation extends TestCase
                 .setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
         );
         FromClause fromClause = FromClause.create(
-                FilterStream.create(SupportBeanString.class.getName(), "one").addView(View.create("win", "length", 100)),
-                FilterStream.create(SupportMarketDataBean.class.getName(), "two").addView(View.create("win", "length", 5)));
+                FilterStream.create(SupportBeanString.class.getName(), "one").addView(View.create("win", "length", Expressions.constant(100))),
+                FilterStream.create(SupportMarketDataBean.class.getName(), "two").addView(View.create("win", "length", Expressions.constant(5))));
         model.setFromClause(fromClause);
         model.setWhereClause(Expressions.and().add(
                     Expressions.or()

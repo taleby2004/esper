@@ -4,8 +4,8 @@ import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.event.EventBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -58,7 +58,7 @@ public class TestGroupByMaxMin extends TestCase
             .add(Expressions.minDistinct("volume"), "minDistVol")
             .add(Expressions.maxDistinct("volume"), "maxDistVol")
             );
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", 3)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(3))));
         model.setWhereClause(Expressions.or()
                 .add(Expressions.eq("symbol", "DELL"))
                 .add(Expressions.eq("symbol", "IBM"))

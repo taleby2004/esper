@@ -1,9 +1,9 @@
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -24,7 +24,6 @@ public class TestOrderByEventPerRow extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
     }
@@ -52,9 +51,9 @@ public class TestOrderByEventPerRow extends TestCase
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("symbol", "volume").add(Expressions.sum("price"), "mySum"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView(View.create("win", "length", 20))));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView(View.create("win", "length", Expressions.constant(20)))));
         model.setGroupByClause(GroupByClause.create("symbol"));
-        model.setOutputLimitClause(OutputLimitClause.create(6, OutputLimitUnit.EVENTS));
+        model.setOutputLimitClause(OutputLimitClause.create(6));
         model.setOrderByClause(OrderByClause.create(Expressions.sum("price")).add("symbol", false));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
