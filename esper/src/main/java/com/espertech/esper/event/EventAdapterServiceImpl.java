@@ -11,14 +11,13 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.EPRuntimeEventSender;
-import com.espertech.esper.event.xml.*;
-import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.BeanEventAdapter;
 import com.espertech.esper.event.bean.BeanEventBean;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.BeanEventTypeFactory;
-import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MappedEventBean;
+import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.xml.*;
 import com.espertech.esper.plugin.*;
 import com.espertech.esper.util.URIUtil;
 import com.espertech.esper.util.UuidGenerator;
@@ -746,10 +745,14 @@ public class EventAdapterServiceImpl implements EventAdapterService
                 DecoratingEventBean wrapper = (DecoratingEventBean) event;
                 converted = adaptorForWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
             }
-            else if (event instanceof MappedEventBean)
+            else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof MapEventType))
             {
-                MappedEventBean mapEvent = (MappedEventBean) event;
+                com.espertech.esper.event.MappedEventBean mapEvent = (com.espertech.esper.event.MappedEventBean) event;
                 converted = this.adaptorForTypedMap(mapEvent.getProperties(), targetType);
+            }
+            else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof WrapperEventType))
+            {
+                converted = this.adaptorForWrapper(event, Collections.EMPTY_MAP, targetType);
             }
             else
             {

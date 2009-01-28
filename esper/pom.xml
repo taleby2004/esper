@@ -174,12 +174,12 @@ mvn javadoc:javadoc
 	<distributionManagement>
 		<repository>
 		  <id>codehaus.org</id>
-		  <name>XFire Central Repository</name>
+		  <name>Central Repository</name>
 		  <url>dav:https://dav.codehaus.org/repository/xfire/</url>
 		</repository>
 		<snapshotRepository>
 		  <id>codehaus.org</id>
-		  <name>XFire Central Development Repository</name>
+		  <name>Central Development Repository</name>
 		  <url>dav:https://dav.codehaus.org/snapshots.repository/xfire/</url>
 		</snapshotRepository>
 		<site>

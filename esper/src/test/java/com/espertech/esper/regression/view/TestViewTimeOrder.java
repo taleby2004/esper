@@ -22,6 +22,103 @@ public class TestViewTimeOrder extends TestCase
         epService.initialize();
     }
 
+    public void testTimeOrderRemoveStream()
+    {
+        sendTimer(1000);
+        epService.getEPAdministrator().createEPL(
+                "insert rstream into OrderedStream select rstream * from " + SupportBeanTimestamp.class.getName() +
+                ".ext:time_order(timestamp, 10 sec)");
+
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(
+                "select * from OrderedStream");
+        stmtTwo.addListener(listener);
+
+        // 1st event at 21 sec
+        sendTimer(21000);
+        sendEvent("E1", 21000);
+
+        // 2nd event at 22 sec
+        sendTimer(22000);
+        sendEvent("E2", 22000);
+
+        // 3nd event at 28 sec
+        sendTimer(28000);
+        sendEvent("E3", 28000);
+
+        // 4th event at 30 sec, however is 27 sec (old 3 sec)
+        sendTimer(30000);
+        sendEvent("E4", 27000);
+
+        // 5th event at 30 sec, however is 22 sec (old 8 sec)
+        sendEvent("E5", 22000);
+
+        // flush one
+        sendTimer(30999);
+        assertFalse(listener.isInvoked());
+
+        sendTimer(31000);
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals("E1", listener.getLastNewData()[0].get("id"));
+        listener.reset();
+
+        // 6th event at 31 sec, however is 21 sec (old 10 sec)
+        sendEvent("E6", 21000);
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals("E6", listener.getLastNewData()[0].get("id"));
+        listener.reset();
+
+        // 7th event at 31 sec, however is 21.3 sec (old 9.7 sec)
+        sendEvent("E7", 21300);
+
+        // flush one
+        sendTimer(31299);
+        assertFalse(listener.isInvoked());
+        sendTimer(31300);
+        assertEquals(1, listener.getNewDataList().size());
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals("E7", listener.getLastNewData()[0].get("id"));
+        listener.reset();
+
+        // flush two
+        sendTimer(31999);
+        assertFalse(listener.isInvoked());
+        sendTimer(32000);
+
+        EventBean[] result = listener.getNewDataListFlattened();
+        assertEquals(2, result.length);
+        assertEquals("E2", result[0].get("id"));
+        assertEquals("E5", result[1].get("id"));
+        listener.reset();
+
+        // flush one
+        sendTimer(36999);
+        assertFalse(listener.isInvoked());
+        sendTimer(37000);
+        assertEquals(1, listener.getNewDataList().size());
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals("E4", listener.getLastNewData()[0].get("id"));
+        listener.reset();
+
+        // rather old event
+        sendEvent("E8", 21000);
+        assertEquals(1, listener.getLastNewData().length);
+        assertEquals("E8", listener.getLastNewData()[0].get("id"));
+        listener.reset();
+
+        // 9-second old event for posting at 38 sec
+        sendEvent("E9", 28000);
+
+        // flush two
+        sendTimer(37999);
+        assertFalse(listener.isInvoked());
+        sendTimer(38000);
+        result = listener.getNewDataListFlattened();
+        assertEquals(2, result.length);
+        assertEquals("E3", result[0].get("id"));
+        assertEquals("E9", result[1].get("id"));
+        listener.reset();
+    }
+
     public void testTimeOrder()
     {
         sendTimer(1000);

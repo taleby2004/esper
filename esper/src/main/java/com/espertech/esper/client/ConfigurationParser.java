@@ -188,7 +188,7 @@ class ConfigurationParser {
 
     private static void handleEventTypes(Configuration configuration, Element element)
     {
-        String name = element.getAttributes().getNamedItem("name").getTextContent();
+        String name = getRequiredAttribute(element, "name");
         Node classNode = element.getAttributes().getNamedItem("class");
 
         String optionalClassName = null;

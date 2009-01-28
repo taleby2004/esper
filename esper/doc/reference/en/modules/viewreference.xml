@@ -1044,7 +1044,7 @@ events with the highest price (with ties resolved by alphabetical order of symbo
 				<para>
 					As an example, the next statement uses the <literal>arrival_time</literal> property of <literal>MyTimestampedEvent</literal> events to order and release events by arrival time:
 				</para>
-				<programlisting><![CDATA[insert into ArrivalTimeOrderedStream
+				<programlisting><![CDATA[insert rstream into ArrivalTimeOrderedStream
 select rstream * from MyTimestampedEvent.ext:time_order(arrival_time, 10 sec)]]></programlisting>
 
 				<para>
@@ -1056,7 +1056,7 @@ select rstream * from MyTimestampedEvent.ext:time_order(arrival_time, 10 sec)]]>
 				</para> 
 
 				<para>
-					The insert stream of this sliding window consists of all arriving events. The remove stream of the view is ordered by timestamp value: The event that has the oldest timestamp value is released first, followed by the next newer events. Note the statement above uses the <literal>rstream</literal> keyword to select ordered events only and uses the <literal>insert into</literal> clause to makes such ordered stream available for subsequent statements to use.
+					The insert stream of this sliding window consists of all arriving events. The remove stream of the view is ordered by timestamp value: The event that has the oldest timestamp value is released first, followed by the next newer events. Note the statement above uses the <literal>rstream</literal> keyword in both the <literal>insert into</literal> clause and the <literal>select</literal> clause to select ordered events only. It uses the <literal>insert into</literal> clause to makes such ordered stream available for subsequent statements to use.
 				</para> 
 
 				<para>
