@@ -1221,8 +1221,7 @@ We generally recommended that listener implementations do not block. By implemen
         </para>
 
         <para>
-			The internal timer relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. The next section describes timer resolution for the internal timer. When using externally-controlled time the 
-			timer resolution is in your control.
+			The internal timer relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. The next section describes timer resolution for the internal timer, by default set to 100 milliseconds. When using externally-controlled time the timer resolution is in your control.
         </para>
 
         <para>
@@ -1230,7 +1229,7 @@ We generally recommended that listener implementations do not block. By implemen
         </para>
 
         <para>
-			This code snippet shows the use of the configuration API to disable the internal timer and thereby turn on externally-provided time:
+			This code snippet shows the use of the configuration API to disable the internal timer and thereby turn on externally-provided time (see the Configuration section for configuration via XML file):
         </para>
 
 		<programlisting><![CDATA[Configuration config = new Configuration();
