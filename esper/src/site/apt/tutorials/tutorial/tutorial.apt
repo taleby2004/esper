@@ -75,6 +75,13 @@ Tutorial
 	
 	[[10]] Test against your performance requirements: throughput and latency in your target environment 
 
+	With "Instrument your sources of events" we mean to plan for, design and implement hooks in the event source systems so that they can 
+	generate the events in the format defined in 4. 
+	Instrumentation is roughly placing hooks that don't change the nominal execution flow. 
+	There are several techniques for that, from custom code to aspect-oriented technology with in the middle a whole range of 
+	component-dependant and framework-dependant technology (servlet filter, proxy objects, decorators, topic-based architecture etc.). This 
+	can also be implemented at a more coarse grained level (pipeline derivation in an enterprise service bus or a BPEL/BPM process for example).
+
 
 * Designing event representations
 

@@ -1283,7 +1283,7 @@ epRuntime().sendEvent(new CurrentTimeEvent(1000));
 epRuntime().sendEvent(new CurrentTimeEvent(6000));]]></programlisting>
 
 		<para>
-			When sending external timer events, your application should make sure that <literal>long</literal>-type time values are ascending. That is, each long-value is either the same or a larger long-value then the prior value provided by a <literal>CurrentTimeEvent</literal>. The engine outputs a warning if time events for the older or same times are received.
+			When sending external timer events, your application should make sure that <literal>long</literal>-type time values are ascending. That is, each long-type value should be either the same value or a larger value then the prior value provided by a <literal>CurrentTimeEvent</literal>. The engine outputs a warning if time events move back in time.
 		</para>
 		
     </sect1>
