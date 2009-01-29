@@ -681,22 +681,22 @@ MaxReading[type='Temperature',device='A',measurement=51,confidence=99.5]</pre></
 			One possible solution builds pairs of events using a join:
 		</p>
 <div class="source"><pre>// Create pairs of device A and B events
-  insert into Pair
-  select * from Sensor(device='A').std:lastevent() as a, Sensor(device='B').std:lastevent() as b
-  where a.type = b.type
+insert into Pair
+select * from Sensor(device='A').std:lastevent() as a, Sensor(device='B').std:lastevent() as b
+where a.type = b.type
 </pre></div>
 
 		<p>
 			From the resulting stream we remove those pairs in which either event was seen before, leaving unique pairs:
 		</p>
-<div class="source"><pre>  // Fast way of declaring the stream type, could also be done via config API or XML
-  insert into PairDuplicatesRemoved select * from Pair(1=2)
+<div class="source"><pre>// Fast way of declaring the stream type, could also be done via config API or XML
+insert into PairDuplicatesRemoved select * from Pair(1=2)
        
-  // Remove duplicate pairs where either sensor event is from the prior pair
-  insert into PairDuplicatesRemoved
-  select * from Pair
-  where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
-    and b.id != (select b.id from PairDuplicatesRemoved.std:lastevent())</pre></div>
+// Remove duplicate pairs where either sensor event is from the prior pair
+insert into PairDuplicatesRemoved
+select * from Pair
+where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
+	and b.id != (select b.id from PairDuplicatesRemoved.std:lastevent())</pre></div>
 
 		<p>
 			Last, select the maximum measurement value between the pair of sensor events and the corresponding confidence and device:
@@ -798,10 +798,12 @@ every a=F -> (
 			The solution considers the maximum market price since statement start time, compared against the current market price:
 		</p>
 		<div class="source"><pre>// since release 2.0
-select * from Quote(symbol=GOOGL) where price &lt;= max(select max(lastPx) as lastPx from Quote(symbol='GOOG')) - 100, 600)
+select * from Quote(symbol=GOOGL)
+where price &lt;= max(select max(lastPx) as lastPx from Quote(symbol='GOOG')) - 100, 600)
 // or since for release 1.x		
 insert into MaxPrice(lastPx) select max(lastPx) as lastPx from Quote(symbol='GOOG')
-select * from Quote(symbol=GOOGL) where price &lt;= max(select lastPx from MaxPrice.std:lastevent()) - 100, 600)
+select * from Quote(symbol=GOOGL)
+where price &lt;= max(select lastPx from MaxPrice.std:lastevent()) - 100, 600)
 		</pre></div>
       </answer>
     </faq>    

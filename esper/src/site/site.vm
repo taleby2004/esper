@@ -1,5 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 #macro ( banner $banner $id )
   #if ( $banner )
     #if( $banner.href )
@@ -287,6 +286,12 @@
         </a>
     #end
 #end
+
+#macro ( googleInURLDoc $v )
+	#set ( $esc = $v )
+	#set ( $esc = $esc.replace('.', '-').replaceAll("-", "\\\\." ) )
+	#set ( $inurl = "$esc/doc/" )
+$inurl#end
 <html>
   <head>
     <title>Esper - Complex Event Processing</title>
@@ -332,10 +337,20 @@ function OnLoad() {
 	searchControl = new google.search.SearchControl();
 	searchControl.setSearchCompleteCallback(this, OnComplete);
 			
+	//Documentation (latest only)
+	var docSearch = new google.search.WebSearch();
+	docSearch.setUserDefinedLabel("Doc");
+	docSearch.setSiteRestriction("esper.codehaus.org");//no slash /esper.codehaus.org here please.
+	// we include doc only for one version (that gets fancy here with escape of . for google and \ for javascript)
+	docSearch.setQueryAddition("-inurl:html_single inurl:#googleInURLDoc($project.version)");
+	searchControl.addSearcher(docSearch);
+
 	//Esper
 	var siteSearch = new google.search.WebSearch();
-	siteSearch.setUserDefinedLabel("Esper & NEsper");
-	siteSearch.setSiteRestriction("esper.codehaus.org");
+	siteSearch.setUserDefinedLabel("Community");
+	// we exclude archive.esper.codehaus.org as we have Nabble below [the / prefix sounds fragile in google search]
+	siteSearch.setSiteRestriction("/esper.codehaus.org");
+	siteSearch.setQueryAddition("-inurl:/doc/");// we exclude doc
 	searchControl.addSearcher(siteSearch);
 
 	//EsperTech
@@ -392,7 +407,7 @@ google.setOnLoadCallback(OnLoad, true);
 	<div id="pic">
 		<div id="slogan">
 			Where <b>Complex Event Processing meets Open Source</b>: <a href="http://www.espertech.com/products/">Esper & NEsper</a></b><br/>
-			High-availability and enterprise readiness: <a href="http://www.espertech.com/products/esperha.php">EsperHA</a>, <a href="http://www.espertech.com/products/esperee.php">Enterprise Edition</a> and <a href="http://www.espertech.com/support/">support services</a>.
+			High-availability and Enterprise Readiness: <a href="http://www.espertech.com/products/esperha.php">EsperHA</a>, <a href="http://www.espertech.com/products/esperee.php">Enterprise Edition</a> and <a href="http://www.espertech.com/support/">support services</a>.
 			Embed mainstream CEP in your products and deployments: Learn about our <a href="http://www.espertech.com/partners/embedded.php">licensing options</a>.<br/>
 			<small><a href="http://www.espertech.com/products/" style="color: #A00">Product info</a> | <a href="http://www.espertech.com/partners/partners.php" style="color: #A00">Customers</a> | <a href="http://www.espertech.com/company/contact.php" style="color: #A00">Contact us</a></small>
 		</div>

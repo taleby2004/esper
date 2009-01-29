@@ -102,7 +102,7 @@ Tutorial
 	A sample EPL that returns the average price per symbol for the last 100 stock ticks.
 		
 ----------------------------------------
-  select symbol, avg(price) as averagePrice
+select symbol, avg(price) as averagePrice
     from StockTickEvent.win:length(100)
 group by symbol
 ----------------------------------------	
@@ -111,11 +111,11 @@ group by symbol
 	The second stream is withdrawal events for which we consider the last 30 seconds. The streams are joined on account number.
 
 ----------------------------------------
-  select fraud.accountNumber as accntNum, fraud.warning as warn, withdraw.amount as amount,
-         MAX(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraud' as desc
-    from FraudWarningEvent.win:time(30 min) as fraud,
-         WithdrawalEvent.win:time(30 sec) as withdraw
-   where fraud.accountNumber = withdraw.accountNumber
+select fraud.accountNumber as accntNum, fraud.warning as warn, withdraw.amount as amount,
+	MAX(fraud.timestamp, withdraw.timestamp) as timestamp, 'withdrawlFraud' as desc
+from FraudWarningEvent.win:time(30 min) as fraud,
+	WithdrawalEvent.win:time(30 sec) as withdraw
+where fraud.accountNumber = withdraw.accountNumber
 ----------------------------------------	
 
 * Event Pattern Matching
@@ -144,25 +144,25 @@ group by symbol
 	A sample pattern that alerts on each IBM stock tick with a price greater then 80 and within the next 60 seconds:
 	
 ----------------------------------------
-  every StockTickEvent(symbol="IBM", price>80) where timer:within(60 seconds)
+every StockTickEvent(symbol="IBM", price>80) where timer:within(60 seconds)
 ----------------------------------------	
 
 	A sample pattern that alerts every 5 minutes past the hour:
 	
 ----------------------------------------
-  every timer:at(5, *, *, *, *)
+every timer:at(5, *, *, *, *)
 ----------------------------------------	
 
 	A sample pattern that alerts when event A occurs, followed by either event B or event C:
 	
 ----------------------------------------
-  A -> ( B or C )
+A -> ( B or C )
 ----------------------------------------	
 
 	An event pattern where a property of a following event must match a property from the first event: 
  
 ----------------------------------------
-  every a=EventX -> every b=EventY(objectID=a.objectID)
+every a=EventX -> every b=EventY(objectID=a.objectID)
 ----------------------------------------
 
 * Combining Patterns Matching with Event Stream Analysis
@@ -174,6 +174,7 @@ group by symbol
 	The statement further counts all such occurrences grouped per id. 
 
 ----------------------------------------
-select a.id, count(*) from pattern [ every a=Status -> (timer:interval(10 sec) and not Status(id=a.id)]
-group by id
+select a.id, count(*) from pattern [
+	every a=Status -> (timer:interval(10 sec) and not Status(id=a.id)
+] group by id
 ----------------------------------------
