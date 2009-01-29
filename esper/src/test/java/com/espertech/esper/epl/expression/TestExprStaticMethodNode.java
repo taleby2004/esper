@@ -25,7 +25,7 @@ public class TestExprStaticMethodNode extends TestCase
         streamTypeService = null;
         EngineImportService engineImportService = new EngineImportServiceImpl();
         engineImportService.addImport("java.lang.*");
-        methodResolutionService = new MethodResolutionServiceImpl(engineImportService);
+        methodResolutionService = new MethodResolutionServiceImpl(engineImportService, true);
         staticMethodResolver = new MethodResolver();
         intThree = new ExprConstantNode(3);
         intFive = new ExprConstantNode(5);
@@ -40,7 +40,7 @@ public class TestExprStaticMethodNode extends TestCase
 
     public void testMaxIntInt() throws Exception
     {
-        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max");
+        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max", true);
         root.addChildNode(intThree);
         root.addChildNode(intFive);
         validate(root);
@@ -53,8 +53,8 @@ public class TestExprStaticMethodNode extends TestCase
     public void testIntegerInt() throws Exception
     {
         Method staticMethod = this.getClass().getMethod("staticIntMethod", Integer.class);
-        ExprStaticMethodNode parent = new ExprStaticMethodNode(this.getClass().getName(), "staticIntMethod");
-        ExprNode child = new ExprStaticMethodNode("Math", "max");
+        ExprStaticMethodNode parent = new ExprStaticMethodNode(this.getClass().getName(), "staticIntMethod",  true);
+        ExprNode child = new ExprStaticMethodNode("Math", "max", true);
         child.addChildNode(intThree);
         child.addChildNode(intFive);
         parent.addChildNode(child);
@@ -67,7 +67,7 @@ public class TestExprStaticMethodNode extends TestCase
 
     public void testMaxIntShort() throws Exception
     {
-        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max");
+        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max",true);
         root.addChildNode(intThree);
         root.addChildNode(shortNine);
         validate(root);
@@ -80,7 +80,7 @@ public class TestExprStaticMethodNode extends TestCase
 
     public void testMaxDoubleInt() throws Exception
     {
-        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max");
+        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max", true);
         root.addChildNode(doubleEight);
         root.addChildNode(intFive);
         validate(root);
@@ -92,7 +92,7 @@ public class TestExprStaticMethodNode extends TestCase
 
     public void testMaxDoubleDouble() throws Exception
     {
-        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max");
+        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "max", true);
         root.addChildNode(doubleEight);
         root.addChildNode(doubleFour);
         validate(root);
@@ -105,7 +105,7 @@ public class TestExprStaticMethodNode extends TestCase
     public void testPowDoubleDouble() throws Exception
     {
         Method pow = Math.class.getMethod("pow", double.class, double.class);
-        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "pow");
+        ExprStaticMethodNode root = new ExprStaticMethodNode("Math", "pow", true);
         root.addChildNode(doubleEight);
         root.addChildNode(doubleFour);
         validate(root);
@@ -118,7 +118,7 @@ public class TestExprStaticMethodNode extends TestCase
     public void testValueOfInt() throws Exception
     {
         Method valueOf = Integer.class.getMethod("valueOf", String.class);
-        ExprStaticMethodNode root = new ExprStaticMethodNode("Integer", "valueOf");
+        ExprStaticMethodNode root = new ExprStaticMethodNode("Integer", "valueOf", true);
         root.addChildNode(stringTen);
         validate(root);
 

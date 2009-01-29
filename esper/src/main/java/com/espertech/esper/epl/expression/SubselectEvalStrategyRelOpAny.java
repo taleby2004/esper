@@ -5,6 +5,9 @@ import com.espertech.esper.client.EventBean;
 
 import java.util.Set;
 
+/**
+ * Strategy for subselects with ">/</<=/>= ANY".
+ */
 public class SubselectEvalStrategyRelOpAny implements SubselectEvalStrategy
 {
     private final RelationalOpEnum.Computer computer;
@@ -12,6 +15,13 @@ public class SubselectEvalStrategyRelOpAny implements SubselectEvalStrategy
     private final ExprNode selectClauseExpr;
     private final ExprNode filterExpr;
 
+    /**
+     * Ctor.
+     * @param computer operator
+     * @param valueExpr LHS
+     * @param selectClause select or null
+     * @param filterExpr filter or null
+     */
     public SubselectEvalStrategyRelOpAny(RelationalOpEnum.Computer computer, ExprNode valueExpr, ExprNode selectClause, ExprNode filterExpr)
     {
         this.computer = computer;

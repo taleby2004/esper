@@ -21,6 +21,12 @@ import java.lang.reflect.Method;
 public interface MethodResolutionService
 {
     /**
+     * Returns true to cache UDF results for constant parameter sets.
+     * @return cache UDF results config
+     */
+    public boolean isUdfCache();
+
+    /**
      * Resolves a given method name and list of parameter types to an instance or static method exposed by the given class.
      * @param clazz is the class to look for a fitting method
      * @param methodName is the method name

@@ -322,9 +322,10 @@ public final class FilterSpecCompiler
      * For a given expression determine if this is optimizable and create the filter parameter
      * representing the expression, or null if not optimizable.
      * @param constituent is the expression to look at
-     * @param taggedEventTypes
-     *@param arrayEventTypes @return filter parameter representing the expression, or null
+     * @param taggedEventTypes event types and their tags
+     * @param arrayEventTypes @return filter parameter representing the expression, or null
      * @throws ExprValidationException if the expression is invalid
+     * @return FilterSpecParam filter param
      */
     protected static FilterSpecParam makeFilterParam(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
             throws ExprValidationException

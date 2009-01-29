@@ -22,7 +22,7 @@ public class Filter implements Serializable
 
     private String eventTypeName;
     private Expression filter;
-    private List<PropertySelect> optionalPropertySelects;
+    private List<ContainedEventSelect> optionalPropertySelects;
 
     /**
      * Creates a filter to the given named event type.
@@ -101,12 +101,20 @@ public class Filter implements Serializable
         this.filter = filter;
     }
 
-    public List<PropertySelect> getOptionalPropertySelects()
+    /**
+     * Returns contained-event spec.
+     * @return spec
+     */
+    public List<ContainedEventSelect> getOptionalPropertySelects()
     {
         return optionalPropertySelects;
     }
 
-    public void setOptionalPropertySelects(List<PropertySelect> optionalPropertySelects)
+    /**
+     * Sets the contained-event selection, if any.
+     * @param optionalPropertySelects spec
+     */
+    public void setOptionalPropertySelects(List<ContainedEventSelect> optionalPropertySelects)
     {
         this.optionalPropertySelects = optionalPropertySelects;
     }
@@ -126,7 +134,7 @@ public class Filter implements Serializable
         }
         if (optionalPropertySelects != null)
         {
-            for (PropertySelect propertySelect : optionalPropertySelects)
+            for (ContainedEventSelect propertySelect : optionalPropertySelects)
             {
                 writer.write('[');
                 propertySelect.toEPL(writer);

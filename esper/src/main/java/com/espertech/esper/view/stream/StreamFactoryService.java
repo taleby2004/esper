@@ -32,6 +32,7 @@ public interface StreamFactoryService
      * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
      * @param isJoin is indicatng whether the stream will participate in a join statement, information
      * necessary for stream reuse and multithreading concerns
+     * @param isSubSelect true for subselects
      * @return event stream representing active filter
      */
     public Pair<EventStream, ManagedLock> createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
@@ -44,6 +45,7 @@ public interface StreamFactoryService
      * @param filterService to be used to deactivate filter when the last event stream is dropped
      * @param isJoin is indicatng whether the stream will participate in a join statement, information
      * necessary for stream reuse and multithreading concerns
+     * @param isSubSelect true for subselects
      */
     public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect);
 

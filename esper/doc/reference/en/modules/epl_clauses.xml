@@ -2288,7 +2288,7 @@ where price > (select max(price) from MarketData(symbol='GOOG').std:lastevent())
 
 		<para>
 			The order of evaluation of subqueries relative to the containing statement is guaranteed: If the containing statement and its subqueries are reacting to the same type of event, the subquery will receive the
-			event first before the containing statement's clauses are evaluated. The order of evaluation of subqueries is not guaranteed between subqueries.
+			event first before the containing statement's clauses are evaluated. This behavior can be changed via configuration. The order of evaluation of subqueries is not guaranteed between subqueries.
 		</para>
 
 		<para>
@@ -2435,10 +2435,6 @@ where price > (select max(price) from MarketData(symbol='GOOG').std:lastevent())
 
 			<para>
 				The above query compares ProductOrder event's quantity value with all rows from the MinimumQuantity stream of events and returns only those ProductOrder events that have a quantity that is less then all of the minimum quantity values of the MinimumQuantity events.
-			</para>
-
-			<para>
-				Note that if there are no successes and at least one right-hand row yields null for the operator's result, the result of the <literal>all</literal> construct will be null, not false. This is in accordance with SQL's normal rules for Boolean combinations of null values.
 			</para>
 		</sect2>
     </sect1>

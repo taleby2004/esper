@@ -9,6 +9,12 @@ public class OutputValueRendererFactory
     private static OutputValueRenderer xmlStringOutput = new OutputValueRendererXMLString();
     private static OutputValueRenderer baseOutput = new OutputValueRendererBase();
 
+    /**
+     * Returns a renderer for an output value.
+     * @param type to render
+     * @param options options
+     * @return renderer
+     */
     protected static OutputValueRenderer getOutputValueRenderer(Class type, RendererMetaOptions options)
     {
         if (type.isArray())

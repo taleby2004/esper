@@ -1295,7 +1295,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         {
             String className = node.getChild(0).getText();
             String methodName = node.getChild(1).getText();
-            astExprNodeMap.put(node, new ExprStaticMethodNode(className, methodName));
+            astExprNodeMap.put(node, new ExprStaticMethodNode(className, methodName,  configurationInformation.getEngineDefaults().getExpression().isUdfCache()));
             return;
         }
 

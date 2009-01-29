@@ -136,6 +136,10 @@ public class RendererMeta
         return nestedProperties;
     }
 
+    /**
+     * Returns mapped properties.
+     * @return mapped props
+     */
     public GetterPair[] getMappedProperties()
     {
         return mappedProperties;

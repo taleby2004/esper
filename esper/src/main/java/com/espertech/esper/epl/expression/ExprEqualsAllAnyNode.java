@@ -32,6 +32,7 @@ public class ExprEqualsAllAnyNode extends ExprNode
     /**
      * Ctor.
      * @param isNotEquals - true if this is a (!=) not equals rather then equals, false if its a '=' equals
+     * @param isAll - true if all, false for any
      */
     public ExprEqualsAllAnyNode(boolean isNotEquals, boolean isAll)
     {
@@ -48,6 +49,10 @@ public class ExprEqualsAllAnyNode extends ExprNode
         return isNot;
     }
 
+    /**
+     * True if all.
+     * @return all-flag
+     */
     public boolean isAll()
     {
         return isAll;

@@ -23,15 +23,24 @@ import java.math.BigDecimal;
 public class MethodResolutionServiceImpl implements MethodResolutionService
 {
 	private final EngineImportService engineImportService;
+    private final boolean isUdfCache;
 
     /**
      * Ctor.
      * @param engineImportService is the engine imports
+     * @param isUdfCache returns true to cache UDF results for constant parameter sets
      */
-    public MethodResolutionServiceImpl(EngineImportService engineImportService)
+    public MethodResolutionServiceImpl(EngineImportService engineImportService,
+                                       boolean isUdfCache)
 	{
         this.engineImportService = engineImportService;
-	}
+        this.isUdfCache = isUdfCache;
+    }
+
+    public boolean isUdfCache()
+    {
+        return isUdfCache;
+    }
 
     public AggregationSupport makePlugInAggregator(String functionName)
     {

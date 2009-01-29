@@ -35,6 +35,7 @@ public class JoinSetComposerImpl implements JoinSetComposer
      * Ctor.
      * @param repositories - for each stream an array of (indexed/unindexed) tables for lookup.
      * @param queryStrategies - for each stream a strategy to execute the join
+     * @param isPureSelfJoin - for self-join only
      */
     public JoinSetComposerImpl(EventTable[][] repositories, QueryStrategy[] queryStrategies, boolean isPureSelfJoin)
     {

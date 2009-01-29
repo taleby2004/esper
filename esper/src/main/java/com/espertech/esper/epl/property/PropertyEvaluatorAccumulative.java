@@ -33,6 +33,7 @@ public class PropertyEvaluatorAccumulative
      * @param getter property getters
      * @param fragmentEventType property fragment types
      * @param whereClauses filters, if any
+     * @param propertyNames the property names that are staggered
      */
     public PropertyEvaluatorAccumulative(EventPropertyGetter[] getter, FragmentEventType[] fragmentEventType, ExprNode[] whereClauses, List<String> propertyNames)
     {

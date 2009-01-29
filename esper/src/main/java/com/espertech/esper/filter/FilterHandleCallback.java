@@ -23,5 +23,9 @@ public interface FilterHandleCallback extends FilterHandle
      */
     public void matchFound(EventBean event);
 
+    /**
+     * Returns true if the filter applies to subselects.
+     * @return subselect filter
+     */
     public boolean isSubSelect();
 }

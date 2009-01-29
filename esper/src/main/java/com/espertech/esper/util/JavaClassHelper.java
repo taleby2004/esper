@@ -421,7 +421,7 @@ public class JavaClassHelper
      * @param typeOne is the first type
      * @param typeTwo is the second type
      * @return One of Long.class, Double.class or String.class
-     * @throws IllegalArgumentException if the types cannot be compared
+     * @throws CoercionException if the types cannot be compared
      */
     public static Class getCompareToCoercionType(Class typeOne, Class typeTwo) throws CoercionException
     {

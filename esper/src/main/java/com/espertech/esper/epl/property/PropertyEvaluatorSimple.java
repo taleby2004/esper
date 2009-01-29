@@ -73,11 +73,19 @@ public class PropertyEvaluatorSimple implements PropertyEvaluator
         return fragmentEventType.getFragmentType();
     }
 
+    /**
+     * Returns the property name.
+     * @return property name
+     */
     public String getPropertyName()
     {
         return propertyName;
     }
 
+    /**
+     * Returns the filter.
+     * @return filter
+     */
     public ExprNode getFilter()
     {
         return filter;

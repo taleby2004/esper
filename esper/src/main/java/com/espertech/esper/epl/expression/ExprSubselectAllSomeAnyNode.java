@@ -36,6 +36,9 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
     /**
      * Ctor.
      * @param statementSpec is the lookup statement spec from the parser, unvalidated
+     * @param not when NOT
+     * @param all when ALL, false for ANY
+     * @param relationalOpEnum operator
      */
     public ExprSubselectAllSomeAnyNode(StatementSpecRaw statementSpec, boolean not, boolean all, RelationalOpEnum relationalOpEnum)
     {
@@ -45,16 +48,28 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
         this.relationalOp = relationalOpEnum;
     }
 
+    /**
+     * Returns true for not.
+     * @return not indicator
+     */
     public boolean isNot()
     {
         return isNot;
     }
 
+    /**
+     * Returns true for all.
+     * @return all indicator
+     */
     public boolean isAll()
     {
         return isAll;
     }
 
+    /**
+     * Returns relational op.
+     * @return op
+     */
     public RelationalOpEnum getRelationalOp()
     {
         return relationalOp;

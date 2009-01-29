@@ -50,7 +50,7 @@ public class SupportStatementContextFactory
                 new PatternObjectResolutionServiceImpl(null),
                 null,
                 null,
-                new MethodResolutionServiceImpl(new EngineImportServiceImpl()),
+                new MethodResolutionServiceImpl(new EngineImportServiceImpl(), true),
                 null,
                 null,
                 null,

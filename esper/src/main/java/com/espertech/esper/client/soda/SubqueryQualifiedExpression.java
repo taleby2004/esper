@@ -22,6 +22,8 @@ public class SubqueryQualifiedExpression extends ExpressionBase
     /**
      * Ctor - for use to create an expression tree, without child expression.
      * @param model is the lookup statement object model
+     * @param operator the op
+     * @param all true for ALL, false for ANY
      */
     public SubqueryQualifiedExpression(EPStatementObjectModel model, String operator, boolean all)
     {
@@ -65,21 +67,37 @@ public class SubqueryQualifiedExpression extends ExpressionBase
         this.model = model;
     }
 
+    /**
+     * Returns the operator.
+     * @return operator
+     */
     public String getOperator()
     {
         return operator;
     }
 
+    /**
+     * Sets the operator.
+     * @param operator op
+     */
     public void setOperator(String operator)
     {
         this.operator = operator;
     }
 
+    /**
+     * Returns true for ALL, false for ANY.
+     * @return all/any flag
+     */
     public boolean isAll()
     {
         return isAll;
     }
 
+    /**
+     * Set to true for ALL, false for ANY.
+     * @param all true for ALL
+     */
     public void setAll(boolean all)
     {
         isAll = all;

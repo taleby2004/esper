@@ -1,9 +1,6 @@
 package com.espertech.esper.regression.epl;
 
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanArrayCollMap;
@@ -118,8 +115,10 @@ public class TestSubselectAllAnySomeExpr extends TestCase
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
         sendEvent("E6", 1, null);
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true});
+
         sendEvent("E7", 0, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EventBean event = listener.assertOneGetNewAndReset();
+        ArrayAssertionUtil.assertProps(event, fields, new Object[] {false, false});
     }
 
     public void testRelationalOpSome()

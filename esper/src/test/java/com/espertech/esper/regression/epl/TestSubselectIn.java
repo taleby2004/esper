@@ -24,27 +24,6 @@ public class TestSubselectIn extends TestCase
         listener = new SupportUpdateListener();
     }
 
-    public void testOrderOfEvaluationSubselectFirst()
-    {
-        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-
-        String viewExpr = "select * from SupportBean(intPrimitive<10) where intPrimitive not in (select intPrimitive from SupportBean.std:unique(intPrimitive))";
-        EPStatement stmtOne = epService.getEPAdministrator().createEPL(viewExpr);
-        stmtOne.addListener(listener);
-
-        epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        assertFalse(listener.getAndClearIsInvoked());
-
-        stmtOne.destroy();
-
-        String viewExprTwo = "select * from SupportBean where intPrimitive not in (select intPrimitive from SupportBean(intPrimitive<10).std:unique(intPrimitive))";
-        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(viewExprTwo);
-        stmtTwo.addListener(listener);
-
-        epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        assertFalse(listener.getAndClearIsInvoked());
-    }
-
     public void testInSelect()
     {
         String stmtText = "select id in (select id from S1.win:length(1000)) as value from S0";

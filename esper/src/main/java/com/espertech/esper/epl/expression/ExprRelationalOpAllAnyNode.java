@@ -30,6 +30,7 @@ public class ExprRelationalOpAllAnyNode extends ExprNode
     /**
      * Ctor.
      * @param relationalOpEnum - type of compare, ie. lt, gt, le, ge
+     * @param isAll - true if all, false for any
      */
     public ExprRelationalOpAllAnyNode(RelationalOpEnum relationalOpEnum, boolean isAll)
     {
@@ -42,6 +43,10 @@ public class ExprRelationalOpAllAnyNode extends ExprNode
         return false;
     }
 
+    /**
+     * Returns true for ALL, false for ANY.
+     * @return indicator all or any
+     */
     public boolean isAll()
     {
         return isAll;

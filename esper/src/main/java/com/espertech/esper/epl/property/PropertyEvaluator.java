@@ -4,7 +4,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 
 /**
- * Interface for a function that evaluates the properties of an eventand returns event representing the properties.
+ * Interface for a function that evaluates the properties of an event and returns event representing the properties.
  */
 public interface PropertyEvaluator
 {
@@ -21,5 +21,10 @@ public interface PropertyEvaluator
      */
     public EventType getFragmentEventType();
 
+    /**
+     * Compare to another property evaluator.
+     * @param otherFilterPropertyEval other
+     * @return equals or not 
+     */
     public boolean compareTo(PropertyEvaluator otherFilterPropertyEval);
 }

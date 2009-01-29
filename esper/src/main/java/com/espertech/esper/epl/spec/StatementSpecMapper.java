@@ -851,7 +851,8 @@ public class StatementSpecMapper
         else if (expr instanceof StaticMethodExpression)
         {
             StaticMethodExpression method = (StaticMethodExpression) expr;
-            return new ExprStaticMethodNode(method.getClassName(), method.getMethod());
+            return new ExprStaticMethodNode(method.getClassName(), method.getMethod(),
+                    mapContext.getConfiguration().getEngineDefaults().getExpression().isUdfCache());
         }
         else if (expr instanceof MinProjectionExpression)
         {
@@ -1617,7 +1618,7 @@ public class StatementSpecMapper
         if (filter.getOptionalPropertySelects() != null)
         {
             evalSpec = new PropertyEvalSpec();
-            for (PropertySelect propertySelect : filter.getOptionalPropertySelects())
+            for (ContainedEventSelect propertySelect : filter.getOptionalPropertySelects())
             {
                 SelectClauseSpecRaw selectSpec = null;
                 if (propertySelect.getSelectClause() != null)
@@ -1659,7 +1660,7 @@ public class StatementSpecMapper
 
         if (filter.getOptionalPropertyEvalSpec() != null)
         {
-            List<PropertySelect> propertySelects = new ArrayList<PropertySelect>();
+            List<ContainedEventSelect> propertySelects = new ArrayList<ContainedEventSelect>();
             for (PropertyEvalAtom atom : filter.getOptionalPropertyEvalSpec().getAtoms())
             {
                 SelectClause selectClause = null;
@@ -1674,7 +1675,7 @@ public class StatementSpecMapper
                     filterExpression = unmapExpressionDeep(atom.getOptionalWhereClause(), unmapContext);
                 }
 
-                propertySelects.add(new PropertySelect(atom.getPropertyName(), atom.getOptionalAsName(), selectClause, filterExpression));
+                propertySelects.add(new ContainedEventSelect(atom.getPropertyName(), atom.getOptionalAsName(), selectClause, filterExpression));
             }
             filterDef.setOptionalPropertySelects(propertySelects);
         }

@@ -12,11 +12,11 @@ import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.join.JoinSetComposerFactoryImpl;
+import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.epl.spec.CreateWindowDesc;
 import com.espertech.esper.epl.spec.OnTriggerDesc;
 import com.espertech.esper.epl.spec.OnTriggerWindowDesc;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
-import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.util.ManagedLock;
@@ -101,7 +101,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         
         EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementResourceLock, expression, hasVariables, stmtMetric);
 
-        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService());
+        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getConfigSnapshot().getEngineDefaults().getExpression().isUdfCache());
 
         PatternContextFactory patternContextFactory = new PatternContextFactoryDefault();
 

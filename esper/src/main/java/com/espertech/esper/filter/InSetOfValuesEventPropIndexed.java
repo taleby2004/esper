@@ -24,6 +24,7 @@ public class InSetOfValuesEventPropIndexed implements FilterSpecParamInValue
      * @param resultEventProperty is the event property name
      * @param isMustCoerce indicates on whether numeric coercion must be performed
      * @param coercionType indicates the numeric coercion type to use
+     * @param resultEventindex index
      */
     public InSetOfValuesEventPropIndexed(String resultEventAsName, int resultEventindex, String resultEventProperty, boolean isMustCoerce, Class coercionType)
     {

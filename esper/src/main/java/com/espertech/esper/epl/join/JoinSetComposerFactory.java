@@ -32,6 +32,7 @@ public interface JoinSetComposerFactory
      * @param streamNames - names of streams
      * @param streamViews - leaf view per stream
      * @param selectStreamSelectorEnum - indicator for rstream or istream-only, for optimization
+     * @param joinAnalysisResult join analysis information
      * @return composer implementation
      * @throws ExprValidationException is thrown to indicate that
      * validation of view use in joins failed.

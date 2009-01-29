@@ -623,6 +623,8 @@
 		<xs:complexType>
 			<xs:attribute name="integer-division" type="xs:boolean" use="optional"/>
 			<xs:attribute name="division-by-zero-is-null" type="xs:boolean" use="optional"/>
+			<xs:attribute name="udf-cache" type="xs:boolean" use="optional"/>
+			<xs:attribute name="self-subselect-preeval" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="stmtgroup">

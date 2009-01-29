@@ -29,6 +29,7 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
      * @param isMustCoerce indicates on whether numeric coercion must be performed
      * @param coercionType indicates the numeric coercion type to use
      * @param numberCoercer interface to use to perform coercion
+     * @param resultEventIndex index
      * @throws IllegalArgumentException if an operator was supplied that does not take a single constant value
      */
     public FilterSpecParamEventPropIndexed(String propertyName, FilterOperator filterOperator, String resultEventAsName,
@@ -113,6 +114,10 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
         return value;
     }
 
+    /**
+     * Returns the index.
+     * @return index
+     */
     public int getResultEventIndex()
     {
         return resultEventIndex;

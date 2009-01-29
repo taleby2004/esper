@@ -168,16 +168,28 @@ public abstract class ExprSubselectNode extends ExprNode
         this.rawEventType = rawEventType;
     }
 
+    /**
+     * Returns the select clause or null if none.
+     * @return clause
+     */
     public ExprNode getSelectClause()
     {
         return selectClause;
     }
 
+    /**
+     * Returns filter expr or null if none.
+     * @return filter
+     */
     public ExprNode getFilterExpr()
     {
         return filterExpr;
     }
 
+    /**
+     * Returns the event type.
+     * @return type
+     */
     public EventType getRawEventType()
     {
         return rawEventType;

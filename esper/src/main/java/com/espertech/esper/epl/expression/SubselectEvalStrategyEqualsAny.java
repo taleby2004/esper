@@ -7,7 +7,7 @@ import com.espertech.esper.util.SimpleNumberCoercerFactory;
 import java.util.Set;
 
 /**
- * Represents a in-subselect evaluation strategy.
+ * Strategy for subselects with "=/!=/<> ANY".
  */
 public class SubselectEvalStrategyEqualsAny implements SubselectEvalStrategy
 {
@@ -18,6 +18,15 @@ public class SubselectEvalStrategyEqualsAny implements SubselectEvalStrategy
     private final ExprNode filterExpr;
     private final ExprNode selectClauseExpr;
 
+    /**
+     * Ctor.
+     * @param notIn false for =, true for !=
+     * @param mustCoerce coercion required
+     * @param coercionType type to coerce to
+     * @param valueExpr LHS
+     * @param selectClauseExpr select clause or null
+     * @param filterExpr filter or null
+     */
     public SubselectEvalStrategyEqualsAny(boolean notIn, boolean mustCoerce, Class coercionType, ExprNode valueExpr, ExprNode selectClauseExpr, ExprNode filterExpr)
     {
         isNot = notIn;

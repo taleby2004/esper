@@ -37,6 +37,7 @@ public class JoinSetComposerStreamToWinImpl implements JoinSetComposer
     /**
      * Ctor.
      * @param repositories - for each stream an array of (indexed/unindexed) tables for lookup.
+     * @param isPureSelfJoin for self-joins
      * @param streamNumber is the undirectional stream
      * @param queryStrategy is the lookup query strategy for the stream
      * @param selfJoinRepositoryResets indicators for any stream's table that reset after strategy executon

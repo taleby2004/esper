@@ -301,6 +301,11 @@ public class IndexedProperty extends PropertyBase
         return null;
     }
 
+    /**
+     * Returns the index number for an indexed property expression.
+     * @param propertyName property expression
+     * @return index
+     */
     public static Integer getIndex(String propertyName)
     {
         int start = propertyName.indexOf('[');

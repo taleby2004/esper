@@ -332,6 +332,25 @@ public class TestStaticFunctions extends TestCase
         long delta = endTime - startTime;
 
         assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        stmt.destroy();
+
+        // test case with non-cache
+        configuration.getEngineDefaults().getExpression().setUdfCache(false);
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
+        stmt = epService.getEPAdministrator().createEPL(text);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        startTime = System.currentTimeMillis();
+        epService.getEPRuntime().sendEvent(new SupportTemperatureBean("a"));
+        epService.getEPRuntime().sendEvent(new SupportTemperatureBean("a"));
+        epService.getEPRuntime().sendEvent(new SupportTemperatureBean("a"));
+        endTime = System.currentTimeMillis();
+        delta = endTime - startTime;
+
+        assertTrue("Failed perf test, delta=" + delta, delta > 120);
     }
 
     public void testPerfConstantParametersNested()

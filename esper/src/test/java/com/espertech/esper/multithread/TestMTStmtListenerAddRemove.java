@@ -21,6 +21,7 @@ public class TestMTStmtListenerAddRemove extends TestCase
     public void setUp()
     {
         Configuration config = new Configuration();
+        config.getEngineDefaults().getThreading().setListenerDispatchTimeout(Long.MAX_VALUE);
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         engine = EPServiceProviderManager.getProvider("TestMTStmtListenerAddRemove", config);
     }

@@ -2,7 +2,6 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,6 +19,7 @@ public class RangeValueEventPropIndexed implements FilterSpecParamRangeValue
      * Ctor.
      * @param resultEventAsName is the event tag
      * @param resultEventProperty is the event property name
+     * @param resultEventIndex index for event
      */
     public RangeValueEventPropIndexed(String resultEventAsName, int resultEventIndex, String resultEventProperty)
     {
@@ -33,6 +33,10 @@ public class RangeValueEventPropIndexed implements FilterSpecParamRangeValue
         return resultEventProperty.hashCode();
     }
 
+    /**
+     * Returns the index.
+     * @return index
+     */
     public int getResultEventIndex()
     {
         return resultEventIndex;

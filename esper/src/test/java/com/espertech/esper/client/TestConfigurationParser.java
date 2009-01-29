@@ -58,7 +58,9 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getLanguage().isSortUsingCollator());
         assertFalse(config.getEngineDefaults().getExpression().isIntegerDivision());
         assertFalse(config.getEngineDefaults().getExpression().isDivisionByZeroReturnsNull());
-        
+        assertTrue(config.getEngineDefaults().getExpression().isSelfSubselectPreeval());
+        assertTrue(config.getEngineDefaults().getExpression().isUdfCache());
+
         ConfigurationEventTypeXMLDOM domType = new ConfigurationEventTypeXMLDOM();
         assertFalse(domType.isXPathPropertyExpr());
         assertTrue(domType.isXPathResolvePropertiesAbsolute());
@@ -298,6 +300,8 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getLanguage().isSortUsingCollator());
         assertTrue(config.getEngineDefaults().getExpression().isIntegerDivision());
         assertTrue(config.getEngineDefaults().getExpression().isDivisionByZeroReturnsNull());
+        assertFalse(config.getEngineDefaults().getExpression().isSelfSubselectPreeval());
+        assertFalse(config.getEngineDefaults().getExpression().isUdfCache());
 
         // variables
         assertEquals(2, config.getVariables().size());

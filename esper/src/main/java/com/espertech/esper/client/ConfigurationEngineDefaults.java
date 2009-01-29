@@ -698,9 +698,12 @@ public class ConfigurationEngineDefaults implements Serializable
      */
     public static class Expression implements Serializable
     {
+        private static final long serialVersionUID = 3192205923560011213L;
+
         private boolean integerDivision;
         private boolean divisionByZeroReturnsNull;
-        private static final long serialVersionUID = 3192205923560011213L;
+        private boolean udfCache;
+        private boolean selfSubselectPreeval;
 
         /**
          * Ctor.
@@ -709,6 +712,8 @@ public class ConfigurationEngineDefaults implements Serializable
         {
             integerDivision = false;
             divisionByZeroReturnsNull = false;
+            udfCache = true;
+            selfSubselectPreeval = true;
         }
 
         /**
@@ -758,6 +763,48 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setDivisionByZeroReturnsNull(boolean divisionByZeroReturnsNull)
         {
             this.divisionByZeroReturnsNull = divisionByZeroReturnsNull;
+        }
+
+        /**
+         * By default true, indicates that user-defined functions cache return results
+         * if the parameter set is empty or has constant-only return values.
+         * @return cache flag
+         */
+        public boolean isUdfCache()
+        {
+            return udfCache;
+        }
+
+        /**
+         * Set to true (the default) to indicate that user-defined functions cache return results
+         * if the parameter set is empty or has constant-only return values.
+         * @param udfCache cache flag
+         */
+        public void setUdfCache(boolean udfCache)
+        {
+            this.udfCache = udfCache;
+        }
+
+        /**
+         * Set to true (the default) to indicate that sub-selects within a statement are updated first when a new
+         * event arrives. This is only relevant for statements in which both subselects
+         * and the from-clause may react to the same exact event.
+         * @return indicator whether to evaluate sub-selects first or last on new event arrival
+         */
+        public boolean isSelfSubselectPreeval()
+        {
+            return selfSubselectPreeval;
+        }
+
+        /**
+         * Set to true (the default) to indicate that sub-selects within a statement are updated first when a new
+         * event arrives. This is only relevant for statements in which both subselects
+         * and the from-clause may react to the same exact event.
+         * @param selfSubselectPreeval indicator whether to evaluate sub-selects first or last on new event arrival
+         */
+        public void setSelfSubselectPreeval(boolean selfSubselectPreeval)
+        {
+            this.selfSubselectPreeval = selfSubselectPreeval;
         }
     }
 

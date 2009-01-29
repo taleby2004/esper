@@ -34,7 +34,7 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
      * @param getter property getter
      * @param fragmentEventType the fragments
      * @param whereClauses the where clauses
-     * @param propertyNames
+     * @param propertyNames the property names that are staggered
      */
     public PropertyEvaluatorNested(EventPropertyGetter[] getter, FragmentEventType[] fragmentEventType, ExprNode[] whereClauses, List<String> propertyNames)
     {

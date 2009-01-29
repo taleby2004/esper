@@ -5,6 +5,9 @@ import com.espertech.esper.type.RelationalOpEnum;
 
 import java.util.Set;
 
+/**
+ * Strategy for subselects with ">/</<=/>= ALL".
+ */
 public class SubselectEvalStrategyRelOpAll implements SubselectEvalStrategy
 {
     private final RelationalOpEnum.Computer computer;
@@ -12,6 +15,13 @@ public class SubselectEvalStrategyRelOpAll implements SubselectEvalStrategy
     private final ExprNode selectClauseExpr;
     private final ExprNode filterExpr;
 
+    /**
+     * Ctor.
+     * @param computer operator
+     * @param valueExpr LHS
+     * @param selectClause select or null
+     * @param filterExpr filter or null
+     */
     public SubselectEvalStrategyRelOpAll(RelationalOpEnum.Computer computer, ExprNode valueExpr, ExprNode selectClause, ExprNode filterExpr)
     {
         this.computer = computer;
@@ -40,6 +50,7 @@ public class SubselectEvalStrategyRelOpAll implements SubselectEvalStrategy
 
         // Filter and check each row.
         boolean hasRows = false;
+        boolean hasNullRow = false;
         for (EventBean subselectEvent : matchingEvents)
         {
             // Prepare filter expression event list
@@ -68,16 +79,19 @@ public class SubselectEvalStrategyRelOpAll implements SubselectEvalStrategy
 
             if (valueRight == null)
             {
-                return null;
+                hasNullRow = true;
             }
-
-            if ((valueLeft != null) && (valueRight != null))
+            else
             {
-                if (!computer.compare(valueLeft, valueRight))
+                if (valueLeft != null)
                 {
-                    return false;
+                    if (!computer.compare(valueLeft, valueRight))
+                    {
+                        return false;
+                    }
                 }
             }
+
         }
 
         if (!hasRows)
@@ -85,6 +99,10 @@ public class SubselectEvalStrategyRelOpAll implements SubselectEvalStrategy
             return true;
         }
         if (valueLeft == null)
+        {
+            return null;
+        }
+        if (hasNullRow)
         {
             return null;
         }

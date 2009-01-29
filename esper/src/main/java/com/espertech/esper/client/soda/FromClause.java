@@ -140,6 +140,7 @@ public class FromClause implements Serializable
     /**
      * Renders the from-clause in textual representation.
      * @param writer to output to
+     * @param includeFrom flag whether to add the "from" literal
      */
     protected void toEPLOptions(StringWriter writer, boolean includeFrom)
     {

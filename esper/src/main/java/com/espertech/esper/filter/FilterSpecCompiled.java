@@ -163,6 +163,11 @@ public final class FilterSpecCompiled
         return this.optionalPropertyEvaluator.compareTo(other.optionalPropertyEvaluator);
     }
 
+    /**
+     * Compares only the type and filter portion and not the property evaluation portion.
+     * @param other filter to compare
+     * @return true if same
+     */
     public boolean equalsTypeAndFilter(FilterSpecCompiled other)
     {
         if (this.filterForEventType != other.filterForEventType)

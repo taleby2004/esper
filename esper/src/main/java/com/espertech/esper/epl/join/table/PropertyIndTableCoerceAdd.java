@@ -12,6 +12,8 @@ import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.SimpleNumberCoercer;
+import com.espertech.esper.util.SimpleNumberCoercerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,7 +29,8 @@ import org.apache.commons.logging.LogFactory;
 public class PropertyIndTableCoerceAdd extends PropertyIndexedEventTable
 {
     private static Log log = LogFactory.getLog(PropertyIndTableCoerceAdd.class);
-    private final Class[] coercionTypes;
+    private final SimpleNumberCoercer[] coercers;
+    private final Class[] coercionType;
 
     /**
      * Ctor.
@@ -39,7 +42,12 @@ public class PropertyIndTableCoerceAdd extends PropertyIndexedEventTable
     public PropertyIndTableCoerceAdd(int streamNum, EventType eventType, String[] propertyNames, Class[] coercionType)
     {
         super(streamNum, eventType, propertyNames);
-        this.coercionTypes = coercionType;
+        this.coercionType = coercionType;
+        coercers = new SimpleNumberCoercer[coercionType.length];
+        for (int i = 0; i < coercionType.length; i++)
+        {
+            coercers[i] = SimpleNumberCoercerFactory.getCoercer(null, coercionType[i]);
+        }
     }
 
     protected MultiKeyUntyped getMultiKey(EventBean event)
@@ -48,12 +56,11 @@ public class PropertyIndTableCoerceAdd extends PropertyIndexedEventTable
         for (int i = 0; i < propertyGetters.length; i++)
         {
             Object value = propertyGetters[i].get(event);
-            Class coercionType = coercionTypes[i];
-            if ((value != null) && (!value.getClass().equals(coercionType)))
+            if ((value != null) && (!value.getClass().equals(coercionType[i])))
             {
                 if (value instanceof Number)
                 {
-                    value = JavaClassHelper.coerceBoxed((Number) value, coercionTypes[i]);
+                    value = coercers[i].coerceBoxed((Number) value);
                 }
             }
             keyValues[i] = value;

@@ -1643,36 +1643,94 @@ config.getEngineDefaults().getLanguage().setSortUsingCollator(true);]]></program
 		<sect2 id="config-engine-expression" revision="1">
 			<title>Engine Settings related to Expression Evaluation</title>
 			
-			<para>
-				By default Esper returns double-typed values for divisions regardless of operand types. Division by zero returns positive or negative double infinity.
-			</para>
-
-			<para>
-				To have Esper use Java-standard integer division instead, use this setting as described here. In Java integer division, when dividing integer types, the result is an integer type. This means that if you divide an integer unevenly by another integer, it returns the whole number part of the result, does not perform any rounding and the fraction part is dropped. If Java-standard integer division is enabled, when dividing an integer numerator by an integer denominator, the result is an integer number. Thus the expression <literal>1 / 4</literal> results in an integer zero. Your EPL must then convert at least one of the numbers to a double value before the division, for example by specifying <literal>1.0 / 4</literal> or by using <literal>cast(myint, double)</literal>.
-			</para>
-			
-			<para>
-				When using Java integer division, division by zero for integer-typed operands always returns null. However division by zero for double-type operands still returns positive or negative double infinity. To also return null upon division by zero for double-type operands, set the flag to true as below (default is false).
-			</para>
-
-			<para>
-			 The XML configuration is as follows:
-			</para>
-
-			<programlisting><![CDATA[<engine-settings>
+			<sect3 id="config-engine-expression-division" revision="1">
+				<title>Integer Division and Division by Zero</title>
+				<para>
+					By default Esper returns double-typed values for divisions regardless of operand types. Division by zero returns positive or negative double infinity.
+				</para>
+	
+				<para>
+					To have Esper use Java-standard integer division instead, use this setting as described here. In Java integer division, when dividing integer types, the result is an integer type. This means that if you divide an integer unevenly by another integer, it returns the whole number part of the result, does not perform any rounding and the fraction part is dropped. If Java-standard integer division is enabled, when dividing an integer numerator by an integer denominator, the result is an integer number. Thus the expression <literal>1 / 4</literal> results in an integer zero. Your EPL must then convert at least one of the numbers to a double value before the division, for example by specifying <literal>1.0 / 4</literal> or by using <literal>cast(myint, double)</literal>.
+				</para>
+				
+				<para>
+					When using Java integer division, division by zero for integer-typed operands always returns null. However division by zero for double-type operands still returns positive or negative double infinity. To also return null upon division by zero for double-type operands, set the flag to true as below (default is false).
+				</para>
+	
+				<para>
+				 The XML configuration is as follows:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
   <defaults>
     <expression integer-division="false" division-by-zero-is-null="false"/>
   </defaults>
 </engine-settings>]]></programlisting>
 			
-			<para>
-			 The API to change the setting:
-			</para>
-
-			<programlisting><![CDATA[Configuration config = new Configuration();
+				<para>
+				 The API to change the setting:
+				</para>
+	
+				<programlisting><![CDATA[Configuration config = new Configuration();
 config.getEngineDefaults().getExpression().setIntegerDivision(true);
 config.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(true);]]></programlisting>
+			</sect3>
 
+			<sect3 id="config-engine-expression-subselecteval" revision="1">
+				<title>Subselect Evaluation Order</title>
+				<para>
+					By default Esper updates sub-selects with new events before evaluating the enclosing statement. This is relevant for statements that look for the same event in both the <literal>from</literal> clause and subselects.
+				</para>
+	
+				<para>
+					To have Esper evaluate the enclosing clauses before updating the subselect in a subselect expression, set the flag as indicated herein.
+				</para>
+				
+				<para>
+					 The XML configuration as below sets the same as the default value:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <expression self-subselect-preeval="true"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+			
+				<para>
+					 Here is a sample statement that utilitzes a sub-select against the same-events:
+				</para>
+	
+				<programlisting><![CDATA[select * from MyEvent where prop not in (select prop from MyEvent.std:unique(otherProp))]]></programlisting>
+
+				<para>
+					 By default the subselect data window updates first before the <literal>where</literal> clause is evaluated, thereby above statement never returns results.
+				</para>
+
+				<para>
+					 Changing the setting described here causes the <literal>where</literal> clause to evaluate before the subselect data window updates, thereby the statement does post results.
+				</para>
+			</sect3>
+
+			<sect3 id="config-engine-expression-udfcache" revision="1">
+				<title>User-Defined Function or Static Method Cache</title>
+				<para>
+					By default Esper caches the result of an user-defined function if the parameter set to that function is empty or all parameters are constant values.
+				</para>
+	
+				<para>
+					To have Esper evaluate the user-defined function regardless of constant parameters, set the flag as indicated herein.
+				</para>
+				
+				<para>
+					 The XML configuration as below sets the same as the default value:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <expression udf-cache="true"/>
+  </defaults>
+</engine-settings>]]></programlisting>			
+			</sect3>
 		</sect2>
 
 		<sect2 id="config-revisionevent" revision="1">

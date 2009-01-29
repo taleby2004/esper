@@ -37,13 +37,15 @@ public class ExprStaticMethodNode extends ExprNode
     private boolean isConstantParameters;
     private boolean isCachedResult;
     private Object cachedResult;
+    private boolean isUseCache;
 
     /**
 	 * Ctor.
 	 * @param className - the declaring class for the method that this node will invoke
 	 * @param methodName - the name of the method that this node will invoke
+     * @param isUseCache - configuration whether to use cache
 	 */
-	public ExprStaticMethodNode(String className, String methodName)
+	public ExprStaticMethodNode(String className, String methodName, boolean isUseCache)
 	{
 		if(className == null)
 		{
@@ -56,7 +58,8 @@ public class ExprStaticMethodNode extends ExprNode
 
 		this.className = className;
 		this.methodName = methodName;
-	}
+        this.isUseCache = isUseCache;
+    }
 
     public boolean isConstantResult()
     {
@@ -150,7 +153,7 @@ public class ExprStaticMethodNode extends ExprNode
                 allConstants = false;
             }
         }
-        isConstantParameters = allConstants;
+        isConstantParameters = allConstants && isUseCache;
 
         // Try to resolve the method
 		try

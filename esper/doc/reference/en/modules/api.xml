@@ -1207,31 +1207,83 @@ We generally recommended that listener implementations do not block. By implemen
     </sect1>
 
     <sect1 id="api-controlling-time">
-        <title>Time-Keeping Events</title>
+        <title>Controlling Time-Keeping</title>
 
 		<indexterm><primary>time</primary><secondary>controlling</secondary></indexterm>
+		<indexterm><primary>external time</primary></indexterm>
+		
         <para>
-			Special events are provided that can be used to control the time-keeping of an engine instance. There are two models for an engine to keep track of time.
-			Internal clocking is when the engine instance relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. External clocking can be used to supply time ticks to the engine. The latter is useful for testing time-based event sequences or for synchronizing the engine with an external time source.
+			There are two modes for an engine to keep track of time: The internal timer based on JVM system time (the default), and externally-controlled time giving your application full control over the concept of time within an engine. 
         </para>
 
         <para>
-			By default, the Esper engine uses internal time ticks. This behavior can be changed by sending a timer control event to the engine as shown below.
+			By default the internal timer provides time and evaluates schedules. External clocking can be used to supply time ticks to the engine instead. The latter is useful for testing time-based event sequences or for synchronizing the engine with an external time source.
+        </para>
+
+        <para>
+			The internal timer relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. The next section describes timer resolution for the internal timer. When using externally-controlled time the 
+			timer resolution is in your control.
+        </para>
+
+        <para>
+			To disable the internal timer and use externally-provided time instead, there are two options. The first option is to use the configuration API at engine initialization time. The second option toggles on and off the internal timer at runtime, via special timer control events that are sent into the engine like any other event.
+        </para>
+
+        <para>
+			This code snippet shows the use of the configuration API to disable the internal timer and thereby turn on externally-provided time:
+        </para>
+
+		<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);]]></programlisting>
+
+        <para>
+			After disabling the internal timer, it is wise to set a defined time so that any statements created thereafter start relative to the time defined. Use the <literal>CurrentTimeEvent</literal> class to indicate current time to the engine
+			and to move time forward for the engine.
+        </para>
+
+        <para>
+			This code snippet obtains the current time and sends a timer event in:
+        </para>
+		<programlisting><![CDATA[long timeInMillis = System.currentTimeMillis();
+CurrentTimeEvent timeEvent = new CurrentTimeEvent(timeInMillis);
+epService.getEPRuntime().sendEvent(timeEvent);]]></programlisting>
+
+        <para>
+			Alternatively, you can use special timer control events to enable or disable the internal timer. Use the <literal>TimerControlEvent</literal> class to control timer operation at runtime.
+        </para>
+
+        <para>
+			The next code snippet demonstrates toggling to external timer at runtime, by sending in a <literal>TimerControlEvent</literal> event:
         </para>
 
 		<programlisting><![CDATA[EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
 EPRuntime runtime = epService.getEPRuntime();
 // switch to external clocking
-runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
-
-// send a time tick
-long timeInMillis = System.currentTimeMillis();	// Or get the time somewhere else
-runtime.sendEvent(new CurrentTimeEvent(timeInMillis));
-]]></programlisting>
+runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));]]></programlisting>
 
 		<para>
-			We recommend that when disabling the internal timer, applications send an external timer event setting the start time before creating statements,
-			such that statement start time is well-defined. Also, note that the engine outputs a warning if duplicate external time events are received.
+			Your application sends a <literal>CurrentTimeEvent</literal> event when it desires to move the time forward. All aspects of Esper engine time related to EPL statements and patterns are driven by the time provided by the <literal>CurrentTimeEvent</literal> that your application sends in.
+		</para>
+
+		<para>
+			The next example sequence of instructions sets time to zero, then creates a statement, then moves time forward to 1 seconds later and then 6 seconds later:
+		</para>
+
+		<programlisting><![CDATA[// Set start time at zero.
+epRuntime().sendEvent(new CurrentTimeEvent(0));
+
+// create a statement here
+epAdministrator.createEPL("select * from MyEvent output every 5 seconds");
+
+// move time forward 1 second
+epRuntime().sendEvent(new CurrentTimeEvent(1000));
+
+// move time forward 5 seconds
+epRuntime().sendEvent(new CurrentTimeEvent(6000));]]></programlisting>
+
+		<para>
+			When sending external timer events, your application should make sure that <literal>long</literal>-type time values are ascending. That is, each long-value is either the same or a larger long-value then the prior value provided by a <literal>CurrentTimeEvent</literal>. The engine outputs a warning if time events for the older or same times are received.
 		</para>
 		
     </sect1>

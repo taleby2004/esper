@@ -26,6 +26,15 @@ public class SubselectEvalStrategyEqualsIn implements SubselectEvalStrategy
     private final ExprNode filterExpr;
     private final ExprNode selectClauseExpr;
 
+    /**
+     * Ctor.
+     * @param notIn false for =, true for !=
+     * @param mustCoerce coercion required
+     * @param coercionType type to coerce to
+     * @param valueExpr LHS
+     * @param selectClauseExpr select clause or null
+     * @param filterExpr filter or null
+     */
     public SubselectEvalStrategyEqualsIn(boolean notIn, boolean mustCoerce, Class coercionType, ExprNode valueExpr, ExprNode selectClauseExpr, ExprNode filterExpr)
     {
         isNotIn = notIn;

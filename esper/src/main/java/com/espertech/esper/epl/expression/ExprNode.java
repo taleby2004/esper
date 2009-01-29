@@ -259,7 +259,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
         // If there is a class name, assume a static method is possible
         if (parse.getClassName() != null)
         {
-            ExprNode result = new ExprStaticMethodNode(parse.getClassName(), parse.getMethodName());
+            ExprNode result = new ExprStaticMethodNode(parse.getClassName(), parse.getMethodName(), methodResolutionService.isUdfCache());
             result.addChildNode(new ExprConstantNode(parse.getArgString()));
 
             // Validate

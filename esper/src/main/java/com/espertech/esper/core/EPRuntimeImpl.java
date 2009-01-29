@@ -45,6 +45,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private EPServicesContext services;
     private boolean isLatchStatementInsertStream;
     private boolean isUsingExternalClocking;
+    private boolean isSubselectPreeval;
     private volatile UnmatchedListener unmatchedListener;
     private AtomicLong routedInternal;
     private AtomicLong routedExternal;
@@ -93,6 +94,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         this.services = services;
         isLatchStatementInsertStream = this.services.getEngineSettingsService().getEngineSettings().getThreading().isInsertIntoDispatchPreserveOrder();
         isUsingExternalClocking = !this.services.getEngineSettingsService().getEngineSettings().getThreading().isInternalTimerEnabled();
+        isSubselectPreeval = services.getEngineSettingsService().getEngineSettings().getExpression().isSelfSubselectPreeval();
         routedInternal = new AtomicLong();
         routedExternal = new AtomicLong();
     }
@@ -780,20 +782,42 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 services.getVariableService().setLocalVersion();
             }
 
-            // sub-selects always go first
-            for (FilterHandleCallback callback : callbackList)
+            if (isSubselectPreeval)
             {
-                if (callback.isSubSelect())
+                // sub-selects always go first
+                for (FilterHandleCallback callback : callbackList)
                 {
-                    callback.matchFound(event);
+                    if (callback.isSubSelect())
+                    {
+                        callback.matchFound(event);
+                    }
+                }
+
+                for (FilterHandleCallback callback : callbackList)
+                {
+                    if (!callback.isSubSelect())
+                    {
+                        callback.matchFound(event);
+                    }
                 }
             }
-
-            for (FilterHandleCallback callback : callbackList)
+            else
             {
-                if (!callback.isSubSelect())
+                // sub-selects always go last
+                for (FilterHandleCallback callback : callbackList)
                 {
-                    callback.matchFound(event);
+                    if (!callback.isSubSelect())
+                    {
+                        callback.matchFound(event);
+                    }
+                }
+                
+                for (FilterHandleCallback callback : callbackList)
+                {
+                    if (callback.isSubSelect())
+                    {
+                        callback.matchFound(event);
+                    }
                 }
             }
 
@@ -1053,6 +1077,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             eventRenderer = new EventRendererImpl();
         }
         return eventRenderer;
+    }
+
+    public long getCurrentTime()
+    {
+        return services.getSchedulingService().getTime();
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

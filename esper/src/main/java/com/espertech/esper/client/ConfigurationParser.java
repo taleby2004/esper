@@ -1147,6 +1147,18 @@ class ConfigurationParser {
             boolean isDivZero = Boolean.parseBoolean(divZero);
             configuration.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(isDivZero);
         }
+        String udfCache = getOptionalAttribute(parentElement, "udf-cache");
+        if (udfCache != null)
+        {
+            boolean isUdfCache = Boolean.parseBoolean(udfCache);
+            configuration.getEngineDefaults().getExpression().setUdfCache(isUdfCache);
+        }
+        String selfSubselectPreeval = getOptionalAttribute(parentElement, "self-subselect-preeval");
+        if (selfSubselectPreeval != null)
+        {
+            boolean isSelfSubselectPreeval = Boolean.parseBoolean(selfSubselectPreeval);
+            configuration.getEngineDefaults().getExpression().setSelfSubselectPreeval(isSelfSubselectPreeval);
+        }
     }
 
     private static void handleMetricsReportingPatterns(ConfigurationMetricsReporting.StmtGroupMetrics groupDef, Element parentElement)

@@ -15,8 +15,21 @@ import com.espertech.esper.type.RelationalOpEnum;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Factory for subselect evaluation strategies.
+ */
 public class SubselectEvalStrategyFactory
 {
+    /**
+     * Create a strategy.
+     * @param subselectExpression expression node
+     * @param isNot true if negated
+     * @param isAll true for ALL
+     * @param isAny true for ANY
+     * @param relationalOp relational op, if any
+     * @return strategy
+     * @throws ExprValidationException if expression validation fails
+     */
     public static SubselectEvalStrategy createStrategy(ExprSubselectNode subselectExpression,
                                                        boolean isNot,
                                                        boolean isAll,

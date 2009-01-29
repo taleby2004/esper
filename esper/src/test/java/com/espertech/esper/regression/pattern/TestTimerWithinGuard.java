@@ -189,6 +189,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
 
         // External clocking
         sendTimer(0, epService);
+        assertEquals(0, epService.getEPRuntime().getCurrentTime());
 
         // Set up a timer:within
         EPStatement statement = epService.getEPAdministrator().createEPL(
@@ -293,6 +294,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
 
         long time = 24*60*60*1000 + 2*60*60*1000 + 3*60*1000 + 4*1000 + 5;
         sendTimer(time - 1, epService);
+        assertEquals(time - 1, epService.getEPRuntime().getCurrentTime());
         sendEvent(epService);
         testListener.assertOneGetNewAndReset();
 

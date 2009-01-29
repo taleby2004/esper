@@ -48,7 +48,7 @@ public class TestExprNode extends TestCase
         StreamTypeService typeService = new SupportStreamTypeSvc1Stream();
         EngineImportService engineImportService = new EngineImportServiceImpl();
         engineImportService.addImport("java.lang.*");
-        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineImportService);
+        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineImportService, true);
 
         ExprNode identNode = new ExprIdentNode("Integer.valueOf(\"3\")");
         ExprNode result = identNode.getValidatedSubtree(typeService, methodResolutionService, null, null, null);
