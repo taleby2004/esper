@@ -862,7 +862,7 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<indexterm><primary>views</primary><secondary>regression</secondary></indexterm>
 				<indexterm><primary>derived-value views</primary><secondary>regression</secondary></indexterm>
 				<para>
-					This view calculates regression on the values returned by two expressions. The view takes two expressions as parameters. The expressions must return a numeric value:
+					This view calculates regression and related intermediate results on the values returned by two expressions. The view takes two expressions as parameters. The expressions must return a numeric value:
 				</para>
 				
 				<synopsis>stat:linest(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis>)</synopsis>
@@ -881,18 +881,86 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 						<tbody>
 							<row>
 								<entry><literal>slope</literal></entry>
-								<entry>Slope</entry>
+								<entry>Slope.</entry>
 							</row>
 							<row>
 								<entry><literal>YIntercept</literal></entry>
-								<entry>Y Intercept</entry>
+								<entry>Y intercept.</entry>
+							</row>
+							<row>
+								<entry><literal>XAverage</literal></entry>
+								<entry>X average.</entry>
+							</row>
+							<row>
+								<entry><literal>XStandardDeviationPop</literal></entry>
+								<entry>X standard deviation population.</entry>
+							</row>
+							<row>
+								<entry><literal>XStandardDeviationSample</literal></entry>
+								<entry>X standard deviation sample.</entry>
+							</row>
+							<row>
+								<entry><literal>XSum</literal></entry>
+								<entry>X sum.</entry>
+							</row>
+							<row>
+								<entry><literal>XVariance</literal></entry>
+								<entry>X variance.</entry>
+							</row>
+							<row>
+								<entry><literal>YAverage</literal></entry>
+								<entry>X average.</entry>
+							</row>
+							<row>
+								<entry><literal>YStandardDeviationPop</literal></entry>
+								<entry>Y standard deviation population.</entry>
+							</row>
+							<row>
+								<entry><literal>YStandardDeviationSample</literal></entry>
+								<entry>Y standard deviation sample.</entry>
+							</row>
+							<row>
+								<entry><literal>YSum</literal></entry>
+								<entry>Y sum.</entry>
+							</row>
+							<row>
+								<entry><literal>YVariance</literal></entry>
+								<entry>Y variance.</entry>
+							</row>
+							<row>
+								<entry><literal>dataPoints</literal></entry>
+								<entry>Number of data points.</entry>
+							</row>
+							<row>
+								<entry><literal>n</literal></entry>
+								<entry>Number of data points.</entry>
+							</row>
+							<row>
+								<entry><literal>sumX</literal></entry>
+								<entry>Sum of X (same as X Sum).</entry>
+							</row>
+							<row>
+								<entry><literal>sumXSq</literal></entry>
+								<entry>Sum of X squared.</entry>
+							</row>
+							<row>
+								<entry><literal>sumXY</literal></entry>
+								<entry>Sum of X times Y.</entry>
+							</row>
+							<row>
+								<entry><literal>sumY</literal></entry>
+								<entry>Sum of Y (same as Y Sum).</entry>
+							</row>
+							<row>
+								<entry><literal>sumYSq</literal></entry>
+								<entry>Sum of Y squared.</entry>
 							</row>
 						</tbody>
 					</tgroup>
 				</table>
 				
 				<para>
-					Calculate slope and y-intercept on price and offer for all events in the last 10 seconds.
+					Calculate regression and return the slope and y-intercept on price and offer for all events in the last 10 seconds.
 				</para>
 	
 				<programlisting><![CDATA[select slope, YIntercept from StockTickEvent.win:time(10 seconds).stat:linest(price, offer)]]></programlisting>	

@@ -25,7 +25,8 @@ public class TestTimestampExpr extends TestCase
     public void testGetTimestamp()
     {
         sendTimer(0);
-        String stmtText = "select current_timestamp as t0, " +
+        String stmtText = "select current_timestamp(), " +
+                          " current_timestamp as t0, " +
                           " current_timestamp() as t1, " +
                           " current_timestamp + 1 as t2 " +
                           " from " + SupportBean.class.getName();
@@ -33,8 +34,10 @@ public class TestTimestampExpr extends TestCase
         EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
+        assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("current_timestamp()"));
         assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("t0"));
         assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("t1"));
+        assertEquals(Long.class, selectTestCase.getEventType().getPropertyType("t2"));
 
         sendTimer(100);
         epService.getEPRuntime().sendEvent(new SupportBean());
@@ -98,6 +101,7 @@ public class TestTimestampExpr extends TestCase
 
     private void assertResults(EventBean event, Object[] result)
     {
+        assertEquals(event.get("current_timestamp()"), event.get("t0"));
         for (int i = 0; i < result.length; i++)
         {
             assertEquals("failed for index " + i, result[i], event.get("t" + i));
