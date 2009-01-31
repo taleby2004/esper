@@ -314,11 +314,11 @@ public class TestVariantStreamDefault extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("MyEvent", SupportBean.class);
     }
 
-    private void tryInvalidConfig(String alias, ConfigurationVariantStream config, String message)
+    private void tryInvalidConfig(String name, ConfigurationVariantStream config, String message)
     {
         try
         {
-            epService.getEPAdministrator().getConfiguration().addVariantStream(alias, config);
+            epService.getEPAdministrator().getConfiguration().addVariantStream(name, config);
             fail();
         }
         catch (ConfigurationException ex)

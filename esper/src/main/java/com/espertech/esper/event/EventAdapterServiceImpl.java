@@ -747,7 +747,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             }
             else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof MapEventType))
             {
-                com.espertech.esper.event.MappedEventBean mapEvent = (com.espertech.esper.event.MappedEventBean) event;
+                MappedEventBean mapEvent = (MappedEventBean) event;
                 converted = this.adaptorForTypedMap(mapEvent.getProperties(), targetType);
             }
             else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof WrapperEventType))

@@ -2,11 +2,12 @@ package com.espertech.esper.event.xml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Represents a XSD schema or other metadata for a class of XML documents. 
  */
-public class SchemaModel
+public class SchemaModel implements Serializable
 {
     private List<SchemaElementComplex> components;
     private List<String> namespaces;

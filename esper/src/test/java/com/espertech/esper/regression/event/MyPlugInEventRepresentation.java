@@ -34,7 +34,7 @@ public class MyPlugInEventRepresentation implements PlugInEventRepresentation
         String typeProperyies = (String) eventTypeContext.getTypeInitializer();
         String[] propertyList = (typeProperyies != null) ? typeProperyies.split(",") : new String[0];
 
-        // the set of properties know are the set of this alias as well as the set for the base
+        // the set of properties know are the set of this name as well as the set for the base
         Set<String> typeProps = new HashSet<String>(Arrays.asList(propertyList));
         typeProps.addAll(baseProps);
 

@@ -1,12 +1,13 @@
 package com.espertech.esper.event.xml;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Represents a complex element possibly with attributes, simple elements, other complex child elements
  * and may itself have a simple type.
  */
-public class SchemaElementComplex implements SchemaElement
+public class SchemaElementComplex implements SchemaElement, Serializable
 {
     private String name;
     private String namespace;

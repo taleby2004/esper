@@ -36,24 +36,23 @@ public class DOMAttributeAndElementGetter implements EventPropertyGetter, DOMPro
     public Node getValueAsNode(Node node)
     {
         NamedNodeMap namedNodeMap = node.getAttributes();
-        if (namedNodeMap == null)
+        if (namedNodeMap != null)
         {
-            return null;
-        }
-        for (int i = 0; i < namedNodeMap.getLength(); i++)
-        {
-            Node attrNode = namedNodeMap.item(i);
-            if (attrNode.getLocalName() != null)
+            for (int i = 0; i < namedNodeMap.getLength(); i++)
             {
-                if (propertyName.equals(attrNode.getLocalName()))
+                Node attrNode = namedNodeMap.item(i);
+                if (attrNode.getLocalName() != null)
+                {
+                    if (propertyName.equals(attrNode.getLocalName()))
+                    {
+                        return attrNode;
+                    }
+                    continue;
+                }
+                if (propertyName.equals(attrNode.getNodeName()))
                 {
                     return attrNode;
                 }
-                continue;
-            }
-            if (propertyName.equals(attrNode.getNodeName()))
-            {
-                return attrNode;
             }
         }
 

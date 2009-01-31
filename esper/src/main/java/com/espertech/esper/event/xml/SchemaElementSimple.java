@@ -1,9 +1,11 @@
 package com.espertech.esper.event.xml;
 
+import java.io.Serializable;
+
 /**
  * Represents a simple value in a schema.
  */
-public class SchemaElementSimple implements SchemaElement
+public class SchemaElementSimple implements SchemaElement, Serializable
 {
     private final String name;
     private final String namespace;

@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.event.xml;
 
-
 import com.espertech.esper.client.ConfigurationEventTypeXMLDOM;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventPropertyGetter;

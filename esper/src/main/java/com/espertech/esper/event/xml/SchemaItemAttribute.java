@@ -1,9 +1,11 @@
 package com.espertech.esper.event.xml;
 
+import java.io.Serializable;
+
 /**
  * Represents an attribute in a schema.
  */
-public class SchemaItemAttribute implements SchemaItem
+public class SchemaItemAttribute implements SchemaItem, Serializable
 {
     private final String namespace;
     private final String name;

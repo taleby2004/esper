@@ -42,7 +42,7 @@ public class TestConfigurationOperations extends TestCase
         assertSame(eventOne, testListener.assertOneGetNewAndReset().getUnderlying());
     }
 
-    public void testAutoAliasPackageAmbigous()
+    public void testAutoNamePackageAmbigous()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventTypeAutoName(this.getClass().getPackage().getName());
@@ -153,12 +153,12 @@ public class TestConfigurationOperations extends TestCase
         assertFalse(testListener.isInvoked());
         assertEquals(eventTwo, testListenerTwo.assertOneGetNewAndReset().getUnderlying());
 
-        // Add the same alias and type again
+        // Add the same name and type again
         mapProps.clear();
         mapProps.put("prop1", int.class);
         configOps.addEventType("AddedNameSecond", mapProps);
 
-        // Add the same alias and a different type
+        // Add the same name and a different type
         try
         {
             mapProps.put("XX", int.class);
@@ -202,12 +202,12 @@ public class TestConfigurationOperations extends TestCase
         assertFalse(testListener.isInvoked());
         assertEquals(eventTwo, testListenerTwo.assertOneGetNewAndReset().getUnderlying());
 
-        // Add the same alias and type again
+        // Add the same name and type again
         mapProps.clear();
         mapProps.put("prop1", int.class.getName());
         configOps.addEventType("AddedNameSecond", mapProps);
 
-        // Add the same alias and a different type
+        // Add the same name and a different type
         try
         {
             mapProps.put("XX", int.class.getName());
@@ -246,10 +246,10 @@ public class TestConfigurationOperations extends TestCase
         assertSame(eventTwo, testListener.assertOneGetNewAndReset().getUnderlying());
         assertSame(eventTwo, testListenerTwo.assertOneGetNewAndReset().getUnderlying());
 
-        // Add the same alias and type again
+        // Add the same name and type again
         configOps.addEventType("AddedNameSecond", SupportBean.class.getName());
 
-        // Add the same alias and a different type
+        // Add the same name and a different type
         try
         {
             configOps.addEventType("AddedNameSecond", SupportBean_A.class.getName());
@@ -261,7 +261,7 @@ public class TestConfigurationOperations extends TestCase
         }
     }
 
-    public void testAddAliasClass()
+    public void testAddNameClass()
     {
         tryInvalid("AddedName");
 
@@ -288,10 +288,10 @@ public class TestConfigurationOperations extends TestCase
         assertSame(eventTwo, testListener.assertOneGetNewAndReset().getUnderlying());
         assertSame(eventTwo, testListenerTwo.assertOneGetNewAndReset().getUnderlying());
 
-        // Add the same alias and type again
+        // Add the same name and type again
         configOps.addEventType("AddedNameSecond", SupportBean.class);
 
-        // Add the same alias and a different type
+        // Add the same name and a different type
         try
         {
             configOps.addEventType("AddedNameSecond", SupportBean_A.class);
@@ -303,11 +303,11 @@ public class TestConfigurationOperations extends TestCase
         }
     }
 
-    private void tryInvalid(String alias)
+    private void tryInvalid(String name)
     {
         try
         {
-            epService.getEPAdministrator().createEPL("select * from " + alias);
+            epService.getEPAdministrator().createEPL("select * from " + name);
             fail();
         }
         catch (EPStatementException ex)

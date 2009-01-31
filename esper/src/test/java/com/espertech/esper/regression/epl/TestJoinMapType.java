@@ -103,11 +103,11 @@ public class TestJoinMapType extends TestCase
         }
     }
 
-    private void sendMapEvent(String alias, String id, int p00)
+    private void sendMapEvent(String name, String id, int p00)
     {
         Map<String, Object> event = new HashMap<String, Object>();
         event.put("id", id);
         event.put("p00", p00);
-        epService.getEPRuntime().sendEvent(event, alias);
+        epService.getEPRuntime().sendEvent(event, name);
     }
 }
