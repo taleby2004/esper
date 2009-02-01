@@ -20,12 +20,19 @@
 		<fileset dir="${lib.dir}">
 			<include name="**/*.jar"/>
 		</fileset>
-		<fileset dir="../">
+		<fileset dir="../esper">
 			<include name="**/esper*.jar"/>
+			<include name="lib/antlr*-runtime.jar"/>
 		</fileset>
 	</path>
+	
+	<target name="clean">
+        <delete>
+        	<fileset dir="${dist.api.dir}" includes="*.*" />
+        </delete>
+    </target>
 
-	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet">
+	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet" depends="clean">
 			<javadoc
 			classpathref="lib.class.path"
 			destdir="${dist.api.dir}"
@@ -35,12 +42,20 @@
 			windowtitle="${Name} API Documentation"
 			Overview="${doc.api.dir}/package.html"
 			stylesheetfile="${doc.api.dir}/jdstyle.css"
-			doctitle="${Name} API Documentation"
-			link="${javadoc_link}">
+			doctitle="${Name} ${version} API Documentation">
+			<link href="${javadoc_link}"/>
+			<link offline="true" href="http://esper.codehaus.org/esper-${version}/doc/api" packagelistLoc="../esper/doc/javadoc/api"/>
 			<footer>
 				<![CDATA[
-				<small><b>&copy; 2007 EsperTech Inc.<br/>All rights reserved.<br/>Visit us at <a href='http://www.espertech.com' target='_blank'>espertech.com</a></b></small>
-				<script src='http://www.google-analytics.com/urchin.js' type='text/javascript'></script><script type='text/javascript'>_uacct = 'UA-1261295-1';urchinTracker();</script>
+				<small><b>&copy; 2009 EsperTech Inc.<br/>All rights reserved.<br/>Visit us at <a href='http://www.espertech.com' target='_blank'>espertech.com</a></b></small>
+				<script type='text/javascript'>				
+				var gaJsHost = (('https:' == document.location.protocol) ? 'https://ssl.' : 'http://www.');
+ 				document.write(unescape('%3Cscript src=\'' + gaJsHost + 'google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E'));
+				</script>
+				<script type='text/javascript'>
+				var pageTracker = _gat._getTracker('UA-1261295-1');
+				pageTracker._trackPageview();
+				</script>
 				]]>
 			</footer>
 			<packageset dir="${src.dir}" defaultexcludes="yes">

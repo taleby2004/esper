@@ -7,6 +7,31 @@
 	<packaging>jar</packaging>
 	<description>Esper CEP engine for Java - Input Output Adapters</description>
 	<inceptionYear>2005</inceptionYear>
+	<licenses>
+		<license>
+			<name>GNU General Public License Version 2</name>
+			<url>http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Maven Repository Switchboard</name>
+			<layout>default</layout>
+			<url>http://repo1.maven.org/maven2</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<!-- Java.Net legacy maven 1 repo for javax.jms -->
+		<repository>
+          <id>maven2-repository.dev.java.net</id>
+          <name>Java.net Repository for Maven</name>
+          <url>https://maven-repository.dev.java.net/nonav/repository</url>
+          <layout>legacy</layout>
+        </repository>		
+	</repositories>	
 	<dependencies>
 		<dependency>
 			<groupId>com.espertech</groupId>
@@ -17,6 +42,20 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.15</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.jms</groupId>
+					<artifactId>jms</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jdmk</groupId>
+					<artifactId>jmxtools</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.jmx</groupId>
+					<artifactId>jmxri</artifactId>
+				</exclusion>
+			</exclusions>			
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -44,11 +83,17 @@
 			<version>4.4</version>
 			<scope>test</scope> 
 		</dependency>
+		<!-- for javax.jms 1.1 dependency -->
 		<dependency>
+			<groupId>javaee</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>5</version>
+		</dependency>
+		<!--<dependency>
 			<groupId>javax.jms</groupId>
 			<artifactId>jms</artifactId>
 			<version>1.1</version>
-		</dependency>
+		</dependency>-->
 		<!-- mvn install:install-file -DgroupId=activemq -DartifactId=activemq -Dversion=4.1.0 -Dpackaging=jar -Dfile=lib/apache-activemq-4.1.0-incubator.jar -->
         <dependency>
             <groupId>org.apache.activemq</groupId>

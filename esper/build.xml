@@ -26,8 +26,14 @@
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>
+	
+	<target name="clean">
+        <delete>
+        	<fileset dir="${dist.api.dir}" includes="*.*" />
+        </delete>
+    </target>
 
-	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet">
+	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet" depends="clean">
 			<javadoc
 			classpathref="lib.class.path"
 			destdir="${dist.api.dir}"
@@ -37,11 +43,11 @@
 			windowtitle="${Name} API Documentation"
 			Overview="${doc.api.dir}/package.html"
 			stylesheetfile="${doc.api.dir}/jdstyle.css"
-			doctitle="${Name} API Documentation"
+			doctitle="${Name} ${version} API Documentation"
 			link="${javadoc_link}">
 			<footer>
 				<![CDATA[
-				<small><b>&copy; 2008 EsperTech Inc.<br/>All rights reserved.<br/>Visit us at <a href='http://www.espertech.com' target=3_blank'>espertech.com</a></b></small>
+				<small><b>&copy; 2009 EsperTech Inc.<br/>All rights reserved.<br/>Visit us at <a href='http://www.espertech.com' target=3_blank'>espertech.com</a></b></small>
 				<script type='text/javascript'>				
 				var gaJsHost = (('https:' == document.location.protocol) ? 'https://ssl.' : 'http://www.');
  				document.write(unescape('%3Cscript src=\'' + gaJsHost + 'google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E'));

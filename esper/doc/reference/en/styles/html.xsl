@@ -39,7 +39,7 @@
     <xsl:param name="graphicsize.extension">0</xsl:param>
     <xsl:template name="user.footer.content">
     <hr/>
-    <center>&#169; 2008 EsperTech Inc. All Rights Reserved</center>
+    <center>&#169; 2009 EsperTech Inc. All Rights Reserved</center>
 	<script type="text/javascript">
 	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
 	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

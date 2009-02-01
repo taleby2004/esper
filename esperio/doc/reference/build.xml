@@ -54,7 +54,7 @@ Changes made:
 
         <!-- Delete build directory. -->
         <delete includeemptydirs="false">
-        	<fileset dir="${build.dir}" includes="*.*" />
+        	<fileset dir="${build.dir}" includes="**/*.*" />
         </delete>
 
     </target>

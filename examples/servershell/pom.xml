@@ -35,9 +35,11 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 		</dependency>
+		<!-- for javax.jms 1.1 dependency -->
 		<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>jms</artifactId>
+			<groupId>javaee</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>5</version>
 		</dependency>
 	</dependencies>
 	<build>
