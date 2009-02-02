@@ -22,7 +22,7 @@
 		</fileset>
 		<fileset dir="../esper">
 			<include name="**/esper*.jar"/>
-			<include name="lib/antlr*-runtime.jar"/>
+			<include name="lib/antlr-runtime-*.jar"/>
 		</fileset>
 	</path>
 	

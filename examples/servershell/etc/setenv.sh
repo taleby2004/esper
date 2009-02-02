@@ -26,7 +26,7 @@ CLASSPATH=$CLASSPATH:../../../esper-3.0.0.jar
 CLASSPATH=$CLASSPATH:$LIB/cglib-nodep-2.2.jar
 CLASSPATH=$CLASSPATH:$LIB/commons-logging-1.1.1.jar
 CLASSPATH=$CLASSPATH:$LIB/log4j-1.2.15.jar
-CLASSPATH=$CLASSPATH:$LIB/antlr-3.1.1-runtime.jar
+CLASSPATH=$CLASSPATH:$LIB/antlr-runtime-3.1.1.jar
 CLASSPATH=$CLASSPATH:$EXLIB/jms.jar
 CLASSPATH=$CLASSPATH:$IOLIB/apache-activemq-4.1.0-incubator.jar
 
