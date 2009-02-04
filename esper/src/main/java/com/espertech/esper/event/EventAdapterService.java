@@ -15,6 +15,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.event.xml.SchemaModel;
 import com.espertech.esper.event.bean.BeanEventTypeFactory;
 import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.epl.thread.ThreadingService;
 import org.w3c.dom.Node;
 
 import java.io.Serializable;
@@ -254,7 +255,7 @@ public interface EventAdapterService
      * @param eventTypeName is the name of the event type to return the sender for
      * @return event sender that is static, single-type
      */
-    public EventSender getStaticTypeEventSender(EPRuntimeEventSender runtimeEventSender, String eventTypeName);
+    public EventSender getStaticTypeEventSender(EPRuntimeEventSender runtimeEventSender, String eventTypeName, ThreadingService threadingService);
 
     /**
      * Returns an event sender that dynamically decides what the event type for a given object is.
@@ -263,7 +264,7 @@ public interface EventAdapterService
      * @return event sender that is dynamic, multi-type based on multiple event bean factories provided by
      * plug-in event representations
      */
-    public EventSender getDynamicTypeEventSender(EPRuntimeEventSender runtimeEventSender, URI[] uri);
+    public EventSender getDynamicTypeEventSender(EPRuntimeEventSender runtimeEventSender, URI[] uri, ThreadingService threadingService);
 
     /**
      * Update a given Map  event type.

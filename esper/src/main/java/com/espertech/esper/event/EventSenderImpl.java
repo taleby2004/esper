@@ -12,6 +12,9 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventSender;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.epl.thread.ThreadingOption;
+import com.espertech.esper.epl.thread.InboundUnitSendWrapped;
+import com.espertech.esper.epl.thread.ThreadingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,16 +32,18 @@ public class EventSenderImpl implements EventSender
     private static Log log = LogFactory.getLog(EventSenderImpl.class);
     private final List<EventSenderURIDesc> handlingFactories;
     private final EPRuntimeEventSender epRuntime;
+    private final ThreadingService threadingService;
 
     /**
      * Ctor.
      * @param handlingFactories list of factories
      * @param epRuntime the runtime to use to process the event
      */
-    public EventSenderImpl(List<EventSenderURIDesc> handlingFactories, EPRuntimeEventSender epRuntime)
+    public EventSenderImpl(List<EventSenderURIDesc> handlingFactories, EPRuntimeEventSender epRuntime, ThreadingService threadingService)
     {
         this.handlingFactories = handlingFactories;
         this.epRuntime = epRuntime;
+        this.threadingService = threadingService;
     }
 
     public void sendEvent(Object event) throws EPException
@@ -75,7 +80,14 @@ public class EventSenderImpl implements EventSender
                 }
                 else
                 {
-                    epRuntime.processWrappedEvent(eventBean);
+                    if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
+                    {
+                        threadingService.submitInbound(new InboundUnitSendWrapped(eventBean));
+                    }
+                    else
+                    {
+                        epRuntime.processWrappedEvent(eventBean);
+                    }
                 }
                 return;
             }

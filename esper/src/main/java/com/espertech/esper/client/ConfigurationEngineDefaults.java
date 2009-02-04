@@ -153,10 +153,15 @@ public class ConfigurationEngineDefaults implements Serializable
         private boolean internalTimerEnabled;
         private static final long serialVersionUID = 6504606101119059962L;
 
+        private boolean isMicroThreadingTimer;
+        private boolean isMicroThreadingInbound;
+        private boolean isMicroThreadingRoute;
+        private boolean isMicroThreadingOutbound;
+
         /**
          * Ctor - sets up defaults.
          */
-        protected Threading()
+        public Threading()
         {
             listenerDispatchTimeout = 1000;
             isListenerDispatchPreserveOrder = true;
@@ -168,6 +173,11 @@ public class ConfigurationEngineDefaults implements Serializable
 
             internalTimerEnabled = true;
             internalTimerMsecResolution = 100;
+
+            isMicroThreadingTimer = false;
+            isMicroThreadingInbound = false;
+            isMicroThreadingRoute = false;
+            isMicroThreadingOutbound = false;
         }
 
         /**
@@ -335,6 +345,46 @@ public class ConfigurationEngineDefaults implements Serializable
         public Locking getInsertIntoDispatchLocking()
         {
             return insertIntoDispatchLocking;
+        }
+
+        public boolean isMicroThreadingInbound()
+        {
+            return isMicroThreadingInbound;
+        }
+
+        public void setMicroThreadingInbound(boolean microThreadingInbound)
+        {
+            isMicroThreadingInbound = microThreadingInbound;
+        }
+
+        public boolean isMicroThreadingTimer()
+        {
+            return isMicroThreadingTimer;
+        }
+
+        public void setMicroThreadingTimer(boolean microThreadingTimer)
+        {
+            isMicroThreadingTimer = microThreadingTimer;
+        }
+
+        public boolean isMicroThreadingRoute()
+        {
+            return isMicroThreadingRoute;
+        }
+
+        public void setMicroThreadingRoute(boolean microThreadingRoute)
+        {
+            isMicroThreadingRoute = microThreadingRoute;
+        }
+
+        public boolean isMicroThreadingOutbound()
+        {
+            return isMicroThreadingOutbound;
+        }
+
+        public void setMicroThreadingOutbound(boolean microThreadingOutbound)
+        {
+            isMicroThreadingOutbound = microThreadingOutbound;
         }
 
         /**

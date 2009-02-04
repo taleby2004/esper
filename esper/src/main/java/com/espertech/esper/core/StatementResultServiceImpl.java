@@ -9,17 +9,20 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.StatementAwareUpdateListener;
 import com.espertech.esper.client.UpdateListener;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.metric.MetricReportingPath;
+import com.espertech.esper.epl.metric.MetricReportingService;
+import com.espertech.esper.epl.metric.StatementMetricHandle;
+import com.espertech.esper.epl.thread.ThreadingOption;
+import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.epl.thread.OutboundUnit;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.epl.metric.MetricReportingPath;
-import com.espertech.esper.epl.metric.StatementMetricHandle;
-import com.espertech.esper.epl.metric.MetricReportingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,6 +37,7 @@ public class StatementResultServiceImpl implements StatementResultService
 
     private final StatementLifecycleSvc statementLifecycleSvc;
     private final MetricReportingService metricReportingService;
+    private final ThreadingService threadingService;
 
     // Part of the statement context
     private EPStatementSPI epStatement;
@@ -69,11 +73,13 @@ public class StatementResultServiceImpl implements StatementResultService
      * @param statementLifecycleSvc handles persistence for statements
      * @param metricReportingService for metrics reporting
      */
-    public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc, MetricReportingService metricReportingService)
+    public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc, MetricReportingService metricReportingService,
+                                      ThreadingService threadingService)
     {
         log.debug(".ctor");
         this.statementLifecycleSvc = statementLifecycleSvc;
         this.metricReportingService = metricReportingService;
+        this.threadingService = threadingService;
     }
 
     public void setContext(EPStatementSPI epStatement, EPServiceProvider epServiceProvider,
@@ -181,6 +187,20 @@ public class StatementResultServiceImpl implements StatementResultService
             ViewSupport.dumpUpdateParams(".execute", events);
         }
 
+        if ((ThreadingOption.isThreadingEnabled) && (threadingService.isOutboundThreading()))
+        {
+            threadingService.submitOutbound(new OutboundUnit(events, this));
+        }
+        else
+        {
+            processDispatch(events);
+        }
+        
+        dispatches.clear();
+    }
+
+    public void processDispatch(UniformPair<EventBean[]> events)
+    {
         if (statementResultNaturalStrategy != null)
         {
             statementResultNaturalStrategy.execute(events);
@@ -200,8 +220,6 @@ public class StatementResultServiceImpl implements StatementResultService
                 listener.update(newEventArr, oldEventArr, epStatement, epServiceProvider);
             }
         }
-
-        dispatches.clear();
     }
 
     /**

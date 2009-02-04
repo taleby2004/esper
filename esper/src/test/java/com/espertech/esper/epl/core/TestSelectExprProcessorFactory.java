@@ -1,5 +1,6 @@
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.client.ConfigurationEngineDefaults;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.core.StatementResultServiceImpl;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -8,6 +9,7 @@ import com.espertech.esper.epl.spec.SelectClauseElementCompiled;
 import com.espertech.esper.epl.spec.SelectClauseElementWildcard;
 import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
+import com.espertech.esper.epl.thread.ThreadingServiceImpl;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
@@ -21,7 +23,7 @@ import java.util.List;
 public class TestSelectExprProcessorFactory extends TestCase
 {
     private List<SelectClauseStreamCompiledSpec> listOfStreamsSelected = new ArrayList<SelectClauseStreamCompiledSpec>();
-    private StatementResultService statementResultService = new StatementResultServiceImpl(null, null); 
+    private StatementResultService statementResultService = new StatementResultServiceImpl(null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())); 
     private SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
 
     public void testGetProcessorInvalid() throws Exception

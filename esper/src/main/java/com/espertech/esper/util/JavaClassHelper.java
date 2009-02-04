@@ -615,6 +615,10 @@ public class JavaClassHelper
         {
             return true;
         }
+        if (clazzBoxed.equals(void.class))
+        {
+            return true;
+        }
         return false;
     }
 

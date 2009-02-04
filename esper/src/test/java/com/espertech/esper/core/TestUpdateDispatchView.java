@@ -4,8 +4,10 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.dispatch.DispatchServiceImpl;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.ConfigurationEngineDefaults;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.epl.thread.ThreadingServiceImpl;
 import junit.framework.TestCase;
 
 public class TestUpdateDispatchView extends TestCase
@@ -27,7 +29,7 @@ public class TestUpdateDispatchView extends TestCase
 
         dispatchService = new DispatchServiceImpl();
 
-        statementResultService = new StatementResultServiceImpl(null, null);
+        statementResultService = new StatementResultServiceImpl(null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading()));
         statementResultService.setUpdateListeners(listenerSet);
 
         updateDispatchView = new UpdateDispatchViewBlockingWait(statementResultService, dispatchService, 1000);

@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
+import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.dispatch.DispatchServiceProvider;
 import com.espertech.esper.epl.core.EngineImportService;
@@ -16,6 +17,7 @@ import com.espertech.esper.epl.db.DatabaseConfigService;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.thread.ThreadingService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.event.EventAdapterService;
@@ -28,7 +30,6 @@ import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.view.ViewService;
 import com.espertech.esper.view.ViewServiceProvider;
 import com.espertech.esper.view.stream.StreamFactoryService;
-import com.espertech.esper.client.ConfigurationInformation;
 
 /**
  * Convenience class to hold implementations for all services.
@@ -62,6 +63,7 @@ public final class EPServicesContext
     private MetricReportingService metricsReportingService;
     private StatementEventTypeRef statementEventTypeRef;
     private ConfigurationInformation configSnapshot;
+    private ThreadingService threadingService;
 
     // Supplied after construction to avoid circular dependency
     private StatementLifecycleSvc statementLifecycleSvc;
@@ -119,7 +121,8 @@ public final class EPServicesContext
                              ValueAddEventService valueAddEventService,
                              MetricReportingService metricsReportingService,
                              StatementEventTypeRef statementEventTypeRef,
-                             ConfigurationInformation configSnapshot)
+                             ConfigurationInformation configSnapshot,
+                             ThreadingService threadingServiceImpl)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -148,6 +151,7 @@ public final class EPServicesContext
         this.metricsReportingService = metricsReportingService;
         this.statementEventTypeRef = statementEventTypeRef;
         this.configSnapshot = configSnapshot;
+        this.threadingService = threadingServiceImpl;
     }
 
     /**
@@ -321,6 +325,11 @@ public final class EPServicesContext
         return engineEnvContext;
     }
 
+    public ThreadingService getThreadingService()
+    {
+        return threadingService;
+    }
+
     /**
      * Destroy services.
      */
@@ -329,6 +338,10 @@ public final class EPServicesContext
         if (metricsReportingService != null)
         {
             metricsReportingService.destroy();
+        }
+        if (threadingService != null)
+        {
+            threadingService.destroy();
         }
         if (statementLifecycleSvc != null)
         {
@@ -384,6 +397,7 @@ public final class EPServicesContext
         this.valueAddEventService = null;
         this.metricsReportingService = null;
         this.statementEventTypeRef = null;
+        this.threadingService = null;
     }
 
     /**

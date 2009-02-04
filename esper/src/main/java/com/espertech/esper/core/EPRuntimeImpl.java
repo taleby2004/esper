@@ -12,28 +12,31 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
+import com.espertech.esper.client.util.EventRenderer;
 import com.espertech.esper.collection.ArrayBackedCollection;
-import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
 import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.util.EventRenderer;
+import com.espertech.esper.epl.thread.*;
+import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.schedule.ScheduleHandle;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.util.*;
-import com.espertech.esper.event.util.EventRendererImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.net.URI;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -97,6 +100,8 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         isSubselectPreeval = services.getEngineSettingsService().getEngineSettings().getExpression().isSelfSubselectPreeval();
         routedInternal = new AtomicLong();
         routedExternal = new AtomicLong();
+
+        services.getThreadingService().initThreading(services, this);
     }
 
     public long getRoutedInternal()
@@ -138,7 +143,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
 
         // Process event
-        processEvent(event);
+        if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isInboundThreading()))
+        {
+            services.getThreadingService().submitInbound(new InboundUnitSendEvent(event));
+        }
+        else
+        {
+            processEvent(event);
+        }
     }
 
     public void sendEvent(org.w3c.dom.Node document) throws EPException
@@ -154,9 +166,17 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             log.debug(".sendEvent Processing DOM node event " + document);
         }
 
-        // Get it wrapped up, process event
-        EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
-        processEvent(eventBean);
+        // Process event
+        if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isInboundThreading()))
+        {
+            services.getThreadingService().submitInbound(new InboundUnitSendDOM(document));
+        }
+        else
+        {
+            // Get it wrapped up, process event
+            EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
+            processEvent(eventBean);
+        }
     }
 
     public void route(org.w3c.dom.Node document) throws EPException
@@ -189,9 +209,16 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             log.debug(".sendMap Processing event " + map);
         }
 
-        // Process event
-        EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeName);
-        processEvent(eventBean);
+        if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isInboundThreading()))
+        {
+            services.getThreadingService().submitInbound(new InboundUnitSendMap(map, eventTypeName));            
+        }
+        else
+        {
+            // Process event
+            EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeName);
+            processWrappedEvent(eventBean);
+        }
     }
 
     public void route(Map map, String eventTypeName) throws EPException
@@ -237,7 +264,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     public void route(EventBean event, EPStatementHandle epStatementHandle)
     {
         routedInternal.incrementAndGet();
-        
+
         if (isLatchStatementInsertStream)
         {
             InsertIntoLatchFactory insertIntoLatchFactory = epStatementHandle.getInsertIntoLatchFactory();
@@ -250,7 +277,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private void processEvent(Object event)
+    public void processEvent(Object event)
     {
         if (event instanceof TimerEvent)
         {
@@ -410,7 +437,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
 
-                processStatementScheduleSingle(handle);
+                processStatementScheduleSingle(handle, services);
 
                 long wallTimeAfter = MetricUtil.getWall();
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
@@ -420,7 +447,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
             else
             {
-                processStatementScheduleSingle(handle);                
+                if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isTimerThreading()))
+                {
+                    services.getThreadingService().submitTimerWork(new Pair<EPStatementHandle, Object>(null, handle));
+                }
+                else
+                {
+                    processStatementScheduleSingle(handle, services);
+                }
             }
 
             handles.clear();
@@ -452,7 +486,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             if (entry instanceof ScheduleHandleCallback)
             {
                 ScheduleHandleCallback existingCallback = (ScheduleHandleCallback) entry;
-                LinkedList<ScheduleHandleCallback> entries = new LinkedList<ScheduleHandleCallback>();
+                ArrayDequeJDK6Backport<ScheduleHandleCallback> entries = new ArrayDequeJDK6Backport<ScheduleHandleCallback>();
                 entries.add(existingCallback);
                 entries.add(callback);
                 stmtCallbacks.put(handle, entries);
@@ -460,7 +494,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
 
             // This statement has been encountered more then once before
-            LinkedList<ScheduleHandleCallback> entries = (LinkedList<ScheduleHandleCallback>) entry;
+            ArrayDequeJDK6Backport<ScheduleHandleCallback> entries = (ArrayDequeJDK6Backport<ScheduleHandleCallback>) entry;
             entries.add(callback);
         }
         handles.clear();
@@ -475,7 +509,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
 
-                processStatementScheduleMultiple(handle, callbackObject);
+                processStatementScheduleMultiple(handle, callbackObject, services);
 
                 long wallTimeAfter = MetricUtil.getWall();
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
@@ -485,12 +519,19 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
             else
             {
-                processStatementScheduleMultiple(handle, callbackObject);
+                if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isTimerThreading()))
+                {
+                    services.getThreadingService().submitTimerWork(new Pair<EPStatementHandle, Object>(entry.getKey(), entry.getValue()));
+                }
+                else
+                {
+                    processStatementScheduleMultiple(handle, callbackObject, services);
+                }
             }
         }
     }
 
-    private void processThreadWorkQueue()
+    public void processThreadWorkQueue()
     {
         Object item;
         while ( (item = ThreadWorkQueue.next()) != null)
@@ -660,7 +701,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 continue;
             }
 
-            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))            
+            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))
             {
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
@@ -675,7 +716,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
             else
             {
-                processStatementFilterSingle(handle, handleCallback, event);
+                if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isRouteThreading()))
+                {
+                    services.getThreadingService().submitRoute(new RouteUnit(handleCallback, event));
+                }
+                else
+                {
+                    processStatementFilterSingle(handle, handleCallback, event);
+                }
             }
         }
         matches.clear();
@@ -689,7 +737,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             EPStatementHandle handle = entry.getKey();
             ArrayDequeJDK6Backport<FilterHandleCallback> callbackList = entry.getValue();
 
-            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))            
+            if ((MetricReportingPath.isMetricsEnabled) && (handle.getMetricsHandle().isEnabled()))
             {
                 long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                 long wallTimeBefore = MetricUtil.getWall();
@@ -704,13 +752,20 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
             else
             {
-                processStatementFilterMultiple(handle, callbackList, event);
+                if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isRouteThreading()))
+                {
+                    services.getThreadingService().submitRoute(new RouteUnit(callbackList, event, handle));
+                }
+                else
+                {
+                    processStatementFilterMultiple(handle, callbackList, event);
+                }
             }
         }
         stmtCallbacks.clear();
     }
 
-    private void processStatementScheduleMultiple(EPStatementHandle handle, Object callbackObject)
+    public static void processStatementScheduleMultiple(EPStatementHandle handle, Object callbackObject, EPServicesContext services)
     {
         handle.getStatementLock().acquireLock(services.getStatementLockFactory());
         try
@@ -720,9 +775,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 services.getVariableService().setLocalVersion();
             }
 
-            if (callbackObject instanceof LinkedList)
+            if (callbackObject instanceof ArrayDequeJDK6Backport)
             {
-                LinkedList<ScheduleHandleCallback> callbackList = (LinkedList<ScheduleHandleCallback>) callbackObject;
+                ArrayDequeJDK6Backport<ScheduleHandleCallback> callbackList = (ArrayDequeJDK6Backport<ScheduleHandleCallback>) callbackObject;
                 for (ScheduleHandleCallback callback : callbackList)
                 {
                     callback.scheduledTrigger(services.getExtensionServicesContext());
@@ -747,7 +802,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private void processStatementScheduleSingle(EPStatementHandleCallback handle)
+    public static void processStatementScheduleSingle(EPStatementHandleCallback handle, EPServicesContext services)
     {
         ManagedLock statementLock = handle.getEpStatementHandle().getStatementLock();
         statementLock.acquireLock(services.getStatementLockFactory());
@@ -772,7 +827,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private void processStatementFilterMultiple(EPStatementHandle handle, ArrayDequeJDK6Backport<FilterHandleCallback> callbackList, EventBean event)
+    public void processStatementFilterMultiple(EPStatementHandle handle, ArrayDequeJDK6Backport<FilterHandleCallback> callbackList, EventBean event)
     {
         handle.getStatementLock().acquireLock(services.getStatementLockFactory());
         try
@@ -811,7 +866,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                         callback.matchFound(event);
                     }
                 }
-                
+
                 for (FilterHandleCallback callback : callbackList)
                 {
                     if (callback.isSubSelect())
@@ -834,7 +889,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private void processStatementFilterSingle(EPStatementHandle handle, EPStatementHandleCallback handleCallback, EventBean event)
+    public void processStatementFilterSingle(EPStatementHandle handle, EPStatementHandleCallback handleCallback, EventBean event)
     {
         handle.getStatementLock().acquireLock(services.getStatementLockFactory());
         try
@@ -859,7 +914,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
-    private void dispatch()
+    public void dispatch()
     {
         try
         {
@@ -1062,12 +1117,12 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public EventSender getEventSender(String eventTypeName)
     {
-        return services.getEventAdapterService().getStaticTypeEventSender(this, eventTypeName);
+        return services.getEventAdapterService().getStaticTypeEventSender(this, eventTypeName, services.getThreadingService());
     }
 
     public EventSender getEventSender(URI uri[]) throws EventTypeException
     {
-        return services.getEventAdapterService().getDynamicTypeEventSender(this, uri);
+        return services.getEventAdapterService().getDynamicTypeEventSender(this, uri, services.getThreadingService());
     }
 
     public EventRenderer getEventRenderer()

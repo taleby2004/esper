@@ -11,12 +11,21 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventSender;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.EPRuntimeEventSender;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.epl.thread.ThreadingOption;
+import com.espertech.esper.epl.thread.InboundUnitSendEvent;
+import com.espertech.esper.epl.thread.InboundUnitSendWrapped;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Event sender for POJO Java object events.
@@ -26,10 +35,12 @@ import java.util.Set;
  */
 public class EventSenderBean implements EventSender
 {
+    private static final Log log = LogFactory.getLog(EventSenderBean.class);
     private final EPRuntimeEventSender runtime;
     private final BeanEventType beanEventType;
     private final EventAdapterService eventAdapterService;
     private final Set<Class> compatibleClasses;
+    private final ThreadingService threadingService;
 
     /**
      * Ctor.
@@ -37,18 +48,41 @@ public class EventSenderBean implements EventSender
      * @param beanEventType the event type
      * @param eventAdapterService factory for event beans and event types
      */
-    public EventSenderBean(EPRuntimeEventSender runtime, BeanEventType beanEventType, EventAdapterService eventAdapterService)
+    public EventSenderBean(EPRuntimeEventSender runtime, BeanEventType beanEventType, EventAdapterService eventAdapterService, ThreadingService threadingService)
     {
         this.runtime = runtime;
         this.beanEventType = beanEventType;
         this.eventAdapterService = eventAdapterService;
         compatibleClasses = new HashSet<Class>();
+        this.threadingService = threadingService;
     }
 
     public void sendEvent(Object event)
     {
+        if (event == null)
+        {
+            throw new NullPointerException("No event object provided to sendEvent method");
+        }
+
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            if ((!(event instanceof CurrentTimeEvent)) || (ExecutionPathDebugLog.isTimerDebugEnabled))
+            {
+                log.debug(".sendEvent Processing event " + event);
+            }
+        }
+
         EventBean eventBean = getEventBean(event);
-        runtime.processWrappedEvent(eventBean);
+
+        // Process event
+        if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
+        {
+            threadingService.submitInbound(new InboundUnitSendWrapped(eventBean));
+        }
+        else
+        {
+            runtime.processWrappedEvent(eventBean);
+        }
     }
 
     public void route(Object event) throws EPException

@@ -21,6 +21,7 @@ import com.espertech.esper.event.xml.*;
 import com.espertech.esper.plugin.*;
 import com.espertech.esper.util.URIUtil;
 import com.espertech.esper.util.UuidGenerator;
+import com.espertech.esper.epl.thread.ThreadingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -165,7 +166,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventType;
     }
 
-    public EventSender getStaticTypeEventSender(EPRuntimeEventSender runtimeEventSender, String eventTypeName) throws EventTypeException
+    public EventSender getStaticTypeEventSender(EPRuntimeEventSender runtimeEventSender, String eventTypeName, ThreadingService threadingService) throws EventTypeException
     {
         EventType eventType = nameToTypeMap.get(eventTypeName);
         if (eventType == null)
@@ -176,15 +177,15 @@ public class EventAdapterServiceImpl implements EventAdapterService
         // handle built-in types
         if (eventType instanceof BeanEventType)
         {
-            return new EventSenderBean(runtimeEventSender, (BeanEventType) eventType, this);
+            return new EventSenderBean(runtimeEventSender, (BeanEventType) eventType, this, threadingService);
         }
         if (eventType instanceof MapEventType)
         {
-            return new EventSenderMap(runtimeEventSender, (MapEventType) eventType);
+            return new EventSenderMap(runtimeEventSender, (MapEventType) eventType, this, threadingService);
         }
         if (eventType instanceof BaseXMLEventType)
         {
-            return new EventSenderXMLDOM(runtimeEventSender, (BaseXMLEventType) eventType);
+            return new EventSenderXMLDOM(runtimeEventSender, (BaseXMLEventType) eventType, this, threadingService);
         }
 
         PlugInEventTypeHandler handlers = nameToHandlerMap.get(eventTypeName);
@@ -211,7 +212,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         mapEventType.addAdditionalProperties(typeMap, this);
     }
 
-    public EventSender getDynamicTypeEventSender(EPRuntimeEventSender epRuntime, URI[] uri) throws EventTypeException
+    public EventSender getDynamicTypeEventSender(EPRuntimeEventSender epRuntime, URI[] uri, ThreadingService threadingService) throws EventTypeException
     {
         List<EventSenderURIDesc> handlingFactories = new ArrayList<EventSenderURIDesc>();
         for (URI resolutionURI : uri)
@@ -250,7 +251,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
                     + "' did not return at least one event representation's event factory");
         }
 
-        return new EventSenderImpl(handlingFactories, epRuntime);
+        return new EventSenderImpl(handlingFactories, epRuntime, threadingService);
     }
 
     public BeanEventTypeFactory getBeanEventTypeFactory() {

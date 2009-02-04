@@ -8,15 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
-import com.espertech.esper.client.EventSender;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventSender;
 import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.epl.thread.InboundUnitSendWrapped;
+import com.espertech.esper.epl.thread.ThreadingOption;
+import com.espertech.esper.epl.thread.ThreadingService;
 import com.espertech.esper.event.xml.BaseXMLEventType;
-import com.espertech.esper.event.xml.XMLEventBean;
-import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Event sender for XML DOM-backed events.
@@ -30,17 +32,23 @@ public class EventSenderXMLDOM implements EventSender
     private final BaseXMLEventType baseXMLEventType;
     private final boolean validateRootElement;
     private String getNodeName;
+    private final EventAdapterServiceImpl eventAdapterService;
+    private final ThreadingService threadingService;
 
     /**
      * Ctor.
      * @param runtimeEventSender for processing events
      * @param baseXMLEventType the event type
+     * @param eventAdapterService
+     * @param threadingService
      */
-    public EventSenderXMLDOM(EPRuntimeEventSender runtimeEventSender, BaseXMLEventType baseXMLEventType)
+    public EventSenderXMLDOM(EPRuntimeEventSender runtimeEventSender, BaseXMLEventType baseXMLEventType, EventAdapterServiceImpl eventAdapterService, ThreadingService threadingService)
     {
         this.runtimeEventSender = runtimeEventSender;
         this.baseXMLEventType = baseXMLEventType;
         this.validateRootElement = baseXMLEventType.getConfigurationEventTypeXMLDOM().isEventSenderValidatesRoot();
+        this.eventAdapterService = eventAdapterService;
+        this.threadingService = threadingService;        
     }
 
     public void sendEvent(Object node) throws EPException
@@ -83,14 +91,21 @@ public class EventSenderXMLDOM implements EventSender
             }
         }
 
-        EventBean event = new XMLEventBean(namedNode, baseXMLEventType);
+        EventBean event = eventAdapterService.adapterForTypedDOM(namedNode, baseXMLEventType);
         if (isRoute)
         {
             runtimeEventSender.routeEventBean(event);            
         }
         else
         {
-            runtimeEventSender.processWrappedEvent(event);
+            if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
+            {
+                threadingService.submitInbound(new InboundUnitSendWrapped(event));
+            }
+            else
+            {
+                runtimeEventSender.processWrappedEvent(event);
+            }
         }
     }
 }

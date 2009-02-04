@@ -14,8 +14,10 @@ import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
 import com.espertech.esper.epl.named.NamedWindowServiceImpl;
 import com.espertech.esper.epl.variable.VariableServiceImpl;
+import com.espertech.esper.epl.thread.ThreadingServiceImpl;
 import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
 import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.ConfigurationEngineDefaults;
 
 public class SupportStatementContextFactory
 {
@@ -57,7 +59,7 @@ public class SupportStatementContextFactory
                 new OutputConditionFactoryDefault(),
                 new NamedWindowServiceImpl(null, variableService),
                 null,
-                new StatementResultServiceImpl(null, null), // statement result svc
+                new StatementResultServiceImpl(null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc
                 null, // resolution URIs
                 new ValueAddEventServiceImpl(), // revison svc
                 config);

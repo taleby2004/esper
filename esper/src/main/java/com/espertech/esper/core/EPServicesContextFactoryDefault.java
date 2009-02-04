@@ -25,6 +25,8 @@ import com.espertech.esper.epl.variable.VariableTypeException;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.epl.view.OutputConditionFactoryDefault;
 import com.espertech.esper.epl.metric.MetricReportingServiceImpl;
+import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.epl.thread.ThreadingServiceImpl;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventAdapterServiceImpl;
@@ -105,13 +107,15 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         MetricReportingServiceImpl metricsReporting = new MetricReportingServiceImpl(configSnapshot.getEngineDefaults().getMetricsReporting(), epServiceProvider.getURI());
         StatementEventTypeRef statementEventTypeRef = new StatementEventTypeRefImpl();
 
+        ThreadingService threadingService = new ThreadingServiceImpl(configSnapshot.getEngineDefaults().getThreading());
+
         // New services context
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
                 plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
                 namedWindowService, variableService, timeSourceService, valueAddEventService, metricsReporting, statementEventTypeRef,
-                configSnapshot);
+                configSnapshot, threadingService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);

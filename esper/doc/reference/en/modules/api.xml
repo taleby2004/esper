@@ -1169,21 +1169,21 @@ In Esper, an engine instance is a unit of separation. Applications can obtain an
 
         <para>
 			Applications can use Esper APIs to concurrently, by multiple threads of execution, perform such functions as creating and 
-managing statements, or sending events into an engine instance for processing. Applications can use one or more thread pools or any set of same or different threads of execution with any of the public Esper APIs. There are no restrictions towards threading other then those noted in specific sections of this document. 
+managing statements, or sending events into an engine instance for processing. Applications can use application-managed thread pools or any set of same or different threads of execution with any of the public Esper APIs. There are no restrictions towards threading other then those noted in specific sections of this document. 
         </para>
         
         <para>
-Applications using Esper retain full control over threading, allowing an engine to be easily embedded and used as a component or library in your favorite Java container or process. It is up to the application code to use multiple threads for processing events by the engine, if so desired. All event processing takes places within your application thread call stack. The exception is timer-based processing if your engine instance relies on the internal timer (default).
+Esper does not prescribe a specific threading model. Applications using Esper retain full control over threading, allowing an engine to be easily embedded and used as a component or library in your favorite Java container or process.
         </para>
 
         <para>
-The fact that event processing takes places within an application thread call stack makes developing applications with Esper easier: Any common Java integrated development environment (IDE) can host an Esper engine instance. This allows developers to easily set up test cases, debug through listener code and inspect input or output events, or trace their call stack.
-        </para>
-        
-		<para>
-To send events into an engine concurrently by multiple execution threads, typically applications use the Java <literal>java.lang.Thread</literal> or <literal>java.lang.Runnable</literal> classes or Java 5 concurrent utilities that include abstractions for thread pools and blocking in-memory queues.
+In the default configuration it is up to the application code to use multiple threads for processing events by the engine, if so desired. All event processing takes places within your application thread call stack. The exception is timer-based processing if your engine instance relies on the internal timer (default). If your application relies on external timer events instead of the internal timer then there need not be any Esper-managed internal threads.
         </para>
 
+        <para>
+The fact that event processing can take place within your application thread's call stack makes developing applications with Esper easier: Any common Java integrated development environment (IDE) can host an Esper engine instance. This allows developers to easily set up test cases, debug through listener code and inspect input or output events, or trace their call stack.
+        </para>
+        
 		<para>
 Each engine instance maintains a single timer thread (internal timer) providing for time or schedule-based processing within the engine. The default resolution at which the internal timer operates is 100 milliseconds. The internal timer thread can be disabled and applications can instead send external time events to an engine instance to perform timer or scheduled processing at the resolution required by an application.
         </para>
@@ -1202,8 +1202,51 @@ In multithreaded environments, when one or more statements make result events av
         </para>
 
 		<para>
-We generally recommended that listener implementations do not block. By implementing listener code as non-blocking code execution threads can often achieve higher levels of concurrency. 
+We generally recommended that listener implementations block minimally or do not block at all. By implementing listener code as non-blocking code execution threads can often achieve higher levels of concurrency.
         </para>
+
+		<para>
+We recommended that, when using a single listener or subscriber instance to receive output from multiple statements, that the listener or subscriber code is multithread-safe. If your application has shared state between
+listener or subscriber instances then such shared state should be thread-safe. 
+        </para>
+        
+		<sect2 id="api-threading-advanced">
+			<title>Advanced Threading</title>
+			<para>
+				The default configuration utilizes the same application thread that invokes <literal>sendEvent</literal> methods to deliver output events to listeners and subscribers. By default the single internal timer thread based on system time
+				performs time-based processing and delivery of time-based results. 
+			</para>
+
+			<para>
+				This default configuration reduces thread context switching, is lightweight and works well in many environments such as J2EE, server or client. Latency and throughput requirements are largely use case dependant: Esper provide facilities for additional concurrency.
+			</para>
+			
+			<para>
+				<emphasis>Inbound Threading</emphasis> queues all incoming events: A pool of threads performs the event processing. The application thread sending an event via one of the <literal>sendEvent</literal> methods returns without blocking.
+			</para>
+
+			<para>
+				<emphasis>Outbound Threading</emphasis> queues events for delivery to listeners and subscribers, such that slow or blocking listeners or subscribers do not block event processing.
+			</para>
+
+			<para>
+				<emphasis>Timer Execution Threading</emphasis> means time-based event processing is performed by a pool of threads. The internal timer thread (or external timer events) serves only as a metronome, providing units-of-work to the threads in the timer execution pool.
+			</para>
+
+			<para>
+				<emphasis>Route Execution Threading</emphasis> means that the thread sending in an event via any of the <literal>sendEvent</literal> methods only identifies and pre-processes an event, and a pool of threads handles the
+				actual processing of the event for each statement.
+			</para>
+
+			<sect3 id="api-threading-advanced-inbound">
+				<title>Inbound Threading</title>
+				
+				<para>
+					TODO
+				</para>
+			</sect3>
+		</sect2>
+
     </sect1>
 
     <sect1 id="api-controlling-time">
@@ -1226,6 +1269,10 @@ We generally recommended that listener implementations do not block. By implemen
 
         <para>
 			To disable the internal timer and use externally-provided time instead, there are two options. The first option is to use the configuration API at engine initialization time. The second option toggles on and off the internal timer at runtime, via special timer control events that are sent into the engine like any other event.
+        </para>
+
+        <para>
+			If using a timer execution thread pool as discussed above, the internal timer or external time event provide the schedule evaluation however do not actually perform the time-based processing. The time-based processing is performed by the threads in the timer execution thread pool.
         </para>
 
         <para>

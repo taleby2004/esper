@@ -13,6 +13,7 @@ import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.epl.thread.ThreadingOption;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
@@ -208,6 +209,13 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         // This setting applies to all engines in a given VM
         MetricReportingPath.setMetricsEnabled(configSnapshot.getEngineDefaults().getMetricsReporting().isEnableMetricsReporting());
 
+        // This setting applies to all engines in a given VM
+        ThreadingOption.setThreadingEnabled(ThreadingOption.isThreadingEnabled() ||
+                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingTimer() ||
+                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingInbound() ||
+                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingRoute() ||
+                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingOutbound());
+        
         if (engine != null)
         {
             engine.getServices().getTimerService().stopInternalClock(false);
