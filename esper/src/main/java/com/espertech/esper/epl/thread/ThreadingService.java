@@ -1,7 +1,10 @@
 package com.espertech.esper.epl.thread;
 
-import com.espertech.esper.core.EPServicesContext;
 import com.espertech.esper.core.EPRuntimeImpl;
+import com.espertech.esper.core.EPServicesContext;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public interface ThreadingService
 {
@@ -19,4 +22,13 @@ public interface ThreadingService
 
     public boolean isOutboundThreading();
     public void submitOutbound(OutboundUnitRunnable outboundUnit);
+
+    public BlockingQueue<Runnable> getOutboundQueue();
+    public ThreadPoolExecutor getOutboundThreadPool();
+    public BlockingQueue<Runnable> getRouteQueue();
+    public ThreadPoolExecutor getRouteThreadPool();
+    public BlockingQueue<Runnable> getTimerQueue();
+    public ThreadPoolExecutor getTimerThreadPool();
+    public BlockingQueue<Runnable> getInboundQueue();
+    public ThreadPoolExecutor getInboundThreadPool();
 }

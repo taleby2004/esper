@@ -12,6 +12,7 @@ import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
+import com.espertech.esper.epl.thread.ThreadingService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
@@ -102,4 +103,10 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      * @return statement-type reference service
      */
     public StatementEventTypeRef getStatementEventTypeRef();
+
+    /**
+     * Returns threading service for the engine.
+     * @return the ThreadingService
+     */
+    public ThreadingService getThreadingService();
 }

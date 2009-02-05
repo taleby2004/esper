@@ -6,6 +6,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
+import com.espertech.esper.core.EPServiceProviderSPI;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -62,7 +63,11 @@ public class TestThreadedConfigInbound extends TestCase
         assertEquals(4, listenerOne.getNewEvents().size());
         assertEquals(4, listenerTwo.getNewEvents().size());
         assertEquals(4, listenerThree.getNewEvents().size());
-        
+
+        EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+        assertEquals(0, spi.getThreadingService().getInboundQueue().size());
+        assertNotNull(spi.getThreadingService().getInboundThreadPool());
+
         stmtOne.destroy();
         stmtTwo.destroy();
         stmtThree.destroy();

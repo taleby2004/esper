@@ -14,6 +14,7 @@ import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.thread.ThreadingOption;
+import com.espertech.esper.epl.thread.ThreadingService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
@@ -87,6 +88,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     public EPAdministrator getEPAdministrator()
     {
         return engine.getAdmin();
+    }
+
+    public ThreadingService getThreadingService()
+    {
+        return engine.getServices().getThreadingService();
     }
 
     public EventAdapterService getEventAdapterService()

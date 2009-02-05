@@ -116,6 +116,46 @@ public class ThreadingServiceImpl implements ThreadingService
         timerQueue.add(unit);
     }
 
+    public LinkedBlockingQueue<Runnable> getOutboundQueue()
+    {
+        return outboundQueue;
+    }
+
+    public ThreadPoolExecutor getOutboundThreadPool()
+    {
+        return outboundThreadPool;
+    }
+
+    public LinkedBlockingQueue<Runnable> getRouteQueue()
+    {
+        return routeQueue;
+    }
+
+    public ThreadPoolExecutor getRouteThreadPool()
+    {
+        return routeThreadPool;
+    }
+
+    public LinkedBlockingQueue<Runnable> getTimerQueue()
+    {
+        return timerQueue;
+    }
+
+    public ThreadPoolExecutor getTimerThreadPool()
+    {
+        return timerThreadPool;
+    }
+
+    public LinkedBlockingQueue<Runnable> getInboundQueue()
+    {
+        return inboundQueue;
+    }
+
+    public ThreadPoolExecutor getInboundThreadPool()
+    {
+        return inboundThreadPool;
+    }
+
     public void destroy()
     {
         if (timerThreadPool != null)

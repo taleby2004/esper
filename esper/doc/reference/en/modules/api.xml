@@ -1221,10 +1221,6 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 			
 			<para>
-				Note that the options discussed herein may introduce additional processing overhead into your system, as each option involves work queue management and thread context switching.
-			</para>
-
-			<para>
 				<emphasis>Inbound Threading</emphasis> queues all incoming events: A pool of engine-managed threads performs the event processing. The application thread that sends an event via any of the <literal>sendEvent</literal> methods returns without blocking.
 			</para>
 
@@ -1241,7 +1237,32 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 
 			<para>
-				Please consult TODO for instructions on how to configure threading options. Threading options take effect at engine initialization time.
+				The engine starts engine-managed threads when the engine instance is first obtained. The engine stops engine-managed threads when the engine instance is destroyed via the <literal>destroy</literal> method. When the engine is initialized via the <literal>initialize</literal> method the existing engine-managed threads are stopped and new threads are created. 
+			</para>
+
+			<para>
+				Note that the options discussed herein may introduce additional processing overhead into your system, as each option involves work queue management and thread context switching.
+			</para>
+
+			<para>
+				If your use cases require ordered processing of events or do not tolerate disorder, the threading options described herein may not be the right choice.
+			</para>
+
+			<para>
+				If your use cases require loss-less processing of events, wherein the threading options mean that events are held in an in-memory queue, the threading options described herein may not be the right choice.
+			</para>
+
+			<para>
+				Care should be taken to consider arrival rates and queue depth. Threading options utilize unbound queues and may therefore introduce an overload situation to your application. You may use the service provider interface as outlined below to manage queue sizes, if required.
+			</para>
+
+			<para>
+				All threading options are on the level of an engine. If you require different threading behavior for certain statements then consider using multiple engine instances, consider using the <literal>route</literal> method or consider 
+				using application threads instead.
+			</para>
+
+			<para>
+				Please consult <xref linkend="config-engine-threading"/> for instructions on how to configure threading options. Threading options take effect at engine initialization time.
 			</para>
 
 			<sect3 id="api-threading-advanced-inbound">
@@ -1301,6 +1322,26 @@ listener or subscriber instances then such shared state should be thread-safe.
 					While inbound threading works on the level of an event, route execution threading is fine grained and works on the level of an event in combination with a statement.
 				</para>
 
+			</sect3>
+
+			<sect3 id="api-threading-management">
+				<title>Threading Service Provider Interface</title>
+				
+				<para>
+					The service-provider interface <literal>EPServiceSPI</literal> is an extension API that allows to manage engine-level queues and thread pools .
+				</para>
+				
+				<para>
+					The service-provider interface <literal>EPServiceSPI</literal> is considered an extension API and subject to change between release versions.
+				</para>
+
+				<para>
+					The following code snippet shows how to obtain the <literal>BlockingQueue&lt;Runnable&gt;</literal> and the <literal>ThreadPoolExecutor</literal> for the managing the queue and thread pool responsible for inbound threading:
+				</para>
+				<programlisting><![CDATA[EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
+int queueSize = spi.getThreadingService().getInboundQueue().size();
+ThreadPoolExecutor threadpool = spi.getThreadingService().getInboundThreadPool();]]></programlisting>
+								
 			</sect3>
 		</sect2>
 
