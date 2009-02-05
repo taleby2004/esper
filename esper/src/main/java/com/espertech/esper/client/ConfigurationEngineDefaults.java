@@ -153,10 +153,14 @@ public class ConfigurationEngineDefaults implements Serializable
         private boolean internalTimerEnabled;
         private static final long serialVersionUID = 6504606101119059962L;
 
-        private boolean isMicroThreadingTimer;
-        private boolean isMicroThreadingInbound;
-        private boolean isMicroThreadingRoute;
-        private boolean isMicroThreadingOutbound;
+        private boolean isThreadPoolTimerExec;
+        private boolean isThreadPoolInbound;
+        private boolean isThreadPoolRouteExec;
+        private boolean isThreadPoolOutbound;
+        private int threadPoolTimerExecNumThreads;
+        private int threadPoolInboundNumThreads;
+        private int threadPoolRouteExecNumThreads;
+        private int threadPoolOutboundNumThreads;
 
         /**
          * Ctor - sets up defaults.
@@ -174,10 +178,15 @@ public class ConfigurationEngineDefaults implements Serializable
             internalTimerEnabled = true;
             internalTimerMsecResolution = 100;
 
-            isMicroThreadingTimer = false;
-            isMicroThreadingInbound = false;
-            isMicroThreadingRoute = false;
-            isMicroThreadingOutbound = false;
+            isThreadPoolInbound = false;
+            isThreadPoolOutbound = false;
+            isThreadPoolRouteExec = false;
+            isThreadPoolTimerExec = false;
+
+            threadPoolTimerExecNumThreads = 2;
+            threadPoolInboundNumThreads = 2;
+            threadPoolRouteExecNumThreads = 2;
+            threadPoolOutboundNumThreads = 2;
         }
 
         /**
@@ -347,44 +356,84 @@ public class ConfigurationEngineDefaults implements Serializable
             return insertIntoDispatchLocking;
         }
 
-        public boolean isMicroThreadingInbound()
+        public boolean isThreadPoolInbound()
         {
-            return isMicroThreadingInbound;
+            return isThreadPoolInbound;
         }
 
-        public void setMicroThreadingInbound(boolean microThreadingInbound)
+        public void setThreadPoolInbound(boolean threadPoolInbound)
         {
-            isMicroThreadingInbound = microThreadingInbound;
+            isThreadPoolInbound = threadPoolInbound;
         }
 
-        public boolean isMicroThreadingTimer()
+        public boolean isThreadPoolTimerExec()
         {
-            return isMicroThreadingTimer;
+            return isThreadPoolTimerExec;
         }
 
-        public void setMicroThreadingTimer(boolean microThreadingTimer)
+        public void setThreadPoolTimerExec(boolean threadPoolTimerExec)
         {
-            isMicroThreadingTimer = microThreadingTimer;
+            isThreadPoolTimerExec = threadPoolTimerExec;
         }
 
-        public boolean isMicroThreadingRoute()
+        public boolean isThreadPoolRouteExec()
         {
-            return isMicroThreadingRoute;
+            return isThreadPoolRouteExec;
         }
 
-        public void setMicroThreadingRoute(boolean microThreadingRoute)
+        public void setThreadPoolRouteExec(boolean threadPoolRouteExec)
         {
-            isMicroThreadingRoute = microThreadingRoute;
+            isThreadPoolRouteExec = threadPoolRouteExec;
         }
 
-        public boolean isMicroThreadingOutbound()
+        public boolean isThreadPoolOutbound()
         {
-            return isMicroThreadingOutbound;
+            return isThreadPoolOutbound;
         }
 
-        public void setMicroThreadingOutbound(boolean microThreadingOutbound)
+        public void setThreadPoolOutbound(boolean threadPoolOutbound)
         {
-            isMicroThreadingOutbound = microThreadingOutbound;
+            isThreadPoolOutbound = threadPoolOutbound;
+        }
+
+        public int getThreadPoolInboundNumThreads()
+        {
+            return threadPoolInboundNumThreads;
+        }
+
+        public void setThreadPoolInboundNumThreads(int threadPoolInboundNumThreads)
+        {
+            this.threadPoolInboundNumThreads = threadPoolInboundNumThreads;
+        }
+
+        public int getThreadPoolOutboundNumThreads()
+        {
+            return threadPoolOutboundNumThreads;
+        }
+
+        public void setThreadPoolOutboundNumThreads(int threadPoolOutboundNumThreads)
+        {
+            this.threadPoolOutboundNumThreads = threadPoolOutboundNumThreads;
+        }
+
+        public int getThreadPoolRouteExecNumThreads()
+        {
+            return threadPoolRouteExecNumThreads;
+        }
+
+        public void setThreadPoolRouteExecNumThreads(int threadPoolRouteExecNumThreads)
+        {
+            this.threadPoolRouteExecNumThreads = threadPoolRouteExecNumThreads;
+        }
+
+        public int getThreadPoolTimerExecNumThreads()
+        {
+            return threadPoolTimerExecNumThreads;
+        }
+
+        public void setThreadPoolTimerExecNumThreads(int threadPoolTimerExecNumThreads)
+        {
+            this.threadPoolTimerExecNumThreads = threadPoolTimerExecNumThreads;
         }
 
         /**

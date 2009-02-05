@@ -935,7 +935,42 @@ class ConfigurationParser {
                 configuration.getEngineDefaults().getThreading().setInternalTimerEnabled(enabled);
                 configuration.getEngineDefaults().getThreading().setInternalTimerMsecResolution(msecResolution);
             }
+            if (subElement.getNodeName().equals("threadpool-inbound"))
+            {
+                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolInbound(result.getFirst());
+                configuration.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(result.getSecond());
+            }
+            if (subElement.getNodeName().equals("threadpool-outbound"))
+            {
+                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolOutbound(result.getFirst());
+                configuration.getEngineDefaults().getThreading().setThreadPoolOutboundNumThreads(result.getSecond());
+            }
+            if (subElement.getNodeName().equals("threadpool-timerexec"))
+            {
+                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExec(result.getFirst());
+                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExecNumThreads(result.getSecond());
+            }
+            if (subElement.getNodeName().equals("threadpool-routeexec"))
+            {
+                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExec(result.getFirst());
+                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExecNumThreads(result.getSecond());
+            }
         }
+    }
+
+    private static Pair<Boolean, Integer> parseThreadPoolConfig(Element parentElement)
+    {
+        String enabled = getRequiredAttribute(parentElement, "enabled");
+        boolean isEnabled = Boolean.parseBoolean(enabled);
+
+        String numThreadsStr = getRequiredAttribute(parentElement, "num-threads");
+        int numThreads = Integer.parseInt(numThreadsStr);
+
+        return new Pair<Boolean, Integer>(isEnabled, numThreads);
     }
 
     private static void handleDefaultsViewResources(Configuration configuration, Element parentElement)

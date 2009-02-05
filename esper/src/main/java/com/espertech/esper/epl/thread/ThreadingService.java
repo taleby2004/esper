@@ -1,9 +1,7 @@
 package com.espertech.esper.epl.thread;
 
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.EPServicesContext;
 import com.espertech.esper.core.EPRuntimeImpl;
-import com.espertech.esper.core.EPStatementHandle;
 
 public interface ThreadingService
 {
@@ -11,14 +9,14 @@ public interface ThreadingService
     public void initThreading(EPServicesContext services,  EPRuntimeImpl runtime);
 
     public boolean isTimerThreading();
-    public void submitTimerWork(Pair<EPStatementHandle, Object> pair);
+    public void submitTimerWork(TimerUnit timerUnit);
 
     public boolean isInboundThreading();
-    public void submitInbound(InboundUnit unit);
+    public void submitInbound(InboundUnitRunnable unit);
 
     public boolean isRouteThreading();
-    public void submitRoute(RouteUnit unit);
+    public void submitRoute(RouteUnitRunnable unit);
 
     public boolean isOutboundThreading();
-    public void submitOutbound(OutboundUnit outboundUnit);
+    public void submitOutbound(OutboundUnitRunnable outboundUnit);
 }

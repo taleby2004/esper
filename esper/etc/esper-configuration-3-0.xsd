@@ -360,6 +360,10 @@
 					<xs:element ref="esper:listener-dispatch" minOccurs="0"/>
 					<xs:element ref="esper:insert-into-dispatch" minOccurs="0"/>
 					<xs:element ref="esper:internal-timer" minOccurs="0"/>
+					<xs:element ref="esper:threadpool-inbound" minOccurs="0"/>
+					<xs:element ref="esper:threadpool-outbound" minOccurs="0"/>
+					<xs:element ref="esper:threadpool-timerexec" minOccurs="0"/>
+					<xs:element ref="esper:threadpool-routeexec" minOccurs="0"/>
 				</xs:sequence>
 			</xs:choice>
 		</xs:complexType>
@@ -391,6 +395,30 @@
 		<xs:complexType>
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 			<xs:attribute name="msec-resolution" type="xs:long" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="threadpool-inbound">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="threadpool-outbound">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="threadpool-timerexec">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="threadpool-routeexec">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+			<xs:attribute name="num-threads" type="xs:int" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="class-property-resolution">

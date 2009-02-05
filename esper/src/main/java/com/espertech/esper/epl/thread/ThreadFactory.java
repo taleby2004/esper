@@ -3,18 +3,16 @@ package com.espertech.esper.epl.thread;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.concurrent.ThreadFactory;
-
-public class MicroThreadFactory implements ThreadFactory
+public class ThreadFactory implements java.util.concurrent.ThreadFactory
 {
-    private static final Log log = LogFactory.getLog(MicroThreadFactory.class);
+    private static final Log log = LogFactory.getLog(ThreadFactory.class);
     private final String engineURI;
     private final String prefix;
     private final ThreadGroup threadGroup;
     private final int threadPriority;
     private int currThreadCount;
 
-    public MicroThreadFactory(String engineURI, String prefix, ThreadGroup threadGroup, int threadPrio)
+    public ThreadFactory(String engineURI, String prefix, ThreadGroup threadGroup, int threadPrio)
     {
         if (engineURI == null)
         {

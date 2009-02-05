@@ -9,11 +9,11 @@
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EventSender;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventSender;
 import com.espertech.esper.core.EPRuntimeEventSender;
-import com.espertech.esper.epl.thread.ThreadingOption;
 import com.espertech.esper.epl.thread.InboundUnitSendWrapped;
+import com.espertech.esper.epl.thread.ThreadingOption;
 import com.espertech.esper.epl.thread.ThreadingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,7 +82,7 @@ public class EventSenderImpl implements EventSender
                 {
                     if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
                     {
-                        threadingService.submitInbound(new InboundUnitSendWrapped(eventBean));
+                        threadingService.submitInbound(new InboundUnitSendWrapped(eventBean, epRuntime));
                     }
                     else
                     {

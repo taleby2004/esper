@@ -2,7 +2,6 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.regression.event.SupportXML;
-import com.espertech.esper.regression.client.SupportListenerTimerHRes;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -11,13 +10,14 @@ import junit.framework.TestCase;
 
 import java.util.HashMap;
 
-public class TestThreadedConfigInbound extends TestCase implements SupportBeanConstants
+public class TestThreadedConfigInbound extends TestCase
 {
     public void testOp() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-        config.getEngineDefaults().getThreading().setMicroThreadingInbound(true);
+        config.getEngineDefaults().getThreading().setThreadPoolInbound(true);
+        config.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(4);
         config.getEngineDefaults().getExpression().setUdfCache(false);
         config.addEventType("MyMap", new HashMap<String, Object>());
         config.addEventType("SupportBean", SupportBean.class);
@@ -62,6 +62,10 @@ public class TestThreadedConfigInbound extends TestCase implements SupportBeanCo
         assertEquals(4, listenerOne.getNewEvents().size());
         assertEquals(4, listenerTwo.getNewEvents().size());
         assertEquals(4, listenerThree.getNewEvents().size());
+        
+        stmtOne.destroy();
+        stmtTwo.destroy();
+        stmtThree.destroy();
 
         epService.destroy();
     }

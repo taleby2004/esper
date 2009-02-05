@@ -211,10 +211,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
         // This setting applies to all engines in a given VM
         ThreadingOption.setThreadingEnabled(ThreadingOption.isThreadingEnabled() ||
-                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingTimer() ||
-                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingInbound() ||
-                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingRoute() ||
-                configSnapshot.getEngineDefaults().getThreading().isMicroThreadingOutbound());
+                configSnapshot.getEngineDefaults().getThreading().isThreadPoolTimerExec() ||
+                configSnapshot.getEngineDefaults().getThreading().isThreadPoolInbound() ||
+                configSnapshot.getEngineDefaults().getThreading().isThreadPoolRouteExec() ||
+                configSnapshot.getEngineDefaults().getThreading().isThreadPoolOutbound());
         
         if (engine != null)
         {

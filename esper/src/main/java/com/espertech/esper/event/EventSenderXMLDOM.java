@@ -100,7 +100,7 @@ public class EventSenderXMLDOM implements EventSender
         {
             if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
             {
-                threadingService.submitInbound(new InboundUnitSendWrapped(event));
+                threadingService.submitInbound(new InboundUnitSendWrapped(event, runtimeEventSender));
             }
             else
             {

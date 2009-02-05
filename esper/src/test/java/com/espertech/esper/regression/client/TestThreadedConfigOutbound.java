@@ -5,18 +5,16 @@ import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.client.*;
-import com.espertech.esper.regression.event.SupportXML;
 
-import java.util.HashMap;
-
-public class TestThreadedConfigOutbound extends TestCase implements SupportBeanConstants
+public class TestThreadedConfigOutbound extends TestCase
 {
     public void testOp() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         config.getEngineDefaults().getExpression().setUdfCache(false);
-        config.getEngineDefaults().getThreading().setMicroThreadingOutbound(true);
+        config.getEngineDefaults().getThreading().setThreadPoolOutbound(true);
+        config.getEngineDefaults().getThreading().setThreadPoolOutboundNumThreads(5);
         config.addEventType("SupportBean", SupportBean.class);
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);

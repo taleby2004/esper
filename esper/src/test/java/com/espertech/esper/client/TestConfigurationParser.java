@@ -44,6 +44,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals(100, config.getEngineDefaults().getThreading().getInternalTimerMsecResolution());
         assertEquals(ConfigurationEngineDefaults.Threading.Locking.SPIN, config.getEngineDefaults().getThreading().getInsertIntoDispatchLocking());
         assertEquals(ConfigurationEngineDefaults.Threading.Locking.SPIN, config.getEngineDefaults().getThreading().getListenerDispatchLocking());
+        assertFalse(config.getEngineDefaults().getThreading().isThreadPoolInbound());
+        assertFalse(config.getEngineDefaults().getThreading().isThreadPoolOutbound());
+        assertFalse(config.getEngineDefaults().getThreading().isThreadPoolRouteExec());
+        assertFalse(config.getEngineDefaults().getThreading().isThreadPoolTimerExec());
+        assertEquals(2, config.getEngineDefaults().getThreading().getThreadPoolInboundNumThreads());
+        assertEquals(2, config.getEngineDefaults().getThreading().getThreadPoolOutboundNumThreads());
+        assertEquals(2, config.getEngineDefaults().getThreading().getThreadPoolRouteExecNumThreads());
+        assertEquals(2, config.getEngineDefaults().getThreading().getThreadPoolTimerExecNumThreads());
 
         assertEquals(Configuration.PropertyResolutionStyle.CASE_SENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
 
@@ -261,6 +269,14 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getThreading().isListenerDispatchPreserveOrder());
         assertEquals(2000, config.getEngineDefaults().getThreading().getListenerDispatchTimeout());
         assertEquals(ConfigurationEngineDefaults.Threading.Locking.SUSPEND, config.getEngineDefaults().getThreading().getListenerDispatchLocking());
+        assertTrue(config.getEngineDefaults().getThreading().isThreadPoolInbound());
+        assertTrue(config.getEngineDefaults().getThreading().isThreadPoolOutbound());
+        assertTrue(config.getEngineDefaults().getThreading().isThreadPoolRouteExec());
+        assertTrue(config.getEngineDefaults().getThreading().isThreadPoolTimerExec());
+        assertEquals(1, config.getEngineDefaults().getThreading().getThreadPoolInboundNumThreads());
+        assertEquals(2, config.getEngineDefaults().getThreading().getThreadPoolOutboundNumThreads());
+        assertEquals(3, config.getEngineDefaults().getThreading().getThreadPoolTimerExecNumThreads());
+        assertEquals(4, config.getEngineDefaults().getThreading().getThreadPoolRouteExecNumThreads());
 
         assertFalse(config.getEngineDefaults().getThreading().isInternalTimerEnabled());
         assertEquals(1234567, config.getEngineDefaults().getThreading().getInternalTimerMsecResolution());

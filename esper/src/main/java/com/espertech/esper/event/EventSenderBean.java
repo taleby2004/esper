@@ -77,7 +77,7 @@ public class EventSenderBean implements EventSender
         // Process event
         if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
         {
-            threadingService.submitInbound(new InboundUnitSendWrapped(eventBean));
+            threadingService.submitInbound(new InboundUnitSendWrapped(eventBean, runtime));
         }
         else
         {

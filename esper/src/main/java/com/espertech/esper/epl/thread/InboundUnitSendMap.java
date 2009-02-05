@@ -6,21 +6,24 @@ import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
 
-public class InboundUnitSendMap implements InboundUnit
+public class InboundUnitSendMap implements InboundUnitRunnable
 {
     private final Map map;
     private final String eventTypeName;
+    private final EPServicesContext services;
+    private final EPRuntimeImpl runtime;
 
-    public InboundUnitSendMap(Map map, String eventTypeName)
+    public InboundUnitSendMap(Map map, String eventTypeName, EPServicesContext services, EPRuntimeImpl runtime)
     {
         this.eventTypeName = eventTypeName;
         this.map = map;
+        this.services = services;
+        this.runtime = runtime;
     }
 
-    public void execute(EPServicesContext services, EPRuntimeImpl runtime)
+    public void run()
     {
-        // Process event
         EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeName);
         runtime.processWrappedEvent(eventBean);
-    }
+    }    
 }

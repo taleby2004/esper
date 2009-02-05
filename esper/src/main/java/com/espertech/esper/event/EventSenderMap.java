@@ -56,7 +56,7 @@ public class EventSenderMap implements EventSender
 
         if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
         {
-            threadingService.submitInbound(new InboundUnitSendWrapped(mapEvent));
+            threadingService.submitInbound(new InboundUnitSendWrapped(mapEvent, runtimeEventSender));
         }
         else
         {

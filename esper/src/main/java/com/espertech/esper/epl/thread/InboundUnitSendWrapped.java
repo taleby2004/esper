@@ -1,19 +1,20 @@
 package com.espertech.esper.epl.thread;
 
-import com.espertech.esper.core.EPServicesContext;
-import com.espertech.esper.core.EPRuntimeImpl;
+import com.espertech.esper.core.EPRuntimeEventSender;
 import com.espertech.esper.client.EventBean;
 
-public class InboundUnitSendWrapped implements InboundUnit
+public class InboundUnitSendWrapped implements InboundUnitRunnable
 {
     private final EventBean eventBean;
+    private final EPRuntimeEventSender runtime;
 
-    public InboundUnitSendWrapped(EventBean event)
+    public InboundUnitSendWrapped(EventBean event, EPRuntimeEventSender runtime)
     {
         this.eventBean = event;
+        this.runtime = runtime;
     }
 
-    public void execute(EPServicesContext services, EPRuntimeImpl runtime)
+    public void run()
     {
         runtime.processWrappedEvent(eventBean);
     }

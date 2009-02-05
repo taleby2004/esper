@@ -19,7 +19,7 @@ import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.epl.thread.ThreadingOption;
 import com.espertech.esper.epl.thread.ThreadingService;
-import com.espertech.esper.epl.thread.OutboundUnit;
+import com.espertech.esper.epl.thread.OutboundUnitRunnable;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.view.ViewSupport;
@@ -189,7 +189,7 @@ public class StatementResultServiceImpl implements StatementResultService
 
         if ((ThreadingOption.isThreadingEnabled) && (threadingService.isOutboundThreading()))
         {
-            threadingService.submitOutbound(new OutboundUnit(events, this));
+            threadingService.submitOutbound(new OutboundUnitRunnable(events, this));
         }
         else
         {

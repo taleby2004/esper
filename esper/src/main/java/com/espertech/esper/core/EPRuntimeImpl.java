@@ -15,14 +15,13 @@ import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.client.util.EventRenderer;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.epl.thread.*;
+import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
@@ -145,7 +144,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         // Process event
         if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isInboundThreading()))
         {
-            services.getThreadingService().submitInbound(new InboundUnitSendEvent(event));
+            services.getThreadingService().submitInbound(new InboundUnitSendEvent(event, this));
         }
         else
         {
@@ -169,7 +168,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         // Process event
         if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isInboundThreading()))
         {
-            services.getThreadingService().submitInbound(new InboundUnitSendDOM(document));
+            services.getThreadingService().submitInbound(new InboundUnitSendDOM(document, services, this));
         }
         else
         {
@@ -211,7 +210,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isInboundThreading()))
         {
-            services.getThreadingService().submitInbound(new InboundUnitSendMap(map, eventTypeName));            
+            services.getThreadingService().submitInbound(new InboundUnitSendMap(map, eventTypeName, services, this));            
         }
         else
         {
@@ -449,7 +448,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             {
                 if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isTimerThreading()))
                 {
-                    services.getThreadingService().submitTimerWork(new Pair<EPStatementHandle, Object>(null, handle));
+                    services.getThreadingService().submitTimerWork(new TimerUnitSingle(services, this, handle));
                 }
                 else
                 {
@@ -521,7 +520,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             {
                 if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isTimerThreading()))
                 {
-                    services.getThreadingService().submitTimerWork(new Pair<EPStatementHandle, Object>(entry.getKey(), entry.getValue()));
+                    services.getThreadingService().submitTimerWork(new TimerUnitMultiple(services, this, handle, callbackObject));
                 }
                 else
                 {
@@ -718,7 +717,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             {
                 if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isRouteThreading()))
                 {
-                    services.getThreadingService().submitRoute(new RouteUnit(handleCallback, event));
+                    services.getThreadingService().submitRoute(new RouteUnitSingle(this, handleCallback, event));
                 }
                 else
                 {
@@ -754,7 +753,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             {
                 if ((ThreadingOption.isThreadingEnabled) && (services.getThreadingService().isRouteThreading()))
                 {
-                    services.getThreadingService().submitRoute(new RouteUnit(callbackList, event, handle));
+                    services.getThreadingService().submitRoute(new RouteUnitMultiple(this, callbackList, event, handle));
                 }
                 else
                 {
