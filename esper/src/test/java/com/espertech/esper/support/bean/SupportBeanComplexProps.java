@@ -1,8 +1,6 @@
 package com.espertech.esper.support.bean;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.io.Serializable;
 
 public class SupportBeanComplexProps implements Serializable, SupportMarkerInterface
@@ -80,6 +78,42 @@ public class SupportBeanComplexProps implements Serializable, SupportMarkerInter
 	public int[] getArrayProperty()
 	{
 		return arrayProperty;
+	}
+
+    public Iterable<SupportBeanSpecialGetterNested> getIterableNested()
+    {
+        return Arrays.asList(new SupportBeanSpecialGetterNested("IN1", "INN1"), new SupportBeanSpecialGetterNested("IN2", "INN2"));
+    }
+
+    public Iterable<Integer> getIterableInteger()
+    {
+        return Arrays.asList(10, 20);
+    }
+
+    public List<SupportBeanSpecialGetterNested> getListNested()
+    {
+        return Arrays.asList(new SupportBeanSpecialGetterNested("LN1", "LNN1"), new SupportBeanSpecialGetterNested("LN2", "LNN2"));
+    }
+
+    public List<Integer> getListInteger()
+    {
+        return Arrays.asList(100, 200);
+    }
+
+    public Map<String, SupportBeanSpecialGetterNested> getMapNested()
+	{
+        Map<String, SupportBeanSpecialGetterNested> map = new HashMap<String, SupportBeanSpecialGetterNested>();
+        map.put("MN1", new SupportBeanSpecialGetterNested("LN1", "LNN1"));
+        map.put("MN2", new SupportBeanSpecialGetterNested("LN2", "LNN2"));
+        return map;
+	}
+
+    public Map<String, Integer> getMapInteger()
+	{
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        map.put("MI1", 1000);
+        map.put("MI2", 2000);
+        return map;
 	}
 
     public void setIndexed(int index, int value)

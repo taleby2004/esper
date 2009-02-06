@@ -16,6 +16,7 @@ import com.espertech.esper.event.bean.KeyedMethodPropertyGetter;
 import com.espertech.esper.event.bean.KeyedFastPropertyGetter;
 import com.espertech.esper.event.xml.*;
 import com.espertech.esper.event.xml.DOMMapGetter;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -86,12 +87,45 @@ public class MappedProperty extends PropertyBase
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
-        if (propertyDesc == null)
+        if (propertyDesc != null)
         {
-            // property not found, is not a property
+            return propertyDesc.getReadMethod().getReturnType();
+        }
+
+        // Check if this is an method returning array which is a type of simple property
+        InternalEventPropDescriptor descriptor = eventType.getSimpleProperty(propertyNameAtomic);
+        if (descriptor == null)
+        {
             return null;
         }
-        return propertyDesc.getReadMethod().getReturnType();
+
+        Class returnType = descriptor.getReturnType();
+        if (!JavaClassHelper.isImplementsInterface(returnType, Map.class))
+        {
+            return null;
+        }
+        if (descriptor.getReadMethod() != null)
+        {
+            Class genericType = JavaClassHelper.getGenericReturnTypeMap(descriptor.getReadMethod());
+            if (genericType == null)
+            {
+                return Object.class;
+            }
+            return genericType;
+        }
+        else if (descriptor.getAccessorField() != null)
+        {
+            Class genericType = JavaClassHelper.getGenericFieldTypeMap(descriptor.getAccessorField());
+            if (genericType == null)
+            {
+                return Object.class;
+            }
+            return genericType;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     public Class getPropertyTypeMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)

@@ -3,6 +3,7 @@ package com.espertech.esper.support.bean;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Arrays;
 import java.io.Serializable;
 
 /**
@@ -39,7 +40,7 @@ public class SupportBeanCombinedProps implements Serializable
         return indexed;
     }
 
-	public static class NestedLevOne implements Serializable
+    public static class NestedLevOne implements Serializable
 	{
         private Map<String, NestedLevTwo> map = new HashMap<String, NestedLevTwo>();
 

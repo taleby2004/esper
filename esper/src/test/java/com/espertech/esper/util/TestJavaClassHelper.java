@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 
 public class TestJavaClassHelper extends TestCase
 {
@@ -796,6 +798,84 @@ public class TestJavaClassHelper extends TestCase
         assertFalse(JavaClassHelper.isBigNumberType(Double.class));
     }
 
+    public void testGetGenericReturnType() throws Exception
+    {
+        Object[][] testcases = new Object[][] {
+                {"getList", String.class},
+                {"getListObject", Object.class},
+                {"getListUndefined", null},
+                {"getIterable", Integer.class},
+                {"getNested", MyClassWithGetters.class},
+                {"getIntPrimitive", null},
+                {"getIntBoxed", null},
+        };
+
+        for (int i = 0; i < testcases.length; i++)
+        {
+            String name = testcases[i][0].toString();
+            Method m = MyClassWithGetters.class.getMethod(name);
+            Class expected = (Class) testcases[i][1];
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericReturnType(m));
+        }
+    }
+
+    public void testGetGenericFieldType() throws Exception
+    {
+        Object[][] testcases = new Object[][] {
+                {"list", String.class},
+                {"listObject", Object.class},
+                {"listUndefined", null},
+                {"iterable", Integer.class},
+                {"nested", MyClassWithGetters.class},
+                {"intPrimitive", null},
+                {"intBoxed", null},
+        };
+
+        for (int i = 0; i < testcases.length; i++)
+        {
+            String name = testcases[i][0].toString();
+            Field f = MyClassWithFields.class.getField(name);
+            Class expected = (Class) testcases[i][1];
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericFieldType(f));
+        }
+    }
+
+    public void testGetGenericFieldTypeMap() throws Exception
+    {
+        Object[][] testcases = new Object[][] {
+                {"mapUndefined", null},
+                {"mapObject", Object.class},
+                {"mapBoolean", Boolean.class},
+                {"mapNotMap", null},
+        };
+
+        for (int i = 0; i < testcases.length; i++)
+        {
+            String name = testcases[i][0].toString();
+            Field f = MyClassWithFields.class.getField(name);
+            Class expected = (Class) testcases[i][1];
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericFieldTypeMap(f));
+        }
+    }
+
+    public void testGetGenericReturnTypeMap() throws Exception
+    {
+        Object[][] testcases = new Object[][] {
+                {"getMapUndefined", null},
+                {"getMapObject", Object.class},
+                {"getMapBoolean", Boolean.class},
+                {"getMapNotMap", null},
+        };
+
+        for (int i = 0; i < testcases.length; i++)
+        {
+            String name = testcases[i][0].toString();
+            Method m = MyClassWithGetters.class.getMethod(name);
+            Class expected = (Class) testcases[i][1];
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericReturnTypeMap(m));
+        }
+    }
+
     private String tryInvalidGetCommonCoercionType(Class[] types)
     {
         try
@@ -810,4 +890,36 @@ public class TestJavaClassHelper extends TestCase
         }
     }
 
+    class MyStringList extends ArrayList<String> {}
+
+    class MyClassWithGetters
+    {
+        public ArrayList<Object> getListObject(){return null;}
+        public ArrayList getListUndefined(){return null;}
+        public ArrayList<String> getList(){return null;}
+        public Iterable<Integer> getIterable(){return null;}
+        public Set<MyClassWithGetters> getNested(){return null;}
+        public Integer getIntBoxed(){return null;}
+        public int getIntPrimitive(){return 1;}
+        public Map getMapUndefined() {return null;}
+        public Map<String, Object> getMapObject() {return null;}
+        public Map<String, Boolean> getMapBoolean()  {return null;}
+        public Integer getMapNotMap()  {return null;}
+    }
+
+    class MyClassWithFields
+    {
+        public ArrayList<Object> listObject;
+        public ArrayList listUndefined;
+        public ArrayList<String> list;
+        public Iterable<Integer> iterable;
+        public Set<MyClassWithGetters> nested;
+        public Integer intBoxed;
+        public int intPrimitive;
+
+        public Map mapUndefined;
+        public Map<String, Object> mapObject;
+        public Map<String, Boolean> mapBoolean;
+        public Integer mapNotMap;
+    }
 }

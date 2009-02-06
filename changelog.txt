@@ -37,6 +37,7 @@ With Esper 3 integer division returns Double values, and Integer division can be
 - new =/> ANY/SOME/ALL; Corrected bug where "1 in (3, null)" yielded false but should be null; null > 1 returned true/false; coercion of float and long returned float not double
 - subselect order of eval well defined (sub-select first)
 - new config setting for UDF cache results
+- theading options
   
 Fixed issue ESPER-313 Using last | snapshot in output...when statement causes parsing error
 Fixed issue ESPER-312 NullPointerException in group-by query with only a count(*) in the having-clause and no other agg functions

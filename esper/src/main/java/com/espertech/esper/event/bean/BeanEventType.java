@@ -348,6 +348,12 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                     isIndexed = true;
                     isFragment = JavaClassHelper.isFragmentableType(type.getComponentType());
                 }
+                else if (JavaClassHelper.isImplementsInterface(type, Iterable.class))
+                {
+                    isIndexed = true;
+                    Class genericType = JavaClassHelper.getGenericReturnType(desc.getReadMethod(), desc.getAccessorField());
+                    isFragment = JavaClassHelper.isFragmentableType(genericType);
+                }
                 else
                 {
                     isMapped = false;

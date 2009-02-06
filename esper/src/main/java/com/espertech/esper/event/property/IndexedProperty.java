@@ -17,6 +17,7 @@ import com.espertech.esper.event.map.MapArrayPOJOEntryIndexedPropertyGetter;
 import com.espertech.esper.event.bean.*;
 import com.espertech.esper.event.xml.*;
 import com.espertech.esper.event.xml.DOMIndexedGetter;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -24,6 +25,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.List;
 
 /**
  * Represents an indexed property or array property, ie. an 'value' property with read method getValue(int index)
@@ -110,6 +112,49 @@ public class IndexedProperty extends PropertyBase
                 return new ArrayFieldPropertyGetter(field, index, eventAdapterService);
             }
         }
+        else if (JavaClassHelper.isImplementsInterface(returnType, List.class))
+        {
+            if (propertyDesc.getReadMethod() != null)
+            {
+                Method method = propertyDesc.getReadMethod();
+                if (fastClass != null)
+                {
+                    FastMethod fastMethod = fastClass.getMethod(method);
+                    return new ListFastPropertyGetter(fastMethod, index, eventAdapterService);
+                }
+                else
+                {
+                    return new ListMethodPropertyGetter(method, index, eventAdapterService);
+                }
+            }
+            else
+            {
+                Field field = propertyDesc.getAccessorField();
+                return new ListFieldPropertyGetter(field, index, eventAdapterService);
+            }
+        }
+        else if (JavaClassHelper.isImplementsInterface(returnType, Iterable.class))
+        {
+            if (propertyDesc.getReadMethod() != null)
+            {
+                Method method = propertyDesc.getReadMethod();
+                if (fastClass != null)
+                {
+                    FastMethod fastMethod = fastClass.getMethod(method);
+                    return new IterableFastPropertyGetter(fastMethod, index, eventAdapterService);
+                }
+                else
+                {
+                    return new IterableMethodPropertyGetter(method, index, eventAdapterService);
+                }
+            }
+            else
+            {
+                Field field = propertyDesc.getAccessorField();
+                return new IterableFieldPropertyGetter(field, index, eventAdapterService);
+            }
+        }
+
 
         return null;
     }
@@ -133,6 +178,31 @@ public class IndexedProperty extends PropertyBase
         if (returnType.isArray())
         {
             return returnType.getComponentType();
+        }
+        else if (JavaClassHelper.isImplementsInterface(returnType, Iterable.class))
+        {
+            if (descriptor.getReadMethod() != null)
+            {
+                Class genericType = JavaClassHelper.getGenericReturnType(descriptor.getReadMethod());
+                if (genericType == null)
+                {
+                    return Object.class;
+                }
+                return genericType;
+            }
+            else if (descriptor.getAccessorField() != null)
+            {
+                Class genericType = JavaClassHelper.getGenericFieldType(descriptor.getAccessorField());
+                if (genericType == null)
+                {
+                    return Object.class;
+                }
+                return genericType;
+            }
+            else
+            {
+                return null;
+            }
         }
         return null;
     }

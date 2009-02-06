@@ -14,6 +14,7 @@ import com.espertech.esper.type.*;
 import java.util.*;
 import java.math.BigInteger;
 import java.math.BigDecimal;
+import java.lang.reflect.*;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -1201,5 +1202,76 @@ public class JavaClassHelper
 
         result.add(superClass);
         getSuper(superClass, result);
+    }
+
+    public static Class getGenericReturnType(Method method, Field field)
+    {
+        if (method == null)
+        {
+            return getGenericFieldType(field);
+        }
+        else
+        {
+            return getGenericReturnType(method);
+        }
+    }
+
+    public static Class getGenericReturnTypeMap(Method method, Field field)
+    {
+        if (method == null)
+        {
+            return getGenericFieldTypeMap(field);
+        }
+        else
+        {
+            return getGenericReturnTypeMap(method);
+        }
+    }
+
+    public static Class getGenericReturnType(Method method)
+    {
+        Type t = method.getGenericReturnType();
+        return getGenericType(t, 0);
+    }
+    
+    public static Class getGenericReturnTypeMap(Method method)
+    {
+        Type t = method.getGenericReturnType();
+        return getGenericType(t, 1);
+    }
+
+    public static Class getGenericFieldType(Field field)
+    {
+        Type t = field.getGenericType();
+        return getGenericType(t, 0);
+    }
+
+    public static Class getGenericFieldTypeMap(Field field)
+    {
+        Type t = field.getGenericType();
+        return getGenericType(t, 1);
+    }
+
+    private static Class getGenericType(Type t, int index)
+    {
+        if (t == null)
+        {
+            return null;
+        }
+        if (!(t instanceof ParameterizedType))
+        {
+            return null;
+        }
+        ParameterizedType ptype = (ParameterizedType) t;
+        if ((ptype.getActualTypeArguments() == null) || (ptype.getActualTypeArguments().length < (index + 1)))
+        {
+            return Object.class;
+        }
+        Type typeParam = ptype.getActualTypeArguments()[index];
+        if (!(typeParam instanceof Class))
+        {
+            return Object.class;
+        }
+        return (Class) typeParam;
     }
 }
