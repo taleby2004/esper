@@ -1,13 +1,14 @@
 package com.espertech.esper.event.bean;
 
-import net.sf.cglib.reflect.FastMethod;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
+import net.sf.cglib.reflect.FastMethod;
 
-import java.util.List;
-import java.util.Iterator;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Iterator;
 
 /**
  * Getter for a iterable property identified by a given index, using the CGLIB fast method.
@@ -23,9 +24,9 @@ public class IterableFastPropertyGetter extends BaseNativePropertyGetter impleme
      * @param index is tge index within the array to get the property from
      * @param eventAdapterService factory for event beans and event types
      */
-    public IterableFastPropertyGetter(FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
+    public IterableFastPropertyGetter(Method method, FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType().getComponentType());
+        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
         this.index = index;
         this.fastMethod = fastMethod;
 

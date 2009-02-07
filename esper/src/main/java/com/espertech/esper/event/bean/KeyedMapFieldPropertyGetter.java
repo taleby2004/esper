@@ -11,46 +11,43 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
- * Getter for an array property backed by a field, identified by a given index, using vanilla reflection.
+ * Getter for a key property identified by a given key value, using vanilla reflection.
  */
-public class ArrayFieldPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class KeyedMapFieldPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
 {
     private final Field field;
-    private final int index;
+    private final Object key;
 
     /**
      * Constructor.
-     * @param field is the field to use to retrieve a value from the object
-     * @param index is tge index within the array to get the property from
+     * @param field is the field to use to retrieve a value from the object.
+     * @param key is the key to supply as parameter to the mapped property getter
      * @param eventAdapterService factory for event beans and event types
      */
-    public ArrayFieldPropertyGetter(Field field, int index, EventAdapterService eventAdapterService)
+    public KeyedMapFieldPropertyGetter(Field field, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, field.getType().getComponentType(), null);
-        this.index = index;
+        super(eventAdapterService, field.getType(), JavaClassHelper.getGenericFieldTypeMap(field));
+        this.key = key;
         this.field = field;
-
-        if (index < 0)
-        {
-            throw new IllegalArgumentException("Invalid negative index value");
-        }
     }
+
 
     public Object getBeanProp(Object object) throws PropertyAccessException
     {
         try
         {
-            Object value = field.get(object);
-            if (Array.getLength(value) <= index)
-            {
+            Object result = field.get(object);
+            if (!(result instanceof Map)) {
                 return null;
             }
-            return Array.get(value, index);
+            Map resultMap = (Map) result;
+            return resultMap.get(key);
         }
         catch (ClassCastException e)
         {
@@ -79,9 +76,9 @@ public class ArrayFieldPropertyGetter extends BaseNativePropertyGetter implement
 
     public String toString()
     {
-        return "ArrayFieldPropertyGetter " +
+        return "KeyedMapFieldPropertyGetter " +
                 " field=" + field.toString() +
-                " index=" + index;
+                " key=" + key;
     }
 
     public boolean isExistsProperty(EventBean eventBean)

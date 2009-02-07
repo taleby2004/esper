@@ -33,7 +33,7 @@ public class MapPOJOEntryPropertyGetter extends BaseNativePropertyGetter impleme
      * @param returnType type of the entry returned
      */
     public MapPOJOEntryPropertyGetter(String propertyMap, EventPropertyGetter mapEntryGetter, EventAdapterService eventAdapterService, Class returnType) {
-        super(eventAdapterService, returnType);
+        super(eventAdapterService, returnType, null);
         this.propertyMap = propertyMap;
         this.mapEntryGetter = mapEntryGetter;
         this.eventAdapterService = eventAdapterService;

@@ -104,7 +104,12 @@ public class NestedProperty implements Property
         }
 
         Class finalPropertyType = lastProperty.getPropertyType(eventType, eventAdapterService);
-        return new NestedPropertyGetter(getters, eventAdapterService,finalPropertyType);
+        return new NestedPropertyGetter(getters, eventAdapterService,finalPropertyType, null);
+    }
+
+    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        return null;  // TODO   also look at null passed to fragment generic type
     }
 
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)

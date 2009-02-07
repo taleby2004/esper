@@ -11,7 +11,6 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.bean.BeanEventPropertyGetter;
 import net.sf.cglib.reflect.FastMethod;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +31,7 @@ public class KeyedFastPropertyGetter extends BaseNativePropertyGetter implements
      */
     public KeyedFastPropertyGetter(FastMethod fastMethod, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType());
+        super(eventAdapterService, fastMethod.getReturnType(), null);
         this.key = key;
         this.fastMethod = fastMethod;
     }

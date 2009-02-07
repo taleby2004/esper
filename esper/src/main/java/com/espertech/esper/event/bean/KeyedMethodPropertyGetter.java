@@ -11,6 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,7 +32,7 @@ public class KeyedMethodPropertyGetter extends BaseNativePropertyGetter implemen
      */
     public KeyedMethodPropertyGetter(Method method, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, method.getReturnType());
+        super(eventAdapterService, method.getReturnType(), null);
         this.key = key;
         this.method = method;
     }

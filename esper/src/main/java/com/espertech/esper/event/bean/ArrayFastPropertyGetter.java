@@ -33,7 +33,7 @@ public class ArrayFastPropertyGetter extends BaseNativePropertyGetter implements
      */
     public ArrayFastPropertyGetter(FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType().getComponentType());
+        super(eventAdapterService, fastMethod.getReturnType().getComponentType(), null);
         this.index = index;
         this.fastMethod = fastMethod;
 

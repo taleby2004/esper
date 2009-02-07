@@ -9,18 +9,15 @@
 package com.espertech.esper.event.property;
 
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.bean.InternalEventPropDescriptor;
-import com.espertech.esper.event.bean.KeyedMethodPropertyGetter;
-import com.espertech.esper.event.bean.KeyedFastPropertyGetter;
+import com.espertech.esper.event.bean.*;
 import com.espertech.esper.event.xml.*;
-import com.espertech.esper.event.xml.DOMMapGetter;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -62,25 +59,60 @@ public class MappedProperty extends PropertyBase
         return false;
     }
 
+    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        return null;  // TODO
+    }
+
     public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
+        if (propertyDesc != null)
+        {
+            Method method = propertyDesc.getReadMethod();
+            FastClass fastClass = eventType.getFastClass();
+            if (fastClass != null)
+            {
+                FastMethod fastMethod = fastClass.getMethod(method);
+                return new KeyedFastPropertyGetter(fastMethod, key, eventAdapterService);
+            }
+            else
+            {
+                return new KeyedMethodPropertyGetter(method, key, eventAdapterService);
+            }
+        }
+
+        // Try the array as a simple property
+        propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
         if (propertyDesc == null)
         {
-            // property not found, is not a property
             return null;
         }
 
-        Method method = propertyDesc.getReadMethod();
-        FastClass fastClass = eventType.getFastClass();
-        if (fastClass != null)
+        Class returnType = propertyDesc.getReturnType();
+        if (!JavaClassHelper.isImplementsInterface(returnType, Map.class))
         {
-            FastMethod fastMethod = fastClass.getMethod(method);
-            return new KeyedFastPropertyGetter(fastMethod, key, eventAdapterService);
+            return null;
+        }
+
+        if (propertyDesc.getReadMethod() != null)
+        {
+            FastClass fastClass = eventType.getFastClass();
+            Method method = propertyDesc.getReadMethod();
+            if (fastClass != null)
+            {
+                FastMethod fastMethod = fastClass.getMethod(method);
+                return new KeyedMapFastPropertyGetter(method, fastMethod, key, eventAdapterService);
+            }
+            else
+            {
+                return new KeyedMapMethodPropertyGetter(method, key, eventAdapterService);
+            }
         }
         else
         {
-            return new KeyedMethodPropertyGetter(method, key, eventAdapterService);
+            Field field = propertyDesc.getAccessorField();
+            return new KeyedMapFieldPropertyGetter(field, key, eventAdapterService);
         }
     }
 

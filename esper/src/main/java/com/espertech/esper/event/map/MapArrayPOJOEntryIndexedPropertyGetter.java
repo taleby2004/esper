@@ -26,7 +26,7 @@ public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGe
      */
     public MapArrayPOJOEntryIndexedPropertyGetter(String propertyMap, int index, EventAdapterService eventAdapterService, Class returnType)
     {
-        super(eventAdapterService, returnType);
+        super(eventAdapterService, returnType, null);
         this.propertyMap = propertyMap;
         this.index = index;
     }

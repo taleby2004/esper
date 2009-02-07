@@ -961,7 +961,7 @@ public class MapEventType implements EventTypeSPI
                 BeanEventType nativeFragmentType = null;
                 if (isFragment)
                 {
-                    FragmentEventType fragmentType = EventBeanUtility.createNativeFragmentType(classType, eventAdapterService);
+                    FragmentEventType fragmentType = EventBeanUtility.createNativeFragmentType(classType, null, eventAdapterService);
                     nativeFragmentType = (BeanEventType) fragmentType.getFragmentType();
                     eventTypeFragments.put(name, fragmentType);
                 }
@@ -1139,7 +1139,7 @@ public class MapEventType implements EventTypeSPI
                 return null;
             }
             // its an array
-            return EventBeanUtility.createNativeFragmentType(((Class)type).getComponentType(), eventAdapterService);
+            return EventBeanUtility.createNativeFragmentType(((Class)type).getComponentType(), null, eventAdapterService);
         }
 
         // Map event types allow 2 types of properties inside:
@@ -1203,7 +1203,7 @@ public class MapEventType implements EventTypeSPI
                 {
                     return null;
                 }
-                FragmentEventType fragmentParent = EventBeanUtility.createNativeFragmentType((Class) type, eventAdapterService);
+                FragmentEventType fragmentParent = EventBeanUtility.createNativeFragmentType((Class) type, null, eventAdapterService);
                 if (fragmentParent == null)
                 {
                     return null;

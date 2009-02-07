@@ -10,12 +10,12 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.BaseNativePropertyGetter;
-import com.espertech.esper.event.bean.BeanEventPropertyGetter;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastMethod;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Property getter using CGLib's FastMethod instance.
@@ -29,9 +29,9 @@ public class CGLibPropertyGetter extends BaseNativePropertyGetter implements Bea
      * @param fastMethod is the method to use to retrieve a value from the object.
      * @param eventAdapterService factory for event beans and event types
      */
-    public CGLibPropertyGetter(FastMethod fastMethod, EventAdapterService eventAdapterService)
+    public CGLibPropertyGetter(Method method, FastMethod fastMethod, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType());
+        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
         this.fastMethod = fastMethod;
     }
 

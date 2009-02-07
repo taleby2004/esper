@@ -12,7 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.bean.BeanEventPropertyGetter;
 
 import java.util.List;
 
@@ -29,9 +28,9 @@ public class NestedPropertyGetter extends BaseNativePropertyGetter implements Ev
      * @param eventAdapterService is the cache and factory for event bean types and event wrappers
      * @param finalPropertyType type of the entry returned
      */
-    public NestedPropertyGetter(List<EventPropertyGetter> getterChain, EventAdapterService eventAdapterService, Class finalPropertyType)
+    public NestedPropertyGetter(List<EventPropertyGetter> getterChain, EventAdapterService eventAdapterService, Class finalPropertyType, Class finalGenericType)
     {
-        super(eventAdapterService, finalPropertyType); 
+        super(eventAdapterService, finalPropertyType, finalGenericType); 
         this.getterChain = new BeanEventPropertyGetter[getterChain.size()];
 
         for (int i = 0; i < getterChain.size(); i++)

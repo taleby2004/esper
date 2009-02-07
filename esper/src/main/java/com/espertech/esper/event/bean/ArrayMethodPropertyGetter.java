@@ -32,7 +32,7 @@ public class ArrayMethodPropertyGetter extends BaseNativePropertyGetter implemen
      */
     public ArrayMethodPropertyGetter(Method method, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, method.getReturnType().getComponentType());
+        super(eventAdapterService, method.getReturnType().getComponentType(), null);
         this.index = index;
         this.method = method;
 

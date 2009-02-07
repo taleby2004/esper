@@ -11,6 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +30,7 @@ public final class ReflectionPropMethodGetter extends BaseNativePropertyGetter i
      */
     public ReflectionPropMethodGetter(Method method, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, method.getReturnType());
+        super(eventAdapterService, method.getReturnType(), JavaClassHelper.getGenericReturnType(method));
         this.method = method;
     }
 

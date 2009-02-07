@@ -13,6 +13,7 @@ import com.espertech.esper.event.*;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
 import com.espertech.esper.event.property.SimpleProperty;
+import com.espertech.esper.event.property.NativePropertyDesc;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import org.apache.commons.logging.Log;
@@ -341,7 +342,8 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 if (JavaClassHelper.isImplementsInterface(type, Map.class))
                 {
                     isMapped = true;
-                    isFragment = false;
+                    Class genericType = JavaClassHelper.getGenericReturnTypeMap(desc.getReadMethod(), desc.getAccessorField());
+                    isFragment = JavaClassHelper.isFragmentableType(genericType);
                 }
                 else if (type.isArray())
                 {
@@ -661,7 +663,29 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
     public FragmentEventType getFragmentType(String propertyExpression)
     {
-        return EventBeanUtility.createNativeFragmentType(getPropertyType(propertyExpression), eventAdapterService);
+        SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyExpression);
+        if ((simpleProp != null) && (simpleProp.getClazz() != null ))
+        {
+            NativePropertyDesc nativeProp = simpleProp.getDescriptor().getReturnTypeNative();
+            return EventBeanUtility.createNativeFragmentType(nativeProp.getType(), nativeProp.getGeneric(), eventAdapterService);
+        }
+
+        Property prop = PropertyParser.parse(propertyExpression, false);
+        if (prop instanceof SimpleProperty)
+        {
+            // there is no such property since it wasn't in simplePropertyTypes
+            return null;
+        }
+        Class propType = prop.getPropertyType(this, eventAdapterService);
+        return EventBeanUtility.createNativeFragmentType(propType, null, eventAdapterService);
+        /*
+        NativePropertyDesc nativeProp = prop.getPropertyTypeNative(this, eventAdapterService);
+        if (nativeProp == null)
+        {
+            return null;
+        }
+        return EventBeanUtility.createNativeFragmentType(nativeProp.getType(), nativeProp.getGeneric(), eventAdapterService);
+        */
     }
 
     private static final Log log = LogFactory.getLog(BeanEventType.class);

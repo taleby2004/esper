@@ -61,6 +61,11 @@ public class DynamicIndexedProperty extends PropertyBase implements DynamicPrope
         return Object.class;
     }
 
+    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        return null;  // TODO
+    }
+
     public Class getPropertyTypeMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
     {
         return Object.class;

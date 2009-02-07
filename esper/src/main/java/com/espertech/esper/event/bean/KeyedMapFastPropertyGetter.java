@@ -11,64 +11,58 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
+import net.sf.cglib.reflect.FastMethod;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
- * Getter for an array property backed by a field, identified by a given index, using vanilla reflection.
+ * Getter for a key property identified by a given key value of a map, using the CGLIB fast method.
  */
-public class ArrayFieldPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
 {
-    private final Field field;
-    private final int index;
+    private final FastMethod fastMethod;
+    private final Object key;
 
     /**
      * Constructor.
-     * @param field is the field to use to retrieve a value from the object
-     * @param index is tge index within the array to get the property from
+     * @param fastMethod is the method to use to retrieve a value from the object.
+     * @param key is the key to supply as parameter to the mapped property getter
      * @param eventAdapterService factory for event beans and event types
      */
-    public ArrayFieldPropertyGetter(Field field, int index, EventAdapterService eventAdapterService)
+    public KeyedMapFastPropertyGetter(Method method, FastMethod fastMethod, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, field.getType().getComponentType(), null);
-        this.index = index;
-        this.field = field;
+        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
+        this.key = key;
+        this.fastMethod = fastMethod;
+    }
 
-        if (index < 0)
-        {
-            throw new IllegalArgumentException("Invalid negative index value");
-        }
+    public boolean isBeanExistsProperty(Object object)
+    {
+        return true; // Property exists as the property is not dynamic (unchecked)
     }
 
     public Object getBeanProp(Object object) throws PropertyAccessException
     {
         try
         {
-            Object value = field.get(object);
-            if (Array.getLength(value) <= index)
-            {
+            Object result = fastMethod.invoke(object, null);
+            if (!(result instanceof Map)) {
                 return null;
             }
-            return Array.get(value, index);
+            Map resultMap = (Map) result;
+            return resultMap.get(key);
         }
         catch (ClassCastException e)
         {
             throw new PropertyAccessException("Mismatched getter instance to event bean type");
         }
-        catch (IllegalAccessException e)
+        catch (InvocationTargetException e)
         {
             throw new PropertyAccessException(e);
         }
-        catch (IllegalArgumentException e)
-        {
-            throw new PropertyAccessException(e);
-        }
-    }
-
-    public boolean isBeanExistsProperty(Object object)
-    {
-        return true; // Property exists as the property is not dynamic (unchecked)
     }
 
     public final Object get(EventBean obj) throws PropertyAccessException
@@ -79,9 +73,9 @@ public class ArrayFieldPropertyGetter extends BaseNativePropertyGetter implement
 
     public String toString()
     {
-        return "ArrayFieldPropertyGetter " +
-                " field=" + field.toString() +
-                " index=" + index;
+        return "KeyedMapFastPropertyGetter " +
+                " fastMethod=" + fastMethod.toString() +
+                " key=" + key;
     }
 
     public boolean isExistsProperty(EventBean eventBean)

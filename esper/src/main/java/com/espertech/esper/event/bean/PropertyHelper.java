@@ -51,7 +51,7 @@ public class PropertyHelper
         EventPropertyGetter getter;
         if (fastMethod != null)
         {
-            getter = new CGLibPropertyGetter(fastMethod, eventAdapterService);
+            getter = new CGLibPropertyGetter(method, fastMethod, eventAdapterService);
         }
         else
         {

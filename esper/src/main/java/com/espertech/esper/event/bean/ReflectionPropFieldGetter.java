@@ -10,9 +10,8 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.BeanEventPropertyGetter;
-import com.espertech.esper.event.bean.BaseNativePropertyGetter;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Field;
 
@@ -30,7 +29,7 @@ public final class ReflectionPropFieldGetter extends BaseNativePropertyGetter im
      */
     public ReflectionPropFieldGetter(Field field, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, field.getType());
+        super(eventAdapterService, field.getType(), JavaClassHelper.getGenericFieldType(field));
         this.field = field;
     }
 

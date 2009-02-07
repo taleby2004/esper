@@ -75,7 +75,7 @@ public class TestCGLibPropertyGetter extends TestCase
         Method method = clazz.getMethod(methodName, new Class[] {});
         FastMethod fastMethod = fastClass.getMethod(method);
 
-        CGLibPropertyGetter getter = new CGLibPropertyGetter(fastMethod, SupportEventAdapterService.getService());
+        CGLibPropertyGetter getter = new CGLibPropertyGetter(method, fastMethod, SupportEventAdapterService.getService());
 
         return getter;
     }

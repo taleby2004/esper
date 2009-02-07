@@ -3,6 +3,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Array;
@@ -23,7 +24,7 @@ public class IterableFieldPropertyGetter extends BaseNativePropertyGetter implem
      */
     public IterableFieldPropertyGetter(Field field, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, field.getType().getComponentType());
+        super(eventAdapterService, field.getType().getComponentType(), JavaClassHelper.getGenericFieldType(field));
         this.index = index;
         this.field = field;
 

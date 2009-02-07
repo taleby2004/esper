@@ -1,12 +1,13 @@
 package com.espertech.esper.event.bean;
 
-import net.sf.cglib.reflect.FastMethod;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
+import net.sf.cglib.reflect.FastMethod;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -23,9 +24,9 @@ public class ListFastPropertyGetter extends BaseNativePropertyGetter implements 
      * @param index is tge index within the array to get the property from
      * @param eventAdapterService factory for event beans and event types
      */
-    public ListFastPropertyGetter(FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
+    public ListFastPropertyGetter(Method method, FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType().getComponentType());
+        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
         this.index = index;
         this.fastMethod = fastMethod;
 

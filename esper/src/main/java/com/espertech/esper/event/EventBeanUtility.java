@@ -20,7 +20,10 @@ import com.espertech.esper.util.JavaClassHelper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Method to getSelectListEvents events in collections to other collections or other event types.
@@ -52,27 +55,6 @@ public class EventBeanUtility
             System.arraycopy(oldArray, 0, newArray, 0, preserveLength);
         }
         return newArray;
-    }
-
-    /**
-     * Creates a fragment event type for the class.
-     * @param propertyType type of property
-     * @param eventAdapterService factory for event beans and event types
-     * @return fragment event type
-     */
-    public static FragmentEventType createNativeFragmentType(Class propertyType, EventAdapterService eventAdapterService)
-    {
-        if (!JavaClassHelper.isFragmentableType(propertyType))
-        {
-            return null;
-        }
-        boolean isIndexed = propertyType.isArray();
-        if (propertyType.isArray())
-        {
-            propertyType = propertyType.getComponentType();
-        }
-        EventType type = eventAdapterService.getBeanEventTypeFactory().createBeanType(propertyType.getName(), propertyType, false);
-        return new FragmentEventType(type, isIndexed, true);
     }
 
     /**
@@ -430,5 +412,29 @@ public class EventBeanUtility
             newArray[counter++] = eventToAdd;
         }
         return newArray;
+    }
+
+    public static FragmentEventType createNativeFragmentType(Class propertyType, Class genericType, EventAdapterService eventAdapterService)
+    {
+        boolean isIndexed = false;
+
+        if (propertyType.isArray())
+        {
+            isIndexed = true;
+            propertyType = propertyType.getComponentType();
+        }
+        else if (JavaClassHelper.isImplementsInterface(propertyType, Iterable.class))
+        {
+            isIndexed = true;
+            propertyType = genericType;
+        }
+
+        if (!JavaClassHelper.isFragmentableType(propertyType))
+        {
+            return null;
+        }
+
+        EventType type = eventAdapterService.getBeanEventTypeFactory().createBeanType(propertyType.getName(), propertyType, false);
+        return new FragmentEventType(type, isIndexed, true);
     }
 }

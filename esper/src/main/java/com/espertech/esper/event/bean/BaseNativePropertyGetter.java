@@ -10,10 +10,12 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Array;
+import java.util.Iterator;
 
 /**
  * Base getter for native fragments.
@@ -22,27 +24,38 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
 {
     private final EventAdapterService eventAdapterService;
     private volatile BeanEventType fragmentEventType;
+    private final Class genericType;
     private final Class fragmentClassType;
     private boolean isFragmentable;
     private final boolean isArray;
+    private final boolean isIterable;
 
     /**
      * Constructor.
      * @param eventAdapterService factory for event beans and event types
      * @param returnType type of the entry returned
      */
-    public BaseNativePropertyGetter(EventAdapterService eventAdapterService, Class returnType)
+    public BaseNativePropertyGetter(EventAdapterService eventAdapterService, Class returnType, Class genericType)
     {
+        this.genericType = genericType;
         this.eventAdapterService = eventAdapterService;
         if (returnType.isArray())
         {
             this.fragmentClassType = returnType.getComponentType();
             isArray = true;
+            isIterable = false;
+        }
+        else if (JavaClassHelper.isImplementsInterface(returnType, Iterable.class))
+        {
+            this.fragmentClassType = genericType;
+            isArray = false;
+            isIterable = true;
         }
         else
         {
             this.fragmentClassType = returnType;
             isArray = false;
+            isIterable = false;
         }
         isFragmentable = true;
     }
@@ -70,6 +83,7 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
                 fragmentEventType = eventAdapterService.getBeanEventTypeFactory().createBeanTypeDefaultName(object.getClass().getComponentType());
             }
         }
+        // TODO - dynamic iterable
         else
         {
             if (JavaClassHelper.isFragmentableType(object.getClass()))
@@ -178,6 +192,30 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
             EventBean[] returnVal = new EventBean[countFilled];
             System.arraycopy(events, 0, returnVal, 0, countFilled);
             return returnVal;
+        }
+        else if (isIterable)
+        {
+            if (!(object instanceof Iterable))
+            {
+                return null;
+            }
+            Iterator iterator = ((Iterable) object).iterator();
+            if (!iterator.hasNext())
+            {
+                return null;
+            }
+            ArrayDequeJDK6Backport<EventBean> events = new ArrayDequeJDK6Backport<EventBean>();
+            while (iterator.hasNext())
+            {
+                Object next = iterator.next();
+                if (next == null)
+                {
+                    continue;
+                }
+
+                events.add(eventAdapterService.adapterForTypedBean(next, fragmentEventType));
+            }
+            return events.toArray(new EventBean[events.size()]);
         }
         else
         {

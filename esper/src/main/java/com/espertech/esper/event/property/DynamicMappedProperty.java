@@ -13,6 +13,7 @@ import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.map.MapMappedPropertyGetter;
 import com.espertech.esper.event.bean.DynamicMappedPropertyGetter;
+import com.espertech.esper.event.bean.InternalEventPropDescriptor;
 import com.espertech.esper.event.xml.SchemaElementComplex;
 import com.espertech.esper.event.xml.SchemaItem;
 import com.espertech.esper.event.xml.BaseXMLEventType;
@@ -59,6 +60,11 @@ public class DynamicMappedProperty extends PropertyBase implements DynamicProper
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         return Object.class;
+    }
+
+    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        return null;  // TODO
     }
 
     public Class getPropertyTypeMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)

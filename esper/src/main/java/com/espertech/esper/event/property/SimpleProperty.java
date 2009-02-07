@@ -64,7 +64,17 @@ public class SimpleProperty extends PropertyBase
         {
             return null;
         }
-        return eventType.getPropertyType(propertyNameAtomic);
+        return propertyDesc.getReturnType();
+    }
+
+    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        InternalEventPropDescriptor propertyDesc = eventType.getSimpleProperty(propertyNameAtomic);
+        if (propertyDesc == null)
+        {
+            return null;
+        }
+        return propertyDesc.getReturnTypeNative();
     }
 
     public Class getPropertyTypeMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)

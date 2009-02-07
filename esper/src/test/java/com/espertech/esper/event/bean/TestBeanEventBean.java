@@ -1,9 +1,6 @@
 package com.espertech.esper.event.bean;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyDescriptor;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanCombinedProps;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
@@ -79,8 +76,9 @@ public class TestBeanEventBean extends TestCase
 
         assertEquals("0ma0", eventBean.get("array[0].mapped('0ma').value"));
         assertEquals("1ma1", eventBean.get("array[1].mapped('1mb').value"));
+        assertEquals("0ma0", eventBean.get("array[0].mapprop('0ma').value"));
+        assertEquals("1ma1", eventBean.get("array[1].mapprop('1mb').value"));
 
-        tryInvalidGet(eventBean, "array[0].mapprop('0ma').value");
         tryInvalidGet(eventBean, "dummy");
         tryInvalidGet(eventBean, "dummy[1]");
         tryInvalidGet(eventBean, "dummy('dd')");
@@ -124,6 +122,35 @@ public class TestBeanEventBean extends TestCase
         assertEquals(Integer.class, eventBean.getEventType().getPropertyType("mapInteger('a')"));
 
         assertEquals(new EventPropertyDescriptor("iterableNested", Iterable.class, false, false, true, false, true), eventBean.getEventType().getPropertyDescriptor("iterableNested"));
+        assertEquals(new EventPropertyDescriptor("iterableInteger", Iterable.class, false, false, true, false, false), eventBean.getEventType().getPropertyDescriptor("iterableInteger"));
+        assertEquals(new EventPropertyDescriptor("listNested", List.class, false, false, true, false, true), eventBean.getEventType().getPropertyDescriptor("listNested"));
+        assertEquals(new EventPropertyDescriptor("listInteger", List.class, false, false, true, false, false), eventBean.getEventType().getPropertyDescriptor("listInteger"));
+        assertEquals(new EventPropertyDescriptor("mapNested", Map.class, false, false, false, true, true), eventBean.getEventType().getPropertyDescriptor("mapNested"));
+        assertEquals(new EventPropertyDescriptor("mapInteger", Map.class, false, false, false, true, false), eventBean.getEventType().getPropertyDescriptor("mapInteger"));
+
+        assertNestedCollection(eventBean, "iterableNested");
+        assertNestedCollection(eventBean, "listNested");
+        assertNestedElement(eventBean, "iterableNested[0]");
+        assertNestedElement(eventBean, "listNested[0]");
+    }
+
+    private void assertNestedElement(EventBean eventBean, String propertyName)
+    {
+        FragmentEventType fragmentTypeOne = eventBean.getEventType().getFragmentType(propertyName);
+        assertEquals(true, fragmentTypeOne.isNative());
+        assertEquals(false, fragmentTypeOne.isIndexed());
+        assertEquals(SupportBeanComplexProps.SupportBeanSpecialGetterNested.class, fragmentTypeOne.getFragmentType().getUnderlyingType());
+    }
+
+    private void assertNestedCollection(EventBean eventBean, String propertyName)
+    {
+        FragmentEventType fragmentTypeTwo = eventBean.getEventType().getFragmentType(propertyName);
+        assertEquals(true, fragmentTypeTwo.isNative());
+        assertEquals(true, fragmentTypeTwo.isIndexed());
+        assertEquals(SupportBeanComplexProps.SupportBeanSpecialGetterNested.class, fragmentTypeTwo.getFragmentType().getUnderlyingType());
+
+        EventBean[] events = (EventBean[]) eventBean.getFragment(propertyName);
+        assertEquals(2, events.length);
     }
 
     private static void tryInvalidGet(EventBean eventBean, String propName)

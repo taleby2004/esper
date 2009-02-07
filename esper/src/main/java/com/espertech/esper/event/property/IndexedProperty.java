@@ -120,7 +120,7 @@ public class IndexedProperty extends PropertyBase
                 if (fastClass != null)
                 {
                     FastMethod fastMethod = fastClass.getMethod(method);
-                    return new ListFastPropertyGetter(fastMethod, index, eventAdapterService);
+                    return new ListFastPropertyGetter(method, fastMethod, index, eventAdapterService);
                 }
                 else
                 {
@@ -141,7 +141,7 @@ public class IndexedProperty extends PropertyBase
                 if (fastClass != null)
                 {
                     FastMethod fastMethod = fastClass.getMethod(method);
-                    return new IterableFastPropertyGetter(fastMethod, index, eventAdapterService);
+                    return new IterableFastPropertyGetter(method, fastMethod, index, eventAdapterService);
                 }
                 else
                 {
@@ -155,8 +155,25 @@ public class IndexedProperty extends PropertyBase
             }
         }
 
-
         return null;
+    }
+
+    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        InternalEventPropDescriptor descriptor = eventType.getIndexedProperty(propertyNameAtomic);
+        if (descriptor != null)
+        {
+            return new NativePropertyDesc(descriptor.getReturnType());
+        }
+
+        // Check if this is an method returning array which is a type of simple property
+        descriptor = eventType.getSimpleProperty(propertyNameAtomic);
+        if (descriptor == null)
+        {
+            return null;
+        }
+
+        return descriptor.getReturnTypeNative();
     }
 
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)

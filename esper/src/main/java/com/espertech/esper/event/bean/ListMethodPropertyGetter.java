@@ -3,6 +3,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +25,7 @@ public class ListMethodPropertyGetter extends BaseNativePropertyGetter implement
      */
     public ListMethodPropertyGetter(Method method, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, method.getReturnType().getComponentType());
+        super(eventAdapterService, method.getReturnType().getComponentType(), JavaClassHelper.getGenericReturnType(method));
         this.index = index;
         this.method = method;
 

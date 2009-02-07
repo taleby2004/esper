@@ -28,7 +28,7 @@ public class MapArrayPOJOBeanEntryIndexedPropertyGetter extends BaseNativeProper
      * @param returnType type of the entry returned
      */
     public MapArrayPOJOBeanEntryIndexedPropertyGetter(String propertyMap, int index, EventPropertyGetter mapEntryGetter, EventAdapterService eventAdapterService, Class returnType) {
-        super(eventAdapterService, returnType);
+        super(eventAdapterService, returnType, null);
         this.propertyMap = propertyMap;
         this.index = index;
         this.mapEntryGetter = mapEntryGetter;
