@@ -5,6 +5,7 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.util.XMLRenderingOptions;
 import com.espertech.esper.support.bean.SupportBeanRendererOne;
+import com.espertech.esper.support.bean.SupportBeanRendererThree;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
@@ -24,17 +25,18 @@ public class TestEventRenderer extends TestCase
     public void testPOJOMap()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanRendererOne", SupportBeanRendererOne.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanRendererThree", SupportBeanRendererThree.class);
 
-        SupportBeanRendererOne bean = new SupportBeanRendererOne();
+        SupportBeanRendererOne beanOne = new SupportBeanRendererOne();
         Map<String, Object> otherMap = new LinkedHashMap<String, Object>();
         otherMap.put("abc", "def");
         otherMap.put("def", 123);
         otherMap.put("efg", null);
         otherMap.put(null, 1234);
-        bean.setStringObjectMap(otherMap);
+        beanOne.setStringObjectMap(otherMap);
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBeanRendererOne");
-        epService.getEPRuntime().sendEvent(bean);
+        epService.getEPRuntime().sendEvent(beanOne);
 
         String json = epService.getEPRuntime().getEventRenderer().renderJSON("MyEvent", stmt.iterator().next());
         String expectedJson = "{ \"MyEvent\": { \"stringObjectMap\": { \"abc\": \"def\", \"def\": 123, \"efg\": null } } }";
@@ -59,6 +61,14 @@ public class TestEventRenderer extends TestCase
                 "  <stringObjectMap abc=\"def\" def=\"123\"/>\n" +
                 "</MyEvent>";
         assertEquals(removeNewline(expectedTwo), removeNewline(xmlTwo));
+        
+        // try the same Map only undeclared
+        SupportBeanRendererThree beanThree = new SupportBeanRendererThree();
+        beanThree.setStringObjectMap(otherMap);
+        stmt = epService.getEPAdministrator().createEPL("select * from SupportBeanRendererThree");
+        epService.getEPRuntime().sendEvent(beanThree);
+        json = epService.getEPRuntime().getEventRenderer().renderJSON("MyEvent", stmt.iterator().next());
+        assertEquals(removeNewline(expectedJson), removeNewline(json));
     }
 
     private String removeNewline(String text)

@@ -34,7 +34,7 @@ public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter impleme
      */
     public KeyedMapFastPropertyGetter(Method method, FastMethod fastMethod, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
+        super(eventAdapterService, JavaClassHelper.getGenericReturnTypeMap(method), null);
         this.key = key;
         this.fastMethod = fastMethod;
     }

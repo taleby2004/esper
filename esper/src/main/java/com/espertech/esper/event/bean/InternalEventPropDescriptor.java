@@ -9,7 +9,7 @@
 package com.espertech.esper.event.bean;
 
 import com.espertech.esper.event.EventPropertyType;
-import com.espertech.esper.event.property.NativePropertyDesc;
+import com.espertech.esper.event.property.GenericPropertyDesc;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Method;
@@ -109,15 +109,15 @@ public class InternalEventPropDescriptor
      * Returns the type of the underlying method or field of the event property.
      * @return return type
      */
-    public NativePropertyDesc getReturnTypeNative()
+    public GenericPropertyDesc getReturnTypeNative()
     {
         if (readMethod != null)
         {
-            return new NativePropertyDesc(readMethod.getReturnType(), JavaClassHelper.getGenericReturnType(readMethod));
+            return new GenericPropertyDesc(readMethod.getReturnType(), JavaClassHelper.getGenericReturnType(readMethod));
         }
         else
         {
-            return new NativePropertyDesc(accessorField.getType(), JavaClassHelper.getGenericFieldType(accessorField));
+            return new GenericPropertyDesc(accessorField.getType(), JavaClassHelper.getGenericFieldType(accessorField));
         }
     }
 

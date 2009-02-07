@@ -26,7 +26,7 @@ public class IterableFastPropertyGetter extends BaseNativePropertyGetter impleme
      */
     public IterableFastPropertyGetter(Method method, FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
+        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method), null);
         this.index = index;
         this.fastMethod = fastMethod;
 
@@ -78,11 +78,15 @@ public class IterableFastPropertyGetter extends BaseNativePropertyGetter impleme
             {
                 return null;
             }
-            count++;
-            if (count == index)
+            if (count < index)
+            {
+                it.next();
+            }
+            else
             {
                 return it.next();
             }
+            count++;
         }
     }
 

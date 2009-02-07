@@ -1,17 +1,17 @@
 package com.espertech.esper.event.property;
 
-public class NativePropertyDesc
+public class GenericPropertyDesc
 {
     private final Class type;
     private final Class generic;
 
-    public NativePropertyDesc(Class type, Class generic)
+    public GenericPropertyDesc(Class type, Class generic)
     {
         this.type = type;
         this.generic = generic;
     }
 
-    public NativePropertyDesc(Class type)
+    public GenericPropertyDesc(Class type)
     {
         this.type = type;
         this.generic = null;

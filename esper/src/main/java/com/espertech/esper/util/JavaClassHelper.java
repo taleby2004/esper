@@ -620,6 +620,10 @@ public class JavaClassHelper
         {
             return true;
         }
+        if (clazzBoxed.equals(Object.class))
+        {
+            return true;
+        }
         return false;
     }
 

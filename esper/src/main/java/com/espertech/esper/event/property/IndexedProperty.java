@@ -158,24 +158,6 @@ public class IndexedProperty extends PropertyBase
         return null;
     }
 
-    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
-    {
-        InternalEventPropDescriptor descriptor = eventType.getIndexedProperty(propertyNameAtomic);
-        if (descriptor != null)
-        {
-            return new NativePropertyDesc(descriptor.getReturnType());
-        }
-
-        // Check if this is an method returning array which is a type of simple property
-        descriptor = eventType.getSimpleProperty(propertyNameAtomic);
-        if (descriptor == null)
-        {
-            return null;
-        }
-
-        return descriptor.getReturnTypeNative();
-    }
-
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         InternalEventPropDescriptor descriptor = eventType.getIndexedProperty(propertyNameAtomic);

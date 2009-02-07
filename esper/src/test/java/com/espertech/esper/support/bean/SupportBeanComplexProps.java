@@ -103,16 +103,16 @@ public class SupportBeanComplexProps implements Serializable, SupportMarkerInter
     public Map<String, SupportBeanSpecialGetterNested> getMapNested()
 	{
         Map<String, SupportBeanSpecialGetterNested> map = new HashMap<String, SupportBeanSpecialGetterNested>();
-        map.put("MN1", new SupportBeanSpecialGetterNested("LN1", "LNN1"));
-        map.put("MN2", new SupportBeanSpecialGetterNested("LN2", "LNN2"));
+        map.put("a", new SupportBeanSpecialGetterNested("MN1", "MNN1"));
+        map.put("b", new SupportBeanSpecialGetterNested("MN2", "MNN2"));
         return map;
 	}
 
     public Map<String, Integer> getMapInteger()
 	{
         Map<String, Integer> map = new HashMap<String, Integer>();
-        map.put("MI1", 1000);
-        map.put("MI2", 2000);
+        map.put("c", 1000);
+        map.put("d", 2000);
         return map;
 	}
 

@@ -26,7 +26,7 @@ public class ListFastPropertyGetter extends BaseNativePropertyGetter implements 
      */
     public ListFastPropertyGetter(Method method, FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
+        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method), null);
         this.index = index;
         this.fastMethod = fastMethod;
 

@@ -37,7 +37,6 @@ public class KeyedMethodPropertyGetter extends BaseNativePropertyGetter implemen
         this.method = method;
     }
 
-
     public Object getBeanProp(Object object) throws PropertyAccessException
     {
         try

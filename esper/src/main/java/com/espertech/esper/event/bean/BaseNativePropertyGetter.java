@@ -83,7 +83,6 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
                 fragmentEventType = eventAdapterService.getBeanEventTypeFactory().createBeanTypeDefaultName(object.getClass().getComponentType());
             }
         }
-        // TODO - dynamic iterable
         else
         {
             if (JavaClassHelper.isFragmentableType(object.getClass()))

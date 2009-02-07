@@ -10,7 +10,6 @@ package com.espertech.esper.event.property;
 
 import com.espertech.esper.event.*;
 import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.event.bean.InternalEventPropDescriptor;
 import com.espertech.esper.event.xml.SchemaItem;
 import com.espertech.esper.event.xml.SchemaElementComplex;
 import com.espertech.esper.event.xml.BaseXMLEventType;
@@ -33,15 +32,6 @@ public interface Property
      * @return property type class
      */
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService);
-
-    /**
-     * Returns the property type in the form of the property descriptor.
-     * @param eventType is the event type representing the JavaBean
-     * @param eventAdapterService for event adapters
-     * @return property type class
-     */
-    // TODO - remove me
-    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService);
 
     /**
      * Returns value getter for the property of an event of the given event type.

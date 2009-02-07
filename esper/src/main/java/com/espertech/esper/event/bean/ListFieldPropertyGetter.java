@@ -24,7 +24,7 @@ public class ListFieldPropertyGetter extends BaseNativePropertyGetter implements
      */
     public ListFieldPropertyGetter(Field field, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, field.getType(), JavaClassHelper.getGenericFieldType(field));
+        super(eventAdapterService, JavaClassHelper.getGenericFieldType(field), null);
         this.index = index;
         this.field = field;
 

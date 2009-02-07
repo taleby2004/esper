@@ -59,11 +59,6 @@ public class MappedProperty extends PropertyBase
         return false;
     }
 
-    public NativePropertyDesc getPropertyTypeNative(BeanEventType eventType, EventAdapterService eventAdapterService)
-    {
-        return null;  // TODO
-    }
-
     public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);

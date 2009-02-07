@@ -20,9 +20,7 @@ public class TestThreadedConfigTimer extends TestCase
     private static final Log log = LogFactory.getLog(TestThreadedConfigTimer.class);
 
     // TODO
-    //   Documentation configuration
     //   runnable error logging
-    //   expose queue/threadpool through extension API
 
     public void testOp() throws Exception
     {
