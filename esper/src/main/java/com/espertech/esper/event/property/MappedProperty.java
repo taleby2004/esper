@@ -133,21 +133,47 @@ public class MappedProperty extends PropertyBase
         }
         if (descriptor.getReadMethod() != null)
         {
-            Class genericType = JavaClassHelper.getGenericReturnTypeMap(descriptor.getReadMethod());
-            if (genericType == null)
-            {
-                return Object.class;
-            }
-            return genericType;
+            return JavaClassHelper.getGenericReturnTypeMap(descriptor.getReadMethod(), false);
         }
         else if (descriptor.getAccessorField() != null)
         {
-            Class genericType = JavaClassHelper.getGenericFieldTypeMap(descriptor.getAccessorField());
-            if (genericType == null)
-            {
-                return Object.class;
-            }
-            return genericType;
+            return JavaClassHelper.getGenericFieldTypeMap(descriptor.getAccessorField(), false);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public GenericPropertyDesc getPropertyTypeGeneric(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
+        if (propertyDesc != null)
+        {
+            return new GenericPropertyDesc(propertyDesc.getReadMethod().getReturnType());
+        }
+
+        // Check if this is an method returning array which is a type of simple property
+        InternalEventPropDescriptor descriptor = eventType.getSimpleProperty(propertyNameAtomic);
+        if (descriptor == null)
+        {
+            return null;
+        }
+
+        Class returnType = descriptor.getReturnType();
+        if (!JavaClassHelper.isImplementsInterface(returnType, Map.class))
+        {
+            return null;
+        }
+        if (descriptor.getReadMethod() != null)
+        {
+            Class genericType = JavaClassHelper.getGenericReturnTypeMap(descriptor.getReadMethod(), false);
+            return new GenericPropertyDesc(genericType);
+        }
+        else if (descriptor.getAccessorField() != null)
+        {
+            Class genericType = JavaClassHelper.getGenericFieldTypeMap(descriptor.getAccessorField(), false);
+            return new GenericPropertyDesc(genericType);
         }
         else
         {

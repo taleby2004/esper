@@ -33,7 +33,7 @@ public class KeyedMapMethodPropertyGetter extends BaseNativePropertyGetter imple
      */
     public KeyedMapMethodPropertyGetter(Method method, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericReturnTypeMap(method), null);
+        super(eventAdapterService, JavaClassHelper.getGenericReturnTypeMap(method, false), null);
         this.key = key;
         this.method = method;
     }

@@ -4,6 +4,9 @@ import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.core.EPServicesContext;
 import com.espertech.esper.core.EPStatementHandle;
 
+/**
+ * Timer unit for multiple callbacks for a statement.
+ */
 public class TimerUnitMultiple implements TimerUnit
 {
     private final EPServicesContext services;
@@ -11,6 +14,13 @@ public class TimerUnitMultiple implements TimerUnit
     private final Object callbackObject;
     private final EPStatementHandle handle;
 
+    /**
+     * Ctor.
+     * @param services engine services
+     * @param runtime runtime to process
+     * @param handle statement handle
+     * @param callbackObject callback list
+     */
     public TimerUnitMultiple(EPServicesContext services, EPRuntimeImpl runtime, EPStatementHandle handle, Object callbackObject)
     {
         this.services = services;

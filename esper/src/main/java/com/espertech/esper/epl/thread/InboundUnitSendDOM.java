@@ -4,12 +4,21 @@ import com.espertech.esper.core.EPServicesContext;
 import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.client.EventBean;
 
+/**
+ * Inbound unit for DOM events.
+ */
 public class InboundUnitSendDOM implements InboundUnitRunnable
 {
     private final org.w3c.dom.Node event;
     private final EPServicesContext services;
     private final EPRuntimeImpl runtime;
 
+    /**
+     * Ctor.
+     * @param event document
+     * @param services for wrapping event
+     * @param runtime runtime to process
+     */
     public InboundUnitSendDOM(org.w3c.dom.Node event, EPServicesContext services, EPRuntimeImpl runtime)
     {
         this.event = event;

@@ -103,6 +103,29 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         return prop.getPropertyType(this, eventAdapterService);
     }
 
+    /**
+     * Returns the type and its generic property type, if any, or just the generic type as the type for indexed
+     * or mapped properties.
+     * @param propertyName a property expression
+     * @return type and generic type, if any
+     */
+    public final GenericPropertyDesc getPropertyTypeGeneric(String propertyName)
+    {
+        SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyName);
+        if ((simpleProp != null) && (simpleProp.getClazz() != null ))
+        {
+            return simpleProp.getDescriptor().getReturnTypeGeneric();
+        }
+
+        Property prop = PropertyParser.parse(propertyName, false);
+        if (prop instanceof SimpleProperty)
+        {
+            // there is no such property since it wasn't in simplePropertyTypes
+            return null;
+        }
+        return prop.getPropertyTypeGeneric(this, eventAdapterService);
+    }
+
     public boolean isProperty(String propertyName)
     {
         if (getPropertyType(propertyName) == null)
@@ -342,8 +365,9 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 if (JavaClassHelper.isImplementsInterface(type, Map.class))
                 {
                     isMapped = true;
-                    Class genericType = JavaClassHelper.getGenericReturnTypeMap(desc.getReadMethod(), desc.getAccessorField());
-                    isFragment = JavaClassHelper.isFragmentableType(genericType);
+                    // We do not yet allow to fragment maps entries.
+                    // Class genericType = JavaClassHelper.getGenericReturnTypeMap(desc.getReadMethod(), desc.getAccessorField());
+                    isFragment = false;
                 }
                 else if (type.isArray())
                 {
@@ -353,7 +377,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 else if (JavaClassHelper.isImplementsInterface(type, Iterable.class))
                 {
                     isIndexed = true;
-                    Class genericType = JavaClassHelper.getGenericReturnType(desc.getReadMethod(), desc.getAccessorField());
+                    Class genericType = JavaClassHelper.getGenericReturnType(desc.getReadMethod(), desc.getAccessorField(), true);
                     isFragment = JavaClassHelper.isFragmentableType(genericType);
                 }
                 else
@@ -666,7 +690,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyExpression);
         if ((simpleProp != null) && (simpleProp.getClazz() != null ))
         {
-            GenericPropertyDesc genericProp = simpleProp.getDescriptor().getReturnTypeNative();
+            GenericPropertyDesc genericProp = simpleProp.getDescriptor().getReturnTypeGeneric();
             return EventBeanUtility.createNativeFragmentType(genericProp.getType(), genericProp.getGeneric(), eventAdapterService);
         }
 
@@ -676,8 +700,9 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
             // there is no such property since it wasn't in simplePropertyTypes
             return null;
         }
-        Class propType = prop.getPropertyType(this, eventAdapterService);
-        return EventBeanUtility.createNativeFragmentType(propType, null, eventAdapterService);
+
+        GenericPropertyDesc genericProp = prop.getPropertyTypeGeneric(this, eventAdapterService);
+        return EventBeanUtility.createNativeFragmentType(genericProp.getType(), genericProp.getGeneric(), eventAdapterService);
     }
 
     private static final Log log = LogFactory.getLog(BeanEventType.class);

@@ -1,12 +1,9 @@
 package com.espertech.esper.regression.view;
 
 import junit.framework.TestCase;
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.epl.parse.ASTFilterSpecValidationException;
-import com.espertech.esper.epl.parse.EPStatementSyntaxException;
+import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_N;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -27,10 +24,34 @@ public class TestInvalidView extends TestCase
         epService.initialize();
     }
 
+    public void testInvalidPropertyExpression()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean");
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        EventBean event = stmt.iterator().next();
+
+        String exceptionText = getSyntaxExceptionProperty("", event);
+        assertEquals("Unexpected end of input []", exceptionText);
+
+        exceptionText = getSyntaxExceptionProperty("inner", event);
+        assertEquals("Incorrect syntax near 'inner' (a reserved keyword) [inner]", exceptionText);
+
+        exceptionText = getSyntaxExceptionProperty("-", event);
+        assertEquals("Incorrect syntax near '-' [-]", exceptionText);
+
+        exceptionText = getSyntaxExceptionProperty("a[]", event);
+        assertEquals("Incorrect syntax near ']' expecting a numeric literal but found a right angle bracket ']' at line 1 column 2 [a[]]", exceptionText);
+    }
+
     public void testInvalidSyntax()
     {
+        // keyword in select clause
+        String exceptionText = getSyntaxExceptionView("select inner from MyStream");
+        assertEquals("Incorrect syntax near 'inner' (a reserved keyword) at line 1 column 7, please check the select clause [select inner from MyStream]", exceptionText);
+
         // keyword in from clause
-        String exceptionText = getSyntaxExceptionView("select something from Outer");
+        exceptionText = getSyntaxExceptionView("select something from Outer");
         assertEquals("Incorrect syntax near 'Outer' (a reserved keyword) at line 1 column 22, please check the from clause [select something from Outer]", exceptionText);
 
         // keyword used in package
@@ -248,7 +269,31 @@ public class TestInvalidView extends TestCase
         catch (EPStatementSyntaxException ex)
         {
             exceptionText = ex.getMessage();
-            log.debug(".getSyntaxExceptionView expression=" + expression, ex);
+            if (log.isDebugEnabled())
+            {
+                log.debug(".getSyntaxExceptionView expression=" + expression, ex);
+            }
+            // Expected exception
+        }
+
+        return exceptionText;
+    }
+
+    private String getSyntaxExceptionProperty(String expression, EventBean event)
+    {
+        String exceptionText = null;
+        try
+        {
+            event.get(expression);
+            fail();
+        }
+        catch (PropertyAccessException ex)
+        {
+            exceptionText = ex.getMessage();
+            if (log.isDebugEnabled())
+            {
+                log.debug(".getSyntaxExceptionProperty expression=" + expression, ex);
+            }
             // Expected exception
         }
 

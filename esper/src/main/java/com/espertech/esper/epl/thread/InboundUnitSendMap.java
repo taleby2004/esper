@@ -6,6 +6,9 @@ import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
 
+/**
+ * Inbound work unit processing a map event.
+ */
 public class InboundUnitSendMap implements InboundUnitRunnable
 {
     private final Map map;
@@ -13,6 +16,13 @@ public class InboundUnitSendMap implements InboundUnitRunnable
     private final EPServicesContext services;
     private final EPRuntimeImpl runtime;
 
+    /**
+     * Ctor.
+     * @param map to send
+     * @param eventTypeName type name
+     * @param services to wrap
+     * @param runtime to process
+     */
     public InboundUnitSendMap(Map map, String eventTypeName, EPServicesContext services, EPRuntimeImpl runtime)
     {
         this.eventTypeName = eventTypeName;

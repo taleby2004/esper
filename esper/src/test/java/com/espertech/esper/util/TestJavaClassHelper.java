@@ -815,7 +815,7 @@ public class TestJavaClassHelper extends TestCase
             String name = testcases[i][0].toString();
             Method m = MyClassWithGetters.class.getMethod(name);
             Class expected = (Class) testcases[i][1];
-            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericReturnType(m));
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericReturnType(m, true));
         }
     }
 
@@ -836,7 +836,7 @@ public class TestJavaClassHelper extends TestCase
             String name = testcases[i][0].toString();
             Field f = MyClassWithFields.class.getField(name);
             Class expected = (Class) testcases[i][1];
-            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericFieldType(f));
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericFieldType(f, true));
         }
     }
 
@@ -854,7 +854,7 @@ public class TestJavaClassHelper extends TestCase
             String name = testcases[i][0].toString();
             Field f = MyClassWithFields.class.getField(name);
             Class expected = (Class) testcases[i][1];
-            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericFieldTypeMap(f));
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericFieldTypeMap(f, true));
         }
     }
 
@@ -872,7 +872,7 @@ public class TestJavaClassHelper extends TestCase
             String name = testcases[i][0].toString();
             Method m = MyClassWithGetters.class.getMethod(name);
             Class expected = (Class) testcases[i][1];
-            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericReturnTypeMap(m));
+            assertEquals("Testing " + name, expected, JavaClassHelper.getGenericReturnTypeMap(m, true));
         }
     }
 

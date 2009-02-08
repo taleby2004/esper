@@ -96,6 +96,7 @@ public final class EPServicesContext
      * @param metricsReportingService - for metric reporting
      * @param statementEventTypeRef - statement to event type reference holding
      * @param configSnapshot configuration snapshot
+     * @param threadingServiceImpl - engine-level threading services
      */
     public EPServicesContext(String engineURI,
                              String engineInstanceId,
@@ -325,6 +326,10 @@ public final class EPServicesContext
         return engineEnvContext;
     }
 
+    /**
+     * Returns engine-level threading settings.
+     * @return threading service
+     */
     public ThreadingService getThreadingService()
     {
         return threadingService;

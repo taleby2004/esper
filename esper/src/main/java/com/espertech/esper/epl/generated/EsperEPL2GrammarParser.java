@@ -1,4 +1,4 @@
-// $ANTLR 3.1.1 EsperEPL2Grammar.g 2009-01-26 22:14:42
+// $ANTLR 3.1.1 EsperEPL2Grammar.g 2009-02-07 10:28:04
 
   package com.espertech.esper.epl.generated;
 
@@ -429,6 +429,7 @@ public class EsperEPL2GrammarParser extends Parser {
     	parserTokenParaphases.put(END, "'end'");
     	parserTokenParaphases.put(FROM, "'from'");
     	parserTokenParaphases.put(OUTER, "'outer'");
+    	parserTokenParaphases.put(INNER, "'inner'");
     	parserTokenParaphases.put(JOIN, "'join'");
     	parserTokenParaphases.put(LEFT, "'left'");
     	parserTokenParaphases.put(RIGHT, "'right'");
@@ -524,7 +525,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "startPatternExpressionRule"
-    // EsperEPL2Grammar.g:466:1: startPatternExpressionRule : patternExpression EOF ;
+    // EsperEPL2Grammar.g:467:1: startPatternExpressionRule : patternExpression EOF ;
     public final EsperEPL2GrammarParser.startPatternExpressionRule_return startPatternExpressionRule() throws RecognitionException {
         EsperEPL2GrammarParser.startPatternExpressionRule_return retval = new EsperEPL2GrammarParser.startPatternExpressionRule_return();
         retval.start = input.LT(1);
@@ -538,8 +539,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree EOF2_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:467:2: ( patternExpression EOF )
-            // EsperEPL2Grammar.g:467:4: patternExpression EOF
+            // EsperEPL2Grammar.g:468:2: ( patternExpression EOF )
+            // EsperEPL2Grammar.g:468:4: patternExpression EOF
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -577,7 +578,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "startEPLExpressionRule"
-    // EsperEPL2Grammar.g:471:1: startEPLExpressionRule : eplExpression EOF -> ^( EPL_EXPR eplExpression ) ;
+    // EsperEPL2Grammar.g:472:1: startEPLExpressionRule : eplExpression EOF -> ^( EPL_EXPR eplExpression ) ;
     public final EsperEPL2GrammarParser.startEPLExpressionRule_return startEPLExpressionRule() throws RecognitionException {
         EsperEPL2GrammarParser.startEPLExpressionRule_return retval = new EsperEPL2GrammarParser.startEPLExpressionRule_return();
         retval.start = input.LT(1);
@@ -592,8 +593,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_EOF=new RewriteRuleTokenStream(adaptor,"token EOF");
         RewriteRuleSubtreeStream stream_eplExpression=new RewriteRuleSubtreeStream(adaptor,"rule eplExpression");
         try {
-            // EsperEPL2Grammar.g:472:2: ( eplExpression EOF -> ^( EPL_EXPR eplExpression ) )
-            // EsperEPL2Grammar.g:472:4: eplExpression EOF
+            // EsperEPL2Grammar.g:473:2: ( eplExpression EOF -> ^( EPL_EXPR eplExpression ) )
+            // EsperEPL2Grammar.g:473:4: eplExpression EOF
             {
             pushFollow(FOLLOW_eplExpression_in_startEPLExpressionRule1375);
             eplExpression3=eplExpression();
@@ -617,9 +618,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 474:3: -> ^( EPL_EXPR eplExpression )
+            // 475:3: -> ^( EPL_EXPR eplExpression )
             {
-                // EsperEPL2Grammar.g:474:6: ^( EPL_EXPR eplExpression )
+                // EsperEPL2Grammar.g:475:6: ^( EPL_EXPR eplExpression )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EPL_EXPR, "EPL_EXPR"), root_1);
@@ -658,7 +659,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "startEventPropertyRule"
-    // EsperEPL2Grammar.g:477:1: startEventPropertyRule : eventProperty EOF ;
+    // EsperEPL2Grammar.g:478:1: startEventPropertyRule : eventProperty EOF ;
     public final EsperEPL2GrammarParser.startEventPropertyRule_return startEventPropertyRule() throws RecognitionException {
         EsperEPL2GrammarParser.startEventPropertyRule_return retval = new EsperEPL2GrammarParser.startEventPropertyRule_return();
         retval.start = input.LT(1);
@@ -672,8 +673,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree EOF6_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:478:2: ( eventProperty EOF )
-            // EsperEPL2Grammar.g:478:4: eventProperty EOF
+            // EsperEPL2Grammar.g:479:2: ( eventProperty EOF )
+            // EsperEPL2Grammar.g:479:4: eventProperty EOF
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -711,7 +712,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "eplExpression"
-    // EsperEPL2Grammar.g:485:1: eplExpression : ( selectExpr | createWindowExpr | createVariableExpr | onExpr );
+    // EsperEPL2Grammar.g:486:1: eplExpression : ( selectExpr | createWindowExpr | createVariableExpr | onExpr );
     public final EsperEPL2GrammarParser.eplExpression_return eplExpression() throws RecognitionException {
         EsperEPL2GrammarParser.eplExpression_return retval = new EsperEPL2GrammarParser.eplExpression_return();
         retval.start = input.LT(1);
@@ -729,7 +730,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:486:2: ( selectExpr | createWindowExpr | createVariableExpr | onExpr )
+            // EsperEPL2Grammar.g:487:2: ( selectExpr | createWindowExpr | createVariableExpr | onExpr )
             int alt1=4;
             switch ( input.LA(1) ) {
             case SELECT:
@@ -772,7 +773,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt1) {
                 case 1 :
-                    // EsperEPL2Grammar.g:486:4: selectExpr
+                    // EsperEPL2Grammar.g:487:4: selectExpr
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -786,7 +787,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:487:4: createWindowExpr
+                    // EsperEPL2Grammar.g:488:4: createWindowExpr
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -800,7 +801,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:488:4: createVariableExpr
+                    // EsperEPL2Grammar.g:489:4: createVariableExpr
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -814,7 +815,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:489:4: onExpr
+                    // EsperEPL2Grammar.g:490:4: onExpr
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -853,7 +854,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "selectExpr"
-    // EsperEPL2Grammar.g:492:1: selectExpr : ( INSERT insertIntoExpr )? SELECT selectClause FROM fromClause ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( OUTPUT outputLimit )? ( ORDER BY orderByListExpr )? ( ROW_LIMIT_EXPR rowLimit )? ;
+    // EsperEPL2Grammar.g:493:1: selectExpr : ( INSERT insertIntoExpr )? SELECT selectClause FROM fromClause ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( OUTPUT outputLimit )? ( ORDER BY orderByListExpr )? ( ROW_LIMIT_EXPR rowLimit )? ;
     public final EsperEPL2GrammarParser.selectExpr_return selectExpr() throws RecognitionException {
         EsperEPL2GrammarParser.selectExpr_return retval = new EsperEPL2GrammarParser.selectExpr_return();
         retval.start = input.LT(1);
@@ -903,12 +904,12 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree ROW_LIMIT_EXPR29_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:493:2: ( ( INSERT insertIntoExpr )? SELECT selectClause FROM fromClause ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( OUTPUT outputLimit )? ( ORDER BY orderByListExpr )? ( ROW_LIMIT_EXPR rowLimit )? )
-            // EsperEPL2Grammar.g:493:4: ( INSERT insertIntoExpr )? SELECT selectClause FROM fromClause ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( OUTPUT outputLimit )? ( ORDER BY orderByListExpr )? ( ROW_LIMIT_EXPR rowLimit )?
+            // EsperEPL2Grammar.g:494:2: ( ( INSERT insertIntoExpr )? SELECT selectClause FROM fromClause ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( OUTPUT outputLimit )? ( ORDER BY orderByListExpr )? ( ROW_LIMIT_EXPR rowLimit )? )
+            // EsperEPL2Grammar.g:494:4: ( INSERT insertIntoExpr )? SELECT selectClause FROM fromClause ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( OUTPUT outputLimit )? ( ORDER BY orderByListExpr )? ( ROW_LIMIT_EXPR rowLimit )?
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:493:4: ( INSERT insertIntoExpr )?
+            // EsperEPL2Grammar.g:494:4: ( INSERT insertIntoExpr )?
             int alt2=2;
             int LA2_0 = input.LA(1);
 
@@ -917,7 +918,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt2) {
                 case 1 :
-                    // EsperEPL2Grammar.g:493:5: INSERT insertIntoExpr
+                    // EsperEPL2Grammar.g:494:5: INSERT insertIntoExpr
                     {
                     INSERT11=(Token)match(input,INSERT,FOLLOW_INSERT_in_selectExpr1450); if (state.failed) return retval;
                     pushFollow(FOLLOW_insertIntoExpr_in_selectExpr1453);
@@ -946,7 +947,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, fromClause16.getTree());
-            // EsperEPL2Grammar.g:496:3: ( WHERE whereClause )?
+            // EsperEPL2Grammar.g:497:3: ( WHERE whereClause )?
             int alt3=2;
             int LA3_0 = input.LA(1);
 
@@ -955,7 +956,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt3) {
                 case 1 :
-                    // EsperEPL2Grammar.g:496:4: WHERE whereClause
+                    // EsperEPL2Grammar.g:497:4: WHERE whereClause
                     {
                     WHERE17=(Token)match(input,WHERE,FOLLOW_WHERE_in_selectExpr1474); if (state.failed) return retval;
                     pushFollow(FOLLOW_whereClause_in_selectExpr1477);
@@ -970,7 +971,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:497:3: ( GROUP BY groupByListExpr )?
+            // EsperEPL2Grammar.g:498:3: ( GROUP BY groupByListExpr )?
             int alt4=2;
             int LA4_0 = input.LA(1);
 
@@ -979,7 +980,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt4) {
                 case 1 :
-                    // EsperEPL2Grammar.g:497:4: GROUP BY groupByListExpr
+                    // EsperEPL2Grammar.g:498:4: GROUP BY groupByListExpr
                     {
                     GROUP19=(Token)match(input,GROUP,FOLLOW_GROUP_in_selectExpr1484); if (state.failed) return retval;
                     BY20=(Token)match(input,BY,FOLLOW_BY_in_selectExpr1487); if (state.failed) return retval;
@@ -995,7 +996,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:498:3: ( HAVING havingClause )?
+            // EsperEPL2Grammar.g:499:3: ( HAVING havingClause )?
             int alt5=2;
             int LA5_0 = input.LA(1);
 
@@ -1004,7 +1005,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt5) {
                 case 1 :
-                    // EsperEPL2Grammar.g:498:4: HAVING havingClause
+                    // EsperEPL2Grammar.g:499:4: HAVING havingClause
                     {
                     HAVING22=(Token)match(input,HAVING,FOLLOW_HAVING_in_selectExpr1497); if (state.failed) return retval;
                     pushFollow(FOLLOW_havingClause_in_selectExpr1500);
@@ -1019,7 +1020,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:499:3: ( OUTPUT outputLimit )?
+            // EsperEPL2Grammar.g:500:3: ( OUTPUT outputLimit )?
             int alt6=2;
             int LA6_0 = input.LA(1);
 
@@ -1028,7 +1029,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt6) {
                 case 1 :
-                    // EsperEPL2Grammar.g:499:4: OUTPUT outputLimit
+                    // EsperEPL2Grammar.g:500:4: OUTPUT outputLimit
                     {
                     OUTPUT24=(Token)match(input,OUTPUT,FOLLOW_OUTPUT_in_selectExpr1507); if (state.failed) return retval;
                     pushFollow(FOLLOW_outputLimit_in_selectExpr1510);
@@ -1043,7 +1044,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:500:3: ( ORDER BY orderByListExpr )?
+            // EsperEPL2Grammar.g:501:3: ( ORDER BY orderByListExpr )?
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -1052,7 +1053,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt7) {
                 case 1 :
-                    // EsperEPL2Grammar.g:500:4: ORDER BY orderByListExpr
+                    // EsperEPL2Grammar.g:501:4: ORDER BY orderByListExpr
                     {
                     ORDER26=(Token)match(input,ORDER,FOLLOW_ORDER_in_selectExpr1517); if (state.failed) return retval;
                     BY27=(Token)match(input,BY,FOLLOW_BY_in_selectExpr1520); if (state.failed) return retval;
@@ -1068,7 +1069,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:501:3: ( ROW_LIMIT_EXPR rowLimit )?
+            // EsperEPL2Grammar.g:502:3: ( ROW_LIMIT_EXPR rowLimit )?
             int alt8=2;
             int LA8_0 = input.LA(1);
 
@@ -1077,7 +1078,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt8) {
                 case 1 :
-                    // EsperEPL2Grammar.g:501:4: ROW_LIMIT_EXPR rowLimit
+                    // EsperEPL2Grammar.g:502:4: ROW_LIMIT_EXPR rowLimit
                     {
                     ROW_LIMIT_EXPR29=(Token)match(input,ROW_LIMIT_EXPR,FOLLOW_ROW_LIMIT_EXPR_in_selectExpr1530); if (state.failed) return retval;
                     pushFollow(FOLLOW_rowLimit_in_selectExpr1533);
@@ -1119,7 +1120,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "onExpr"
-    // EsperEPL2Grammar.g:504:1: onExpr : ON ( eventFilterExpression | patternInclusionExpression ) ( AS i= IDENT | i= IDENT )? ( onDeleteExpr | onSelectExpr | onSetExpr ) -> ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? ) ;
+    // EsperEPL2Grammar.g:505:1: onExpr : ON ( eventFilterExpression | patternInclusionExpression ) ( AS i= IDENT | i= IDENT )? ( onDeleteExpr | onSelectExpr | onSetExpr ) -> ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? ) ;
     public final EsperEPL2GrammarParser.onExpr_return onExpr() throws RecognitionException {
         EsperEPL2GrammarParser.onExpr_return retval = new EsperEPL2GrammarParser.onExpr_return();
         retval.start = input.LT(1);
@@ -1152,13 +1153,13 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_onSetExpr=new RewriteRuleSubtreeStream(adaptor,"rule onSetExpr");
         RewriteRuleSubtreeStream stream_patternInclusionExpression=new RewriteRuleSubtreeStream(adaptor,"rule patternInclusionExpression");
         try {
-            // EsperEPL2Grammar.g:505:2: ( ON ( eventFilterExpression | patternInclusionExpression ) ( AS i= IDENT | i= IDENT )? ( onDeleteExpr | onSelectExpr | onSetExpr ) -> ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? ) )
-            // EsperEPL2Grammar.g:505:4: ON ( eventFilterExpression | patternInclusionExpression ) ( AS i= IDENT | i= IDENT )? ( onDeleteExpr | onSelectExpr | onSetExpr )
+            // EsperEPL2Grammar.g:506:2: ( ON ( eventFilterExpression | patternInclusionExpression ) ( AS i= IDENT | i= IDENT )? ( onDeleteExpr | onSelectExpr | onSetExpr ) -> ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? ) )
+            // EsperEPL2Grammar.g:506:4: ON ( eventFilterExpression | patternInclusionExpression ) ( AS i= IDENT | i= IDENT )? ( onDeleteExpr | onSelectExpr | onSetExpr )
             {
             ON31=(Token)match(input,ON,FOLLOW_ON_in_onExpr1548); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_ON.add(ON31);
 
-            // EsperEPL2Grammar.g:505:7: ( eventFilterExpression | patternInclusionExpression )
+            // EsperEPL2Grammar.g:506:7: ( eventFilterExpression | patternInclusionExpression )
             int alt9=2;
             int LA9_0 = input.LA(1);
 
@@ -1177,7 +1178,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt9) {
                 case 1 :
-                    // EsperEPL2Grammar.g:505:8: eventFilterExpression
+                    // EsperEPL2Grammar.g:506:8: eventFilterExpression
                     {
                     pushFollow(FOLLOW_eventFilterExpression_in_onExpr1551);
                     eventFilterExpression32=eventFilterExpression();
@@ -1189,7 +1190,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:505:32: patternInclusionExpression
+                    // EsperEPL2Grammar.g:506:32: patternInclusionExpression
                     {
                     pushFollow(FOLLOW_patternInclusionExpression_in_onExpr1555);
                     patternInclusionExpression33=patternInclusionExpression();
@@ -1203,7 +1204,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:505:60: ( AS i= IDENT | i= IDENT )?
+            // EsperEPL2Grammar.g:506:60: ( AS i= IDENT | i= IDENT )?
             int alt10=3;
             int LA10_0 = input.LA(1);
 
@@ -1215,7 +1216,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt10) {
                 case 1 :
-                    // EsperEPL2Grammar.g:505:61: AS i= IDENT
+                    // EsperEPL2Grammar.g:506:61: AS i= IDENT
                     {
                     AS34=(Token)match(input,AS,FOLLOW_AS_in_onExpr1559); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS34);
@@ -1227,7 +1228,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:505:74: i= IDENT
+                    // EsperEPL2Grammar.g:506:74: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_onExpr1569); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -1238,7 +1239,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:506:3: ( onDeleteExpr | onSelectExpr | onSetExpr )
+            // EsperEPL2Grammar.g:507:3: ( onDeleteExpr | onSelectExpr | onSetExpr )
             int alt11=3;
             switch ( input.LA(1) ) {
             case DELETE:
@@ -1267,7 +1268,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt11) {
                 case 1 :
-                    // EsperEPL2Grammar.g:506:4: onDeleteExpr
+                    // EsperEPL2Grammar.g:507:4: onDeleteExpr
                     {
                     pushFollow(FOLLOW_onDeleteExpr_in_onExpr1577);
                     onDeleteExpr35=onDeleteExpr();
@@ -1279,7 +1280,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:506:19: onSelectExpr
+                    // EsperEPL2Grammar.g:507:19: onSelectExpr
                     {
                     pushFollow(FOLLOW_onSelectExpr_in_onExpr1581);
                     onSelectExpr36=onSelectExpr();
@@ -1291,7 +1292,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:506:34: onSetExpr
+                    // EsperEPL2Grammar.g:507:34: onSetExpr
                     {
                     pushFollow(FOLLOW_onSetExpr_in_onExpr1585);
                     onSetExpr37=onSetExpr();
@@ -1308,7 +1309,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: i, patternInclusionExpression, onSetExpr, onSelectExpr, onDeleteExpr, eventFilterExpression
+            // elements: i, onDeleteExpr, eventFilterExpression, onSelectExpr, patternInclusionExpression, onSetExpr
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -1319,44 +1320,44 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 507:3: -> ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? )
+            // 508:3: -> ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? )
             {
-                // EsperEPL2Grammar.g:507:6: ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? )
+                // EsperEPL2Grammar.g:508:6: ^( ON_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( $i)? ( onDeleteExpr )? ( onSelectExpr )? ( onSetExpr )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ON_EXPR, "ON_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:507:16: ( eventFilterExpression )?
+                // EsperEPL2Grammar.g:508:16: ( eventFilterExpression )?
                 if ( stream_eventFilterExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_eventFilterExpression.nextTree());
 
                 }
                 stream_eventFilterExpression.reset();
-                // EsperEPL2Grammar.g:507:39: ( patternInclusionExpression )?
+                // EsperEPL2Grammar.g:508:39: ( patternInclusionExpression )?
                 if ( stream_patternInclusionExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_patternInclusionExpression.nextTree());
 
                 }
                 stream_patternInclusionExpression.reset();
-                // EsperEPL2Grammar.g:507:67: ( $i)?
+                // EsperEPL2Grammar.g:508:67: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
                 }
                 stream_i.reset();
-                // EsperEPL2Grammar.g:507:71: ( onDeleteExpr )?
+                // EsperEPL2Grammar.g:508:71: ( onDeleteExpr )?
                 if ( stream_onDeleteExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_onDeleteExpr.nextTree());
 
                 }
                 stream_onDeleteExpr.reset();
-                // EsperEPL2Grammar.g:507:85: ( onSelectExpr )?
+                // EsperEPL2Grammar.g:508:85: ( onSelectExpr )?
                 if ( stream_onSelectExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_onSelectExpr.nextTree());
 
                 }
                 stream_onSelectExpr.reset();
-                // EsperEPL2Grammar.g:507:99: ( onSetExpr )?
+                // EsperEPL2Grammar.g:508:99: ( onSetExpr )?
                 if ( stream_onSetExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_onSetExpr.nextTree());
 
@@ -1395,7 +1396,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "onSelectExpr"
-    // EsperEPL2Grammar.g:510:1: onSelectExpr : ( INSERT insertIntoExpr )? SELECT selectionList onExprFrom ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( ORDER BY orderByListExpr )? -> ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? ) ;
+    // EsperEPL2Grammar.g:511:1: onSelectExpr : ( INSERT insertIntoExpr )? SELECT selectionList onExprFrom ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( ORDER BY orderByListExpr )? -> ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? ) ;
     public final EsperEPL2GrammarParser.onSelectExpr_return onSelectExpr() throws RecognitionException {
         EsperEPL2GrammarParser.onSelectExpr_return retval = new EsperEPL2GrammarParser.onSelectExpr_return();
         retval.start = input.LT(1);
@@ -1449,10 +1450,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_havingClause=new RewriteRuleSubtreeStream(adaptor,"rule havingClause");
          paraphrases.push("on-select clause"); 
         try {
-            // EsperEPL2Grammar.g:513:2: ( ( INSERT insertIntoExpr )? SELECT selectionList onExprFrom ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( ORDER BY orderByListExpr )? -> ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? ) )
-            // EsperEPL2Grammar.g:513:4: ( INSERT insertIntoExpr )? SELECT selectionList onExprFrom ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( ORDER BY orderByListExpr )?
+            // EsperEPL2Grammar.g:514:2: ( ( INSERT insertIntoExpr )? SELECT selectionList onExprFrom ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( ORDER BY orderByListExpr )? -> ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? ) )
+            // EsperEPL2Grammar.g:514:4: ( INSERT insertIntoExpr )? SELECT selectionList onExprFrom ( WHERE whereClause )? ( GROUP BY groupByListExpr )? ( HAVING havingClause )? ( ORDER BY orderByListExpr )?
             {
-            // EsperEPL2Grammar.g:513:4: ( INSERT insertIntoExpr )?
+            // EsperEPL2Grammar.g:514:4: ( INSERT insertIntoExpr )?
             int alt12=2;
             int LA12_0 = input.LA(1);
 
@@ -1461,7 +1462,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt12) {
                 case 1 :
-                    // EsperEPL2Grammar.g:513:5: INSERT insertIntoExpr
+                    // EsperEPL2Grammar.g:514:5: INSERT insertIntoExpr
                     {
                     INSERT38=(Token)match(input,INSERT,FOLLOW_INSERT_in_onSelectExpr1638); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INSERT.add(INSERT38);
@@ -1493,7 +1494,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_onExprFrom.add(onExprFrom42.getTree());
-            // EsperEPL2Grammar.g:516:3: ( WHERE whereClause )?
+            // EsperEPL2Grammar.g:517:3: ( WHERE whereClause )?
             int alt13=2;
             int LA13_0 = input.LA(1);
 
@@ -1502,7 +1503,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt13) {
                 case 1 :
-                    // EsperEPL2Grammar.g:516:4: WHERE whereClause
+                    // EsperEPL2Grammar.g:517:4: WHERE whereClause
                     {
                     WHERE43=(Token)match(input,WHERE,FOLLOW_WHERE_in_onSelectExpr1657); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_WHERE.add(WHERE43);
@@ -1519,7 +1520,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:517:3: ( GROUP BY groupByListExpr )?
+            // EsperEPL2Grammar.g:518:3: ( GROUP BY groupByListExpr )?
             int alt14=2;
             int LA14_0 = input.LA(1);
 
@@ -1528,7 +1529,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt14) {
                 case 1 :
-                    // EsperEPL2Grammar.g:517:4: GROUP BY groupByListExpr
+                    // EsperEPL2Grammar.g:518:4: GROUP BY groupByListExpr
                     {
                     GROUP45=(Token)match(input,GROUP,FOLLOW_GROUP_in_onSelectExpr1668); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_GROUP.add(GROUP45);
@@ -1548,7 +1549,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:518:3: ( HAVING havingClause )?
+            // EsperEPL2Grammar.g:519:3: ( HAVING havingClause )?
             int alt15=2;
             int LA15_0 = input.LA(1);
 
@@ -1557,7 +1558,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt15) {
                 case 1 :
-                    // EsperEPL2Grammar.g:518:4: HAVING havingClause
+                    // EsperEPL2Grammar.g:519:4: HAVING havingClause
                     {
                     HAVING48=(Token)match(input,HAVING,FOLLOW_HAVING_in_onSelectExpr1679); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_HAVING.add(HAVING48);
@@ -1574,7 +1575,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:519:3: ( ORDER BY orderByListExpr )?
+            // EsperEPL2Grammar.g:520:3: ( ORDER BY orderByListExpr )?
             int alt16=2;
             int LA16_0 = input.LA(1);
 
@@ -1583,7 +1584,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt16) {
                 case 1 :
-                    // EsperEPL2Grammar.g:519:4: ORDER BY orderByListExpr
+                    // EsperEPL2Grammar.g:520:4: ORDER BY orderByListExpr
                     {
                     ORDER50=(Token)match(input,ORDER,FOLLOW_ORDER_in_onSelectExpr1688); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ORDER.add(ORDER50);
@@ -1606,7 +1607,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: whereClause, onExprFrom, havingClause, orderByListExpr, selectionList, insertIntoExpr, groupByListExpr
+            // elements: whereClause, insertIntoExpr, selectionList, groupByListExpr, orderByListExpr, onExprFrom, havingClause
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1616,14 +1617,14 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 520:3: -> ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? )
+            // 521:3: -> ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? )
             {
-                // EsperEPL2Grammar.g:520:6: ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? )
+                // EsperEPL2Grammar.g:521:6: ^( ON_SELECT_EXPR ( insertIntoExpr )? selectionList onExprFrom ( whereClause )? ( groupByListExpr )? ( havingClause )? ( orderByListExpr )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ON_SELECT_EXPR, "ON_SELECT_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:520:23: ( insertIntoExpr )?
+                // EsperEPL2Grammar.g:521:23: ( insertIntoExpr )?
                 if ( stream_insertIntoExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_insertIntoExpr.nextTree());
 
@@ -1631,25 +1632,25 @@ public class EsperEPL2GrammarParser extends Parser {
                 stream_insertIntoExpr.reset();
                 adaptor.addChild(root_1, stream_selectionList.nextTree());
                 adaptor.addChild(root_1, stream_onExprFrom.nextTree());
-                // EsperEPL2Grammar.g:520:64: ( whereClause )?
+                // EsperEPL2Grammar.g:521:64: ( whereClause )?
                 if ( stream_whereClause.hasNext() ) {
                     adaptor.addChild(root_1, stream_whereClause.nextTree());
 
                 }
                 stream_whereClause.reset();
-                // EsperEPL2Grammar.g:520:77: ( groupByListExpr )?
+                // EsperEPL2Grammar.g:521:77: ( groupByListExpr )?
                 if ( stream_groupByListExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_groupByListExpr.nextTree());
 
                 }
                 stream_groupByListExpr.reset();
-                // EsperEPL2Grammar.g:520:94: ( havingClause )?
+                // EsperEPL2Grammar.g:521:94: ( havingClause )?
                 if ( stream_havingClause.hasNext() ) {
                     adaptor.addChild(root_1, stream_havingClause.nextTree());
 
                 }
                 stream_havingClause.reset();
-                // EsperEPL2Grammar.g:520:108: ( orderByListExpr )?
+                // EsperEPL2Grammar.g:521:108: ( orderByListExpr )?
                 if ( stream_orderByListExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_orderByListExpr.nextTree());
 
@@ -1691,7 +1692,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "onDeleteExpr"
-    // EsperEPL2Grammar.g:523:1: onDeleteExpr : DELETE onExprFrom ( WHERE whereClause )? -> ^( ON_DELETE_EXPR onExprFrom ( whereClause )? ) ;
+    // EsperEPL2Grammar.g:524:1: onDeleteExpr : DELETE onExprFrom ( WHERE whereClause )? -> ^( ON_DELETE_EXPR onExprFrom ( whereClause )? ) ;
     public final EsperEPL2GrammarParser.onDeleteExpr_return onDeleteExpr() throws RecognitionException {
         EsperEPL2GrammarParser.onDeleteExpr_return retval = new EsperEPL2GrammarParser.onDeleteExpr_return();
         retval.start = input.LT(1);
@@ -1713,8 +1714,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_onExprFrom=new RewriteRuleSubtreeStream(adaptor,"rule onExprFrom");
          paraphrases.push("on-delete clause"); 
         try {
-            // EsperEPL2Grammar.g:526:2: ( DELETE onExprFrom ( WHERE whereClause )? -> ^( ON_DELETE_EXPR onExprFrom ( whereClause )? ) )
-            // EsperEPL2Grammar.g:526:4: DELETE onExprFrom ( WHERE whereClause )?
+            // EsperEPL2Grammar.g:527:2: ( DELETE onExprFrom ( WHERE whereClause )? -> ^( ON_DELETE_EXPR onExprFrom ( whereClause )? ) )
+            // EsperEPL2Grammar.g:527:4: DELETE onExprFrom ( WHERE whereClause )?
             {
             DELETE53=(Token)match(input,DELETE,FOLLOW_DELETE_in_onDeleteExpr1745); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_DELETE.add(DELETE53);
@@ -1725,7 +1726,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_onExprFrom.add(onExprFrom54.getTree());
-            // EsperEPL2Grammar.g:528:3: ( WHERE whereClause )?
+            // EsperEPL2Grammar.g:529:3: ( WHERE whereClause )?
             int alt17=2;
             int LA17_0 = input.LA(1);
 
@@ -1734,7 +1735,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt17) {
                 case 1 :
-                    // EsperEPL2Grammar.g:528:4: WHERE whereClause
+                    // EsperEPL2Grammar.g:529:4: WHERE whereClause
                     {
                     WHERE55=(Token)match(input,WHERE,FOLLOW_WHERE_in_onDeleteExpr1754); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_WHERE.add(WHERE55);
@@ -1754,7 +1755,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: whereClause, onExprFrom
+            // elements: onExprFrom, whereClause
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -1764,15 +1765,15 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 529:3: -> ^( ON_DELETE_EXPR onExprFrom ( whereClause )? )
+            // 530:3: -> ^( ON_DELETE_EXPR onExprFrom ( whereClause )? )
             {
-                // EsperEPL2Grammar.g:529:6: ^( ON_DELETE_EXPR onExprFrom ( whereClause )? )
+                // EsperEPL2Grammar.g:530:6: ^( ON_DELETE_EXPR onExprFrom ( whereClause )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ON_DELETE_EXPR, "ON_DELETE_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_onExprFrom.nextTree());
-                // EsperEPL2Grammar.g:529:34: ( whereClause )?
+                // EsperEPL2Grammar.g:530:34: ( whereClause )?
                 if ( stream_whereClause.hasNext() ) {
                     adaptor.addChild(root_1, stream_whereClause.nextTree());
 
@@ -1814,7 +1815,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "onSetExpr"
-    // EsperEPL2Grammar.g:532:1: onSetExpr : SET onSetAssignment ( COMMA onSetAssignment )* -> ^( ON_SET_EXPR ( onSetAssignment )+ ) ;
+    // EsperEPL2Grammar.g:533:1: onSetExpr : SET onSetAssignment ( COMMA onSetAssignment )* -> ^( ON_SET_EXPR ( onSetAssignment )+ ) ;
     public final EsperEPL2GrammarParser.onSetExpr_return onSetExpr() throws RecognitionException {
         EsperEPL2GrammarParser.onSetExpr_return retval = new EsperEPL2GrammarParser.onSetExpr_return();
         retval.start = input.LT(1);
@@ -1835,8 +1836,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_onSetAssignment=new RewriteRuleSubtreeStream(adaptor,"rule onSetAssignment");
          paraphrases.push("on-set clause"); 
         try {
-            // EsperEPL2Grammar.g:535:2: ( SET onSetAssignment ( COMMA onSetAssignment )* -> ^( ON_SET_EXPR ( onSetAssignment )+ ) )
-            // EsperEPL2Grammar.g:535:4: SET onSetAssignment ( COMMA onSetAssignment )*
+            // EsperEPL2Grammar.g:536:2: ( SET onSetAssignment ( COMMA onSetAssignment )* -> ^( ON_SET_EXPR ( onSetAssignment )+ ) )
+            // EsperEPL2Grammar.g:536:4: SET onSetAssignment ( COMMA onSetAssignment )*
             {
             SET57=(Token)match(input,SET,FOLLOW_SET_in_onSetExpr1796); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_SET.add(SET57);
@@ -1847,7 +1848,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_onSetAssignment.add(onSetAssignment58.getTree());
-            // EsperEPL2Grammar.g:535:24: ( COMMA onSetAssignment )*
+            // EsperEPL2Grammar.g:536:24: ( COMMA onSetAssignment )*
             loop18:
             do {
                 int alt18=2;
@@ -1860,7 +1861,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt18) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:535:25: COMMA onSetAssignment
+            	    // EsperEPL2Grammar.g:536:25: COMMA onSetAssignment
             	    {
             	    COMMA59=(Token)match(input,COMMA,FOLLOW_COMMA_in_onSetExpr1801); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA59);
@@ -1893,9 +1894,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 536:3: -> ^( ON_SET_EXPR ( onSetAssignment )+ )
+            // 537:3: -> ^( ON_SET_EXPR ( onSetAssignment )+ )
             {
-                // EsperEPL2Grammar.g:536:6: ^( ON_SET_EXPR ( onSetAssignment )+ )
+                // EsperEPL2Grammar.g:537:6: ^( ON_SET_EXPR ( onSetAssignment )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ON_SET_EXPR, "ON_SET_EXPR"), root_1);
@@ -1944,7 +1945,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "onSetAssignment"
-    // EsperEPL2Grammar.g:539:1: onSetAssignment : IDENT EQUALS expression ;
+    // EsperEPL2Grammar.g:540:1: onSetAssignment : IDENT EQUALS expression ;
     public final EsperEPL2GrammarParser.onSetAssignment_return onSetAssignment() throws RecognitionException {
         EsperEPL2GrammarParser.onSetAssignment_return retval = new EsperEPL2GrammarParser.onSetAssignment_return();
         retval.start = input.LT(1);
@@ -1960,8 +1961,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree EQUALS62_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:540:2: ( IDENT EQUALS expression )
-            // EsperEPL2Grammar.g:540:4: IDENT EQUALS expression
+            // EsperEPL2Grammar.g:541:2: ( IDENT EQUALS expression )
+            // EsperEPL2Grammar.g:541:4: IDENT EQUALS expression
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -2004,7 +2005,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "onExprFrom"
-    // EsperEPL2Grammar.g:543:1: onExprFrom : FROM n= IDENT ( AS i= IDENT | i= IDENT )? -> ^( ON_EXPR_FROM $n ( $i)? ) ;
+    // EsperEPL2Grammar.g:544:1: onExprFrom : FROM n= IDENT ( AS i= IDENT | i= IDENT )? -> ^( ON_EXPR_FROM $n ( $i)? ) ;
     public final EsperEPL2GrammarParser.onExprFrom_return onExprFrom() throws RecognitionException {
         EsperEPL2GrammarParser.onExprFrom_return retval = new EsperEPL2GrammarParser.onExprFrom_return();
         retval.start = input.LT(1);
@@ -2025,8 +2026,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_FROM=new RewriteRuleTokenStream(adaptor,"token FROM");
 
         try {
-            // EsperEPL2Grammar.g:544:2: ( FROM n= IDENT ( AS i= IDENT | i= IDENT )? -> ^( ON_EXPR_FROM $n ( $i)? ) )
-            // EsperEPL2Grammar.g:544:4: FROM n= IDENT ( AS i= IDENT | i= IDENT )?
+            // EsperEPL2Grammar.g:545:2: ( FROM n= IDENT ( AS i= IDENT | i= IDENT )? -> ^( ON_EXPR_FROM $n ( $i)? ) )
+            // EsperEPL2Grammar.g:545:4: FROM n= IDENT ( AS i= IDENT | i= IDENT )?
             {
             FROM64=(Token)match(input,FROM,FOLLOW_FROM_in_onExprFrom1846); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_FROM.add(FROM64);
@@ -2034,7 +2035,7 @@ public class EsperEPL2GrammarParser extends Parser {
             n=(Token)match(input,IDENT,FOLLOW_IDENT_in_onExprFrom1850); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(n);
 
-            // EsperEPL2Grammar.g:544:17: ( AS i= IDENT | i= IDENT )?
+            // EsperEPL2Grammar.g:545:17: ( AS i= IDENT | i= IDENT )?
             int alt19=3;
             int LA19_0 = input.LA(1);
 
@@ -2046,7 +2047,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt19) {
                 case 1 :
-                    // EsperEPL2Grammar.g:544:18: AS i= IDENT
+                    // EsperEPL2Grammar.g:545:18: AS i= IDENT
                     {
                     AS65=(Token)match(input,AS,FOLLOW_AS_in_onExprFrom1853); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS65);
@@ -2058,7 +2059,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:544:31: i= IDENT
+                    // EsperEPL2Grammar.g:545:31: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_onExprFrom1863); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -2084,15 +2085,15 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 545:3: -> ^( ON_EXPR_FROM $n ( $i)? )
+            // 546:3: -> ^( ON_EXPR_FROM $n ( $i)? )
             {
-                // EsperEPL2Grammar.g:545:6: ^( ON_EXPR_FROM $n ( $i)? )
+                // EsperEPL2Grammar.g:546:6: ^( ON_EXPR_FROM $n ( $i)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ON_EXPR_FROM, "ON_EXPR_FROM"), root_1);
 
                 adaptor.addChild(root_1, stream_n.nextNode());
-                // EsperEPL2Grammar.g:545:24: ( $i)?
+                // EsperEPL2Grammar.g:546:24: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
@@ -2131,7 +2132,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createWindowExpr"
-    // EsperEPL2Grammar.g:548:1: createWindowExpr : CREATE WINDOW i= IDENT ( DOT viewExpression ( DOT viewExpression )* )? (ru= RETAINUNION | ri= RETAININTERSECTION )? ( AS )? ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN ) (i1= INSERT ( WHERE expression )? )? -> {i1 != null}? ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) ) -> ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ) ;
+    // EsperEPL2Grammar.g:549:1: createWindowExpr : CREATE WINDOW i= IDENT ( DOT viewExpression ( DOT viewExpression )* )? (ru= RETAINUNION | ri= RETAININTERSECTION )? ( AS )? ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN ) (i1= INSERT ( WHERE expression )? )? -> {i1 != null}? ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) ) -> ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ) ;
     public final EsperEPL2GrammarParser.createWindowExpr_return createWindowExpr() throws RecognitionException {
         EsperEPL2GrammarParser.createWindowExpr_return retval = new EsperEPL2GrammarParser.createWindowExpr_return();
         retval.start = input.LT(1);
@@ -2189,8 +2190,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_viewExpression=new RewriteRuleSubtreeStream(adaptor,"rule viewExpression");
         RewriteRuleSubtreeStream stream_createWindowColumnList=new RewriteRuleSubtreeStream(adaptor,"rule createWindowColumnList");
         try {
-            // EsperEPL2Grammar.g:549:2: ( CREATE WINDOW i= IDENT ( DOT viewExpression ( DOT viewExpression )* )? (ru= RETAINUNION | ri= RETAININTERSECTION )? ( AS )? ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN ) (i1= INSERT ( WHERE expression )? )? -> {i1 != null}? ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) ) -> ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ) )
-            // EsperEPL2Grammar.g:549:4: CREATE WINDOW i= IDENT ( DOT viewExpression ( DOT viewExpression )* )? (ru= RETAINUNION | ri= RETAININTERSECTION )? ( AS )? ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN ) (i1= INSERT ( WHERE expression )? )?
+            // EsperEPL2Grammar.g:550:2: ( CREATE WINDOW i= IDENT ( DOT viewExpression ( DOT viewExpression )* )? (ru= RETAINUNION | ri= RETAININTERSECTION )? ( AS )? ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN ) (i1= INSERT ( WHERE expression )? )? -> {i1 != null}? ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) ) -> ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ) )
+            // EsperEPL2Grammar.g:550:4: CREATE WINDOW i= IDENT ( DOT viewExpression ( DOT viewExpression )* )? (ru= RETAINUNION | ri= RETAININTERSECTION )? ( AS )? ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN ) (i1= INSERT ( WHERE expression )? )?
             {
             CREATE66=(Token)match(input,CREATE,FOLLOW_CREATE_in_createWindowExpr1891); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CREATE.add(CREATE66);
@@ -2201,7 +2202,7 @@ public class EsperEPL2GrammarParser extends Parser {
             i=(Token)match(input,IDENT,FOLLOW_IDENT_in_createWindowExpr1897); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(i);
 
-            // EsperEPL2Grammar.g:549:26: ( DOT viewExpression ( DOT viewExpression )* )?
+            // EsperEPL2Grammar.g:550:26: ( DOT viewExpression ( DOT viewExpression )* )?
             int alt21=2;
             int LA21_0 = input.LA(1);
 
@@ -2210,7 +2211,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt21) {
                 case 1 :
-                    // EsperEPL2Grammar.g:549:27: DOT viewExpression ( DOT viewExpression )*
+                    // EsperEPL2Grammar.g:550:27: DOT viewExpression ( DOT viewExpression )*
                     {
                     DOT68=(Token)match(input,DOT,FOLLOW_DOT_in_createWindowExpr1900); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DOT.add(DOT68);
@@ -2221,7 +2222,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_viewExpression.add(viewExpression69.getTree());
-                    // EsperEPL2Grammar.g:549:46: ( DOT viewExpression )*
+                    // EsperEPL2Grammar.g:550:46: ( DOT viewExpression )*
                     loop20:
                     do {
                         int alt20=2;
@@ -2234,7 +2235,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt20) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:549:47: DOT viewExpression
+                    	    // EsperEPL2Grammar.g:550:47: DOT viewExpression
                     	    {
                     	    DOT70=(Token)match(input,DOT,FOLLOW_DOT_in_createWindowExpr1905); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_DOT.add(DOT70);
@@ -2260,7 +2261,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:549:70: (ru= RETAINUNION | ri= RETAININTERSECTION )?
+            // EsperEPL2Grammar.g:550:70: (ru= RETAINUNION | ri= RETAININTERSECTION )?
             int alt22=3;
             int LA22_0 = input.LA(1);
 
@@ -2272,7 +2273,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt22) {
                 case 1 :
-                    // EsperEPL2Grammar.g:549:71: ru= RETAINUNION
+                    // EsperEPL2Grammar.g:550:71: ru= RETAINUNION
                     {
                     ru=(Token)match(input,RETAINUNION,FOLLOW_RETAINUNION_in_createWindowExpr1916); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RETAINUNION.add(ru);
@@ -2281,7 +2282,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:549:86: ri= RETAININTERSECTION
+                    // EsperEPL2Grammar.g:550:86: ri= RETAININTERSECTION
                     {
                     ri=(Token)match(input,RETAININTERSECTION,FOLLOW_RETAININTERSECTION_in_createWindowExpr1920); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RETAININTERSECTION.add(ri);
@@ -2292,7 +2293,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:549:110: ( AS )?
+            // EsperEPL2Grammar.g:550:110: ( AS )?
             int alt23=2;
             int LA23_0 = input.LA(1);
 
@@ -2301,7 +2302,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt23) {
                 case 1 :
-                    // EsperEPL2Grammar.g:549:110: AS
+                    // EsperEPL2Grammar.g:550:110: AS
                     {
                     AS72=(Token)match(input,AS,FOLLOW_AS_in_createWindowExpr1924); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS72);
@@ -2312,7 +2313,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:550:5: ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN )
+            // EsperEPL2Grammar.g:551:5: ( createWindowExprModelAfter | LPAREN createWindowColumnList RPAREN )
             int alt24=2;
             int LA24_0 = input.LA(1);
 
@@ -2331,7 +2332,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt24) {
                 case 1 :
-                    // EsperEPL2Grammar.g:551:6: createWindowExprModelAfter
+                    // EsperEPL2Grammar.g:552:6: createWindowExprModelAfter
                     {
                     pushFollow(FOLLOW_createWindowExprModelAfter_in_createWindowExpr1939);
                     createWindowExprModelAfter73=createWindowExprModelAfter();
@@ -2343,7 +2344,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:552:10: LPAREN createWindowColumnList RPAREN
+                    // EsperEPL2Grammar.g:553:10: LPAREN createWindowColumnList RPAREN
                     {
                     LPAREN74=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_createWindowExpr1954); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN74);
@@ -2363,7 +2364,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:554:5: (i1= INSERT ( WHERE expression )? )?
+            // EsperEPL2Grammar.g:555:5: (i1= INSERT ( WHERE expression )? )?
             int alt26=2;
             int LA26_0 = input.LA(1);
 
@@ -2372,12 +2373,12 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt26) {
                 case 1 :
-                    // EsperEPL2Grammar.g:554:6: i1= INSERT ( WHERE expression )?
+                    // EsperEPL2Grammar.g:555:6: i1= INSERT ( WHERE expression )?
                     {
                     i1=(Token)match(input,INSERT,FOLLOW_INSERT_in_createWindowExpr1975); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INSERT.add(i1);
 
-                    // EsperEPL2Grammar.g:554:16: ( WHERE expression )?
+                    // EsperEPL2Grammar.g:555:16: ( WHERE expression )?
                     int alt25=2;
                     int LA25_0 = input.LA(1);
 
@@ -2386,7 +2387,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt25) {
                         case 1 :
-                            // EsperEPL2Grammar.g:554:17: WHERE expression
+                            // EsperEPL2Grammar.g:555:17: WHERE expression
                             {
                             WHERE77=(Token)match(input,WHERE,FOLLOW_WHERE_in_createWindowExpr1978); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_WHERE.add(WHERE77);
@@ -2412,7 +2413,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: expression, createWindowColumnList, ri, createWindowColumnList, i, ru, INSERT, i, ru, createWindowExprModelAfter, viewExpression, viewExpression, ri, createWindowExprModelAfter
+            // elements: INSERT, createWindowExprModelAfter, viewExpression, i, createWindowExprModelAfter, viewExpression, createWindowColumnList, createWindowColumnList, ri, ru, ru, expression, ri, i
             // token labels: ri, ru, i
             // rule labels: retval
             // token list labels: 
@@ -2425,50 +2426,50 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 555:3: -> {i1 != null}? ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) )
+            // 556:3: -> {i1 != null}? ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) )
             if (i1 != null) {
-                // EsperEPL2Grammar.g:555:20: ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) )
+                // EsperEPL2Grammar.g:556:20: ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? ^( INSERT ( expression )? ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CREATE_WINDOW_EXPR, "CREATE_WINDOW_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_i.nextNode());
-                // EsperEPL2Grammar.g:555:44: ( viewExpression )*
+                // EsperEPL2Grammar.g:556:44: ( viewExpression )*
                 while ( stream_viewExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_viewExpression.nextTree());
 
                 }
                 stream_viewExpression.reset();
-                // EsperEPL2Grammar.g:555:60: ( $ru)?
+                // EsperEPL2Grammar.g:556:60: ( $ru)?
                 if ( stream_ru.hasNext() ) {
                     adaptor.addChild(root_1, stream_ru.nextNode());
 
                 }
                 stream_ru.reset();
-                // EsperEPL2Grammar.g:555:65: ( $ri)?
+                // EsperEPL2Grammar.g:556:65: ( $ri)?
                 if ( stream_ri.hasNext() ) {
                     adaptor.addChild(root_1, stream_ri.nextNode());
 
                 }
                 stream_ri.reset();
-                // EsperEPL2Grammar.g:555:70: ( createWindowExprModelAfter )?
+                // EsperEPL2Grammar.g:556:70: ( createWindowExprModelAfter )?
                 if ( stream_createWindowExprModelAfter.hasNext() ) {
                     adaptor.addChild(root_1, stream_createWindowExprModelAfter.nextTree());
 
                 }
                 stream_createWindowExprModelAfter.reset();
-                // EsperEPL2Grammar.g:555:98: ( createWindowColumnList )?
+                // EsperEPL2Grammar.g:556:98: ( createWindowColumnList )?
                 if ( stream_createWindowColumnList.hasNext() ) {
                     adaptor.addChild(root_1, stream_createWindowColumnList.nextTree());
 
                 }
                 stream_createWindowColumnList.reset();
-                // EsperEPL2Grammar.g:556:5: ^( INSERT ( expression )? )
+                // EsperEPL2Grammar.g:557:5: ^( INSERT ( expression )? )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot(stream_INSERT.nextNode(), root_2);
 
-                // EsperEPL2Grammar.g:556:14: ( expression )?
+                // EsperEPL2Grammar.g:557:14: ( expression )?
                 if ( stream_expression.hasNext() ) {
                     adaptor.addChild(root_2, stream_expression.nextTree());
 
@@ -2482,39 +2483,39 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 557:3: -> ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? )
+            else // 558:3: -> ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? )
             {
-                // EsperEPL2Grammar.g:557:6: ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? )
+                // EsperEPL2Grammar.g:558:6: ^( CREATE_WINDOW_EXPR $i ( viewExpression )* ( $ru)? ( $ri)? ( createWindowExprModelAfter )? ( createWindowColumnList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CREATE_WINDOW_EXPR, "CREATE_WINDOW_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_i.nextNode());
-                // EsperEPL2Grammar.g:557:30: ( viewExpression )*
+                // EsperEPL2Grammar.g:558:30: ( viewExpression )*
                 while ( stream_viewExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_viewExpression.nextTree());
 
                 }
                 stream_viewExpression.reset();
-                // EsperEPL2Grammar.g:557:46: ( $ru)?
+                // EsperEPL2Grammar.g:558:46: ( $ru)?
                 if ( stream_ru.hasNext() ) {
                     adaptor.addChild(root_1, stream_ru.nextNode());
 
                 }
                 stream_ru.reset();
-                // EsperEPL2Grammar.g:557:51: ( $ri)?
+                // EsperEPL2Grammar.g:558:51: ( $ri)?
                 if ( stream_ri.hasNext() ) {
                     adaptor.addChild(root_1, stream_ri.nextNode());
 
                 }
                 stream_ri.reset();
-                // EsperEPL2Grammar.g:557:56: ( createWindowExprModelAfter )?
+                // EsperEPL2Grammar.g:558:56: ( createWindowExprModelAfter )?
                 if ( stream_createWindowExprModelAfter.hasNext() ) {
                     adaptor.addChild(root_1, stream_createWindowExprModelAfter.nextTree());
 
                 }
                 stream_createWindowExprModelAfter.reset();
-                // EsperEPL2Grammar.g:557:84: ( createWindowColumnList )?
+                // EsperEPL2Grammar.g:558:84: ( createWindowColumnList )?
                 if ( stream_createWindowColumnList.hasNext() ) {
                     adaptor.addChild(root_1, stream_createWindowColumnList.nextTree());
 
@@ -2553,7 +2554,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createWindowExprModelAfter"
-    // EsperEPL2Grammar.g:560:1: createWindowExprModelAfter : ( SELECT createSelectionList FROM )? classIdentifier ;
+    // EsperEPL2Grammar.g:561:1: createWindowExprModelAfter : ( SELECT createSelectionList FROM )? classIdentifier ;
     public final EsperEPL2GrammarParser.createWindowExprModelAfter_return createWindowExprModelAfter() throws RecognitionException {
         EsperEPL2GrammarParser.createWindowExprModelAfter_return retval = new EsperEPL2GrammarParser.createWindowExprModelAfter_return();
         retval.start = input.LT(1);
@@ -2571,12 +2572,12 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree FROM81_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:561:2: ( ( SELECT createSelectionList FROM )? classIdentifier )
-            // EsperEPL2Grammar.g:561:4: ( SELECT createSelectionList FROM )? classIdentifier
+            // EsperEPL2Grammar.g:562:2: ( ( SELECT createSelectionList FROM )? classIdentifier )
+            // EsperEPL2Grammar.g:562:4: ( SELECT createSelectionList FROM )? classIdentifier
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:561:4: ( SELECT createSelectionList FROM )?
+            // EsperEPL2Grammar.g:562:4: ( SELECT createSelectionList FROM )?
             int alt27=2;
             int LA27_0 = input.LA(1);
 
@@ -2585,7 +2586,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt27) {
                 case 1 :
-                    // EsperEPL2Grammar.g:561:5: SELECT createSelectionList FROM
+                    // EsperEPL2Grammar.g:562:5: SELECT createSelectionList FROM
                     {
                     SELECT79=(Token)match(input,SELECT,FOLLOW_SELECT_in_createWindowExprModelAfter2067); if (state.failed) return retval;
                     pushFollow(FOLLOW_createSelectionList_in_createWindowExprModelAfter2070);
@@ -2634,7 +2635,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createVariableExpr"
-    // EsperEPL2Grammar.g:564:1: createVariableExpr : CREATE VARIABLE t= IDENT n= IDENT ( EQUALS expression )? -> ^( CREATE_VARIABLE_EXPR $t $n ( expression )? ) ;
+    // EsperEPL2Grammar.g:565:1: createVariableExpr : CREATE VARIABLE t= IDENT n= IDENT ( EQUALS expression )? -> ^( CREATE_VARIABLE_EXPR $t $n ( expression )? ) ;
     public final EsperEPL2GrammarParser.createVariableExpr_return createVariableExpr() throws RecognitionException {
         EsperEPL2GrammarParser.createVariableExpr_return retval = new EsperEPL2GrammarParser.createVariableExpr_return();
         retval.start = input.LT(1);
@@ -2660,8 +2661,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_VARIABLE=new RewriteRuleTokenStream(adaptor,"token VARIABLE");
         RewriteRuleSubtreeStream stream_expression=new RewriteRuleSubtreeStream(adaptor,"rule expression");
         try {
-            // EsperEPL2Grammar.g:565:2: ( CREATE VARIABLE t= IDENT n= IDENT ( EQUALS expression )? -> ^( CREATE_VARIABLE_EXPR $t $n ( expression )? ) )
-            // EsperEPL2Grammar.g:565:4: CREATE VARIABLE t= IDENT n= IDENT ( EQUALS expression )?
+            // EsperEPL2Grammar.g:566:2: ( CREATE VARIABLE t= IDENT n= IDENT ( EQUALS expression )? -> ^( CREATE_VARIABLE_EXPR $t $n ( expression )? ) )
+            // EsperEPL2Grammar.g:566:4: CREATE VARIABLE t= IDENT n= IDENT ( EQUALS expression )?
             {
             CREATE83=(Token)match(input,CREATE,FOLLOW_CREATE_in_createVariableExpr2090); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_CREATE.add(CREATE83);
@@ -2675,7 +2676,7 @@ public class EsperEPL2GrammarParser extends Parser {
             n=(Token)match(input,IDENT,FOLLOW_IDENT_in_createVariableExpr2100); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(n);
 
-            // EsperEPL2Grammar.g:565:36: ( EQUALS expression )?
+            // EsperEPL2Grammar.g:566:36: ( EQUALS expression )?
             int alt28=2;
             int LA28_0 = input.LA(1);
 
@@ -2684,7 +2685,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt28) {
                 case 1 :
-                    // EsperEPL2Grammar.g:565:37: EQUALS expression
+                    // EsperEPL2Grammar.g:566:37: EQUALS expression
                     {
                     EQUALS85=(Token)match(input,EQUALS,FOLLOW_EQUALS_in_createVariableExpr2103); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_EQUALS.add(EQUALS85);
@@ -2704,7 +2705,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: n, expression, t
+            // elements: expression, t, n
             // token labels: t, n
             // rule labels: retval
             // token list labels: 
@@ -2716,16 +2717,16 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 566:3: -> ^( CREATE_VARIABLE_EXPR $t $n ( expression )? )
+            // 567:3: -> ^( CREATE_VARIABLE_EXPR $t $n ( expression )? )
             {
-                // EsperEPL2Grammar.g:566:6: ^( CREATE_VARIABLE_EXPR $t $n ( expression )? )
+                // EsperEPL2Grammar.g:567:6: ^( CREATE_VARIABLE_EXPR $t $n ( expression )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CREATE_VARIABLE_EXPR, "CREATE_VARIABLE_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_t.nextNode());
                 adaptor.addChild(root_1, stream_n.nextNode());
-                // EsperEPL2Grammar.g:566:35: ( expression )?
+                // EsperEPL2Grammar.g:567:35: ( expression )?
                 if ( stream_expression.hasNext() ) {
                     adaptor.addChild(root_1, stream_expression.nextTree());
 
@@ -2764,7 +2765,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createWindowColumnList"
-    // EsperEPL2Grammar.g:569:1: createWindowColumnList : createWindowColumnListElement ( COMMA createWindowColumnListElement )* -> ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ ) ;
+    // EsperEPL2Grammar.g:570:1: createWindowColumnList : createWindowColumnListElement ( COMMA createWindowColumnListElement )* -> ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ ) ;
     public final EsperEPL2GrammarParser.createWindowColumnList_return createWindowColumnList() throws RecognitionException {
         EsperEPL2GrammarParser.createWindowColumnList_return retval = new EsperEPL2GrammarParser.createWindowColumnList_return();
         retval.start = input.LT(1);
@@ -2782,8 +2783,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_createWindowColumnListElement=new RewriteRuleSubtreeStream(adaptor,"rule createWindowColumnListElement");
          paraphrases.push("create window column list"); 
         try {
-            // EsperEPL2Grammar.g:572:2: ( createWindowColumnListElement ( COMMA createWindowColumnListElement )* -> ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ ) )
-            // EsperEPL2Grammar.g:572:4: createWindowColumnListElement ( COMMA createWindowColumnListElement )*
+            // EsperEPL2Grammar.g:573:2: ( createWindowColumnListElement ( COMMA createWindowColumnListElement )* -> ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ ) )
+            // EsperEPL2Grammar.g:573:4: createWindowColumnListElement ( COMMA createWindowColumnListElement )*
             {
             pushFollow(FOLLOW_createWindowColumnListElement_in_createWindowColumnList2148);
             createWindowColumnListElement87=createWindowColumnListElement();
@@ -2791,7 +2792,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_createWindowColumnListElement.add(createWindowColumnListElement87.getTree());
-            // EsperEPL2Grammar.g:572:34: ( COMMA createWindowColumnListElement )*
+            // EsperEPL2Grammar.g:573:34: ( COMMA createWindowColumnListElement )*
             loop29:
             do {
                 int alt29=2;
@@ -2804,7 +2805,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt29) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:572:35: COMMA createWindowColumnListElement
+            	    // EsperEPL2Grammar.g:573:35: COMMA createWindowColumnListElement
             	    {
             	    COMMA88=(Token)match(input,COMMA,FOLLOW_COMMA_in_createWindowColumnList2151); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA88);
@@ -2837,9 +2838,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 573:3: -> ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ )
+            // 574:3: -> ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ )
             {
-                // EsperEPL2Grammar.g:573:6: ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ )
+                // EsperEPL2Grammar.g:574:6: ^( CREATE_WINDOW_COL_TYPE_LIST ( createWindowColumnListElement )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CREATE_WINDOW_COL_TYPE_LIST, "CREATE_WINDOW_COL_TYPE_LIST"), root_1);
@@ -2888,7 +2889,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createWindowColumnListElement"
-    // EsperEPL2Grammar.g:576:1: createWindowColumnListElement : name= IDENT type= IDENT -> ^( CREATE_WINDOW_COL_TYPE $name $type) ;
+    // EsperEPL2Grammar.g:577:1: createWindowColumnListElement : name= IDENT type= IDENT -> ^( CREATE_WINDOW_COL_TYPE $name $type) ;
     public final EsperEPL2GrammarParser.createWindowColumnListElement_return createWindowColumnListElement() throws RecognitionException {
         EsperEPL2GrammarParser.createWindowColumnListElement_return retval = new EsperEPL2GrammarParser.createWindowColumnListElement_return();
         retval.start = input.LT(1);
@@ -2903,8 +2904,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_IDENT=new RewriteRuleTokenStream(adaptor,"token IDENT");
 
         try {
-            // EsperEPL2Grammar.g:577:2: (name= IDENT type= IDENT -> ^( CREATE_WINDOW_COL_TYPE $name $type) )
-            // EsperEPL2Grammar.g:577:7: name= IDENT type= IDENT
+            // EsperEPL2Grammar.g:578:2: (name= IDENT type= IDENT -> ^( CREATE_WINDOW_COL_TYPE $name $type) )
+            // EsperEPL2Grammar.g:578:7: name= IDENT type= IDENT
             {
             name=(Token)match(input,IDENT,FOLLOW_IDENT_in_createWindowColumnListElement2183); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(name);
@@ -2915,7 +2916,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: type, name
+            // elements: name, type
             // token labels: name, type
             // rule labels: retval
             // token list labels: 
@@ -2927,9 +2928,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 578:3: -> ^( CREATE_WINDOW_COL_TYPE $name $type)
+            // 579:3: -> ^( CREATE_WINDOW_COL_TYPE $name $type)
             {
-                // EsperEPL2Grammar.g:578:6: ^( CREATE_WINDOW_COL_TYPE $name $type)
+                // EsperEPL2Grammar.g:579:6: ^( CREATE_WINDOW_COL_TYPE $name $type)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CREATE_WINDOW_COL_TYPE, "CREATE_WINDOW_COL_TYPE"), root_1);
@@ -2969,7 +2970,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createSelectionList"
-    // EsperEPL2Grammar.g:581:1: createSelectionList : createSelectionListElement ( COMMA createSelectionListElement )* -> ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ ) ;
+    // EsperEPL2Grammar.g:582:1: createSelectionList : createSelectionListElement ( COMMA createSelectionListElement )* -> ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ ) ;
     public final EsperEPL2GrammarParser.createSelectionList_return createSelectionList() throws RecognitionException {
         EsperEPL2GrammarParser.createSelectionList_return retval = new EsperEPL2GrammarParser.createSelectionList_return();
         retval.start = input.LT(1);
@@ -2987,8 +2988,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_createSelectionListElement=new RewriteRuleSubtreeStream(adaptor,"rule createSelectionListElement");
          paraphrases.push("select clause"); 
         try {
-            // EsperEPL2Grammar.g:584:2: ( createSelectionListElement ( COMMA createSelectionListElement )* -> ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ ) )
-            // EsperEPL2Grammar.g:584:4: createSelectionListElement ( COMMA createSelectionListElement )*
+            // EsperEPL2Grammar.g:585:2: ( createSelectionListElement ( COMMA createSelectionListElement )* -> ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ ) )
+            // EsperEPL2Grammar.g:585:4: createSelectionListElement ( COMMA createSelectionListElement )*
             {
             pushFollow(FOLLOW_createSelectionListElement_in_createSelectionList2225);
             createSelectionListElement90=createSelectionListElement();
@@ -2996,7 +2997,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_createSelectionListElement.add(createSelectionListElement90.getTree());
-            // EsperEPL2Grammar.g:584:31: ( COMMA createSelectionListElement )*
+            // EsperEPL2Grammar.g:585:31: ( COMMA createSelectionListElement )*
             loop30:
             do {
                 int alt30=2;
@@ -3009,7 +3010,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt30) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:584:32: COMMA createSelectionListElement
+            	    // EsperEPL2Grammar.g:585:32: COMMA createSelectionListElement
             	    {
             	    COMMA91=(Token)match(input,COMMA,FOLLOW_COMMA_in_createSelectionList2228); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA91);
@@ -3042,9 +3043,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 585:3: -> ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ )
+            // 586:3: -> ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ )
             {
-                // EsperEPL2Grammar.g:585:6: ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ )
+                // EsperEPL2Grammar.g:586:6: ^( CREATE_WINDOW_SELECT_EXPR ( createSelectionListElement )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CREATE_WINDOW_SELECT_EXPR, "CREATE_WINDOW_SELECT_EXPR"), root_1);
@@ -3093,7 +3094,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "createSelectionListElement"
-    // EsperEPL2Grammar.g:588:1: createSelectionListElement : (s= STAR -> WILDCARD_SELECT[$s] | eventProperty ( AS i= IDENT )? -> ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? ) | constant AS i= IDENT -> ^( SELECTION_ELEMENT_EXPR constant ( $i)? ) );
+    // EsperEPL2Grammar.g:589:1: createSelectionListElement : (s= STAR -> WILDCARD_SELECT[$s] | eventProperty ( AS i= IDENT )? -> ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? ) | constant AS i= IDENT -> ^( SELECTION_ELEMENT_EXPR constant ( $i)? ) );
     public final EsperEPL2GrammarParser.createSelectionListElement_return createSelectionListElement() throws RecognitionException {
         EsperEPL2GrammarParser.createSelectionListElement_return retval = new EsperEPL2GrammarParser.createSelectionListElement_return();
         retval.start = input.LT(1);
@@ -3119,7 +3120,7 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_constant=new RewriteRuleSubtreeStream(adaptor,"rule constant");
         RewriteRuleSubtreeStream stream_eventProperty=new RewriteRuleSubtreeStream(adaptor,"rule eventProperty");
         try {
-            // EsperEPL2Grammar.g:589:2: (s= STAR -> WILDCARD_SELECT[$s] | eventProperty ( AS i= IDENT )? -> ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? ) | constant AS i= IDENT -> ^( SELECTION_ELEMENT_EXPR constant ( $i)? ) )
+            // EsperEPL2Grammar.g:590:2: (s= STAR -> WILDCARD_SELECT[$s] | eventProperty ( AS i= IDENT )? -> ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? ) | constant AS i= IDENT -> ^( SELECTION_ELEMENT_EXPR constant ( $i)? ) )
             int alt32=3;
             switch ( input.LA(1) ) {
             case STAR:
@@ -3193,7 +3194,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt32) {
                 case 1 :
-                    // EsperEPL2Grammar.g:589:7: s= STAR
+                    // EsperEPL2Grammar.g:590:7: s= STAR
                     {
                     s=(Token)match(input,STAR,FOLLOW_STAR_in_createSelectionListElement2259); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(s);
@@ -3211,7 +3212,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 590:3: -> WILDCARD_SELECT[$s]
+                    // 591:3: -> WILDCARD_SELECT[$s]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(WILDCARD_SELECT, s));
 
@@ -3221,7 +3222,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:591:4: eventProperty ( AS i= IDENT )?
+                    // EsperEPL2Grammar.g:592:4: eventProperty ( AS i= IDENT )?
                     {
                     pushFollow(FOLLOW_eventProperty_in_createSelectionListElement2271);
                     eventProperty93=eventProperty();
@@ -3229,7 +3230,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_eventProperty.add(eventProperty93.getTree());
-                    // EsperEPL2Grammar.g:591:18: ( AS i= IDENT )?
+                    // EsperEPL2Grammar.g:592:18: ( AS i= IDENT )?
                     int alt31=2;
                     int LA31_0 = input.LA(1);
 
@@ -3238,7 +3239,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt31) {
                         case 1 :
-                            // EsperEPL2Grammar.g:591:19: AS i= IDENT
+                            // EsperEPL2Grammar.g:592:19: AS i= IDENT
                             {
                             AS94=(Token)match(input,AS,FOLLOW_AS_in_createSelectionListElement2274); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_AS.add(AS94);
@@ -3255,7 +3256,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: eventProperty, i
+                    // elements: i, eventProperty
                     // token labels: i
                     // rule labels: retval
                     // token list labels: 
@@ -3266,15 +3267,15 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 592:3: -> ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? )
+                    // 593:3: -> ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? )
                     {
-                        // EsperEPL2Grammar.g:592:6: ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? )
+                        // EsperEPL2Grammar.g:593:6: ^( SELECTION_ELEMENT_EXPR eventProperty ( $i)? )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_ELEMENT_EXPR, "SELECTION_ELEMENT_EXPR"), root_1);
 
                         adaptor.addChild(root_1, stream_eventProperty.nextTree());
-                        // EsperEPL2Grammar.g:592:45: ( $i)?
+                        // EsperEPL2Grammar.g:593:45: ( $i)?
                         if ( stream_i.hasNext() ) {
                             adaptor.addChild(root_1, stream_i.nextNode());
 
@@ -3290,7 +3291,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:593:4: constant AS i= IDENT
+                    // EsperEPL2Grammar.g:594:4: constant AS i= IDENT
                     {
                     pushFollow(FOLLOW_constant_in_createSelectionListElement2299);
                     constant95=constant();
@@ -3307,7 +3308,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: i, constant
+                    // elements: constant, i
                     // token labels: i
                     // rule labels: retval
                     // token list labels: 
@@ -3318,15 +3319,15 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 594:3: -> ^( SELECTION_ELEMENT_EXPR constant ( $i)? )
+                    // 595:3: -> ^( SELECTION_ELEMENT_EXPR constant ( $i)? )
                     {
-                        // EsperEPL2Grammar.g:594:6: ^( SELECTION_ELEMENT_EXPR constant ( $i)? )
+                        // EsperEPL2Grammar.g:595:6: ^( SELECTION_ELEMENT_EXPR constant ( $i)? )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_ELEMENT_EXPR, "SELECTION_ELEMENT_EXPR"), root_1);
 
                         adaptor.addChild(root_1, stream_constant.nextTree());
-                        // EsperEPL2Grammar.g:594:40: ( $i)?
+                        // EsperEPL2Grammar.g:595:40: ( $i)?
                         if ( stream_i.hasNext() ) {
                             adaptor.addChild(root_1, stream_i.nextNode());
 
@@ -3367,7 +3368,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "insertIntoExpr"
-    // EsperEPL2Grammar.g:597:1: insertIntoExpr : (s= ISTREAM | s= RSTREAM )? INTO i= IDENT ( insertIntoColumnList )? -> ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? ) ;
+    // EsperEPL2Grammar.g:598:1: insertIntoExpr : (s= ISTREAM | s= RSTREAM )? INTO i= IDENT ( insertIntoColumnList )? -> ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? ) ;
     public final EsperEPL2GrammarParser.insertIntoExpr_return insertIntoExpr() throws RecognitionException {
         EsperEPL2GrammarParser.insertIntoExpr_return retval = new EsperEPL2GrammarParser.insertIntoExpr_return();
         retval.start = input.LT(1);
@@ -3390,10 +3391,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_insertIntoColumnList=new RewriteRuleSubtreeStream(adaptor,"rule insertIntoColumnList");
          paraphrases.push("insert-into clause"); 
         try {
-            // EsperEPL2Grammar.g:600:2: ( (s= ISTREAM | s= RSTREAM )? INTO i= IDENT ( insertIntoColumnList )? -> ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? ) )
-            // EsperEPL2Grammar.g:600:4: (s= ISTREAM | s= RSTREAM )? INTO i= IDENT ( insertIntoColumnList )?
+            // EsperEPL2Grammar.g:601:2: ( (s= ISTREAM | s= RSTREAM )? INTO i= IDENT ( insertIntoColumnList )? -> ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? ) )
+            // EsperEPL2Grammar.g:601:4: (s= ISTREAM | s= RSTREAM )? INTO i= IDENT ( insertIntoColumnList )?
             {
-            // EsperEPL2Grammar.g:600:4: (s= ISTREAM | s= RSTREAM )?
+            // EsperEPL2Grammar.g:601:4: (s= ISTREAM | s= RSTREAM )?
             int alt33=3;
             int LA33_0 = input.LA(1);
 
@@ -3405,7 +3406,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt33) {
                 case 1 :
-                    // EsperEPL2Grammar.g:600:5: s= ISTREAM
+                    // EsperEPL2Grammar.g:601:5: s= ISTREAM
                     {
                     s=(Token)match(input,ISTREAM,FOLLOW_ISTREAM_in_insertIntoExpr2344); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ISTREAM.add(s);
@@ -3414,7 +3415,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:600:17: s= RSTREAM
+                    // EsperEPL2Grammar.g:601:17: s= RSTREAM
                     {
                     s=(Token)match(input,RSTREAM,FOLLOW_RSTREAM_in_insertIntoExpr2350); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RSTREAM.add(s);
@@ -3431,7 +3432,7 @@ public class EsperEPL2GrammarParser extends Parser {
             i=(Token)match(input,IDENT,FOLLOW_IDENT_in_insertIntoExpr2358); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(i);
 
-            // EsperEPL2Grammar.g:600:42: ( insertIntoColumnList )?
+            // EsperEPL2Grammar.g:601:42: ( insertIntoColumnList )?
             int alt34=2;
             int LA34_0 = input.LA(1);
 
@@ -3440,7 +3441,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt34) {
                 case 1 :
-                    // EsperEPL2Grammar.g:600:43: insertIntoColumnList
+                    // EsperEPL2Grammar.g:601:43: insertIntoColumnList
                     {
                     pushFollow(FOLLOW_insertIntoColumnList_in_insertIntoExpr2361);
                     insertIntoColumnList98=insertIntoColumnList();
@@ -3457,7 +3458,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: insertIntoColumnList, i, s
+            // elements: i, s, insertIntoColumnList
             // token labels: s, i
             // rule labels: retval
             // token list labels: 
@@ -3469,21 +3470,21 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 601:3: -> ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? )
+            // 602:3: -> ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? )
             {
-                // EsperEPL2Grammar.g:601:6: ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? )
+                // EsperEPL2Grammar.g:602:6: ^( INSERTINTO_EXPR ( $s)? $i ( insertIntoColumnList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(INSERTINTO_EXPR, "INSERTINTO_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:601:24: ( $s)?
+                // EsperEPL2Grammar.g:602:24: ( $s)?
                 if ( stream_s.hasNext() ) {
                     adaptor.addChild(root_1, stream_s.nextNode());
 
                 }
                 stream_s.reset();
                 adaptor.addChild(root_1, stream_i.nextNode());
-                // EsperEPL2Grammar.g:601:31: ( insertIntoColumnList )?
+                // EsperEPL2Grammar.g:602:31: ( insertIntoColumnList )?
                 if ( stream_insertIntoColumnList.hasNext() ) {
                     adaptor.addChild(root_1, stream_insertIntoColumnList.nextTree());
 
@@ -3525,7 +3526,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "insertIntoColumnList"
-    // EsperEPL2Grammar.g:604:1: insertIntoColumnList : LPAREN IDENT ( COMMA IDENT )* RPAREN -> ^( INSERTINTO_EXPRCOL ( IDENT )* ) ;
+    // EsperEPL2Grammar.g:605:1: insertIntoColumnList : LPAREN IDENT ( COMMA IDENT )* RPAREN -> ^( INSERTINTO_EXPRCOL ( IDENT )* ) ;
     public final EsperEPL2GrammarParser.insertIntoColumnList_return insertIntoColumnList() throws RecognitionException {
         EsperEPL2GrammarParser.insertIntoColumnList_return retval = new EsperEPL2GrammarParser.insertIntoColumnList_return();
         retval.start = input.LT(1);
@@ -3549,8 +3550,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_LPAREN=new RewriteRuleTokenStream(adaptor,"token LPAREN");
 
         try {
-            // EsperEPL2Grammar.g:605:2: ( LPAREN IDENT ( COMMA IDENT )* RPAREN -> ^( INSERTINTO_EXPRCOL ( IDENT )* ) )
-            // EsperEPL2Grammar.g:605:5: LPAREN IDENT ( COMMA IDENT )* RPAREN
+            // EsperEPL2Grammar.g:606:2: ( LPAREN IDENT ( COMMA IDENT )* RPAREN -> ^( INSERTINTO_EXPRCOL ( IDENT )* ) )
+            // EsperEPL2Grammar.g:606:5: LPAREN IDENT ( COMMA IDENT )* RPAREN
             {
             LPAREN99=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_insertIntoColumnList2395); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN99);
@@ -3558,7 +3559,7 @@ public class EsperEPL2GrammarParser extends Parser {
             IDENT100=(Token)match(input,IDENT,FOLLOW_IDENT_in_insertIntoColumnList2397); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(IDENT100);
 
-            // EsperEPL2Grammar.g:605:18: ( COMMA IDENT )*
+            // EsperEPL2Grammar.g:606:18: ( COMMA IDENT )*
             loop35:
             do {
                 int alt35=2;
@@ -3571,7 +3572,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt35) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:605:19: COMMA IDENT
+            	    // EsperEPL2Grammar.g:606:19: COMMA IDENT
             	    {
             	    COMMA101=(Token)match(input,COMMA,FOLLOW_COMMA_in_insertIntoColumnList2400); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA101);
@@ -3604,14 +3605,14 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 606:3: -> ^( INSERTINTO_EXPRCOL ( IDENT )* )
+            // 607:3: -> ^( INSERTINTO_EXPRCOL ( IDENT )* )
             {
-                // EsperEPL2Grammar.g:606:6: ^( INSERTINTO_EXPRCOL ( IDENT )* )
+                // EsperEPL2Grammar.g:607:6: ^( INSERTINTO_EXPRCOL ( IDENT )* )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(INSERTINTO_EXPRCOL, "INSERTINTO_EXPRCOL"), root_1);
 
-                // EsperEPL2Grammar.g:606:27: ( IDENT )*
+                // EsperEPL2Grammar.g:607:27: ( IDENT )*
                 while ( stream_IDENT.hasNext() ) {
                     adaptor.addChild(root_1, stream_IDENT.nextNode());
 
@@ -3650,7 +3651,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "fromClause"
-    // EsperEPL2Grammar.g:609:1: fromClause : streamExpression ( regularJoin | outerJoinList ) ;
+    // EsperEPL2Grammar.g:610:1: fromClause : streamExpression ( regularJoin | outerJoinList ) ;
     public final EsperEPL2GrammarParser.fromClause_return fromClause() throws RecognitionException {
         EsperEPL2GrammarParser.fromClause_return retval = new EsperEPL2GrammarParser.fromClause_return();
         retval.start = input.LT(1);
@@ -3667,8 +3668,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
          paraphrases.push("from clause"); 
         try {
-            // EsperEPL2Grammar.g:612:2: ( streamExpression ( regularJoin | outerJoinList ) )
-            // EsperEPL2Grammar.g:612:4: streamExpression ( regularJoin | outerJoinList )
+            // EsperEPL2Grammar.g:613:2: ( streamExpression ( regularJoin | outerJoinList ) )
+            // EsperEPL2Grammar.g:613:4: streamExpression ( regularJoin | outerJoinList )
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -3678,7 +3679,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, streamExpression104.getTree());
-            // EsperEPL2Grammar.g:612:21: ( regularJoin | outerJoinList )
+            // EsperEPL2Grammar.g:613:21: ( regularJoin | outerJoinList )
             int alt36=2;
             int LA36_0 = input.LA(1);
 
@@ -3697,7 +3698,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt36) {
                 case 1 :
-                    // EsperEPL2Grammar.g:612:22: regularJoin
+                    // EsperEPL2Grammar.g:613:22: regularJoin
                     {
                     pushFollow(FOLLOW_regularJoin_in_fromClause2444);
                     regularJoin105=regularJoin();
@@ -3709,7 +3710,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:612:36: outerJoinList
+                    // EsperEPL2Grammar.g:613:36: outerJoinList
                     {
                     pushFollow(FOLLOW_outerJoinList_in_fromClause2448);
                     outerJoinList106=outerJoinList();
@@ -3753,7 +3754,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "regularJoin"
-    // EsperEPL2Grammar.g:615:1: regularJoin : ( COMMA streamExpression )* ;
+    // EsperEPL2Grammar.g:616:1: regularJoin : ( COMMA streamExpression )* ;
     public final EsperEPL2GrammarParser.regularJoin_return regularJoin() throws RecognitionException {
         EsperEPL2GrammarParser.regularJoin_return retval = new EsperEPL2GrammarParser.regularJoin_return();
         retval.start = input.LT(1);
@@ -3767,12 +3768,12 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree COMMA107_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:616:2: ( ( COMMA streamExpression )* )
-            // EsperEPL2Grammar.g:616:4: ( COMMA streamExpression )*
+            // EsperEPL2Grammar.g:617:2: ( ( COMMA streamExpression )* )
+            // EsperEPL2Grammar.g:617:4: ( COMMA streamExpression )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:616:4: ( COMMA streamExpression )*
+            // EsperEPL2Grammar.g:617:4: ( COMMA streamExpression )*
             loop37:
             do {
                 int alt37=2;
@@ -3785,7 +3786,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt37) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:616:5: COMMA streamExpression
+            	    // EsperEPL2Grammar.g:617:5: COMMA streamExpression
             	    {
             	    COMMA107=(Token)match(input,COMMA,FOLLOW_COMMA_in_regularJoin2462); if (state.failed) return retval;
             	    pushFollow(FOLLOW_streamExpression_in_regularJoin2465);
@@ -3830,7 +3831,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "outerJoinList"
-    // EsperEPL2Grammar.g:619:1: outerJoinList : outerJoin ( outerJoin )* ;
+    // EsperEPL2Grammar.g:620:1: outerJoinList : outerJoin ( outerJoin )* ;
     public final EsperEPL2GrammarParser.outerJoinList_return outerJoinList() throws RecognitionException {
         EsperEPL2GrammarParser.outerJoinList_return retval = new EsperEPL2GrammarParser.outerJoinList_return();
         retval.start = input.LT(1);
@@ -3844,8 +3845,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:620:2: ( outerJoin ( outerJoin )* )
-            // EsperEPL2Grammar.g:620:4: outerJoin ( outerJoin )*
+            // EsperEPL2Grammar.g:621:2: ( outerJoin ( outerJoin )* )
+            // EsperEPL2Grammar.g:621:4: outerJoin ( outerJoin )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -3855,7 +3856,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, outerJoin109.getTree());
-            // EsperEPL2Grammar.g:620:14: ( outerJoin )*
+            // EsperEPL2Grammar.g:621:14: ( outerJoin )*
             loop38:
             do {
                 int alt38=2;
@@ -3868,7 +3869,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt38) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:620:15: outerJoin
+            	    // EsperEPL2Grammar.g:621:15: outerJoin
             	    {
             	    pushFollow(FOLLOW_outerJoin_in_outerJoinList2482);
             	    outerJoin110=outerJoin();
@@ -3912,7 +3913,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "outerJoin"
-    // EsperEPL2Grammar.g:623:1: outerJoin : ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) ) JOIN streamExpression outerJoinIdent -> {$i != null}? streamExpression ^( INNERJOIN_EXPR outerJoinIdent ) -> {$tl != null}? streamExpression ^( LEFT_OUTERJOIN_EXPR outerJoinIdent ) -> {$tr != null}? streamExpression ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent ) -> streamExpression ^( FULL_OUTERJOIN_EXPR outerJoinIdent ) ;
+    // EsperEPL2Grammar.g:624:1: outerJoin : ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) ) JOIN streamExpression outerJoinIdent -> {$i != null}? streamExpression ^( INNERJOIN_EXPR outerJoinIdent ) -> {$tl != null}? streamExpression ^( LEFT_OUTERJOIN_EXPR outerJoinIdent ) -> {$tr != null}? streamExpression ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent ) -> streamExpression ^( FULL_OUTERJOIN_EXPR outerJoinIdent ) ;
     public final EsperEPL2GrammarParser.outerJoin_return outerJoin() throws RecognitionException {
         EsperEPL2GrammarParser.outerJoin_return retval = new EsperEPL2GrammarParser.outerJoin_return();
         retval.start = input.LT(1);
@@ -3946,10 +3947,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_outerJoinIdent=new RewriteRuleSubtreeStream(adaptor,"rule outerJoinIdent");
          paraphrases.push("outer join"); 
         try {
-            // EsperEPL2Grammar.g:626:2: ( ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) ) JOIN streamExpression outerJoinIdent -> {$i != null}? streamExpression ^( INNERJOIN_EXPR outerJoinIdent ) -> {$tl != null}? streamExpression ^( LEFT_OUTERJOIN_EXPR outerJoinIdent ) -> {$tr != null}? streamExpression ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent ) -> streamExpression ^( FULL_OUTERJOIN_EXPR outerJoinIdent ) )
-            // EsperEPL2Grammar.g:626:4: ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) ) JOIN streamExpression outerJoinIdent
+            // EsperEPL2Grammar.g:627:2: ( ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) ) JOIN streamExpression outerJoinIdent -> {$i != null}? streamExpression ^( INNERJOIN_EXPR outerJoinIdent ) -> {$tl != null}? streamExpression ^( LEFT_OUTERJOIN_EXPR outerJoinIdent ) -> {$tr != null}? streamExpression ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent ) -> streamExpression ^( FULL_OUTERJOIN_EXPR outerJoinIdent ) )
+            // EsperEPL2Grammar.g:627:4: ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) ) JOIN streamExpression outerJoinIdent
             {
-            // EsperEPL2Grammar.g:626:4: ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) )
+            // EsperEPL2Grammar.g:627:4: ( ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )? | (i= INNER ) )
             int alt41=2;
             int LA41_0 = input.LA(1);
 
@@ -3968,9 +3969,9 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt41) {
                 case 1 :
-                    // EsperEPL2Grammar.g:627:14: ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )?
+                    // EsperEPL2Grammar.g:628:14: ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )?
                     {
-                    // EsperEPL2Grammar.g:627:14: ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )?
+                    // EsperEPL2Grammar.g:628:14: ( (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER )?
                     int alt40=2;
                     int LA40_0 = input.LA(1);
 
@@ -3979,9 +3980,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt40) {
                         case 1 :
-                            // EsperEPL2Grammar.g:627:15: (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER
+                            // EsperEPL2Grammar.g:628:15: (tl= LEFT | tr= RIGHT | tf= FULL ) OUTER
                             {
-                            // EsperEPL2Grammar.g:627:15: (tl= LEFT | tr= RIGHT | tf= FULL )
+                            // EsperEPL2Grammar.g:628:15: (tl= LEFT | tr= RIGHT | tf= FULL )
                             int alt39=3;
                             switch ( input.LA(1) ) {
                             case LEFT:
@@ -4009,7 +4010,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                             switch (alt39) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:627:16: tl= LEFT
+                                    // EsperEPL2Grammar.g:628:16: tl= LEFT
                                     {
                                     tl=(Token)match(input,LEFT,FOLLOW_LEFT_in_outerJoin2525); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_LEFT.add(tl);
@@ -4018,7 +4019,7 @@ public class EsperEPL2GrammarParser extends Parser {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:627:24: tr= RIGHT
+                                    // EsperEPL2Grammar.g:628:24: tr= RIGHT
                                     {
                                     tr=(Token)match(input,RIGHT,FOLLOW_RIGHT_in_outerJoin2529); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_RIGHT.add(tr);
@@ -4027,7 +4028,7 @@ public class EsperEPL2GrammarParser extends Parser {
                                     }
                                     break;
                                 case 3 :
-                                    // EsperEPL2Grammar.g:627:33: tf= FULL
+                                    // EsperEPL2Grammar.g:628:33: tf= FULL
                                     {
                                     tf=(Token)match(input,FULL,FOLLOW_FULL_in_outerJoin2533); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_FULL.add(tf);
@@ -4051,10 +4052,10 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:628:14: (i= INNER )
+                    // EsperEPL2Grammar.g:629:14: (i= INNER )
                     {
-                    // EsperEPL2Grammar.g:628:14: (i= INNER )
-                    // EsperEPL2Grammar.g:628:15: i= INNER
+                    // EsperEPL2Grammar.g:629:14: (i= INNER )
+                    // EsperEPL2Grammar.g:629:15: i= INNER
                     {
                     i=(Token)match(input,INNER,FOLLOW_INNER_in_outerJoin2557); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_INNER.add(i);
@@ -4086,7 +4087,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: outerJoinIdent, outerJoinIdent, outerJoinIdent, outerJoinIdent, streamExpression, streamExpression, streamExpression, streamExpression
+            // elements: outerJoinIdent, streamExpression, outerJoinIdent, outerJoinIdent, streamExpression, streamExpression, outerJoinIdent, streamExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -4096,10 +4097,10 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 630:3: -> {$i != null}? streamExpression ^( INNERJOIN_EXPR outerJoinIdent )
+            // 631:3: -> {$i != null}? streamExpression ^( INNERJOIN_EXPR outerJoinIdent )
             if (i != null) {
                 adaptor.addChild(root_0, stream_streamExpression.nextTree());
-                // EsperEPL2Grammar.g:630:37: ^( INNERJOIN_EXPR outerJoinIdent )
+                // EsperEPL2Grammar.g:631:37: ^( INNERJOIN_EXPR outerJoinIdent )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(INNERJOIN_EXPR, "INNERJOIN_EXPR"), root_1);
@@ -4110,10 +4111,10 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 631:3: -> {$tl != null}? streamExpression ^( LEFT_OUTERJOIN_EXPR outerJoinIdent )
+            else // 632:3: -> {$tl != null}? streamExpression ^( LEFT_OUTERJOIN_EXPR outerJoinIdent )
             if (tl != null) {
                 adaptor.addChild(root_0, stream_streamExpression.nextTree());
-                // EsperEPL2Grammar.g:631:38: ^( LEFT_OUTERJOIN_EXPR outerJoinIdent )
+                // EsperEPL2Grammar.g:632:38: ^( LEFT_OUTERJOIN_EXPR outerJoinIdent )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(LEFT_OUTERJOIN_EXPR, "LEFT_OUTERJOIN_EXPR"), root_1);
@@ -4124,10 +4125,10 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 632:3: -> {$tr != null}? streamExpression ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent )
+            else // 633:3: -> {$tr != null}? streamExpression ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent )
             if (tr != null) {
                 adaptor.addChild(root_0, stream_streamExpression.nextTree());
-                // EsperEPL2Grammar.g:632:38: ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent )
+                // EsperEPL2Grammar.g:633:38: ^( RIGHT_OUTERJOIN_EXPR outerJoinIdent )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(RIGHT_OUTERJOIN_EXPR, "RIGHT_OUTERJOIN_EXPR"), root_1);
@@ -4138,10 +4139,10 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 633:3: -> streamExpression ^( FULL_OUTERJOIN_EXPR outerJoinIdent )
+            else // 634:3: -> streamExpression ^( FULL_OUTERJOIN_EXPR outerJoinIdent )
             {
                 adaptor.addChild(root_0, stream_streamExpression.nextTree());
-                // EsperEPL2Grammar.g:633:23: ^( FULL_OUTERJOIN_EXPR outerJoinIdent )
+                // EsperEPL2Grammar.g:634:23: ^( FULL_OUTERJOIN_EXPR outerJoinIdent )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(FULL_OUTERJOIN_EXPR, "FULL_OUTERJOIN_EXPR"), root_1);
@@ -4183,7 +4184,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "outerJoinIdent"
-    // EsperEPL2Grammar.g:636:1: outerJoinIdent : ON outerJoinIdentPair ( AND_EXPR outerJoinIdentPair )* ;
+    // EsperEPL2Grammar.g:637:1: outerJoinIdent : ON outerJoinIdentPair ( AND_EXPR outerJoinIdentPair )* ;
     public final EsperEPL2GrammarParser.outerJoinIdent_return outerJoinIdent() throws RecognitionException {
         EsperEPL2GrammarParser.outerJoinIdent_return retval = new EsperEPL2GrammarParser.outerJoinIdent_return();
         retval.start = input.LT(1);
@@ -4201,8 +4202,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree AND_EXPR117_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:637:2: ( ON outerJoinIdentPair ( AND_EXPR outerJoinIdentPair )* )
-            // EsperEPL2Grammar.g:637:4: ON outerJoinIdentPair ( AND_EXPR outerJoinIdentPair )*
+            // EsperEPL2Grammar.g:638:2: ( ON outerJoinIdentPair ( AND_EXPR outerJoinIdentPair )* )
+            // EsperEPL2Grammar.g:638:4: ON outerJoinIdentPair ( AND_EXPR outerJoinIdentPair )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -4213,7 +4214,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, outerJoinIdentPair116.getTree());
-            // EsperEPL2Grammar.g:637:27: ( AND_EXPR outerJoinIdentPair )*
+            // EsperEPL2Grammar.g:638:27: ( AND_EXPR outerJoinIdentPair )*
             loop42:
             do {
                 int alt42=2;
@@ -4226,7 +4227,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt42) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:637:28: AND_EXPR outerJoinIdentPair
+            	    // EsperEPL2Grammar.g:638:28: AND_EXPR outerJoinIdentPair
             	    {
             	    AND_EXPR117=(Token)match(input,AND_EXPR,FOLLOW_AND_EXPR_in_outerJoinIdent2646); if (state.failed) return retval;
             	    pushFollow(FOLLOW_outerJoinIdentPair_in_outerJoinIdent2649);
@@ -4271,7 +4272,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "outerJoinIdentPair"
-    // EsperEPL2Grammar.g:640:1: outerJoinIdentPair : eventProperty EQUALS eventProperty ;
+    // EsperEPL2Grammar.g:641:1: outerJoinIdentPair : eventProperty EQUALS eventProperty ;
     public final EsperEPL2GrammarParser.outerJoinIdentPair_return outerJoinIdentPair() throws RecognitionException {
         EsperEPL2GrammarParser.outerJoinIdentPair_return retval = new EsperEPL2GrammarParser.outerJoinIdentPair_return();
         retval.start = input.LT(1);
@@ -4287,8 +4288,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree EQUALS120_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:641:2: ( eventProperty EQUALS eventProperty )
-            // EsperEPL2Grammar.g:641:4: eventProperty EQUALS eventProperty
+            // EsperEPL2Grammar.g:642:2: ( eventProperty EQUALS eventProperty )
+            // EsperEPL2Grammar.g:642:4: eventProperty EQUALS eventProperty
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -4332,7 +4333,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "whereClause"
-    // EsperEPL2Grammar.g:644:1: whereClause : evalOrExpression -> ^( WHERE_EXPR evalOrExpression ) ;
+    // EsperEPL2Grammar.g:645:1: whereClause : evalOrExpression -> ^( WHERE_EXPR evalOrExpression ) ;
     public final EsperEPL2GrammarParser.whereClause_return whereClause() throws RecognitionException {
         EsperEPL2GrammarParser.whereClause_return retval = new EsperEPL2GrammarParser.whereClause_return();
         retval.start = input.LT(1);
@@ -4345,8 +4346,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_evalOrExpression=new RewriteRuleSubtreeStream(adaptor,"rule evalOrExpression");
          paraphrases.push("where clause"); 
         try {
-            // EsperEPL2Grammar.g:647:2: ( evalOrExpression -> ^( WHERE_EXPR evalOrExpression ) )
-            // EsperEPL2Grammar.g:647:4: evalOrExpression
+            // EsperEPL2Grammar.g:648:2: ( evalOrExpression -> ^( WHERE_EXPR evalOrExpression ) )
+            // EsperEPL2Grammar.g:648:4: evalOrExpression
             {
             pushFollow(FOLLOW_evalOrExpression_in_whereClause2691);
             evalOrExpression122=evalOrExpression();
@@ -4367,9 +4368,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 648:3: -> ^( WHERE_EXPR evalOrExpression )
+            // 649:3: -> ^( WHERE_EXPR evalOrExpression )
             {
-                // EsperEPL2Grammar.g:648:6: ^( WHERE_EXPR evalOrExpression )
+                // EsperEPL2Grammar.g:649:6: ^( WHERE_EXPR evalOrExpression )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(WHERE_EXPR, "WHERE_EXPR"), root_1);
@@ -4411,7 +4412,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "selectClause"
-    // EsperEPL2Grammar.g:651:1: selectClause : (s= RSTREAM | s= ISTREAM | s= IRSTREAM )? selectionList -> ^( SELECTION_EXPR ( $s)? selectionList ) ;
+    // EsperEPL2Grammar.g:652:1: selectClause : (s= RSTREAM | s= ISTREAM | s= IRSTREAM )? selectionList -> ^( SELECTION_EXPR ( $s)? selectionList ) ;
     public final EsperEPL2GrammarParser.selectClause_return selectClause() throws RecognitionException {
         EsperEPL2GrammarParser.selectClause_return retval = new EsperEPL2GrammarParser.selectClause_return();
         retval.start = input.LT(1);
@@ -4429,10 +4430,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_selectionList=new RewriteRuleSubtreeStream(adaptor,"rule selectionList");
          paraphrases.push("select clause"); 
         try {
-            // EsperEPL2Grammar.g:654:2: ( (s= RSTREAM | s= ISTREAM | s= IRSTREAM )? selectionList -> ^( SELECTION_EXPR ( $s)? selectionList ) )
-            // EsperEPL2Grammar.g:654:4: (s= RSTREAM | s= ISTREAM | s= IRSTREAM )? selectionList
+            // EsperEPL2Grammar.g:655:2: ( (s= RSTREAM | s= ISTREAM | s= IRSTREAM )? selectionList -> ^( SELECTION_EXPR ( $s)? selectionList ) )
+            // EsperEPL2Grammar.g:655:4: (s= RSTREAM | s= ISTREAM | s= IRSTREAM )? selectionList
             {
-            // EsperEPL2Grammar.g:654:4: (s= RSTREAM | s= ISTREAM | s= IRSTREAM )?
+            // EsperEPL2Grammar.g:655:4: (s= RSTREAM | s= ISTREAM | s= IRSTREAM )?
             int alt43=4;
             switch ( input.LA(1) ) {
                 case RSTREAM:
@@ -4454,7 +4455,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt43) {
                 case 1 :
-                    // EsperEPL2Grammar.g:654:5: s= RSTREAM
+                    // EsperEPL2Grammar.g:655:5: s= RSTREAM
                     {
                     s=(Token)match(input,RSTREAM,FOLLOW_RSTREAM_in_selectClause2727); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RSTREAM.add(s);
@@ -4463,7 +4464,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:654:17: s= ISTREAM
+                    // EsperEPL2Grammar.g:655:17: s= ISTREAM
                     {
                     s=(Token)match(input,ISTREAM,FOLLOW_ISTREAM_in_selectClause2733); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ISTREAM.add(s);
@@ -4472,7 +4473,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:654:29: s= IRSTREAM
+                    // EsperEPL2Grammar.g:655:29: s= IRSTREAM
                     {
                     s=(Token)match(input,IRSTREAM,FOLLOW_IRSTREAM_in_selectClause2739); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IRSTREAM.add(s);
@@ -4492,7 +4493,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: s, selectionList
+            // elements: selectionList, s
             // token labels: s
             // rule labels: retval
             // token list labels: 
@@ -4503,14 +4504,14 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 655:3: -> ^( SELECTION_EXPR ( $s)? selectionList )
+            // 656:3: -> ^( SELECTION_EXPR ( $s)? selectionList )
             {
-                // EsperEPL2Grammar.g:655:6: ^( SELECTION_EXPR ( $s)? selectionList )
+                // EsperEPL2Grammar.g:656:6: ^( SELECTION_EXPR ( $s)? selectionList )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_EXPR, "SELECTION_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:655:23: ( $s)?
+                // EsperEPL2Grammar.g:656:23: ( $s)?
                 if ( stream_s.hasNext() ) {
                     adaptor.addChild(root_1, stream_s.nextNode());
 
@@ -4553,7 +4554,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "selectionList"
-    // EsperEPL2Grammar.g:658:1: selectionList : selectionListElement ( COMMA selectionListElement )* ;
+    // EsperEPL2Grammar.g:659:1: selectionList : selectionListElement ( COMMA selectionListElement )* ;
     public final EsperEPL2GrammarParser.selectionList_return selectionList() throws RecognitionException {
         EsperEPL2GrammarParser.selectionList_return retval = new EsperEPL2GrammarParser.selectionList_return();
         retval.start = input.LT(1);
@@ -4569,8 +4570,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree COMMA125_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:659:2: ( selectionListElement ( COMMA selectionListElement )* )
-            // EsperEPL2Grammar.g:659:4: selectionListElement ( COMMA selectionListElement )*
+            // EsperEPL2Grammar.g:660:2: ( selectionListElement ( COMMA selectionListElement )* )
+            // EsperEPL2Grammar.g:660:4: selectionListElement ( COMMA selectionListElement )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -4580,7 +4581,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, selectionListElement124.getTree());
-            // EsperEPL2Grammar.g:659:25: ( COMMA selectionListElement )*
+            // EsperEPL2Grammar.g:660:25: ( COMMA selectionListElement )*
             loop44:
             do {
                 int alt44=2;
@@ -4593,7 +4594,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt44) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:659:26: COMMA selectionListElement
+            	    // EsperEPL2Grammar.g:660:26: COMMA selectionListElement
             	    {
             	    COMMA125=(Token)match(input,COMMA,FOLLOW_COMMA_in_selectionList2773); if (state.failed) return retval;
             	    pushFollow(FOLLOW_selectionListElement_in_selectionList2776);
@@ -4638,7 +4639,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "selectionListElement"
-    // EsperEPL2Grammar.g:662:1: selectionListElement : (s= STAR -> WILDCARD_SELECT[$s] | ( streamSelector )=> streamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression ) -> ^( SELECTION_ELEMENT_EXPR expression ) );
+    // EsperEPL2Grammar.g:663:1: selectionListElement : (s= STAR -> WILDCARD_SELECT[$s] | ( streamSelector )=> streamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression ) -> ^( SELECTION_ELEMENT_EXPR expression ) );
     public final EsperEPL2GrammarParser.selectionListElement_return selectionListElement() throws RecognitionException {
         EsperEPL2GrammarParser.selectionListElement_return retval = new EsperEPL2GrammarParser.selectionListElement_return();
         retval.start = input.LT(1);
@@ -4662,12 +4663,12 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_keywordAllowedIdent=new RewriteRuleSubtreeStream(adaptor,"rule keywordAllowedIdent");
          String identifier = null; 
         try {
-            // EsperEPL2Grammar.g:664:2: (s= STAR -> WILDCARD_SELECT[$s] | ( streamSelector )=> streamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression ) -> ^( SELECTION_ELEMENT_EXPR expression ) )
+            // EsperEPL2Grammar.g:665:2: (s= STAR -> WILDCARD_SELECT[$s] | ( streamSelector )=> streamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression ) -> ^( SELECTION_ELEMENT_EXPR expression ) )
             int alt46=3;
             alt46 = dfa46.predict(input);
             switch (alt46) {
                 case 1 :
-                    // EsperEPL2Grammar.g:664:7: s= STAR
+                    // EsperEPL2Grammar.g:665:7: s= STAR
                     {
                     s=(Token)match(input,STAR,FOLLOW_STAR_in_selectionListElement2802); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(s);
@@ -4685,7 +4686,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 664:14: -> WILDCARD_SELECT[$s]
+                    // 665:14: -> WILDCARD_SELECT[$s]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(WILDCARD_SELECT, s));
 
@@ -4695,7 +4696,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:665:4: ( streamSelector )=> streamSelector
+                    // EsperEPL2Grammar.g:666:4: ( streamSelector )=> streamSelector
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -4709,7 +4710,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:666:4: expression ( AS i= keywordAllowedIdent )?
+                    // EsperEPL2Grammar.g:667:4: expression ( AS i= keywordAllowedIdent )?
                     {
                     pushFollow(FOLLOW_expression_in_selectionListElement2823);
                     expression128=expression();
@@ -4717,7 +4718,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_expression.add(expression128.getTree());
-                    // EsperEPL2Grammar.g:666:15: ( AS i= keywordAllowedIdent )?
+                    // EsperEPL2Grammar.g:667:15: ( AS i= keywordAllowedIdent )?
                     int alt45=2;
                     int LA45_0 = input.LA(1);
 
@@ -4726,7 +4727,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt45) {
                         case 1 :
-                            // EsperEPL2Grammar.g:666:16: AS i= keywordAllowedIdent
+                            // EsperEPL2Grammar.g:667:16: AS i= keywordAllowedIdent
                             {
                             AS129=(Token)match(input,AS,FOLLOW_AS_in_selectionListElement2826); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_AS.add(AS129);
@@ -4759,9 +4760,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 667:3: -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
+                    // 668:3: -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
                     if (identifier != null) {
-                        // EsperEPL2Grammar.g:667:28: ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
+                        // EsperEPL2Grammar.g:668:28: ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_ELEMENT_EXPR, "SELECTION_ELEMENT_EXPR"), root_1);
@@ -4773,9 +4774,9 @@ public class EsperEPL2GrammarParser extends Parser {
                         }
 
                     }
-                    else // 668:3: -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression )
+                    else // 669:3: -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression )
                     if (identifier == null) {
-                        // EsperEPL2Grammar.g:668:28: ^( SELECTION_ELEMENT_EXPR expression )
+                        // EsperEPL2Grammar.g:669:28: ^( SELECTION_ELEMENT_EXPR expression )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_ELEMENT_EXPR, "SELECTION_ELEMENT_EXPR"), root_1);
@@ -4786,9 +4787,9 @@ public class EsperEPL2GrammarParser extends Parser {
                         }
 
                     }
-                    else // 669:3: -> ^( SELECTION_ELEMENT_EXPR expression )
+                    else // 670:3: -> ^( SELECTION_ELEMENT_EXPR expression )
                     {
-                        // EsperEPL2Grammar.g:669:6: ^( SELECTION_ELEMENT_EXPR expression )
+                        // EsperEPL2Grammar.g:670:6: ^( SELECTION_ELEMENT_EXPR expression )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_ELEMENT_EXPR, "SELECTION_ELEMENT_EXPR"), root_1);
@@ -4829,7 +4830,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "streamSelector"
-    // EsperEPL2Grammar.g:672:1: streamSelector : s= IDENT DOT STAR ( AS i= IDENT )? -> ^( SELECTION_STREAM $s ( $i)? ) ;
+    // EsperEPL2Grammar.g:673:1: streamSelector : s= IDENT DOT STAR ( AS i= IDENT )? -> ^( SELECTION_STREAM $s ( $i)? ) ;
     public final EsperEPL2GrammarParser.streamSelector_return streamSelector() throws RecognitionException {
         EsperEPL2GrammarParser.streamSelector_return retval = new EsperEPL2GrammarParser.streamSelector_return();
         retval.start = input.LT(1);
@@ -4853,8 +4854,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_DOT=new RewriteRuleTokenStream(adaptor,"token DOT");
 
         try {
-            // EsperEPL2Grammar.g:673:2: (s= IDENT DOT STAR ( AS i= IDENT )? -> ^( SELECTION_STREAM $s ( $i)? ) )
-            // EsperEPL2Grammar.g:673:4: s= IDENT DOT STAR ( AS i= IDENT )?
+            // EsperEPL2Grammar.g:674:2: (s= IDENT DOT STAR ( AS i= IDENT )? -> ^( SELECTION_STREAM $s ( $i)? ) )
+            // EsperEPL2Grammar.g:674:4: s= IDENT DOT STAR ( AS i= IDENT )?
             {
             s=(Token)match(input,IDENT,FOLLOW_IDENT_in_streamSelector2886); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(s);
@@ -4865,7 +4866,7 @@ public class EsperEPL2GrammarParser extends Parser {
             STAR131=(Token)match(input,STAR,FOLLOW_STAR_in_streamSelector2890); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_STAR.add(STAR131);
 
-            // EsperEPL2Grammar.g:673:21: ( AS i= IDENT )?
+            // EsperEPL2Grammar.g:674:21: ( AS i= IDENT )?
             int alt47=2;
             int LA47_0 = input.LA(1);
 
@@ -4874,7 +4875,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt47) {
                 case 1 :
-                    // EsperEPL2Grammar.g:673:22: AS i= IDENT
+                    // EsperEPL2Grammar.g:674:22: AS i= IDENT
                     {
                     AS132=(Token)match(input,AS,FOLLOW_AS_in_streamSelector2893); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS132);
@@ -4903,15 +4904,15 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 674:3: -> ^( SELECTION_STREAM $s ( $i)? )
+            // 675:3: -> ^( SELECTION_STREAM $s ( $i)? )
             {
-                // EsperEPL2Grammar.g:674:6: ^( SELECTION_STREAM $s ( $i)? )
+                // EsperEPL2Grammar.g:675:6: ^( SELECTION_STREAM $s ( $i)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SELECTION_STREAM, "SELECTION_STREAM"), root_1);
 
                 adaptor.addChild(root_1, stream_s.nextNode());
-                // EsperEPL2Grammar.g:674:28: ( $i)?
+                // EsperEPL2Grammar.g:675:28: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
@@ -4950,7 +4951,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "streamExpression"
-    // EsperEPL2Grammar.g:677:1: streamExpression : ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression ) ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (u= UNIDIRECTIONAL )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? ) ;
+    // EsperEPL2Grammar.g:678:1: streamExpression : ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression ) ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (u= UNIDIRECTIONAL )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? ) ;
     public final EsperEPL2GrammarParser.streamExpression_return streamExpression() throws RecognitionException {
         EsperEPL2GrammarParser.streamExpression_return retval = new EsperEPL2GrammarParser.streamExpression_return();
         retval.start = input.LT(1);
@@ -4996,10 +4997,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_eventFilterExpression=new RewriteRuleSubtreeStream(adaptor,"rule eventFilterExpression");
         RewriteRuleSubtreeStream stream_patternInclusionExpression=new RewriteRuleSubtreeStream(adaptor,"rule patternInclusionExpression");
         try {
-            // EsperEPL2Grammar.g:678:2: ( ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression ) ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (u= UNIDIRECTIONAL )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? ) )
-            // EsperEPL2Grammar.g:678:4: ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression ) ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (u= UNIDIRECTIONAL )? (ru= RETAINUNION | ri= RETAININTERSECTION )?
+            // EsperEPL2Grammar.g:679:2: ( ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression ) ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (u= UNIDIRECTIONAL )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? ) )
+            // EsperEPL2Grammar.g:679:4: ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression ) ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (u= UNIDIRECTIONAL )? (ru= RETAINUNION | ri= RETAININTERSECTION )?
             {
-            // EsperEPL2Grammar.g:678:4: ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression )
+            // EsperEPL2Grammar.g:679:4: ( eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression )
             int alt48=4;
             switch ( input.LA(1) ) {
             case IDENT:
@@ -5041,7 +5042,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt48) {
                 case 1 :
-                    // EsperEPL2Grammar.g:678:5: eventFilterExpression
+                    // EsperEPL2Grammar.g:679:5: eventFilterExpression
                     {
                     pushFollow(FOLLOW_eventFilterExpression_in_streamExpression2927);
                     eventFilterExpression133=eventFilterExpression();
@@ -5053,7 +5054,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:678:29: patternInclusionExpression
+                    // EsperEPL2Grammar.g:679:29: patternInclusionExpression
                     {
                     pushFollow(FOLLOW_patternInclusionExpression_in_streamExpression2931);
                     patternInclusionExpression134=patternInclusionExpression();
@@ -5065,7 +5066,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:678:58: databaseJoinExpression
+                    // EsperEPL2Grammar.g:679:58: databaseJoinExpression
                     {
                     pushFollow(FOLLOW_databaseJoinExpression_in_streamExpression2935);
                     databaseJoinExpression135=databaseJoinExpression();
@@ -5077,7 +5078,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:678:83: methodJoinExpression
+                    // EsperEPL2Grammar.g:679:83: methodJoinExpression
                     {
                     pushFollow(FOLLOW_methodJoinExpression_in_streamExpression2939);
                     methodJoinExpression136=methodJoinExpression();
@@ -5091,7 +5092,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:679:3: ( DOT viewExpression ( DOT viewExpression )* )?
+            // EsperEPL2Grammar.g:680:3: ( DOT viewExpression ( DOT viewExpression )* )?
             int alt50=2;
             int LA50_0 = input.LA(1);
 
@@ -5100,7 +5101,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt50) {
                 case 1 :
-                    // EsperEPL2Grammar.g:679:4: DOT viewExpression ( DOT viewExpression )*
+                    // EsperEPL2Grammar.g:680:4: DOT viewExpression ( DOT viewExpression )*
                     {
                     DOT137=(Token)match(input,DOT,FOLLOW_DOT_in_streamExpression2945); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DOT.add(DOT137);
@@ -5111,7 +5112,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_viewExpression.add(viewExpression138.getTree());
-                    // EsperEPL2Grammar.g:679:23: ( DOT viewExpression )*
+                    // EsperEPL2Grammar.g:680:23: ( DOT viewExpression )*
                     loop49:
                     do {
                         int alt49=2;
@@ -5124,7 +5125,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt49) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:679:24: DOT viewExpression
+                    	    // EsperEPL2Grammar.g:680:24: DOT viewExpression
                     	    {
                     	    DOT139=(Token)match(input,DOT,FOLLOW_DOT_in_streamExpression2950); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_DOT.add(DOT139);
@@ -5150,7 +5151,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:679:47: ( AS i= IDENT | i= IDENT )?
+            // EsperEPL2Grammar.g:680:47: ( AS i= IDENT | i= IDENT )?
             int alt51=3;
             int LA51_0 = input.LA(1);
 
@@ -5162,7 +5163,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt51) {
                 case 1 :
-                    // EsperEPL2Grammar.g:679:48: AS i= IDENT
+                    // EsperEPL2Grammar.g:680:48: AS i= IDENT
                     {
                     AS141=(Token)match(input,AS,FOLLOW_AS_in_streamExpression2959); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS141);
@@ -5174,7 +5175,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:679:61: i= IDENT
+                    // EsperEPL2Grammar.g:680:61: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_streamExpression2969); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -5185,7 +5186,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:679:71: (u= UNIDIRECTIONAL )?
+            // EsperEPL2Grammar.g:680:71: (u= UNIDIRECTIONAL )?
             int alt52=2;
             int LA52_0 = input.LA(1);
 
@@ -5194,7 +5195,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt52) {
                 case 1 :
-                    // EsperEPL2Grammar.g:679:72: u= UNIDIRECTIONAL
+                    // EsperEPL2Grammar.g:680:72: u= UNIDIRECTIONAL
                     {
                     u=(Token)match(input,UNIDIRECTIONAL,FOLLOW_UNIDIRECTIONAL_in_streamExpression2976); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_UNIDIRECTIONAL.add(u);
@@ -5205,7 +5206,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:679:91: (ru= RETAINUNION | ri= RETAININTERSECTION )?
+            // EsperEPL2Grammar.g:680:91: (ru= RETAINUNION | ri= RETAININTERSECTION )?
             int alt53=3;
             int LA53_0 = input.LA(1);
 
@@ -5217,7 +5218,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt53) {
                 case 1 :
-                    // EsperEPL2Grammar.g:679:92: ru= RETAINUNION
+                    // EsperEPL2Grammar.g:680:92: ru= RETAINUNION
                     {
                     ru=(Token)match(input,RETAINUNION,FOLLOW_RETAINUNION_in_streamExpression2983); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RETAINUNION.add(ru);
@@ -5226,7 +5227,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:679:107: ri= RETAININTERSECTION
+                    // EsperEPL2Grammar.g:680:107: ri= RETAININTERSECTION
                     {
                     ri=(Token)match(input,RETAININTERSECTION,FOLLOW_RETAININTERSECTION_in_streamExpression2987); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RETAININTERSECTION.add(ri);
@@ -5240,7 +5241,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: u, i, viewExpression, methodJoinExpression, patternInclusionExpression, databaseJoinExpression, eventFilterExpression, ri, ru
+            // elements: u, ru, i, viewExpression, ri, databaseJoinExpression, eventFilterExpression, patternInclusionExpression, methodJoinExpression
             // token labels: u, ri, ru, i
             // rule labels: retval
             // token list labels: 
@@ -5254,62 +5255,62 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 680:3: -> ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? )
+            // 681:3: -> ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? )
             {
-                // EsperEPL2Grammar.g:680:6: ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? )
+                // EsperEPL2Grammar.g:681:6: ^( STREAM_EXPR ( eventFilterExpression )? ( patternInclusionExpression )? ( databaseJoinExpression )? ( methodJoinExpression )? ( viewExpression )* ( $i)? ( $u)? ( $ru)? ( $ri)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(STREAM_EXPR, "STREAM_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:680:20: ( eventFilterExpression )?
+                // EsperEPL2Grammar.g:681:20: ( eventFilterExpression )?
                 if ( stream_eventFilterExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_eventFilterExpression.nextTree());
 
                 }
                 stream_eventFilterExpression.reset();
-                // EsperEPL2Grammar.g:680:43: ( patternInclusionExpression )?
+                // EsperEPL2Grammar.g:681:43: ( patternInclusionExpression )?
                 if ( stream_patternInclusionExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_patternInclusionExpression.nextTree());
 
                 }
                 stream_patternInclusionExpression.reset();
-                // EsperEPL2Grammar.g:680:71: ( databaseJoinExpression )?
+                // EsperEPL2Grammar.g:681:71: ( databaseJoinExpression )?
                 if ( stream_databaseJoinExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_databaseJoinExpression.nextTree());
 
                 }
                 stream_databaseJoinExpression.reset();
-                // EsperEPL2Grammar.g:680:95: ( methodJoinExpression )?
+                // EsperEPL2Grammar.g:681:95: ( methodJoinExpression )?
                 if ( stream_methodJoinExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_methodJoinExpression.nextTree());
 
                 }
                 stream_methodJoinExpression.reset();
-                // EsperEPL2Grammar.g:681:3: ( viewExpression )*
+                // EsperEPL2Grammar.g:682:3: ( viewExpression )*
                 while ( stream_viewExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_viewExpression.nextTree());
 
                 }
                 stream_viewExpression.reset();
-                // EsperEPL2Grammar.g:681:19: ( $i)?
+                // EsperEPL2Grammar.g:682:19: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
                 }
                 stream_i.reset();
-                // EsperEPL2Grammar.g:681:23: ( $u)?
+                // EsperEPL2Grammar.g:682:23: ( $u)?
                 if ( stream_u.hasNext() ) {
                     adaptor.addChild(root_1, stream_u.nextNode());
 
                 }
                 stream_u.reset();
-                // EsperEPL2Grammar.g:681:27: ( $ru)?
+                // EsperEPL2Grammar.g:682:27: ( $ru)?
                 if ( stream_ru.hasNext() ) {
                     adaptor.addChild(root_1, stream_ru.nextNode());
 
                 }
                 stream_ru.reset();
-                // EsperEPL2Grammar.g:681:32: ( $ri)?
+                // EsperEPL2Grammar.g:682:32: ( $ri)?
                 if ( stream_ri.hasNext() ) {
                     adaptor.addChild(root_1, stream_ri.nextNode());
 
@@ -5348,7 +5349,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "patternInclusionExpression"
-    // EsperEPL2Grammar.g:684:1: patternInclusionExpression : PATTERN LBRACK patternExpression RBRACK -> ^( PATTERN_INCL_EXPR patternExpression ) ;
+    // EsperEPL2Grammar.g:685:1: patternInclusionExpression : PATTERN LBRACK patternExpression RBRACK -> ^( PATTERN_INCL_EXPR patternExpression ) ;
     public final EsperEPL2GrammarParser.patternInclusionExpression_return patternInclusionExpression() throws RecognitionException {
         EsperEPL2GrammarParser.patternInclusionExpression_return retval = new EsperEPL2GrammarParser.patternInclusionExpression_return();
         retval.start = input.LT(1);
@@ -5369,8 +5370,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_LBRACK=new RewriteRuleTokenStream(adaptor,"token LBRACK");
         RewriteRuleSubtreeStream stream_patternExpression=new RewriteRuleSubtreeStream(adaptor,"rule patternExpression");
         try {
-            // EsperEPL2Grammar.g:685:2: ( PATTERN LBRACK patternExpression RBRACK -> ^( PATTERN_INCL_EXPR patternExpression ) )
-            // EsperEPL2Grammar.g:685:4: PATTERN LBRACK patternExpression RBRACK
+            // EsperEPL2Grammar.g:686:2: ( PATTERN LBRACK patternExpression RBRACK -> ^( PATTERN_INCL_EXPR patternExpression ) )
+            // EsperEPL2Grammar.g:686:4: PATTERN LBRACK patternExpression RBRACK
             {
             PATTERN142=(Token)match(input,PATTERN,FOLLOW_PATTERN_in_patternInclusionExpression3044); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_PATTERN.add(PATTERN142);
@@ -5400,9 +5401,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 686:3: -> ^( PATTERN_INCL_EXPR patternExpression )
+            // 687:3: -> ^( PATTERN_INCL_EXPR patternExpression )
             {
-                // EsperEPL2Grammar.g:686:6: ^( PATTERN_INCL_EXPR patternExpression )
+                // EsperEPL2Grammar.g:687:6: ^( PATTERN_INCL_EXPR patternExpression )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(PATTERN_INCL_EXPR, "PATTERN_INCL_EXPR"), root_1);
@@ -5441,7 +5442,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "databaseJoinExpression"
-    // EsperEPL2Grammar.g:689:1: databaseJoinExpression : SQL COLON i= IDENT LBRACK (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )? RBRACK -> ^( DATABASE_JOIN_EXPR $i $s ( $s2)? ) ;
+    // EsperEPL2Grammar.g:690:1: databaseJoinExpression : SQL COLON i= IDENT LBRACK (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )? RBRACK -> ^( DATABASE_JOIN_EXPR $i $s ( $s2)? ) ;
     public final EsperEPL2GrammarParser.databaseJoinExpression_return databaseJoinExpression() throws RecognitionException {
         EsperEPL2GrammarParser.databaseJoinExpression_return retval = new EsperEPL2GrammarParser.databaseJoinExpression_return();
         retval.start = input.LT(1);
@@ -5476,8 +5477,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
          paraphrases.push("relational data join"); 
         try {
-            // EsperEPL2Grammar.g:692:2: ( SQL COLON i= IDENT LBRACK (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )? RBRACK -> ^( DATABASE_JOIN_EXPR $i $s ( $s2)? ) )
-            // EsperEPL2Grammar.g:692:4: SQL COLON i= IDENT LBRACK (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )? RBRACK
+            // EsperEPL2Grammar.g:693:2: ( SQL COLON i= IDENT LBRACK (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )? RBRACK -> ^( DATABASE_JOIN_EXPR $i $s ( $s2)? ) )
+            // EsperEPL2Grammar.g:693:4: SQL COLON i= IDENT LBRACK (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )? RBRACK
             {
             SQL146=(Token)match(input,SQL,FOLLOW_SQL_in_databaseJoinExpression3083); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_SQL.add(SQL146);
@@ -5491,7 +5492,7 @@ public class EsperEPL2GrammarParser extends Parser {
             LBRACK148=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_databaseJoinExpression3091); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK148);
 
-            // EsperEPL2Grammar.g:692:29: (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL )
+            // EsperEPL2Grammar.g:693:29: (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL )
             int alt54=2;
             int LA54_0 = input.LA(1);
 
@@ -5510,7 +5511,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt54) {
                 case 1 :
-                    // EsperEPL2Grammar.g:692:30: s= STRING_LITERAL
+                    // EsperEPL2Grammar.g:693:30: s= STRING_LITERAL
                     {
                     s=(Token)match(input,STRING_LITERAL,FOLLOW_STRING_LITERAL_in_databaseJoinExpression3096); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STRING_LITERAL.add(s);
@@ -5519,7 +5520,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:692:49: s= QUOTED_STRING_LITERAL
+                    // EsperEPL2Grammar.g:693:49: s= QUOTED_STRING_LITERAL
                     {
                     s=(Token)match(input,QUOTED_STRING_LITERAL,FOLLOW_QUOTED_STRING_LITERAL_in_databaseJoinExpression3102); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_QUOTED_STRING_LITERAL.add(s);
@@ -5530,7 +5531,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:692:74: ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )?
+            // EsperEPL2Grammar.g:693:74: ( METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL ) )?
             int alt56=2;
             int LA56_0 = input.LA(1);
 
@@ -5539,12 +5540,12 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt56) {
                 case 1 :
-                    // EsperEPL2Grammar.g:692:75: METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL )
+                    // EsperEPL2Grammar.g:693:75: METADATASQL (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL )
                     {
                     METADATASQL149=(Token)match(input,METADATASQL,FOLLOW_METADATASQL_in_databaseJoinExpression3106); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_METADATASQL.add(METADATASQL149);
 
-                    // EsperEPL2Grammar.g:692:87: (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL )
+                    // EsperEPL2Grammar.g:693:87: (s2= STRING_LITERAL | s2= QUOTED_STRING_LITERAL )
                     int alt55=2;
                     int LA55_0 = input.LA(1);
 
@@ -5563,7 +5564,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt55) {
                         case 1 :
-                            // EsperEPL2Grammar.g:692:88: s2= STRING_LITERAL
+                            // EsperEPL2Grammar.g:693:88: s2= STRING_LITERAL
                             {
                             s2=(Token)match(input,STRING_LITERAL,FOLLOW_STRING_LITERAL_in_databaseJoinExpression3111); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_STRING_LITERAL.add(s2);
@@ -5572,7 +5573,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:692:108: s2= QUOTED_STRING_LITERAL
+                            // EsperEPL2Grammar.g:693:108: s2= QUOTED_STRING_LITERAL
                             {
                             s2=(Token)match(input,QUOTED_STRING_LITERAL,FOLLOW_QUOTED_STRING_LITERAL_in_databaseJoinExpression3117); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_QUOTED_STRING_LITERAL.add(s2);
@@ -5595,7 +5596,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: s2, s, i
+            // elements: i, s2, s
             // token labels: s2, s, i
             // rule labels: retval
             // token list labels: 
@@ -5608,16 +5609,16 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 693:3: -> ^( DATABASE_JOIN_EXPR $i $s ( $s2)? )
+            // 694:3: -> ^( DATABASE_JOIN_EXPR $i $s ( $s2)? )
             {
-                // EsperEPL2Grammar.g:693:6: ^( DATABASE_JOIN_EXPR $i $s ( $s2)? )
+                // EsperEPL2Grammar.g:694:6: ^( DATABASE_JOIN_EXPR $i $s ( $s2)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(DATABASE_JOIN_EXPR, "DATABASE_JOIN_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_i.nextNode());
                 adaptor.addChild(root_1, stream_s.nextNode());
-                // EsperEPL2Grammar.g:693:33: ( $s2)?
+                // EsperEPL2Grammar.g:694:33: ( $s2)?
                 if ( stream_s2.hasNext() ) {
                     adaptor.addChild(root_1, stream_s2.nextNode());
 
@@ -5659,7 +5660,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "methodJoinExpression"
-    // EsperEPL2Grammar.g:696:1: methodJoinExpression : i= IDENT COLON classIdentifier ( LPAREN ( expressionList )? RPAREN )? -> ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? ) ;
+    // EsperEPL2Grammar.g:697:1: methodJoinExpression : i= IDENT COLON classIdentifier ( LPAREN ( expressionList )? RPAREN )? -> ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? ) ;
     public final EsperEPL2GrammarParser.methodJoinExpression_return methodJoinExpression() throws RecognitionException {
         EsperEPL2GrammarParser.methodJoinExpression_return retval = new EsperEPL2GrammarParser.methodJoinExpression_return();
         retval.start = input.LT(1);
@@ -5687,8 +5688,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_classIdentifier=new RewriteRuleSubtreeStream(adaptor,"rule classIdentifier");
          paraphrases.push("method invocation join"); 
         try {
-            // EsperEPL2Grammar.g:699:6: (i= IDENT COLON classIdentifier ( LPAREN ( expressionList )? RPAREN )? -> ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? ) )
-            // EsperEPL2Grammar.g:699:11: i= IDENT COLON classIdentifier ( LPAREN ( expressionList )? RPAREN )?
+            // EsperEPL2Grammar.g:700:6: (i= IDENT COLON classIdentifier ( LPAREN ( expressionList )? RPAREN )? -> ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? ) )
+            // EsperEPL2Grammar.g:700:11: i= IDENT COLON classIdentifier ( LPAREN ( expressionList )? RPAREN )?
             {
             i=(Token)match(input,IDENT,FOLLOW_IDENT_in_methodJoinExpression3173); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -5702,7 +5703,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_classIdentifier.add(classIdentifier152.getTree());
-            // EsperEPL2Grammar.g:699:41: ( LPAREN ( expressionList )? RPAREN )?
+            // EsperEPL2Grammar.g:700:41: ( LPAREN ( expressionList )? RPAREN )?
             int alt58=2;
             int LA58_0 = input.LA(1);
 
@@ -5711,12 +5712,12 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt58) {
                 case 1 :
-                    // EsperEPL2Grammar.g:699:42: LPAREN ( expressionList )? RPAREN
+                    // EsperEPL2Grammar.g:700:42: LPAREN ( expressionList )? RPAREN
                     {
                     LPAREN153=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_methodJoinExpression3180); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN153);
 
-                    // EsperEPL2Grammar.g:699:49: ( expressionList )?
+                    // EsperEPL2Grammar.g:700:49: ( expressionList )?
                     int alt57=2;
                     int LA57_0 = input.LA(1);
 
@@ -5725,7 +5726,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt57) {
                         case 1 :
-                            // EsperEPL2Grammar.g:699:49: expressionList
+                            // EsperEPL2Grammar.g:700:49: expressionList
                             {
                             pushFollow(FOLLOW_expressionList_in_methodJoinExpression3182);
                             expressionList154=expressionList();
@@ -5751,7 +5752,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: expressionList, i, classIdentifier
+            // elements: classIdentifier, i, expressionList
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -5762,16 +5763,16 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 700:10: -> ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? )
+            // 701:10: -> ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? )
             {
-                // EsperEPL2Grammar.g:700:13: ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? )
+                // EsperEPL2Grammar.g:701:13: ^( METHOD_JOIN_EXPR $i classIdentifier ( expressionList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(METHOD_JOIN_EXPR, "METHOD_JOIN_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_i.nextNode());
                 adaptor.addChild(root_1, stream_classIdentifier.nextTree());
-                // EsperEPL2Grammar.g:700:51: ( expressionList )?
+                // EsperEPL2Grammar.g:701:51: ( expressionList )?
                 if ( stream_expressionList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionList.nextTree());
 
@@ -5813,7 +5814,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "viewExpression"
-    // EsperEPL2Grammar.g:703:1: viewExpression : ns= IDENT COLON nm= IDENT LPAREN ( expressionWithTimeList )? RPAREN -> ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? ) ;
+    // EsperEPL2Grammar.g:704:1: viewExpression : ns= IDENT COLON nm= IDENT LPAREN ( expressionWithTimeList )? RPAREN -> ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? ) ;
     public final EsperEPL2GrammarParser.viewExpression_return viewExpression() throws RecognitionException {
         EsperEPL2GrammarParser.viewExpression_return retval = new EsperEPL2GrammarParser.viewExpression_return();
         retval.start = input.LT(1);
@@ -5840,8 +5841,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_expressionWithTimeList=new RewriteRuleSubtreeStream(adaptor,"rule expressionWithTimeList");
          paraphrases.push("view specifications"); 
         try {
-            // EsperEPL2Grammar.g:706:2: (ns= IDENT COLON nm= IDENT LPAREN ( expressionWithTimeList )? RPAREN -> ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? ) )
-            // EsperEPL2Grammar.g:706:4: ns= IDENT COLON nm= IDENT LPAREN ( expressionWithTimeList )? RPAREN
+            // EsperEPL2Grammar.g:707:2: (ns= IDENT COLON nm= IDENT LPAREN ( expressionWithTimeList )? RPAREN -> ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? ) )
+            // EsperEPL2Grammar.g:707:4: ns= IDENT COLON nm= IDENT LPAREN ( expressionWithTimeList )? RPAREN
             {
             ns=(Token)match(input,IDENT,FOLLOW_IDENT_in_viewExpression3238); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(ns);
@@ -5855,7 +5856,7 @@ public class EsperEPL2GrammarParser extends Parser {
             LPAREN157=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_viewExpression3246); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN157);
 
-            // EsperEPL2Grammar.g:706:35: ( expressionWithTimeList )?
+            // EsperEPL2Grammar.g:707:35: ( expressionWithTimeList )?
             int alt59=2;
             int LA59_0 = input.LA(1);
 
@@ -5864,7 +5865,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt59) {
                 case 1 :
-                    // EsperEPL2Grammar.g:706:35: expressionWithTimeList
+                    // EsperEPL2Grammar.g:707:35: expressionWithTimeList
                     {
                     pushFollow(FOLLOW_expressionWithTimeList_in_viewExpression3248);
                     expressionWithTimeList158=expressionWithTimeList();
@@ -5884,7 +5885,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: ns, nm, expressionWithTimeList
+            // elements: nm, expressionWithTimeList, ns
             // token labels: ns, nm
             // rule labels: retval
             // token list labels: 
@@ -5896,16 +5897,16 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 707:3: -> ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? )
+            // 708:3: -> ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? )
             {
-                // EsperEPL2Grammar.g:707:6: ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? )
+                // EsperEPL2Grammar.g:708:6: ^( VIEW_EXPR $ns $nm ( expressionWithTimeList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(VIEW_EXPR, "VIEW_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_ns.nextNode());
                 adaptor.addChild(root_1, stream_nm.nextNode());
-                // EsperEPL2Grammar.g:707:26: ( expressionWithTimeList )?
+                // EsperEPL2Grammar.g:708:26: ( expressionWithTimeList )?
                 if ( stream_expressionWithTimeList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionWithTimeList.nextTree());
 
@@ -5947,7 +5948,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "groupByListExpr"
-    // EsperEPL2Grammar.g:710:1: groupByListExpr : expression ( COMMA expression )* -> ^( GROUP_BY_EXPR ( expression )+ ) ;
+    // EsperEPL2Grammar.g:711:1: groupByListExpr : expression ( COMMA expression )* -> ^( GROUP_BY_EXPR ( expression )+ ) ;
     public final EsperEPL2GrammarParser.groupByListExpr_return groupByListExpr() throws RecognitionException {
         EsperEPL2GrammarParser.groupByListExpr_return retval = new EsperEPL2GrammarParser.groupByListExpr_return();
         retval.start = input.LT(1);
@@ -5965,8 +5966,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_expression=new RewriteRuleSubtreeStream(adaptor,"rule expression");
          paraphrases.push("group-by clause"); 
         try {
-            // EsperEPL2Grammar.g:713:2: ( expression ( COMMA expression )* -> ^( GROUP_BY_EXPR ( expression )+ ) )
-            // EsperEPL2Grammar.g:713:4: expression ( COMMA expression )*
+            // EsperEPL2Grammar.g:714:2: ( expression ( COMMA expression )* -> ^( GROUP_BY_EXPR ( expression )+ ) )
+            // EsperEPL2Grammar.g:714:4: expression ( COMMA expression )*
             {
             pushFollow(FOLLOW_expression_in_groupByListExpr3290);
             expression160=expression();
@@ -5974,7 +5975,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_expression.add(expression160.getTree());
-            // EsperEPL2Grammar.g:713:15: ( COMMA expression )*
+            // EsperEPL2Grammar.g:714:15: ( COMMA expression )*
             loop60:
             do {
                 int alt60=2;
@@ -5987,7 +5988,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt60) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:713:16: COMMA expression
+            	    // EsperEPL2Grammar.g:714:16: COMMA expression
             	    {
             	    COMMA161=(Token)match(input,COMMA,FOLLOW_COMMA_in_groupByListExpr3293); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA161);
@@ -6020,9 +6021,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 714:3: -> ^( GROUP_BY_EXPR ( expression )+ )
+            // 715:3: -> ^( GROUP_BY_EXPR ( expression )+ )
             {
-                // EsperEPL2Grammar.g:714:6: ^( GROUP_BY_EXPR ( expression )+ )
+                // EsperEPL2Grammar.g:715:6: ^( GROUP_BY_EXPR ( expression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(GROUP_BY_EXPR, "GROUP_BY_EXPR"), root_1);
@@ -6071,7 +6072,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "orderByListExpr"
-    // EsperEPL2Grammar.g:717:1: orderByListExpr : orderByListElement ( COMMA orderByListElement )* -> ^( ORDER_BY_EXPR ( orderByListElement )+ ) ;
+    // EsperEPL2Grammar.g:718:1: orderByListExpr : orderByListElement ( COMMA orderByListElement )* -> ^( ORDER_BY_EXPR ( orderByListElement )+ ) ;
     public final EsperEPL2GrammarParser.orderByListExpr_return orderByListExpr() throws RecognitionException {
         EsperEPL2GrammarParser.orderByListExpr_return retval = new EsperEPL2GrammarParser.orderByListExpr_return();
         retval.start = input.LT(1);
@@ -6089,8 +6090,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_orderByListElement=new RewriteRuleSubtreeStream(adaptor,"rule orderByListElement");
          paraphrases.push("order by clause"); 
         try {
-            // EsperEPL2Grammar.g:720:2: ( orderByListElement ( COMMA orderByListElement )* -> ^( ORDER_BY_EXPR ( orderByListElement )+ ) )
-            // EsperEPL2Grammar.g:720:4: orderByListElement ( COMMA orderByListElement )*
+            // EsperEPL2Grammar.g:721:2: ( orderByListElement ( COMMA orderByListElement )* -> ^( ORDER_BY_EXPR ( orderByListElement )+ ) )
+            // EsperEPL2Grammar.g:721:4: orderByListElement ( COMMA orderByListElement )*
             {
             pushFollow(FOLLOW_orderByListElement_in_orderByListExpr3330);
             orderByListElement163=orderByListElement();
@@ -6098,7 +6099,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_orderByListElement.add(orderByListElement163.getTree());
-            // EsperEPL2Grammar.g:720:23: ( COMMA orderByListElement )*
+            // EsperEPL2Grammar.g:721:23: ( COMMA orderByListElement )*
             loop61:
             do {
                 int alt61=2;
@@ -6111,7 +6112,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt61) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:720:24: COMMA orderByListElement
+            	    // EsperEPL2Grammar.g:721:24: COMMA orderByListElement
             	    {
             	    COMMA164=(Token)match(input,COMMA,FOLLOW_COMMA_in_orderByListExpr3333); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA164);
@@ -6144,9 +6145,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 721:3: -> ^( ORDER_BY_EXPR ( orderByListElement )+ )
+            // 722:3: -> ^( ORDER_BY_EXPR ( orderByListElement )+ )
             {
-                // EsperEPL2Grammar.g:721:6: ^( ORDER_BY_EXPR ( orderByListElement )+ )
+                // EsperEPL2Grammar.g:722:6: ^( ORDER_BY_EXPR ( orderByListElement )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ORDER_BY_EXPR, "ORDER_BY_EXPR"), root_1);
@@ -6195,7 +6196,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "orderByListElement"
-    // EsperEPL2Grammar.g:724:1: orderByListElement : expression (d= ASC | d= DESC )? -> ^( ORDER_ELEMENT_EXPR expression ( $d)? ) ;
+    // EsperEPL2Grammar.g:725:1: orderByListElement : expression (d= ASC | d= DESC )? -> ^( ORDER_ELEMENT_EXPR expression ( $d)? ) ;
     public final EsperEPL2GrammarParser.orderByListElement_return orderByListElement() throws RecognitionException {
         EsperEPL2GrammarParser.orderByListElement_return retval = new EsperEPL2GrammarParser.orderByListElement_return();
         retval.start = input.LT(1);
@@ -6211,8 +6212,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_DESC=new RewriteRuleTokenStream(adaptor,"token DESC");
         RewriteRuleSubtreeStream stream_expression=new RewriteRuleSubtreeStream(adaptor,"rule expression");
         try {
-            // EsperEPL2Grammar.g:725:2: ( expression (d= ASC | d= DESC )? -> ^( ORDER_ELEMENT_EXPR expression ( $d)? ) )
-            // EsperEPL2Grammar.g:725:4: expression (d= ASC | d= DESC )?
+            // EsperEPL2Grammar.g:726:2: ( expression (d= ASC | d= DESC )? -> ^( ORDER_ELEMENT_EXPR expression ( $d)? ) )
+            // EsperEPL2Grammar.g:726:4: expression (d= ASC | d= DESC )?
             {
             pushFollow(FOLLOW_expression_in_orderByListElement3360);
             expression166=expression();
@@ -6220,7 +6221,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_expression.add(expression166.getTree());
-            // EsperEPL2Grammar.g:725:15: (d= ASC | d= DESC )?
+            // EsperEPL2Grammar.g:726:15: (d= ASC | d= DESC )?
             int alt62=3;
             int LA62_0 = input.LA(1);
 
@@ -6232,7 +6233,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt62) {
                 case 1 :
-                    // EsperEPL2Grammar.g:725:16: d= ASC
+                    // EsperEPL2Grammar.g:726:16: d= ASC
                     {
                     d=(Token)match(input,ASC,FOLLOW_ASC_in_orderByListElement3365); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ASC.add(d);
@@ -6241,7 +6242,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:725:22: d= DESC
+                    // EsperEPL2Grammar.g:726:22: d= DESC
                     {
                     d=(Token)match(input,DESC,FOLLOW_DESC_in_orderByListElement3369); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DESC.add(d);
@@ -6266,15 +6267,15 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 726:3: -> ^( ORDER_ELEMENT_EXPR expression ( $d)? )
+            // 727:3: -> ^( ORDER_ELEMENT_EXPR expression ( $d)? )
             {
-                // EsperEPL2Grammar.g:726:6: ^( ORDER_ELEMENT_EXPR expression ( $d)? )
+                // EsperEPL2Grammar.g:727:6: ^( ORDER_ELEMENT_EXPR expression ( $d)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ORDER_ELEMENT_EXPR, "ORDER_ELEMENT_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_expression.nextTree());
-                // EsperEPL2Grammar.g:726:38: ( $d)?
+                // EsperEPL2Grammar.g:727:38: ( $d)?
                 if ( stream_d.hasNext() ) {
                     adaptor.addChild(root_1, stream_d.nextNode());
 
@@ -6313,7 +6314,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "havingClause"
-    // EsperEPL2Grammar.g:729:1: havingClause : evalOrExpression -> ^( HAVING_EXPR evalOrExpression ) ;
+    // EsperEPL2Grammar.g:730:1: havingClause : evalOrExpression -> ^( HAVING_EXPR evalOrExpression ) ;
     public final EsperEPL2GrammarParser.havingClause_return havingClause() throws RecognitionException {
         EsperEPL2GrammarParser.havingClause_return retval = new EsperEPL2GrammarParser.havingClause_return();
         retval.start = input.LT(1);
@@ -6326,8 +6327,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_evalOrExpression=new RewriteRuleSubtreeStream(adaptor,"rule evalOrExpression");
          paraphrases.push("having clause"); 
         try {
-            // EsperEPL2Grammar.g:732:2: ( evalOrExpression -> ^( HAVING_EXPR evalOrExpression ) )
-            // EsperEPL2Grammar.g:732:4: evalOrExpression
+            // EsperEPL2Grammar.g:733:2: ( evalOrExpression -> ^( HAVING_EXPR evalOrExpression ) )
+            // EsperEPL2Grammar.g:733:4: evalOrExpression
             {
             pushFollow(FOLLOW_evalOrExpression_in_havingClause3407);
             evalOrExpression167=evalOrExpression();
@@ -6348,9 +6349,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 733:3: -> ^( HAVING_EXPR evalOrExpression )
+            // 734:3: -> ^( HAVING_EXPR evalOrExpression )
             {
-                // EsperEPL2Grammar.g:733:6: ^( HAVING_EXPR evalOrExpression )
+                // EsperEPL2Grammar.g:734:6: ^( HAVING_EXPR evalOrExpression )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(HAVING_EXPR, "HAVING_EXPR"), root_1);
@@ -6392,7 +6393,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "outputLimit"
-    // EsperEPL2Grammar.g:736:1: outputLimit : (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )? ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) ) -> {$ev != null && $e != null}? ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? ) -> {$ev != null}? ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod ) -> {$at != null}? ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet ) -> ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? ) ;
+    // EsperEPL2Grammar.g:737:1: outputLimit : (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )? ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) ) -> {$ev != null && $e != null}? ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? ) -> {$ev != null}? ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod ) -> {$at != null}? ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet ) -> ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? ) ;
     public final EsperEPL2GrammarParser.outputLimit_return outputLimit() throws RecognitionException {
         EsperEPL2GrammarParser.outputLimit_return retval = new EsperEPL2GrammarParser.outputLimit_return();
         retval.start = input.LT(1);
@@ -6441,10 +6442,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_onSetExpr=new RewriteRuleSubtreeStream(adaptor,"rule onSetExpr");
          paraphrases.push("output rate clause"); 
         try {
-            // EsperEPL2Grammar.g:739:2: ( (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )? ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) ) -> {$ev != null && $e != null}? ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? ) -> {$ev != null}? ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod ) -> {$at != null}? ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet ) -> ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? ) )
-            // EsperEPL2Grammar.g:739:6: (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )? ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) )
+            // EsperEPL2Grammar.g:740:2: ( (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )? ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) ) -> {$ev != null && $e != null}? ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? ) -> {$ev != null}? ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod ) -> {$at != null}? ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet ) -> ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? ) )
+            // EsperEPL2Grammar.g:740:6: (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )? ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) )
             {
-            // EsperEPL2Grammar.g:739:6: (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )?
+            // EsperEPL2Grammar.g:740:6: (k= ALL | k= FIRST | k= LAST | k= SNAPSHOT )?
             int alt63=5;
             switch ( input.LA(1) ) {
                 case ALL:
@@ -6471,7 +6472,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt63) {
                 case 1 :
-                    // EsperEPL2Grammar.g:739:7: k= ALL
+                    // EsperEPL2Grammar.g:740:7: k= ALL
                     {
                     k=(Token)match(input,ALL,FOLLOW_ALL_in_outputLimit3445); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ALL.add(k);
@@ -6480,7 +6481,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:739:13: k= FIRST
+                    // EsperEPL2Grammar.g:740:13: k= FIRST
                     {
                     k=(Token)match(input,FIRST,FOLLOW_FIRST_in_outputLimit3449); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_FIRST.add(k);
@@ -6489,7 +6490,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:739:21: k= LAST
+                    // EsperEPL2Grammar.g:740:21: k= LAST
                     {
                     k=(Token)match(input,LAST,FOLLOW_LAST_in_outputLimit3453); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LAST.add(k);
@@ -6498,7 +6499,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:739:28: k= SNAPSHOT
+                    // EsperEPL2Grammar.g:740:28: k= SNAPSHOT
                     {
                     k=(Token)match(input,SNAPSHOT,FOLLOW_SNAPSHOT_in_outputLimit3457); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SNAPSHOT.add(k);
@@ -6509,7 +6510,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:740:8: ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) )
+            // EsperEPL2Grammar.g:741:8: ( (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) ) | (at= AT crontabLimitParameterSet ) | (wh= WHEN expression ( THEN onSetExpr )? ) )
             int alt67=3;
             switch ( input.LA(1) ) {
             case EVERY_EXPR:
@@ -6537,15 +6538,15 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt67) {
                 case 1 :
-                    // EsperEPL2Grammar.g:741:10: (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) )
+                    // EsperEPL2Grammar.g:742:10: (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) )
                     {
-                    // EsperEPL2Grammar.g:741:10: (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) )
-                    // EsperEPL2Grammar.g:741:12: ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) )
+                    // EsperEPL2Grammar.g:742:10: (ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) ) )
+                    // EsperEPL2Grammar.g:742:12: ev= EVERY_EXPR ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) )
                     {
                     ev=(Token)match(input,EVERY_EXPR,FOLLOW_EVERY_EXPR_in_outputLimit3484); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_EVERY_EXPR.add(ev);
 
-                    // EsperEPL2Grammar.g:742:5: ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) )
+                    // EsperEPL2Grammar.g:743:5: ( ( timePeriod )=> timePeriod | ( number | i= IDENT ) (e= EVENTS ) )
                     int alt65=2;
                     int LA65_0 = input.LA(1);
 
@@ -6826,7 +6827,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt65) {
                         case 1 :
-                            // EsperEPL2Grammar.g:743:7: ( timePeriod )=> timePeriod
+                            // EsperEPL2Grammar.g:744:7: ( timePeriod )=> timePeriod
                             {
                             pushFollow(FOLLOW_timePeriod_in_outputLimit3506);
                             timePeriod168=timePeriod();
@@ -6838,9 +6839,9 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:744:7: ( number | i= IDENT ) (e= EVENTS )
+                            // EsperEPL2Grammar.g:745:7: ( number | i= IDENT ) (e= EVENTS )
                             {
-                            // EsperEPL2Grammar.g:744:7: ( number | i= IDENT )
+                            // EsperEPL2Grammar.g:745:7: ( number | i= IDENT )
                             int alt64=2;
                             int LA64_0 = input.LA(1);
 
@@ -6859,7 +6860,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt64) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:744:8: number
+                                    // EsperEPL2Grammar.g:745:8: number
                                     {
                                     pushFollow(FOLLOW_number_in_outputLimit3515);
                                     number169=number();
@@ -6871,7 +6872,7 @@ public class EsperEPL2GrammarParser extends Parser {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:744:17: i= IDENT
+                                    // EsperEPL2Grammar.g:745:17: i= IDENT
                                     {
                                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_outputLimit3521); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -6882,8 +6883,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
                             }
 
-                            // EsperEPL2Grammar.g:744:26: (e= EVENTS )
-                            // EsperEPL2Grammar.g:744:27: e= EVENTS
+                            // EsperEPL2Grammar.g:745:26: (e= EVENTS )
+                            // EsperEPL2Grammar.g:745:27: e= EVENTS
                             {
                             e=(Token)match(input,EVENTS,FOLLOW_EVENTS_in_outputLimit3527); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_EVENTS.add(e);
@@ -6904,10 +6905,10 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:748:3: (at= AT crontabLimitParameterSet )
+                    // EsperEPL2Grammar.g:749:3: (at= AT crontabLimitParameterSet )
                     {
-                    // EsperEPL2Grammar.g:748:3: (at= AT crontabLimitParameterSet )
-                    // EsperEPL2Grammar.g:748:5: at= AT crontabLimitParameterSet
+                    // EsperEPL2Grammar.g:749:3: (at= AT crontabLimitParameterSet )
+                    // EsperEPL2Grammar.g:749:5: at= AT crontabLimitParameterSet
                     {
                     at=(Token)match(input,AT,FOLLOW_AT_in_outputLimit3550); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AT.add(at);
@@ -6925,10 +6926,10 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:750:3: (wh= WHEN expression ( THEN onSetExpr )? )
+                    // EsperEPL2Grammar.g:751:3: (wh= WHEN expression ( THEN onSetExpr )? )
                     {
-                    // EsperEPL2Grammar.g:750:3: (wh= WHEN expression ( THEN onSetExpr )? )
-                    // EsperEPL2Grammar.g:750:5: wh= WHEN expression ( THEN onSetExpr )?
+                    // EsperEPL2Grammar.g:751:3: (wh= WHEN expression ( THEN onSetExpr )? )
+                    // EsperEPL2Grammar.g:751:5: wh= WHEN expression ( THEN onSetExpr )?
                     {
                     wh=(Token)match(input,WHEN,FOLLOW_WHEN_in_outputLimit3566); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_WHEN.add(wh);
@@ -6939,7 +6940,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_expression.add(expression171.getTree());
-                    // EsperEPL2Grammar.g:750:24: ( THEN onSetExpr )?
+                    // EsperEPL2Grammar.g:751:24: ( THEN onSetExpr )?
                     int alt66=2;
                     int LA66_0 = input.LA(1);
 
@@ -6948,7 +6949,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt66) {
                         case 1 :
-                            // EsperEPL2Grammar.g:750:25: THEN onSetExpr
+                            // EsperEPL2Grammar.g:751:25: THEN onSetExpr
                             {
                             THEN172=(Token)match(input,THEN,FOLLOW_THEN_in_outputLimit3571); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_THEN.add(THEN172);
@@ -6977,7 +6978,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: k, i, k, k, timePeriod, k, number, onSetExpr, expression, crontabLimitParameterSet
+            // elements: k, k, crontabLimitParameterSet, number, onSetExpr, i, k, k, expression, timePeriod
             // token labels: k, i
             // rule labels: retval
             // token list labels: 
@@ -6989,26 +6990,26 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 752:6: -> {$ev != null && $e != null}? ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? )
+            // 753:6: -> {$ev != null && $e != null}? ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? )
             if (ev != null && e != null) {
-                // EsperEPL2Grammar.g:752:38: ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? )
+                // EsperEPL2Grammar.g:753:38: ^( EVENT_LIMIT_EXPR ( $k)? ( number )? ( $i)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_LIMIT_EXPR, "EVENT_LIMIT_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:752:57: ( $k)?
+                // EsperEPL2Grammar.g:753:57: ( $k)?
                 if ( stream_k.hasNext() ) {
                     adaptor.addChild(root_1, stream_k.nextNode());
 
                 }
                 stream_k.reset();
-                // EsperEPL2Grammar.g:752:61: ( number )?
+                // EsperEPL2Grammar.g:753:61: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:752:69: ( $i)?
+                // EsperEPL2Grammar.g:753:69: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
@@ -7019,14 +7020,14 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 753:6: -> {$ev != null}? ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod )
+            else // 754:6: -> {$ev != null}? ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod )
             if (ev != null) {
-                // EsperEPL2Grammar.g:753:24: ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod )
+                // EsperEPL2Grammar.g:754:24: ^( TIMEPERIOD_LIMIT_EXPR ( $k)? timePeriod )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(TIMEPERIOD_LIMIT_EXPR, "TIMEPERIOD_LIMIT_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:753:48: ( $k)?
+                // EsperEPL2Grammar.g:754:48: ( $k)?
                 if ( stream_k.hasNext() ) {
                     adaptor.addChild(root_1, stream_k.nextNode());
 
@@ -7038,14 +7039,14 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 754:6: -> {$at != null}? ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet )
+            else // 755:6: -> {$at != null}? ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet )
             if (at != null) {
-                // EsperEPL2Grammar.g:754:24: ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet )
+                // EsperEPL2Grammar.g:755:24: ^( CRONTAB_LIMIT_EXPR ( $k)? crontabLimitParameterSet )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CRONTAB_LIMIT_EXPR, "CRONTAB_LIMIT_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:754:45: ( $k)?
+                // EsperEPL2Grammar.g:755:45: ( $k)?
                 if ( stream_k.hasNext() ) {
                     adaptor.addChild(root_1, stream_k.nextNode());
 
@@ -7057,21 +7058,21 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 755:6: -> ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? )
+            else // 756:6: -> ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? )
             {
-                // EsperEPL2Grammar.g:755:9: ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? )
+                // EsperEPL2Grammar.g:756:9: ^( WHEN_LIMIT_EXPR ( $k)? expression ( onSetExpr )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(WHEN_LIMIT_EXPR, "WHEN_LIMIT_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:755:27: ( $k)?
+                // EsperEPL2Grammar.g:756:27: ( $k)?
                 if ( stream_k.hasNext() ) {
                     adaptor.addChild(root_1, stream_k.nextNode());
 
                 }
                 stream_k.reset();
                 adaptor.addChild(root_1, stream_expression.nextTree());
-                // EsperEPL2Grammar.g:755:42: ( onSetExpr )?
+                // EsperEPL2Grammar.g:756:42: ( onSetExpr )?
                 if ( stream_onSetExpr.hasNext() ) {
                     adaptor.addChild(root_1, stream_onSetExpr.nextTree());
 
@@ -7113,7 +7114,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "rowLimit"
-    // EsperEPL2Grammar.g:758:1: rowLimit : (n1= numberconstant | i1= IDENT ) ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )? -> ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? ) ;
+    // EsperEPL2Grammar.g:759:1: rowLimit : (n1= numberconstant | i1= IDENT ) ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )? -> ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? ) ;
     public final EsperEPL2GrammarParser.rowLimit_return rowLimit() throws RecognitionException {
         EsperEPL2GrammarParser.rowLimit_return retval = new EsperEPL2GrammarParser.rowLimit_return();
         retval.start = input.LT(1);
@@ -7139,10 +7140,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_numberconstant=new RewriteRuleSubtreeStream(adaptor,"rule numberconstant");
          paraphrases.push("row limit clause"); 
         try {
-            // EsperEPL2Grammar.g:761:2: ( (n1= numberconstant | i1= IDENT ) ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )? -> ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? ) )
-            // EsperEPL2Grammar.g:761:6: (n1= numberconstant | i1= IDENT ) ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )?
+            // EsperEPL2Grammar.g:762:2: ( (n1= numberconstant | i1= IDENT ) ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )? -> ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? ) )
+            // EsperEPL2Grammar.g:762:6: (n1= numberconstant | i1= IDENT ) ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )?
             {
-            // EsperEPL2Grammar.g:761:6: (n1= numberconstant | i1= IDENT )
+            // EsperEPL2Grammar.g:762:6: (n1= numberconstant | i1= IDENT )
             int alt68=2;
             int LA68_0 = input.LA(1);
 
@@ -7161,7 +7162,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt68) {
                 case 1 :
-                    // EsperEPL2Grammar.g:761:7: n1= numberconstant
+                    // EsperEPL2Grammar.g:762:7: n1= numberconstant
                     {
                     pushFollow(FOLLOW_numberconstant_in_rowLimit3702);
                     n1=numberconstant();
@@ -7173,7 +7174,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:761:27: i1= IDENT
+                    // EsperEPL2Grammar.g:762:27: i1= IDENT
                     {
                     i1=(Token)match(input,IDENT,FOLLOW_IDENT_in_rowLimit3708); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i1);
@@ -7184,7 +7185,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:761:37: ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )?
+            // EsperEPL2Grammar.g:762:37: ( (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT ) )?
             int alt71=2;
             int LA71_0 = input.LA(1);
 
@@ -7193,9 +7194,9 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt71) {
                 case 1 :
-                    // EsperEPL2Grammar.g:761:38: (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT )
+                    // EsperEPL2Grammar.g:762:38: (c= COMMA | o= OFFSET ) (n2= numberconstant | i2= IDENT )
                     {
-                    // EsperEPL2Grammar.g:761:38: (c= COMMA | o= OFFSET )
+                    // EsperEPL2Grammar.g:762:38: (c= COMMA | o= OFFSET )
                     int alt69=2;
                     int LA69_0 = input.LA(1);
 
@@ -7214,7 +7215,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt69) {
                         case 1 :
-                            // EsperEPL2Grammar.g:761:39: c= COMMA
+                            // EsperEPL2Grammar.g:762:39: c= COMMA
                             {
                             c=(Token)match(input,COMMA,FOLLOW_COMMA_in_rowLimit3715); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_COMMA.add(c);
@@ -7223,7 +7224,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:761:49: o= OFFSET
+                            // EsperEPL2Grammar.g:762:49: o= OFFSET
                             {
                             o=(Token)match(input,OFFSET,FOLLOW_OFFSET_in_rowLimit3721); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_OFFSET.add(o);
@@ -7234,7 +7235,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:761:59: (n2= numberconstant | i2= IDENT )
+                    // EsperEPL2Grammar.g:762:59: (n2= numberconstant | i2= IDENT )
                     int alt70=2;
                     int LA70_0 = input.LA(1);
 
@@ -7253,7 +7254,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt70) {
                         case 1 :
-                            // EsperEPL2Grammar.g:761:60: n2= numberconstant
+                            // EsperEPL2Grammar.g:762:60: n2= numberconstant
                             {
                             pushFollow(FOLLOW_numberconstant_in_rowLimit3727);
                             n2=numberconstant();
@@ -7265,7 +7266,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:761:80: i2= IDENT
+                            // EsperEPL2Grammar.g:762:80: i2= IDENT
                             {
                             i2=(Token)match(input,IDENT,FOLLOW_IDENT_in_rowLimit3733); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_IDENT.add(i2);
@@ -7285,7 +7286,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: c, n2, o, i2, n1, i1
+            // elements: i1, o, c, i2, n1, n2
             // token labels: c, o, i2, i1
             // rule labels: n1, retval, n2
             // token list labels: 
@@ -7301,44 +7302,44 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_n2=new RewriteRuleSubtreeStream(adaptor,"token n2",n2!=null?n2.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 762:6: -> ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? )
+            // 763:6: -> ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? )
             {
-                // EsperEPL2Grammar.g:762:9: ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? )
+                // EsperEPL2Grammar.g:763:9: ^( ROW_LIMIT_EXPR ( $n1)? ( $i1)? ( $n2)? ( $i2)? ( $o)? ( $c)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ROW_LIMIT_EXPR, "ROW_LIMIT_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:762:26: ( $n1)?
+                // EsperEPL2Grammar.g:763:26: ( $n1)?
                 if ( stream_n1.hasNext() ) {
                     adaptor.addChild(root_1, stream_n1.nextTree());
 
                 }
                 stream_n1.reset();
-                // EsperEPL2Grammar.g:762:31: ( $i1)?
+                // EsperEPL2Grammar.g:763:31: ( $i1)?
                 if ( stream_i1.hasNext() ) {
                     adaptor.addChild(root_1, stream_i1.nextNode());
 
                 }
                 stream_i1.reset();
-                // EsperEPL2Grammar.g:762:36: ( $n2)?
+                // EsperEPL2Grammar.g:763:36: ( $n2)?
                 if ( stream_n2.hasNext() ) {
                     adaptor.addChild(root_1, stream_n2.nextTree());
 
                 }
                 stream_n2.reset();
-                // EsperEPL2Grammar.g:762:41: ( $i2)?
+                // EsperEPL2Grammar.g:763:41: ( $i2)?
                 if ( stream_i2.hasNext() ) {
                     adaptor.addChild(root_1, stream_i2.nextNode());
 
                 }
                 stream_i2.reset();
-                // EsperEPL2Grammar.g:762:46: ( $o)?
+                // EsperEPL2Grammar.g:763:46: ( $o)?
                 if ( stream_o.hasNext() ) {
                     adaptor.addChild(root_1, stream_o.nextNode());
 
                 }
                 stream_o.reset();
-                // EsperEPL2Grammar.g:762:50: ( $c)?
+                // EsperEPL2Grammar.g:763:50: ( $c)?
                 if ( stream_c.hasNext() ) {
                     adaptor.addChild(root_1, stream_c.nextNode());
 
@@ -7380,7 +7381,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "crontabLimitParameterSet"
-    // EsperEPL2Grammar.g:765:1: crontabLimitParameterSet : LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime ( COMMA expressionWithTime )? RPAREN -> ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* ) ;
+    // EsperEPL2Grammar.g:766:1: crontabLimitParameterSet : LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime ( COMMA expressionWithTime )? RPAREN -> ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* ) ;
     public final EsperEPL2GrammarParser.crontabLimitParameterSet_return crontabLimitParameterSet() throws RecognitionException {
         EsperEPL2GrammarParser.crontabLimitParameterSet_return retval = new EsperEPL2GrammarParser.crontabLimitParameterSet_return();
         retval.start = input.LT(1);
@@ -7419,8 +7420,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_LPAREN=new RewriteRuleTokenStream(adaptor,"token LPAREN");
         RewriteRuleSubtreeStream stream_expressionWithTime=new RewriteRuleSubtreeStream(adaptor,"rule expressionWithTime");
         try {
-            // EsperEPL2Grammar.g:766:2: ( LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime ( COMMA expressionWithTime )? RPAREN -> ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* ) )
-            // EsperEPL2Grammar.g:766:4: LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime ( COMMA expressionWithTime )? RPAREN
+            // EsperEPL2Grammar.g:767:2: ( LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime ( COMMA expressionWithTime )? RPAREN -> ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* ) )
+            // EsperEPL2Grammar.g:767:4: LPAREN expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime COMMA expressionWithTime ( COMMA expressionWithTime )? RPAREN
             {
             LPAREN174=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_crontabLimitParameterSet3785); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN174);
@@ -7467,7 +7468,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_expressionWithTime.add(expressionWithTime183.getTree());
-            // EsperEPL2Grammar.g:766:130: ( COMMA expressionWithTime )?
+            // EsperEPL2Grammar.g:767:130: ( COMMA expressionWithTime )?
             int alt72=2;
             int LA72_0 = input.LA(1);
 
@@ -7476,7 +7477,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt72) {
                 case 1 :
-                    // EsperEPL2Grammar.g:766:131: COMMA expressionWithTime
+                    // EsperEPL2Grammar.g:767:131: COMMA expressionWithTime
                     {
                     COMMA184=(Token)match(input,COMMA,FOLLOW_COMMA_in_crontabLimitParameterSet3806); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_COMMA.add(COMMA184);
@@ -7509,14 +7510,14 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 767:3: -> ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* )
+            // 768:3: -> ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* )
             {
-                // EsperEPL2Grammar.g:767:6: ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* )
+                // EsperEPL2Grammar.g:768:6: ^( CRONTAB_LIMIT_EXPR_PARAM ( expressionWithTime )* )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CRONTAB_LIMIT_EXPR_PARAM, "CRONTAB_LIMIT_EXPR_PARAM"), root_1);
 
-                // EsperEPL2Grammar.g:767:33: ( expressionWithTime )*
+                // EsperEPL2Grammar.g:768:33: ( expressionWithTime )*
                 while ( stream_expressionWithTime.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionWithTime.nextTree());
 
@@ -7555,7 +7556,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "whenClause"
-    // EsperEPL2Grammar.g:770:1: whenClause : ( WHEN expression THEN expression ) ;
+    // EsperEPL2Grammar.g:771:1: whenClause : ( WHEN expression THEN expression ) ;
     public final EsperEPL2GrammarParser.whenClause_return whenClause() throws RecognitionException {
         EsperEPL2GrammarParser.whenClause_return retval = new EsperEPL2GrammarParser.whenClause_return();
         retval.start = input.LT(1);
@@ -7573,13 +7574,13 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree THEN189_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:771:2: ( ( WHEN expression THEN expression ) )
-            // EsperEPL2Grammar.g:771:4: ( WHEN expression THEN expression )
+            // EsperEPL2Grammar.g:772:2: ( ( WHEN expression THEN expression ) )
+            // EsperEPL2Grammar.g:772:4: ( WHEN expression THEN expression )
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:771:4: ( WHEN expression THEN expression )
-            // EsperEPL2Grammar.g:771:5: WHEN expression THEN expression
+            // EsperEPL2Grammar.g:772:4: ( WHEN expression THEN expression )
+            // EsperEPL2Grammar.g:772:5: WHEN expression THEN expression
             {
             WHEN187=(Token)match(input,WHEN,FOLLOW_WHEN_in_whenClause3842); if (state.failed) return retval;
             pushFollow(FOLLOW_expression_in_whenClause3845);
@@ -7625,7 +7626,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "elseClause"
-    // EsperEPL2Grammar.g:774:1: elseClause : ( ELSE expression ) ;
+    // EsperEPL2Grammar.g:775:1: elseClause : ( ELSE expression ) ;
     public final EsperEPL2GrammarParser.elseClause_return elseClause() throws RecognitionException {
         EsperEPL2GrammarParser.elseClause_return retval = new EsperEPL2GrammarParser.elseClause_return();
         retval.start = input.LT(1);
@@ -7639,13 +7640,13 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree ELSE191_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:775:2: ( ( ELSE expression ) )
-            // EsperEPL2Grammar.g:775:4: ( ELSE expression )
+            // EsperEPL2Grammar.g:776:2: ( ( ELSE expression ) )
+            // EsperEPL2Grammar.g:776:4: ( ELSE expression )
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:775:4: ( ELSE expression )
-            // EsperEPL2Grammar.g:775:5: ELSE expression
+            // EsperEPL2Grammar.g:776:4: ( ELSE expression )
+            // EsperEPL2Grammar.g:776:5: ELSE expression
             {
             ELSE191=(Token)match(input,ELSE,FOLLOW_ELSE_in_elseClause3863); if (state.failed) return retval;
             pushFollow(FOLLOW_expression_in_elseClause3866);
@@ -7684,7 +7685,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "expression"
-    // EsperEPL2Grammar.g:779:1: expression : caseExpression ;
+    // EsperEPL2Grammar.g:780:1: expression : caseExpression ;
     public final EsperEPL2GrammarParser.expression_return expression() throws RecognitionException {
         EsperEPL2GrammarParser.expression_return retval = new EsperEPL2GrammarParser.expression_return();
         retval.start = input.LT(1);
@@ -7696,8 +7697,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:780:2: ( caseExpression )
-            // EsperEPL2Grammar.g:780:4: caseExpression
+            // EsperEPL2Grammar.g:781:2: ( caseExpression )
+            // EsperEPL2Grammar.g:781:4: caseExpression
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -7734,7 +7735,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "caseExpression"
-    // EsperEPL2Grammar.g:783:1: caseExpression : ( CASE ( whenClause )+ ( elseClause )? END | CASE expression ( whenClause )+ ( elseClause )? END -> ^( CASE2 expression ( whenClause )+ ( elseClause )? ) | evalOrExpression );
+    // EsperEPL2Grammar.g:784:1: caseExpression : ( CASE ( whenClause )+ ( elseClause )? END | CASE expression ( whenClause )+ ( elseClause )? END -> ^( CASE2 expression ( whenClause )+ ( elseClause )? ) | evalOrExpression );
     public final EsperEPL2GrammarParser.caseExpression_return caseExpression() throws RecognitionException {
         EsperEPL2GrammarParser.caseExpression_return retval = new EsperEPL2GrammarParser.caseExpression_return();
         retval.start = input.LT(1);
@@ -7768,12 +7769,12 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_whenClause=new RewriteRuleSubtreeStream(adaptor,"rule whenClause");
         RewriteRuleSubtreeStream stream_elseClause=new RewriteRuleSubtreeStream(adaptor,"rule elseClause");
         try {
-            // EsperEPL2Grammar.g:784:2: ( CASE ( whenClause )+ ( elseClause )? END | CASE expression ( whenClause )+ ( elseClause )? END -> ^( CASE2 expression ( whenClause )+ ( elseClause )? ) | evalOrExpression )
+            // EsperEPL2Grammar.g:785:2: ( CASE ( whenClause )+ ( elseClause )? END | CASE expression ( whenClause )+ ( elseClause )? END -> ^( CASE2 expression ( whenClause )+ ( elseClause )? ) | evalOrExpression )
             int alt77=3;
             alt77 = dfa77.predict(input);
             switch (alt77) {
                 case 1 :
-                    // EsperEPL2Grammar.g:784:4: CASE ( whenClause )+ ( elseClause )? END
+                    // EsperEPL2Grammar.g:785:4: CASE ( whenClause )+ ( elseClause )? END
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -7785,7 +7786,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     CASE194_tree = (CommonTree)adaptor.create(CASE194);
                     root_0 = (CommonTree)adaptor.becomeRoot(CASE194_tree, root_0);
                     }
-                    // EsperEPL2Grammar.g:784:52: ( whenClause )+
+                    // EsperEPL2Grammar.g:785:52: ( whenClause )+
                     int cnt73=0;
                     loop73:
                     do {
@@ -7799,7 +7800,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt73) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:784:52: whenClause
+                    	    // EsperEPL2Grammar.g:785:52: whenClause
                     	    {
                     	    pushFollow(FOLLOW_whenClause_in_caseExpression3896);
                     	    whenClause195=whenClause();
@@ -7821,7 +7822,7 @@ public class EsperEPL2GrammarParser extends Parser {
                         cnt73++;
                     } while (true);
 
-                    // EsperEPL2Grammar.g:784:64: ( elseClause )?
+                    // EsperEPL2Grammar.g:785:64: ( elseClause )?
                     int alt74=2;
                     int LA74_0 = input.LA(1);
 
@@ -7830,7 +7831,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt74) {
                         case 1 :
-                            // EsperEPL2Grammar.g:784:64: elseClause
+                            // EsperEPL2Grammar.g:785:64: elseClause
                             {
                             pushFollow(FOLLOW_elseClause_in_caseExpression3899);
                             elseClause196=elseClause();
@@ -7852,7 +7853,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:785:4: CASE expression ( whenClause )+ ( elseClause )? END
+                    // EsperEPL2Grammar.g:786:4: CASE expression ( whenClause )+ ( elseClause )? END
                     {
                     if ( state.backtracking==0 ) {
                        paraphrases.push("case expression"); 
@@ -7866,7 +7867,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_expression.add(expression199.getTree());
-                    // EsperEPL2Grammar.g:785:62: ( whenClause )+
+                    // EsperEPL2Grammar.g:786:62: ( whenClause )+
                     int cnt75=0;
                     loop75:
                     do {
@@ -7880,7 +7881,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt75) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:785:62: whenClause
+                    	    // EsperEPL2Grammar.g:786:62: whenClause
                     	    {
                     	    pushFollow(FOLLOW_whenClause_in_caseExpression3917);
                     	    whenClause200=whenClause();
@@ -7902,7 +7903,7 @@ public class EsperEPL2GrammarParser extends Parser {
                         cnt75++;
                     } while (true);
 
-                    // EsperEPL2Grammar.g:785:74: ( elseClause )?
+                    // EsperEPL2Grammar.g:786:74: ( elseClause )?
                     int alt76=2;
                     int LA76_0 = input.LA(1);
 
@@ -7911,7 +7912,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt76) {
                         case 1 :
-                            // EsperEPL2Grammar.g:785:74: elseClause
+                            // EsperEPL2Grammar.g:786:74: elseClause
                             {
                             pushFollow(FOLLOW_elseClause_in_caseExpression3920);
                             elseClause201=elseClause();
@@ -7934,7 +7935,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: elseClause, expression, whenClause
+                    // elements: expression, elseClause, whenClause
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -7944,9 +7945,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 786:4: -> ^( CASE2 expression ( whenClause )+ ( elseClause )? )
+                    // 787:4: -> ^( CASE2 expression ( whenClause )+ ( elseClause )? )
                     {
-                        // EsperEPL2Grammar.g:786:7: ^( CASE2 expression ( whenClause )+ ( elseClause )? )
+                        // EsperEPL2Grammar.g:787:7: ^( CASE2 expression ( whenClause )+ ( elseClause )? )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CASE2, "CASE2"), root_1);
@@ -7960,7 +7961,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         }
                         stream_whenClause.reset();
-                        // EsperEPL2Grammar.g:786:38: ( elseClause )?
+                        // EsperEPL2Grammar.g:787:38: ( elseClause )?
                         if ( stream_elseClause.hasNext() ) {
                             adaptor.addChild(root_1, stream_elseClause.nextTree());
 
@@ -7976,7 +7977,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:787:4: evalOrExpression
+                    // EsperEPL2Grammar.g:788:4: evalOrExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -8015,7 +8016,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "evalOrExpression"
-    // EsperEPL2Grammar.g:790:1: evalOrExpression : evalAndExpression (op= OR_EXPR evalAndExpression )* -> {$op != null}? ^( EVAL_OR_EXPR ( evalAndExpression )* ) -> evalAndExpression ;
+    // EsperEPL2Grammar.g:791:1: evalOrExpression : evalAndExpression (op= OR_EXPR evalAndExpression )* -> {$op != null}? ^( EVAL_OR_EXPR ( evalAndExpression )* ) -> evalAndExpression ;
     public final EsperEPL2GrammarParser.evalOrExpression_return evalOrExpression() throws RecognitionException {
         EsperEPL2GrammarParser.evalOrExpression_return retval = new EsperEPL2GrammarParser.evalOrExpression_return();
         retval.start = input.LT(1);
@@ -8032,8 +8033,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_OR_EXPR=new RewriteRuleTokenStream(adaptor,"token OR_EXPR");
         RewriteRuleSubtreeStream stream_evalAndExpression=new RewriteRuleSubtreeStream(adaptor,"rule evalAndExpression");
         try {
-            // EsperEPL2Grammar.g:791:2: ( evalAndExpression (op= OR_EXPR evalAndExpression )* -> {$op != null}? ^( EVAL_OR_EXPR ( evalAndExpression )* ) -> evalAndExpression )
-            // EsperEPL2Grammar.g:791:4: evalAndExpression (op= OR_EXPR evalAndExpression )*
+            // EsperEPL2Grammar.g:792:2: ( evalAndExpression (op= OR_EXPR evalAndExpression )* -> {$op != null}? ^( EVAL_OR_EXPR ( evalAndExpression )* ) -> evalAndExpression )
+            // EsperEPL2Grammar.g:792:4: evalAndExpression (op= OR_EXPR evalAndExpression )*
             {
             pushFollow(FOLLOW_evalAndExpression_in_evalOrExpression3958);
             evalAndExpression204=evalAndExpression();
@@ -8041,7 +8042,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_evalAndExpression.add(evalAndExpression204.getTree());
-            // EsperEPL2Grammar.g:791:22: (op= OR_EXPR evalAndExpression )*
+            // EsperEPL2Grammar.g:792:22: (op= OR_EXPR evalAndExpression )*
             loop78:
             do {
                 int alt78=2;
@@ -8054,7 +8055,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt78) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:791:23: op= OR_EXPR evalAndExpression
+            	    // EsperEPL2Grammar.g:792:23: op= OR_EXPR evalAndExpression
             	    {
             	    op=(Token)match(input,OR_EXPR,FOLLOW_OR_EXPR_in_evalOrExpression3963); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_OR_EXPR.add(op);
@@ -8087,14 +8088,14 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 792:3: -> {$op != null}? ^( EVAL_OR_EXPR ( evalAndExpression )* )
+            // 793:3: -> {$op != null}? ^( EVAL_OR_EXPR ( evalAndExpression )* )
             if (op != null) {
-                // EsperEPL2Grammar.g:792:21: ^( EVAL_OR_EXPR ( evalAndExpression )* )
+                // EsperEPL2Grammar.g:793:21: ^( EVAL_OR_EXPR ( evalAndExpression )* )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVAL_OR_EXPR, "EVAL_OR_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:792:36: ( evalAndExpression )*
+                // EsperEPL2Grammar.g:793:36: ( evalAndExpression )*
                 while ( stream_evalAndExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_evalAndExpression.nextTree());
 
@@ -8105,7 +8106,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 793:3: -> evalAndExpression
+            else // 794:3: -> evalAndExpression
             {
                 adaptor.addChild(root_0, stream_evalAndExpression.nextTree());
 
@@ -8138,7 +8139,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "evalAndExpression"
-    // EsperEPL2Grammar.g:796:1: evalAndExpression : bitWiseExpression (op= AND_EXPR bitWiseExpression )* -> {$op != null}? ^( EVAL_AND_EXPR ( bitWiseExpression )+ ) -> bitWiseExpression ;
+    // EsperEPL2Grammar.g:797:1: evalAndExpression : bitWiseExpression (op= AND_EXPR bitWiseExpression )* -> {$op != null}? ^( EVAL_AND_EXPR ( bitWiseExpression )+ ) -> bitWiseExpression ;
     public final EsperEPL2GrammarParser.evalAndExpression_return evalAndExpression() throws RecognitionException {
         EsperEPL2GrammarParser.evalAndExpression_return retval = new EsperEPL2GrammarParser.evalAndExpression_return();
         retval.start = input.LT(1);
@@ -8155,8 +8156,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_AND_EXPR=new RewriteRuleTokenStream(adaptor,"token AND_EXPR");
         RewriteRuleSubtreeStream stream_bitWiseExpression=new RewriteRuleSubtreeStream(adaptor,"rule bitWiseExpression");
         try {
-            // EsperEPL2Grammar.g:797:2: ( bitWiseExpression (op= AND_EXPR bitWiseExpression )* -> {$op != null}? ^( EVAL_AND_EXPR ( bitWiseExpression )+ ) -> bitWiseExpression )
-            // EsperEPL2Grammar.g:797:4: bitWiseExpression (op= AND_EXPR bitWiseExpression )*
+            // EsperEPL2Grammar.g:798:2: ( bitWiseExpression (op= AND_EXPR bitWiseExpression )* -> {$op != null}? ^( EVAL_AND_EXPR ( bitWiseExpression )+ ) -> bitWiseExpression )
+            // EsperEPL2Grammar.g:798:4: bitWiseExpression (op= AND_EXPR bitWiseExpression )*
             {
             pushFollow(FOLLOW_bitWiseExpression_in_evalAndExpression3997);
             bitWiseExpression206=bitWiseExpression();
@@ -8164,7 +8165,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_bitWiseExpression.add(bitWiseExpression206.getTree());
-            // EsperEPL2Grammar.g:797:22: (op= AND_EXPR bitWiseExpression )*
+            // EsperEPL2Grammar.g:798:22: (op= AND_EXPR bitWiseExpression )*
             loop79:
             do {
                 int alt79=2;
@@ -8177,7 +8178,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt79) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:797:23: op= AND_EXPR bitWiseExpression
+            	    // EsperEPL2Grammar.g:798:23: op= AND_EXPR bitWiseExpression
             	    {
             	    op=(Token)match(input,AND_EXPR,FOLLOW_AND_EXPR_in_evalAndExpression4002); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_AND_EXPR.add(op);
@@ -8210,9 +8211,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 798:3: -> {$op != null}? ^( EVAL_AND_EXPR ( bitWiseExpression )+ )
+            // 799:3: -> {$op != null}? ^( EVAL_AND_EXPR ( bitWiseExpression )+ )
             if (op != null) {
-                // EsperEPL2Grammar.g:798:21: ^( EVAL_AND_EXPR ( bitWiseExpression )+ )
+                // EsperEPL2Grammar.g:799:21: ^( EVAL_AND_EXPR ( bitWiseExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVAL_AND_EXPR, "EVAL_AND_EXPR"), root_1);
@@ -8230,7 +8231,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 799:3: -> bitWiseExpression
+            else // 800:3: -> bitWiseExpression
             {
                 adaptor.addChild(root_0, stream_bitWiseExpression.nextTree());
 
@@ -8263,7 +8264,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "bitWiseExpression"
-    // EsperEPL2Grammar.g:802:1: bitWiseExpression : negatedExpression ( ( BAND | BOR | BXOR ) negatedExpression )* ;
+    // EsperEPL2Grammar.g:803:1: bitWiseExpression : negatedExpression ( ( BAND | BOR | BXOR ) negatedExpression )* ;
     public final EsperEPL2GrammarParser.bitWiseExpression_return bitWiseExpression() throws RecognitionException {
         EsperEPL2GrammarParser.bitWiseExpression_return retval = new EsperEPL2GrammarParser.bitWiseExpression_return();
         retval.start = input.LT(1);
@@ -8283,8 +8284,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree BXOR211_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:803:2: ( negatedExpression ( ( BAND | BOR | BXOR ) negatedExpression )* )
-            // EsperEPL2Grammar.g:803:4: negatedExpression ( ( BAND | BOR | BXOR ) negatedExpression )*
+            // EsperEPL2Grammar.g:804:2: ( negatedExpression ( ( BAND | BOR | BXOR ) negatedExpression )* )
+            // EsperEPL2Grammar.g:804:4: negatedExpression ( ( BAND | BOR | BXOR ) negatedExpression )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -8294,7 +8295,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, negatedExpression208.getTree());
-            // EsperEPL2Grammar.g:803:22: ( ( BAND | BOR | BXOR ) negatedExpression )*
+            // EsperEPL2Grammar.g:804:22: ( ( BAND | BOR | BXOR ) negatedExpression )*
             loop81:
             do {
                 int alt81=2;
@@ -8307,9 +8308,9 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt81) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:803:24: ( BAND | BOR | BXOR ) negatedExpression
+            	    // EsperEPL2Grammar.g:804:24: ( BAND | BOR | BXOR ) negatedExpression
             	    {
-            	    // EsperEPL2Grammar.g:803:24: ( BAND | BOR | BXOR )
+            	    // EsperEPL2Grammar.g:804:24: ( BAND | BOR | BXOR )
             	    int alt80=3;
             	    switch ( input.LA(1) ) {
             	    case BAND:
@@ -8337,7 +8338,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             	    switch (alt80) {
             	        case 1 :
-            	            // EsperEPL2Grammar.g:803:25: BAND
+            	            // EsperEPL2Grammar.g:804:25: BAND
             	            {
             	            BAND209=(Token)match(input,BAND,FOLLOW_BAND_in_bitWiseExpression4041); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -8348,7 +8349,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // EsperEPL2Grammar.g:803:31: BOR
+            	            // EsperEPL2Grammar.g:804:31: BOR
             	            {
             	            BOR210=(Token)match(input,BOR,FOLLOW_BOR_in_bitWiseExpression4044); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -8359,7 +8360,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 3 :
-            	            // EsperEPL2Grammar.g:803:36: BXOR
+            	            // EsperEPL2Grammar.g:804:36: BXOR
             	            {
             	            BXOR211=(Token)match(input,BXOR,FOLLOW_BXOR_in_bitWiseExpression4047); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -8414,7 +8415,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "negatedExpression"
-    // EsperEPL2Grammar.g:806:1: negatedExpression : ( evalEqualsExpression | NOT_EXPR evalEqualsExpression );
+    // EsperEPL2Grammar.g:807:1: negatedExpression : ( evalEqualsExpression | NOT_EXPR evalEqualsExpression );
     public final EsperEPL2GrammarParser.negatedExpression_return negatedExpression() throws RecognitionException {
         EsperEPL2GrammarParser.negatedExpression_return retval = new EsperEPL2GrammarParser.negatedExpression_return();
         retval.start = input.LT(1);
@@ -8430,7 +8431,7 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree NOT_EXPR214_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:807:2: ( evalEqualsExpression | NOT_EXPR evalEqualsExpression )
+            // EsperEPL2Grammar.g:808:2: ( evalEqualsExpression | NOT_EXPR evalEqualsExpression )
             int alt82=2;
             int LA82_0 = input.LA(1);
 
@@ -8449,7 +8450,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt82) {
                 case 1 :
-                    // EsperEPL2Grammar.g:807:4: evalEqualsExpression
+                    // EsperEPL2Grammar.g:808:4: evalEqualsExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -8463,7 +8464,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:808:4: NOT_EXPR evalEqualsExpression
+                    // EsperEPL2Grammar.g:809:4: NOT_EXPR evalEqualsExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -8507,7 +8508,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "evalEqualsExpression"
-    // EsperEPL2Grammar.g:811:1: evalEqualsExpression : evalRelationalExpression ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$a == null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> ( evalRelationalExpression )+ ;
+    // EsperEPL2Grammar.g:812:1: evalEqualsExpression : evalRelationalExpression ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$a == null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> ( evalRelationalExpression )+ ;
     public final EsperEPL2GrammarParser.evalEqualsExpression_return evalEqualsExpression() throws RecognitionException {
         EsperEPL2GrammarParser.evalEqualsExpression_return retval = new EsperEPL2GrammarParser.evalEqualsExpression_return();
         retval.start = input.LT(1);
@@ -8555,8 +8556,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_expressionList=new RewriteRuleSubtreeStream(adaptor,"rule expressionList");
         RewriteRuleSubtreeStream stream_evalRelationalExpression=new RewriteRuleSubtreeStream(adaptor,"rule evalRelationalExpression");
         try {
-            // EsperEPL2Grammar.g:812:2: ( evalRelationalExpression ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$a == null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> ( evalRelationalExpression )+ )
-            // EsperEPL2Grammar.g:812:4: evalRelationalExpression ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
+            // EsperEPL2Grammar.g:813:2: ( evalRelationalExpression ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$a == null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ ) -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? ) -> ( evalRelationalExpression )+ )
+            // EsperEPL2Grammar.g:813:4: evalRelationalExpression ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
             {
             pushFollow(FOLLOW_evalRelationalExpression_in_evalEqualsExpression4088);
             evalRelationalExpression216=evalRelationalExpression();
@@ -8564,7 +8565,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_evalRelationalExpression.add(evalRelationalExpression216.getTree());
-            // EsperEPL2Grammar.g:812:29: ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
+            // EsperEPL2Grammar.g:813:29: ( (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
             loop88:
             do {
                 int alt88=2;
@@ -8577,9 +8578,9 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt88) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:813:6: (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
+            	    // EsperEPL2Grammar.g:814:6: (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL ) ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
             	    {
-            	    // EsperEPL2Grammar.g:813:6: (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL )
+            	    // EsperEPL2Grammar.g:814:6: (eq= EQUALS | is= IS | isnot= IS NOT_EXPR | sqlne= SQL_NE | ne= NOT_EQUAL )
             	    int alt83=5;
             	    switch ( input.LA(1) ) {
             	    case EQUALS:
@@ -8626,7 +8627,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             	    switch (alt83) {
             	        case 1 :
-            	            // EsperEPL2Grammar.g:813:7: eq= EQUALS
+            	            // EsperEPL2Grammar.g:814:7: eq= EQUALS
             	            {
             	            eq=(Token)match(input,EQUALS,FOLLOW_EQUALS_in_evalEqualsExpression4101); if (state.failed) return retval; 
             	            if ( state.backtracking==0 ) stream_EQUALS.add(eq);
@@ -8635,7 +8636,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // EsperEPL2Grammar.g:814:15: is= IS
+            	            // EsperEPL2Grammar.g:815:15: is= IS
             	            {
             	            is=(Token)match(input,IS,FOLLOW_IS_in_evalEqualsExpression4119); if (state.failed) return retval; 
             	            if ( state.backtracking==0 ) stream_IS.add(is);
@@ -8644,7 +8645,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 3 :
-            	            // EsperEPL2Grammar.g:815:11: isnot= IS NOT_EXPR
+            	            // EsperEPL2Grammar.g:816:11: isnot= IS NOT_EXPR
             	            {
             	            isnot=(Token)match(input,IS,FOLLOW_IS_in_evalEqualsExpression4133); if (state.failed) return retval; 
             	            if ( state.backtracking==0 ) stream_IS.add(isnot);
@@ -8656,7 +8657,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 4 :
-            	            // EsperEPL2Grammar.g:816:11: sqlne= SQL_NE
+            	            // EsperEPL2Grammar.g:817:11: sqlne= SQL_NE
             	            {
             	            sqlne=(Token)match(input,SQL_NE,FOLLOW_SQL_NE_in_evalEqualsExpression4149); if (state.failed) return retval; 
             	            if ( state.backtracking==0 ) stream_SQL_NE.add(sqlne);
@@ -8665,7 +8666,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 5 :
-            	            // EsperEPL2Grammar.g:817:11: ne= NOT_EQUAL
+            	            // EsperEPL2Grammar.g:818:11: ne= NOT_EQUAL
             	            {
             	            ne=(Token)match(input,NOT_EQUAL,FOLLOW_NOT_EQUAL_in_evalEqualsExpression4163); if (state.failed) return retval; 
             	            if ( state.backtracking==0 ) stream_NOT_EQUAL.add(ne);
@@ -8676,7 +8677,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             	    }
 
-            	    // EsperEPL2Grammar.g:819:9: ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
+            	    // EsperEPL2Grammar.g:820:9: ( evalRelationalExpression | (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
             	    int alt87=2;
             	    int LA87_0 = input.LA(1);
 
@@ -8695,7 +8696,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	    }
             	    switch (alt87) {
             	        case 1 :
-            	            // EsperEPL2Grammar.g:820:10: evalRelationalExpression
+            	            // EsperEPL2Grammar.g:821:10: evalRelationalExpression
             	            {
             	            pushFollow(FOLLOW_evalRelationalExpression_in_evalEqualsExpression4193);
             	            evalRelationalExpression218=evalRelationalExpression();
@@ -8707,9 +8708,9 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // EsperEPL2Grammar.g:821:13: (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
+            	            // EsperEPL2Grammar.g:822:13: (a= ANY | a= SOME | a= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
             	            {
-            	            // EsperEPL2Grammar.g:821:13: (a= ANY | a= SOME | a= ALL )
+            	            // EsperEPL2Grammar.g:822:13: (a= ANY | a= SOME | a= ALL )
             	            int alt84=3;
             	            switch ( input.LA(1) ) {
             	            case ANY:
@@ -8737,7 +8738,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             	            switch (alt84) {
             	                case 1 :
-            	                    // EsperEPL2Grammar.g:821:14: a= ANY
+            	                    // EsperEPL2Grammar.g:822:14: a= ANY
             	                    {
             	                    a=(Token)match(input,ANY,FOLLOW_ANY_in_evalEqualsExpression4210); if (state.failed) return retval; 
             	                    if ( state.backtracking==0 ) stream_ANY.add(a);
@@ -8746,7 +8747,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	                    }
             	                    break;
             	                case 2 :
-            	                    // EsperEPL2Grammar.g:821:22: a= SOME
+            	                    // EsperEPL2Grammar.g:822:22: a= SOME
             	                    {
             	                    a=(Token)match(input,SOME,FOLLOW_SOME_in_evalEqualsExpression4216); if (state.failed) return retval; 
             	                    if ( state.backtracking==0 ) stream_SOME.add(a);
@@ -8755,7 +8756,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	                    }
             	                    break;
             	                case 3 :
-            	                    // EsperEPL2Grammar.g:821:31: a= ALL
+            	                    // EsperEPL2Grammar.g:822:31: a= ALL
             	                    {
             	                    a=(Token)match(input,ALL,FOLLOW_ALL_in_evalEqualsExpression4222); if (state.failed) return retval; 
             	                    if ( state.backtracking==0 ) stream_ALL.add(a);
@@ -8766,7 +8767,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             	            }
 
-            	            // EsperEPL2Grammar.g:821:38: ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
+            	            // EsperEPL2Grammar.g:822:38: ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
             	            int alt86=2;
             	            int LA86_0 = input.LA(1);
 
@@ -8796,15 +8797,15 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            switch (alt86) {
             	                case 1 :
-            	                    // EsperEPL2Grammar.g:821:40: ( LPAREN ( expressionList )? RPAREN )
+            	                    // EsperEPL2Grammar.g:822:40: ( LPAREN ( expressionList )? RPAREN )
             	                    {
-            	                    // EsperEPL2Grammar.g:821:40: ( LPAREN ( expressionList )? RPAREN )
-            	                    // EsperEPL2Grammar.g:821:41: LPAREN ( expressionList )? RPAREN
+            	                    // EsperEPL2Grammar.g:822:40: ( LPAREN ( expressionList )? RPAREN )
+            	                    // EsperEPL2Grammar.g:822:41: LPAREN ( expressionList )? RPAREN
             	                    {
             	                    LPAREN219=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_evalEqualsExpression4228); if (state.failed) return retval; 
             	                    if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN219);
 
-            	                    // EsperEPL2Grammar.g:821:48: ( expressionList )?
+            	                    // EsperEPL2Grammar.g:822:48: ( expressionList )?
             	                    int alt85=2;
             	                    int LA85_0 = input.LA(1);
 
@@ -8813,7 +8814,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	                    }
             	                    switch (alt85) {
             	                        case 1 :
-            	                            // EsperEPL2Grammar.g:821:48: expressionList
+            	                            // EsperEPL2Grammar.g:822:48: expressionList
             	                            {
             	                            pushFollow(FOLLOW_expressionList_in_evalEqualsExpression4230);
             	                            expressionList220=expressionList();
@@ -8837,7 +8838,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	                    }
             	                    break;
             	                case 2 :
-            	                    // EsperEPL2Grammar.g:821:74: subSelectGroupExpression
+            	                    // EsperEPL2Grammar.g:822:74: subSelectGroupExpression
             	                    {
             	                    pushFollow(FOLLOW_subSelectGroupExpression_in_evalEqualsExpression4238);
             	                    subSelectGroupExpression222=subSelectGroupExpression();
@@ -8869,7 +8870,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: subSelectGroupExpression, a, evalRelationalExpression, a, expressionList, expressionList, evalRelationalExpression, evalRelationalExpression, evalRelationalExpression, evalRelationalExpression, subSelectGroupExpression
+            // elements: expressionList, expressionList, evalRelationalExpression, subSelectGroupExpression, a, a, subSelectGroupExpression, evalRelationalExpression, evalRelationalExpression, evalRelationalExpression, evalRelationalExpression
             // token labels: a
             // rule labels: retval
             // token list labels: 
@@ -8880,9 +8881,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 824:6: -> {$a == null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ )
+            // 825:6: -> {$a == null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ )
             if (a == null && (eq != null || is != null)) {
-                // EsperEPL2Grammar.g:824:55: ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ )
+                // EsperEPL2Grammar.g:825:55: ^( EVAL_EQUALS_EXPR ( evalRelationalExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVAL_EQUALS_EXPR, "EVAL_EQUALS_EXPR"), root_1);
@@ -8900,22 +8901,22 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 825:6: -> {$a != null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
+            else // 826:6: -> {$a != null && ($eq != null || $is != null)}? ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
             if (a != null && (eq != null || is != null)) {
-                // EsperEPL2Grammar.g:825:55: ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
+                // EsperEPL2Grammar.g:826:55: ^( EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVAL_EQUALS_GROUP_EXPR, "EVAL_EQUALS_GROUP_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_evalRelationalExpression.nextTree());
                 adaptor.addChild(root_1, stream_a.nextNode());
-                // EsperEPL2Grammar.g:825:108: ( expressionList )?
+                // EsperEPL2Grammar.g:826:108: ( expressionList )?
                 if ( stream_expressionList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionList.nextTree());
 
                 }
                 stream_expressionList.reset();
-                // EsperEPL2Grammar.g:825:124: ( subSelectGroupExpression )?
+                // EsperEPL2Grammar.g:826:124: ( subSelectGroupExpression )?
                 if ( stream_subSelectGroupExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_subSelectGroupExpression.nextTree());
 
@@ -8926,9 +8927,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 826:6: -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ )
+            else // 827:6: -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ )
             if (a == null && (isnot != null || sqlne != null || ne != null)) {
-                // EsperEPL2Grammar.g:826:76: ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ )
+                // EsperEPL2Grammar.g:827:76: ^( EVAL_NOTEQUALS_EXPR ( evalRelationalExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVAL_NOTEQUALS_EXPR, "EVAL_NOTEQUALS_EXPR"), root_1);
@@ -8946,22 +8947,22 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 827:6: -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
+            else // 828:6: -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
             if (a != null && (isnot != null || sqlne != null || ne != null)) {
-                // EsperEPL2Grammar.g:827:76: ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
+                // EsperEPL2Grammar.g:828:76: ^( EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a ( expressionList )? ( subSelectGroupExpression )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVAL_NOTEQUALS_GROUP_EXPR, "EVAL_NOTEQUALS_GROUP_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_evalRelationalExpression.nextTree());
                 adaptor.addChild(root_1, stream_a.nextNode());
-                // EsperEPL2Grammar.g:827:132: ( expressionList )?
+                // EsperEPL2Grammar.g:828:132: ( expressionList )?
                 if ( stream_expressionList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionList.nextTree());
 
                 }
                 stream_expressionList.reset();
-                // EsperEPL2Grammar.g:827:148: ( subSelectGroupExpression )?
+                // EsperEPL2Grammar.g:828:148: ( subSelectGroupExpression )?
                 if ( stream_subSelectGroupExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_subSelectGroupExpression.nextTree());
 
@@ -8972,7 +8973,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 828:6: -> ( evalRelationalExpression )+
+            else // 829:6: -> ( evalRelationalExpression )+
             {
                 if ( !(stream_evalRelationalExpression.hasNext()) ) {
                     throw new RewriteEarlyExitException();
@@ -9012,7 +9013,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "evalRelationalExpression"
-    // EsperEPL2Grammar.g:831:1: evalRelationalExpression : concatenationExpr ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) ) ;
+    // EsperEPL2Grammar.g:832:1: evalRelationalExpression : concatenationExpr ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) ) ;
     public final EsperEPL2GrammarParser.evalRelationalExpression_return evalRelationalExpression() throws RecognitionException {
         EsperEPL2GrammarParser.evalRelationalExpression_return retval = new EsperEPL2GrammarParser.evalRelationalExpression_return();
         retval.start = input.LT(1);
@@ -9099,8 +9100,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_stringconstant=new RewriteRuleSubtreeStream(adaptor,"rule stringconstant");
         RewriteRuleSubtreeStream stream_betweenList=new RewriteRuleSubtreeStream(adaptor,"rule betweenList");
         try {
-            // EsperEPL2Grammar.g:832:2: ( concatenationExpr ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) ) )
-            // EsperEPL2Grammar.g:832:4: concatenationExpr ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) )
+            // EsperEPL2Grammar.g:833:2: ( concatenationExpr ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) ) )
+            // EsperEPL2Grammar.g:833:4: concatenationExpr ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) )
             {
             pushFollow(FOLLOW_concatenationExpr_in_evalRelationalExpression4366);
             concatenationExpr223=concatenationExpr();
@@ -9108,7 +9109,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_concatenationExpr.add(concatenationExpr223.getTree());
-            // EsperEPL2Grammar.g:833:3: ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) )
+            // EsperEPL2Grammar.g:834:3: ( ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ ) | (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) ) )
             int alt102=2;
             int LA102_0 = input.LA(1);
 
@@ -9127,12 +9128,12 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt102) {
                 case 1 :
-                    // EsperEPL2Grammar.g:834:4: ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ )
+                    // EsperEPL2Grammar.g:835:4: ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ )
                     {
-                    // EsperEPL2Grammar.g:834:4: ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ )
-                    // EsperEPL2Grammar.g:835:6: ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
+                    // EsperEPL2Grammar.g:835:4: ( ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )* -> {$g == null && $r != null}? ^( ( concatenationExpr )+ ) -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? ) -> ( concatenationExpr )+ )
+                    // EsperEPL2Grammar.g:836:6: ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
                     {
-                    // EsperEPL2Grammar.g:835:6: ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
+                    // EsperEPL2Grammar.g:836:6: ( (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) ) )*
                     loop94:
                     do {
                         int alt94=2;
@@ -9145,9 +9146,9 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt94) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:836:8: (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
+                    	    // EsperEPL2Grammar.g:837:8: (r= LT | r= GT | r= LE | r= GE ) ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
                     	    {
-                    	    // EsperEPL2Grammar.g:836:8: (r= LT | r= GT | r= LE | r= GE )
+                    	    // EsperEPL2Grammar.g:837:8: (r= LT | r= GT | r= LE | r= GE )
                     	    int alt89=4;
                     	    switch ( input.LA(1) ) {
                     	    case LT:
@@ -9180,7 +9181,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     	    switch (alt89) {
                     	        case 1 :
-                    	            // EsperEPL2Grammar.g:836:9: r= LT
+                    	            // EsperEPL2Grammar.g:837:9: r= LT
                     	            {
                     	            r=(Token)match(input,LT,FOLLOW_LT_in_evalRelationalExpression4398); if (state.failed) return retval; 
                     	            if ( state.backtracking==0 ) stream_LT.add(r);
@@ -9189,7 +9190,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	            }
                     	            break;
                     	        case 2 :
-                    	            // EsperEPL2Grammar.g:836:14: r= GT
+                    	            // EsperEPL2Grammar.g:837:14: r= GT
                     	            {
                     	            r=(Token)match(input,GT,FOLLOW_GT_in_evalRelationalExpression4402); if (state.failed) return retval; 
                     	            if ( state.backtracking==0 ) stream_GT.add(r);
@@ -9198,7 +9199,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	            }
                     	            break;
                     	        case 3 :
-                    	            // EsperEPL2Grammar.g:836:19: r= LE
+                    	            // EsperEPL2Grammar.g:837:19: r= LE
                     	            {
                     	            r=(Token)match(input,LE,FOLLOW_LE_in_evalRelationalExpression4406); if (state.failed) return retval; 
                     	            if ( state.backtracking==0 ) stream_LE.add(r);
@@ -9207,7 +9208,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	            }
                     	            break;
                     	        case 4 :
-                    	            // EsperEPL2Grammar.g:836:24: r= GE
+                    	            // EsperEPL2Grammar.g:837:24: r= GE
                     	            {
                     	            r=(Token)match(input,GE,FOLLOW_GE_in_evalRelationalExpression4410); if (state.failed) return retval; 
                     	            if ( state.backtracking==0 ) stream_GE.add(r);
@@ -9218,7 +9219,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     	    }
 
-                    	    // EsperEPL2Grammar.g:837:9: ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
+                    	    // EsperEPL2Grammar.g:838:9: ( concatenationExpr | (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression ) )
                     	    int alt93=2;
                     	    int LA93_0 = input.LA(1);
 
@@ -9237,7 +9238,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	    }
                     	    switch (alt93) {
                     	        case 1 :
-                    	            // EsperEPL2Grammar.g:838:11: concatenationExpr
+                    	            // EsperEPL2Grammar.g:839:11: concatenationExpr
                     	            {
                     	            pushFollow(FOLLOW_concatenationExpr_in_evalRelationalExpression4434);
                     	            concatenationExpr224=concatenationExpr();
@@ -9249,9 +9250,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     	            }
                     	            break;
                     	        case 2 :
-                    	            // EsperEPL2Grammar.g:839:13: (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
+                    	            // EsperEPL2Grammar.g:840:13: (g= ANY | g= SOME | g= ALL ) ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
                     	            {
-                    	            // EsperEPL2Grammar.g:839:13: (g= ANY | g= SOME | g= ALL )
+                    	            // EsperEPL2Grammar.g:840:13: (g= ANY | g= SOME | g= ALL )
                     	            int alt90=3;
                     	            switch ( input.LA(1) ) {
                     	            case ANY:
@@ -9279,7 +9280,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     	            switch (alt90) {
                     	                case 1 :
-                    	                    // EsperEPL2Grammar.g:839:14: g= ANY
+                    	                    // EsperEPL2Grammar.g:840:14: g= ANY
                     	                    {
                     	                    g=(Token)match(input,ANY,FOLLOW_ANY_in_evalRelationalExpression4451); if (state.failed) return retval; 
                     	                    if ( state.backtracking==0 ) stream_ANY.add(g);
@@ -9288,7 +9289,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	                    }
                     	                    break;
                     	                case 2 :
-                    	                    // EsperEPL2Grammar.g:839:22: g= SOME
+                    	                    // EsperEPL2Grammar.g:840:22: g= SOME
                     	                    {
                     	                    g=(Token)match(input,SOME,FOLLOW_SOME_in_evalRelationalExpression4457); if (state.failed) return retval; 
                     	                    if ( state.backtracking==0 ) stream_SOME.add(g);
@@ -9297,7 +9298,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	                    }
                     	                    break;
                     	                case 3 :
-                    	                    // EsperEPL2Grammar.g:839:31: g= ALL
+                    	                    // EsperEPL2Grammar.g:840:31: g= ALL
                     	                    {
                     	                    g=(Token)match(input,ALL,FOLLOW_ALL_in_evalRelationalExpression4463); if (state.failed) return retval; 
                     	                    if ( state.backtracking==0 ) stream_ALL.add(g);
@@ -9308,7 +9309,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     	            }
 
-                    	            // EsperEPL2Grammar.g:839:38: ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
+                    	            // EsperEPL2Grammar.g:840:38: ( ( LPAREN ( expressionList )? RPAREN ) | subSelectGroupExpression )
                     	            int alt92=2;
                     	            int LA92_0 = input.LA(1);
 
@@ -9338,15 +9339,15 @@ public class EsperEPL2GrammarParser extends Parser {
                     	            }
                     	            switch (alt92) {
                     	                case 1 :
-                    	                    // EsperEPL2Grammar.g:839:40: ( LPAREN ( expressionList )? RPAREN )
+                    	                    // EsperEPL2Grammar.g:840:40: ( LPAREN ( expressionList )? RPAREN )
                     	                    {
-                    	                    // EsperEPL2Grammar.g:839:40: ( LPAREN ( expressionList )? RPAREN )
-                    	                    // EsperEPL2Grammar.g:839:41: LPAREN ( expressionList )? RPAREN
+                    	                    // EsperEPL2Grammar.g:840:40: ( LPAREN ( expressionList )? RPAREN )
+                    	                    // EsperEPL2Grammar.g:840:41: LPAREN ( expressionList )? RPAREN
                     	                    {
                     	                    LPAREN225=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_evalRelationalExpression4469); if (state.failed) return retval; 
                     	                    if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN225);
 
-                    	                    // EsperEPL2Grammar.g:839:48: ( expressionList )?
+                    	                    // EsperEPL2Grammar.g:840:48: ( expressionList )?
                     	                    int alt91=2;
                     	                    int LA91_0 = input.LA(1);
 
@@ -9355,7 +9356,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	                    }
                     	                    switch (alt91) {
                     	                        case 1 :
-                    	                            // EsperEPL2Grammar.g:839:48: expressionList
+                    	                            // EsperEPL2Grammar.g:840:48: expressionList
                     	                            {
                     	                            pushFollow(FOLLOW_expressionList_in_evalRelationalExpression4471);
                     	                            expressionList226=expressionList();
@@ -9379,7 +9380,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     	                    }
                     	                    break;
                     	                case 2 :
-                    	                    // EsperEPL2Grammar.g:839:74: subSelectGroupExpression
+                    	                    // EsperEPL2Grammar.g:840:74: subSelectGroupExpression
                     	                    {
                     	                    pushFollow(FOLLOW_subSelectGroupExpression_in_evalRelationalExpression4479);
                     	                    subSelectGroupExpression228=subSelectGroupExpression();
@@ -9411,7 +9412,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: concatenationExpr, subSelectGroupExpression, concatenationExpr, g, concatenationExpr, expressionList
+                    // elements: g, concatenationExpr, subSelectGroupExpression, concatenationExpr, concatenationExpr, expressionList
                     // token labels: g
                     // rule labels: retval
                     // token list labels: 
@@ -9422,9 +9423,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 843:6: -> {$g == null && $r != null}? ^( ( concatenationExpr )+ )
+                    // 844:6: -> {$g == null && $r != null}? ^( ( concatenationExpr )+ )
                     if (g == null && r != null) {
-                        // EsperEPL2Grammar.g:843:37: ^( ( concatenationExpr )+ )
+                        // EsperEPL2Grammar.g:844:37: ^( ( concatenationExpr )+ )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot(adaptor.create(r), root_1);
@@ -9442,22 +9443,22 @@ public class EsperEPL2GrammarParser extends Parser {
                         }
 
                     }
-                    else // 844:6: -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? )
+                    else // 845:6: -> {$g != null && $r != null}? ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? )
                     if (g != null && r != null) {
-                        // EsperEPL2Grammar.g:844:37: ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? )
+                        // EsperEPL2Grammar.g:845:37: ^( concatenationExpr $g ( expressionList )? ( subSelectGroupExpression )? )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot(adaptor.create(r), root_1);
 
                         adaptor.addChild(root_1, stream_concatenationExpr.nextTree());
                         adaptor.addChild(root_1, stream_g.nextNode());
-                        // EsperEPL2Grammar.g:844:81: ( expressionList )?
+                        // EsperEPL2Grammar.g:845:81: ( expressionList )?
                         if ( stream_expressionList.hasNext() ) {
                             adaptor.addChild(root_1, stream_expressionList.nextTree());
 
                         }
                         stream_expressionList.reset();
-                        // EsperEPL2Grammar.g:844:97: ( subSelectGroupExpression )?
+                        // EsperEPL2Grammar.g:845:97: ( subSelectGroupExpression )?
                         if ( stream_subSelectGroupExpression.hasNext() ) {
                             adaptor.addChild(root_1, stream_subSelectGroupExpression.nextTree());
 
@@ -9468,7 +9469,7 @@ public class EsperEPL2GrammarParser extends Parser {
                         }
 
                     }
-                    else // 845:6: -> ( concatenationExpr )+
+                    else // 846:6: -> ( concatenationExpr )+
                     {
                         if ( !(stream_concatenationExpr.hasNext()) ) {
                             throw new RewriteEarlyExitException();
@@ -9488,9 +9489,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:847:6: (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) )
+                    // EsperEPL2Grammar.g:848:6: (n= NOT_EXPR )? ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) )
                     {
-                    // EsperEPL2Grammar.g:847:6: (n= NOT_EXPR )?
+                    // EsperEPL2Grammar.g:848:6: (n= NOT_EXPR )?
                     int alt95=2;
                     int LA95_0 = input.LA(1);
 
@@ -9499,7 +9500,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt95) {
                         case 1 :
-                            // EsperEPL2Grammar.g:847:7: n= NOT_EXPR
+                            // EsperEPL2Grammar.g:848:7: n= NOT_EXPR
                             {
                             n=(Token)match(input,NOT_EXPR,FOLLOW_NOT_EXPR_in_evalRelationalExpression4575); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_NOT_EXPR.add(n);
@@ -9510,7 +9511,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:848:4: ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) )
+                    // EsperEPL2Grammar.g:849:4: ( (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) ) -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r) -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r) -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r) -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r) | IN_SET inSubSelectQuery -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery ) | BETWEEN betweenList -> {$n == null}? ^( BETWEEN concatenationExpr betweenList ) -> ^( NOT_BETWEEN concatenationExpr betweenList ) | LIKE concatenationExpr ( ESCAPE stringconstant )? -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? ) -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? ) | REGEXP concatenationExpr -> {$n == null}? ^( REGEXP ( concatenationExpr )+ ) -> ^( NOT_REGEXP ( concatenationExpr )+ ) )
                     int alt101=5;
                     switch ( input.LA(1) ) {
                     case IN_SET:
@@ -9571,15 +9572,15 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt101) {
                         case 1 :
-                            // EsperEPL2Grammar.g:851:5: (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) )
+                            // EsperEPL2Grammar.g:852:5: (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) )
                             {
-                            // EsperEPL2Grammar.g:851:5: (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) )
-                            // EsperEPL2Grammar.g:851:6: i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK )
+                            // EsperEPL2Grammar.g:852:5: (i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK ) )
+                            // EsperEPL2Grammar.g:852:6: i= IN_SET (l= LPAREN | l= LBRACK ) expression ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) ) (r= RPAREN | r= RBRACK )
                             {
                             i=(Token)match(input,IN_SET,FOLLOW_IN_SET_in_evalRelationalExpression4602); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_IN_SET.add(i);
 
-                            // EsperEPL2Grammar.g:852:8: (l= LPAREN | l= LBRACK )
+                            // EsperEPL2Grammar.g:853:8: (l= LPAREN | l= LBRACK )
                             int alt96=2;
                             int LA96_0 = input.LA(1);
 
@@ -9598,7 +9599,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt96) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:852:9: l= LPAREN
+                                    // EsperEPL2Grammar.g:853:9: l= LPAREN
                                     {
                                     l=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_evalRelationalExpression4614); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_LPAREN.add(l);
@@ -9607,7 +9608,7 @@ public class EsperEPL2GrammarParser extends Parser {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:852:20: l= LBRACK
+                                    // EsperEPL2Grammar.g:853:20: l= LBRACK
                                     {
                                     l=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_evalRelationalExpression4620); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_LBRACK.add(l);
@@ -9624,7 +9625,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             state._fsp--;
                             if (state.failed) return retval;
                             if ( state.backtracking==0 ) stream_expression.add(expression229.getTree());
-                            // EsperEPL2Grammar.g:853:7: ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) )
+                            // EsperEPL2Grammar.g:854:7: ( (col= COLON ( expression ) ) | ( ( COMMA expression )* ) )
                             int alt98=2;
                             int LA98_0 = input.LA(1);
 
@@ -9643,16 +9644,16 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt98) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:854:8: (col= COLON ( expression ) )
+                                    // EsperEPL2Grammar.g:855:8: (col= COLON ( expression ) )
                                     {
-                                    // EsperEPL2Grammar.g:854:8: (col= COLON ( expression ) )
-                                    // EsperEPL2Grammar.g:854:10: col= COLON ( expression )
+                                    // EsperEPL2Grammar.g:855:8: (col= COLON ( expression ) )
+                                    // EsperEPL2Grammar.g:855:10: col= COLON ( expression )
                                     {
                                     col=(Token)match(input,COLON,FOLLOW_COLON_in_evalRelationalExpression4645); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_COLON.add(col);
 
-                                    // EsperEPL2Grammar.g:854:20: ( expression )
-                                    // EsperEPL2Grammar.g:854:21: expression
+                                    // EsperEPL2Grammar.g:855:20: ( expression )
+                                    // EsperEPL2Grammar.g:855:21: expression
                                     {
                                     pushFollow(FOLLOW_expression_in_evalRelationalExpression4648);
                                     expression230=expression();
@@ -9670,12 +9671,12 @@ public class EsperEPL2GrammarParser extends Parser {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:856:8: ( ( COMMA expression )* )
+                                    // EsperEPL2Grammar.g:857:8: ( ( COMMA expression )* )
                                     {
-                                    // EsperEPL2Grammar.g:856:8: ( ( COMMA expression )* )
-                                    // EsperEPL2Grammar.g:856:10: ( COMMA expression )*
+                                    // EsperEPL2Grammar.g:857:8: ( ( COMMA expression )* )
+                                    // EsperEPL2Grammar.g:857:10: ( COMMA expression )*
                                     {
-                                    // EsperEPL2Grammar.g:856:10: ( COMMA expression )*
+                                    // EsperEPL2Grammar.g:857:10: ( COMMA expression )*
                                     loop97:
                                     do {
                                         int alt97=2;
@@ -9688,7 +9689,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                                         switch (alt97) {
                                     	case 1 :
-                                    	    // EsperEPL2Grammar.g:856:11: COMMA expression
+                                    	    // EsperEPL2Grammar.g:857:11: COMMA expression
                                     	    {
                                     	    COMMA231=(Token)match(input,COMMA,FOLLOW_COMMA_in_evalRelationalExpression4674); if (state.failed) return retval; 
                                     	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA231);
@@ -9717,7 +9718,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                             }
 
-                            // EsperEPL2Grammar.g:858:8: (r= RPAREN | r= RBRACK )
+                            // EsperEPL2Grammar.g:859:8: (r= RPAREN | r= RBRACK )
                             int alt99=2;
                             int LA99_0 = input.LA(1);
 
@@ -9736,7 +9737,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt99) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:858:9: r= RPAREN
+                                    // EsperEPL2Grammar.g:859:9: r= RPAREN
                                     {
                                     r=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_evalRelationalExpression4702); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_RPAREN.add(r);
@@ -9745,7 +9746,7 @@ public class EsperEPL2GrammarParser extends Parser {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:858:20: r= RBRACK
+                                    // EsperEPL2Grammar.g:859:20: r= RBRACK
                                     {
                                     r=(Token)match(input,RBRACK,FOLLOW_RBRACK_in_evalRelationalExpression4708); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_RBRACK.add(r);
@@ -9762,7 +9763,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                             // AST REWRITE
-                            // elements: l, expression, expression, r, r, l, expression, concatenationExpr, r, concatenationExpr, IN_SET, expression, r, concatenationExpr, concatenationExpr, l, l
+                            // elements: concatenationExpr, r, r, concatenationExpr, concatenationExpr, r, l, l, concatenationExpr, expression, expression, IN_SET, expression, l, l, r, expression
                             // token labels: r, l
                             // rule labels: retval
                             // token list labels: 
@@ -9774,9 +9775,9 @@ public class EsperEPL2GrammarParser extends Parser {
                             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                             root_0 = (CommonTree)adaptor.nil();
-                            // 860:9: -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r)
+                            // 861:9: -> {$col == null && $n == null}? ^( IN_SET concatenationExpr $l ( expression )+ $r)
                             if (col == null && n == null) {
-                                // EsperEPL2Grammar.g:860:42: ^( IN_SET concatenationExpr $l ( expression )+ $r)
+                                // EsperEPL2Grammar.g:861:42: ^( IN_SET concatenationExpr $l ( expression )+ $r)
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot(stream_IN_SET.nextNode(), root_1);
@@ -9797,9 +9798,9 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 861:9: -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r)
+                            else // 862:9: -> {$col == null && $n != null}? ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r)
                             if (col == null && n != null) {
-                                // EsperEPL2Grammar.g:861:42: ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r)
+                                // EsperEPL2Grammar.g:862:42: ^( NOT_IN_SET concatenationExpr $l ( expression )+ $r)
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NOT_IN_SET, "NOT_IN_SET"), root_1);
@@ -9820,9 +9821,9 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 862:9: -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r)
+                            else // 863:9: -> {$col != null && $n == null}? ^( IN_RANGE concatenationExpr $l ( expression )+ $r)
                             if (col != null && n == null) {
-                                // EsperEPL2Grammar.g:862:42: ^( IN_RANGE concatenationExpr $l ( expression )+ $r)
+                                // EsperEPL2Grammar.g:863:42: ^( IN_RANGE concatenationExpr $l ( expression )+ $r)
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(IN_RANGE, "IN_RANGE"), root_1);
@@ -9843,9 +9844,9 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 863:9: -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r)
+                            else // 864:9: -> ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r)
                             {
-                                // EsperEPL2Grammar.g:863:12: ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r)
+                                // EsperEPL2Grammar.g:864:12: ^( NOT_IN_RANGE concatenationExpr $l ( expression )+ $r)
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NOT_IN_RANGE, "NOT_IN_RANGE"), root_1);
@@ -9871,7 +9872,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:864:7: IN_SET inSubSelectQuery
+                            // EsperEPL2Grammar.g:865:7: IN_SET inSubSelectQuery
                             {
                             IN_SET233=(Token)match(input,IN_SET,FOLLOW_IN_SET_in_evalRelationalExpression4831); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_IN_SET.add(IN_SET233);
@@ -9885,7 +9886,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                             // AST REWRITE
-                            // elements: inSubSelectQuery, inSubSelectQuery, concatenationExpr, concatenationExpr
+                            // elements: concatenationExpr, inSubSelectQuery, inSubSelectQuery, concatenationExpr
                             // token labels: 
                             // rule labels: retval
                             // token list labels: 
@@ -9895,9 +9896,9 @@ public class EsperEPL2GrammarParser extends Parser {
                             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                             root_0 = (CommonTree)adaptor.nil();
-                            // 865:9: -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
+                            // 866:9: -> {$n == null}? ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
                             if (n == null) {
-                                // EsperEPL2Grammar.g:865:26: ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
+                                // EsperEPL2Grammar.g:866:26: ^( IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(IN_SUBSELECT_EXPR, "IN_SUBSELECT_EXPR"), root_1);
@@ -9909,9 +9910,9 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 866:9: -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
+                            else // 867:9: -> ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
                             {
-                                // EsperEPL2Grammar.g:866:12: ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
+                                // EsperEPL2Grammar.g:867:12: ^( NOT_IN_SUBSELECT_EXPR concatenationExpr inSubSelectQuery )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NOT_IN_SUBSELECT_EXPR, "NOT_IN_SUBSELECT_EXPR"), root_1);
@@ -9928,7 +9929,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 3 :
-                            // EsperEPL2Grammar.g:867:7: BETWEEN betweenList
+                            // EsperEPL2Grammar.g:868:7: BETWEEN betweenList
                             {
                             BETWEEN235=(Token)match(input,BETWEEN,FOLLOW_BETWEEN_in_evalRelationalExpression4879); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_BETWEEN.add(BETWEEN235);
@@ -9942,7 +9943,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                             // AST REWRITE
-                            // elements: concatenationExpr, betweenList, BETWEEN, betweenList, concatenationExpr
+                            // elements: betweenList, BETWEEN, concatenationExpr, betweenList, concatenationExpr
                             // token labels: 
                             // rule labels: retval
                             // token list labels: 
@@ -9952,9 +9953,9 @@ public class EsperEPL2GrammarParser extends Parser {
                             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                             root_0 = (CommonTree)adaptor.nil();
-                            // 868:9: -> {$n == null}? ^( BETWEEN concatenationExpr betweenList )
+                            // 869:9: -> {$n == null}? ^( BETWEEN concatenationExpr betweenList )
                             if (n == null) {
-                                // EsperEPL2Grammar.g:868:26: ^( BETWEEN concatenationExpr betweenList )
+                                // EsperEPL2Grammar.g:869:26: ^( BETWEEN concatenationExpr betweenList )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot(stream_BETWEEN.nextNode(), root_1);
@@ -9966,9 +9967,9 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 869:9: -> ^( NOT_BETWEEN concatenationExpr betweenList )
+                            else // 870:9: -> ^( NOT_BETWEEN concatenationExpr betweenList )
                             {
-                                // EsperEPL2Grammar.g:869:12: ^( NOT_BETWEEN concatenationExpr betweenList )
+                                // EsperEPL2Grammar.g:870:12: ^( NOT_BETWEEN concatenationExpr betweenList )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NOT_BETWEEN, "NOT_BETWEEN"), root_1);
@@ -9985,7 +9986,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 4 :
-                            // EsperEPL2Grammar.g:870:7: LIKE concatenationExpr ( ESCAPE stringconstant )?
+                            // EsperEPL2Grammar.g:871:7: LIKE concatenationExpr ( ESCAPE stringconstant )?
                             {
                             LIKE237=(Token)match(input,LIKE,FOLLOW_LIKE_in_evalRelationalExpression4931); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_LIKE.add(LIKE237);
@@ -9996,7 +9997,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             state._fsp--;
                             if (state.failed) return retval;
                             if ( state.backtracking==0 ) stream_concatenationExpr.add(concatenationExpr238.getTree());
-                            // EsperEPL2Grammar.g:870:30: ( ESCAPE stringconstant )?
+                            // EsperEPL2Grammar.g:871:30: ( ESCAPE stringconstant )?
                             int alt100=2;
                             int LA100_0 = input.LA(1);
 
@@ -10005,7 +10006,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt100) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:870:31: ESCAPE stringconstant
+                                    // EsperEPL2Grammar.g:871:31: ESCAPE stringconstant
                                     {
                                     ESCAPE239=(Token)match(input,ESCAPE,FOLLOW_ESCAPE_in_evalRelationalExpression4936); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_ESCAPE.add(ESCAPE239);
@@ -10025,7 +10026,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
                             // AST REWRITE
-                            // elements: stringconstant, concatenationExpr, stringconstant, concatenationExpr, LIKE
+                            // elements: concatenationExpr, stringconstant, concatenationExpr, LIKE, stringconstant
                             // token labels: 
                             // rule labels: retval
                             // token list labels: 
@@ -10035,20 +10036,20 @@ public class EsperEPL2GrammarParser extends Parser {
                             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                             root_0 = (CommonTree)adaptor.nil();
-                            // 871:9: -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? )
+                            // 872:9: -> {$n == null}? ^( LIKE ( concatenationExpr )* ( stringconstant )? )
                             if (n == null) {
-                                // EsperEPL2Grammar.g:871:26: ^( LIKE ( concatenationExpr )* ( stringconstant )? )
+                                // EsperEPL2Grammar.g:872:26: ^( LIKE ( concatenationExpr )* ( stringconstant )? )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot(stream_LIKE.nextNode(), root_1);
 
-                                // EsperEPL2Grammar.g:871:33: ( concatenationExpr )*
+                                // EsperEPL2Grammar.g:872:33: ( concatenationExpr )*
                                 while ( stream_concatenationExpr.hasNext() ) {
                                     adaptor.addChild(root_1, stream_concatenationExpr.nextTree());
 
                                 }
                                 stream_concatenationExpr.reset();
-                                // EsperEPL2Grammar.g:871:52: ( stringconstant )?
+                                // EsperEPL2Grammar.g:872:52: ( stringconstant )?
                                 if ( stream_stringconstant.hasNext() ) {
                                     adaptor.addChild(root_1, stream_stringconstant.nextTree());
 
@@ -10059,20 +10060,20 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 872:9: -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? )
+                            else // 873:9: -> ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? )
                             {
-                                // EsperEPL2Grammar.g:872:12: ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? )
+                                // EsperEPL2Grammar.g:873:12: ^( NOT_LIKE ( concatenationExpr )* ( stringconstant )? )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NOT_LIKE, "NOT_LIKE"), root_1);
 
-                                // EsperEPL2Grammar.g:872:23: ( concatenationExpr )*
+                                // EsperEPL2Grammar.g:873:23: ( concatenationExpr )*
                                 while ( stream_concatenationExpr.hasNext() ) {
                                     adaptor.addChild(root_1, stream_concatenationExpr.nextTree());
 
                                 }
                                 stream_concatenationExpr.reset();
-                                // EsperEPL2Grammar.g:872:42: ( stringconstant )?
+                                // EsperEPL2Grammar.g:873:42: ( stringconstant )?
                                 if ( stream_stringconstant.hasNext() ) {
                                     adaptor.addChild(root_1, stream_stringconstant.nextTree());
 
@@ -10088,7 +10089,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 5 :
-                            // EsperEPL2Grammar.g:873:7: REGEXP concatenationExpr
+                            // EsperEPL2Grammar.g:874:7: REGEXP concatenationExpr
                             {
                             REGEXP241=(Token)match(input,REGEXP,FOLLOW_REGEXP_in_evalRelationalExpression4990); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_REGEXP.add(REGEXP241);
@@ -10112,9 +10113,9 @@ public class EsperEPL2GrammarParser extends Parser {
                             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                             root_0 = (CommonTree)adaptor.nil();
-                            // 874:9: -> {$n == null}? ^( REGEXP ( concatenationExpr )+ )
+                            // 875:9: -> {$n == null}? ^( REGEXP ( concatenationExpr )+ )
                             if (n == null) {
-                                // EsperEPL2Grammar.g:874:26: ^( REGEXP ( concatenationExpr )+ )
+                                // EsperEPL2Grammar.g:875:26: ^( REGEXP ( concatenationExpr )+ )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot(stream_REGEXP.nextNode(), root_1);
@@ -10132,9 +10133,9 @@ public class EsperEPL2GrammarParser extends Parser {
                                 }
 
                             }
-                            else // 875:9: -> ^( NOT_REGEXP ( concatenationExpr )+ )
+                            else // 876:9: -> ^( NOT_REGEXP ( concatenationExpr )+ )
                             {
-                                // EsperEPL2Grammar.g:875:12: ^( NOT_REGEXP ( concatenationExpr )+ )
+                                // EsperEPL2Grammar.g:876:12: ^( NOT_REGEXP ( concatenationExpr )+ )
                                 {
                                 CommonTree root_1 = (CommonTree)adaptor.nil();
                                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NOT_REGEXP, "NOT_REGEXP"), root_1);
@@ -10192,7 +10193,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "inSubSelectQuery"
-    // EsperEPL2Grammar.g:880:1: inSubSelectQuery : subQueryExpr -> ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr ) ;
+    // EsperEPL2Grammar.g:881:1: inSubSelectQuery : subQueryExpr -> ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr ) ;
     public final EsperEPL2GrammarParser.inSubSelectQuery_return inSubSelectQuery() throws RecognitionException {
         EsperEPL2GrammarParser.inSubSelectQuery_return retval = new EsperEPL2GrammarParser.inSubSelectQuery_return();
         retval.start = input.LT(1);
@@ -10204,8 +10205,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
         RewriteRuleSubtreeStream stream_subQueryExpr=new RewriteRuleSubtreeStream(adaptor,"rule subQueryExpr");
         try {
-            // EsperEPL2Grammar.g:881:2: ( subQueryExpr -> ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr ) )
-            // EsperEPL2Grammar.g:881:4: subQueryExpr
+            // EsperEPL2Grammar.g:882:2: ( subQueryExpr -> ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr ) )
+            // EsperEPL2Grammar.g:882:4: subQueryExpr
             {
             pushFollow(FOLLOW_subQueryExpr_in_inSubSelectQuery5054);
             subQueryExpr243=subQueryExpr();
@@ -10226,9 +10227,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 882:4: -> ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr )
+            // 883:4: -> ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr )
             {
-                // EsperEPL2Grammar.g:882:7: ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr )
+                // EsperEPL2Grammar.g:883:7: ^( IN_SUBSELECT_QUERY_EXPR subQueryExpr )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(IN_SUBSELECT_QUERY_EXPR, "IN_SUBSELECT_QUERY_EXPR"), root_1);
@@ -10267,7 +10268,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "concatenationExpr"
-    // EsperEPL2Grammar.g:885:1: concatenationExpr : additiveExpression (c= LOR additiveExpression ( LOR additiveExpression )* )? -> {$c != null}? ^( CONCAT ( additiveExpression )+ ) -> additiveExpression ;
+    // EsperEPL2Grammar.g:886:1: concatenationExpr : additiveExpression (c= LOR additiveExpression ( LOR additiveExpression )* )? -> {$c != null}? ^( CONCAT ( additiveExpression )+ ) -> additiveExpression ;
     public final EsperEPL2GrammarParser.concatenationExpr_return concatenationExpr() throws RecognitionException {
         EsperEPL2GrammarParser.concatenationExpr_return retval = new EsperEPL2GrammarParser.concatenationExpr_return();
         retval.start = input.LT(1);
@@ -10288,8 +10289,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_LOR=new RewriteRuleTokenStream(adaptor,"token LOR");
         RewriteRuleSubtreeStream stream_additiveExpression=new RewriteRuleSubtreeStream(adaptor,"rule additiveExpression");
         try {
-            // EsperEPL2Grammar.g:886:2: ( additiveExpression (c= LOR additiveExpression ( LOR additiveExpression )* )? -> {$c != null}? ^( CONCAT ( additiveExpression )+ ) -> additiveExpression )
-            // EsperEPL2Grammar.g:886:4: additiveExpression (c= LOR additiveExpression ( LOR additiveExpression )* )?
+            // EsperEPL2Grammar.g:887:2: ( additiveExpression (c= LOR additiveExpression ( LOR additiveExpression )* )? -> {$c != null}? ^( CONCAT ( additiveExpression )+ ) -> additiveExpression )
+            // EsperEPL2Grammar.g:887:4: additiveExpression (c= LOR additiveExpression ( LOR additiveExpression )* )?
             {
             pushFollow(FOLLOW_additiveExpression_in_concatenationExpr5079);
             additiveExpression244=additiveExpression();
@@ -10297,7 +10298,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_additiveExpression.add(additiveExpression244.getTree());
-            // EsperEPL2Grammar.g:886:23: (c= LOR additiveExpression ( LOR additiveExpression )* )?
+            // EsperEPL2Grammar.g:887:23: (c= LOR additiveExpression ( LOR additiveExpression )* )?
             int alt104=2;
             int LA104_0 = input.LA(1);
 
@@ -10306,7 +10307,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt104) {
                 case 1 :
-                    // EsperEPL2Grammar.g:886:25: c= LOR additiveExpression ( LOR additiveExpression )*
+                    // EsperEPL2Grammar.g:887:25: c= LOR additiveExpression ( LOR additiveExpression )*
                     {
                     c=(Token)match(input,LOR,FOLLOW_LOR_in_concatenationExpr5085); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LOR.add(c);
@@ -10317,7 +10318,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_additiveExpression.add(additiveExpression245.getTree());
-                    // EsperEPL2Grammar.g:886:50: ( LOR additiveExpression )*
+                    // EsperEPL2Grammar.g:887:50: ( LOR additiveExpression )*
                     loop103:
                     do {
                         int alt103=2;
@@ -10330,7 +10331,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt103) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:886:52: LOR additiveExpression
+                    	    // EsperEPL2Grammar.g:887:52: LOR additiveExpression
                     	    {
                     	    LOR246=(Token)match(input,LOR,FOLLOW_LOR_in_concatenationExpr5091); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_LOR.add(LOR246);
@@ -10369,9 +10370,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 887:6: -> {$c != null}? ^( CONCAT ( additiveExpression )+ )
+            // 888:6: -> {$c != null}? ^( CONCAT ( additiveExpression )+ )
             if (c != null) {
-                // EsperEPL2Grammar.g:887:23: ^( CONCAT ( additiveExpression )+ )
+                // EsperEPL2Grammar.g:888:23: ^( CONCAT ( additiveExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CONCAT, "CONCAT"), root_1);
@@ -10389,7 +10390,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 888:6: -> additiveExpression
+            else // 889:6: -> additiveExpression
             {
                 adaptor.addChild(root_0, stream_additiveExpression.nextTree());
 
@@ -10422,7 +10423,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "additiveExpression"
-    // EsperEPL2Grammar.g:891:1: additiveExpression : multiplyExpression ( ( PLUS | MINUS ) multiplyExpression )* ;
+    // EsperEPL2Grammar.g:892:1: additiveExpression : multiplyExpression ( ( PLUS | MINUS ) multiplyExpression )* ;
     public final EsperEPL2GrammarParser.additiveExpression_return additiveExpression() throws RecognitionException {
         EsperEPL2GrammarParser.additiveExpression_return retval = new EsperEPL2GrammarParser.additiveExpression_return();
         retval.start = input.LT(1);
@@ -10440,8 +10441,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree MINUS250_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:892:2: ( multiplyExpression ( ( PLUS | MINUS ) multiplyExpression )* )
-            // EsperEPL2Grammar.g:892:4: multiplyExpression ( ( PLUS | MINUS ) multiplyExpression )*
+            // EsperEPL2Grammar.g:893:2: ( multiplyExpression ( ( PLUS | MINUS ) multiplyExpression )* )
+            // EsperEPL2Grammar.g:893:4: multiplyExpression ( ( PLUS | MINUS ) multiplyExpression )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -10451,7 +10452,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, multiplyExpression248.getTree());
-            // EsperEPL2Grammar.g:892:23: ( ( PLUS | MINUS ) multiplyExpression )*
+            // EsperEPL2Grammar.g:893:23: ( ( PLUS | MINUS ) multiplyExpression )*
             loop106:
             do {
                 int alt106=2;
@@ -10464,9 +10465,9 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt106) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:892:25: ( PLUS | MINUS ) multiplyExpression
+            	    // EsperEPL2Grammar.g:893:25: ( PLUS | MINUS ) multiplyExpression
             	    {
-            	    // EsperEPL2Grammar.g:892:25: ( PLUS | MINUS )
+            	    // EsperEPL2Grammar.g:893:25: ( PLUS | MINUS )
             	    int alt105=2;
             	    int LA105_0 = input.LA(1);
 
@@ -10485,7 +10486,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	    }
             	    switch (alt105) {
             	        case 1 :
-            	            // EsperEPL2Grammar.g:892:26: PLUS
+            	            // EsperEPL2Grammar.g:893:26: PLUS
             	            {
             	            PLUS249=(Token)match(input,PLUS,FOLLOW_PLUS_in_additiveExpression5139); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -10496,7 +10497,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // EsperEPL2Grammar.g:892:32: MINUS
+            	            // EsperEPL2Grammar.g:893:32: MINUS
             	            {
             	            MINUS250=(Token)match(input,MINUS,FOLLOW_MINUS_in_additiveExpression5142); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -10551,7 +10552,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "multiplyExpression"
-    // EsperEPL2Grammar.g:895:1: multiplyExpression : unaryExpression ( ( STAR | DIV | MOD ) unaryExpression )* ;
+    // EsperEPL2Grammar.g:896:1: multiplyExpression : unaryExpression ( ( STAR | DIV | MOD ) unaryExpression )* ;
     public final EsperEPL2GrammarParser.multiplyExpression_return multiplyExpression() throws RecognitionException {
         EsperEPL2GrammarParser.multiplyExpression_return retval = new EsperEPL2GrammarParser.multiplyExpression_return();
         retval.start = input.LT(1);
@@ -10571,8 +10572,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree MOD255_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:896:2: ( unaryExpression ( ( STAR | DIV | MOD ) unaryExpression )* )
-            // EsperEPL2Grammar.g:896:4: unaryExpression ( ( STAR | DIV | MOD ) unaryExpression )*
+            // EsperEPL2Grammar.g:897:2: ( unaryExpression ( ( STAR | DIV | MOD ) unaryExpression )* )
+            // EsperEPL2Grammar.g:897:4: unaryExpression ( ( STAR | DIV | MOD ) unaryExpression )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -10582,7 +10583,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, unaryExpression252.getTree());
-            // EsperEPL2Grammar.g:896:20: ( ( STAR | DIV | MOD ) unaryExpression )*
+            // EsperEPL2Grammar.g:897:20: ( ( STAR | DIV | MOD ) unaryExpression )*
             loop108:
             do {
                 int alt108=2;
@@ -10595,9 +10596,9 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt108) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:896:22: ( STAR | DIV | MOD ) unaryExpression
+            	    // EsperEPL2Grammar.g:897:22: ( STAR | DIV | MOD ) unaryExpression
             	    {
-            	    // EsperEPL2Grammar.g:896:22: ( STAR | DIV | MOD )
+            	    // EsperEPL2Grammar.g:897:22: ( STAR | DIV | MOD )
             	    int alt107=3;
             	    switch ( input.LA(1) ) {
             	    case STAR:
@@ -10625,7 +10626,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             	    switch (alt107) {
             	        case 1 :
-            	            // EsperEPL2Grammar.g:896:23: STAR
+            	            // EsperEPL2Grammar.g:897:23: STAR
             	            {
             	            STAR253=(Token)match(input,STAR,FOLLOW_STAR_in_multiplyExpression5165); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -10636,7 +10637,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 2 :
-            	            // EsperEPL2Grammar.g:896:29: DIV
+            	            // EsperEPL2Grammar.g:897:29: DIV
             	            {
             	            DIV254=(Token)match(input,DIV,FOLLOW_DIV_in_multiplyExpression5168); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -10647,7 +10648,7 @@ public class EsperEPL2GrammarParser extends Parser {
             	            }
             	            break;
             	        case 3 :
-            	            // EsperEPL2Grammar.g:896:34: MOD
+            	            // EsperEPL2Grammar.g:897:34: MOD
             	            {
             	            MOD255=(Token)match(input,MOD,FOLLOW_MOD_in_multiplyExpression5171); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
@@ -10702,7 +10703,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "unaryExpression"
-    // EsperEPL2Grammar.g:899:1: unaryExpression : ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression | existsSubSelectExpression );
+    // EsperEPL2Grammar.g:900:1: unaryExpression : ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression | existsSubSelectExpression );
     public final EsperEPL2GrammarParser.unaryExpression_return unaryExpression() throws RecognitionException {
         EsperEPL2GrammarParser.unaryExpression_return retval = new EsperEPL2GrammarParser.unaryExpression_return();
         retval.start = input.LT(1);
@@ -10737,12 +10738,12 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_MINUS=new RewriteRuleTokenStream(adaptor,"token MINUS");
         RewriteRuleSubtreeStream stream_eventProperty=new RewriteRuleSubtreeStream(adaptor,"rule eventProperty");
         try {
-            // EsperEPL2Grammar.g:900:2: ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression | existsSubSelectExpression )
+            // EsperEPL2Grammar.g:901:2: ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression | existsSubSelectExpression )
             int alt109=9;
             alt109 = dfa109.predict(input);
             switch (alt109) {
                 case 1 :
-                    // EsperEPL2Grammar.g:900:4: MINUS eventProperty
+                    // EsperEPL2Grammar.g:901:4: MINUS eventProperty
                     {
                     MINUS257=(Token)match(input,MINUS,FOLLOW_MINUS_in_unaryExpression5190); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_MINUS.add(MINUS257);
@@ -10766,9 +10767,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 900:24: -> ^( UNARY_MINUS eventProperty )
+                    // 901:24: -> ^( UNARY_MINUS eventProperty )
                     {
-                        // EsperEPL2Grammar.g:900:27: ^( UNARY_MINUS eventProperty )
+                        // EsperEPL2Grammar.g:901:27: ^( UNARY_MINUS eventProperty )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(UNARY_MINUS, "UNARY_MINUS"), root_1);
@@ -10784,7 +10785,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:901:4: constant
+                    // EsperEPL2Grammar.g:902:4: constant
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10798,7 +10799,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:902:4: substitution
+                    // EsperEPL2Grammar.g:903:4: substitution
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10812,7 +10813,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:903:4: LPAREN expression RPAREN
+                    // EsperEPL2Grammar.g:904:4: LPAREN expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10828,7 +10829,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:904:4: eventPropertyOrLibFunction
+                    // EsperEPL2Grammar.g:905:4: eventPropertyOrLibFunction
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10842,12 +10843,12 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // EsperEPL2Grammar.g:905:4: ( builtinFunc )=> ( builtinFunc )
+                    // EsperEPL2Grammar.g:906:4: ( builtinFunc )=> ( builtinFunc )
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
-                    // EsperEPL2Grammar.g:905:21: ( builtinFunc )
-                    // EsperEPL2Grammar.g:905:22: builtinFunc
+                    // EsperEPL2Grammar.g:906:21: ( builtinFunc )
+                    // EsperEPL2Grammar.g:906:22: builtinFunc
                     {
                     pushFollow(FOLLOW_builtinFunc_in_unaryExpression5238);
                     builtinFunc265=builtinFunc();
@@ -10862,7 +10863,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 7 :
-                    // EsperEPL2Grammar.g:906:4: arrayExpression
+                    // EsperEPL2Grammar.g:907:4: arrayExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10876,7 +10877,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 8 :
-                    // EsperEPL2Grammar.g:907:4: subSelectExpression
+                    // EsperEPL2Grammar.g:908:4: subSelectExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10890,7 +10891,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 9 :
-                    // EsperEPL2Grammar.g:908:4: existsSubSelectExpression
+                    // EsperEPL2Grammar.g:909:4: existsSubSelectExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -10929,7 +10930,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "subSelectExpression"
-    // EsperEPL2Grammar.g:911:1: subSelectExpression : subQueryExpr -> ^( SUBSELECT_EXPR subQueryExpr ) ;
+    // EsperEPL2Grammar.g:912:1: subSelectExpression : subQueryExpr -> ^( SUBSELECT_EXPR subQueryExpr ) ;
     public final EsperEPL2GrammarParser.subSelectExpression_return subSelectExpression() throws RecognitionException {
         EsperEPL2GrammarParser.subSelectExpression_return retval = new EsperEPL2GrammarParser.subSelectExpression_return();
         retval.start = input.LT(1);
@@ -10941,8 +10942,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
         RewriteRuleSubtreeStream stream_subQueryExpr=new RewriteRuleSubtreeStream(adaptor,"rule subQueryExpr");
         try {
-            // EsperEPL2Grammar.g:912:2: ( subQueryExpr -> ^( SUBSELECT_EXPR subQueryExpr ) )
-            // EsperEPL2Grammar.g:912:4: subQueryExpr
+            // EsperEPL2Grammar.g:913:2: ( subQueryExpr -> ^( SUBSELECT_EXPR subQueryExpr ) )
+            // EsperEPL2Grammar.g:913:4: subQueryExpr
             {
             pushFollow(FOLLOW_subQueryExpr_in_subSelectExpression5271);
             subQueryExpr269=subQueryExpr();
@@ -10963,9 +10964,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 913:3: -> ^( SUBSELECT_EXPR subQueryExpr )
+            // 914:3: -> ^( SUBSELECT_EXPR subQueryExpr )
             {
-                // EsperEPL2Grammar.g:913:6: ^( SUBSELECT_EXPR subQueryExpr )
+                // EsperEPL2Grammar.g:914:6: ^( SUBSELECT_EXPR subQueryExpr )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SUBSELECT_EXPR, "SUBSELECT_EXPR"), root_1);
@@ -11004,7 +11005,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "subSelectGroupExpression"
-    // EsperEPL2Grammar.g:916:1: subSelectGroupExpression : subQueryExpr -> ^( SUBSELECT_GROUP_EXPR subQueryExpr ) ;
+    // EsperEPL2Grammar.g:917:1: subSelectGroupExpression : subQueryExpr -> ^( SUBSELECT_GROUP_EXPR subQueryExpr ) ;
     public final EsperEPL2GrammarParser.subSelectGroupExpression_return subSelectGroupExpression() throws RecognitionException {
         EsperEPL2GrammarParser.subSelectGroupExpression_return retval = new EsperEPL2GrammarParser.subSelectGroupExpression_return();
         retval.start = input.LT(1);
@@ -11016,8 +11017,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
         RewriteRuleSubtreeStream stream_subQueryExpr=new RewriteRuleSubtreeStream(adaptor,"rule subQueryExpr");
         try {
-            // EsperEPL2Grammar.g:917:2: ( subQueryExpr -> ^( SUBSELECT_GROUP_EXPR subQueryExpr ) )
-            // EsperEPL2Grammar.g:917:4: subQueryExpr
+            // EsperEPL2Grammar.g:918:2: ( subQueryExpr -> ^( SUBSELECT_GROUP_EXPR subQueryExpr ) )
+            // EsperEPL2Grammar.g:918:4: subQueryExpr
             {
             pushFollow(FOLLOW_subQueryExpr_in_subSelectGroupExpression5293);
             subQueryExpr270=subQueryExpr();
@@ -11038,9 +11039,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 918:3: -> ^( SUBSELECT_GROUP_EXPR subQueryExpr )
+            // 919:3: -> ^( SUBSELECT_GROUP_EXPR subQueryExpr )
             {
-                // EsperEPL2Grammar.g:918:6: ^( SUBSELECT_GROUP_EXPR subQueryExpr )
+                // EsperEPL2Grammar.g:919:6: ^( SUBSELECT_GROUP_EXPR subQueryExpr )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SUBSELECT_GROUP_EXPR, "SUBSELECT_GROUP_EXPR"), root_1);
@@ -11079,7 +11080,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "existsSubSelectExpression"
-    // EsperEPL2Grammar.g:921:1: existsSubSelectExpression : EXISTS subQueryExpr -> ^( EXISTS_SUBSELECT_EXPR subQueryExpr ) ;
+    // EsperEPL2Grammar.g:922:1: existsSubSelectExpression : EXISTS subQueryExpr -> ^( EXISTS_SUBSELECT_EXPR subQueryExpr ) ;
     public final EsperEPL2GrammarParser.existsSubSelectExpression_return existsSubSelectExpression() throws RecognitionException {
         EsperEPL2GrammarParser.existsSubSelectExpression_return retval = new EsperEPL2GrammarParser.existsSubSelectExpression_return();
         retval.start = input.LT(1);
@@ -11094,8 +11095,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_EXISTS=new RewriteRuleTokenStream(adaptor,"token EXISTS");
         RewriteRuleSubtreeStream stream_subQueryExpr=new RewriteRuleSubtreeStream(adaptor,"rule subQueryExpr");
         try {
-            // EsperEPL2Grammar.g:922:2: ( EXISTS subQueryExpr -> ^( EXISTS_SUBSELECT_EXPR subQueryExpr ) )
-            // EsperEPL2Grammar.g:922:4: EXISTS subQueryExpr
+            // EsperEPL2Grammar.g:923:2: ( EXISTS subQueryExpr -> ^( EXISTS_SUBSELECT_EXPR subQueryExpr ) )
+            // EsperEPL2Grammar.g:923:4: EXISTS subQueryExpr
             {
             EXISTS271=(Token)match(input,EXISTS,FOLLOW_EXISTS_in_existsSubSelectExpression5315); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_EXISTS.add(EXISTS271);
@@ -11119,9 +11120,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 923:3: -> ^( EXISTS_SUBSELECT_EXPR subQueryExpr )
+            // 924:3: -> ^( EXISTS_SUBSELECT_EXPR subQueryExpr )
             {
-                // EsperEPL2Grammar.g:923:6: ^( EXISTS_SUBSELECT_EXPR subQueryExpr )
+                // EsperEPL2Grammar.g:924:6: ^( EXISTS_SUBSELECT_EXPR subQueryExpr )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EXISTS_SUBSELECT_EXPR, "EXISTS_SUBSELECT_EXPR"), root_1);
@@ -11160,7 +11161,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "subQueryExpr"
-    // EsperEPL2Grammar.g:926:1: subQueryExpr : LPAREN SELECT selectionListElement FROM subSelectFilterExpr ( WHERE whereClause )? RPAREN ;
+    // EsperEPL2Grammar.g:927:1: subQueryExpr : LPAREN SELECT selectionListElement FROM subSelectFilterExpr ( WHERE whereClause )? RPAREN ;
     public final EsperEPL2GrammarParser.subQueryExpr_return subQueryExpr() throws RecognitionException {
         EsperEPL2GrammarParser.subQueryExpr_return retval = new EsperEPL2GrammarParser.subQueryExpr_return();
         retval.start = input.LT(1);
@@ -11187,8 +11188,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
          paraphrases.push("subquery"); 
         try {
-            // EsperEPL2Grammar.g:929:2: ( LPAREN SELECT selectionListElement FROM subSelectFilterExpr ( WHERE whereClause )? RPAREN )
-            // EsperEPL2Grammar.g:929:4: LPAREN SELECT selectionListElement FROM subSelectFilterExpr ( WHERE whereClause )? RPAREN
+            // EsperEPL2Grammar.g:930:2: ( LPAREN SELECT selectionListElement FROM subSelectFilterExpr ( WHERE whereClause )? RPAREN )
+            // EsperEPL2Grammar.g:930:4: LPAREN SELECT selectionListElement FROM subSelectFilterExpr ( WHERE whereClause )? RPAREN
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -11207,7 +11208,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, subSelectFilterExpr277.getTree());
-            // EsperEPL2Grammar.g:932:6: ( WHERE whereClause )?
+            // EsperEPL2Grammar.g:933:6: ( WHERE whereClause )?
             int alt110=2;
             int LA110_0 = input.LA(1);
 
@@ -11216,7 +11217,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt110) {
                 case 1 :
-                    // EsperEPL2Grammar.g:932:7: WHERE whereClause
+                    // EsperEPL2Grammar.g:933:7: WHERE whereClause
                     {
                     WHERE278=(Token)match(input,WHERE,FOLLOW_WHERE_in_subQueryExpr5377); if (state.failed) return retval;
                     pushFollow(FOLLOW_whereClause_in_subQueryExpr5380);
@@ -11262,7 +11263,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "subSelectFilterExpr"
-    // EsperEPL2Grammar.g:936:1: subSelectFilterExpr : eventFilterExpression ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? ) ;
+    // EsperEPL2Grammar.g:937:1: subSelectFilterExpr : eventFilterExpression ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? ) ;
     public final EsperEPL2GrammarParser.subSelectFilterExpr_return subSelectFilterExpr() throws RecognitionException {
         EsperEPL2GrammarParser.subSelectFilterExpr_return retval = new EsperEPL2GrammarParser.subSelectFilterExpr_return();
         retval.start = input.LT(1);
@@ -11297,8 +11298,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_eventFilterExpression=new RewriteRuleSubtreeStream(adaptor,"rule eventFilterExpression");
          paraphrases.push("subquery filter specification"); 
         try {
-            // EsperEPL2Grammar.g:939:2: ( eventFilterExpression ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? ) )
-            // EsperEPL2Grammar.g:939:4: eventFilterExpression ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (ru= RETAINUNION | ri= RETAININTERSECTION )?
+            // EsperEPL2Grammar.g:940:2: ( eventFilterExpression ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (ru= RETAINUNION | ri= RETAININTERSECTION )? -> ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? ) )
+            // EsperEPL2Grammar.g:940:4: eventFilterExpression ( DOT viewExpression ( DOT viewExpression )* )? ( AS i= IDENT | i= IDENT )? (ru= RETAINUNION | ri= RETAININTERSECTION )?
             {
             pushFollow(FOLLOW_eventFilterExpression_in_subSelectFilterExpr5413);
             eventFilterExpression281=eventFilterExpression();
@@ -11306,7 +11307,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_eventFilterExpression.add(eventFilterExpression281.getTree());
-            // EsperEPL2Grammar.g:940:3: ( DOT viewExpression ( DOT viewExpression )* )?
+            // EsperEPL2Grammar.g:941:3: ( DOT viewExpression ( DOT viewExpression )* )?
             int alt112=2;
             int LA112_0 = input.LA(1);
 
@@ -11315,7 +11316,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt112) {
                 case 1 :
-                    // EsperEPL2Grammar.g:940:4: DOT viewExpression ( DOT viewExpression )*
+                    // EsperEPL2Grammar.g:941:4: DOT viewExpression ( DOT viewExpression )*
                     {
                     DOT282=(Token)match(input,DOT,FOLLOW_DOT_in_subSelectFilterExpr5418); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DOT.add(DOT282);
@@ -11326,7 +11327,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_viewExpression.add(viewExpression283.getTree());
-                    // EsperEPL2Grammar.g:940:23: ( DOT viewExpression )*
+                    // EsperEPL2Grammar.g:941:23: ( DOT viewExpression )*
                     loop111:
                     do {
                         int alt111=2;
@@ -11339,7 +11340,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt111) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:940:24: DOT viewExpression
+                    	    // EsperEPL2Grammar.g:941:24: DOT viewExpression
                     	    {
                     	    DOT284=(Token)match(input,DOT,FOLLOW_DOT_in_subSelectFilterExpr5423); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_DOT.add(DOT284);
@@ -11365,7 +11366,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:940:47: ( AS i= IDENT | i= IDENT )?
+            // EsperEPL2Grammar.g:941:47: ( AS i= IDENT | i= IDENT )?
             int alt113=3;
             int LA113_0 = input.LA(1);
 
@@ -11377,7 +11378,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt113) {
                 case 1 :
-                    // EsperEPL2Grammar.g:940:48: AS i= IDENT
+                    // EsperEPL2Grammar.g:941:48: AS i= IDENT
                     {
                     AS286=(Token)match(input,AS,FOLLOW_AS_in_subSelectFilterExpr5432); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS286);
@@ -11389,7 +11390,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:940:61: i= IDENT
+                    // EsperEPL2Grammar.g:941:61: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_subSelectFilterExpr5442); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -11400,7 +11401,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:940:71: (ru= RETAINUNION | ri= RETAININTERSECTION )?
+            // EsperEPL2Grammar.g:941:71: (ru= RETAINUNION | ri= RETAININTERSECTION )?
             int alt114=3;
             int LA114_0 = input.LA(1);
 
@@ -11412,7 +11413,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt114) {
                 case 1 :
-                    // EsperEPL2Grammar.g:940:72: ru= RETAINUNION
+                    // EsperEPL2Grammar.g:941:72: ru= RETAINUNION
                     {
                     ru=(Token)match(input,RETAINUNION,FOLLOW_RETAINUNION_in_subSelectFilterExpr5449); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RETAINUNION.add(ru);
@@ -11421,7 +11422,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:940:87: ri= RETAININTERSECTION
+                    // EsperEPL2Grammar.g:941:87: ri= RETAININTERSECTION
                     {
                     ri=(Token)match(input,RETAININTERSECTION,FOLLOW_RETAININTERSECTION_in_subSelectFilterExpr5453); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RETAININTERSECTION.add(ri);
@@ -11435,7 +11436,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: ri, ru, viewExpression, eventFilterExpression, i
+            // elements: ru, viewExpression, ri, i, eventFilterExpression
             // token labels: ri, ru, i
             // rule labels: retval
             // token list labels: 
@@ -11448,33 +11449,33 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 941:3: -> ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? )
+            // 942:3: -> ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? )
             {
-                // EsperEPL2Grammar.g:941:6: ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? )
+                // EsperEPL2Grammar.g:942:6: ^( STREAM_EXPR eventFilterExpression ( viewExpression )* ( $i)? ( $ru)? ( $ri)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(STREAM_EXPR, "STREAM_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_eventFilterExpression.nextTree());
-                // EsperEPL2Grammar.g:941:42: ( viewExpression )*
+                // EsperEPL2Grammar.g:942:42: ( viewExpression )*
                 while ( stream_viewExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_viewExpression.nextTree());
 
                 }
                 stream_viewExpression.reset();
-                // EsperEPL2Grammar.g:941:58: ( $i)?
+                // EsperEPL2Grammar.g:942:58: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
                 }
                 stream_i.reset();
-                // EsperEPL2Grammar.g:941:62: ( $ru)?
+                // EsperEPL2Grammar.g:942:62: ( $ru)?
                 if ( stream_ru.hasNext() ) {
                     adaptor.addChild(root_1, stream_ru.nextNode());
 
                 }
                 stream_ru.reset();
-                // EsperEPL2Grammar.g:941:67: ( $ri)?
+                // EsperEPL2Grammar.g:942:67: ( $ri)?
                 if ( stream_ri.hasNext() ) {
                     adaptor.addChild(root_1, stream_ri.nextNode());
 
@@ -11516,7 +11517,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "arrayExpression"
-    // EsperEPL2Grammar.g:944:1: arrayExpression : LCURLY ( expression ( COMMA expression )* )? RCURLY -> ^( ARRAY_EXPR ( expression )* ) ;
+    // EsperEPL2Grammar.g:945:1: arrayExpression : LCURLY ( expression ( COMMA expression )* )? RCURLY -> ^( ARRAY_EXPR ( expression )* ) ;
     public final EsperEPL2GrammarParser.arrayExpression_return arrayExpression() throws RecognitionException {
         EsperEPL2GrammarParser.arrayExpression_return retval = new EsperEPL2GrammarParser.arrayExpression_return();
         retval.start = input.LT(1);
@@ -11539,13 +11540,13 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_RCURLY=new RewriteRuleTokenStream(adaptor,"token RCURLY");
         RewriteRuleSubtreeStream stream_expression=new RewriteRuleSubtreeStream(adaptor,"rule expression");
         try {
-            // EsperEPL2Grammar.g:945:2: ( LCURLY ( expression ( COMMA expression )* )? RCURLY -> ^( ARRAY_EXPR ( expression )* ) )
-            // EsperEPL2Grammar.g:945:4: LCURLY ( expression ( COMMA expression )* )? RCURLY
+            // EsperEPL2Grammar.g:946:2: ( LCURLY ( expression ( COMMA expression )* )? RCURLY -> ^( ARRAY_EXPR ( expression )* ) )
+            // EsperEPL2Grammar.g:946:4: LCURLY ( expression ( COMMA expression )* )? RCURLY
             {
             LCURLY287=(Token)match(input,LCURLY,FOLLOW_LCURLY_in_arrayExpression5493); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LCURLY.add(LCURLY287);
 
-            // EsperEPL2Grammar.g:945:11: ( expression ( COMMA expression )* )?
+            // EsperEPL2Grammar.g:946:11: ( expression ( COMMA expression )* )?
             int alt116=2;
             int LA116_0 = input.LA(1);
 
@@ -11554,7 +11555,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt116) {
                 case 1 :
-                    // EsperEPL2Grammar.g:945:12: expression ( COMMA expression )*
+                    // EsperEPL2Grammar.g:946:12: expression ( COMMA expression )*
                     {
                     pushFollow(FOLLOW_expression_in_arrayExpression5496);
                     expression288=expression();
@@ -11562,7 +11563,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_expression.add(expression288.getTree());
-                    // EsperEPL2Grammar.g:945:23: ( COMMA expression )*
+                    // EsperEPL2Grammar.g:946:23: ( COMMA expression )*
                     loop115:
                     do {
                         int alt115=2;
@@ -11575,7 +11576,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt115) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:945:24: COMMA expression
+                    	    // EsperEPL2Grammar.g:946:24: COMMA expression
                     	    {
                     	    COMMA289=(Token)match(input,COMMA,FOLLOW_COMMA_in_arrayExpression5499); if (state.failed) return retval; 
                     	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA289);
@@ -11617,14 +11618,14 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 946:4: -> ^( ARRAY_EXPR ( expression )* )
+            // 947:4: -> ^( ARRAY_EXPR ( expression )* )
             {
-                // EsperEPL2Grammar.g:946:7: ^( ARRAY_EXPR ( expression )* )
+                // EsperEPL2Grammar.g:947:7: ^( ARRAY_EXPR ( expression )* )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(ARRAY_EXPR, "ARRAY_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:946:20: ( expression )*
+                // EsperEPL2Grammar.g:947:20: ( expression )*
                 while ( stream_expression.hasNext() ) {
                     adaptor.addChild(root_1, stream_expression.nextTree());
 
@@ -11663,7 +11664,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "builtinFunc"
-    // EsperEPL2Grammar.g:949:1: builtinFunc : ( SUM LPAREN ( ALL | DISTINCT )? expression RPAREN | AVG LPAREN ( ALL | DISTINCT )? expression RPAREN | COUNT LPAREN ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) ) RPAREN | MEDIAN LPAREN ( ALL | DISTINCT )? expression RPAREN | STDDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | AVEDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | COALESCE LPAREN expression COMMA expression ( COMMA expression )* RPAREN | PREVIOUS LPAREN expression COMMA eventProperty RPAREN | PRIOR LPAREN NUM_INT COMMA eventProperty RPAREN | INSTANCEOF LPAREN expression COMMA classIdentifier ( COMMA classIdentifier )* RPAREN | CAST LPAREN expression ( COMMA | AS ) classIdentifier RPAREN | EXISTS LPAREN eventProperty RPAREN | CURRENT_TIMESTAMP ( LPAREN RPAREN )? );
+    // EsperEPL2Grammar.g:950:1: builtinFunc : ( SUM LPAREN ( ALL | DISTINCT )? expression RPAREN | AVG LPAREN ( ALL | DISTINCT )? expression RPAREN | COUNT LPAREN ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) ) RPAREN | MEDIAN LPAREN ( ALL | DISTINCT )? expression RPAREN | STDDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | AVEDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | COALESCE LPAREN expression COMMA expression ( COMMA expression )* RPAREN | PREVIOUS LPAREN expression COMMA eventProperty RPAREN | PRIOR LPAREN NUM_INT COMMA eventProperty RPAREN | INSTANCEOF LPAREN expression COMMA classIdentifier ( COMMA classIdentifier )* RPAREN | CAST LPAREN expression ( COMMA | AS ) classIdentifier RPAREN | EXISTS LPAREN eventProperty RPAREN | CURRENT_TIMESTAMP ( LPAREN RPAREN )? );
     public final EsperEPL2GrammarParser.builtinFunc_return builtinFunc() throws RecognitionException {
         EsperEPL2GrammarParser.builtinFunc_return retval = new EsperEPL2GrammarParser.builtinFunc_return();
         retval.start = input.LT(1);
@@ -11831,7 +11832,7 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree RPAREN370_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:950:2: ( SUM LPAREN ( ALL | DISTINCT )? expression RPAREN | AVG LPAREN ( ALL | DISTINCT )? expression RPAREN | COUNT LPAREN ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) ) RPAREN | MEDIAN LPAREN ( ALL | DISTINCT )? expression RPAREN | STDDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | AVEDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | COALESCE LPAREN expression COMMA expression ( COMMA expression )* RPAREN | PREVIOUS LPAREN expression COMMA eventProperty RPAREN | PRIOR LPAREN NUM_INT COMMA eventProperty RPAREN | INSTANCEOF LPAREN expression COMMA classIdentifier ( COMMA classIdentifier )* RPAREN | CAST LPAREN expression ( COMMA | AS ) classIdentifier RPAREN | EXISTS LPAREN eventProperty RPAREN | CURRENT_TIMESTAMP ( LPAREN RPAREN )? )
+            // EsperEPL2Grammar.g:951:2: ( SUM LPAREN ( ALL | DISTINCT )? expression RPAREN | AVG LPAREN ( ALL | DISTINCT )? expression RPAREN | COUNT LPAREN ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) ) RPAREN | MEDIAN LPAREN ( ALL | DISTINCT )? expression RPAREN | STDDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | AVEDEV LPAREN ( ALL | DISTINCT )? expression RPAREN | COALESCE LPAREN expression COMMA expression ( COMMA expression )* RPAREN | PREVIOUS LPAREN expression COMMA eventProperty RPAREN | PRIOR LPAREN NUM_INT COMMA eventProperty RPAREN | INSTANCEOF LPAREN expression COMMA classIdentifier ( COMMA classIdentifier )* RPAREN | CAST LPAREN expression ( COMMA | AS ) classIdentifier RPAREN | EXISTS LPAREN eventProperty RPAREN | CURRENT_TIMESTAMP ( LPAREN RPAREN )? )
             int alt128=13;
             switch ( input.LA(1) ) {
             case SUM:
@@ -11909,7 +11910,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt128) {
                 case 1 :
-                    // EsperEPL2Grammar.g:950:4: SUM LPAREN ( ALL | DISTINCT )? expression RPAREN
+                    // EsperEPL2Grammar.g:951:4: SUM LPAREN ( ALL | DISTINCT )? expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -11919,7 +11920,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     root_0 = (CommonTree)adaptor.becomeRoot(SUM292_tree, root_0);
                     }
                     LPAREN293=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5534); if (state.failed) return retval;
-                    // EsperEPL2Grammar.g:950:17: ( ALL | DISTINCT )?
+                    // EsperEPL2Grammar.g:951:17: ( ALL | DISTINCT )?
                     int alt117=3;
                     int LA117_0 = input.LA(1);
 
@@ -11931,14 +11932,14 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt117) {
                         case 1 :
-                            // EsperEPL2Grammar.g:950:18: ALL
+                            // EsperEPL2Grammar.g:951:18: ALL
                             {
                             ALL294=(Token)match(input,ALL,FOLLOW_ALL_in_builtinFunc5538); if (state.failed) return retval;
 
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:950:25: DISTINCT
+                            // EsperEPL2Grammar.g:951:25: DISTINCT
                             {
                             DISTINCT295=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_builtinFunc5543); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
@@ -11962,7 +11963,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:951:4: AVG LPAREN ( ALL | DISTINCT )? expression RPAREN
+                    // EsperEPL2Grammar.g:952:4: AVG LPAREN ( ALL | DISTINCT )? expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -11972,7 +11973,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     root_0 = (CommonTree)adaptor.becomeRoot(AVG298_tree, root_0);
                     }
                     LPAREN299=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5558); if (state.failed) return retval;
-                    // EsperEPL2Grammar.g:951:17: ( ALL | DISTINCT )?
+                    // EsperEPL2Grammar.g:952:17: ( ALL | DISTINCT )?
                     int alt118=3;
                     int LA118_0 = input.LA(1);
 
@@ -11984,14 +11985,14 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt118) {
                         case 1 :
-                            // EsperEPL2Grammar.g:951:18: ALL
+                            // EsperEPL2Grammar.g:952:18: ALL
                             {
                             ALL300=(Token)match(input,ALL,FOLLOW_ALL_in_builtinFunc5562); if (state.failed) return retval;
 
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:951:25: DISTINCT
+                            // EsperEPL2Grammar.g:952:25: DISTINCT
                             {
                             DISTINCT301=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_builtinFunc5567); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
@@ -12015,7 +12016,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:952:4: COUNT LPAREN ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) ) RPAREN
+                    // EsperEPL2Grammar.g:953:4: COUNT LPAREN ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) ) RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12025,7 +12026,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     root_0 = (CommonTree)adaptor.becomeRoot(COUNT304_tree, root_0);
                     }
                     LPAREN305=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5582); if (state.failed) return retval;
-                    // EsperEPL2Grammar.g:953:3: ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) )
+                    // EsperEPL2Grammar.g:954:3: ( ( ( ALL | DISTINCT )? expression ) | ( STAR ) )
                     int alt120=2;
                     int LA120_0 = input.LA(1);
 
@@ -12044,12 +12045,12 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt120) {
                         case 1 :
-                            // EsperEPL2Grammar.g:954:4: ( ( ALL | DISTINCT )? expression )
+                            // EsperEPL2Grammar.g:955:4: ( ( ALL | DISTINCT )? expression )
                             {
-                            // EsperEPL2Grammar.g:954:4: ( ( ALL | DISTINCT )? expression )
-                            // EsperEPL2Grammar.g:954:5: ( ALL | DISTINCT )? expression
+                            // EsperEPL2Grammar.g:955:4: ( ( ALL | DISTINCT )? expression )
+                            // EsperEPL2Grammar.g:955:5: ( ALL | DISTINCT )? expression
                             {
-                            // EsperEPL2Grammar.g:954:5: ( ALL | DISTINCT )?
+                            // EsperEPL2Grammar.g:955:5: ( ALL | DISTINCT )?
                             int alt119=3;
                             int LA119_0 = input.LA(1);
 
@@ -12061,14 +12062,14 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt119) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:954:6: ALL
+                                    // EsperEPL2Grammar.g:955:6: ALL
                                     {
                                     ALL306=(Token)match(input,ALL,FOLLOW_ALL_in_builtinFunc5594); if (state.failed) return retval;
 
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:954:13: DISTINCT
+                                    // EsperEPL2Grammar.g:955:13: DISTINCT
                                     {
                                     DISTINCT307=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_builtinFunc5599); if (state.failed) return retval;
                                     if ( state.backtracking==0 ) {
@@ -12094,10 +12095,10 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:956:4: ( STAR )
+                            // EsperEPL2Grammar.g:957:4: ( STAR )
                             {
-                            // EsperEPL2Grammar.g:956:4: ( STAR )
-                            // EsperEPL2Grammar.g:956:5: STAR
+                            // EsperEPL2Grammar.g:957:4: ( STAR )
+                            // EsperEPL2Grammar.g:957:5: STAR
                             {
                             STAR309=(Token)match(input,STAR,FOLLOW_STAR_in_builtinFunc5614); if (state.failed) return retval;
 
@@ -12114,7 +12115,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:959:4: MEDIAN LPAREN ( ALL | DISTINCT )? expression RPAREN
+                    // EsperEPL2Grammar.g:960:4: MEDIAN LPAREN ( ALL | DISTINCT )? expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12124,7 +12125,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     root_0 = (CommonTree)adaptor.becomeRoot(MEDIAN311_tree, root_0);
                     }
                     LPAREN312=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5634); if (state.failed) return retval;
-                    // EsperEPL2Grammar.g:959:20: ( ALL | DISTINCT )?
+                    // EsperEPL2Grammar.g:960:20: ( ALL | DISTINCT )?
                     int alt121=3;
                     int LA121_0 = input.LA(1);
 
@@ -12136,14 +12137,14 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt121) {
                         case 1 :
-                            // EsperEPL2Grammar.g:959:21: ALL
+                            // EsperEPL2Grammar.g:960:21: ALL
                             {
                             ALL313=(Token)match(input,ALL,FOLLOW_ALL_in_builtinFunc5638); if (state.failed) return retval;
 
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:959:28: DISTINCT
+                            // EsperEPL2Grammar.g:960:28: DISTINCT
                             {
                             DISTINCT314=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_builtinFunc5643); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
@@ -12167,7 +12168,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:960:4: STDDEV LPAREN ( ALL | DISTINCT )? expression RPAREN
+                    // EsperEPL2Grammar.g:961:4: STDDEV LPAREN ( ALL | DISTINCT )? expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12177,7 +12178,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     root_0 = (CommonTree)adaptor.becomeRoot(STDDEV317_tree, root_0);
                     }
                     LPAREN318=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5658); if (state.failed) return retval;
-                    // EsperEPL2Grammar.g:960:20: ( ALL | DISTINCT )?
+                    // EsperEPL2Grammar.g:961:20: ( ALL | DISTINCT )?
                     int alt122=3;
                     int LA122_0 = input.LA(1);
 
@@ -12189,14 +12190,14 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt122) {
                         case 1 :
-                            // EsperEPL2Grammar.g:960:21: ALL
+                            // EsperEPL2Grammar.g:961:21: ALL
                             {
                             ALL319=(Token)match(input,ALL,FOLLOW_ALL_in_builtinFunc5662); if (state.failed) return retval;
 
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:960:28: DISTINCT
+                            // EsperEPL2Grammar.g:961:28: DISTINCT
                             {
                             DISTINCT320=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_builtinFunc5667); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
@@ -12220,7 +12221,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // EsperEPL2Grammar.g:961:4: AVEDEV LPAREN ( ALL | DISTINCT )? expression RPAREN
+                    // EsperEPL2Grammar.g:962:4: AVEDEV LPAREN ( ALL | DISTINCT )? expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12230,7 +12231,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     root_0 = (CommonTree)adaptor.becomeRoot(AVEDEV323_tree, root_0);
                     }
                     LPAREN324=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5682); if (state.failed) return retval;
-                    // EsperEPL2Grammar.g:961:20: ( ALL | DISTINCT )?
+                    // EsperEPL2Grammar.g:962:20: ( ALL | DISTINCT )?
                     int alt123=3;
                     int LA123_0 = input.LA(1);
 
@@ -12242,14 +12243,14 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt123) {
                         case 1 :
-                            // EsperEPL2Grammar.g:961:21: ALL
+                            // EsperEPL2Grammar.g:962:21: ALL
                             {
                             ALL325=(Token)match(input,ALL,FOLLOW_ALL_in_builtinFunc5686); if (state.failed) return retval;
 
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:961:28: DISTINCT
+                            // EsperEPL2Grammar.g:962:28: DISTINCT
                             {
                             DISTINCT326=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_builtinFunc5691); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
@@ -12273,7 +12274,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 7 :
-                    // EsperEPL2Grammar.g:962:4: COALESCE LPAREN expression COMMA expression ( COMMA expression )* RPAREN
+                    // EsperEPL2Grammar.g:963:4: COALESCE LPAREN expression COMMA expression ( COMMA expression )* RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12296,7 +12297,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, expression333.getTree());
-                    // EsperEPL2Grammar.g:962:51: ( COMMA expression )*
+                    // EsperEPL2Grammar.g:963:51: ( COMMA expression )*
                     loop124:
                     do {
                         int alt124=2;
@@ -12309,7 +12310,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt124) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:962:52: COMMA expression
+                    	    // EsperEPL2Grammar.g:963:52: COMMA expression
                     	    {
                     	    COMMA334=(Token)match(input,COMMA,FOLLOW_COMMA_in_builtinFunc5717); if (state.failed) return retval;
                     	    pushFollow(FOLLOW_expression_in_builtinFunc5720);
@@ -12332,7 +12333,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 8 :
-                    // EsperEPL2Grammar.g:963:4: PREVIOUS LPAREN expression COMMA eventProperty RPAREN
+                    // EsperEPL2Grammar.g:964:4: PREVIOUS LPAREN expression COMMA eventProperty RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12360,7 +12361,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 9 :
-                    // EsperEPL2Grammar.g:964:4: PRIOR LPAREN NUM_INT COMMA eventProperty RPAREN
+                    // EsperEPL2Grammar.g:965:4: PRIOR LPAREN NUM_INT COMMA eventProperty RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12387,7 +12388,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 10 :
-                    // EsperEPL2Grammar.g:967:4: INSTANCEOF LPAREN expression COMMA classIdentifier ( COMMA classIdentifier )* RPAREN
+                    // EsperEPL2Grammar.g:968:4: INSTANCEOF LPAREN expression COMMA classIdentifier ( COMMA classIdentifier )* RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12410,7 +12411,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, classIdentifier353.getTree());
-                    // EsperEPL2Grammar.g:967:58: ( COMMA classIdentifier )*
+                    // EsperEPL2Grammar.g:968:58: ( COMMA classIdentifier )*
                     loop125:
                     do {
                         int alt125=2;
@@ -12423,7 +12424,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt125) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:967:59: COMMA classIdentifier
+                    	    // EsperEPL2Grammar.g:968:59: COMMA classIdentifier
                     	    {
                     	    COMMA354=(Token)match(input,COMMA,FOLLOW_COMMA_in_builtinFunc5786); if (state.failed) return retval;
                     	    pushFollow(FOLLOW_classIdentifier_in_builtinFunc5789);
@@ -12446,7 +12447,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 11 :
-                    // EsperEPL2Grammar.g:968:4: CAST LPAREN expression ( COMMA | AS ) classIdentifier RPAREN
+                    // EsperEPL2Grammar.g:969:4: CAST LPAREN expression ( COMMA | AS ) classIdentifier RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12462,7 +12463,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, expression359.getTree());
-                    // EsperEPL2Grammar.g:968:29: ( COMMA | AS )
+                    // EsperEPL2Grammar.g:969:29: ( COMMA | AS )
                     int alt126=2;
                     int LA126_0 = input.LA(1);
 
@@ -12481,14 +12482,14 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt126) {
                         case 1 :
-                            // EsperEPL2Grammar.g:968:30: COMMA
+                            // EsperEPL2Grammar.g:969:30: COMMA
                             {
                             COMMA360=(Token)match(input,COMMA,FOLLOW_COMMA_in_builtinFunc5808); if (state.failed) return retval;
 
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:968:39: AS
+                            // EsperEPL2Grammar.g:969:39: AS
                             {
                             AS361=(Token)match(input,AS,FOLLOW_AS_in_builtinFunc5813); if (state.failed) return retval;
 
@@ -12508,7 +12509,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 12 :
-                    // EsperEPL2Grammar.g:969:4: EXISTS LPAREN eventProperty RPAREN
+                    // EsperEPL2Grammar.g:970:4: EXISTS LPAREN eventProperty RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12529,7 +12530,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 13 :
-                    // EsperEPL2Grammar.g:970:4: CURRENT_TIMESTAMP ( LPAREN RPAREN )?
+                    // EsperEPL2Grammar.g:971:4: CURRENT_TIMESTAMP ( LPAREN RPAREN )?
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12538,7 +12539,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     CURRENT_TIMESTAMP368_tree = (CommonTree)adaptor.create(CURRENT_TIMESTAMP368);
                     root_0 = (CommonTree)adaptor.becomeRoot(CURRENT_TIMESTAMP368_tree, root_0);
                     }
-                    // EsperEPL2Grammar.g:970:23: ( LPAREN RPAREN )?
+                    // EsperEPL2Grammar.g:971:23: ( LPAREN RPAREN )?
                     int alt127=2;
                     int LA127_0 = input.LA(1);
 
@@ -12547,7 +12548,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt127) {
                         case 1 :
-                            // EsperEPL2Grammar.g:970:24: LPAREN RPAREN
+                            // EsperEPL2Grammar.g:971:24: LPAREN RPAREN
                             {
                             LPAREN369=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_builtinFunc5843); if (state.failed) return retval;
                             RPAREN370=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_builtinFunc5846); if (state.failed) return retval;
@@ -12586,7 +12587,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "maxFunc"
-    // EsperEPL2Grammar.g:973:1: maxFunc : ( MAX | MIN ) LPAREN expression ( COMMA expression ( COMMA expression )* )? RPAREN ;
+    // EsperEPL2Grammar.g:974:1: maxFunc : ( MAX | MIN ) LPAREN expression ( COMMA expression ( COMMA expression )* )? RPAREN ;
     public final EsperEPL2GrammarParser.maxFunc_return maxFunc() throws RecognitionException {
         EsperEPL2GrammarParser.maxFunc_return retval = new EsperEPL2GrammarParser.maxFunc_return();
         retval.start = input.LT(1);
@@ -12614,12 +12615,12 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree RPAREN379_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:974:2: ( ( MAX | MIN ) LPAREN expression ( COMMA expression ( COMMA expression )* )? RPAREN )
-            // EsperEPL2Grammar.g:974:4: ( MAX | MIN ) LPAREN expression ( COMMA expression ( COMMA expression )* )? RPAREN
+            // EsperEPL2Grammar.g:975:2: ( ( MAX | MIN ) LPAREN expression ( COMMA expression ( COMMA expression )* )? RPAREN )
+            // EsperEPL2Grammar.g:975:4: ( MAX | MIN ) LPAREN expression ( COMMA expression ( COMMA expression )* )? RPAREN
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:974:4: ( MAX | MIN )
+            // EsperEPL2Grammar.g:975:4: ( MAX | MIN )
             int alt129=2;
             int LA129_0 = input.LA(1);
 
@@ -12638,7 +12639,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt129) {
                 case 1 :
-                    // EsperEPL2Grammar.g:974:5: MAX
+                    // EsperEPL2Grammar.g:975:5: MAX
                     {
                     MAX371=(Token)match(input,MAX,FOLLOW_MAX_in_maxFunc5862); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
@@ -12649,7 +12650,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:974:12: MIN
+                    // EsperEPL2Grammar.g:975:12: MIN
                     {
                     MIN372=(Token)match(input,MIN,FOLLOW_MIN_in_maxFunc5867); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
@@ -12669,7 +12670,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, expression374.getTree());
-            // EsperEPL2Grammar.g:974:37: ( COMMA expression ( COMMA expression )* )?
+            // EsperEPL2Grammar.g:975:37: ( COMMA expression ( COMMA expression )* )?
             int alt131=2;
             int LA131_0 = input.LA(1);
 
@@ -12678,7 +12679,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt131) {
                 case 1 :
-                    // EsperEPL2Grammar.g:974:38: COMMA expression ( COMMA expression )*
+                    // EsperEPL2Grammar.g:975:38: COMMA expression ( COMMA expression )*
                     {
                     COMMA375=(Token)match(input,COMMA,FOLLOW_COMMA_in_maxFunc5877); if (state.failed) return retval;
                     pushFollow(FOLLOW_expression_in_maxFunc5880);
@@ -12687,7 +12688,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, expression376.getTree());
-                    // EsperEPL2Grammar.g:974:56: ( COMMA expression )*
+                    // EsperEPL2Grammar.g:975:56: ( COMMA expression )*
                     loop130:
                     do {
                         int alt130=2;
@@ -12700,7 +12701,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                         switch (alt130) {
                     	case 1 :
-                    	    // EsperEPL2Grammar.g:974:57: COMMA expression
+                    	    // EsperEPL2Grammar.g:975:57: COMMA expression
                     	    {
                     	    COMMA377=(Token)match(input,COMMA,FOLLOW_COMMA_in_maxFunc5883); if (state.failed) return retval;
                     	    pushFollow(FOLLOW_expression_in_maxFunc5886);
@@ -12752,7 +12753,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "eventPropertyOrLibFunction"
-    // EsperEPL2Grammar.g:977:1: eventPropertyOrLibFunction : ( ( eventProperty )=> eventProperty | libFunction );
+    // EsperEPL2Grammar.g:978:1: eventPropertyOrLibFunction : ( ( eventProperty )=> eventProperty | libFunction );
     public final EsperEPL2GrammarParser.eventPropertyOrLibFunction_return eventPropertyOrLibFunction() throws RecognitionException {
         EsperEPL2GrammarParser.eventPropertyOrLibFunction_return retval = new EsperEPL2GrammarParser.eventPropertyOrLibFunction_return();
         retval.start = input.LT(1);
@@ -12766,12 +12767,12 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:978:2: ( ( eventProperty )=> eventProperty | libFunction )
+            // EsperEPL2Grammar.g:979:2: ( ( eventProperty )=> eventProperty | libFunction )
             int alt132=2;
             alt132 = dfa132.predict(input);
             switch (alt132) {
                 case 1 :
-                    // EsperEPL2Grammar.g:978:4: ( eventProperty )=> eventProperty
+                    // EsperEPL2Grammar.g:979:4: ( eventProperty )=> eventProperty
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12785,7 +12786,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:979:4: libFunction
+                    // EsperEPL2Grammar.g:980:4: libFunction
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -12824,7 +12825,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "libFunction"
-    // EsperEPL2Grammar.g:982:1: libFunction : ( classIdentifierNonGreedy DOT )? funcIdent LPAREN ( libFunctionArgs )? RPAREN -> ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? ) ;
+    // EsperEPL2Grammar.g:983:1: libFunction : ( classIdentifierNonGreedy DOT )? funcIdent LPAREN ( libFunctionArgs )? RPAREN -> ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? ) ;
     public final EsperEPL2GrammarParser.libFunction_return libFunction() throws RecognitionException {
         EsperEPL2GrammarParser.libFunction_return retval = new EsperEPL2GrammarParser.libFunction_return();
         retval.start = input.LT(1);
@@ -12851,10 +12852,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_classIdentifierNonGreedy=new RewriteRuleSubtreeStream(adaptor,"rule classIdentifierNonGreedy");
         RewriteRuleSubtreeStream stream_funcIdent=new RewriteRuleSubtreeStream(adaptor,"rule funcIdent");
         try {
-            // EsperEPL2Grammar.g:983:2: ( ( classIdentifierNonGreedy DOT )? funcIdent LPAREN ( libFunctionArgs )? RPAREN -> ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? ) )
-            // EsperEPL2Grammar.g:983:4: ( classIdentifierNonGreedy DOT )? funcIdent LPAREN ( libFunctionArgs )? RPAREN
+            // EsperEPL2Grammar.g:984:2: ( ( classIdentifierNonGreedy DOT )? funcIdent LPAREN ( libFunctionArgs )? RPAREN -> ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? ) )
+            // EsperEPL2Grammar.g:984:4: ( classIdentifierNonGreedy DOT )? funcIdent LPAREN ( libFunctionArgs )? RPAREN
             {
-            // EsperEPL2Grammar.g:983:4: ( classIdentifierNonGreedy DOT )?
+            // EsperEPL2Grammar.g:984:4: ( classIdentifierNonGreedy DOT )?
             int alt133=2;
             int LA133_0 = input.LA(1);
 
@@ -12867,7 +12868,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt133) {
                 case 1 :
-                    // EsperEPL2Grammar.g:983:5: classIdentifierNonGreedy DOT
+                    // EsperEPL2Grammar.g:984:5: classIdentifierNonGreedy DOT
                     {
                     pushFollow(FOLLOW_classIdentifierNonGreedy_in_libFunction5930);
                     classIdentifierNonGreedy382=classIdentifierNonGreedy();
@@ -12893,7 +12894,7 @@ public class EsperEPL2GrammarParser extends Parser {
             LPAREN385=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_libFunction5938); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN385);
 
-            // EsperEPL2Grammar.g:983:53: ( libFunctionArgs )?
+            // EsperEPL2Grammar.g:984:53: ( libFunctionArgs )?
             int alt134=2;
             int LA134_0 = input.LA(1);
 
@@ -12902,7 +12903,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt134) {
                 case 1 :
-                    // EsperEPL2Grammar.g:983:54: libFunctionArgs
+                    // EsperEPL2Grammar.g:984:54: libFunctionArgs
                     {
                     pushFollow(FOLLOW_libFunctionArgs_in_libFunction5941);
                     libFunctionArgs386=libFunctionArgs();
@@ -12922,7 +12923,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: funcIdent, libFunctionArgs, classIdentifierNonGreedy
+            // elements: libFunctionArgs, funcIdent, classIdentifierNonGreedy
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -12932,21 +12933,21 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 984:4: -> ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? )
+            // 985:4: -> ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? )
             {
-                // EsperEPL2Grammar.g:984:7: ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? )
+                // EsperEPL2Grammar.g:985:7: ^( LIB_FUNCTION ( classIdentifierNonGreedy )? funcIdent ( libFunctionArgs )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(LIB_FUNCTION, "LIB_FUNCTION"), root_1);
 
-                // EsperEPL2Grammar.g:984:22: ( classIdentifierNonGreedy )?
+                // EsperEPL2Grammar.g:985:22: ( classIdentifierNonGreedy )?
                 if ( stream_classIdentifierNonGreedy.hasNext() ) {
                     adaptor.addChild(root_1, stream_classIdentifierNonGreedy.nextTree());
 
                 }
                 stream_classIdentifierNonGreedy.reset();
                 adaptor.addChild(root_1, stream_funcIdent.nextTree());
-                // EsperEPL2Grammar.g:984:58: ( libFunctionArgs )?
+                // EsperEPL2Grammar.g:985:58: ( libFunctionArgs )?
                 if ( stream_libFunctionArgs.hasNext() ) {
                     adaptor.addChild(root_1, stream_libFunctionArgs.nextTree());
 
@@ -12985,7 +12986,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "funcIdent"
-    // EsperEPL2Grammar.g:987:1: funcIdent : ( IDENT | max= MAX -> IDENT[$max] | min= MIN -> IDENT[$min] );
+    // EsperEPL2Grammar.g:988:1: funcIdent : ( IDENT | max= MAX -> IDENT[$max] | min= MIN -> IDENT[$min] );
     public final EsperEPL2GrammarParser.funcIdent_return funcIdent() throws RecognitionException {
         EsperEPL2GrammarParser.funcIdent_return retval = new EsperEPL2GrammarParser.funcIdent_return();
         retval.start = input.LT(1);
@@ -13003,7 +13004,7 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_MIN=new RewriteRuleTokenStream(adaptor,"token MIN");
 
         try {
-            // EsperEPL2Grammar.g:988:2: ( IDENT | max= MAX -> IDENT[$max] | min= MIN -> IDENT[$min] )
+            // EsperEPL2Grammar.g:989:2: ( IDENT | max= MAX -> IDENT[$max] | min= MIN -> IDENT[$min] )
             int alt135=3;
             switch ( input.LA(1) ) {
             case IDENT:
@@ -13031,7 +13032,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt135) {
                 case 1 :
-                    // EsperEPL2Grammar.g:988:4: IDENT
+                    // EsperEPL2Grammar.g:989:4: IDENT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -13044,7 +13045,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:989:4: max= MAX
+                    // EsperEPL2Grammar.g:990:4: max= MAX
                     {
                     max=(Token)match(input,MAX,FOLLOW_MAX_in_funcIdent5982); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_MAX.add(max);
@@ -13062,7 +13063,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 989:12: -> IDENT[$max]
+                    // 990:12: -> IDENT[$max]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(IDENT, max));
 
@@ -13072,7 +13073,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:990:4: min= MIN
+                    // EsperEPL2Grammar.g:991:4: min= MIN
                     {
                     min=(Token)match(input,MIN,FOLLOW_MIN_in_funcIdent5994); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_MIN.add(min);
@@ -13090,7 +13091,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 990:12: -> IDENT[$min]
+                    // 991:12: -> IDENT[$min]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(IDENT, min));
 
@@ -13125,7 +13126,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "libFunctionArgs"
-    // EsperEPL2Grammar.g:993:1: libFunctionArgs : ( ALL | DISTINCT )? expression ( COMMA expression )* ;
+    // EsperEPL2Grammar.g:994:1: libFunctionArgs : ( ALL | DISTINCT )? expression ( COMMA expression )* ;
     public final EsperEPL2GrammarParser.libFunctionArgs_return libFunctionArgs() throws RecognitionException {
         EsperEPL2GrammarParser.libFunctionArgs_return retval = new EsperEPL2GrammarParser.libFunctionArgs_return();
         retval.start = input.LT(1);
@@ -13145,12 +13146,12 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree COMMA392_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:994:2: ( ( ALL | DISTINCT )? expression ( COMMA expression )* )
-            // EsperEPL2Grammar.g:994:4: ( ALL | DISTINCT )? expression ( COMMA expression )*
+            // EsperEPL2Grammar.g:995:2: ( ( ALL | DISTINCT )? expression ( COMMA expression )* )
+            // EsperEPL2Grammar.g:995:4: ( ALL | DISTINCT )? expression ( COMMA expression )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
-            // EsperEPL2Grammar.g:994:4: ( ALL | DISTINCT )?
+            // EsperEPL2Grammar.g:995:4: ( ALL | DISTINCT )?
             int alt136=3;
             int LA136_0 = input.LA(1);
 
@@ -13162,14 +13163,14 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt136) {
                 case 1 :
-                    // EsperEPL2Grammar.g:994:5: ALL
+                    // EsperEPL2Grammar.g:995:5: ALL
                     {
                     ALL389=(Token)match(input,ALL,FOLLOW_ALL_in_libFunctionArgs6012); if (state.failed) return retval;
 
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:994:12: DISTINCT
+                    // EsperEPL2Grammar.g:995:12: DISTINCT
                     {
                     DISTINCT390=(Token)match(input,DISTINCT,FOLLOW_DISTINCT_in_libFunctionArgs6017); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
@@ -13188,7 +13189,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, expression391.getTree());
-            // EsperEPL2Grammar.g:994:34: ( COMMA expression )*
+            // EsperEPL2Grammar.g:995:34: ( COMMA expression )*
             loop137:
             do {
                 int alt137=2;
@@ -13201,7 +13202,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt137) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:994:35: COMMA expression
+            	    // EsperEPL2Grammar.g:995:35: COMMA expression
             	    {
             	    COMMA392=(Token)match(input,COMMA,FOLLOW_COMMA_in_libFunctionArgs6024); if (state.failed) return retval;
             	    pushFollow(FOLLOW_expression_in_libFunctionArgs6027);
@@ -13246,7 +13247,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "betweenList"
-    // EsperEPL2Grammar.g:997:1: betweenList : concatenationExpr AND_EXPR concatenationExpr ;
+    // EsperEPL2Grammar.g:998:1: betweenList : concatenationExpr AND_EXPR concatenationExpr ;
     public final EsperEPL2GrammarParser.betweenList_return betweenList() throws RecognitionException {
         EsperEPL2GrammarParser.betweenList_return retval = new EsperEPL2GrammarParser.betweenList_return();
         retval.start = input.LT(1);
@@ -13262,8 +13263,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree AND_EXPR395_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:998:2: ( concatenationExpr AND_EXPR concatenationExpr )
-            // EsperEPL2Grammar.g:998:4: concatenationExpr AND_EXPR concatenationExpr
+            // EsperEPL2Grammar.g:999:2: ( concatenationExpr AND_EXPR concatenationExpr )
+            // EsperEPL2Grammar.g:999:4: concatenationExpr AND_EXPR concatenationExpr
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -13307,7 +13308,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "patternExpression"
-    // EsperEPL2Grammar.g:1007:1: patternExpression : followedByExpression ;
+    // EsperEPL2Grammar.g:1008:1: patternExpression : followedByExpression ;
     public final EsperEPL2GrammarParser.patternExpression_return patternExpression() throws RecognitionException {
         EsperEPL2GrammarParser.patternExpression_return retval = new EsperEPL2GrammarParser.patternExpression_return();
         retval.start = input.LT(1);
@@ -13320,8 +13321,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
          paraphrases.push("pattern expression"); 
         try {
-            // EsperEPL2Grammar.g:1010:2: ( followedByExpression )
-            // EsperEPL2Grammar.g:1010:4: followedByExpression
+            // EsperEPL2Grammar.g:1011:2: ( followedByExpression )
+            // EsperEPL2Grammar.g:1011:4: followedByExpression
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -13361,7 +13362,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "followedByExpression"
-    // EsperEPL2Grammar.g:1013:1: followedByExpression : orExpression (f= FOLLOWED_BY orExpression )* -> {$f != null}? ^( FOLLOWED_BY_EXPR ( orExpression )+ ) -> orExpression ;
+    // EsperEPL2Grammar.g:1014:1: followedByExpression : orExpression (f= FOLLOWED_BY orExpression )* -> {$f != null}? ^( FOLLOWED_BY_EXPR ( orExpression )+ ) -> orExpression ;
     public final EsperEPL2GrammarParser.followedByExpression_return followedByExpression() throws RecognitionException {
         EsperEPL2GrammarParser.followedByExpression_return retval = new EsperEPL2GrammarParser.followedByExpression_return();
         retval.start = input.LT(1);
@@ -13378,8 +13379,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_FOLLOWED_BY=new RewriteRuleTokenStream(adaptor,"token FOLLOWED_BY");
         RewriteRuleSubtreeStream stream_orExpression=new RewriteRuleSubtreeStream(adaptor,"rule orExpression");
         try {
-            // EsperEPL2Grammar.g:1014:2: ( orExpression (f= FOLLOWED_BY orExpression )* -> {$f != null}? ^( FOLLOWED_BY_EXPR ( orExpression )+ ) -> orExpression )
-            // EsperEPL2Grammar.g:1014:4: orExpression (f= FOLLOWED_BY orExpression )*
+            // EsperEPL2Grammar.g:1015:2: ( orExpression (f= FOLLOWED_BY orExpression )* -> {$f != null}? ^( FOLLOWED_BY_EXPR ( orExpression )+ ) -> orExpression )
+            // EsperEPL2Grammar.g:1015:4: orExpression (f= FOLLOWED_BY orExpression )*
             {
             pushFollow(FOLLOW_orExpression_in_followedByExpression6086);
             orExpression398=orExpression();
@@ -13387,7 +13388,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_orExpression.add(orExpression398.getTree());
-            // EsperEPL2Grammar.g:1014:17: (f= FOLLOWED_BY orExpression )*
+            // EsperEPL2Grammar.g:1015:17: (f= FOLLOWED_BY orExpression )*
             loop138:
             do {
                 int alt138=2;
@@ -13400,7 +13401,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt138) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1014:18: f= FOLLOWED_BY orExpression
+            	    // EsperEPL2Grammar.g:1015:18: f= FOLLOWED_BY orExpression
             	    {
             	    f=(Token)match(input,FOLLOWED_BY,FOLLOW_FOLLOWED_BY_in_followedByExpression6091); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_FOLLOWED_BY.add(f);
@@ -13433,9 +13434,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1015:6: -> {$f != null}? ^( FOLLOWED_BY_EXPR ( orExpression )+ )
+            // 1016:6: -> {$f != null}? ^( FOLLOWED_BY_EXPR ( orExpression )+ )
             if (f != null) {
-                // EsperEPL2Grammar.g:1015:23: ^( FOLLOWED_BY_EXPR ( orExpression )+ )
+                // EsperEPL2Grammar.g:1016:23: ^( FOLLOWED_BY_EXPR ( orExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(FOLLOWED_BY_EXPR, "FOLLOWED_BY_EXPR"), root_1);
@@ -13453,7 +13454,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1016:6: -> orExpression
+            else // 1017:6: -> orExpression
             {
                 adaptor.addChild(root_0, stream_orExpression.nextTree());
 
@@ -13486,7 +13487,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "orExpression"
-    // EsperEPL2Grammar.g:1019:1: orExpression : andExpression (o= OR_EXPR andExpression )* -> {$o != null}? ^( OR_EXPR ( andExpression )+ ) -> andExpression ;
+    // EsperEPL2Grammar.g:1020:1: orExpression : andExpression (o= OR_EXPR andExpression )* -> {$o != null}? ^( OR_EXPR ( andExpression )+ ) -> andExpression ;
     public final EsperEPL2GrammarParser.orExpression_return orExpression() throws RecognitionException {
         EsperEPL2GrammarParser.orExpression_return retval = new EsperEPL2GrammarParser.orExpression_return();
         retval.start = input.LT(1);
@@ -13503,8 +13504,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_OR_EXPR=new RewriteRuleTokenStream(adaptor,"token OR_EXPR");
         RewriteRuleSubtreeStream stream_andExpression=new RewriteRuleSubtreeStream(adaptor,"rule andExpression");
         try {
-            // EsperEPL2Grammar.g:1020:2: ( andExpression (o= OR_EXPR andExpression )* -> {$o != null}? ^( OR_EXPR ( andExpression )+ ) -> andExpression )
-            // EsperEPL2Grammar.g:1020:4: andExpression (o= OR_EXPR andExpression )*
+            // EsperEPL2Grammar.g:1021:2: ( andExpression (o= OR_EXPR andExpression )* -> {$o != null}? ^( OR_EXPR ( andExpression )+ ) -> andExpression )
+            // EsperEPL2Grammar.g:1021:4: andExpression (o= OR_EXPR andExpression )*
             {
             pushFollow(FOLLOW_andExpression_in_orExpression6132);
             andExpression400=andExpression();
@@ -13512,7 +13513,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_andExpression.add(andExpression400.getTree());
-            // EsperEPL2Grammar.g:1020:18: (o= OR_EXPR andExpression )*
+            // EsperEPL2Grammar.g:1021:18: (o= OR_EXPR andExpression )*
             loop139:
             do {
                 int alt139=2;
@@ -13525,7 +13526,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt139) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1020:19: o= OR_EXPR andExpression
+            	    // EsperEPL2Grammar.g:1021:19: o= OR_EXPR andExpression
             	    {
             	    o=(Token)match(input,OR_EXPR,FOLLOW_OR_EXPR_in_orExpression6137); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_OR_EXPR.add(o);
@@ -13558,9 +13559,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1021:3: -> {$o != null}? ^( OR_EXPR ( andExpression )+ )
+            // 1022:3: -> {$o != null}? ^( OR_EXPR ( andExpression )+ )
             if (o != null) {
-                // EsperEPL2Grammar.g:1021:20: ^( OR_EXPR ( andExpression )+ )
+                // EsperEPL2Grammar.g:1022:20: ^( OR_EXPR ( andExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot(stream_OR_EXPR.nextNode(), root_1);
@@ -13578,7 +13579,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1022:3: -> andExpression
+            else // 1023:3: -> andExpression
             {
                 adaptor.addChild(root_0, stream_andExpression.nextTree());
 
@@ -13611,7 +13612,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "andExpression"
-    // EsperEPL2Grammar.g:1025:1: andExpression : matchUntilExpression (a= AND_EXPR matchUntilExpression )* -> {$a != null}? ^( AND_EXPR ( matchUntilExpression )+ ) -> matchUntilExpression ;
+    // EsperEPL2Grammar.g:1026:1: andExpression : matchUntilExpression (a= AND_EXPR matchUntilExpression )* -> {$a != null}? ^( AND_EXPR ( matchUntilExpression )+ ) -> matchUntilExpression ;
     public final EsperEPL2GrammarParser.andExpression_return andExpression() throws RecognitionException {
         EsperEPL2GrammarParser.andExpression_return retval = new EsperEPL2GrammarParser.andExpression_return();
         retval.start = input.LT(1);
@@ -13628,8 +13629,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_AND_EXPR=new RewriteRuleTokenStream(adaptor,"token AND_EXPR");
         RewriteRuleSubtreeStream stream_matchUntilExpression=new RewriteRuleSubtreeStream(adaptor,"rule matchUntilExpression");
         try {
-            // EsperEPL2Grammar.g:1026:2: ( matchUntilExpression (a= AND_EXPR matchUntilExpression )* -> {$a != null}? ^( AND_EXPR ( matchUntilExpression )+ ) -> matchUntilExpression )
-            // EsperEPL2Grammar.g:1026:4: matchUntilExpression (a= AND_EXPR matchUntilExpression )*
+            // EsperEPL2Grammar.g:1027:2: ( matchUntilExpression (a= AND_EXPR matchUntilExpression )* -> {$a != null}? ^( AND_EXPR ( matchUntilExpression )+ ) -> matchUntilExpression )
+            // EsperEPL2Grammar.g:1027:4: matchUntilExpression (a= AND_EXPR matchUntilExpression )*
             {
             pushFollow(FOLLOW_matchUntilExpression_in_andExpression6171);
             matchUntilExpression402=matchUntilExpression();
@@ -13637,7 +13638,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_matchUntilExpression.add(matchUntilExpression402.getTree());
-            // EsperEPL2Grammar.g:1026:25: (a= AND_EXPR matchUntilExpression )*
+            // EsperEPL2Grammar.g:1027:25: (a= AND_EXPR matchUntilExpression )*
             loop140:
             do {
                 int alt140=2;
@@ -13650,7 +13651,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt140) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1026:26: a= AND_EXPR matchUntilExpression
+            	    // EsperEPL2Grammar.g:1027:26: a= AND_EXPR matchUntilExpression
             	    {
             	    a=(Token)match(input,AND_EXPR,FOLLOW_AND_EXPR_in_andExpression6176); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_AND_EXPR.add(a);
@@ -13683,9 +13684,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1027:3: -> {$a != null}? ^( AND_EXPR ( matchUntilExpression )+ )
+            // 1028:3: -> {$a != null}? ^( AND_EXPR ( matchUntilExpression )+ )
             if (a != null) {
-                // EsperEPL2Grammar.g:1027:20: ^( AND_EXPR ( matchUntilExpression )+ )
+                // EsperEPL2Grammar.g:1028:20: ^( AND_EXPR ( matchUntilExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot(stream_AND_EXPR.nextNode(), root_1);
@@ -13703,7 +13704,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1028:3: -> matchUntilExpression
+            else // 1029:3: -> matchUntilExpression
             {
                 adaptor.addChild(root_0, stream_matchUntilExpression.nextTree());
 
@@ -13736,7 +13737,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "matchUntilExpression"
-    // EsperEPL2Grammar.g:1031:1: matchUntilExpression : (r= matchUntilRange )? qualifyExpression (a= UNTIL qualifyExpression )? -> {r != null && a != null}? ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ ) -> {r != null && a == null}? ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression ) -> {$a != null}? ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ ) -> qualifyExpression ;
+    // EsperEPL2Grammar.g:1032:1: matchUntilExpression : (r= matchUntilRange )? qualifyExpression (a= UNTIL qualifyExpression )? -> {r != null && a != null}? ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ ) -> {r != null && a == null}? ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression ) -> {$a != null}? ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ ) -> qualifyExpression ;
     public final EsperEPL2GrammarParser.matchUntilExpression_return matchUntilExpression() throws RecognitionException {
         EsperEPL2GrammarParser.matchUntilExpression_return retval = new EsperEPL2GrammarParser.matchUntilExpression_return();
         retval.start = input.LT(1);
@@ -13756,10 +13757,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_qualifyExpression=new RewriteRuleSubtreeStream(adaptor,"rule qualifyExpression");
         RewriteRuleSubtreeStream stream_matchUntilRange=new RewriteRuleSubtreeStream(adaptor,"rule matchUntilRange");
         try {
-            // EsperEPL2Grammar.g:1032:2: ( (r= matchUntilRange )? qualifyExpression (a= UNTIL qualifyExpression )? -> {r != null && a != null}? ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ ) -> {r != null && a == null}? ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression ) -> {$a != null}? ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ ) -> qualifyExpression )
-            // EsperEPL2Grammar.g:1032:4: (r= matchUntilRange )? qualifyExpression (a= UNTIL qualifyExpression )?
+            // EsperEPL2Grammar.g:1033:2: ( (r= matchUntilRange )? qualifyExpression (a= UNTIL qualifyExpression )? -> {r != null && a != null}? ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ ) -> {r != null && a == null}? ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression ) -> {$a != null}? ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ ) -> qualifyExpression )
+            // EsperEPL2Grammar.g:1033:4: (r= matchUntilRange )? qualifyExpression (a= UNTIL qualifyExpression )?
             {
-            // EsperEPL2Grammar.g:1032:4: (r= matchUntilRange )?
+            // EsperEPL2Grammar.g:1033:4: (r= matchUntilRange )?
             int alt141=2;
             int LA141_0 = input.LA(1);
 
@@ -13768,7 +13769,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt141) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1032:5: r= matchUntilRange
+                    // EsperEPL2Grammar.g:1033:5: r= matchUntilRange
                     {
                     pushFollow(FOLLOW_matchUntilRange_in_matchUntilExpression6213);
                     r=matchUntilRange();
@@ -13788,7 +13789,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_qualifyExpression.add(qualifyExpression404.getTree());
-            // EsperEPL2Grammar.g:1032:43: (a= UNTIL qualifyExpression )?
+            // EsperEPL2Grammar.g:1033:43: (a= UNTIL qualifyExpression )?
             int alt142=2;
             int LA142_0 = input.LA(1);
 
@@ -13797,7 +13798,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt142) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1032:44: a= UNTIL qualifyExpression
+                    // EsperEPL2Grammar.g:1033:44: a= UNTIL qualifyExpression
                     {
                     a=(Token)match(input,UNTIL,FOLLOW_UNTIL_in_matchUntilExpression6222); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_UNTIL.add(a);
@@ -13817,7 +13818,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: qualifyExpression, qualifyExpression, qualifyExpression, matchUntilRange, qualifyExpression, matchUntilRange
+            // elements: qualifyExpression, qualifyExpression, matchUntilRange, qualifyExpression, matchUntilRange, qualifyExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -13827,9 +13828,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1033:3: -> {r != null && a != null}? ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ )
+            // 1034:3: -> {r != null && a != null}? ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ )
             if (r != null && a != null) {
-                // EsperEPL2Grammar.g:1033:32: ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ )
+                // EsperEPL2Grammar.g:1034:32: ^( MATCH_UNTIL_EXPR matchUntilRange ( qualifyExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_EXPR, "MATCH_UNTIL_EXPR"), root_1);
@@ -13848,9 +13849,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1034:3: -> {r != null && a == null}? ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression )
+            else // 1035:3: -> {r != null && a == null}? ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression )
             if (r != null && a == null) {
-                // EsperEPL2Grammar.g:1034:32: ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression )
+                // EsperEPL2Grammar.g:1035:32: ^( MATCH_UNTIL_EXPR matchUntilRange qualifyExpression )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_EXPR, "MATCH_UNTIL_EXPR"), root_1);
@@ -13862,9 +13863,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1035:3: -> {$a != null}? ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ )
+            else // 1036:3: -> {$a != null}? ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ )
             if (a != null) {
-                // EsperEPL2Grammar.g:1035:20: ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ )
+                // EsperEPL2Grammar.g:1036:20: ^( MATCH_UNTIL_EXPR ( qualifyExpression )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_EXPR, "MATCH_UNTIL_EXPR"), root_1);
@@ -13882,7 +13883,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1036:3: -> qualifyExpression
+            else // 1037:3: -> qualifyExpression
             {
                 adaptor.addChild(root_0, stream_qualifyExpression.nextTree());
 
@@ -13915,7 +13916,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "qualifyExpression"
-    // EsperEPL2Grammar.g:1039:1: qualifyExpression : (e= EVERY_EXPR | n= NOT_EXPR )? guardPostFix -> {e != null}? ^( EVERY_EXPR guardPostFix ) -> {n != null}? ^( PATTERN_NOT_EXPR guardPostFix ) -> guardPostFix ;
+    // EsperEPL2Grammar.g:1040:1: qualifyExpression : (e= EVERY_EXPR | n= NOT_EXPR )? guardPostFix -> {e != null}? ^( EVERY_EXPR guardPostFix ) -> {n != null}? ^( PATTERN_NOT_EXPR guardPostFix ) -> guardPostFix ;
     public final EsperEPL2GrammarParser.qualifyExpression_return qualifyExpression() throws RecognitionException {
         EsperEPL2GrammarParser.qualifyExpression_return retval = new EsperEPL2GrammarParser.qualifyExpression_return();
         retval.start = input.LT(1);
@@ -13933,10 +13934,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_EVERY_EXPR=new RewriteRuleTokenStream(adaptor,"token EVERY_EXPR");
         RewriteRuleSubtreeStream stream_guardPostFix=new RewriteRuleSubtreeStream(adaptor,"rule guardPostFix");
         try {
-            // EsperEPL2Grammar.g:1040:2: ( (e= EVERY_EXPR | n= NOT_EXPR )? guardPostFix -> {e != null}? ^( EVERY_EXPR guardPostFix ) -> {n != null}? ^( PATTERN_NOT_EXPR guardPostFix ) -> guardPostFix )
-            // EsperEPL2Grammar.g:1040:4: (e= EVERY_EXPR | n= NOT_EXPR )? guardPostFix
+            // EsperEPL2Grammar.g:1041:2: ( (e= EVERY_EXPR | n= NOT_EXPR )? guardPostFix -> {e != null}? ^( EVERY_EXPR guardPostFix ) -> {n != null}? ^( PATTERN_NOT_EXPR guardPostFix ) -> guardPostFix )
+            // EsperEPL2Grammar.g:1041:4: (e= EVERY_EXPR | n= NOT_EXPR )? guardPostFix
             {
-            // EsperEPL2Grammar.g:1040:4: (e= EVERY_EXPR | n= NOT_EXPR )?
+            // EsperEPL2Grammar.g:1041:4: (e= EVERY_EXPR | n= NOT_EXPR )?
             int alt143=3;
             int LA143_0 = input.LA(1);
 
@@ -13948,7 +13949,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt143) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1040:5: e= EVERY_EXPR
+                    // EsperEPL2Grammar.g:1041:5: e= EVERY_EXPR
                     {
                     e=(Token)match(input,EVERY_EXPR,FOLLOW_EVERY_EXPR_in_qualifyExpression6288); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_EVERY_EXPR.add(e);
@@ -13957,7 +13958,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1040:20: n= NOT_EXPR
+                    // EsperEPL2Grammar.g:1041:20: n= NOT_EXPR
                     {
                     n=(Token)match(input,NOT_EXPR,FOLLOW_NOT_EXPR_in_qualifyExpression6294); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NOT_EXPR.add(n);
@@ -13977,7 +13978,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: guardPostFix, guardPostFix, guardPostFix, EVERY_EXPR
+            // elements: guardPostFix, EVERY_EXPR, guardPostFix, guardPostFix
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -13987,9 +13988,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1042:3: -> {e != null}? ^( EVERY_EXPR guardPostFix )
+            // 1043:3: -> {e != null}? ^( EVERY_EXPR guardPostFix )
             if (e != null) {
-                // EsperEPL2Grammar.g:1042:19: ^( EVERY_EXPR guardPostFix )
+                // EsperEPL2Grammar.g:1043:19: ^( EVERY_EXPR guardPostFix )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot(stream_EVERY_EXPR.nextNode(), root_1);
@@ -14000,9 +14001,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1043:3: -> {n != null}? ^( PATTERN_NOT_EXPR guardPostFix )
+            else // 1044:3: -> {n != null}? ^( PATTERN_NOT_EXPR guardPostFix )
             if (n != null) {
-                // EsperEPL2Grammar.g:1043:19: ^( PATTERN_NOT_EXPR guardPostFix )
+                // EsperEPL2Grammar.g:1044:19: ^( PATTERN_NOT_EXPR guardPostFix )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(PATTERN_NOT_EXPR, "PATTERN_NOT_EXPR"), root_1);
@@ -14013,7 +14014,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1044:3: -> guardPostFix
+            else // 1045:3: -> guardPostFix
             {
                 adaptor.addChild(root_0, stream_guardPostFix.nextTree());
 
@@ -14046,7 +14047,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "guardPostFix"
-    // EsperEPL2Grammar.g:1047:1: guardPostFix : ( atomicExpression | l= LPAREN patternExpression RPAREN ) (w= WHERE guardExpression )? -> {$w != null}? ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression ) -> ( atomicExpression )? ( patternExpression )? ;
+    // EsperEPL2Grammar.g:1048:1: guardPostFix : ( atomicExpression | l= LPAREN patternExpression RPAREN ) (w= WHERE guardExpression )? -> {$w != null}? ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression ) -> ( atomicExpression )? ( patternExpression )? ;
     public final EsperEPL2GrammarParser.guardPostFix_return guardPostFix() throws RecognitionException {
         EsperEPL2GrammarParser.guardPostFix_return retval = new EsperEPL2GrammarParser.guardPostFix_return();
         retval.start = input.LT(1);
@@ -14073,10 +14074,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_atomicExpression=new RewriteRuleSubtreeStream(adaptor,"rule atomicExpression");
         RewriteRuleSubtreeStream stream_patternExpression=new RewriteRuleSubtreeStream(adaptor,"rule patternExpression");
         try {
-            // EsperEPL2Grammar.g:1048:2: ( ( atomicExpression | l= LPAREN patternExpression RPAREN ) (w= WHERE guardExpression )? -> {$w != null}? ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression ) -> ( atomicExpression )? ( patternExpression )? )
-            // EsperEPL2Grammar.g:1048:4: ( atomicExpression | l= LPAREN patternExpression RPAREN ) (w= WHERE guardExpression )?
+            // EsperEPL2Grammar.g:1049:2: ( ( atomicExpression | l= LPAREN patternExpression RPAREN ) (w= WHERE guardExpression )? -> {$w != null}? ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression ) -> ( atomicExpression )? ( patternExpression )? )
+            // EsperEPL2Grammar.g:1049:4: ( atomicExpression | l= LPAREN patternExpression RPAREN ) (w= WHERE guardExpression )?
             {
-            // EsperEPL2Grammar.g:1048:4: ( atomicExpression | l= LPAREN patternExpression RPAREN )
+            // EsperEPL2Grammar.g:1049:4: ( atomicExpression | l= LPAREN patternExpression RPAREN )
             int alt144=2;
             int LA144_0 = input.LA(1);
 
@@ -14095,7 +14096,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt144) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1048:5: atomicExpression
+                    // EsperEPL2Grammar.g:1049:5: atomicExpression
                     {
                     pushFollow(FOLLOW_atomicExpression_in_guardPostFix6343);
                     atomicExpression407=atomicExpression();
@@ -14107,7 +14108,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1048:24: l= LPAREN patternExpression RPAREN
+                    // EsperEPL2Grammar.g:1049:24: l= LPAREN patternExpression RPAREN
                     {
                     l=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_guardPostFix6349); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(l);
@@ -14127,7 +14128,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1048:59: (w= WHERE guardExpression )?
+            // EsperEPL2Grammar.g:1049:59: (w= WHERE guardExpression )?
             int alt145=2;
             int LA145_0 = input.LA(1);
 
@@ -14136,7 +14137,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt145) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1048:60: w= WHERE guardExpression
+                    // EsperEPL2Grammar.g:1049:60: w= WHERE guardExpression
                     {
                     w=(Token)match(input,WHERE,FOLLOW_WHERE_in_guardPostFix6359); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_WHERE.add(w);
@@ -14156,7 +14157,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: atomicExpression, patternExpression, guardExpression, atomicExpression, patternExpression
+            // elements: atomicExpression, patternExpression, patternExpression, atomicExpression, guardExpression
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -14166,20 +14167,20 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1049:3: -> {$w != null}? ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression )
+            // 1050:3: -> {$w != null}? ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression )
             if (w != null) {
-                // EsperEPL2Grammar.g:1049:20: ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression )
+                // EsperEPL2Grammar.g:1050:20: ^( GUARD_EXPR ( atomicExpression )? ( patternExpression )? guardExpression )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(GUARD_EXPR, "GUARD_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:1049:33: ( atomicExpression )?
+                // EsperEPL2Grammar.g:1050:33: ( atomicExpression )?
                 if ( stream_atomicExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_atomicExpression.nextTree());
 
                 }
                 stream_atomicExpression.reset();
-                // EsperEPL2Grammar.g:1049:51: ( patternExpression )?
+                // EsperEPL2Grammar.g:1050:51: ( patternExpression )?
                 if ( stream_patternExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_patternExpression.nextTree());
 
@@ -14191,15 +14192,15 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1050:3: -> ( atomicExpression )? ( patternExpression )?
+            else // 1051:3: -> ( atomicExpression )? ( patternExpression )?
             {
-                // EsperEPL2Grammar.g:1050:6: ( atomicExpression )?
+                // EsperEPL2Grammar.g:1051:6: ( atomicExpression )?
                 if ( stream_atomicExpression.hasNext() ) {
                     adaptor.addChild(root_0, stream_atomicExpression.nextTree());
 
                 }
                 stream_atomicExpression.reset();
-                // EsperEPL2Grammar.g:1050:24: ( patternExpression )?
+                // EsperEPL2Grammar.g:1051:24: ( patternExpression )?
                 if ( stream_patternExpression.hasNext() ) {
                     adaptor.addChild(root_0, stream_patternExpression.nextTree());
 
@@ -14235,7 +14236,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "atomicExpression"
-    // EsperEPL2Grammar.g:1053:1: atomicExpression : ( observerExpression | patternFilterExpression );
+    // EsperEPL2Grammar.g:1054:1: atomicExpression : ( observerExpression | patternFilterExpression );
     public final EsperEPL2GrammarParser.atomicExpression_return atomicExpression() throws RecognitionException {
         EsperEPL2GrammarParser.atomicExpression_return retval = new EsperEPL2GrammarParser.atomicExpression_return();
         retval.start = input.LT(1);
@@ -14249,7 +14250,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:1054:2: ( observerExpression | patternFilterExpression )
+            // EsperEPL2Grammar.g:1055:2: ( observerExpression | patternFilterExpression )
             int alt146=2;
             int LA146_0 = input.LA(1);
 
@@ -14279,7 +14280,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt146) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1054:4: observerExpression
+                    // EsperEPL2Grammar.g:1055:4: observerExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -14293,7 +14294,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1054:25: patternFilterExpression
+                    // EsperEPL2Grammar.g:1055:25: patternFilterExpression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -14332,7 +14333,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "observerExpression"
-    // EsperEPL2Grammar.g:1057:1: observerExpression : ns= IDENT COLON (nm= IDENT | a= AT ) LPAREN ( expressionWithTimeList )? RPAREN -> {$a != null}? ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? ) -> ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? ) ;
+    // EsperEPL2Grammar.g:1058:1: observerExpression : ns= IDENT COLON (nm= IDENT | a= AT ) LPAREN ( expressionWithTimeList )? RPAREN -> {$a != null}? ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? ) -> ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? ) ;
     public final EsperEPL2GrammarParser.observerExpression_return observerExpression() throws RecognitionException {
         EsperEPL2GrammarParser.observerExpression_return retval = new EsperEPL2GrammarParser.observerExpression_return();
         retval.start = input.LT(1);
@@ -14361,8 +14362,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_LPAREN=new RewriteRuleTokenStream(adaptor,"token LPAREN");
         RewriteRuleSubtreeStream stream_expressionWithTimeList=new RewriteRuleSubtreeStream(adaptor,"rule expressionWithTimeList");
         try {
-            // EsperEPL2Grammar.g:1058:2: (ns= IDENT COLON (nm= IDENT | a= AT ) LPAREN ( expressionWithTimeList )? RPAREN -> {$a != null}? ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? ) -> ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? ) )
-            // EsperEPL2Grammar.g:1058:4: ns= IDENT COLON (nm= IDENT | a= AT ) LPAREN ( expressionWithTimeList )? RPAREN
+            // EsperEPL2Grammar.g:1059:2: (ns= IDENT COLON (nm= IDENT | a= AT ) LPAREN ( expressionWithTimeList )? RPAREN -> {$a != null}? ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? ) -> ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? ) )
+            // EsperEPL2Grammar.g:1059:4: ns= IDENT COLON (nm= IDENT | a= AT ) LPAREN ( expressionWithTimeList )? RPAREN
             {
             ns=(Token)match(input,IDENT,FOLLOW_IDENT_in_observerExpression6422); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(ns);
@@ -14370,7 +14371,7 @@ public class EsperEPL2GrammarParser extends Parser {
             COLON413=(Token)match(input,COLON,FOLLOW_COLON_in_observerExpression6424); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_COLON.add(COLON413);
 
-            // EsperEPL2Grammar.g:1058:19: (nm= IDENT | a= AT )
+            // EsperEPL2Grammar.g:1059:19: (nm= IDENT | a= AT )
             int alt147=2;
             int LA147_0 = input.LA(1);
 
@@ -14389,7 +14390,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt147) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1058:20: nm= IDENT
+                    // EsperEPL2Grammar.g:1059:20: nm= IDENT
                     {
                     nm=(Token)match(input,IDENT,FOLLOW_IDENT_in_observerExpression6429); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(nm);
@@ -14398,7 +14399,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1058:31: a= AT
+                    // EsperEPL2Grammar.g:1059:31: a= AT
                     {
                     a=(Token)match(input,AT,FOLLOW_AT_in_observerExpression6435); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AT.add(a);
@@ -14412,7 +14413,7 @@ public class EsperEPL2GrammarParser extends Parser {
             LPAREN414=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_observerExpression6438); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN414);
 
-            // EsperEPL2Grammar.g:1058:44: ( expressionWithTimeList )?
+            // EsperEPL2Grammar.g:1059:44: ( expressionWithTimeList )?
             int alt148=2;
             int LA148_0 = input.LA(1);
 
@@ -14421,7 +14422,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt148) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1058:44: expressionWithTimeList
+                    // EsperEPL2Grammar.g:1059:44: expressionWithTimeList
                     {
                     pushFollow(FOLLOW_expressionWithTimeList_in_observerExpression6440);
                     expressionWithTimeList415=expressionWithTimeList();
@@ -14441,7 +14442,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: IDENT, expressionWithTimeList, nm, ns, expressionWithTimeList, ns
+            // elements: nm, IDENT, ns, expressionWithTimeList, ns, expressionWithTimeList
             // token labels: ns, nm
             // rule labels: retval
             // token list labels: 
@@ -14453,22 +14454,22 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1059:3: -> {$a != null}? ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? )
+            // 1060:3: -> {$a != null}? ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? )
             if (a != null) {
-                // EsperEPL2Grammar.g:1059:20: ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? )
+                // EsperEPL2Grammar.g:1060:20: ^( OBSERVER_EXPR $ns ^( IDENT[$a.text] ) ( expressionWithTimeList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(OBSERVER_EXPR, "OBSERVER_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_ns.nextNode());
-                // EsperEPL2Grammar.g:1059:40: ^( IDENT[$a.text] )
+                // EsperEPL2Grammar.g:1060:40: ^( IDENT[$a.text] )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(IDENT, (a!=null?a.getText():null)), root_2);
 
                 adaptor.addChild(root_1, root_2);
                 }
-                // EsperEPL2Grammar.g:1059:58: ( expressionWithTimeList )?
+                // EsperEPL2Grammar.g:1060:58: ( expressionWithTimeList )?
                 if ( stream_expressionWithTimeList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionWithTimeList.nextTree());
 
@@ -14479,16 +14480,16 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1060:3: -> ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? )
+            else // 1061:3: -> ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? )
             {
-                // EsperEPL2Grammar.g:1060:6: ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? )
+                // EsperEPL2Grammar.g:1061:6: ^( OBSERVER_EXPR $ns $nm ( expressionWithTimeList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(OBSERVER_EXPR, "OBSERVER_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_ns.nextNode());
                 adaptor.addChild(root_1, stream_nm.nextNode());
-                // EsperEPL2Grammar.g:1060:30: ( expressionWithTimeList )?
+                // EsperEPL2Grammar.g:1061:30: ( expressionWithTimeList )?
                 if ( stream_expressionWithTimeList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionWithTimeList.nextTree());
 
@@ -14527,7 +14528,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "guardExpression"
-    // EsperEPL2Grammar.g:1063:1: guardExpression : IDENT COLON IDENT LPAREN ( expressionWithTimeList )? RPAREN ;
+    // EsperEPL2Grammar.g:1064:1: guardExpression : IDENT COLON IDENT LPAREN ( expressionWithTimeList )? RPAREN ;
     public final EsperEPL2GrammarParser.guardExpression_return guardExpression() throws RecognitionException {
         EsperEPL2GrammarParser.guardExpression_return retval = new EsperEPL2GrammarParser.guardExpression_return();
         retval.start = input.LT(1);
@@ -14549,8 +14550,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree RPAREN422_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:1064:2: ( IDENT COLON IDENT LPAREN ( expressionWithTimeList )? RPAREN )
-            // EsperEPL2Grammar.g:1064:4: IDENT COLON IDENT LPAREN ( expressionWithTimeList )? RPAREN
+            // EsperEPL2Grammar.g:1065:2: ( IDENT COLON IDENT LPAREN ( expressionWithTimeList )? RPAREN )
+            // EsperEPL2Grammar.g:1065:4: IDENT COLON IDENT LPAREN ( expressionWithTimeList )? RPAREN
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -14566,7 +14567,7 @@ public class EsperEPL2GrammarParser extends Parser {
             adaptor.addChild(root_0, IDENT419_tree);
             }
             LPAREN420=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_guardExpression6499); if (state.failed) return retval;
-            // EsperEPL2Grammar.g:1064:31: ( expressionWithTimeList )?
+            // EsperEPL2Grammar.g:1065:31: ( expressionWithTimeList )?
             int alt149=2;
             int LA149_0 = input.LA(1);
 
@@ -14575,7 +14576,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt149) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1064:32: expressionWithTimeList
+                    // EsperEPL2Grammar.g:1065:32: expressionWithTimeList
                     {
                     pushFollow(FOLLOW_expressionWithTimeList_in_guardExpression6503);
                     expressionWithTimeList421=expressionWithTimeList();
@@ -14617,7 +14618,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "matchUntilRange"
-    // EsperEPL2Grammar.g:1068:1: matchUntilRange : LBRACK (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE ) RBRACK -> {$l != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $l) -> {$l != null && c1 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null}? ^( MATCH_UNTIL_RANGE_BOUNDED $l) -> {$db != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $r) -> {$db != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $db) -> {$db != null && db2 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $db2) -> {$db3 != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3) -> {$r != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $r) -> ^( MATCH_UNTIL_RANGE_HALFCLOSED $db) ;
+    // EsperEPL2Grammar.g:1069:1: matchUntilRange : LBRACK (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE ) RBRACK -> {$l != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $l) -> {$l != null && c1 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null}? ^( MATCH_UNTIL_RANGE_BOUNDED $l) -> {$db != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $r) -> {$db != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $db) -> {$db != null && db2 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $db2) -> {$db3 != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3) -> {$r != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $r) -> ^( MATCH_UNTIL_RANGE_HALFCLOSED $db) ;
     public final EsperEPL2GrammarParser.matchUntilRange_return matchUntilRange() throws RecognitionException {
         EsperEPL2GrammarParser.matchUntilRange_return retval = new EsperEPL2GrammarParser.matchUntilRange_return();
         retval.start = input.LT(1);
@@ -14659,13 +14660,13 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_NUM_INT=new RewriteRuleTokenStream(adaptor,"token NUM_INT");
 
         try {
-            // EsperEPL2Grammar.g:1069:2: ( LBRACK (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE ) RBRACK -> {$l != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $l) -> {$l != null && c1 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null}? ^( MATCH_UNTIL_RANGE_BOUNDED $l) -> {$db != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $r) -> {$db != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $db) -> {$db != null && db2 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $db2) -> {$db3 != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3) -> {$r != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $r) -> ^( MATCH_UNTIL_RANGE_HALFCLOSED $db) )
-            // EsperEPL2Grammar.g:1069:4: LBRACK (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE ) RBRACK
+            // EsperEPL2Grammar.g:1070:2: ( LBRACK (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE ) RBRACK -> {$l != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $l) -> {$l != null && c1 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r) -> {$l != null}? ^( MATCH_UNTIL_RANGE_BOUNDED $l) -> {$db != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $r) -> {$db != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $db) -> {$db != null && db2 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $db2) -> {$db3 != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3) -> {$r != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $r) -> ^( MATCH_UNTIL_RANGE_HALFCLOSED $db) )
+            // EsperEPL2Grammar.g:1070:4: LBRACK (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE ) RBRACK
             {
             LBRACK423=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_matchUntilRange6521); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK423);
 
-            // EsperEPL2Grammar.g:1069:11: (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE )
+            // EsperEPL2Grammar.g:1070:11: (l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )? | db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )? | DOT DOT r= NUM_INT | DOT db3= NUM_DOUBLE )
             int alt154=4;
             switch ( input.LA(1) ) {
             case NUM_INT:
@@ -14707,12 +14708,12 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt154) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1070:4: l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )?
+                    // EsperEPL2Grammar.g:1071:4: l= NUM_INT ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )?
                     {
                     l=(Token)match(input,NUM_INT,FOLLOW_NUM_INT_in_matchUntilRange6530); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUM_INT.add(l);
 
-                    // EsperEPL2Grammar.g:1070:14: ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )?
+                    // EsperEPL2Grammar.g:1071:14: ( (d1= DOT DOT (r= NUM_INT )? ) | (c1= COLON r= NUM_INT ) )?
                     int alt151=3;
                     int LA151_0 = input.LA(1);
 
@@ -14724,10 +14725,10 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt151) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1070:17: (d1= DOT DOT (r= NUM_INT )? )
+                            // EsperEPL2Grammar.g:1071:17: (d1= DOT DOT (r= NUM_INT )? )
                             {
-                            // EsperEPL2Grammar.g:1070:17: (d1= DOT DOT (r= NUM_INT )? )
-                            // EsperEPL2Grammar.g:1070:18: d1= DOT DOT (r= NUM_INT )?
+                            // EsperEPL2Grammar.g:1071:17: (d1= DOT DOT (r= NUM_INT )? )
+                            // EsperEPL2Grammar.g:1071:18: d1= DOT DOT (r= NUM_INT )?
                             {
                             d1=(Token)match(input,DOT,FOLLOW_DOT_in_matchUntilRange6538); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_DOT.add(d1);
@@ -14735,7 +14736,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             DOT424=(Token)match(input,DOT,FOLLOW_DOT_in_matchUntilRange6540); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_DOT.add(DOT424);
 
-                            // EsperEPL2Grammar.g:1070:30: (r= NUM_INT )?
+                            // EsperEPL2Grammar.g:1071:30: (r= NUM_INT )?
                             int alt150=2;
                             int LA150_0 = input.LA(1);
 
@@ -14744,7 +14745,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt150) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:1070:30: r= NUM_INT
+                                    // EsperEPL2Grammar.g:1071:30: r= NUM_INT
                                     {
                                     r=(Token)match(input,NUM_INT,FOLLOW_NUM_INT_in_matchUntilRange6544); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_NUM_INT.add(r);
@@ -14762,10 +14763,10 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:1071:17: (c1= COLON r= NUM_INT )
+                            // EsperEPL2Grammar.g:1072:17: (c1= COLON r= NUM_INT )
                             {
-                            // EsperEPL2Grammar.g:1071:17: (c1= COLON r= NUM_INT )
-                            // EsperEPL2Grammar.g:1071:18: c1= COLON r= NUM_INT
+                            // EsperEPL2Grammar.g:1072:17: (c1= COLON r= NUM_INT )
+                            // EsperEPL2Grammar.g:1072:18: c1= COLON r= NUM_INT
                             {
                             c1=(Token)match(input,COLON,FOLLOW_COLON_in_matchUntilRange6568); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_COLON.add(c1);
@@ -14786,12 +14787,12 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1073:8: db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )?
+                    // EsperEPL2Grammar.g:1074:8: db= NUM_DOUBLE (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )?
                     {
                     db=(Token)match(input,NUM_DOUBLE,FOLLOW_NUM_DOUBLE_in_matchUntilRange6594); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUM_DOUBLE.add(db);
 
-                    // EsperEPL2Grammar.g:1073:22: (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )?
+                    // EsperEPL2Grammar.g:1074:22: (d1= DOT (r= NUM_INT )? | db2= NUM_DOUBLE )?
                     int alt153=3;
                     int LA153_0 = input.LA(1);
 
@@ -14803,12 +14804,12 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt153) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1074:27: d1= DOT (r= NUM_INT )?
+                            // EsperEPL2Grammar.g:1075:27: d1= DOT (r= NUM_INT )?
                             {
                             d1=(Token)match(input,DOT,FOLLOW_DOT_in_matchUntilRange6626); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_DOT.add(d1);
 
-                            // EsperEPL2Grammar.g:1074:35: (r= NUM_INT )?
+                            // EsperEPL2Grammar.g:1075:35: (r= NUM_INT )?
                             int alt152=2;
                             int LA152_0 = input.LA(1);
 
@@ -14817,7 +14818,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             switch (alt152) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:1074:35: r= NUM_INT
+                                    // EsperEPL2Grammar.g:1075:35: r= NUM_INT
                                     {
                                     r=(Token)match(input,NUM_INT,FOLLOW_NUM_INT_in_matchUntilRange6630); if (state.failed) return retval; 
                                     if ( state.backtracking==0 ) stream_NUM_INT.add(r);
@@ -14832,7 +14833,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:1076:27: db2= NUM_DOUBLE
+                            // EsperEPL2Grammar.g:1077:27: db2= NUM_DOUBLE
                             {
                             db2=(Token)match(input,NUM_DOUBLE,FOLLOW_NUM_DOUBLE_in_matchUntilRange6690); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_NUM_DOUBLE.add(db2);
@@ -14847,7 +14848,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1078:8: DOT DOT r= NUM_INT
+                    // EsperEPL2Grammar.g:1079:8: DOT DOT r= NUM_INT
                     {
                     DOT425=(Token)match(input,DOT,FOLLOW_DOT_in_matchUntilRange6727); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DOT.add(DOT425);
@@ -14862,7 +14863,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1079:8: DOT db3= NUM_DOUBLE
+                    // EsperEPL2Grammar.g:1080:8: DOT db3= NUM_DOUBLE
                     {
                     DOT427=(Token)match(input,DOT,FOLLOW_DOT_in_matchUntilRange6742); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DOT.add(DOT427);
@@ -14882,7 +14883,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: l, l, r, l, r, r, r, l, db, db, db3, db, db2, db
+            // elements: db3, l, db2, r, db, l, r, l, l, db, r, r, db, db
             // token labels: db, r, l, db2, db3
             // rule labels: retval
             // token list labels: 
@@ -14897,9 +14898,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1082:3: -> {$l != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
+            // 1083:3: -> {$l != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
             if (l != null && d1 != null && r != null) {
-                // EsperEPL2Grammar.g:1082:47: ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
+                // EsperEPL2Grammar.g:1083:47: ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_CLOSED, "MATCH_UNTIL_RANGE_CLOSED"), root_1);
@@ -14911,9 +14912,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1083:3: -> {$l != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $l)
+            else // 1084:3: -> {$l != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $l)
             if (l != null && d1 != null) {
-                // EsperEPL2Grammar.g:1083:34: ^( MATCH_UNTIL_RANGE_HALFOPEN $l)
+                // EsperEPL2Grammar.g:1084:34: ^( MATCH_UNTIL_RANGE_HALFOPEN $l)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_HALFOPEN, "MATCH_UNTIL_RANGE_HALFOPEN"), root_1);
@@ -14924,9 +14925,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1084:3: -> {$l != null && c1 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
+            else // 1085:3: -> {$l != null && c1 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
             if (l != null && c1 != null) {
-                // EsperEPL2Grammar.g:1084:34: ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
+                // EsperEPL2Grammar.g:1085:34: ^( MATCH_UNTIL_RANGE_CLOSED $l $r)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_CLOSED, "MATCH_UNTIL_RANGE_CLOSED"), root_1);
@@ -14938,9 +14939,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1085:3: -> {$l != null}? ^( MATCH_UNTIL_RANGE_BOUNDED $l)
+            else // 1086:3: -> {$l != null}? ^( MATCH_UNTIL_RANGE_BOUNDED $l)
             if (l != null) {
-                // EsperEPL2Grammar.g:1085:20: ^( MATCH_UNTIL_RANGE_BOUNDED $l)
+                // EsperEPL2Grammar.g:1086:20: ^( MATCH_UNTIL_RANGE_BOUNDED $l)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_BOUNDED, "MATCH_UNTIL_RANGE_BOUNDED"), root_1);
@@ -14951,9 +14952,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1086:3: -> {$db != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $r)
+            else // 1087:3: -> {$db != null && d1 != null && r != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $r)
             if (db != null && d1 != null && r != null) {
-                // EsperEPL2Grammar.g:1086:48: ^( MATCH_UNTIL_RANGE_CLOSED $db $r)
+                // EsperEPL2Grammar.g:1087:48: ^( MATCH_UNTIL_RANGE_CLOSED $db $r)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_CLOSED, "MATCH_UNTIL_RANGE_CLOSED"), root_1);
@@ -14965,9 +14966,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1087:3: -> {$db != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $db)
+            else // 1088:3: -> {$db != null && d1 != null}? ^( MATCH_UNTIL_RANGE_HALFOPEN $db)
             if (db != null && d1 != null) {
-                // EsperEPL2Grammar.g:1087:35: ^( MATCH_UNTIL_RANGE_HALFOPEN $db)
+                // EsperEPL2Grammar.g:1088:35: ^( MATCH_UNTIL_RANGE_HALFOPEN $db)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_HALFOPEN, "MATCH_UNTIL_RANGE_HALFOPEN"), root_1);
@@ -14978,9 +14979,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1088:3: -> {$db != null && db2 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $db2)
+            else // 1089:3: -> {$db != null && db2 != null}? ^( MATCH_UNTIL_RANGE_CLOSED $db $db2)
             if (db != null && db2 != null) {
-                // EsperEPL2Grammar.g:1088:36: ^( MATCH_UNTIL_RANGE_CLOSED $db $db2)
+                // EsperEPL2Grammar.g:1089:36: ^( MATCH_UNTIL_RANGE_CLOSED $db $db2)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_CLOSED, "MATCH_UNTIL_RANGE_CLOSED"), root_1);
@@ -14992,9 +14993,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1089:3: -> {$db3 != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3)
+            else // 1090:3: -> {$db3 != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3)
             if (db3 != null) {
-                // EsperEPL2Grammar.g:1089:22: ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3)
+                // EsperEPL2Grammar.g:1090:22: ^( MATCH_UNTIL_RANGE_HALFCLOSED $db3)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_HALFCLOSED, "MATCH_UNTIL_RANGE_HALFCLOSED"), root_1);
@@ -15005,9 +15006,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1090:3: -> {$r != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $r)
+            else // 1091:3: -> {$r != null}? ^( MATCH_UNTIL_RANGE_HALFCLOSED $r)
             if (r != null) {
-                // EsperEPL2Grammar.g:1090:20: ^( MATCH_UNTIL_RANGE_HALFCLOSED $r)
+                // EsperEPL2Grammar.g:1091:20: ^( MATCH_UNTIL_RANGE_HALFCLOSED $r)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_HALFCLOSED, "MATCH_UNTIL_RANGE_HALFCLOSED"), root_1);
@@ -15018,9 +15019,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1091:3: -> ^( MATCH_UNTIL_RANGE_HALFCLOSED $db)
+            else // 1092:3: -> ^( MATCH_UNTIL_RANGE_HALFCLOSED $db)
             {
-                // EsperEPL2Grammar.g:1091:6: ^( MATCH_UNTIL_RANGE_HALFCLOSED $db)
+                // EsperEPL2Grammar.g:1092:6: ^( MATCH_UNTIL_RANGE_HALFCLOSED $db)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MATCH_UNTIL_RANGE_HALFCLOSED, "MATCH_UNTIL_RANGE_HALFCLOSED"), root_1);
@@ -15059,7 +15060,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "eventFilterExpression"
-    // EsperEPL2Grammar.g:1099:1: eventFilterExpression : (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) ;
+    // EsperEPL2Grammar.g:1100:1: eventFilterExpression : (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) ;
     public final EsperEPL2GrammarParser.eventFilterExpression_return eventFilterExpression() throws RecognitionException {
         EsperEPL2GrammarParser.eventFilterExpression_return retval = new EsperEPL2GrammarParser.eventFilterExpression_return();
         retval.start = input.LT(1);
@@ -15090,10 +15091,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_classIdentifier=new RewriteRuleSubtreeStream(adaptor,"rule classIdentifier");
          paraphrases.push("filter specification"); 
         try {
-            // EsperEPL2Grammar.g:1102:5: ( (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) )
-            // EsperEPL2Grammar.g:1102:9: (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )?
+            // EsperEPL2Grammar.g:1103:5: ( (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) )
+            // EsperEPL2Grammar.g:1103:9: (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )?
             {
-            // EsperEPL2Grammar.g:1102:9: (i= IDENT EQUALS )?
+            // EsperEPL2Grammar.g:1103:9: (i= IDENT EQUALS )?
             int alt155=2;
             int LA155_0 = input.LA(1);
 
@@ -15106,7 +15107,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt155) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1102:10: i= IDENT EQUALS
+                    // EsperEPL2Grammar.g:1103:10: i= IDENT EQUALS
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_eventFilterExpression6942); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -15126,7 +15127,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_classIdentifier.add(classIdentifier430.getTree());
-            // EsperEPL2Grammar.g:1104:9: ( LPAREN ( expressionList )? RPAREN )?
+            // EsperEPL2Grammar.g:1105:9: ( LPAREN ( expressionList )? RPAREN )?
             int alt157=2;
             int LA157_0 = input.LA(1);
 
@@ -15135,12 +15136,12 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt157) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1104:10: LPAREN ( expressionList )? RPAREN
+                    // EsperEPL2Grammar.g:1105:10: LPAREN ( expressionList )? RPAREN
                     {
                     LPAREN431=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_eventFilterExpression6964); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN431);
 
-                    // EsperEPL2Grammar.g:1104:17: ( expressionList )?
+                    // EsperEPL2Grammar.g:1105:17: ( expressionList )?
                     int alt156=2;
                     int LA156_0 = input.LA(1);
 
@@ -15149,7 +15150,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt156) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1104:17: expressionList
+                            // EsperEPL2Grammar.g:1105:17: expressionList
                             {
                             pushFollow(FOLLOW_expressionList_in_eventFilterExpression6966);
                             expressionList432=expressionList();
@@ -15172,7 +15173,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1105:9: ( propertyExpression )?
+            // EsperEPL2Grammar.g:1106:9: ( propertyExpression )?
             int alt158=2;
             int LA158_0 = input.LA(1);
 
@@ -15181,7 +15182,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt158) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1105:9: propertyExpression
+                    // EsperEPL2Grammar.g:1106:9: propertyExpression
                     {
                     pushFollow(FOLLOW_propertyExpression_in_eventFilterExpression6981);
                     propertyExpression434=propertyExpression();
@@ -15198,7 +15199,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: i, propertyExpression, classIdentifier, expressionList
+            // elements: propertyExpression, i, expressionList, classIdentifier
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -15209,27 +15210,27 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1106:9: -> ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
+            // 1107:9: -> ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
             {
-                // EsperEPL2Grammar.g:1106:12: ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
+                // EsperEPL2Grammar.g:1107:12: ^( EVENT_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_FILTER_EXPR, "EVENT_FILTER_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:1106:32: ( $i)?
+                // EsperEPL2Grammar.g:1107:32: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
                 }
                 stream_i.reset();
                 adaptor.addChild(root_1, stream_classIdentifier.nextTree());
-                // EsperEPL2Grammar.g:1106:52: ( propertyExpression )?
+                // EsperEPL2Grammar.g:1107:52: ( propertyExpression )?
                 if ( stream_propertyExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_propertyExpression.nextTree());
 
                 }
                 stream_propertyExpression.reset();
-                // EsperEPL2Grammar.g:1106:72: ( expressionList )?
+                // EsperEPL2Grammar.g:1107:72: ( expressionList )?
                 if ( stream_expressionList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionList.nextTree());
 
@@ -15271,7 +15272,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "propertyExpression"
-    // EsperEPL2Grammar.g:1109:1: propertyExpression : propertyExpressionAtomic ( propertyExpressionAtomic )* -> ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ ) ;
+    // EsperEPL2Grammar.g:1110:1: propertyExpression : propertyExpressionAtomic ( propertyExpressionAtomic )* -> ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ ) ;
     public final EsperEPL2GrammarParser.propertyExpression_return propertyExpression() throws RecognitionException {
         EsperEPL2GrammarParser.propertyExpression_return retval = new EsperEPL2GrammarParser.propertyExpression_return();
         retval.start = input.LT(1);
@@ -15285,8 +15286,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
         RewriteRuleSubtreeStream stream_propertyExpressionAtomic=new RewriteRuleSubtreeStream(adaptor,"rule propertyExpressionAtomic");
         try {
-            // EsperEPL2Grammar.g:1110:2: ( propertyExpressionAtomic ( propertyExpressionAtomic )* -> ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ ) )
-            // EsperEPL2Grammar.g:1110:4: propertyExpressionAtomic ( propertyExpressionAtomic )*
+            // EsperEPL2Grammar.g:1111:2: ( propertyExpressionAtomic ( propertyExpressionAtomic )* -> ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ ) )
+            // EsperEPL2Grammar.g:1111:4: propertyExpressionAtomic ( propertyExpressionAtomic )*
             {
             pushFollow(FOLLOW_propertyExpressionAtomic_in_propertyExpression7026);
             propertyExpressionAtomic435=propertyExpressionAtomic();
@@ -15294,7 +15295,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_propertyExpressionAtomic.add(propertyExpressionAtomic435.getTree());
-            // EsperEPL2Grammar.g:1110:29: ( propertyExpressionAtomic )*
+            // EsperEPL2Grammar.g:1111:29: ( propertyExpressionAtomic )*
             loop159:
             do {
                 int alt159=2;
@@ -15307,7 +15308,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt159) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1110:30: propertyExpressionAtomic
+            	    // EsperEPL2Grammar.g:1111:30: propertyExpressionAtomic
             	    {
             	    pushFollow(FOLLOW_propertyExpressionAtomic_in_propertyExpression7029);
             	    propertyExpressionAtomic436=propertyExpressionAtomic();
@@ -15337,9 +15338,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1111:9: -> ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ )
+            // 1112:9: -> ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ )
             {
-                // EsperEPL2Grammar.g:1111:12: ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ )
+                // EsperEPL2Grammar.g:1112:12: ^( EVENT_FILTER_PROPERTY_EXPR ( propertyExpressionAtomic )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_FILTER_PROPERTY_EXPR, "EVENT_FILTER_PROPERTY_EXPR"), root_1);
@@ -15385,7 +15386,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "propertyExpressionAtomic"
-    // EsperEPL2Grammar.g:1114:1: propertyExpressionAtomic : LBRACK ( SELECT propertySelectionList FROM )? eventProperty ( AS IDENT )? ( WHERE expression )? RBRACK -> ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) ) ;
+    // EsperEPL2Grammar.g:1115:1: propertyExpressionAtomic : LBRACK ( SELECT propertySelectionList FROM )? eventProperty ( AS IDENT )? ( WHERE expression )? RBRACK -> ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) ) ;
     public final EsperEPL2GrammarParser.propertyExpressionAtomic_return propertyExpressionAtomic() throws RecognitionException {
         EsperEPL2GrammarParser.propertyExpressionAtomic_return retval = new EsperEPL2GrammarParser.propertyExpressionAtomic_return();
         retval.start = input.LT(1);
@@ -15424,13 +15425,13 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_propertySelectionList=new RewriteRuleSubtreeStream(adaptor,"rule propertySelectionList");
         RewriteRuleSubtreeStream stream_eventProperty=new RewriteRuleSubtreeStream(adaptor,"rule eventProperty");
         try {
-            // EsperEPL2Grammar.g:1115:2: ( LBRACK ( SELECT propertySelectionList FROM )? eventProperty ( AS IDENT )? ( WHERE expression )? RBRACK -> ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) ) )
-            // EsperEPL2Grammar.g:1115:4: LBRACK ( SELECT propertySelectionList FROM )? eventProperty ( AS IDENT )? ( WHERE expression )? RBRACK
+            // EsperEPL2Grammar.g:1116:2: ( LBRACK ( SELECT propertySelectionList FROM )? eventProperty ( AS IDENT )? ( WHERE expression )? RBRACK -> ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) ) )
+            // EsperEPL2Grammar.g:1116:4: LBRACK ( SELECT propertySelectionList FROM )? eventProperty ( AS IDENT )? ( WHERE expression )? RBRACK
             {
             LBRACK437=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_propertyExpressionAtomic7059); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK437);
 
-            // EsperEPL2Grammar.g:1115:11: ( SELECT propertySelectionList FROM )?
+            // EsperEPL2Grammar.g:1116:11: ( SELECT propertySelectionList FROM )?
             int alt160=2;
             int LA160_0 = input.LA(1);
 
@@ -15439,7 +15440,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt160) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1115:12: SELECT propertySelectionList FROM
+                    // EsperEPL2Grammar.g:1116:12: SELECT propertySelectionList FROM
                     {
                     SELECT438=(Token)match(input,SELECT,FOLLOW_SELECT_in_propertyExpressionAtomic7062); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_SELECT.add(SELECT438);
@@ -15465,7 +15466,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_eventProperty.add(eventProperty441.getTree());
-            // EsperEPL2Grammar.g:1115:62: ( AS IDENT )?
+            // EsperEPL2Grammar.g:1116:62: ( AS IDENT )?
             int alt161=2;
             int LA161_0 = input.LA(1);
 
@@ -15474,7 +15475,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt161) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1115:63: AS IDENT
+                    // EsperEPL2Grammar.g:1116:63: AS IDENT
                     {
                     AS442=(Token)match(input,AS,FOLLOW_AS_in_propertyExpressionAtomic7073); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS442);
@@ -15488,7 +15489,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1115:74: ( WHERE expression )?
+            // EsperEPL2Grammar.g:1116:74: ( WHERE expression )?
             int alt162=2;
             int LA162_0 = input.LA(1);
 
@@ -15497,7 +15498,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt162) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1115:75: WHERE expression
+                    // EsperEPL2Grammar.g:1116:75: WHERE expression
                     {
                     WHERE444=(Token)match(input,WHERE,FOLLOW_WHERE_in_propertyExpressionAtomic7080); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_WHERE.add(WHERE444);
@@ -15520,7 +15521,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: eventProperty, IDENT, propertySelectionList, expression
+            // elements: IDENT, propertySelectionList, expression, eventProperty
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -15530,32 +15531,32 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1116:9: -> ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) )
+            // 1117:9: -> ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) )
             {
-                // EsperEPL2Grammar.g:1116:12: ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) )
+                // EsperEPL2Grammar.g:1117:12: ^( EVENT_FILTER_PROPERTY_EXPR_ATOM ( propertySelectionList )? eventProperty ( IDENT )? ^( WHERE_EXPR ( expression )? ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_FILTER_PROPERTY_EXPR_ATOM, "EVENT_FILTER_PROPERTY_EXPR_ATOM"), root_1);
 
-                // EsperEPL2Grammar.g:1116:46: ( propertySelectionList )?
+                // EsperEPL2Grammar.g:1117:46: ( propertySelectionList )?
                 if ( stream_propertySelectionList.hasNext() ) {
                     adaptor.addChild(root_1, stream_propertySelectionList.nextTree());
 
                 }
                 stream_propertySelectionList.reset();
                 adaptor.addChild(root_1, stream_eventProperty.nextTree());
-                // EsperEPL2Grammar.g:1116:83: ( IDENT )?
+                // EsperEPL2Grammar.g:1117:83: ( IDENT )?
                 if ( stream_IDENT.hasNext() ) {
                     adaptor.addChild(root_1, stream_IDENT.nextNode());
 
                 }
                 stream_IDENT.reset();
-                // EsperEPL2Grammar.g:1116:90: ^( WHERE_EXPR ( expression )? )
+                // EsperEPL2Grammar.g:1117:90: ^( WHERE_EXPR ( expression )? )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(WHERE_EXPR, "WHERE_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1116:103: ( expression )?
+                // EsperEPL2Grammar.g:1117:103: ( expression )?
                 if ( stream_expression.hasNext() ) {
                     adaptor.addChild(root_2, stream_expression.nextTree());
 
@@ -15597,7 +15598,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "propertySelectionList"
-    // EsperEPL2Grammar.g:1119:1: propertySelectionList : propertySelectionListElement ( COMMA propertySelectionListElement )* ;
+    // EsperEPL2Grammar.g:1120:1: propertySelectionList : propertySelectionListElement ( COMMA propertySelectionListElement )* ;
     public final EsperEPL2GrammarParser.propertySelectionList_return propertySelectionList() throws RecognitionException {
         EsperEPL2GrammarParser.propertySelectionList_return retval = new EsperEPL2GrammarParser.propertySelectionList_return();
         retval.start = input.LT(1);
@@ -15613,8 +15614,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree COMMA448_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:1120:2: ( propertySelectionListElement ( COMMA propertySelectionListElement )* )
-            // EsperEPL2Grammar.g:1120:4: propertySelectionListElement ( COMMA propertySelectionListElement )*
+            // EsperEPL2Grammar.g:1121:2: ( propertySelectionListElement ( COMMA propertySelectionListElement )* )
+            // EsperEPL2Grammar.g:1121:4: propertySelectionListElement ( COMMA propertySelectionListElement )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -15624,7 +15625,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, propertySelectionListElement447.getTree());
-            // EsperEPL2Grammar.g:1120:33: ( COMMA propertySelectionListElement )*
+            // EsperEPL2Grammar.g:1121:33: ( COMMA propertySelectionListElement )*
             loop163:
             do {
                 int alt163=2;
@@ -15637,7 +15638,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt163) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1120:34: COMMA propertySelectionListElement
+            	    // EsperEPL2Grammar.g:1121:34: COMMA propertySelectionListElement
             	    {
             	    COMMA448=(Token)match(input,COMMA,FOLLOW_COMMA_in_propertySelectionList7139); if (state.failed) return retval;
             	    pushFollow(FOLLOW_propertySelectionListElement_in_propertySelectionList7142);
@@ -15682,7 +15683,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "propertySelectionListElement"
-    // EsperEPL2Grammar.g:1123:1: propertySelectionListElement : (s= STAR -> PROPERTY_WILDCARD_SELECT[$s] | ( propertyStreamSelector )=> propertyStreamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression ) );
+    // EsperEPL2Grammar.g:1124:1: propertySelectionListElement : (s= STAR -> PROPERTY_WILDCARD_SELECT[$s] | ( propertyStreamSelector )=> propertyStreamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression ) );
     public final EsperEPL2GrammarParser.propertySelectionListElement_return propertySelectionListElement() throws RecognitionException {
         EsperEPL2GrammarParser.propertySelectionListElement_return retval = new EsperEPL2GrammarParser.propertySelectionListElement_return();
         retval.start = input.LT(1);
@@ -15706,12 +15707,12 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_keywordAllowedIdent=new RewriteRuleSubtreeStream(adaptor,"rule keywordAllowedIdent");
          String identifier = null; 
         try {
-            // EsperEPL2Grammar.g:1125:2: (s= STAR -> PROPERTY_WILDCARD_SELECT[$s] | ( propertyStreamSelector )=> propertyStreamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression ) )
+            // EsperEPL2Grammar.g:1126:2: (s= STAR -> PROPERTY_WILDCARD_SELECT[$s] | ( propertyStreamSelector )=> propertyStreamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression ) )
             int alt165=3;
             alt165 = dfa165.predict(input);
             switch (alt165) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1125:7: s= STAR
+                    // EsperEPL2Grammar.g:1126:7: s= STAR
                     {
                     s=(Token)match(input,STAR,FOLLOW_STAR_in_propertySelectionListElement7168); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STAR.add(s);
@@ -15729,7 +15730,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1125:14: -> PROPERTY_WILDCARD_SELECT[$s]
+                    // 1126:14: -> PROPERTY_WILDCARD_SELECT[$s]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(PROPERTY_WILDCARD_SELECT, s));
 
@@ -15739,7 +15740,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1126:4: ( propertyStreamSelector )=> propertyStreamSelector
+                    // EsperEPL2Grammar.g:1127:4: ( propertyStreamSelector )=> propertyStreamSelector
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -15753,7 +15754,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1127:4: expression ( AS i= keywordAllowedIdent )?
+                    // EsperEPL2Grammar.g:1128:4: expression ( AS i= keywordAllowedIdent )?
                     {
                     pushFollow(FOLLOW_expression_in_propertySelectionListElement7189);
                     expression451=expression();
@@ -15761,7 +15762,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_expression.add(expression451.getTree());
-                    // EsperEPL2Grammar.g:1127:15: ( AS i= keywordAllowedIdent )?
+                    // EsperEPL2Grammar.g:1128:15: ( AS i= keywordAllowedIdent )?
                     int alt164=2;
                     int LA164_0 = input.LA(1);
 
@@ -15770,7 +15771,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt164) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1127:16: AS i= keywordAllowedIdent
+                            // EsperEPL2Grammar.g:1128:16: AS i= keywordAllowedIdent
                             {
                             AS452=(Token)match(input,AS,FOLLOW_AS_in_propertySelectionListElement7192); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_AS.add(AS452);
@@ -15803,9 +15804,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1128:3: -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
+                    // 1129:3: -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
                     if (identifier != null) {
-                        // EsperEPL2Grammar.g:1128:28: ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
+                        // EsperEPL2Grammar.g:1129:28: ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(PROPERTY_SELECTION_ELEMENT_EXPR, "PROPERTY_SELECTION_ELEMENT_EXPR"), root_1);
@@ -15817,9 +15818,9 @@ public class EsperEPL2GrammarParser extends Parser {
                         }
 
                     }
-                    else // 1129:3: -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression )
+                    else // 1130:3: -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression )
                     {
-                        // EsperEPL2Grammar.g:1129:6: ^( PROPERTY_SELECTION_ELEMENT_EXPR expression )
+                        // EsperEPL2Grammar.g:1130:6: ^( PROPERTY_SELECTION_ELEMENT_EXPR expression )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(PROPERTY_SELECTION_ELEMENT_EXPR, "PROPERTY_SELECTION_ELEMENT_EXPR"), root_1);
@@ -15860,7 +15861,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "propertyStreamSelector"
-    // EsperEPL2Grammar.g:1132:1: propertyStreamSelector : s= IDENT DOT STAR ( AS i= IDENT )? -> ^( PROPERTY_SELECTION_STREAM $s ( $i)? ) ;
+    // EsperEPL2Grammar.g:1133:1: propertyStreamSelector : s= IDENT DOT STAR ( AS i= IDENT )? -> ^( PROPERTY_SELECTION_STREAM $s ( $i)? ) ;
     public final EsperEPL2GrammarParser.propertyStreamSelector_return propertyStreamSelector() throws RecognitionException {
         EsperEPL2GrammarParser.propertyStreamSelector_return retval = new EsperEPL2GrammarParser.propertyStreamSelector_return();
         retval.start = input.LT(1);
@@ -15884,8 +15885,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_DOT=new RewriteRuleTokenStream(adaptor,"token DOT");
 
         try {
-            // EsperEPL2Grammar.g:1133:2: (s= IDENT DOT STAR ( AS i= IDENT )? -> ^( PROPERTY_SELECTION_STREAM $s ( $i)? ) )
-            // EsperEPL2Grammar.g:1133:4: s= IDENT DOT STAR ( AS i= IDENT )?
+            // EsperEPL2Grammar.g:1134:2: (s= IDENT DOT STAR ( AS i= IDENT )? -> ^( PROPERTY_SELECTION_STREAM $s ( $i)? ) )
+            // EsperEPL2Grammar.g:1134:4: s= IDENT DOT STAR ( AS i= IDENT )?
             {
             s=(Token)match(input,IDENT,FOLLOW_IDENT_in_propertyStreamSelector7240); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(s);
@@ -15896,7 +15897,7 @@ public class EsperEPL2GrammarParser extends Parser {
             STAR454=(Token)match(input,STAR,FOLLOW_STAR_in_propertyStreamSelector7244); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_STAR.add(STAR454);
 
-            // EsperEPL2Grammar.g:1133:21: ( AS i= IDENT )?
+            // EsperEPL2Grammar.g:1134:21: ( AS i= IDENT )?
             int alt166=2;
             int LA166_0 = input.LA(1);
 
@@ -15905,7 +15906,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt166) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1133:22: AS i= IDENT
+                    // EsperEPL2Grammar.g:1134:22: AS i= IDENT
                     {
                     AS455=(Token)match(input,AS,FOLLOW_AS_in_propertyStreamSelector7247); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_AS.add(AS455);
@@ -15934,15 +15935,15 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1134:3: -> ^( PROPERTY_SELECTION_STREAM $s ( $i)? )
+            // 1135:3: -> ^( PROPERTY_SELECTION_STREAM $s ( $i)? )
             {
-                // EsperEPL2Grammar.g:1134:6: ^( PROPERTY_SELECTION_STREAM $s ( $i)? )
+                // EsperEPL2Grammar.g:1135:6: ^( PROPERTY_SELECTION_STREAM $s ( $i)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(PROPERTY_SELECTION_STREAM, "PROPERTY_SELECTION_STREAM"), root_1);
 
                 adaptor.addChild(root_1, stream_s.nextNode());
-                // EsperEPL2Grammar.g:1134:37: ( $i)?
+                // EsperEPL2Grammar.g:1135:37: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
@@ -15981,7 +15982,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "patternFilterExpression"
-    // EsperEPL2Grammar.g:1137:1: patternFilterExpression : (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) ;
+    // EsperEPL2Grammar.g:1138:1: patternFilterExpression : (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) ;
     public final EsperEPL2GrammarParser.patternFilterExpression_return patternFilterExpression() throws RecognitionException {
         EsperEPL2GrammarParser.patternFilterExpression_return retval = new EsperEPL2GrammarParser.patternFilterExpression_return();
         retval.start = input.LT(1);
@@ -16012,10 +16013,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_classIdentifier=new RewriteRuleSubtreeStream(adaptor,"rule classIdentifier");
          paraphrases.push("filter specification"); 
         try {
-            // EsperEPL2Grammar.g:1140:5: ( (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) )
-            // EsperEPL2Grammar.g:1140:9: (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )?
+            // EsperEPL2Grammar.g:1141:5: ( (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )? -> ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? ) )
+            // EsperEPL2Grammar.g:1141:9: (i= IDENT EQUALS )? classIdentifier ( LPAREN ( expressionList )? RPAREN )? ( propertyExpression )?
             {
-            // EsperEPL2Grammar.g:1140:9: (i= IDENT EQUALS )?
+            // EsperEPL2Grammar.g:1141:9: (i= IDENT EQUALS )?
             int alt167=2;
             int LA167_0 = input.LA(1);
 
@@ -16028,7 +16029,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt167) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1140:10: i= IDENT EQUALS
+                    // EsperEPL2Grammar.g:1141:10: i= IDENT EQUALS
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_patternFilterExpression7298); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -16048,7 +16049,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_classIdentifier.add(classIdentifier457.getTree());
-            // EsperEPL2Grammar.g:1142:9: ( LPAREN ( expressionList )? RPAREN )?
+            // EsperEPL2Grammar.g:1143:9: ( LPAREN ( expressionList )? RPAREN )?
             int alt169=2;
             int LA169_0 = input.LA(1);
 
@@ -16057,12 +16058,12 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt169) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1142:10: LPAREN ( expressionList )? RPAREN
+                    // EsperEPL2Grammar.g:1143:10: LPAREN ( expressionList )? RPAREN
                     {
                     LPAREN458=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_patternFilterExpression7320); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(LPAREN458);
 
-                    // EsperEPL2Grammar.g:1142:17: ( expressionList )?
+                    // EsperEPL2Grammar.g:1143:17: ( expressionList )?
                     int alt168=2;
                     int LA168_0 = input.LA(1);
 
@@ -16071,7 +16072,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt168) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1142:17: expressionList
+                            // EsperEPL2Grammar.g:1143:17: expressionList
                             {
                             pushFollow(FOLLOW_expressionList_in_patternFilterExpression7322);
                             expressionList459=expressionList();
@@ -16094,7 +16095,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1143:9: ( propertyExpression )?
+            // EsperEPL2Grammar.g:1144:9: ( propertyExpression )?
             int alt170=2;
             int LA170_0 = input.LA(1);
 
@@ -16103,7 +16104,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt170) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1143:9: propertyExpression
+                    // EsperEPL2Grammar.g:1144:9: propertyExpression
                     {
                     pushFollow(FOLLOW_propertyExpression_in_patternFilterExpression7337);
                     propertyExpression461=propertyExpression();
@@ -16120,7 +16121,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: i, propertyExpression, expressionList, classIdentifier
+            // elements: classIdentifier, expressionList, propertyExpression, i
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -16131,27 +16132,27 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1144:9: -> ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
+            // 1145:9: -> ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
             {
-                // EsperEPL2Grammar.g:1144:12: ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
+                // EsperEPL2Grammar.g:1145:12: ^( PATTERN_FILTER_EXPR ( $i)? classIdentifier ( propertyExpression )? ( expressionList )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(PATTERN_FILTER_EXPR, "PATTERN_FILTER_EXPR"), root_1);
 
-                // EsperEPL2Grammar.g:1144:34: ( $i)?
+                // EsperEPL2Grammar.g:1145:34: ( $i)?
                 if ( stream_i.hasNext() ) {
                     adaptor.addChild(root_1, stream_i.nextNode());
 
                 }
                 stream_i.reset();
                 adaptor.addChild(root_1, stream_classIdentifier.nextTree());
-                // EsperEPL2Grammar.g:1144:54: ( propertyExpression )?
+                // EsperEPL2Grammar.g:1145:54: ( propertyExpression )?
                 if ( stream_propertyExpression.hasNext() ) {
                     adaptor.addChild(root_1, stream_propertyExpression.nextTree());
 
                 }
                 stream_propertyExpression.reset();
-                // EsperEPL2Grammar.g:1144:74: ( expressionList )?
+                // EsperEPL2Grammar.g:1145:74: ( expressionList )?
                 if ( stream_expressionList.hasNext() ) {
                     adaptor.addChild(root_1, stream_expressionList.nextTree());
 
@@ -16193,7 +16194,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "classIdentifier"
-    // EsperEPL2Grammar.g:1147:1: classIdentifier : i1= IDENT ( DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) ;
+    // EsperEPL2Grammar.g:1148:1: classIdentifier : i1= IDENT ( DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) ;
     public final EsperEPL2GrammarParser.classIdentifier_return classIdentifier() throws RecognitionException {
         EsperEPL2GrammarParser.classIdentifier_return retval = new EsperEPL2GrammarParser.classIdentifier_return();
         retval.start = input.LT(1);
@@ -16212,8 +16213,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
          String identifier = ""; 
         try {
-            // EsperEPL2Grammar.g:1149:2: (i1= IDENT ( DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) )
-            // EsperEPL2Grammar.g:1149:4: i1= IDENT ( DOT i2= IDENT )*
+            // EsperEPL2Grammar.g:1150:2: (i1= IDENT ( DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) )
+            // EsperEPL2Grammar.g:1150:4: i1= IDENT ( DOT i2= IDENT )*
             {
             i1=(Token)match(input,IDENT,FOLLOW_IDENT_in_classIdentifier7387); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(i1);
@@ -16221,7 +16222,7 @@ public class EsperEPL2GrammarParser extends Parser {
             if ( state.backtracking==0 ) {
                identifier = i1.getText(); 
             }
-            // EsperEPL2Grammar.g:1150:6: ( DOT i2= IDENT )*
+            // EsperEPL2Grammar.g:1151:6: ( DOT i2= IDENT )*
             loop171:
             do {
                 int alt171=2;
@@ -16246,7 +16247,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt171) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1151:8: DOT i2= IDENT
+            	    // EsperEPL2Grammar.g:1152:8: DOT i2= IDENT
             	    {
             	    DOT462=(Token)match(input,DOT,FOLLOW_DOT_in_classIdentifier7406); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_DOT.add(DOT462);
@@ -16279,9 +16280,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1153:6: -> ^( CLASS_IDENT[identifier] )
+            // 1154:6: -> ^( CLASS_IDENT[identifier] )
             {
-                // EsperEPL2Grammar.g:1153:9: ^( CLASS_IDENT[identifier] )
+                // EsperEPL2Grammar.g:1154:9: ^( CLASS_IDENT[identifier] )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CLASS_IDENT, identifier), root_1);
@@ -16318,7 +16319,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "classIdentifierNonGreedy"
-    // EsperEPL2Grammar.g:1156:1: classIdentifierNonGreedy : i1= IDENT ( options {greedy=false; } : DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) ;
+    // EsperEPL2Grammar.g:1157:1: classIdentifierNonGreedy : i1= IDENT ( options {greedy=false; } : DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) ;
     public final EsperEPL2GrammarParser.classIdentifierNonGreedy_return classIdentifierNonGreedy() throws RecognitionException {
         EsperEPL2GrammarParser.classIdentifierNonGreedy_return retval = new EsperEPL2GrammarParser.classIdentifierNonGreedy_return();
         retval.start = input.LT(1);
@@ -16337,8 +16338,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
          String identifier = ""; 
         try {
-            // EsperEPL2Grammar.g:1158:2: (i1= IDENT ( options {greedy=false; } : DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) )
-            // EsperEPL2Grammar.g:1158:4: i1= IDENT ( options {greedy=false; } : DOT i2= IDENT )*
+            // EsperEPL2Grammar.g:1159:2: (i1= IDENT ( options {greedy=false; } : DOT i2= IDENT )* -> ^( CLASS_IDENT[identifier] ) )
+            // EsperEPL2Grammar.g:1159:4: i1= IDENT ( options {greedy=false; } : DOT i2= IDENT )*
             {
             i1=(Token)match(input,IDENT,FOLLOW_IDENT_in_classIdentifierNonGreedy7455); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_IDENT.add(i1);
@@ -16346,7 +16347,7 @@ public class EsperEPL2GrammarParser extends Parser {
             if ( state.backtracking==0 ) {
                identifier = i1.getText(); 
             }
-            // EsperEPL2Grammar.g:1159:6: ( options {greedy=false; } : DOT i2= IDENT )*
+            // EsperEPL2Grammar.g:1160:6: ( options {greedy=false; } : DOT i2= IDENT )*
             loop172:
             do {
                 int alt172=2;
@@ -16377,7 +16378,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt172) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1161:8: DOT i2= IDENT
+            	    // EsperEPL2Grammar.g:1162:8: DOT i2= IDENT
             	    {
             	    DOT463=(Token)match(input,DOT,FOLLOW_DOT_in_classIdentifierNonGreedy7490); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_DOT.add(DOT463);
@@ -16410,9 +16411,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1163:6: -> ^( CLASS_IDENT[identifier] )
+            // 1164:6: -> ^( CLASS_IDENT[identifier] )
             {
-                // EsperEPL2Grammar.g:1163:9: ^( CLASS_IDENT[identifier] )
+                // EsperEPL2Grammar.g:1164:9: ^( CLASS_IDENT[identifier] )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(CLASS_IDENT, identifier), root_1);
@@ -16449,7 +16450,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "expressionList"
-    // EsperEPL2Grammar.g:1166:1: expressionList : expression ( COMMA expression )* ;
+    // EsperEPL2Grammar.g:1167:1: expressionList : expression ( COMMA expression )* ;
     public final EsperEPL2GrammarParser.expressionList_return expressionList() throws RecognitionException {
         EsperEPL2GrammarParser.expressionList_return retval = new EsperEPL2GrammarParser.expressionList_return();
         retval.start = input.LT(1);
@@ -16465,8 +16466,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree COMMA465_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:1167:6: ( expression ( COMMA expression )* )
-            // EsperEPL2Grammar.g:1167:11: expression ( COMMA expression )*
+            // EsperEPL2Grammar.g:1168:6: ( expression ( COMMA expression )* )
+            // EsperEPL2Grammar.g:1168:11: expression ( COMMA expression )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -16476,7 +16477,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, expression464.getTree());
-            // EsperEPL2Grammar.g:1167:22: ( COMMA expression )*
+            // EsperEPL2Grammar.g:1168:22: ( COMMA expression )*
             loop173:
             do {
                 int alt173=2;
@@ -16489,7 +16490,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt173) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1167:23: COMMA expression
+            	    // EsperEPL2Grammar.g:1168:23: COMMA expression
             	    {
             	    COMMA465=(Token)match(input,COMMA,FOLLOW_COMMA_in_expressionList7539); if (state.failed) return retval;
             	    pushFollow(FOLLOW_expression_in_expressionList7542);
@@ -16534,7 +16535,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "expressionWithTimeList"
-    // EsperEPL2Grammar.g:1170:1: expressionWithTimeList : expressionWithTime ( COMMA expressionWithTime )* ;
+    // EsperEPL2Grammar.g:1171:1: expressionWithTimeList : expressionWithTime ( COMMA expressionWithTime )* ;
     public final EsperEPL2GrammarParser.expressionWithTimeList_return expressionWithTimeList() throws RecognitionException {
         EsperEPL2GrammarParser.expressionWithTimeList_return retval = new EsperEPL2GrammarParser.expressionWithTimeList_return();
         retval.start = input.LT(1);
@@ -16550,8 +16551,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree COMMA468_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:1171:6: ( expressionWithTime ( COMMA expressionWithTime )* )
-            // EsperEPL2Grammar.g:1171:11: expressionWithTime ( COMMA expressionWithTime )*
+            // EsperEPL2Grammar.g:1172:6: ( expressionWithTime ( COMMA expressionWithTime )* )
+            // EsperEPL2Grammar.g:1172:11: expressionWithTime ( COMMA expressionWithTime )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -16561,7 +16562,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, expressionWithTime467.getTree());
-            // EsperEPL2Grammar.g:1171:30: ( COMMA expressionWithTime )*
+            // EsperEPL2Grammar.g:1172:30: ( COMMA expressionWithTime )*
             loop174:
             do {
                 int alt174=2;
@@ -16574,7 +16575,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt174) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1171:31: COMMA expressionWithTime
+            	    // EsperEPL2Grammar.g:1172:31: COMMA expressionWithTime
             	    {
             	    COMMA468=(Token)match(input,COMMA,FOLLOW_COMMA_in_expressionWithTimeList7573); if (state.failed) return retval;
             	    pushFollow(FOLLOW_expressionWithTime_in_expressionWithTimeList7576);
@@ -16619,7 +16620,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "expressionWithTime"
-    // EsperEPL2Grammar.g:1174:1: expressionWithTime : ( ( lastOperand )=> lastOperand | ( lastWeekdayOperand )=> lastWeekdayOperand | ( timePeriod )=> timePeriod | ( expressionQualifyable )=> expressionQualifyable | ( rangeOperand )=> rangeOperand | ( frequencyOperand )=> frequencyOperand | ( lastOperator )=> lastOperator | ( weekDayOperator )=> weekDayOperator | ( numericParameterList )=> numericParameterList | numberSetStar );
+    // EsperEPL2Grammar.g:1175:1: expressionWithTime : ( ( lastOperand )=> lastOperand | ( lastWeekdayOperand )=> lastWeekdayOperand | ( timePeriod )=> timePeriod | ( expressionQualifyable )=> expressionQualifyable | ( rangeOperand )=> rangeOperand | ( frequencyOperand )=> frequencyOperand | ( lastOperator )=> lastOperator | ( weekDayOperator )=> weekDayOperator | ( numericParameterList )=> numericParameterList | numberSetStar );
     public final EsperEPL2GrammarParser.expressionWithTime_return expressionWithTime() throws RecognitionException {
         EsperEPL2GrammarParser.expressionWithTime_return retval = new EsperEPL2GrammarParser.expressionWithTime_return();
         retval.start = input.LT(1);
@@ -16649,12 +16650,12 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:1175:2: ( ( lastOperand )=> lastOperand | ( lastWeekdayOperand )=> lastWeekdayOperand | ( timePeriod )=> timePeriod | ( expressionQualifyable )=> expressionQualifyable | ( rangeOperand )=> rangeOperand | ( frequencyOperand )=> frequencyOperand | ( lastOperator )=> lastOperator | ( weekDayOperator )=> weekDayOperator | ( numericParameterList )=> numericParameterList | numberSetStar )
+            // EsperEPL2Grammar.g:1176:2: ( ( lastOperand )=> lastOperand | ( lastWeekdayOperand )=> lastWeekdayOperand | ( timePeriod )=> timePeriod | ( expressionQualifyable )=> expressionQualifyable | ( rangeOperand )=> rangeOperand | ( frequencyOperand )=> frequencyOperand | ( lastOperator )=> lastOperator | ( weekDayOperator )=> weekDayOperator | ( numericParameterList )=> numericParameterList | numberSetStar )
             int alt175=10;
             alt175 = dfa175.predict(input);
             switch (alt175) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1175:7: ( lastOperand )=> lastOperand
+                    // EsperEPL2Grammar.g:1176:7: ( lastOperand )=> lastOperand
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16668,7 +16669,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1176:4: ( lastWeekdayOperand )=> lastWeekdayOperand
+                    // EsperEPL2Grammar.g:1177:4: ( lastWeekdayOperand )=> lastWeekdayOperand
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16682,7 +16683,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1177:4: ( timePeriod )=> timePeriod
+                    // EsperEPL2Grammar.g:1178:4: ( timePeriod )=> timePeriod
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16696,7 +16697,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1178:4: ( expressionQualifyable )=> expressionQualifyable
+                    // EsperEPL2Grammar.g:1179:4: ( expressionQualifyable )=> expressionQualifyable
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16710,7 +16711,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:1179:4: ( rangeOperand )=> rangeOperand
+                    // EsperEPL2Grammar.g:1180:4: ( rangeOperand )=> rangeOperand
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16724,7 +16725,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // EsperEPL2Grammar.g:1180:5: ( frequencyOperand )=> frequencyOperand
+                    // EsperEPL2Grammar.g:1181:5: ( frequencyOperand )=> frequencyOperand
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16738,7 +16739,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 7 :
-                    // EsperEPL2Grammar.g:1181:4: ( lastOperator )=> lastOperator
+                    // EsperEPL2Grammar.g:1182:4: ( lastOperator )=> lastOperator
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16752,7 +16753,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 8 :
-                    // EsperEPL2Grammar.g:1182:4: ( weekDayOperator )=> weekDayOperator
+                    // EsperEPL2Grammar.g:1183:4: ( weekDayOperator )=> weekDayOperator
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16766,7 +16767,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 9 :
-                    // EsperEPL2Grammar.g:1183:5: ( numericParameterList )=> numericParameterList
+                    // EsperEPL2Grammar.g:1184:5: ( numericParameterList )=> numericParameterList
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16780,7 +16781,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 10 :
-                    // EsperEPL2Grammar.g:1184:4: numberSetStar
+                    // EsperEPL2Grammar.g:1185:4: numberSetStar
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -16819,7 +16820,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "expressionQualifyable"
-    // EsperEPL2Grammar.g:1187:1: expressionQualifyable : expression (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )? -> {d != null || a != null}? ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? ) -> {s != null}? ^( TIME_PERIOD ^( SECOND_PART expression ) ) -> expression ;
+    // EsperEPL2Grammar.g:1188:1: expressionQualifyable : expression (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )? -> {d != null || a != null}? ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? ) -> {s != null}? ^( TIME_PERIOD ^( SECOND_PART expression ) ) -> expression ;
     public final EsperEPL2GrammarParser.expressionQualifyable_return expressionQualifyable() throws RecognitionException {
         EsperEPL2GrammarParser.expressionQualifyable_return retval = new EsperEPL2GrammarParser.expressionQualifyable_return();
         retval.start = input.LT(1);
@@ -16842,8 +16843,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_TIMEPERIOD_SECONDS=new RewriteRuleTokenStream(adaptor,"token TIMEPERIOD_SECONDS");
         RewriteRuleSubtreeStream stream_expression=new RewriteRuleSubtreeStream(adaptor,"rule expression");
         try {
-            // EsperEPL2Grammar.g:1188:2: ( expression (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )? -> {d != null || a != null}? ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? ) -> {s != null}? ^( TIME_PERIOD ^( SECOND_PART expression ) ) -> expression )
-            // EsperEPL2Grammar.g:1188:4: expression (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )?
+            // EsperEPL2Grammar.g:1189:2: ( expression (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )? -> {d != null || a != null}? ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? ) -> {s != null}? ^( TIME_PERIOD ^( SECOND_PART expression ) ) -> expression )
+            // EsperEPL2Grammar.g:1189:4: expression (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )?
             {
             pushFollow(FOLLOW_expression_in_expressionQualifyable7709);
             expression480=expression();
@@ -16851,7 +16852,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_expression.add(expression480.getTree());
-            // EsperEPL2Grammar.g:1188:15: (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )?
+            // EsperEPL2Grammar.g:1189:15: (a= ASC | d= DESC | s= TIMEPERIOD_SECONDS | s= TIMEPERIOD_SECOND | s= TIMEPERIOD_SEC )?
             int alt176=6;
             switch ( input.LA(1) ) {
                 case ASC:
@@ -16883,7 +16884,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt176) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1188:16: a= ASC
+                    // EsperEPL2Grammar.g:1189:16: a= ASC
                     {
                     a=(Token)match(input,ASC,FOLLOW_ASC_in_expressionQualifyable7714); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_ASC.add(a);
@@ -16892,7 +16893,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1188:22: d= DESC
+                    // EsperEPL2Grammar.g:1189:22: d= DESC
                     {
                     d=(Token)match(input,DESC,FOLLOW_DESC_in_expressionQualifyable7718); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_DESC.add(d);
@@ -16901,7 +16902,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1188:29: s= TIMEPERIOD_SECONDS
+                    // EsperEPL2Grammar.g:1189:29: s= TIMEPERIOD_SECONDS
                     {
                     s=(Token)match(input,TIMEPERIOD_SECONDS,FOLLOW_TIMEPERIOD_SECONDS_in_expressionQualifyable7722); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_SECONDS.add(s);
@@ -16910,7 +16911,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1188:50: s= TIMEPERIOD_SECOND
+                    // EsperEPL2Grammar.g:1189:50: s= TIMEPERIOD_SECOND
                     {
                     s=(Token)match(input,TIMEPERIOD_SECOND,FOLLOW_TIMEPERIOD_SECOND_in_expressionQualifyable7726); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_SECOND.add(s);
@@ -16919,7 +16920,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:1188:70: s= TIMEPERIOD_SEC
+                    // EsperEPL2Grammar.g:1189:70: s= TIMEPERIOD_SEC
                     {
                     s=(Token)match(input,TIMEPERIOD_SEC,FOLLOW_TIMEPERIOD_SEC_in_expressionQualifyable7730); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_SEC.add(s);
@@ -16933,7 +16934,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: expression, d, a, expression, expression
+            // elements: expression, expression, a, d, expression
             // token labels: d, a
             // rule labels: retval
             // token list labels: 
@@ -16945,21 +16946,21 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1189:3: -> {d != null || a != null}? ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? )
+            // 1190:3: -> {d != null || a != null}? ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? )
             if (d != null || a != null) {
-                // EsperEPL2Grammar.g:1189:32: ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? )
+                // EsperEPL2Grammar.g:1190:32: ^( OBJECT_PARAM_ORDERED_EXPR expression ( $a)? ( $d)? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(OBJECT_PARAM_ORDERED_EXPR, "OBJECT_PARAM_ORDERED_EXPR"), root_1);
 
                 adaptor.addChild(root_1, stream_expression.nextTree());
-                // EsperEPL2Grammar.g:1189:71: ( $a)?
+                // EsperEPL2Grammar.g:1190:71: ( $a)?
                 if ( stream_a.hasNext() ) {
                     adaptor.addChild(root_1, stream_a.nextNode());
 
                 }
                 stream_a.reset();
-                // EsperEPL2Grammar.g:1189:75: ( $d)?
+                // EsperEPL2Grammar.g:1190:75: ( $d)?
                 if ( stream_d.hasNext() ) {
                     adaptor.addChild(root_1, stream_d.nextNode());
 
@@ -16970,14 +16971,14 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1190:3: -> {s != null}? ^( TIME_PERIOD ^( SECOND_PART expression ) )
+            else // 1191:3: -> {s != null}? ^( TIME_PERIOD ^( SECOND_PART expression ) )
             if (s != null) {
-                // EsperEPL2Grammar.g:1190:19: ^( TIME_PERIOD ^( SECOND_PART expression ) )
+                // EsperEPL2Grammar.g:1191:19: ^( TIME_PERIOD ^( SECOND_PART expression ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(TIME_PERIOD, "TIME_PERIOD"), root_1);
 
-                // EsperEPL2Grammar.g:1190:33: ^( SECOND_PART expression )
+                // EsperEPL2Grammar.g:1191:33: ^( SECOND_PART expression )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SECOND_PART, "SECOND_PART"), root_2);
@@ -16991,7 +16992,7 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1191:3: -> expression
+            else // 1192:3: -> expression
             {
                 adaptor.addChild(root_0, stream_expression.nextTree());
 
@@ -17024,7 +17025,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "numberSetStar"
-    // EsperEPL2Grammar.g:1195:1: numberSetStar : STAR -> ^( NUMBERSETSTAR ) ;
+    // EsperEPL2Grammar.g:1196:1: numberSetStar : STAR -> ^( NUMBERSETSTAR ) ;
     public final EsperEPL2GrammarParser.numberSetStar_return numberSetStar() throws RecognitionException {
         EsperEPL2GrammarParser.numberSetStar_return retval = new EsperEPL2GrammarParser.numberSetStar_return();
         retval.start = input.LT(1);
@@ -17037,8 +17038,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_STAR=new RewriteRuleTokenStream(adaptor,"token STAR");
 
         try {
-            // EsperEPL2Grammar.g:1196:2: ( STAR -> ^( NUMBERSETSTAR ) )
-            // EsperEPL2Grammar.g:1196:4: STAR
+            // EsperEPL2Grammar.g:1197:2: ( STAR -> ^( NUMBERSETSTAR ) )
+            // EsperEPL2Grammar.g:1197:4: STAR
             {
             STAR481=(Token)match(input,STAR,FOLLOW_STAR_in_numberSetStar7787); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_STAR.add(STAR481);
@@ -17056,9 +17057,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1197:3: -> ^( NUMBERSETSTAR )
+            // 1198:3: -> ^( NUMBERSETSTAR )
             {
-                // EsperEPL2Grammar.g:1197:6: ^( NUMBERSETSTAR )
+                // EsperEPL2Grammar.g:1198:6: ^( NUMBERSETSTAR )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMBERSETSTAR, "NUMBERSETSTAR"), root_1);
@@ -17095,7 +17096,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "lastWeekdayOperand"
-    // EsperEPL2Grammar.g:1200:1: lastWeekdayOperand : LW ;
+    // EsperEPL2Grammar.g:1201:1: lastWeekdayOperand : LW ;
     public final EsperEPL2GrammarParser.lastWeekdayOperand_return lastWeekdayOperand() throws RecognitionException {
         EsperEPL2GrammarParser.lastWeekdayOperand_return retval = new EsperEPL2GrammarParser.lastWeekdayOperand_return();
         retval.start = input.LT(1);
@@ -17107,8 +17108,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree LW482_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:1201:2: ( LW )
-            // EsperEPL2Grammar.g:1201:4: LW
+            // EsperEPL2Grammar.g:1202:2: ( LW )
+            // EsperEPL2Grammar.g:1202:4: LW
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -17144,7 +17145,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "lastOperand"
-    // EsperEPL2Grammar.g:1204:1: lastOperand : LAST ;
+    // EsperEPL2Grammar.g:1205:1: lastOperand : LAST ;
     public final EsperEPL2GrammarParser.lastOperand_return lastOperand() throws RecognitionException {
         EsperEPL2GrammarParser.lastOperand_return retval = new EsperEPL2GrammarParser.lastOperand_return();
         retval.start = input.LT(1);
@@ -17156,8 +17157,8 @@ public class EsperEPL2GrammarParser extends Parser {
         CommonTree LAST483_tree=null;
 
         try {
-            // EsperEPL2Grammar.g:1205:2: ( LAST )
-            // EsperEPL2Grammar.g:1205:4: LAST
+            // EsperEPL2Grammar.g:1206:2: ( LAST )
+            // EsperEPL2Grammar.g:1206:4: LAST
             {
             root_0 = (CommonTree)adaptor.nil();
 
@@ -17193,7 +17194,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "frequencyOperand"
-    // EsperEPL2Grammar.g:1208:1: frequencyOperand : STAR DIV ( number | i= IDENT | substitution ) -> {i!= null}? ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1209:1: frequencyOperand : STAR DIV ( number | i= IDENT | substitution ) -> {i!= null}? ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.frequencyOperand_return frequencyOperand() throws RecognitionException {
         EsperEPL2GrammarParser.frequencyOperand_return retval = new EsperEPL2GrammarParser.frequencyOperand_return();
         retval.start = input.LT(1);
@@ -17217,8 +17218,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1209:2: ( STAR DIV ( number | i= IDENT | substitution ) -> {i!= null}? ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1209:4: STAR DIV ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1210:2: ( STAR DIV ( number | i= IDENT | substitution ) -> {i!= null}? ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1210:4: STAR DIV ( number | i= IDENT | substitution )
             {
             STAR484=(Token)match(input,STAR,FOLLOW_STAR_in_frequencyOperand7832); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_STAR.add(STAR484);
@@ -17226,7 +17227,7 @@ public class EsperEPL2GrammarParser extends Parser {
             DIV485=(Token)match(input,DIV,FOLLOW_DIV_in_frequencyOperand7834); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_DIV.add(DIV485);
 
-            // EsperEPL2Grammar.g:1209:13: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1210:13: ( number | i= IDENT | substitution )
             int alt177=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -17257,7 +17258,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt177) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1209:14: number
+                    // EsperEPL2Grammar.g:1210:14: number
                     {
                     pushFollow(FOLLOW_number_in_frequencyOperand7837);
                     number486=number();
@@ -17269,7 +17270,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1209:21: i= IDENT
+                    // EsperEPL2Grammar.g:1210:21: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_frequencyOperand7841); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -17278,7 +17279,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1209:29: substitution
+                    // EsperEPL2Grammar.g:1210:29: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_frequencyOperand7843);
                     substitution487=substitution();
@@ -17295,7 +17296,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: i, substitution, number
+            // elements: number, substitution, i
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -17306,19 +17307,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1210:3: -> {i!= null}? ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1211:3: -> {i!= null}? ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1210:18: ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1211:18: ^( NUMERIC_PARAM_FREQUENCY ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_FREQUENCY, "NUMERIC_PARAM_FREQUENCY"), root_1);
 
-                // EsperEPL2Grammar.g:1210:44: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1211:44: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1210:62: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1211:62: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -17335,20 +17336,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1211:3: -> ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? )
+            else // 1212:3: -> ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1211:6: ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1212:6: ^( NUMERIC_PARAM_FREQUENCY ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_FREQUENCY, "NUMERIC_PARAM_FREQUENCY"), root_1);
 
-                // EsperEPL2Grammar.g:1211:32: ( number )?
+                // EsperEPL2Grammar.g:1212:32: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1211:40: ( substitution )?
+                // EsperEPL2Grammar.g:1212:40: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -17387,7 +17388,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "rangeOperand"
-    // EsperEPL2Grammar.g:1214:1: rangeOperand : ( number | i1= IDENT | substitution ) COLON ( number | i2= IDENT | substitution ) -> {i1 != null && i2 != null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> {i1 != null && i2 == null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? ) -> {i1 == null && i2 != null}? ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* ) ;
+    // EsperEPL2Grammar.g:1215:1: rangeOperand : ( number | i1= IDENT | substitution ) COLON ( number | i2= IDENT | substitution ) -> {i1 != null && i2 != null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> {i1 != null && i2 == null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? ) -> {i1 == null && i2 != null}? ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* ) ;
     public final EsperEPL2GrammarParser.rangeOperand_return rangeOperand() throws RecognitionException {
         EsperEPL2GrammarParser.rangeOperand_return retval = new EsperEPL2GrammarParser.rangeOperand_return();
         retval.start = input.LT(1);
@@ -17414,10 +17415,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1215:2: ( ( number | i1= IDENT | substitution ) COLON ( number | i2= IDENT | substitution ) -> {i1 != null && i2 != null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> {i1 != null && i2 == null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? ) -> {i1 == null && i2 != null}? ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* ) )
-            // EsperEPL2Grammar.g:1215:4: ( number | i1= IDENT | substitution ) COLON ( number | i2= IDENT | substitution )
+            // EsperEPL2Grammar.g:1216:2: ( ( number | i1= IDENT | substitution ) COLON ( number | i2= IDENT | substitution ) -> {i1 != null && i2 != null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> {i1 != null && i2 == null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? ) -> {i1 == null && i2 != null}? ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) ) -> ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* ) )
+            // EsperEPL2Grammar.g:1216:4: ( number | i1= IDENT | substitution ) COLON ( number | i2= IDENT | substitution )
             {
-            // EsperEPL2Grammar.g:1215:4: ( number | i1= IDENT | substitution )
+            // EsperEPL2Grammar.g:1216:4: ( number | i1= IDENT | substitution )
             int alt178=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -17448,7 +17449,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt178) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1215:5: number
+                    // EsperEPL2Grammar.g:1216:5: number
                     {
                     pushFollow(FOLLOW_number_in_rangeOperand7892);
                     number488=number();
@@ -17460,7 +17461,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1215:12: i1= IDENT
+                    // EsperEPL2Grammar.g:1216:12: i1= IDENT
                     {
                     i1=(Token)match(input,IDENT,FOLLOW_IDENT_in_rangeOperand7896); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i1);
@@ -17469,7 +17470,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1215:21: substitution
+                    // EsperEPL2Grammar.g:1216:21: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_rangeOperand7898);
                     substitution489=substitution();
@@ -17486,7 +17487,7 @@ public class EsperEPL2GrammarParser extends Parser {
             COLON490=(Token)match(input,COLON,FOLLOW_COLON_in_rangeOperand7901); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_COLON.add(COLON490);
 
-            // EsperEPL2Grammar.g:1215:41: ( number | i2= IDENT | substitution )
+            // EsperEPL2Grammar.g:1216:41: ( number | i2= IDENT | substitution )
             int alt179=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -17517,7 +17518,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt179) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1215:42: number
+                    // EsperEPL2Grammar.g:1216:42: number
                     {
                     pushFollow(FOLLOW_number_in_rangeOperand7904);
                     number491=number();
@@ -17529,7 +17530,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1215:49: i2= IDENT
+                    // EsperEPL2Grammar.g:1216:49: i2= IDENT
                     {
                     i2=(Token)match(input,IDENT,FOLLOW_IDENT_in_rangeOperand7908); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i2);
@@ -17538,7 +17539,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1215:58: substitution
+                    // EsperEPL2Grammar.g:1216:58: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_rangeOperand7910);
                     substitution492=substitution();
@@ -17555,7 +17556,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: number, substitution, substitution, i2, number, i1, i2, number, i1, substitution
+            // elements: number, substitution, substitution, i1, substitution, i2, i1, number, i2, number
             // token labels: i2, i1
             // rule labels: retval
             // token list labels: 
@@ -17567,55 +17568,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1216:3: -> {i1 != null && i2 != null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
+            // 1217:3: -> {i1 != null && i2 != null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
             if (i1 != null && i2 != null) {
-                // EsperEPL2Grammar.g:1216:34: ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
-                {
-                CommonTree root_1 = (CommonTree)adaptor.nil();
-                root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_RANGE, "NUMERIC_PARAM_RANGE"), root_1);
-
-                // EsperEPL2Grammar.g:1216:56: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) )
-                {
-                CommonTree root_2 = (CommonTree)adaptor.nil();
-                root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
-
-                // EsperEPL2Grammar.g:1216:74: ^( EVENT_PROP_SIMPLE $i1)
-                {
-                CommonTree root_3 = (CommonTree)adaptor.nil();
-                root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
-
-                adaptor.addChild(root_3, stream_i1.nextNode());
-
-                adaptor.addChild(root_2, root_3);
-                }
-
-                adaptor.addChild(root_1, root_2);
-                }
-                // EsperEPL2Grammar.g:1216:100: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) )
-                {
-                CommonTree root_2 = (CommonTree)adaptor.nil();
-                root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
-
-                // EsperEPL2Grammar.g:1216:118: ^( EVENT_PROP_SIMPLE $i2)
-                {
-                CommonTree root_3 = (CommonTree)adaptor.nil();
-                root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
-
-                adaptor.addChild(root_3, stream_i2.nextNode());
-
-                adaptor.addChild(root_2, root_3);
-                }
-
-                adaptor.addChild(root_1, root_2);
-                }
-
-                adaptor.addChild(root_0, root_1);
-                }
-
-            }
-            else // 1217:3: -> {i1 != null && i2 == null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? )
-            if (i1 != null && i2 == null) {
-                // EsperEPL2Grammar.g:1217:34: ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1217:34: ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_RANGE, "NUMERIC_PARAM_RANGE"), root_1);
@@ -17637,48 +17592,12 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 adaptor.addChild(root_1, root_2);
                 }
-                // EsperEPL2Grammar.g:1217:100: ( number )?
-                if ( stream_number.hasNext() ) {
-                    adaptor.addChild(root_1, stream_number.nextTree());
-
-                }
-                stream_number.reset();
-                // EsperEPL2Grammar.g:1217:108: ( substitution )?
-                if ( stream_substitution.hasNext() ) {
-                    adaptor.addChild(root_1, stream_substitution.nextTree());
-
-                }
-                stream_substitution.reset();
-
-                adaptor.addChild(root_0, root_1);
-                }
-
-            }
-            else // 1218:3: -> {i1 == null && i2 != null}? ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
-            if (i1 == null && i2 != null) {
-                // EsperEPL2Grammar.g:1218:34: ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
-                {
-                CommonTree root_1 = (CommonTree)adaptor.nil();
-                root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_RANGE, "NUMERIC_PARAM_RANGE"), root_1);
-
-                // EsperEPL2Grammar.g:1218:56: ( number )?
-                if ( stream_number.hasNext() ) {
-                    adaptor.addChild(root_1, stream_number.nextTree());
-
-                }
-                stream_number.reset();
-                // EsperEPL2Grammar.g:1218:64: ( substitution )?
-                if ( stream_substitution.hasNext() ) {
-                    adaptor.addChild(root_1, stream_substitution.nextTree());
-
-                }
-                stream_substitution.reset();
-                // EsperEPL2Grammar.g:1218:78: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) )
+                // EsperEPL2Grammar.g:1217:100: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1218:96: ^( EVENT_PROP_SIMPLE $i2)
+                // EsperEPL2Grammar.g:1217:118: ^( EVENT_PROP_SIMPLE $i2)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -17695,20 +17614,102 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1219:3: -> ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* )
-            {
-                // EsperEPL2Grammar.g:1219:6: ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* )
+            else // 1218:3: -> {i1 != null && i2 == null}? ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? )
+            if (i1 != null && i2 == null) {
+                // EsperEPL2Grammar.g:1218:34: ^( NUMERIC_PARAM_RANGE ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) ) ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_RANGE, "NUMERIC_PARAM_RANGE"), root_1);
 
-                // EsperEPL2Grammar.g:1219:28: ( number )*
+                // EsperEPL2Grammar.g:1218:56: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i1) )
+                {
+                CommonTree root_2 = (CommonTree)adaptor.nil();
+                root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
+
+                // EsperEPL2Grammar.g:1218:74: ^( EVENT_PROP_SIMPLE $i1)
+                {
+                CommonTree root_3 = (CommonTree)adaptor.nil();
+                root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
+
+                adaptor.addChild(root_3, stream_i1.nextNode());
+
+                adaptor.addChild(root_2, root_3);
+                }
+
+                adaptor.addChild(root_1, root_2);
+                }
+                // EsperEPL2Grammar.g:1218:100: ( number )?
+                if ( stream_number.hasNext() ) {
+                    adaptor.addChild(root_1, stream_number.nextTree());
+
+                }
+                stream_number.reset();
+                // EsperEPL2Grammar.g:1218:108: ( substitution )?
+                if ( stream_substitution.hasNext() ) {
+                    adaptor.addChild(root_1, stream_substitution.nextTree());
+
+                }
+                stream_substitution.reset();
+
+                adaptor.addChild(root_0, root_1);
+                }
+
+            }
+            else // 1219:3: -> {i1 == null && i2 != null}? ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
+            if (i1 == null && i2 != null) {
+                // EsperEPL2Grammar.g:1219:34: ^( NUMERIC_PARAM_RANGE ( number )? ( substitution )? ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) ) )
+                {
+                CommonTree root_1 = (CommonTree)adaptor.nil();
+                root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_RANGE, "NUMERIC_PARAM_RANGE"), root_1);
+
+                // EsperEPL2Grammar.g:1219:56: ( number )?
+                if ( stream_number.hasNext() ) {
+                    adaptor.addChild(root_1, stream_number.nextTree());
+
+                }
+                stream_number.reset();
+                // EsperEPL2Grammar.g:1219:64: ( substitution )?
+                if ( stream_substitution.hasNext() ) {
+                    adaptor.addChild(root_1, stream_substitution.nextTree());
+
+                }
+                stream_substitution.reset();
+                // EsperEPL2Grammar.g:1219:78: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i2) )
+                {
+                CommonTree root_2 = (CommonTree)adaptor.nil();
+                root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
+
+                // EsperEPL2Grammar.g:1219:96: ^( EVENT_PROP_SIMPLE $i2)
+                {
+                CommonTree root_3 = (CommonTree)adaptor.nil();
+                root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
+
+                adaptor.addChild(root_3, stream_i2.nextNode());
+
+                adaptor.addChild(root_2, root_3);
+                }
+
+                adaptor.addChild(root_1, root_2);
+                }
+
+                adaptor.addChild(root_0, root_1);
+                }
+
+            }
+            else // 1220:3: -> ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* )
+            {
+                // EsperEPL2Grammar.g:1220:6: ^( NUMERIC_PARAM_RANGE ( number )* ( substitution )* )
+                {
+                CommonTree root_1 = (CommonTree)adaptor.nil();
+                root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_RANGE, "NUMERIC_PARAM_RANGE"), root_1);
+
+                // EsperEPL2Grammar.g:1220:28: ( number )*
                 while ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1219:36: ( substitution )*
+                // EsperEPL2Grammar.g:1220:36: ( substitution )*
                 while ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -17747,7 +17748,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "lastOperator"
-    // EsperEPL2Grammar.g:1222:1: lastOperator : ( number | i= IDENT | substitution ) LAST -> {i!= null}? ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( LAST_OPERATOR ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1223:1: lastOperator : ( number | i= IDENT | substitution ) LAST -> {i!= null}? ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( LAST_OPERATOR ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.lastOperator_return lastOperator() throws RecognitionException {
         EsperEPL2GrammarParser.lastOperator_return retval = new EsperEPL2GrammarParser.lastOperator_return();
         retval.start = input.LT(1);
@@ -17768,10 +17769,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1223:2: ( ( number | i= IDENT | substitution ) LAST -> {i!= null}? ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( LAST_OPERATOR ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1223:4: ( number | i= IDENT | substitution ) LAST
+            // EsperEPL2Grammar.g:1224:2: ( ( number | i= IDENT | substitution ) LAST -> {i!= null}? ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( LAST_OPERATOR ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1224:4: ( number | i= IDENT | substitution ) LAST
             {
-            // EsperEPL2Grammar.g:1223:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1224:4: ( number | i= IDENT | substitution )
             int alt180=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -17802,7 +17803,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt180) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1223:5: number
+                    // EsperEPL2Grammar.g:1224:5: number
                     {
                     pushFollow(FOLLOW_number_in_lastOperator8024);
                     number493=number();
@@ -17814,7 +17815,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1223:12: i= IDENT
+                    // EsperEPL2Grammar.g:1224:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_lastOperator8028); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -17823,7 +17824,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1223:20: substitution
+                    // EsperEPL2Grammar.g:1224:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_lastOperator8030);
                     substitution494=substitution();
@@ -17854,19 +17855,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1224:3: -> {i!= null}? ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1225:3: -> {i!= null}? ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1224:18: ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1225:18: ^( LAST_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(LAST_OPERATOR, "LAST_OPERATOR"), root_1);
 
-                // EsperEPL2Grammar.g:1224:34: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1225:34: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1224:52: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1225:52: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -17883,20 +17884,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1225:3: -> ^( LAST_OPERATOR ( number )? ( substitution )? )
+            else // 1226:3: -> ^( LAST_OPERATOR ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1225:6: ^( LAST_OPERATOR ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1226:6: ^( LAST_OPERATOR ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(LAST_OPERATOR, "LAST_OPERATOR"), root_1);
 
-                // EsperEPL2Grammar.g:1225:22: ( number )?
+                // EsperEPL2Grammar.g:1226:22: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1225:30: ( substitution )?
+                // EsperEPL2Grammar.g:1226:30: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -17935,7 +17936,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "weekDayOperator"
-    // EsperEPL2Grammar.g:1228:1: weekDayOperator : ( number | i= IDENT | substitution ) WEEKDAY -> {i!= null}? ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( WEEKDAY_OPERATOR ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1229:1: weekDayOperator : ( number | i= IDENT | substitution ) WEEKDAY -> {i!= null}? ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( WEEKDAY_OPERATOR ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.weekDayOperator_return weekDayOperator() throws RecognitionException {
         EsperEPL2GrammarParser.weekDayOperator_return retval = new EsperEPL2GrammarParser.weekDayOperator_return();
         retval.start = input.LT(1);
@@ -17956,10 +17957,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1229:2: ( ( number | i= IDENT | substitution ) WEEKDAY -> {i!= null}? ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( WEEKDAY_OPERATOR ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1229:4: ( number | i= IDENT | substitution ) WEEKDAY
+            // EsperEPL2Grammar.g:1230:2: ( ( number | i= IDENT | substitution ) WEEKDAY -> {i!= null}? ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( WEEKDAY_OPERATOR ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1230:4: ( number | i= IDENT | substitution ) WEEKDAY
             {
-            // EsperEPL2Grammar.g:1229:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1230:4: ( number | i= IDENT | substitution )
             int alt181=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -17990,7 +17991,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt181) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1229:5: number
+                    // EsperEPL2Grammar.g:1230:5: number
                     {
                     pushFollow(FOLLOW_number_in_weekDayOperator8081);
                     number496=number();
@@ -18002,7 +18003,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1229:12: i= IDENT
+                    // EsperEPL2Grammar.g:1230:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_weekDayOperator8085); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -18011,7 +18012,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1229:20: substitution
+                    // EsperEPL2Grammar.g:1230:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_weekDayOperator8087);
                     substitution497=substitution();
@@ -18031,7 +18032,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: number, i, substitution
+            // elements: i, number, substitution
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -18042,19 +18043,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1230:3: -> {i!= null}? ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1231:3: -> {i!= null}? ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1230:18: ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1231:18: ^( WEEKDAY_OPERATOR ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(WEEKDAY_OPERATOR, "WEEKDAY_OPERATOR"), root_1);
 
-                // EsperEPL2Grammar.g:1230:37: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1231:37: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1230:55: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1231:55: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -18071,20 +18072,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1231:3: -> ^( WEEKDAY_OPERATOR ( number )? ( substitution )? )
+            else // 1232:3: -> ^( WEEKDAY_OPERATOR ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1231:6: ^( WEEKDAY_OPERATOR ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1232:6: ^( WEEKDAY_OPERATOR ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(WEEKDAY_OPERATOR, "WEEKDAY_OPERATOR"), root_1);
 
-                // EsperEPL2Grammar.g:1231:25: ( number )?
+                // EsperEPL2Grammar.g:1232:25: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1231:33: ( substitution )?
+                // EsperEPL2Grammar.g:1232:33: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -18123,7 +18124,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "numericParameterList"
-    // EsperEPL2Grammar.g:1234:1: numericParameterList : LBRACK numericListParameter ( COMMA numericListParameter )* RBRACK -> ^( NUMERIC_PARAM_LIST ( numericListParameter )+ ) ;
+    // EsperEPL2Grammar.g:1235:1: numericParameterList : LBRACK numericListParameter ( COMMA numericListParameter )* RBRACK -> ^( NUMERIC_PARAM_LIST ( numericListParameter )+ ) ;
     public final EsperEPL2GrammarParser.numericParameterList_return numericParameterList() throws RecognitionException {
         EsperEPL2GrammarParser.numericParameterList_return retval = new EsperEPL2GrammarParser.numericParameterList_return();
         retval.start = input.LT(1);
@@ -18146,8 +18147,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_COMMA=new RewriteRuleTokenStream(adaptor,"token COMMA");
         RewriteRuleSubtreeStream stream_numericListParameter=new RewriteRuleSubtreeStream(adaptor,"rule numericListParameter");
         try {
-            // EsperEPL2Grammar.g:1235:2: ( LBRACK numericListParameter ( COMMA numericListParameter )* RBRACK -> ^( NUMERIC_PARAM_LIST ( numericListParameter )+ ) )
-            // EsperEPL2Grammar.g:1235:4: LBRACK numericListParameter ( COMMA numericListParameter )* RBRACK
+            // EsperEPL2Grammar.g:1236:2: ( LBRACK numericListParameter ( COMMA numericListParameter )* RBRACK -> ^( NUMERIC_PARAM_LIST ( numericListParameter )+ ) )
+            // EsperEPL2Grammar.g:1236:4: LBRACK numericListParameter ( COMMA numericListParameter )* RBRACK
             {
             LBRACK499=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_numericParameterList8137); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_LBRACK.add(LBRACK499);
@@ -18158,7 +18159,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_numericListParameter.add(numericListParameter500.getTree());
-            // EsperEPL2Grammar.g:1235:32: ( COMMA numericListParameter )*
+            // EsperEPL2Grammar.g:1236:32: ( COMMA numericListParameter )*
             loop182:
             do {
                 int alt182=2;
@@ -18171,7 +18172,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt182) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1235:33: COMMA numericListParameter
+            	    // EsperEPL2Grammar.g:1236:33: COMMA numericListParameter
             	    {
             	    COMMA501=(Token)match(input,COMMA,FOLLOW_COMMA_in_numericParameterList8142); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_COMMA.add(COMMA501);
@@ -18207,9 +18208,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1236:3: -> ^( NUMERIC_PARAM_LIST ( numericListParameter )+ )
+            // 1237:3: -> ^( NUMERIC_PARAM_LIST ( numericListParameter )+ )
             {
-                // EsperEPL2Grammar.g:1236:6: ^( NUMERIC_PARAM_LIST ( numericListParameter )+ )
+                // EsperEPL2Grammar.g:1237:6: ^( NUMERIC_PARAM_LIST ( numericListParameter )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NUMERIC_PARAM_LIST, "NUMERIC_PARAM_LIST"), root_1);
@@ -18255,7 +18256,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "numericListParameter"
-    // EsperEPL2Grammar.g:1239:1: numericListParameter : ( rangeOperand | frequencyOperand | numberconstant );
+    // EsperEPL2Grammar.g:1240:1: numericListParameter : ( rangeOperand | frequencyOperand | numberconstant );
     public final EsperEPL2GrammarParser.numericListParameter_return numericListParameter() throws RecognitionException {
         EsperEPL2GrammarParser.numericListParameter_return retval = new EsperEPL2GrammarParser.numericListParameter_return();
         retval.start = input.LT(1);
@@ -18271,7 +18272,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
         try {
-            // EsperEPL2Grammar.g:1240:2: ( rangeOperand | frequencyOperand | numberconstant )
+            // EsperEPL2Grammar.g:1241:2: ( rangeOperand | frequencyOperand | numberconstant )
             int alt183=3;
             switch ( input.LA(1) ) {
             case NUM_INT:
@@ -18377,7 +18378,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt183) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1240:4: rangeOperand
+                    // EsperEPL2Grammar.g:1241:4: rangeOperand
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -18391,7 +18392,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1241:5: frequencyOperand
+                    // EsperEPL2Grammar.g:1242:5: frequencyOperand
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -18405,7 +18406,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1242:4: numberconstant
+                    // EsperEPL2Grammar.g:1243:4: numberconstant
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -18444,7 +18445,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "eventProperty"
-    // EsperEPL2Grammar.g:1245:1: eventProperty : eventPropertyAtomic ( DOT eventPropertyAtomic )* -> ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ ) ;
+    // EsperEPL2Grammar.g:1246:1: eventProperty : eventPropertyAtomic ( DOT eventPropertyAtomic )* -> ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ ) ;
     public final EsperEPL2GrammarParser.eventProperty_return eventProperty() throws RecognitionException {
         EsperEPL2GrammarParser.eventProperty_return retval = new EsperEPL2GrammarParser.eventProperty_return();
         retval.start = input.LT(1);
@@ -18461,8 +18462,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_DOT=new RewriteRuleTokenStream(adaptor,"token DOT");
         RewriteRuleSubtreeStream stream_eventPropertyAtomic=new RewriteRuleSubtreeStream(adaptor,"rule eventPropertyAtomic");
         try {
-            // EsperEPL2Grammar.g:1246:2: ( eventPropertyAtomic ( DOT eventPropertyAtomic )* -> ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ ) )
-            // EsperEPL2Grammar.g:1246:4: eventPropertyAtomic ( DOT eventPropertyAtomic )*
+            // EsperEPL2Grammar.g:1247:2: ( eventPropertyAtomic ( DOT eventPropertyAtomic )* -> ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ ) )
+            // EsperEPL2Grammar.g:1247:4: eventPropertyAtomic ( DOT eventPropertyAtomic )*
             {
             pushFollow(FOLLOW_eventPropertyAtomic_in_eventProperty8197);
             eventPropertyAtomic507=eventPropertyAtomic();
@@ -18470,7 +18471,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_eventPropertyAtomic.add(eventPropertyAtomic507.getTree());
-            // EsperEPL2Grammar.g:1246:24: ( DOT eventPropertyAtomic )*
+            // EsperEPL2Grammar.g:1247:24: ( DOT eventPropertyAtomic )*
             loop184:
             do {
                 int alt184=2;
@@ -18483,7 +18484,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt184) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1246:25: DOT eventPropertyAtomic
+            	    // EsperEPL2Grammar.g:1247:25: DOT eventPropertyAtomic
             	    {
             	    DOT508=(Token)match(input,DOT,FOLLOW_DOT_in_eventProperty8200); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_DOT.add(DOT508);
@@ -18516,9 +18517,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1247:3: -> ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ )
+            // 1248:3: -> ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ )
             {
-                // EsperEPL2Grammar.g:1247:6: ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ )
+                // EsperEPL2Grammar.g:1248:6: ^( EVENT_PROP_EXPR ( eventPropertyAtomic )+ )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_1);
@@ -18564,7 +18565,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "eventPropertyAtomic"
-    // EsperEPL2Grammar.g:1250:1: eventPropertyAtomic : eventPropertyIdent (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )? -> {lb!= null && $q == null}? ^( EVENT_PROP_INDEXED eventPropertyIdent $ni) -> {lb!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni) -> {lp!= null && $q == null}? ^( EVENT_PROP_MAPPED eventPropertyIdent $s) -> {lp!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s) -> {q1 != null}? ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent ) -> ^( EVENT_PROP_SIMPLE eventPropertyIdent ) ;
+    // EsperEPL2Grammar.g:1251:1: eventPropertyAtomic : eventPropertyIdent (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )? -> {lb!= null && $q == null}? ^( EVENT_PROP_INDEXED eventPropertyIdent $ni) -> {lb!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni) -> {lp!= null && $q == null}? ^( EVENT_PROP_MAPPED eventPropertyIdent $s) -> {lp!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s) -> {q1 != null}? ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent ) -> ^( EVENT_PROP_SIMPLE eventPropertyIdent ) ;
     public final EsperEPL2GrammarParser.eventPropertyAtomic_return eventPropertyAtomic() throws RecognitionException {
         EsperEPL2GrammarParser.eventPropertyAtomic_return retval = new EsperEPL2GrammarParser.eventPropertyAtomic_return();
         retval.start = input.LT(1);
@@ -18600,8 +18601,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_NUM_INT=new RewriteRuleTokenStream(adaptor,"token NUM_INT");
         RewriteRuleSubtreeStream stream_eventPropertyIdent=new RewriteRuleSubtreeStream(adaptor,"rule eventPropertyIdent");
         try {
-            // EsperEPL2Grammar.g:1251:2: ( eventPropertyIdent (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )? -> {lb!= null && $q == null}? ^( EVENT_PROP_INDEXED eventPropertyIdent $ni) -> {lb!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni) -> {lp!= null && $q == null}? ^( EVENT_PROP_MAPPED eventPropertyIdent $s) -> {lp!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s) -> {q1 != null}? ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent ) -> ^( EVENT_PROP_SIMPLE eventPropertyIdent ) )
-            // EsperEPL2Grammar.g:1251:4: eventPropertyIdent (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )?
+            // EsperEPL2Grammar.g:1252:2: ( eventPropertyIdent (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )? -> {lb!= null && $q == null}? ^( EVENT_PROP_INDEXED eventPropertyIdent $ni) -> {lb!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni) -> {lp!= null && $q == null}? ^( EVENT_PROP_MAPPED eventPropertyIdent $s) -> {lp!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s) -> {q1 != null}? ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent ) -> ^( EVENT_PROP_SIMPLE eventPropertyIdent ) )
+            // EsperEPL2Grammar.g:1252:4: eventPropertyIdent (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )?
             {
             pushFollow(FOLLOW_eventPropertyIdent_in_eventPropertyAtomic8228);
             eventPropertyIdent510=eventPropertyIdent();
@@ -18609,7 +18610,7 @@ public class EsperEPL2GrammarParser extends Parser {
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) stream_eventPropertyIdent.add(eventPropertyIdent510.getTree());
-            // EsperEPL2Grammar.g:1251:23: (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )?
+            // EsperEPL2Grammar.g:1252:23: (lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )? | lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )? | q1= QUESTION )?
             int alt188=4;
             switch ( input.LA(1) ) {
                 case LBRACK:
@@ -18631,7 +18632,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt188) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1252:4: lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )?
+                    // EsperEPL2Grammar.g:1253:4: lb= LBRACK ni= NUM_INT RBRACK (q= QUESTION )?
                     {
                     lb=(Token)match(input,LBRACK,FOLLOW_LBRACK_in_eventPropertyAtomic8237); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LBRACK.add(lb);
@@ -18642,7 +18643,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RBRACK511=(Token)match(input,RBRACK,FOLLOW_RBRACK_in_eventPropertyAtomic8243); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RBRACK.add(RBRACK511);
 
-                    // EsperEPL2Grammar.g:1252:32: (q= QUESTION )?
+                    // EsperEPL2Grammar.g:1253:32: (q= QUESTION )?
                     int alt185=2;
                     int LA185_0 = input.LA(1);
 
@@ -18651,7 +18652,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt185) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1252:33: q= QUESTION
+                            // EsperEPL2Grammar.g:1253:33: q= QUESTION
                             {
                             q=(Token)match(input,QUESTION,FOLLOW_QUESTION_in_eventPropertyAtomic8248); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_QUESTION.add(q);
@@ -18666,12 +18667,12 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1254:4: lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )?
+                    // EsperEPL2Grammar.g:1255:4: lp= LPAREN (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL ) RPAREN (q= QUESTION )?
                     {
                     lp=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_eventPropertyAtomic8262); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_LPAREN.add(lp);
 
-                    // EsperEPL2Grammar.g:1254:14: (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL )
+                    // EsperEPL2Grammar.g:1255:14: (s= STRING_LITERAL | s= QUOTED_STRING_LITERAL )
                     int alt186=2;
                     int LA186_0 = input.LA(1);
 
@@ -18690,7 +18691,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt186) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1254:15: s= STRING_LITERAL
+                            // EsperEPL2Grammar.g:1255:15: s= STRING_LITERAL
                             {
                             s=(Token)match(input,STRING_LITERAL,FOLLOW_STRING_LITERAL_in_eventPropertyAtomic8267); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_STRING_LITERAL.add(s);
@@ -18699,7 +18700,7 @@ public class EsperEPL2GrammarParser extends Parser {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:1254:34: s= QUOTED_STRING_LITERAL
+                            // EsperEPL2Grammar.g:1255:34: s= QUOTED_STRING_LITERAL
                             {
                             s=(Token)match(input,QUOTED_STRING_LITERAL,FOLLOW_QUOTED_STRING_LITERAL_in_eventPropertyAtomic8273); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_QUOTED_STRING_LITERAL.add(s);
@@ -18713,7 +18714,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RPAREN512=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_eventPropertyAtomic8276); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_RPAREN.add(RPAREN512);
 
-                    // EsperEPL2Grammar.g:1254:66: (q= QUESTION )?
+                    // EsperEPL2Grammar.g:1255:66: (q= QUESTION )?
                     int alt187=2;
                     int LA187_0 = input.LA(1);
 
@@ -18722,7 +18723,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt187) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1254:67: q= QUESTION
+                            // EsperEPL2Grammar.g:1255:67: q= QUESTION
                             {
                             q=(Token)match(input,QUESTION,FOLLOW_QUESTION_in_eventPropertyAtomic8281); if (state.failed) return retval; 
                             if ( state.backtracking==0 ) stream_QUESTION.add(q);
@@ -18737,7 +18738,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1256:4: q1= QUESTION
+                    // EsperEPL2Grammar.g:1257:4: q1= QUESTION
                     {
                     q1=(Token)match(input,QUESTION,FOLLOW_QUESTION_in_eventPropertyAtomic8295); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_QUESTION.add(q1);
@@ -18751,7 +18752,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: s, eventPropertyIdent, s, eventPropertyIdent, eventPropertyIdent, ni, ni, eventPropertyIdent, eventPropertyIdent, eventPropertyIdent
+            // elements: ni, s, eventPropertyIdent, eventPropertyIdent, eventPropertyIdent, eventPropertyIdent, eventPropertyIdent, eventPropertyIdent, s, ni
             // token labels: s, ni
             // rule labels: retval
             // token list labels: 
@@ -18763,9 +18764,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1259:3: -> {lb!= null && $q == null}? ^( EVENT_PROP_INDEXED eventPropertyIdent $ni)
+            // 1260:3: -> {lb!= null && $q == null}? ^( EVENT_PROP_INDEXED eventPropertyIdent $ni)
             if (lb!= null && q == null) {
-                // EsperEPL2Grammar.g:1259:33: ^( EVENT_PROP_INDEXED eventPropertyIdent $ni)
+                // EsperEPL2Grammar.g:1260:33: ^( EVENT_PROP_INDEXED eventPropertyIdent $ni)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_INDEXED, "EVENT_PROP_INDEXED"), root_1);
@@ -18777,9 +18778,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1260:3: -> {lb!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni)
+            else // 1261:3: -> {lb!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni)
             if (lb!= null && q != null) {
-                // EsperEPL2Grammar.g:1260:33: ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni)
+                // EsperEPL2Grammar.g:1261:33: ^( EVENT_PROP_DYNAMIC_INDEXED eventPropertyIdent $ni)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_DYNAMIC_INDEXED, "EVENT_PROP_DYNAMIC_INDEXED"), root_1);
@@ -18791,9 +18792,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1261:3: -> {lp!= null && $q == null}? ^( EVENT_PROP_MAPPED eventPropertyIdent $s)
+            else // 1262:3: -> {lp!= null && $q == null}? ^( EVENT_PROP_MAPPED eventPropertyIdent $s)
             if (lp!= null && q == null) {
-                // EsperEPL2Grammar.g:1261:33: ^( EVENT_PROP_MAPPED eventPropertyIdent $s)
+                // EsperEPL2Grammar.g:1262:33: ^( EVENT_PROP_MAPPED eventPropertyIdent $s)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_MAPPED, "EVENT_PROP_MAPPED"), root_1);
@@ -18805,9 +18806,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1262:3: -> {lp!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s)
+            else // 1263:3: -> {lp!= null && $q != null}? ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s)
             if (lp!= null && q != null) {
-                // EsperEPL2Grammar.g:1262:33: ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s)
+                // EsperEPL2Grammar.g:1263:33: ^( EVENT_PROP_DYNAMIC_MAPPED eventPropertyIdent $s)
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_DYNAMIC_MAPPED, "EVENT_PROP_DYNAMIC_MAPPED"), root_1);
@@ -18819,9 +18820,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1263:3: -> {q1 != null}? ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent )
+            else // 1264:3: -> {q1 != null}? ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent )
             if (q1 != null) {
-                // EsperEPL2Grammar.g:1263:27: ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent )
+                // EsperEPL2Grammar.g:1264:27: ^( EVENT_PROP_DYNAMIC_SIMPLE eventPropertyIdent )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_DYNAMIC_SIMPLE, "EVENT_PROP_DYNAMIC_SIMPLE"), root_1);
@@ -18832,9 +18833,9 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1264:3: -> ^( EVENT_PROP_SIMPLE eventPropertyIdent )
+            else // 1265:3: -> ^( EVENT_PROP_SIMPLE eventPropertyIdent )
             {
-                // EsperEPL2Grammar.g:1264:6: ^( EVENT_PROP_SIMPLE eventPropertyIdent )
+                // EsperEPL2Grammar.g:1265:6: ^( EVENT_PROP_SIMPLE eventPropertyIdent )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_1);
@@ -18873,7 +18874,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "eventPropertyIdent"
-    // EsperEPL2Grammar.g:1267:1: eventPropertyIdent : ipi= keywordAllowedIdent ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )* -> ^( IDENT[identifier] ) ;
+    // EsperEPL2Grammar.g:1268:1: eventPropertyIdent : ipi= keywordAllowedIdent ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )* -> ^( IDENT[identifier] ) ;
     public final EsperEPL2GrammarParser.eventPropertyIdent_return eventPropertyIdent() throws RecognitionException {
         EsperEPL2GrammarParser.eventPropertyIdent_return retval = new EsperEPL2GrammarParser.eventPropertyIdent_return();
         retval.start = input.LT(1);
@@ -18894,8 +18895,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_keywordAllowedIdent=new RewriteRuleSubtreeStream(adaptor,"rule keywordAllowedIdent");
          String identifier = ""; 
         try {
-            // EsperEPL2Grammar.g:1269:2: (ipi= keywordAllowedIdent ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )* -> ^( IDENT[identifier] ) )
-            // EsperEPL2Grammar.g:1269:4: ipi= keywordAllowedIdent ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )*
+            // EsperEPL2Grammar.g:1270:2: (ipi= keywordAllowedIdent ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )* -> ^( IDENT[identifier] ) )
+            // EsperEPL2Grammar.g:1270:4: ipi= keywordAllowedIdent ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )*
             {
             pushFollow(FOLLOW_keywordAllowedIdent_in_eventPropertyIdent8418);
             ipi=keywordAllowedIdent();
@@ -18906,7 +18907,7 @@ public class EsperEPL2GrammarParser extends Parser {
             if ( state.backtracking==0 ) {
                identifier = ipi.getTree().toString(); 
             }
-            // EsperEPL2Grammar.g:1270:3: ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )*
+            // EsperEPL2Grammar.g:1271:3: ( ESCAPECHAR DOT (ipi2= keywordAllowedIdent )? )*
             loop190:
             do {
                 int alt190=2;
@@ -18919,7 +18920,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                 switch (alt190) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:1271:5: ESCAPECHAR DOT (ipi2= keywordAllowedIdent )?
+            	    // EsperEPL2Grammar.g:1272:5: ESCAPECHAR DOT (ipi2= keywordAllowedIdent )?
             	    {
             	    ESCAPECHAR513=(Token)match(input,ESCAPECHAR,FOLLOW_ESCAPECHAR_in_eventPropertyIdent8430); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_ESCAPECHAR.add(ESCAPECHAR513);
@@ -18927,12 +18928,12 @@ public class EsperEPL2GrammarParser extends Parser {
             	    DOT514=(Token)match(input,DOT,FOLLOW_DOT_in_eventPropertyIdent8432); if (state.failed) return retval; 
             	    if ( state.backtracking==0 ) stream_DOT.add(DOT514);
 
-            	    // EsperEPL2Grammar.g:1271:24: (ipi2= keywordAllowedIdent )?
+            	    // EsperEPL2Grammar.g:1272:24: (ipi2= keywordAllowedIdent )?
             	    int alt189=2;
             	    alt189 = dfa189.predict(input);
             	    switch (alt189) {
             	        case 1 :
-            	            // EsperEPL2Grammar.g:1271:24: ipi2= keywordAllowedIdent
+            	            // EsperEPL2Grammar.g:1272:24: ipi2= keywordAllowedIdent
             	            {
             	            pushFollow(FOLLOW_keywordAllowedIdent_in_eventPropertyIdent8436);
             	            ipi2=keywordAllowedIdent();
@@ -18971,9 +18972,9 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1273:7: -> ^( IDENT[identifier] )
+            // 1274:7: -> ^( IDENT[identifier] )
             {
-                // EsperEPL2Grammar.g:1273:10: ^( IDENT[identifier] )
+                // EsperEPL2Grammar.g:1274:10: ^( IDENT[identifier] )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(IDENT, identifier), root_1);
@@ -19010,7 +19011,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "keywordAllowedIdent"
-    // EsperEPL2Grammar.g:1276:1: keywordAllowedIdent : (i1= IDENT | AT | COUNT | ESCAPE | EVERY_EXPR | SUM | AVG | MAX | MIN | COALESCE | MEDIAN | STDDEV | AVEDEV | EVENTS | FIRST | LAST | UNIDIRECTIONAL | RETAINUNION | RETAININTERSECTION | UNTIL | PATTERN | SQL | METADATASQL | PREVIOUS | PRIOR | WEEKDAY | LW | INSTANCEOF | CAST | SNAPSHOT | VARIABLE | WINDOW | LEFT | RIGHT | OUTER | FULL | JOIN -> ^( IDENT[identifier] ) );
+    // EsperEPL2Grammar.g:1277:1: keywordAllowedIdent : (i1= IDENT | AT | COUNT | ESCAPE | EVERY_EXPR | SUM | AVG | MAX | MIN | COALESCE | MEDIAN | STDDEV | AVEDEV | EVENTS | FIRST | LAST | UNIDIRECTIONAL | RETAINUNION | RETAININTERSECTION | UNTIL | PATTERN | SQL | METADATASQL | PREVIOUS | PRIOR | WEEKDAY | LW | INSTANCEOF | CAST | SNAPSHOT | VARIABLE | WINDOW | LEFT | RIGHT | OUTER | FULL | JOIN -> ^( IDENT[identifier] ) );
     public final EsperEPL2GrammarParser.keywordAllowedIdent_return keywordAllowedIdent() throws RecognitionException {
         EsperEPL2GrammarParser.keywordAllowedIdent_return retval = new EsperEPL2GrammarParser.keywordAllowedIdent_return();
         retval.start = input.LT(1);
@@ -19096,7 +19097,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
          String identifier = ""; 
         try {
-            // EsperEPL2Grammar.g:1278:2: (i1= IDENT | AT | COUNT | ESCAPE | EVERY_EXPR | SUM | AVG | MAX | MIN | COALESCE | MEDIAN | STDDEV | AVEDEV | EVENTS | FIRST | LAST | UNIDIRECTIONAL | RETAINUNION | RETAININTERSECTION | UNTIL | PATTERN | SQL | METADATASQL | PREVIOUS | PRIOR | WEEKDAY | LW | INSTANCEOF | CAST | SNAPSHOT | VARIABLE | WINDOW | LEFT | RIGHT | OUTER | FULL | JOIN -> ^( IDENT[identifier] ) )
+            // EsperEPL2Grammar.g:1279:2: (i1= IDENT | AT | COUNT | ESCAPE | EVERY_EXPR | SUM | AVG | MAX | MIN | COALESCE | MEDIAN | STDDEV | AVEDEV | EVENTS | FIRST | LAST | UNIDIRECTIONAL | RETAINUNION | RETAININTERSECTION | UNTIL | PATTERN | SQL | METADATASQL | PREVIOUS | PRIOR | WEEKDAY | LW | INSTANCEOF | CAST | SNAPSHOT | VARIABLE | WINDOW | LEFT | RIGHT | OUTER | FULL | JOIN -> ^( IDENT[identifier] ) )
             int alt191=37;
             switch ( input.LA(1) ) {
             case IDENT:
@@ -19294,7 +19295,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt191) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1278:4: i1= IDENT
+                    // EsperEPL2Grammar.g:1279:4: i1= IDENT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19310,7 +19311,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1279:4: AT
+                    // EsperEPL2Grammar.g:1280:4: AT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19326,7 +19327,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1280:4: COUNT
+                    // EsperEPL2Grammar.g:1281:4: COUNT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19342,7 +19343,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1281:4: ESCAPE
+                    // EsperEPL2Grammar.g:1282:4: ESCAPE
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19358,7 +19359,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:1282:8: EVERY_EXPR
+                    // EsperEPL2Grammar.g:1283:8: EVERY_EXPR
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19374,7 +19375,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 6 :
-                    // EsperEPL2Grammar.g:1283:4: SUM
+                    // EsperEPL2Grammar.g:1284:4: SUM
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19390,7 +19391,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 7 :
-                    // EsperEPL2Grammar.g:1284:4: AVG
+                    // EsperEPL2Grammar.g:1285:4: AVG
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19406,7 +19407,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 8 :
-                    // EsperEPL2Grammar.g:1285:4: MAX
+                    // EsperEPL2Grammar.g:1286:4: MAX
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19422,7 +19423,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 9 :
-                    // EsperEPL2Grammar.g:1286:4: MIN
+                    // EsperEPL2Grammar.g:1287:4: MIN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19438,7 +19439,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 10 :
-                    // EsperEPL2Grammar.g:1287:4: COALESCE
+                    // EsperEPL2Grammar.g:1288:4: COALESCE
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19454,7 +19455,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 11 :
-                    // EsperEPL2Grammar.g:1288:4: MEDIAN
+                    // EsperEPL2Grammar.g:1289:4: MEDIAN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19470,7 +19471,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 12 :
-                    // EsperEPL2Grammar.g:1289:4: STDDEV
+                    // EsperEPL2Grammar.g:1290:4: STDDEV
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19486,7 +19487,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 13 :
-                    // EsperEPL2Grammar.g:1290:4: AVEDEV
+                    // EsperEPL2Grammar.g:1291:4: AVEDEV
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19502,7 +19503,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 14 :
-                    // EsperEPL2Grammar.g:1291:4: EVENTS
+                    // EsperEPL2Grammar.g:1292:4: EVENTS
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19518,7 +19519,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 15 :
-                    // EsperEPL2Grammar.g:1292:4: FIRST
+                    // EsperEPL2Grammar.g:1293:4: FIRST
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19534,7 +19535,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 16 :
-                    // EsperEPL2Grammar.g:1293:4: LAST
+                    // EsperEPL2Grammar.g:1294:4: LAST
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19550,7 +19551,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 17 :
-                    // EsperEPL2Grammar.g:1294:4: UNIDIRECTIONAL
+                    // EsperEPL2Grammar.g:1295:4: UNIDIRECTIONAL
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19566,7 +19567,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 18 :
-                    // EsperEPL2Grammar.g:1295:4: RETAINUNION
+                    // EsperEPL2Grammar.g:1296:4: RETAINUNION
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19582,7 +19583,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 19 :
-                    // EsperEPL2Grammar.g:1296:4: RETAININTERSECTION
+                    // EsperEPL2Grammar.g:1297:4: RETAININTERSECTION
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19598,7 +19599,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 20 :
-                    // EsperEPL2Grammar.g:1297:4: UNTIL
+                    // EsperEPL2Grammar.g:1298:4: UNTIL
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19614,7 +19615,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 21 :
-                    // EsperEPL2Grammar.g:1298:4: PATTERN
+                    // EsperEPL2Grammar.g:1299:4: PATTERN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19630,7 +19631,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 22 :
-                    // EsperEPL2Grammar.g:1299:4: SQL
+                    // EsperEPL2Grammar.g:1300:4: SQL
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19646,7 +19647,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 23 :
-                    // EsperEPL2Grammar.g:1300:4: METADATASQL
+                    // EsperEPL2Grammar.g:1301:4: METADATASQL
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19662,7 +19663,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 24 :
-                    // EsperEPL2Grammar.g:1301:4: PREVIOUS
+                    // EsperEPL2Grammar.g:1302:4: PREVIOUS
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19678,7 +19679,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 25 :
-                    // EsperEPL2Grammar.g:1302:4: PRIOR
+                    // EsperEPL2Grammar.g:1303:4: PRIOR
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19694,7 +19695,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 26 :
-                    // EsperEPL2Grammar.g:1303:4: WEEKDAY
+                    // EsperEPL2Grammar.g:1304:4: WEEKDAY
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19710,7 +19711,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 27 :
-                    // EsperEPL2Grammar.g:1304:4: LW
+                    // EsperEPL2Grammar.g:1305:4: LW
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19726,7 +19727,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 28 :
-                    // EsperEPL2Grammar.g:1305:4: INSTANCEOF
+                    // EsperEPL2Grammar.g:1306:4: INSTANCEOF
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19742,7 +19743,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 29 :
-                    // EsperEPL2Grammar.g:1306:4: CAST
+                    // EsperEPL2Grammar.g:1307:4: CAST
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19758,7 +19759,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 30 :
-                    // EsperEPL2Grammar.g:1307:4: SNAPSHOT
+                    // EsperEPL2Grammar.g:1308:4: SNAPSHOT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19774,7 +19775,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 31 :
-                    // EsperEPL2Grammar.g:1308:4: VARIABLE
+                    // EsperEPL2Grammar.g:1309:4: VARIABLE
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19790,7 +19791,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 32 :
-                    // EsperEPL2Grammar.g:1309:4: WINDOW
+                    // EsperEPL2Grammar.g:1310:4: WINDOW
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19806,7 +19807,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 33 :
-                    // EsperEPL2Grammar.g:1310:4: LEFT
+                    // EsperEPL2Grammar.g:1311:4: LEFT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19822,7 +19823,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 34 :
-                    // EsperEPL2Grammar.g:1311:4: RIGHT
+                    // EsperEPL2Grammar.g:1312:4: RIGHT
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19838,7 +19839,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 35 :
-                    // EsperEPL2Grammar.g:1312:4: OUTER
+                    // EsperEPL2Grammar.g:1313:4: OUTER
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19854,7 +19855,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 36 :
-                    // EsperEPL2Grammar.g:1313:4: FULL
+                    // EsperEPL2Grammar.g:1314:4: FULL
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -19870,7 +19871,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 37 :
-                    // EsperEPL2Grammar.g:1314:4: JOIN
+                    // EsperEPL2Grammar.g:1315:4: JOIN
                     {
                     JOIN550=(Token)match(input,JOIN,FOLLOW_JOIN_in_keywordAllowedIdent8737); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_JOIN.add(JOIN550);
@@ -19891,9 +19892,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1315:2: -> ^( IDENT[identifier] )
+                    // 1316:2: -> ^( IDENT[identifier] )
                     {
-                        // EsperEPL2Grammar.g:1315:5: ^( IDENT[identifier] )
+                        // EsperEPL2Grammar.g:1316:5: ^( IDENT[identifier] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(IDENT, identifier), root_1);
@@ -19932,7 +19933,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "timePeriod"
-    // EsperEPL2Grammar.g:1318:1: timePeriod : ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart ) -> ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? ) ;
+    // EsperEPL2Grammar.g:1319:1: timePeriod : ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart ) -> ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? ) ;
     public final EsperEPL2GrammarParser.timePeriod_return timePeriod() throws RecognitionException {
         EsperEPL2GrammarParser.timePeriod_return retval = new EsperEPL2GrammarParser.timePeriod_return();
         retval.start = input.LT(1);
@@ -19976,10 +19977,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_dayPart=new RewriteRuleSubtreeStream(adaptor,"rule dayPart");
         RewriteRuleSubtreeStream stream_hourPart=new RewriteRuleSubtreeStream(adaptor,"rule hourPart");
         try {
-            // EsperEPL2Grammar.g:1319:2: ( ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart ) -> ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? ) )
-            // EsperEPL2Grammar.g:1320:2: ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart )
+            // EsperEPL2Grammar.g:1320:2: ( ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart ) -> ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? ) )
+            // EsperEPL2Grammar.g:1321:2: ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart )
             {
-            // EsperEPL2Grammar.g:1320:2: ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart )
+            // EsperEPL2Grammar.g:1321:2: ( dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? | hourPart ( minutePart )? ( secondPart )? ( millisecondPart )? | minutePart ( secondPart )? ( millisecondPart )? | secondPart ( millisecondPart )? | millisecondPart )
             int alt202=5;
             switch ( input.LA(1) ) {
             case NUM_INT:
@@ -20268,7 +20269,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt202) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1321:3: dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1322:3: dayPart ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )?
                     {
                     pushFollow(FOLLOW_dayPart_in_timePeriod8769);
                     dayPart551=dayPart();
@@ -20276,7 +20277,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_dayPart.add(dayPart551.getTree());
-                    // EsperEPL2Grammar.g:1321:11: ( hourPart )?
+                    // EsperEPL2Grammar.g:1322:11: ( hourPart )?
                     int alt192=2;
                     switch ( input.LA(1) ) {
                         case NUM_INT:
@@ -20337,7 +20338,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt192) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1321:11: hourPart
+                            // EsperEPL2Grammar.g:1322:11: hourPart
                             {
                             pushFollow(FOLLOW_hourPart_in_timePeriod8771);
                             hourPart552=hourPart();
@@ -20351,7 +20352,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:1321:21: ( minutePart )?
+                    // EsperEPL2Grammar.g:1322:21: ( minutePart )?
                     int alt193=2;
                     switch ( input.LA(1) ) {
                         case NUM_INT:
@@ -20412,7 +20413,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt193) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1321:21: minutePart
+                            // EsperEPL2Grammar.g:1322:21: minutePart
                             {
                             pushFollow(FOLLOW_minutePart_in_timePeriod8774);
                             minutePart553=minutePart();
@@ -20426,7 +20427,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:1321:33: ( secondPart )?
+                    // EsperEPL2Grammar.g:1322:33: ( secondPart )?
                     int alt194=2;
                     switch ( input.LA(1) ) {
                         case NUM_INT:
@@ -20487,7 +20488,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt194) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1321:33: secondPart
+                            // EsperEPL2Grammar.g:1322:33: secondPart
                             {
                             pushFollow(FOLLOW_secondPart_in_timePeriod8777);
                             secondPart554=secondPart();
@@ -20501,7 +20502,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:1321:45: ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1322:45: ( millisecondPart )?
                     int alt195=2;
                     int LA195_0 = input.LA(1);
 
@@ -20510,7 +20511,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt195) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1321:45: millisecondPart
+                            // EsperEPL2Grammar.g:1322:45: millisecondPart
                             {
                             pushFollow(FOLLOW_millisecondPart_in_timePeriod8780);
                             millisecondPart555=millisecondPart();
@@ -20528,7 +20529,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1322:4: hourPart ( minutePart )? ( secondPart )? ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1323:4: hourPart ( minutePart )? ( secondPart )? ( millisecondPart )?
                     {
                     pushFollow(FOLLOW_hourPart_in_timePeriod8786);
                     hourPart556=hourPart();
@@ -20536,7 +20537,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_hourPart.add(hourPart556.getTree());
-                    // EsperEPL2Grammar.g:1322:13: ( minutePart )?
+                    // EsperEPL2Grammar.g:1323:13: ( minutePart )?
                     int alt196=2;
                     switch ( input.LA(1) ) {
                         case NUM_INT:
@@ -20597,7 +20598,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt196) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1322:13: minutePart
+                            // EsperEPL2Grammar.g:1323:13: minutePart
                             {
                             pushFollow(FOLLOW_minutePart_in_timePeriod8788);
                             minutePart557=minutePart();
@@ -20611,7 +20612,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:1322:25: ( secondPart )?
+                    // EsperEPL2Grammar.g:1323:25: ( secondPart )?
                     int alt197=2;
                     switch ( input.LA(1) ) {
                         case NUM_INT:
@@ -20672,7 +20673,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt197) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1322:25: secondPart
+                            // EsperEPL2Grammar.g:1323:25: secondPart
                             {
                             pushFollow(FOLLOW_secondPart_in_timePeriod8791);
                             secondPart558=secondPart();
@@ -20686,7 +20687,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:1322:37: ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1323:37: ( millisecondPart )?
                     int alt198=2;
                     int LA198_0 = input.LA(1);
 
@@ -20695,7 +20696,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt198) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1322:37: millisecondPart
+                            // EsperEPL2Grammar.g:1323:37: millisecondPart
                             {
                             pushFollow(FOLLOW_millisecondPart_in_timePeriod8794);
                             millisecondPart559=millisecondPart();
@@ -20713,7 +20714,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1323:4: minutePart ( secondPart )? ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1324:4: minutePart ( secondPart )? ( millisecondPart )?
                     {
                     pushFollow(FOLLOW_minutePart_in_timePeriod8800);
                     minutePart560=minutePart();
@@ -20721,7 +20722,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_minutePart.add(minutePart560.getTree());
-                    // EsperEPL2Grammar.g:1323:15: ( secondPart )?
+                    // EsperEPL2Grammar.g:1324:15: ( secondPart )?
                     int alt199=2;
                     switch ( input.LA(1) ) {
                         case NUM_INT:
@@ -20782,7 +20783,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     switch (alt199) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1323:15: secondPart
+                            // EsperEPL2Grammar.g:1324:15: secondPart
                             {
                             pushFollow(FOLLOW_secondPart_in_timePeriod8802);
                             secondPart561=secondPart();
@@ -20796,7 +20797,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
                     }
 
-                    // EsperEPL2Grammar.g:1323:27: ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1324:27: ( millisecondPart )?
                     int alt200=2;
                     int LA200_0 = input.LA(1);
 
@@ -20805,7 +20806,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt200) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1323:27: millisecondPart
+                            // EsperEPL2Grammar.g:1324:27: millisecondPart
                             {
                             pushFollow(FOLLOW_millisecondPart_in_timePeriod8805);
                             millisecondPart562=millisecondPart();
@@ -20823,7 +20824,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1324:4: secondPart ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1325:4: secondPart ( millisecondPart )?
                     {
                     pushFollow(FOLLOW_secondPart_in_timePeriod8811);
                     secondPart563=secondPart();
@@ -20831,7 +20832,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) stream_secondPart.add(secondPart563.getTree());
-                    // EsperEPL2Grammar.g:1324:15: ( millisecondPart )?
+                    // EsperEPL2Grammar.g:1325:15: ( millisecondPart )?
                     int alt201=2;
                     int LA201_0 = input.LA(1);
 
@@ -20840,7 +20841,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     switch (alt201) {
                         case 1 :
-                            // EsperEPL2Grammar.g:1324:15: millisecondPart
+                            // EsperEPL2Grammar.g:1325:15: millisecondPart
                             {
                             pushFollow(FOLLOW_millisecondPart_in_timePeriod8813);
                             millisecondPart564=millisecondPart();
@@ -20858,7 +20859,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:1325:4: millisecondPart
+                    // EsperEPL2Grammar.g:1326:4: millisecondPart
                     {
                     pushFollow(FOLLOW_millisecondPart_in_timePeriod8819);
                     millisecondPart565=millisecondPart();
@@ -20875,7 +20876,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: secondPart, hourPart, millisecondPart, minutePart, dayPart
+            // elements: millisecondPart, secondPart, minutePart, hourPart, dayPart
             // token labels: 
             // rule labels: retval
             // token list labels: 
@@ -20885,38 +20886,38 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1327:3: -> ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? )
+            // 1328:3: -> ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? )
             {
-                // EsperEPL2Grammar.g:1327:6: ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? )
+                // EsperEPL2Grammar.g:1328:6: ^( TIME_PERIOD ( dayPart )? ( hourPart )? ( minutePart )? ( secondPart )? ( millisecondPart )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(TIME_PERIOD, "TIME_PERIOD"), root_1);
 
-                // EsperEPL2Grammar.g:1327:20: ( dayPart )?
+                // EsperEPL2Grammar.g:1328:20: ( dayPart )?
                 if ( stream_dayPart.hasNext() ) {
                     adaptor.addChild(root_1, stream_dayPart.nextTree());
 
                 }
                 stream_dayPart.reset();
-                // EsperEPL2Grammar.g:1327:29: ( hourPart )?
+                // EsperEPL2Grammar.g:1328:29: ( hourPart )?
                 if ( stream_hourPart.hasNext() ) {
                     adaptor.addChild(root_1, stream_hourPart.nextTree());
 
                 }
                 stream_hourPart.reset();
-                // EsperEPL2Grammar.g:1327:39: ( minutePart )?
+                // EsperEPL2Grammar.g:1328:39: ( minutePart )?
                 if ( stream_minutePart.hasNext() ) {
                     adaptor.addChild(root_1, stream_minutePart.nextTree());
 
                 }
                 stream_minutePart.reset();
-                // EsperEPL2Grammar.g:1327:51: ( secondPart )?
+                // EsperEPL2Grammar.g:1328:51: ( secondPart )?
                 if ( stream_secondPart.hasNext() ) {
                     adaptor.addChild(root_1, stream_secondPart.nextTree());
 
                 }
                 stream_secondPart.reset();
-                // EsperEPL2Grammar.g:1327:63: ( millisecondPart )?
+                // EsperEPL2Grammar.g:1328:63: ( millisecondPart )?
                 if ( stream_millisecondPart.hasNext() ) {
                     adaptor.addChild(root_1, stream_millisecondPart.nextTree());
 
@@ -20955,7 +20956,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "dayPart"
-    // EsperEPL2Grammar.g:1330:1: dayPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY ) -> {i!= null}? ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( DAY_PART ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1331:1: dayPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY ) -> {i!= null}? ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( DAY_PART ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.dayPart_return dayPart() throws RecognitionException {
         EsperEPL2GrammarParser.dayPart_return retval = new EsperEPL2GrammarParser.dayPart_return();
         retval.start = input.LT(1);
@@ -20979,10 +20980,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1331:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY ) -> {i!= null}? ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( DAY_PART ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1331:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY )
+            // EsperEPL2Grammar.g:1332:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY ) -> {i!= null}? ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( DAY_PART ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1332:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY )
             {
-            // EsperEPL2Grammar.g:1331:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1332:4: ( number | i= IDENT | substitution )
             int alt203=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -21013,7 +21014,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt203) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1331:5: number
+                    // EsperEPL2Grammar.g:1332:5: number
                     {
                     pushFollow(FOLLOW_number_in_dayPart8857);
                     number566=number();
@@ -21025,7 +21026,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1331:12: i= IDENT
+                    // EsperEPL2Grammar.g:1332:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_dayPart8861); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -21034,7 +21035,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1331:20: substitution
+                    // EsperEPL2Grammar.g:1332:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_dayPart8863);
                     substitution567=substitution();
@@ -21048,7 +21049,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1331:34: ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY )
+            // EsperEPL2Grammar.g:1332:34: ( TIMEPERIOD_DAYS | TIMEPERIOD_DAY )
             int alt204=2;
             int LA204_0 = input.LA(1);
 
@@ -21067,7 +21068,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt204) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1331:35: TIMEPERIOD_DAYS
+                    // EsperEPL2Grammar.g:1332:35: TIMEPERIOD_DAYS
                     {
                     TIMEPERIOD_DAYS568=(Token)match(input,TIMEPERIOD_DAYS,FOLLOW_TIMEPERIOD_DAYS_in_dayPart8867); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_DAYS.add(TIMEPERIOD_DAYS568);
@@ -21076,7 +21077,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1331:53: TIMEPERIOD_DAY
+                    // EsperEPL2Grammar.g:1332:53: TIMEPERIOD_DAY
                     {
                     TIMEPERIOD_DAY569=(Token)match(input,TIMEPERIOD_DAY,FOLLOW_TIMEPERIOD_DAY_in_dayPart8871); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_DAY.add(TIMEPERIOD_DAY569);
@@ -21090,7 +21091,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: i, substitution, number
+            // elements: number, substitution, i
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -21101,19 +21102,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1332:3: -> {i!= null}? ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1333:3: -> {i!= null}? ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1332:18: ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1333:18: ^( DAY_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(DAY_PART, "DAY_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1332:29: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1333:29: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1332:47: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1333:47: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -21130,20 +21131,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1333:3: -> ^( DAY_PART ( number )? ( substitution )? )
+            else // 1334:3: -> ^( DAY_PART ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1333:6: ^( DAY_PART ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1334:6: ^( DAY_PART ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(DAY_PART, "DAY_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1333:17: ( number )?
+                // EsperEPL2Grammar.g:1334:17: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1333:25: ( substitution )?
+                // EsperEPL2Grammar.g:1334:25: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -21182,7 +21183,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "hourPart"
-    // EsperEPL2Grammar.g:1336:1: hourPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR ) -> {i!= null}? ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( HOUR_PART ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1337:1: hourPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR ) -> {i!= null}? ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( HOUR_PART ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.hourPart_return hourPart() throws RecognitionException {
         EsperEPL2GrammarParser.hourPart_return retval = new EsperEPL2GrammarParser.hourPart_return();
         retval.start = input.LT(1);
@@ -21206,10 +21207,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1337:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR ) -> {i!= null}? ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( HOUR_PART ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1337:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR )
+            // EsperEPL2Grammar.g:1338:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR ) -> {i!= null}? ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( HOUR_PART ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1338:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR )
             {
-            // EsperEPL2Grammar.g:1337:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1338:4: ( number | i= IDENT | substitution )
             int alt205=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -21240,7 +21241,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt205) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1337:5: number
+                    // EsperEPL2Grammar.g:1338:5: number
                     {
                     pushFollow(FOLLOW_number_in_hourPart8920);
                     number570=number();
@@ -21252,7 +21253,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1337:12: i= IDENT
+                    // EsperEPL2Grammar.g:1338:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_hourPart8924); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -21261,7 +21262,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1337:20: substitution
+                    // EsperEPL2Grammar.g:1338:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_hourPart8926);
                     substitution571=substitution();
@@ -21275,7 +21276,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1337:34: ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR )
+            // EsperEPL2Grammar.g:1338:34: ( TIMEPERIOD_HOURS | TIMEPERIOD_HOUR )
             int alt206=2;
             int LA206_0 = input.LA(1);
 
@@ -21294,7 +21295,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt206) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1337:35: TIMEPERIOD_HOURS
+                    // EsperEPL2Grammar.g:1338:35: TIMEPERIOD_HOURS
                     {
                     TIMEPERIOD_HOURS572=(Token)match(input,TIMEPERIOD_HOURS,FOLLOW_TIMEPERIOD_HOURS_in_hourPart8930); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_HOURS.add(TIMEPERIOD_HOURS572);
@@ -21303,7 +21304,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1337:54: TIMEPERIOD_HOUR
+                    // EsperEPL2Grammar.g:1338:54: TIMEPERIOD_HOUR
                     {
                     TIMEPERIOD_HOUR573=(Token)match(input,TIMEPERIOD_HOUR,FOLLOW_TIMEPERIOD_HOUR_in_hourPart8934); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_HOUR.add(TIMEPERIOD_HOUR573);
@@ -21317,7 +21318,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: number, i, substitution
+            // elements: i, substitution, number
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -21328,19 +21329,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1338:3: -> {i!= null}? ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1339:3: -> {i!= null}? ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1338:18: ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1339:18: ^( HOUR_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(HOUR_PART, "HOUR_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1338:30: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1339:30: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1338:48: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1339:48: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -21357,20 +21358,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1339:3: -> ^( HOUR_PART ( number )? ( substitution )? )
+            else // 1340:3: -> ^( HOUR_PART ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1339:6: ^( HOUR_PART ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1340:6: ^( HOUR_PART ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(HOUR_PART, "HOUR_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1339:18: ( number )?
+                // EsperEPL2Grammar.g:1340:18: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1339:26: ( substitution )?
+                // EsperEPL2Grammar.g:1340:26: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -21409,7 +21410,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "minutePart"
-    // EsperEPL2Grammar.g:1342:1: minutePart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN ) -> {i!= null}? ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MINUTE_PART ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1343:1: minutePart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN ) -> {i!= null}? ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MINUTE_PART ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.minutePart_return minutePart() throws RecognitionException {
         EsperEPL2GrammarParser.minutePart_return retval = new EsperEPL2GrammarParser.minutePart_return();
         retval.start = input.LT(1);
@@ -21436,10 +21437,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1343:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN ) -> {i!= null}? ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MINUTE_PART ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1343:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN )
+            // EsperEPL2Grammar.g:1344:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN ) -> {i!= null}? ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MINUTE_PART ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1344:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN )
             {
-            // EsperEPL2Grammar.g:1343:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1344:4: ( number | i= IDENT | substitution )
             int alt207=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -21470,7 +21471,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt207) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1343:5: number
+                    // EsperEPL2Grammar.g:1344:5: number
                     {
                     pushFollow(FOLLOW_number_in_minutePart8983);
                     number574=number();
@@ -21482,7 +21483,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1343:12: i= IDENT
+                    // EsperEPL2Grammar.g:1344:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_minutePart8987); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -21491,7 +21492,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1343:20: substitution
+                    // EsperEPL2Grammar.g:1344:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_minutePart8989);
                     substitution575=substitution();
@@ -21505,7 +21506,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1343:34: ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN )
+            // EsperEPL2Grammar.g:1344:34: ( TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN )
             int alt208=3;
             switch ( input.LA(1) ) {
             case TIMEPERIOD_MINUTES:
@@ -21533,7 +21534,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt208) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1343:35: TIMEPERIOD_MINUTES
+                    // EsperEPL2Grammar.g:1344:35: TIMEPERIOD_MINUTES
                     {
                     TIMEPERIOD_MINUTES576=(Token)match(input,TIMEPERIOD_MINUTES,FOLLOW_TIMEPERIOD_MINUTES_in_minutePart8993); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_MINUTES.add(TIMEPERIOD_MINUTES576);
@@ -21542,7 +21543,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1343:56: TIMEPERIOD_MINUTE
+                    // EsperEPL2Grammar.g:1344:56: TIMEPERIOD_MINUTE
                     {
                     TIMEPERIOD_MINUTE577=(Token)match(input,TIMEPERIOD_MINUTE,FOLLOW_TIMEPERIOD_MINUTE_in_minutePart8997); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_MINUTE.add(TIMEPERIOD_MINUTE577);
@@ -21551,7 +21552,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1343:76: MIN
+                    // EsperEPL2Grammar.g:1344:76: MIN
                     {
                     MIN578=(Token)match(input,MIN,FOLLOW_MIN_in_minutePart9001); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_MIN.add(MIN578);
@@ -21565,7 +21566,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: i, number, substitution
+            // elements: substitution, i, number
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -21576,19 +21577,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1344:3: -> {i!= null}? ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1345:3: -> {i!= null}? ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1344:18: ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1345:18: ^( MINUTE_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MINUTE_PART, "MINUTE_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1344:32: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1345:32: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1344:50: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1345:50: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -21605,20 +21606,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1345:3: -> ^( MINUTE_PART ( number )? ( substitution )? )
+            else // 1346:3: -> ^( MINUTE_PART ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1345:6: ^( MINUTE_PART ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1346:6: ^( MINUTE_PART ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MINUTE_PART, "MINUTE_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1345:20: ( number )?
+                // EsperEPL2Grammar.g:1346:20: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1345:28: ( substitution )?
+                // EsperEPL2Grammar.g:1346:28: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -21657,7 +21658,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "secondPart"
-    // EsperEPL2Grammar.g:1348:1: secondPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC ) -> {i!= null}? ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( SECOND_PART ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1349:1: secondPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC ) -> {i!= null}? ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( SECOND_PART ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.secondPart_return secondPart() throws RecognitionException {
         EsperEPL2GrammarParser.secondPart_return retval = new EsperEPL2GrammarParser.secondPart_return();
         retval.start = input.LT(1);
@@ -21684,10 +21685,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1349:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC ) -> {i!= null}? ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( SECOND_PART ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1349:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC )
+            // EsperEPL2Grammar.g:1350:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC ) -> {i!= null}? ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( SECOND_PART ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1350:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC )
             {
-            // EsperEPL2Grammar.g:1349:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1350:4: ( number | i= IDENT | substitution )
             int alt209=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -21718,7 +21719,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt209) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1349:5: number
+                    // EsperEPL2Grammar.g:1350:5: number
                     {
                     pushFollow(FOLLOW_number_in_secondPart9051);
                     number579=number();
@@ -21730,7 +21731,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1349:12: i= IDENT
+                    // EsperEPL2Grammar.g:1350:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_secondPart9055); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -21739,7 +21740,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1349:20: substitution
+                    // EsperEPL2Grammar.g:1350:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_secondPart9057);
                     substitution580=substitution();
@@ -21753,7 +21754,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1349:34: ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC )
+            // EsperEPL2Grammar.g:1350:34: ( TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC )
             int alt210=3;
             switch ( input.LA(1) ) {
             case TIMEPERIOD_SECONDS:
@@ -21781,7 +21782,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt210) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1349:35: TIMEPERIOD_SECONDS
+                    // EsperEPL2Grammar.g:1350:35: TIMEPERIOD_SECONDS
                     {
                     TIMEPERIOD_SECONDS581=(Token)match(input,TIMEPERIOD_SECONDS,FOLLOW_TIMEPERIOD_SECONDS_in_secondPart9061); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_SECONDS.add(TIMEPERIOD_SECONDS581);
@@ -21790,7 +21791,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1349:56: TIMEPERIOD_SECOND
+                    // EsperEPL2Grammar.g:1350:56: TIMEPERIOD_SECOND
                     {
                     TIMEPERIOD_SECOND582=(Token)match(input,TIMEPERIOD_SECOND,FOLLOW_TIMEPERIOD_SECOND_in_secondPart9065); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_SECOND.add(TIMEPERIOD_SECOND582);
@@ -21799,7 +21800,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1349:76: TIMEPERIOD_SEC
+                    // EsperEPL2Grammar.g:1350:76: TIMEPERIOD_SEC
                     {
                     TIMEPERIOD_SEC583=(Token)match(input,TIMEPERIOD_SEC,FOLLOW_TIMEPERIOD_SEC_in_secondPart9069); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_SEC.add(TIMEPERIOD_SEC583);
@@ -21813,7 +21814,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: number, substitution, i
+            // elements: i, substitution, number
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -21824,19 +21825,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1350:3: -> {i!= null}? ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1351:3: -> {i!= null}? ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1350:18: ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1351:18: ^( SECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SECOND_PART, "SECOND_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1350:32: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1351:32: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1350:50: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1351:50: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -21853,20 +21854,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1351:3: -> ^( SECOND_PART ( number )? ( substitution )? )
+            else // 1352:3: -> ^( SECOND_PART ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1351:6: ^( SECOND_PART ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1352:6: ^( SECOND_PART ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(SECOND_PART, "SECOND_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1351:20: ( number )?
+                // EsperEPL2Grammar.g:1352:20: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1351:28: ( substitution )?
+                // EsperEPL2Grammar.g:1352:28: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -21905,7 +21906,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "millisecondPart"
-    // EsperEPL2Grammar.g:1354:1: millisecondPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC ) -> {i!= null}? ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MILLISECOND_PART ( number )? ( substitution )? ) ;
+    // EsperEPL2Grammar.g:1355:1: millisecondPart : ( number | i= IDENT | substitution ) ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC ) -> {i!= null}? ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MILLISECOND_PART ( number )? ( substitution )? ) ;
     public final EsperEPL2GrammarParser.millisecondPart_return millisecondPart() throws RecognitionException {
         EsperEPL2GrammarParser.millisecondPart_return retval = new EsperEPL2GrammarParser.millisecondPart_return();
         retval.start = input.LT(1);
@@ -21932,10 +21933,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         RewriteRuleSubtreeStream stream_substitution=new RewriteRuleSubtreeStream(adaptor,"rule substitution");
         try {
-            // EsperEPL2Grammar.g:1355:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC ) -> {i!= null}? ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MILLISECOND_PART ( number )? ( substitution )? ) )
-            // EsperEPL2Grammar.g:1355:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC )
+            // EsperEPL2Grammar.g:1356:2: ( ( number | i= IDENT | substitution ) ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC ) -> {i!= null}? ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) ) -> ^( MILLISECOND_PART ( number )? ( substitution )? ) )
+            // EsperEPL2Grammar.g:1356:4: ( number | i= IDENT | substitution ) ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC )
             {
-            // EsperEPL2Grammar.g:1355:4: ( number | i= IDENT | substitution )
+            // EsperEPL2Grammar.g:1356:4: ( number | i= IDENT | substitution )
             int alt211=3;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -21966,7 +21967,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt211) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1355:5: number
+                    // EsperEPL2Grammar.g:1356:5: number
                     {
                     pushFollow(FOLLOW_number_in_millisecondPart9119);
                     number584=number();
@@ -21978,7 +21979,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1355:12: i= IDENT
+                    // EsperEPL2Grammar.g:1356:12: i= IDENT
                     {
                     i=(Token)match(input,IDENT,FOLLOW_IDENT_in_millisecondPart9123); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_IDENT.add(i);
@@ -21987,7 +21988,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1355:20: substitution
+                    // EsperEPL2Grammar.g:1356:20: substitution
                     {
                     pushFollow(FOLLOW_substitution_in_millisecondPart9125);
                     substitution585=substitution();
@@ -22001,7 +22002,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             }
 
-            // EsperEPL2Grammar.g:1355:34: ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC )
+            // EsperEPL2Grammar.g:1356:34: ( TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC )
             int alt212=3;
             switch ( input.LA(1) ) {
             case TIMEPERIOD_MILLISECONDS:
@@ -22029,7 +22030,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt212) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1355:35: TIMEPERIOD_MILLISECONDS
+                    // EsperEPL2Grammar.g:1356:35: TIMEPERIOD_MILLISECONDS
                     {
                     TIMEPERIOD_MILLISECONDS586=(Token)match(input,TIMEPERIOD_MILLISECONDS,FOLLOW_TIMEPERIOD_MILLISECONDS_in_millisecondPart9129); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_MILLISECONDS.add(TIMEPERIOD_MILLISECONDS586);
@@ -22038,7 +22039,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1355:61: TIMEPERIOD_MILLISECOND
+                    // EsperEPL2Grammar.g:1356:61: TIMEPERIOD_MILLISECOND
                     {
                     TIMEPERIOD_MILLISECOND587=(Token)match(input,TIMEPERIOD_MILLISECOND,FOLLOW_TIMEPERIOD_MILLISECOND_in_millisecondPart9133); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_MILLISECOND.add(TIMEPERIOD_MILLISECOND587);
@@ -22047,7 +22048,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1355:86: TIMEPERIOD_MILLISEC
+                    // EsperEPL2Grammar.g:1356:86: TIMEPERIOD_MILLISEC
                     {
                     TIMEPERIOD_MILLISEC588=(Token)match(input,TIMEPERIOD_MILLISEC,FOLLOW_TIMEPERIOD_MILLISEC_in_millisecondPart9137); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_TIMEPERIOD_MILLISEC.add(TIMEPERIOD_MILLISEC588);
@@ -22061,7 +22062,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
 
             // AST REWRITE
-            // elements: substitution, number, i
+            // elements: number, i, substitution
             // token labels: i
             // rule labels: retval
             // token list labels: 
@@ -22072,19 +22073,19 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1356:3: -> {i!= null}? ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+            // 1357:3: -> {i!= null}? ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
             if (i!= null) {
-                // EsperEPL2Grammar.g:1356:18: ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
+                // EsperEPL2Grammar.g:1357:18: ^( MILLISECOND_PART ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) ) )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MILLISECOND_PART, "MILLISECOND_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1356:37: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
+                // EsperEPL2Grammar.g:1357:37: ^( EVENT_PROP_EXPR ^( EVENT_PROP_SIMPLE $i) )
                 {
                 CommonTree root_2 = (CommonTree)adaptor.nil();
                 root_2 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_EXPR, "EVENT_PROP_EXPR"), root_2);
 
-                // EsperEPL2Grammar.g:1356:55: ^( EVENT_PROP_SIMPLE $i)
+                // EsperEPL2Grammar.g:1357:55: ^( EVENT_PROP_SIMPLE $i)
                 {
                 CommonTree root_3 = (CommonTree)adaptor.nil();
                 root_3 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(EVENT_PROP_SIMPLE, "EVENT_PROP_SIMPLE"), root_3);
@@ -22101,20 +22102,20 @@ public class EsperEPL2GrammarParser extends Parser {
                 }
 
             }
-            else // 1357:3: -> ^( MILLISECOND_PART ( number )? ( substitution )? )
+            else // 1358:3: -> ^( MILLISECOND_PART ( number )? ( substitution )? )
             {
-                // EsperEPL2Grammar.g:1357:6: ^( MILLISECOND_PART ( number )? ( substitution )? )
+                // EsperEPL2Grammar.g:1358:6: ^( MILLISECOND_PART ( number )? ( substitution )? )
                 {
                 CommonTree root_1 = (CommonTree)adaptor.nil();
                 root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(MILLISECOND_PART, "MILLISECOND_PART"), root_1);
 
-                // EsperEPL2Grammar.g:1357:25: ( number )?
+                // EsperEPL2Grammar.g:1358:25: ( number )?
                 if ( stream_number.hasNext() ) {
                     adaptor.addChild(root_1, stream_number.nextTree());
 
                 }
                 stream_number.reset();
-                // EsperEPL2Grammar.g:1357:33: ( substitution )?
+                // EsperEPL2Grammar.g:1358:33: ( substitution )?
                 if ( stream_substitution.hasNext() ) {
                     adaptor.addChild(root_1, stream_substitution.nextTree());
 
@@ -22153,7 +22154,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "number"
-    // EsperEPL2Grammar.g:1360:1: number : (ni= NUM_INT -> INT_TYPE[$ni] | nl= NUM_LONG -> LONG_TYPE[$nl] | nf= NUM_FLOAT -> FLOAT_TYPE[$nf] | nd= NUM_DOUBLE -> DOUBLE_TYPE[$nd] );
+    // EsperEPL2Grammar.g:1361:1: number : (ni= NUM_INT -> INT_TYPE[$ni] | nl= NUM_LONG -> LONG_TYPE[$nl] | nf= NUM_FLOAT -> FLOAT_TYPE[$nf] | nd= NUM_DOUBLE -> DOUBLE_TYPE[$nd] );
     public final EsperEPL2GrammarParser.number_return number() throws RecognitionException {
         EsperEPL2GrammarParser.number_return retval = new EsperEPL2GrammarParser.number_return();
         retval.start = input.LT(1);
@@ -22175,7 +22176,7 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_NUM_INT=new RewriteRuleTokenStream(adaptor,"token NUM_INT");
 
         try {
-            // EsperEPL2Grammar.g:1361:5: (ni= NUM_INT -> INT_TYPE[$ni] | nl= NUM_LONG -> LONG_TYPE[$nl] | nf= NUM_FLOAT -> FLOAT_TYPE[$nf] | nd= NUM_DOUBLE -> DOUBLE_TYPE[$nd] )
+            // EsperEPL2Grammar.g:1362:5: (ni= NUM_INT -> INT_TYPE[$ni] | nl= NUM_LONG -> LONG_TYPE[$nl] | nf= NUM_FLOAT -> FLOAT_TYPE[$nf] | nd= NUM_DOUBLE -> DOUBLE_TYPE[$nd] )
             int alt213=4;
             switch ( input.LA(1) ) {
             case NUM_INT:
@@ -22208,7 +22209,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt213) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1361:9: ni= NUM_INT
+                    // EsperEPL2Grammar.g:1362:9: ni= NUM_INT
                     {
                     ni=(Token)match(input,NUM_INT,FOLLOW_NUM_INT_in_number9192); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUM_INT.add(ni);
@@ -22226,7 +22227,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1361:20: -> INT_TYPE[$ni]
+                    // 1362:20: -> INT_TYPE[$ni]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(INT_TYPE, ni));
 
@@ -22236,7 +22237,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1362:9: nl= NUM_LONG
+                    // EsperEPL2Grammar.g:1363:9: nl= NUM_LONG
                     {
                     nl=(Token)match(input,NUM_LONG,FOLLOW_NUM_LONG_in_number9209); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUM_LONG.add(nl);
@@ -22254,7 +22255,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1362:21: -> LONG_TYPE[$nl]
+                    // 1363:21: -> LONG_TYPE[$nl]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(LONG_TYPE, nl));
 
@@ -22264,7 +22265,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1363:9: nf= NUM_FLOAT
+                    // EsperEPL2Grammar.g:1364:9: nf= NUM_FLOAT
                     {
                     nf=(Token)match(input,NUM_FLOAT,FOLLOW_NUM_FLOAT_in_number9226); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUM_FLOAT.add(nf);
@@ -22282,7 +22283,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1363:22: -> FLOAT_TYPE[$nf]
+                    // 1364:22: -> FLOAT_TYPE[$nf]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(FLOAT_TYPE, nf));
 
@@ -22292,7 +22293,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1364:9: nd= NUM_DOUBLE
+                    // EsperEPL2Grammar.g:1365:9: nd= NUM_DOUBLE
                     {
                     nd=(Token)match(input,NUM_DOUBLE,FOLLOW_NUM_DOUBLE_in_number9243); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_NUM_DOUBLE.add(nd);
@@ -22310,7 +22311,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1364:23: -> DOUBLE_TYPE[$nd]
+                    // 1365:23: -> DOUBLE_TYPE[$nd]
                     {
                         adaptor.addChild(root_0, (CommonTree)adaptor.create(DOUBLE_TYPE, nd));
 
@@ -22345,7 +22346,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "substitution"
-    // EsperEPL2Grammar.g:1367:1: substitution : q= QUESTION -> SUBSTITUTION[$q] ;
+    // EsperEPL2Grammar.g:1368:1: substitution : q= QUESTION -> SUBSTITUTION[$q] ;
     public final EsperEPL2GrammarParser.substitution_return substitution() throws RecognitionException {
         EsperEPL2GrammarParser.substitution_return retval = new EsperEPL2GrammarParser.substitution_return();
         retval.start = input.LT(1);
@@ -22358,8 +22359,8 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_QUESTION=new RewriteRuleTokenStream(adaptor,"token QUESTION");
 
         try {
-            // EsperEPL2Grammar.g:1368:2: (q= QUESTION -> SUBSTITUTION[$q] )
-            // EsperEPL2Grammar.g:1368:4: q= QUESTION
+            // EsperEPL2Grammar.g:1369:2: (q= QUESTION -> SUBSTITUTION[$q] )
+            // EsperEPL2Grammar.g:1369:4: q= QUESTION
             {
             q=(Token)match(input,QUESTION,FOLLOW_QUESTION_in_substitution9264); if (state.failed) return retval; 
             if ( state.backtracking==0 ) stream_QUESTION.add(q);
@@ -22377,7 +22378,7 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1368:15: -> SUBSTITUTION[$q]
+            // 1369:15: -> SUBSTITUTION[$q]
             {
                 adaptor.addChild(root_0, (CommonTree)adaptor.create(SUBSTITUTION, q));
 
@@ -22410,7 +22411,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "constant"
-    // EsperEPL2Grammar.g:1371:1: constant : ( numberconstant | stringconstant | t= BOOLEAN_TRUE -> ^( BOOL_TYPE[$t] ) | f= BOOLEAN_FALSE -> ^( BOOL_TYPE[$f] ) | nu= VALUE_NULL -> ^( NULL_TYPE[$nu] ) );
+    // EsperEPL2Grammar.g:1372:1: constant : ( numberconstant | stringconstant | t= BOOLEAN_TRUE -> ^( BOOL_TYPE[$t] ) | f= BOOLEAN_FALSE -> ^( BOOL_TYPE[$f] ) | nu= VALUE_NULL -> ^( NULL_TYPE[$nu] ) );
     public final EsperEPL2GrammarParser.constant_return constant() throws RecognitionException {
         EsperEPL2GrammarParser.constant_return retval = new EsperEPL2GrammarParser.constant_return();
         retval.start = input.LT(1);
@@ -22433,7 +22434,7 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_BOOLEAN_FALSE=new RewriteRuleTokenStream(adaptor,"token BOOLEAN_FALSE");
 
         try {
-            // EsperEPL2Grammar.g:1372:2: ( numberconstant | stringconstant | t= BOOLEAN_TRUE -> ^( BOOL_TYPE[$t] ) | f= BOOLEAN_FALSE -> ^( BOOL_TYPE[$f] ) | nu= VALUE_NULL -> ^( NULL_TYPE[$nu] ) )
+            // EsperEPL2Grammar.g:1373:2: ( numberconstant | stringconstant | t= BOOLEAN_TRUE -> ^( BOOL_TYPE[$t] ) | f= BOOLEAN_FALSE -> ^( BOOL_TYPE[$f] ) | nu= VALUE_NULL -> ^( NULL_TYPE[$nu] ) )
             int alt214=5;
             switch ( input.LA(1) ) {
             case NUM_DOUBLE:
@@ -22477,7 +22478,7 @@ public class EsperEPL2GrammarParser extends Parser {
 
             switch (alt214) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1372:6: numberconstant
+                    // EsperEPL2Grammar.g:1373:6: numberconstant
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -22491,7 +22492,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1373:6: stringconstant
+                    // EsperEPL2Grammar.g:1374:6: stringconstant
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
@@ -22505,7 +22506,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:1374:10: t= BOOLEAN_TRUE
+                    // EsperEPL2Grammar.g:1375:10: t= BOOLEAN_TRUE
                     {
                     t=(Token)match(input,BOOLEAN_TRUE,FOLLOW_BOOLEAN_TRUE_in_constant9303); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_BOOLEAN_TRUE.add(t);
@@ -22523,9 +22524,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1374:25: -> ^( BOOL_TYPE[$t] )
+                    // 1375:25: -> ^( BOOL_TYPE[$t] )
                     {
-                        // EsperEPL2Grammar.g:1374:28: ^( BOOL_TYPE[$t] )
+                        // EsperEPL2Grammar.g:1375:28: ^( BOOL_TYPE[$t] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(BOOL_TYPE, t), root_1);
@@ -22539,7 +22540,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:1375:10: f= BOOLEAN_FALSE
+                    // EsperEPL2Grammar.g:1376:10: f= BOOLEAN_FALSE
                     {
                     f=(Token)match(input,BOOLEAN_FALSE,FOLLOW_BOOLEAN_FALSE_in_constant9323); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_BOOLEAN_FALSE.add(f);
@@ -22557,9 +22558,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1375:26: -> ^( BOOL_TYPE[$f] )
+                    // 1376:26: -> ^( BOOL_TYPE[$f] )
                     {
-                        // EsperEPL2Grammar.g:1375:29: ^( BOOL_TYPE[$f] )
+                        // EsperEPL2Grammar.g:1376:29: ^( BOOL_TYPE[$f] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(BOOL_TYPE, f), root_1);
@@ -22573,7 +22574,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:1376:10: nu= VALUE_NULL
+                    // EsperEPL2Grammar.g:1377:10: nu= VALUE_NULL
                     {
                     nu=(Token)match(input,VALUE_NULL,FOLLOW_VALUE_NULL_in_constant9343); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_VALUE_NULL.add(nu);
@@ -22591,9 +22592,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1376:24: -> ^( NULL_TYPE[$nu] )
+                    // 1377:24: -> ^( NULL_TYPE[$nu] )
                     {
-                        // EsperEPL2Grammar.g:1376:27: ^( NULL_TYPE[$nu] )
+                        // EsperEPL2Grammar.g:1377:27: ^( NULL_TYPE[$nu] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(NULL_TYPE, nu), root_1);
@@ -22632,7 +22633,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "numberconstant"
-    // EsperEPL2Grammar.g:1379:1: numberconstant : (m= MINUS | p= PLUS )? number -> {$m != null}? -> number ;
+    // EsperEPL2Grammar.g:1380:1: numberconstant : (m= MINUS | p= PLUS )? number -> {$m != null}? -> number ;
     public final EsperEPL2GrammarParser.numberconstant_return numberconstant() throws RecognitionException {
         EsperEPL2GrammarParser.numberconstant_return retval = new EsperEPL2GrammarParser.numberconstant_return();
         retval.start = input.LT(1);
@@ -22650,10 +22651,10 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_MINUS=new RewriteRuleTokenStream(adaptor,"token MINUS");
         RewriteRuleSubtreeStream stream_number=new RewriteRuleSubtreeStream(adaptor,"rule number");
         try {
-            // EsperEPL2Grammar.g:1380:2: ( (m= MINUS | p= PLUS )? number -> {$m != null}? -> number )
-            // EsperEPL2Grammar.g:1380:5: (m= MINUS | p= PLUS )? number
+            // EsperEPL2Grammar.g:1381:2: ( (m= MINUS | p= PLUS )? number -> {$m != null}? -> number )
+            // EsperEPL2Grammar.g:1381:5: (m= MINUS | p= PLUS )? number
             {
-            // EsperEPL2Grammar.g:1380:5: (m= MINUS | p= PLUS )?
+            // EsperEPL2Grammar.g:1381:5: (m= MINUS | p= PLUS )?
             int alt215=3;
             int LA215_0 = input.LA(1);
 
@@ -22665,7 +22666,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt215) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1380:6: m= MINUS
+                    // EsperEPL2Grammar.g:1381:6: m= MINUS
                     {
                     m=(Token)match(input,MINUS,FOLLOW_MINUS_in_numberconstant9365); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_MINUS.add(m);
@@ -22674,7 +22675,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1380:16: p= PLUS
+                    // EsperEPL2Grammar.g:1381:16: p= PLUS
                     {
                     p=(Token)match(input,PLUS,FOLLOW_PLUS_in_numberconstant9371); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_PLUS.add(p);
@@ -22704,12 +22705,12 @@ public class EsperEPL2GrammarParser extends Parser {
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
             root_0 = (CommonTree)adaptor.nil();
-            // 1381:3: -> {$m != null}?
+            // 1382:3: -> {$m != null}?
             if (m != null) {
                 adaptor.addChild(root_0, adaptor.create((number591!=null?((CommonTree)number591.tree):null).getType(), "-" + (number591!=null?input.toString(number591.start,number591.stop):null)));
 
             }
-            else // 1382:3: -> number
+            else // 1383:3: -> number
             {
                 adaptor.addChild(root_0, stream_number.nextTree());
 
@@ -22742,7 +22743,7 @@ public class EsperEPL2GrammarParser extends Parser {
     };
 
     // $ANTLR start "stringconstant"
-    // EsperEPL2Grammar.g:1385:1: stringconstant : (sl= STRING_LITERAL -> ^( STRING_TYPE[$sl] ) | qsl= QUOTED_STRING_LITERAL -> ^( STRING_TYPE[$qsl] ) );
+    // EsperEPL2Grammar.g:1386:1: stringconstant : (sl= STRING_LITERAL -> ^( STRING_TYPE[$sl] ) | qsl= QUOTED_STRING_LITERAL -> ^( STRING_TYPE[$qsl] ) );
     public final EsperEPL2GrammarParser.stringconstant_return stringconstant() throws RecognitionException {
         EsperEPL2GrammarParser.stringconstant_return retval = new EsperEPL2GrammarParser.stringconstant_return();
         retval.start = input.LT(1);
@@ -22758,7 +22759,7 @@ public class EsperEPL2GrammarParser extends Parser {
         RewriteRuleTokenStream stream_QUOTED_STRING_LITERAL=new RewriteRuleTokenStream(adaptor,"token QUOTED_STRING_LITERAL");
 
         try {
-            // EsperEPL2Grammar.g:1386:2: (sl= STRING_LITERAL -> ^( STRING_TYPE[$sl] ) | qsl= QUOTED_STRING_LITERAL -> ^( STRING_TYPE[$qsl] ) )
+            // EsperEPL2Grammar.g:1387:2: (sl= STRING_LITERAL -> ^( STRING_TYPE[$sl] ) | qsl= QUOTED_STRING_LITERAL -> ^( STRING_TYPE[$qsl] ) )
             int alt216=2;
             int LA216_0 = input.LA(1);
 
@@ -22777,7 +22778,7 @@ public class EsperEPL2GrammarParser extends Parser {
             }
             switch (alt216) {
                 case 1 :
-                    // EsperEPL2Grammar.g:1386:6: sl= STRING_LITERAL
+                    // EsperEPL2Grammar.g:1387:6: sl= STRING_LITERAL
                     {
                     sl=(Token)match(input,STRING_LITERAL,FOLLOW_STRING_LITERAL_in_stringconstant9404); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_STRING_LITERAL.add(sl);
@@ -22795,9 +22796,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1386:24: -> ^( STRING_TYPE[$sl] )
+                    // 1387:24: -> ^( STRING_TYPE[$sl] )
                     {
-                        // EsperEPL2Grammar.g:1386:27: ^( STRING_TYPE[$sl] )
+                        // EsperEPL2Grammar.g:1387:27: ^( STRING_TYPE[$sl] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(STRING_TYPE, sl), root_1);
@@ -22811,7 +22812,7 @@ public class EsperEPL2GrammarParser extends Parser {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:1387:6: qsl= QUOTED_STRING_LITERAL
+                    // EsperEPL2Grammar.g:1388:6: qsl= QUOTED_STRING_LITERAL
                     {
                     qsl=(Token)match(input,QUOTED_STRING_LITERAL,FOLLOW_QUOTED_STRING_LITERAL_in_stringconstant9420); if (state.failed) return retval; 
                     if ( state.backtracking==0 ) stream_QUOTED_STRING_LITERAL.add(qsl);
@@ -22829,9 +22830,9 @@ public class EsperEPL2GrammarParser extends Parser {
                     RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"token retval",retval!=null?retval.tree:null);
 
                     root_0 = (CommonTree)adaptor.nil();
-                    // 1387:32: -> ^( STRING_TYPE[$qsl] )
+                    // 1388:32: -> ^( STRING_TYPE[$qsl] )
                     {
-                        // EsperEPL2Grammar.g:1387:35: ^( STRING_TYPE[$qsl] )
+                        // EsperEPL2Grammar.g:1388:35: ^( STRING_TYPE[$qsl] )
                         {
                         CommonTree root_1 = (CommonTree)adaptor.nil();
                         root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(STRING_TYPE, qsl), root_1);
@@ -22866,8 +22867,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred1_EsperEPL2Grammar
     public final void synpred1_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:665:4: ( streamSelector )
-        // EsperEPL2Grammar.g:665:5: streamSelector
+        // EsperEPL2Grammar.g:666:4: ( streamSelector )
+        // EsperEPL2Grammar.g:666:5: streamSelector
         {
         pushFollow(FOLLOW_streamSelector_in_synpred1_EsperEPL2Grammar2813);
         streamSelector();
@@ -22881,8 +22882,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred2_EsperEPL2Grammar
     public final void synpred2_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:743:7: ( timePeriod )
-        // EsperEPL2Grammar.g:743:8: timePeriod
+        // EsperEPL2Grammar.g:744:7: ( timePeriod )
+        // EsperEPL2Grammar.g:744:8: timePeriod
         {
         pushFollow(FOLLOW_timePeriod_in_synpred2_EsperEPL2Grammar3501);
         timePeriod();
@@ -22896,8 +22897,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred3_EsperEPL2Grammar
     public final void synpred3_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:905:4: ( builtinFunc )
-        // EsperEPL2Grammar.g:905:5: builtinFunc
+        // EsperEPL2Grammar.g:906:4: ( builtinFunc )
+        // EsperEPL2Grammar.g:906:5: builtinFunc
         {
         pushFollow(FOLLOW_builtinFunc_in_synpred3_EsperEPL2Grammar5232);
         builtinFunc();
@@ -22911,8 +22912,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred4_EsperEPL2Grammar
     public final void synpred4_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:978:4: ( eventProperty )
-        // EsperEPL2Grammar.g:978:5: eventProperty
+        // EsperEPL2Grammar.g:979:4: ( eventProperty )
+        // EsperEPL2Grammar.g:979:5: eventProperty
         {
         pushFollow(FOLLOW_eventProperty_in_synpred4_EsperEPL2Grammar5907);
         eventProperty();
@@ -22926,8 +22927,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred5_EsperEPL2Grammar
     public final void synpred5_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1126:4: ( propertyStreamSelector )
-        // EsperEPL2Grammar.g:1126:5: propertyStreamSelector
+        // EsperEPL2Grammar.g:1127:4: ( propertyStreamSelector )
+        // EsperEPL2Grammar.g:1127:5: propertyStreamSelector
         {
         pushFollow(FOLLOW_propertyStreamSelector_in_synpred5_EsperEPL2Grammar7179);
         propertyStreamSelector();
@@ -22941,8 +22942,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred6_EsperEPL2Grammar
     public final void synpred6_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1175:7: ( lastOperand )
-        // EsperEPL2Grammar.g:1175:8: lastOperand
+        // EsperEPL2Grammar.g:1176:7: ( lastOperand )
+        // EsperEPL2Grammar.g:1176:8: lastOperand
         {
         pushFollow(FOLLOW_lastOperand_in_synpred6_EsperEPL2Grammar7597);
         lastOperand();
@@ -22956,8 +22957,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred7_EsperEPL2Grammar
     public final void synpred7_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1176:4: ( lastWeekdayOperand )
-        // EsperEPL2Grammar.g:1176:5: lastWeekdayOperand
+        // EsperEPL2Grammar.g:1177:4: ( lastWeekdayOperand )
+        // EsperEPL2Grammar.g:1177:5: lastWeekdayOperand
         {
         pushFollow(FOLLOW_lastWeekdayOperand_in_synpred7_EsperEPL2Grammar7608);
         lastWeekdayOperand();
@@ -22971,8 +22972,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred8_EsperEPL2Grammar
     public final void synpred8_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1177:4: ( timePeriod )
-        // EsperEPL2Grammar.g:1177:5: timePeriod
+        // EsperEPL2Grammar.g:1178:4: ( timePeriod )
+        // EsperEPL2Grammar.g:1178:5: timePeriod
         {
         pushFollow(FOLLOW_timePeriod_in_synpred8_EsperEPL2Grammar7619);
         timePeriod();
@@ -22986,8 +22987,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred9_EsperEPL2Grammar
     public final void synpred9_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1178:4: ( expressionQualifyable )
-        // EsperEPL2Grammar.g:1178:5: expressionQualifyable
+        // EsperEPL2Grammar.g:1179:4: ( expressionQualifyable )
+        // EsperEPL2Grammar.g:1179:5: expressionQualifyable
         {
         pushFollow(FOLLOW_expressionQualifyable_in_synpred9_EsperEPL2Grammar7630);
         expressionQualifyable();
@@ -23001,8 +23002,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred10_EsperEPL2Grammar
     public final void synpred10_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1179:4: ( rangeOperand )
-        // EsperEPL2Grammar.g:1179:5: rangeOperand
+        // EsperEPL2Grammar.g:1180:4: ( rangeOperand )
+        // EsperEPL2Grammar.g:1180:5: rangeOperand
         {
         pushFollow(FOLLOW_rangeOperand_in_synpred10_EsperEPL2Grammar7641);
         rangeOperand();
@@ -23016,8 +23017,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred11_EsperEPL2Grammar
     public final void synpred11_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1180:5: ( frequencyOperand )
-        // EsperEPL2Grammar.g:1180:6: frequencyOperand
+        // EsperEPL2Grammar.g:1181:5: ( frequencyOperand )
+        // EsperEPL2Grammar.g:1181:6: frequencyOperand
         {
         pushFollow(FOLLOW_frequencyOperand_in_synpred11_EsperEPL2Grammar7653);
         frequencyOperand();
@@ -23031,8 +23032,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred12_EsperEPL2Grammar
     public final void synpred12_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1181:4: ( lastOperator )
-        // EsperEPL2Grammar.g:1181:5: lastOperator
+        // EsperEPL2Grammar.g:1182:4: ( lastOperator )
+        // EsperEPL2Grammar.g:1182:5: lastOperator
         {
         pushFollow(FOLLOW_lastOperator_in_synpred12_EsperEPL2Grammar7664);
         lastOperator();
@@ -23046,8 +23047,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred13_EsperEPL2Grammar
     public final void synpred13_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1182:4: ( weekDayOperator )
-        // EsperEPL2Grammar.g:1182:5: weekDayOperator
+        // EsperEPL2Grammar.g:1183:4: ( weekDayOperator )
+        // EsperEPL2Grammar.g:1183:5: weekDayOperator
         {
         pushFollow(FOLLOW_weekDayOperator_in_synpred13_EsperEPL2Grammar7675);
         weekDayOperator();
@@ -23061,8 +23062,8 @@ public class EsperEPL2GrammarParser extends Parser {
 
     // $ANTLR start synpred14_EsperEPL2Grammar
     public final void synpred14_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:1183:5: ( numericParameterList )
-        // EsperEPL2Grammar.g:1183:6: numericParameterList
+        // EsperEPL2Grammar.g:1184:5: ( numericParameterList )
+        // EsperEPL2Grammar.g:1184:6: numericParameterList
         {
         pushFollow(FOLLOW_numericParameterList_in_synpred14_EsperEPL2Grammar7688);
         numericParameterList();
@@ -23460,7 +23461,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA46_transition;
         }
         public String getDescription() {
-            return "662:1: selectionListElement : (s= STAR -> WILDCARD_SELECT[$s] | ( streamSelector )=> streamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression ) -> ^( SELECTION_ELEMENT_EXPR expression ) );";
+            return "663:1: selectionListElement : (s= STAR -> WILDCARD_SELECT[$s] | ( streamSelector )=> streamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> {identifier == null}? ^( SELECTION_ELEMENT_EXPR expression ) -> ^( SELECTION_ELEMENT_EXPR expression ) );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             TokenStream input = (TokenStream)_input;
@@ -23654,7 +23655,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA77_transition;
         }
         public String getDescription() {
-            return "783:1: caseExpression : ( CASE ( whenClause )+ ( elseClause )? END | CASE expression ( whenClause )+ ( elseClause )? END -> ^( CASE2 expression ( whenClause )+ ( elseClause )? ) | evalOrExpression );";
+            return "784:1: caseExpression : ( CASE ( whenClause )+ ( elseClause )? END | CASE expression ( whenClause )+ ( elseClause )? END -> ^( CASE2 expression ( whenClause )+ ( elseClause )? ) | evalOrExpression );";
         }
     }
     static final String DFA109_eotS =
@@ -25777,7 +25778,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA109_transition;
         }
         public String getDescription() {
-            return "899:1: unaryExpression : ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression | existsSubSelectExpression );";
+            return "900:1: unaryExpression : ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression | existsSubSelectExpression );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             TokenStream input = (TokenStream)_input;
@@ -29449,7 +29450,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA132_transition;
         }
         public String getDescription() {
-            return "977:1: eventPropertyOrLibFunction : ( ( eventProperty )=> eventProperty | libFunction );";
+            return "978:1: eventPropertyOrLibFunction : ( ( eventProperty )=> eventProperty | libFunction );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             TokenStream input = (TokenStream)_input;
@@ -30652,7 +30653,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA165_transition;
         }
         public String getDescription() {
-            return "1123:1: propertySelectionListElement : (s= STAR -> PROPERTY_WILDCARD_SELECT[$s] | ( propertyStreamSelector )=> propertyStreamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression ) );";
+            return "1124:1: propertySelectionListElement : (s= STAR -> PROPERTY_WILDCARD_SELECT[$s] | ( propertyStreamSelector )=> propertyStreamSelector | expression ( AS i= keywordAllowedIdent )? -> {identifier != null}? ^( PROPERTY_SELECTION_ELEMENT_EXPR expression IDENT[identifier] ) -> ^( PROPERTY_SELECTION_ELEMENT_EXPR expression ) );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             TokenStream input = (TokenStream)_input;
@@ -31333,7 +31334,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA175_transition;
         }
         public String getDescription() {
-            return "1174:1: expressionWithTime : ( ( lastOperand )=> lastOperand | ( lastWeekdayOperand )=> lastWeekdayOperand | ( timePeriod )=> timePeriod | ( expressionQualifyable )=> expressionQualifyable | ( rangeOperand )=> rangeOperand | ( frequencyOperand )=> frequencyOperand | ( lastOperator )=> lastOperator | ( weekDayOperator )=> weekDayOperator | ( numericParameterList )=> numericParameterList | numberSetStar );";
+            return "1175:1: expressionWithTime : ( ( lastOperand )=> lastOperand | ( lastWeekdayOperand )=> lastWeekdayOperand | ( timePeriod )=> timePeriod | ( expressionQualifyable )=> expressionQualifyable | ( rangeOperand )=> rangeOperand | ( frequencyOperand )=> frequencyOperand | ( lastOperator )=> lastOperator | ( weekDayOperator )=> weekDayOperator | ( numericParameterList )=> numericParameterList | numberSetStar );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             TokenStream input = (TokenStream)_input;
@@ -32841,7 +32842,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA189_transition;
         }
         public String getDescription() {
-            return "1271:24: (ipi2= keywordAllowedIdent )?";
+            return "1272:24: (ipi2= keywordAllowedIdent )?";
         }
     }
  

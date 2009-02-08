@@ -72,6 +72,7 @@ public class StatementResultServiceImpl implements StatementResultService
      * Ctor.
      * @param statementLifecycleSvc handles persistence for statements
      * @param metricReportingService for metrics reporting
+     * @param threadingService for outbound threading
      */
     public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc, MetricReportingService metricReportingService,
                                       ThreadingService threadingService)
@@ -199,6 +200,10 @@ public class StatementResultServiceImpl implements StatementResultService
         dispatches.clear();
     }
 
+    /**
+     * Indicate an outbound result.
+     * @param events to indicate 
+     */
     public void processDispatch(UniformPair<EventBean[]> events)
     {
         if (statementResultNaturalStrategy != null)

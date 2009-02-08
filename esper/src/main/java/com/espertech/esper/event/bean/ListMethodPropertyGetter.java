@@ -25,7 +25,7 @@ public class ListMethodPropertyGetter extends BaseNativePropertyGetter implement
      */
     public ListMethodPropertyGetter(Method method, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method), null);
+        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method, false), null);
         this.index = index;
         this.method = method;
 

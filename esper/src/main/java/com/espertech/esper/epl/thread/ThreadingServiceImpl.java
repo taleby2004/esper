@@ -10,6 +10,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Implementation for engine-level threading.
+ */
 public class ThreadingServiceImpl implements ThreadingService
 {
     private static final Log log = LogFactory.getLog(ThreadingServiceImpl.class);
@@ -30,6 +33,10 @@ public class ThreadingServiceImpl implements ThreadingService
     private ThreadPoolExecutor routeThreadPool;
     private ThreadPoolExecutor outboundThreadPool;
 
+    /**
+     * Ctor.
+     * @param threadingConfig configuration
+     */
     public ThreadingServiceImpl(ConfigurationEngineDefaults.Threading threadingConfig)
     {
         this.config = threadingConfig;

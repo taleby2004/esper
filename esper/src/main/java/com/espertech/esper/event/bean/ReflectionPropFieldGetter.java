@@ -29,7 +29,7 @@ public final class ReflectionPropFieldGetter extends BaseNativePropertyGetter im
      */
     public ReflectionPropFieldGetter(Field field, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, field.getType(), JavaClassHelper.getGenericFieldType(field));
+        super(eventAdapterService, field.getType(), JavaClassHelper.getGenericFieldType(field, true));
         this.field = field;
     }
 

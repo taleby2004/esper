@@ -356,84 +356,148 @@ public class ConfigurationEngineDefaults implements Serializable
             return insertIntoDispatchLocking;
         }
 
+        /**
+         * Returns true for inbound threading enabled, the default is false for not enabled.
+         * @return indicator whether inbound threading is enabled
+         */
         public boolean isThreadPoolInbound()
         {
             return isThreadPoolInbound;
         }
 
+        /**
+         * Set to true for inbound threading enabled, the default is false for not enabled.
+         * @param threadPoolInbound indicator whether inbound threading is enabled
+         */
         public void setThreadPoolInbound(boolean threadPoolInbound)
         {
             isThreadPoolInbound = threadPoolInbound;
         }
 
+        /**
+         * Returns true for timer execution threading enabled, the default is false for not enabled.
+         * @return indicator whether timer execution threading is enabled
+         */
         public boolean isThreadPoolTimerExec()
         {
             return isThreadPoolTimerExec;
         }
 
+        /**
+         * Set to true for timer execution threading enabled, the default is false for not enabled.
+         * @param threadPoolTimerExec indicator whether timer execution threading is enabled
+         */
         public void setThreadPoolTimerExec(boolean threadPoolTimerExec)
         {
             isThreadPoolTimerExec = threadPoolTimerExec;
         }
 
+        /**
+         * Returns true for route execution threading enabled, the default is false for not enabled.
+         * @return indicator whether route execution threading is enabled
+         */
         public boolean isThreadPoolRouteExec()
         {
             return isThreadPoolRouteExec;
         }
 
+        /**
+         * Set to true for route execution threading enabled, the default is false for not enabled.
+         * @param threadPoolRouteExec indicator whether route execution threading is enabled
+         */
         public void setThreadPoolRouteExec(boolean threadPoolRouteExec)
         {
             isThreadPoolRouteExec = threadPoolRouteExec;
         }
 
+        /**
+         * Returns true for outbound threading enabled, the default is false for not enabled.
+         * @return indicator whether outbound threading is enabled
+         */
         public boolean isThreadPoolOutbound()
         {
             return isThreadPoolOutbound;
         }
 
+        /**
+         * Set to true for outbound threading enabled, the default is false for not enabled.
+         * @param threadPoolOutbound indicator whether outbound threading is enabled
+         */
         public void setThreadPoolOutbound(boolean threadPoolOutbound)
         {
             isThreadPoolOutbound = threadPoolOutbound;
         }
 
+        /**
+         * Returns the number of thread in the inbound threading pool. 
+         * @return number of threads
+         */
         public int getThreadPoolInboundNumThreads()
         {
             return threadPoolInboundNumThreads;
         }
 
-        public void setThreadPoolInboundNumThreads(int threadPoolInboundNumThreads)
+        /**
+         * Sets the number of threads in the thread pool for inbound threading.  
+         * @param num number of threads
+         */
+        public void setThreadPoolInboundNumThreads(int num)
         {
-            this.threadPoolInboundNumThreads = threadPoolInboundNumThreads;
+            this.threadPoolInboundNumThreads = num;
         }
 
+        /**
+         * Returns the number of thread in the outbound threading pool.
+         * @return number of threads
+         */
         public int getThreadPoolOutboundNumThreads()
         {
             return threadPoolOutboundNumThreads;
         }
 
-        public void setThreadPoolOutboundNumThreads(int threadPoolOutboundNumThreads)
+        /**
+         * Sets the number of threads in the thread pool for outbound threading.
+         * @param num number of threads
+         */
+        public void setThreadPoolOutboundNumThreads(int num)
         {
-            this.threadPoolOutboundNumThreads = threadPoolOutboundNumThreads;
+            this.threadPoolOutboundNumThreads = num;
         }
 
+        /**
+         * Returns the number of thread in the route execution thread pool.
+         * @return number of threads
+         */
         public int getThreadPoolRouteExecNumThreads()
         {
             return threadPoolRouteExecNumThreads;
         }
 
-        public void setThreadPoolRouteExecNumThreads(int threadPoolRouteExecNumThreads)
+        /**
+         * Sets the number of threads in the thread pool for route exec threading.
+         * @param num number of threads
+         */
+        public void setThreadPoolRouteExecNumThreads(int num)
         {
-            this.threadPoolRouteExecNumThreads = threadPoolRouteExecNumThreads;
+            this.threadPoolRouteExecNumThreads = num;
         }
 
+        /**
+         * Returns the number of thread in the timer execution threading pool.
+         * @return number of threads
+         */
         public int getThreadPoolTimerExecNumThreads()
         {
             return threadPoolTimerExecNumThreads;
         }
 
-        public void setThreadPoolTimerExecNumThreads(int threadPoolTimerExecNumThreads)
+        /**
+         * Sets the number of threads in the thread pool for timer exec threading.  
+         * @param num number of threads
+         */
+        public void setThreadPoolTimerExecNumThreads(int num)
         {
-            this.threadPoolTimerExecNumThreads = threadPoolTimerExecNumThreads;
+            this.threadPoolTimerExecNumThreads = num;
         }
 
         /**

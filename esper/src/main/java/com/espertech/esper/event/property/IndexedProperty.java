@@ -158,6 +158,46 @@ public class IndexedProperty extends PropertyBase
         return null;
     }
 
+    public GenericPropertyDesc getPropertyTypeGeneric(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        InternalEventPropDescriptor descriptor = eventType.getIndexedProperty(propertyNameAtomic);
+        if (descriptor != null)
+        {
+            return new GenericPropertyDesc(descriptor.getReturnType());
+        }
+
+        // Check if this is an method returning array which is a type of simple property
+        descriptor = eventType.getSimpleProperty(propertyNameAtomic);
+        if (descriptor == null)
+        {
+            return null;
+        }
+
+        Class returnType = descriptor.getReturnType();
+        if (returnType.isArray())
+        {
+            return new GenericPropertyDesc(returnType.getComponentType());
+        }
+        else if (JavaClassHelper.isImplementsInterface(returnType, Iterable.class))
+        {
+            if (descriptor.getReadMethod() != null)
+            {
+                Class genericType = JavaClassHelper.getGenericReturnType(descriptor.getReadMethod(), false);
+                return new GenericPropertyDesc(genericType);
+            }
+            else if (descriptor.getAccessorField() != null)
+            {
+                Class genericType = JavaClassHelper.getGenericFieldType(descriptor.getAccessorField(), false);
+                return new GenericPropertyDesc(genericType);
+            }
+            else
+            {
+                return null;
+            }
+        }
+        return null;
+    }
+
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         InternalEventPropDescriptor descriptor = eventType.getIndexedProperty(propertyNameAtomic);
@@ -182,21 +222,11 @@ public class IndexedProperty extends PropertyBase
         {
             if (descriptor.getReadMethod() != null)
             {
-                Class genericType = JavaClassHelper.getGenericReturnType(descriptor.getReadMethod());
-                if (genericType == null)
-                {
-                    return Object.class;
-                }
-                return genericType;
+                return JavaClassHelper.getGenericReturnType(descriptor.getReadMethod(), false);
             }
             else if (descriptor.getAccessorField() != null)
             {
-                Class genericType = JavaClassHelper.getGenericFieldType(descriptor.getAccessorField());
-                if (genericType == null)
-                {
-                    return Object.class;
-                }
-                return genericType;
+                return JavaClassHelper.getGenericFieldType(descriptor.getAccessorField(), false);
             }
             else
             {

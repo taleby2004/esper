@@ -1208,52 +1208,110 @@ public class JavaClassHelper
         getSuper(superClass, result);
     }
 
-    public static Class getGenericReturnType(Method method, Field field)
+    /**
+     * Returns the generic type parameter of a return value by a field or method.
+     * @param method method or null if field
+     * @param field field or null if method
+     * @param isAllowNull whether null is allowed as a return value or expected Object.class
+     * @return generic type parameter
+     */
+    public static Class getGenericReturnType(Method method, Field field, boolean isAllowNull)
     {
         if (method == null)
         {
-            return getGenericFieldType(field);
+            return getGenericFieldType(field, isAllowNull);
         }
         else
         {
-            return getGenericReturnType(method);
+            return getGenericReturnType(method, isAllowNull);
         }
     }
 
-    public static Class getGenericReturnTypeMap(Method method, Field field)
+    /**
+     * Returns the second generic type parameter of a return value by a field or method.
+     * @param method method or null if field
+     * @param field field or null if method
+     * @param isAllowNull whether null is allowed as a return value or expected Object.class
+     * @return generic type parameter
+     */
+    public static Class getGenericReturnTypeMap(Method method, Field field, boolean isAllowNull)
     {
         if (method == null)
         {
-            return getGenericFieldTypeMap(field);
+            return getGenericFieldTypeMap(field, isAllowNull);
         }
         else
         {
-            return getGenericReturnTypeMap(method);
+            return getGenericReturnTypeMap(method, isAllowNull);
         }
     }
 
-    public static Class getGenericReturnType(Method method)
+    /**
+     * Returns the generic type parameter of a return value by a method.
+     * @param method method or null if field
+     * @param isAllowNull whether null is allowed as a return value or expected Object.class
+     * @return generic type parameter
+     */
+    public static Class getGenericReturnType(Method method, boolean isAllowNull)
     {
         Type t = method.getGenericReturnType();
-        return getGenericType(t, 0);
+        Class result = getGenericType(t, 0);
+        if (!isAllowNull && result == null)
+        {
+            return Object.class;
+        }
+        return result;
     }
     
-    public static Class getGenericReturnTypeMap(Method method)
+    /**
+     * Returns the second generic type parameter of a return value by a field or method.
+     * @param method method or null if field
+     * @param isAllowNull whether null is allowed as a return value or expected Object.class
+     * @return generic type parameter
+     */
+    public static Class getGenericReturnTypeMap(Method method, boolean isAllowNull)
     {
         Type t = method.getGenericReturnType();
-        return getGenericType(t, 1);
+        Class result = getGenericType(t, 1);
+        if (!isAllowNull && result == null)
+        {
+            return Object.class;
+        }
+        return result;
     }
 
-    public static Class getGenericFieldType(Field field)
+    /**
+     * Returns the generic type parameter of a return value by a field.
+     * @param field field or null if method
+     * @param isAllowNull whether null is allowed as a return value or expected Object.class
+     * @return generic type parameter
+     */
+    public static Class getGenericFieldType(Field field, boolean isAllowNull)
     {
         Type t = field.getGenericType();
-        return getGenericType(t, 0);
+        Class result = getGenericType(t, 0);
+        if (!isAllowNull && result == null)
+        {
+            return Object.class;
+        }
+        return result;
     }
 
-    public static Class getGenericFieldTypeMap(Field field)
+    /**
+     * Returns the generic type parameter of a return value by a field or method.
+     * @param field field or null if method
+     * @param isAllowNull whether null is allowed as a return value or expected Object.class
+     * @return generic type parameter
+     */
+    public static Class getGenericFieldTypeMap(Field field, boolean isAllowNull)
     {
         Type t = field.getGenericType();
-        return getGenericType(t, 1);
+        Class result = getGenericType(t, 1);
+        if (!isAllowNull && result == null)
+        {
+            return Object.class;
+        }
+        return result;
     }
 
     private static Class getGenericType(Type t, int index)

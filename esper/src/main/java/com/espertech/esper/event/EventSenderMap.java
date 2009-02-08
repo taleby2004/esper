@@ -35,6 +35,8 @@ public class EventSenderMap implements EventSender
      * Ctor.
      * @param runtimeEventSender for processing events
      * @param mapEventType the event type
+     * @param threadingService for inbound threading
+     * @param eventAdapterService for event bean creation
      */
     public EventSenderMap(EPRuntimeEventSender runtimeEventSender, MapEventType mapEventType, EventAdapterService eventAdapterService, ThreadingService threadingService)
     {

@@ -13,6 +13,8 @@ import com.espertech.esper.antlr.NoCaseSensitiveStream;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.epl.parse.ExceptionConvertor;
+import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.type.IntValue;
 import com.espertech.esper.type.StringValue;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -100,9 +102,24 @@ public class PropertyParser
         {
              r = g.startEventPropertyRule();
         }
+        catch (RuntimeException e)
+        {
+            if (log.isDebugEnabled())
+            {
+                log.debug("Error parsing property expression [" + propertyName + "]", e);
+            }
+            if (e.getCause() instanceof RecognitionException)
+            {
+                throw ExceptionConvertor.convertProperty((RecognitionException)e.getCause(), propertyName, g);
+            }
+            else
+            {
+                throw e;
+            }
+        }
         catch (RecognitionException e)
         {
-            throw new PropertyAccessException("Failed to parse property name '" + propertyName + '\'', e);
+            throw ExceptionConvertor.convertProperty(e, propertyName, g);
         }
 
         return (Tree) r.getTree();

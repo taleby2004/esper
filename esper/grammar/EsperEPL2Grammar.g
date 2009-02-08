@@ -369,6 +369,7 @@ tokens
 	parserTokenParaphases.put(END, "'end'");
 	parserTokenParaphases.put(FROM, "'from'");
 	parserTokenParaphases.put(OUTER, "'outer'");
+	parserTokenParaphases.put(INNER, "'inner'");
 	parserTokenParaphases.put(JOIN, "'join'");
 	parserTokenParaphases.put(LEFT, "'left'");
 	parserTokenParaphases.put(RIGHT, "'right'");

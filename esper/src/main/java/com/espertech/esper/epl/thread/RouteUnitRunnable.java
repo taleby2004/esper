@@ -9,6 +9,9 @@ import com.espertech.esper.filter.FilterHandleCallback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Interface for route execution work units.
+ */
 public interface RouteUnitRunnable extends Runnable
 {
 }

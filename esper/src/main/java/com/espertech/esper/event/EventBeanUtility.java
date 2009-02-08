@@ -414,6 +414,13 @@ public class EventBeanUtility
         return newArray;
     }
 
+    /**
+     * Create a fragment event type.
+     * @param propertyType property return type
+     * @param genericType property generic type parameter, or null if none
+     * @param eventAdapterService for event types
+     * @return fragment type
+     */
     public static FragmentEventType createNativeFragmentType(Class propertyType, Class genericType, EventAdapterService eventAdapterService)
     {
         boolean isIndexed = false;
@@ -426,6 +433,10 @@ public class EventBeanUtility
         else if (JavaClassHelper.isImplementsInterface(propertyType, Iterable.class))
         {
             isIndexed = true;
+            if (genericType == null)
+            {
+                return null;
+            }
             propertyType = genericType;
         }
 

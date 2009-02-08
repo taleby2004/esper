@@ -39,8 +39,8 @@ public class EventSenderXMLDOM implements EventSender
      * Ctor.
      * @param runtimeEventSender for processing events
      * @param baseXMLEventType the event type
-     * @param eventAdapterService
-     * @param threadingService
+     * @param threadingService for inbound threading
+     * @param eventAdapterService for event bean creation
      */
     public EventSenderXMLDOM(EPRuntimeEventSender runtimeEventSender, BaseXMLEventType baseXMLEventType, EventAdapterServiceImpl eventAdapterService, ThreadingService threadingService)
     {

@@ -12,6 +12,7 @@ import java.io.StringReader;
 import java.io.IOException;
 
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.antlr.NoCaseSensitiveStream;
@@ -57,7 +58,7 @@ public class ParseHelper
             log.info("Error walking statement [" + expression + "]", e);
             if (e.getCause() instanceof RecognitionException)
             {
-                throw EPStatementSyntaxException.convert((RecognitionException)e.getCause(), expression, walker);
+                throw ExceptionConvertor.convert((RecognitionException)e.getCause(), expression, walker);
             }
             else
             {
@@ -67,7 +68,7 @@ public class ParseHelper
         catch (RecognitionException e)
         {
             log.info("Error walking statement [" + expression + "]", e);
-            throw EPStatementSyntaxException.convert(e, expression, walker);
+            throw ExceptionConvertor.convert(e, expression, walker);
         }
     }
 
@@ -107,10 +108,13 @@ public class ParseHelper
         }
         catch (RuntimeException e)
         {
-            log.debug("Error parsing statement [" + expression + "]", e);
+            if (log.isDebugEnabled())
+            {
+                log.debug("Error parsing statement [" + expression + "]", e);
+            }
             if (e.getCause() instanceof RecognitionException)
             {
-                throw EPStatementSyntaxException.convert((RecognitionException)e.getCause(), expression, parser);
+                throw ExceptionConvertor.convertStatement((RecognitionException)e.getCause(), expression, parser);
             }
             else
             {
@@ -120,7 +124,7 @@ public class ParseHelper
         catch (RecognitionException ex)
         {
             log.debug("Error parsing statement [" + expression + "]", ex);
-            throw EPStatementSyntaxException.convert(ex, expression, parser);
+            throw ExceptionConvertor.convertStatement(ex, expression, parser);
         }
 
         if (log.isDebugEnabled())

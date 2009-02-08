@@ -34,6 +34,7 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
      * Constructor.
      * @param eventAdapterService factory for event beans and event types
      * @param returnType type of the entry returned
+     * @param genericType type generic parameter, if any
      */
     public BaseNativePropertyGetter(EventAdapterService eventAdapterService, Class returnType, Class genericType)
     {

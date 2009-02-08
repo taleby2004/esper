@@ -28,13 +28,14 @@ public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter impleme
 
     /**
      * Constructor.
+     * @param method the underlying method
      * @param fastMethod is the method to use to retrieve a value from the object.
      * @param key is the key to supply as parameter to the mapped property getter
      * @param eventAdapterService factory for event beans and event types
      */
     public KeyedMapFastPropertyGetter(Method method, FastMethod fastMethod, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericReturnTypeMap(method), null);
+        super(eventAdapterService, JavaClassHelper.getGenericReturnTypeMap(method, false), null);
         this.key = key;
         this.fastMethod = fastMethod;
     }

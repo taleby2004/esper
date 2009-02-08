@@ -38,6 +38,7 @@ With Esper 3 integer division returns Double values, and Integer division can be
 - subselect order of eval well defined (sub-select first)
 - new config setting for UDF cache results
 - theading options
+- support for Iterable<Some> (with performance benefits for List<Some>) indexed properties; Also Map<A,B> returns B type now
   
 Fixed issue ESPER-313 Using last | snapshot in output...when statement causes parsing error
 Fixed issue ESPER-312 NullPointerException in group-by query with only a count(*) in the having-clause and no other agg functions

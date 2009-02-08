@@ -32,7 +32,7 @@ public class KeyedMapFieldPropertyGetter extends BaseNativePropertyGetter implem
      */
     public KeyedMapFieldPropertyGetter(Field field, Object key, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericFieldTypeMap(field), null);
+        super(eventAdapterService, JavaClassHelper.getGenericFieldTypeMap(field, false), null);
         this.key = key;
         this.field = field;
     }

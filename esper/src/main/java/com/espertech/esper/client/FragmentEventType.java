@@ -6,8 +6,11 @@ package com.espertech.esper.client;
  * A fragment is a property value that is itself an event, or that can be represented as an event.
  * Thereby a fragment comes with event type metadata and means of querying the fragment's properties.
  * <p>
- * A property values that is an array of events or that can be represented as an array of events
+ * A array or collection of property values that is an array of events or that can be represented as an array of events
  * has the indexed flag set.
+ * <p>
+ * A map of property values that is an map of events or that can be represented as a map of events
+ * has the mapped flag set.
  */
 public class FragmentEventType
 {

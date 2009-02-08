@@ -24,7 +24,7 @@ public class IterableMethodPropertyGetter extends BaseNativePropertyGetter imple
      */
     public IterableMethodPropertyGetter(Method method, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method), null);
+        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method, false), null);
         this.index = index;
         this.method = method;
 

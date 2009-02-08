@@ -109,15 +109,15 @@ public class InternalEventPropDescriptor
      * Returns the type of the underlying method or field of the event property.
      * @return return type
      */
-    public GenericPropertyDesc getReturnTypeNative()
+    public GenericPropertyDesc getReturnTypeGeneric()
     {
         if (readMethod != null)
         {
-            return new GenericPropertyDesc(readMethod.getReturnType(), JavaClassHelper.getGenericReturnType(readMethod));
+            return new GenericPropertyDesc(readMethod.getReturnType(), JavaClassHelper.getGenericReturnType(readMethod, true));
         }
         else
         {
-            return new GenericPropertyDesc(accessorField.getType(), JavaClassHelper.getGenericFieldType(accessorField));
+            return new GenericPropertyDesc(accessorField.getType(), JavaClassHelper.getGenericFieldType(accessorField, true));
         }
     }
 

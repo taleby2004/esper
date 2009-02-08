@@ -1,7 +1,7 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.epl.parse.EPStatementSyntaxException;
+import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;

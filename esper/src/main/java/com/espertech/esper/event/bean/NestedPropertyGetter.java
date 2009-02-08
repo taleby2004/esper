@@ -27,6 +27,7 @@ public class NestedPropertyGetter extends BaseNativePropertyGetter implements Ev
      * @param getterChain is the chain of getters to retrieve each nested property
      * @param eventAdapterService is the cache and factory for event bean types and event wrappers
      * @param finalPropertyType type of the entry returned
+     * @param finalGenericType generic type parameter of the entry returned, if any
      */
     public NestedPropertyGetter(List<EventPropertyGetter> getterChain, EventAdapterService eventAdapterService, Class finalPropertyType, Class finalGenericType)
     {

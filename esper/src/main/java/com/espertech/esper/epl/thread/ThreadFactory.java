@@ -3,6 +3,9 @@ package com.espertech.esper.epl.thread;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Thread factory for threading options.
+ */
 public class ThreadFactory implements java.util.concurrent.ThreadFactory
 {
     private static final Log log = LogFactory.getLog(ThreadFactory.class);
@@ -12,6 +15,13 @@ public class ThreadFactory implements java.util.concurrent.ThreadFactory
     private final int threadPriority;
     private int currThreadCount;
 
+    /**
+     * Ctor.
+     * @param engineURI engine URI
+     * @param prefix prefix for thread names
+     * @param threadGroup thread group
+     * @param threadPrio priority to use
+     */
     public ThreadFactory(String engineURI, String prefix, ThreadGroup threadGroup, int threadPrio)
     {
         if (engineURI == null)

@@ -957,18 +957,25 @@ public class MapEventType implements EventTypeSPI
 
                 boolean isArray = classType.isArray();
                 boolean isFragment = JavaClassHelper.isFragmentableType(classType);
-                propertyDescriptors.add(new EventPropertyDescriptor(name, classType, false, false, isArray, false, isFragment));
                 BeanEventType nativeFragmentType = null;
                 if (isFragment)
                 {
                     FragmentEventType fragmentType = EventBeanUtility.createNativeFragmentType(classType, null, eventAdapterService);
-                    nativeFragmentType = (BeanEventType) fragmentType.getFragmentType();
-                    eventTypeFragments.put(name, fragmentType);
+                    if (fragmentType != null)
+                    {
+                        nativeFragmentType = (BeanEventType) fragmentType.getFragmentType();
+                        eventTypeFragments.put(name, fragmentType);
+                    }
+                    else
+                    {
+                        isFragment = false;
+                    }
                 }
                 else
                 {
                     eventTypeFragments.put(name, null);
                 }
+                propertyDescriptors.add(new EventPropertyDescriptor(name, classType, false, false, isArray, false, isFragment));
 
                 EventPropertyGetter getter = new MapEntryPropertyGetter(name, nativeFragmentType, eventAdapterService);
                 propertyGetters.put(name, getter);

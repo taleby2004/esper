@@ -80,42 +80,6 @@ public class SupportBeanComplexProps implements Serializable, SupportMarkerInter
 		return arrayProperty;
 	}
 
-    public Iterable<SupportBeanSpecialGetterNested> getIterableNested()
-    {
-        return Arrays.asList(new SupportBeanSpecialGetterNested("IN1", "INN1"), new SupportBeanSpecialGetterNested("IN2", "INN2"));
-    }
-
-    public Iterable<Integer> getIterableInteger()
-    {
-        return Arrays.asList(10, 20);
-    }
-
-    public List<SupportBeanSpecialGetterNested> getListNested()
-    {
-        return Arrays.asList(new SupportBeanSpecialGetterNested("LN1", "LNN1"), new SupportBeanSpecialGetterNested("LN2", "LNN2"));
-    }
-
-    public List<Integer> getListInteger()
-    {
-        return Arrays.asList(100, 200);
-    }
-
-    public Map<String, SupportBeanSpecialGetterNested> getMapNested()
-	{
-        Map<String, SupportBeanSpecialGetterNested> map = new HashMap<String, SupportBeanSpecialGetterNested>();
-        map.put("a", new SupportBeanSpecialGetterNested("MN1", "MNN1"));
-        map.put("b", new SupportBeanSpecialGetterNested("MN2", "MNN2"));
-        return map;
-	}
-
-    public Map<String, Integer> getMapInteger()
-	{
-        Map<String, Integer> map = new HashMap<String, Integer>();
-        map.put("c", 1000);
-        map.put("d", 2000);
-        return map;
-	}
-
     public void setIndexed(int index, int value)
     {
         indexedProps[index] = value;

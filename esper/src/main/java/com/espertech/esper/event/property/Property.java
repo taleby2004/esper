@@ -34,6 +34,14 @@ public interface Property
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService);
 
     /**
+     * Returns the property type plus its generic type parameter, if any.
+     * @param eventType is the event type representing the JavaBean
+     * @param eventAdapterService for event adapters
+     * @return type and generic descriptor
+     */
+    public GenericPropertyDesc getPropertyTypeGeneric(BeanEventType eventType, EventAdapterService eventAdapterService);
+
+    /**
      * Returns value getter for the property of an event of the given event type.
      * @param eventType is the type of event to make a getter for
      * @param eventAdapterService factory for event beans and event types

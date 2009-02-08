@@ -276,6 +276,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    /**
+     * Process an unwrapped event.
+     * @param event to process.
+     */
     public void processEvent(Object event)
     {
         if (event instanceof TimerEvent)
@@ -530,6 +534,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    /**
+     * Works off the thread's work queue.
+     */
     public void processThreadWorkQueue()
     {
         Object item;
@@ -764,6 +771,12 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         stmtCallbacks.clear();
     }
 
+    /**
+     * Processing multiple schedule matches for a statement.
+     * @param handle statement handle
+     * @param callbackObject object containing matches
+     * @param services engine services
+     */
     public static void processStatementScheduleMultiple(EPStatementHandle handle, Object callbackObject, EPServicesContext services)
     {
         handle.getStatementLock().acquireLock(services.getStatementLockFactory());
@@ -801,6 +814,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    /**
+     * Processing single schedule matche for a statement.
+     * @param handle statement handle
+     * @param services engine services
+     */
     public static void processStatementScheduleSingle(EPStatementHandleCallback handle, EPServicesContext services)
     {
         ManagedLock statementLock = handle.getEpStatementHandle().getStatementLock();
@@ -826,6 +844,12 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    /**
+     * Processing multiple filter matches for a statement.
+     * @param handle statement handle
+     * @param callbackList object containing callbacks
+     * @param event to process
+     */
     public void processStatementFilterMultiple(EPStatementHandle handle, ArrayDequeJDK6Backport<FilterHandleCallback> callbackList, EventBean event)
     {
         handle.getStatementLock().acquireLock(services.getStatementLockFactory());
@@ -888,6 +912,12 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    /**
+     * Process a single match.
+     * @param handle statement
+     * @param handleCallback callback
+     * @param event event to indicate
+     */
     public void processStatementFilterSingle(EPStatementHandle handle, EPStatementHandleCallback handleCallback, EventBean event)
     {
         handle.getStatementLock().acquireLock(services.getStatementLockFactory());
@@ -913,6 +943,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     }
 
+    /**
+     * Dispatch events.
+     */
     public void dispatch()
     {
         try

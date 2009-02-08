@@ -24,7 +24,7 @@ public class IterableFieldPropertyGetter extends BaseNativePropertyGetter implem
      */
     public IterableFieldPropertyGetter(Field field, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericFieldType(field), null);
+        super(eventAdapterService, JavaClassHelper.getGenericFieldType(field, false), null);
         this.index = index;
         this.field = field;
 

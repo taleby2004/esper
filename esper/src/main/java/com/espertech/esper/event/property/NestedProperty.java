@@ -103,8 +103,8 @@ public class NestedProperty implements Property
             getters.add(getter);
         }
 
-        Class finalPropertyType = lastProperty.getPropertyType(eventType, eventAdapterService);
-        return new NestedPropertyGetter(getters, eventAdapterService,finalPropertyType, null);
+        GenericPropertyDesc finalPropertyType = lastProperty.getPropertyTypeGeneric(eventType, eventAdapterService);
+        return new NestedPropertyGetter(getters, eventAdapterService, finalPropertyType.getType(), finalPropertyType.getGeneric());
     }
 
     public Class getPropertyType(BeanEventType eventType, EventAdapterService eventAdapterService)
@@ -136,6 +136,41 @@ public class NestedProperty implements Property
                 }
 
                 eventType = eventAdapterService.getBeanEventTypeFactory().createBeanType(result.getName(), result, false);
+            }
+        }
+
+        return result;
+    }
+
+    public GenericPropertyDesc getPropertyTypeGeneric(BeanEventType eventType, EventAdapterService eventAdapterService)
+    {
+        GenericPropertyDesc result = null;
+
+        for (Iterator<Property> it = properties.iterator(); it.hasNext();)
+        {
+            Property property = it.next();
+            result = property.getPropertyTypeGeneric(eventType, eventAdapterService);
+
+            if (result == null)
+            {
+                // property not found, return null
+                return null;
+            }
+
+            if (it.hasNext())
+            {
+                // Map cannot be used to further nest as the type cannot be determined
+                if (result.getType() == Map.class)
+                {
+                    return null;
+                }
+
+                if (result.getType().isArray())
+                {
+                    return null;
+                }
+
+                eventType = eventAdapterService.getBeanEventTypeFactory().createBeanType(result.getType().getName(), result.getType(), false);
             }
         }
 

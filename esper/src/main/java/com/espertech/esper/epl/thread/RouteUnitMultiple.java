@@ -9,6 +9,9 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 
+/**
+ * Route execution work unit.
+ */
 public class RouteUnitMultiple implements RouteUnitRunnable
 {
     private static final Log log = LogFactory.getLog(RouteUnitMultiple.class);
@@ -18,6 +21,13 @@ public class RouteUnitMultiple implements RouteUnitRunnable
     private ArrayDequeJDK6Backport<FilterHandleCallback> callbackList;
     private EPStatementHandle handle;
 
+    /**
+     * Ctor.
+     * @param epRuntime runtime to process
+     * @param callbackList callback list
+     * @param event event to pass
+     * @param handle statement handle
+     */
     public RouteUnitMultiple(EPRuntimeImpl epRuntime, ArrayDequeJDK6Backport<FilterHandleCallback> callbackList, EventBean event, EPStatementHandle handle)
     {
         this.epRuntime = epRuntime;

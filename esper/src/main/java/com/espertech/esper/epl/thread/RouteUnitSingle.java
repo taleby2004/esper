@@ -1,14 +1,14 @@
 package com.espertech.esper.epl.thread;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.filter.FilterHandleCallback;
-import com.espertech.esper.collection.ArrayDequeJDK6Backport;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+/**
+ * Route unit for single match.
+ */
 public class RouteUnitSingle implements RouteUnitRunnable
 {
     private static final Log log = LogFactory.getLog(RouteUnitSingle.class);
@@ -17,6 +17,12 @@ public class RouteUnitSingle implements RouteUnitRunnable
     private EPStatementHandleCallback handleCallback;
     private final EventBean event;
 
+    /**
+     * Ctor.
+     * @param epRuntime runtime to process
+     * @param handleCallback callback
+     * @param event event
+     */
     public RouteUnitSingle(EPRuntimeImpl epRuntime, EPStatementHandleCallback handleCallback, EventBean event)
     {
         this.epRuntime = epRuntime;

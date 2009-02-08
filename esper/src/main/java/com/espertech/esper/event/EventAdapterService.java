@@ -253,6 +253,7 @@ public interface EventAdapterService
      * Returns an event sender for a specific type, only generating events of that type.
      * @param runtimeEventSender the runtime handle for sending the wrapped type
      * @param eventTypeName is the name of the event type to return the sender for
+     * @param threadingService threading service
      * @return event sender that is static, single-type
      */
     public EventSender getStaticTypeEventSender(EPRuntimeEventSender runtimeEventSender, String eventTypeName, ThreadingService threadingService);
@@ -261,6 +262,7 @@ public interface EventAdapterService
      * Returns an event sender that dynamically decides what the event type for a given object is.
      * @param runtimeEventSender the runtime handle for sending the wrapped type
      * @param uri is for plug-in event representations to provide implementations, if accepted, to make a wrapped event
+     * @param threadingService threading service
      * @return event sender that is dynamic, multi-type based on multiple event bean factories provided by
      * plug-in event representations
      */

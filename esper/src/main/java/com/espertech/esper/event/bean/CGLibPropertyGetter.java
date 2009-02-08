@@ -26,12 +26,13 @@ public class CGLibPropertyGetter extends BaseNativePropertyGetter implements Bea
 
     /**
      * Constructor.
+     * @param method the underlying method
      * @param fastMethod is the method to use to retrieve a value from the object.
      * @param eventAdapterService factory for event beans and event types
      */
     public CGLibPropertyGetter(Method method, FastMethod fastMethod, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method));
+        super(eventAdapterService, fastMethod.getReturnType(), JavaClassHelper.getGenericReturnType(method, true));
         this.fastMethod = fastMethod;
     }
 

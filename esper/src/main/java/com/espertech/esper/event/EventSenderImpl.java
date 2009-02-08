@@ -38,6 +38,7 @@ public class EventSenderImpl implements EventSender
      * Ctor.
      * @param handlingFactories list of factories
      * @param epRuntime the runtime to use to process the event
+     * @param threadingService for inbound threading
      */
     public EventSenderImpl(List<EventSenderURIDesc> handlingFactories, EPRuntimeEventSender epRuntime, ThreadingService threadingService)
     {

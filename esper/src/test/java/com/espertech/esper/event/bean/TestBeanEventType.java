@@ -149,7 +149,7 @@ public class TestBeanEventType extends TestCase
         tests.add(new PropTestDesc("mapped('keyOne')", true, String.class, true, "valueOne"));
         tests.add(new PropTestDesc("arrayProperty", true, int[].class, true, objComplex.getArrayProperty()));
         tests.add(new PropTestDesc("arrayProperty[1]", true, int.class, true, 20));
-        tests.add(new PropTestDesc("mapProperty('xOne')", false, null, false, null));
+        tests.add(new PropTestDesc("mapProperty('xOne')", true, String.class, true, "yOne"));
         tests.add(new PropTestDesc("google('x')", false, null, false, null));
         tests.add(new PropTestDesc("mapped('x')", true, String.class, true, null));
         tests.add(new PropTestDesc("mapped('x').x", false, null, false, null));
@@ -181,8 +181,8 @@ public class TestBeanEventType extends TestCase
         tests.add(new PropTestDesc("indexed[1].mapped('1mb')", true, nestedTwo, true, objCombined.getIndexed(1).getMapped("1mb")));
         tests.add(new PropTestDesc("indexed[1].mapped('1mb').value", true, String.class, true, objCombined.getIndexed(1).getMapped("1mb").getValue()));
         tests.add(new PropTestDesc("array[1].mapprop", true, Map.class, true, objCombined.getIndexed(1).getMapprop()));
-        tests.add(new PropTestDesc("array[1].mapprop('a')", false, null, false, null));
-        tests.add(new PropTestDesc("array[1].mapprop('a').value", false, null, false, null));
+        tests.add(new PropTestDesc("array[1].mapprop('1ma')", true, SupportBeanCombinedProps.NestedLevTwo.class, true, objCombined.getArray()[1].getMapped("1ma")));
+        tests.add(new PropTestDesc("array[1].mapprop('1ma').value", true, String.class, true, "1ma0"));
         tests.add(new PropTestDesc("indexed[1].mapprop", true, Map.class, true, objCombined.getIndexed(1).getMapprop()));
         runTest(tests, eventTypeNested, eventNested);
 

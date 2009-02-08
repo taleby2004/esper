@@ -1,36 +1,20 @@
-/**************************************************************************************
- * Copyright (C) 2008 EsperTech, Inc. All rights reserved.                            *
- * http://esper.codehaus.org                                                          *
- * http://www.espertech.com                                                           *
- * ---------------------------------------------------------------------------------- *
- * The software in this package is published under the terms of the GPL license       *
- * a copy of which has been included with this distribution in the license.txt file.  *
- **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
-import com.espertech.esper.client.EPStatementException;
-import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.epl.generated.EsperEPL2Ast;
+import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.collection.UniformPair;
 import org.antlr.runtime.*;
 
-import java.util.Stack;
 import java.util.Set;
+import java.util.Stack;
 
 /**
- * This exception is thrown to indicate a problem in statement creation.
+ * Converts recognition exceptions.
  */
-public class EPStatementSyntaxException extends EPStatementException
+public class ExceptionConvertor
 {
-    /**
-     * Ctor.
-     * @param message - error message
-     * @param expression - expression text
-     */
-    public EPStatementSyntaxException(String message, String expression)
-    {
-        super(message, expression);
-    }
-
     /**
      * Converts from a syntax error to a nice statement exception.
      * @param e is the syntax error
@@ -38,12 +22,38 @@ public class EPStatementSyntaxException extends EPStatementException
      * @param parser the parser that parsed the expression
      * @return syntax exception
      */
-    public static EPStatementSyntaxException convert(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
+    public static EPStatementSyntaxException convertStatement(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
+    {
+        UniformPair<String> pair = convert(e, expression, parser);
+        return new EPStatementSyntaxException(pair.getFirst(), pair.getSecond());
+    }
+
+    /**
+     * Converts from a syntax error to a nice property exception.
+     * @param e is the syntax error
+     * @param expression is the expression text
+     * @param parser the parser that parsed the expression
+     * @return syntax exception
+     */
+    public static PropertyAccessException convertProperty(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
+    {
+        UniformPair<String> pair = convert(e, expression, parser);
+        return new PropertyAccessException(pair.getFirst(), pair.getSecond());
+    }
+
+    /**
+     * Converts from a syntax error to a nice exception.
+     * @param e is the syntax error
+     * @param expression is the expression text
+     * @param parser the parser that parsed the expression
+     * @return syntax exception
+     */
+    public static UniformPair<String> convert(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
     {
         if (expression.trim().length() == 0)
         {
             String message = "Unexpected end of input";
-            return new EPStatementSyntaxException(message, expression);
+            return new UniformPair<String>(message, expression);
         }
 
         Token t;
@@ -190,7 +200,7 @@ public class EPStatementSyntaxException extends EPStatementException
             message = "Incorrect syntax near " + token + positionInfo + " unexpected character '" + c + "', check for an invalid identifier";
         }
 
-        return new EPStatementSyntaxException(message, expression);
+        return new UniformPair<String>(message, expression);
     }
 
     /**
@@ -250,7 +260,3 @@ public class EPStatementSyntaxException extends EPStatementException
                 : "";
     }
 }
-
-
-
-

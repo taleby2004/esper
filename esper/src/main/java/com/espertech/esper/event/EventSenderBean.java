@@ -47,6 +47,7 @@ public class EventSenderBean implements EventSender
      * @param runtime for processing events
      * @param beanEventType the event type
      * @param eventAdapterService factory for event beans and event types
+     * @param threadingService for inbound threading
      */
     public EventSenderBean(EPRuntimeEventSender runtime, BeanEventType beanEventType, EventAdapterService eventAdapterService, ThreadingService threadingService)
     {

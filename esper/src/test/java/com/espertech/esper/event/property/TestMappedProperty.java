@@ -50,6 +50,6 @@ public class TestMappedProperty extends TestCase
         MappedProperty mpd = new MappedProperty("dummy", "dummy");
         assertNull(mpd.getPropertyType(eventType, SupportEventAdapterService.getService()));
         mpd = new MappedProperty("mapProperty", "dummy");
-        assertNull(mpd.getPropertyType(eventType, SupportEventAdapterService.getService()));
+        assertEquals(String.class, mpd.getPropertyType(eventType, SupportEventAdapterService.getService()));
     }
 }

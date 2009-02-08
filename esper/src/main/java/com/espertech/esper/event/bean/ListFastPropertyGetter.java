@@ -20,13 +20,14 @@ public class ListFastPropertyGetter extends BaseNativePropertyGetter implements 
 
     /**
      * Constructor.
+     * @param method the underlying method
      * @param fastMethod is the method to use to retrieve a value from the object
      * @param index is tge index within the array to get the property from
      * @param eventAdapterService factory for event beans and event types
      */
     public ListFastPropertyGetter(Method method, FastMethod fastMethod, int index, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method), null);
+        super(eventAdapterService, JavaClassHelper.getGenericReturnType(method, false), null);
         this.index = index;
         this.fastMethod = fastMethod;
 

@@ -30,7 +30,7 @@ public final class ReflectionPropMethodGetter extends BaseNativePropertyGetter i
      */
     public ReflectionPropMethodGetter(Method method, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, method.getReturnType(), JavaClassHelper.getGenericReturnType(method));
+        super(eventAdapterService, method.getReturnType(), JavaClassHelper.getGenericReturnType(method, false));
         this.method = method;
     }
 

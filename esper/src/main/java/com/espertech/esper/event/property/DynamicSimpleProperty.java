@@ -58,6 +58,11 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
         return Object.class;
     }
 
+    public GenericPropertyDesc getPropertyTypeGeneric(BeanEventType beanEventType, EventAdapterService eventAdapterService)
+    {
+        return GenericPropertyDesc.getObjectGeneric();
+    }
+
     public Class getPropertyTypeMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
     {
         return Object.class;
