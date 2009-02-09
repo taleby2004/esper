@@ -301,7 +301,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 	   <title>Fragment and Fragment Type</title>
 		<para>
 			Sometimes an event can have properties that are itself events. Esper uses the term <emphasis>fragment</emphasis> and <emphasis>fragment type</emphasis> for such event pieces. The best example is a pattern
-			that matches two or more events and the output event contains the matching events as fragments. In other words, output events can be a composite event that consists or further events, the fragments.
+			that matches two or more events and the output event contains the matching events as fragments. In other words, output events can be a composite event that consists of further events, the fragments.
 		</para>
 
 		<para>
@@ -337,10 +337,11 @@ select detail?.direction? from OrderEvent]]></programlisting>
 
 		<para>
 			Please see <xref linkend="configuration"/> on options for naming event types represented by Java object event classes.
+			Java classes that do not follow JavaBean conventions, such as legacy Java classes that expose public fields, or methods not following naming conventions, require additional configuration. Via configuration it is also possible to control case sensitivity in property name resolution. The relevant section in the chapter on configuration is <xref linkend="config-java-legacy"/>.
 		</para>
 
         <sect2 id="event-properties">
-           <title>Java Object Event Properties </title>
+           <title>Java Object Event Properties</title>
            
 			<para>
 				As outlined earlier, the different property types are supported by the standard JavaBeans specification, and some of which are uniquely supported by Esper:
@@ -354,7 +355,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 				</listitem>
 				<listitem>
 					<para>
-						<emphasis>Indexed</emphasis> - An indexed property stores an ordered collection of objects (all of the same type) that can be individually accessed by an integer-valued, non-negative index (or subscript). Alternatively, the entire set of values may be retrieved using an array. 
+						<emphasis>Indexed</emphasis> - An indexed property stores an ordered collection of objects (all of the same type) that can be individually accessed by an integer-valued, non-negative index (or subscript). 
 					</para>
 				</listitem>
 				<listitem>
@@ -370,9 +371,10 @@ select detail?.direction? from OrderEvent]]></programlisting>
 			</itemizedlist>
 		
 			<para>
-				Assume there is an EmployeeEvent event class as shown below. The mapped and indexed properties in this example return Java objects but could also return Java language primitive types (such as int or String). The Address object and Employee objects can themselves have properties that are nested within them, such as a streetName in the Address object or a name of the employee in the Employee object.
+				Assume there is an <literal>NewEmployeeEvent</literal> event class as shown below. The mapped and indexed properties in this example return Java objects but could also return Java language primitive types (such as int or String). The Address object and Employee objects can themselves have properties that are nested within them, such as a street name in the <literal>Address</literal> object or a name of the employee in the <literal>Employee</literal> object.
 			</para>
-<programlisting><![CDATA[public class EmployeeEvent {
+			
+			<programlisting><![CDATA[public class NewEmployeeEvent {
 	public String getFirstName();
 	public Address getAddress(String type);
 	public Employee getSubordinate(int index);
@@ -380,134 +382,158 @@ select detail?.direction? from OrderEvent]]></programlisting>
 }
 ]]></programlisting>
 
-			<para>
-				<emphasis>Simple</emphasis> event properties require a getter-method that returns the property value. In this example, the <literal>getFirstName</literal> getter method returns the <literal>firstName</literal> event property of type String.
-			</para>
+				<para>
+					<emphasis>Simple</emphasis> event properties require a getter-method that returns the property value. In this example, the <literal>getFirstName</literal> getter method returns the <literal>firstName</literal> event property of type String.
+				</para>
+		
+				<para>
+					<emphasis>Indexed</emphasis> event properties require either one of the following getter-methods. A method that takes an integer-type key value and returns the property value, such as the <literal>getSubordinate</literal> method, or a method that returns an array-type, or a class that implements <literal>Iterable</literal>. An example is the <literal>getSubordinates</literal> getter method, which returns an array of Employee but could also return an <literal>Iterable</literal>. In an EPL or event pattern statement, indexed properties are accessed via the <literal>property[index]</literal> syntax.
+				</para>
+		
+				<para>
+					<emphasis>Mapped</emphasis> event properties require a getter-method that takes a String-typed key value and returns the property value, such as the <literal>getAddress</literal> method. In an EPL or event pattern statement, mapped properties are accessed via the <literal>property('key')</literal> syntax.
+				</para>
+		
+				<para>
+					<emphasis>Nested</emphasis> event properties require a getter-method that returns the nesting object. The <literal>getAddress</literal> and <literal>getSubordinate</literal> methods are mapped and indexed properties that return a nesting object. In an EPL or event pattern statement, nested properties are accessed via the <literal>property.nestedProperty</literal> syntax.
+				</para>
 	
-			<para>
-				<emphasis>Indexed</emphasis> event properties require either one of the following getter-methods. A method that takes an integer-type key value and returns the property value, such as the <literal>getSubordinate</literal> method. Or a method that returns an array-type such as the <literal>getSubordinates</literal> getter method, which returns an array of Employee. In an EPL or event pattern statement, indexed properties are accessed via the <literal>property[index]</literal> syntax.
-			</para>
+				<para>
+					All event pattern and EPL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions:
+				</para>
+
+				<programlisting><![CDATA[every NewEmployeeEvent(firstName='myName')
+every NewEmployeeEvent(address('home').streetName='Park Avenue')
+every NewEmployeeEvent(subordinate[0].name='anotherName')
+every NewEmployeeEvent(allSubordinates[1].name='thatName')
+every NewEmployeeEvent(subordinate[0].address('home').streetName='Water Street')]]></programlisting>
 	
-			<para>
-				<emphasis>Mapped</emphasis> event properties require a getter-method that takes a String-typed key value and returns the property value, such as the <literal>getAddress</literal> method. In an EPL or event pattern statement, mapped properties are accessed via the <literal>property('key')</literal> syntax.
-			</para>
+				<para>
+					Similarly, the syntax can be used in EPL statements in all places where an event property name is expected, such as in select lists, where-clauses or join criteria.
+				</para>
+
+				<programlisting><![CDATA[select firstName, address('work'), subordinate[0].name, subordinate[1].name
+from NewEmployeeEvent
+where address('work').streetName = 'Park Ave']]></programlisting>
+			</sect2>
+
+			<sect2 id="event-properties-names">
+			   <title>Property Names</title>
+				<para>
+					Property names follows Java standards: the class <literal>java.beans.Introspector</literal> and method <literal>getBeanInfo</literal> returns the property names as derived from the name of getter methods. In addition, Esper configuration provides a flag to turn off case-sensitive property names. A sample list of getter methods and property names is: 
+				</para>
 	
-			<para>
-				<emphasis>Nested</emphasis> event properties require a getter-method that returns the nesting object. The <literal>getAddress</literal> and <literal>getSubordinate</literal> methods are mapped and indexed properties that return a nesting object. In an EPL or event pattern statement, nested properties are accessed via the <literal>property.nestedProperty</literal> syntax.
-			</para>
-
-			<para>
-				All event pattern and EPL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions:
-			</para>
-
-<programlisting><![CDATA[every EmployeeEvent(firstName='myName')
-every EmployeeEvent(address('home').streetName='Park Avenue')
-every EmployeeEvent(subordinate[0].name='anotherName')
-every EmployeeEvent(allSubordinates[1].name='thatName')
-every EmployeeEvent(subordinate[0].address('home').streetName='Water Street')
-]]></programlisting>
-
-			<para>
-				Similarly, the syntax can be used in EPL statements in all places where an event property name is expected, such as in select lists, where-clauses or join criteria.
-			</para>
-
-<programlisting><![CDATA[select firstName, address('work'), subordinate[0].name, subordinate[1].name
-from EmployeeEvent
-where address('work').streetName = 'Park Ave'
-]]></programlisting>
-
-			<para>
-				Property names follows Java standards: the class <literal>java.beans.Introspector</literal> and method <literal>getBeanInfo</literal> returns the property names as derived from the name of getter methods. In addition, Esper configuration provides a flag to turn off case-sensitive property names. A sample list of getter methods and property names is: 
-			</para>
-
-			<table frame="topbot">
-				<title>JavaBeans-style Getter Methods and Property Names</title>
-				<tgroup cols="3">
-					<colspec colwidth="1*"/>
-					<colspec colwidth="1*"/>
-					<colspec colwidth="2*"/>
-					<thead>
-						<row>
-							<entry>Method</entry>
-							<entry>Property Name</entry>
-							<entry>Example</entry>
-						</row>
-					</thead>
-					<tbody>
-						<row>
-							<entry><literal>getPrice()</literal></entry>
-							<entry>price</entry>
-							<entry><synopsis>select price from MyEvent</synopsis></entry>
-						</row>
-						<row>
-							<entry><literal>getNAME()</literal></entry>
-							<entry>NAME</entry>
-							<entry><synopsis>select NAME from MyEvent</synopsis></entry>
-						</row>
-						<row>
-							<entry><literal>getItemDesc()</literal></entry>
-							<entry>itemDesc</entry>
-							<entry><synopsis>select itemDesc from MyEvent</synopsis></entry>
-						</row>
-						<row>
-							<entry><literal>getQ()</literal></entry>
-							<entry>q</entry>
-							<entry><synopsis>select q from MyEvent</synopsis></entry>
-						</row>
-						<row>
-							<entry><literal>getQN()</literal></entry>
-							<entry>QN</entry>
-							<entry><synopsis>select QN from MyEvent</synopsis></entry>
-						</row>
-						<row>
-							<entry><literal>getqn()</literal></entry>
-							<entry>qn</entry>
-							<entry><synopsis>select qn from MyEvent</synopsis></entry>
-						</row>
-						<row>
-							<entry><literal>gets()</literal></entry>
-							<entry>s</entry>
-							<entry><synopsis>select s from MyEvent</synopsis></entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</table>
+				<table frame="topbot">
+					<title>JavaBeans-style Getter Methods and Property Names</title>
+					<tgroup cols="3">
+						<colspec colwidth="1*"/>
+						<colspec colwidth="1*"/>
+						<colspec colwidth="2*"/>
+						<thead>
+							<row>
+								<entry>Method</entry>
+								<entry>Property Name</entry>
+								<entry>Example</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry><literal>getPrice()</literal></entry>
+								<entry>price</entry>
+								<entry><synopsis>select price from MyEvent</synopsis></entry>
+							</row>
+							<row>
+								<entry><literal>getNAME()</literal></entry>
+								<entry>NAME</entry>
+								<entry><synopsis>select NAME from MyEvent</synopsis></entry>
+							</row>
+							<row>
+								<entry><literal>getItemDesc()</literal></entry>
+								<entry>itemDesc</entry>
+								<entry><synopsis>select itemDesc from MyEvent</synopsis></entry>
+							</row>
+							<row>
+								<entry><literal>getQ()</literal></entry>
+								<entry>q</entry>
+								<entry><synopsis>select q from MyEvent</synopsis></entry>
+							</row>
+							<row>
+								<entry><literal>getQN()</literal></entry>
+								<entry>QN</entry>
+								<entry><synopsis>select QN from MyEvent</synopsis></entry>
+							</row>
+							<row>
+								<entry><literal>getqn()</literal></entry>
+								<entry>qn</entry>
+								<entry><synopsis>select qn from MyEvent</synopsis></entry>
+							</row>
+							<row>
+								<entry><literal>gets()</literal></entry>
+								<entry>s</entry>
+								<entry><synopsis>select s from MyEvent</synopsis></entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
 		</sect2>
 		
-		<indexterm><primary>constants</primary></indexterm>
-		<indexterm><primary>enumeration</primary></indexterm>
-		<para>
-			Constants are public static final fields in Java that may also participate in expressions of all kinds, as this example shows:
-		</para>
-		<programlisting><![CDATA[select * from MyEvent where property=MyConstantClass.FIELD_VALUE]]></programlisting>
+        <sect2 id="event-properties-const">
+           <title>Constants and Enumeration</title>
+			<indexterm><primary>constants</primary></indexterm>
+			<indexterm><primary>enumeration</primary></indexterm>
+			<para>
+				Constants are public static final fields in Java that may also participate in expressions of all kinds, as this example shows:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where property=MyConstantClass.FIELD_VALUE]]></programlisting>
+	
+			<para>
+				Event properties that are enumeration values can be compared by their enumeration value:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where enumProp=EnumClass.ENUM_VALUE_1]]></programlisting>
+	
+			<para>
+				Alternatively, a static method may be employed on a class, such as the enumeration class 'EnumClass' as below:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent where enumProp=EnumClass.valueOf('ENUM_VALUE_1')]]></programlisting>
+	
+			<para>
+				If your application does not import, through configuration, the package that contains the enumeration class, then it must also specify the package name of the class. Enumeration
+				classes that are inner classes must be qualified with <literal>$</literal> following Java conventions.
+			</para>
+			<para>
+				For example, the Color enumeration as an inner class to <literal>MyEvent</literal> in package <literal>org.myorg</literal> can be referenced as shown:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent(enumProp=org.myorg.MyEvent$Color.GREEN).std:firstevent()]]></programlisting>
+	
+			<para>
+				Instance methods may also be invoked on event instances by specifying a stream name, as shown below:
+			</para>
+			<programlisting><![CDATA[select myevent.computeSomething() as result from MyEvent as myevent]]></programlisting>
+		</sect2>
 
-		<para>
-			Event properties that are enumeration values can be compared by their enumeration value:
-		</para>
-		<programlisting><![CDATA[select * from MyEvent where enumProp=EnumClass.ENUM_VALUE_1]]></programlisting>
+		<sect2 id="event-properties-parameterized">
+		   <title>Parameterized Types</title>
 
-		<para>
-			Alternatively, a static method may be employed on a class, such as the enumeration class 'EnumClass' as below:
-		</para>
-		<programlisting><![CDATA[select * from MyEvent where enumProp=EnumClass.valueOf('ENUM_VALUE_1')]]></programlisting>
+			<para>
+				When your getter methods or accessor fields return a parameterized type, for example <literal>Iterable&lt;MyEventData&gt;</literal> for an indexed property or <literal>Map&lt;String, MyEventData&gt;</literal> for a mapped property, then property expressions may refer to the properties available through the class that is the type parameter.
+			</para>
 
-		<para>
-			If your application does not import, through configuration, the package that contains the enumeration class, then it must also specify the package name of the class. Enumeration
-			classes that are inner classes must be qualified with <literal>$</literal> following Java conventions.
-		</para>
-		<para>
-			For example, the Color enumeration as an inner class to <literal>MyEvent</literal> in package <literal>org.myorg</literal> can be referenced as shown:
-		</para>
-		<programlisting><![CDATA[select * from MyEvent(enumProp=org.myorg.MyEvent$Color.GREEN).std:firstevent()]]></programlisting>
-
-		<para>
-			Instance methods may also be invoked on event instances by specifying a stream name, as shown below:
-		</para>
-		<programlisting><![CDATA[select myevent.computeSomething() as result from MyEvent as myevent]]></programlisting>
-
-		<para>
-			Java classes that do not follow JavaBean conventions, such as legacy Java classes that expose public fields, or methods not following naming conventions, require additional configuration. Via configuration it is also possible to control case sensitivity in property name resolution. The relevant section in the chapter on configuration is <xref linkend="config-java-legacy"/>.
-		</para>
+			<para>
+				An example event that have properties that are parameterized types is:
+			</para>
+	
+			<programlisting><![CDATA[public class NewEmployeeEvent {
+  public String getName();
+  public Iterable<EducationHistory> getEducation();
+  public Map<String, Address> getAddresses();
+}]]></programlisting>
+			
+			<para>
+				A sample of valid property expressions for this event is shown next:
+			</para>
+			<programlisting><![CDATA[select name, education, education[0].date, addresses('home').street
+  from NewEmployeeEvent]]></programlisting>
+		</sect2>
     </sect1>
     
 	<sect1 id="eventrep-java-util-map">

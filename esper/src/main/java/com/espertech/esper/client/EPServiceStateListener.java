@@ -17,5 +17,5 @@ public interface EPServiceStateListener
      * Invoked after an existing {@link EPServiceProvider} is initialized upon completion of a call to initialize.
      * @param serviceProvider service provider that has been successfully initialized
      */
-    public void onEPServiceInitialized(EPServiceProviderImpl serviceProvider);
+    public void onEPServiceInitialized(EPServiceProvider serviceProvider);
 }
