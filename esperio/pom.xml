@@ -85,20 +85,16 @@
 		</dependency>
 		<!-- for javax.jms 1.1 dependency -->
 		<dependency>
-			<groupId>javaee</groupId>
-			<artifactId>javaee-api</artifactId>
-			<version>5</version>
+			<groupId>org.apache.geronimo.specs</groupId>
+			<artifactId>geronimo-jms_1.1_spec</artifactId>
+			<version>1.0</version> 
 		</dependency>
-		<!--<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>jms</artifactId>
-			<version>1.1</version>
-		</dependency>-->
 		<!-- mvn install:install-file -DgroupId=activemq -DartifactId=activemq -Dversion=4.1.0 -Dpackaging=jar -Dfile=lib/apache-activemq-4.1.0-incubator.jar -->
         <dependency>
             <groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-core</artifactId>
 			<version>4.1.1</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- mvn install:install-file -DgroupId=spring -DartifactId=spring -Dversion=2.0.2 -Dpackaging=jar -Dfile=lib/spring.jar -->
 		<dependency>
@@ -117,6 +113,7 @@
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
 			<version>1.3</version>
+			<scope>test</scope>
 		</dependency>
 	   <!--
 			The following dependencies required for Apache Axiom event representation.
