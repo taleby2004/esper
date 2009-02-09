@@ -64,11 +64,11 @@
   </bean>
 
   <bean id="subscriptionOne" class="com.espertech.esperio.jms.JMSSubscription">
-    <property name="eventTypeAlias" value="MyOutputStream"/>
+    <property name="eventTypeName" value="MyOutputStream"/>
   </bean>
 
   <bean id="subscriptionTwo" class="com.espertech.esperio.jms.JMSSubscription">
-    <property name="eventTypeAlias" value="MyMapEventTwo"/>
+    <property name="eventTypeName" value="MyMapEventTwo"/>
     <property name="jmsMessageMarshaller">
       <ref bean="myCustomMarshaller"/>
     </property>
