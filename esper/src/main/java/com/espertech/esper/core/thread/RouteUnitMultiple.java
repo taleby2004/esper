@@ -1,9 +1,8 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.espertech.esper.core.EPRuntimeImpl;
-import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.filter.FilterHandleCallback;
@@ -48,7 +47,7 @@ public class RouteUnitMultiple implements RouteUnitRunnable
         }
         catch (RuntimeException e)
         {
-            log.error(e); // TODO
+            log.error("Unexpected error processing multiple route execution: " + e.getMessage(), e);
         }
     }
 

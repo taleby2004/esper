@@ -1,4 +1,4 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.client.ConfigurationEngineDefaults;
 import com.espertech.esper.core.EPRuntimeImpl;
@@ -6,9 +6,7 @@ import com.espertech.esper.core.EPServicesContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * Implementation for engine-level threading.
@@ -23,10 +21,10 @@ public class ThreadingServiceImpl implements ThreadingService
     private final boolean isRouteThreading;
     private final boolean isOutboundThreading;
 
-    private LinkedBlockingQueue<Runnable> timerQueue;
-    private LinkedBlockingQueue<Runnable> inboundQueue;
-    private LinkedBlockingQueue<Runnable> routeQueue;
-    private LinkedBlockingQueue<Runnable> outboundQueue;
+    private BlockingQueue<Runnable> timerQueue;
+    private BlockingQueue<Runnable> inboundQueue;
+    private BlockingQueue<Runnable> routeQueue;
+    private BlockingQueue<Runnable> outboundQueue;
 
     private ThreadPoolExecutor timerThreadPool;
     private ThreadPoolExecutor inboundThreadPool;
@@ -80,50 +78,92 @@ public class ThreadingServiceImpl implements ThreadingService
     {
         if (isInboundThreading)
         {
-            inboundQueue = new LinkedBlockingQueue<Runnable>();
+            inboundQueue = makeQueue(config.getThreadPoolInboundCapacity());
             inboundThreadPool = getThreadPool(services.getEngineURI(), "Inbound", inboundQueue, config.getThreadPoolInboundNumThreads());
         }
 
         if (isTimerThreading)
         {
-            timerQueue = new LinkedBlockingQueue<Runnable>();
+            timerQueue = makeQueue(config.getThreadPoolTimerExecCapacity());
             timerThreadPool = getThreadPool(services.getEngineURI(), "TimerExec", timerQueue, config.getThreadPoolTimerExecNumThreads());
         }
 
         if (isRouteThreading)
         {
-            routeQueue = new LinkedBlockingQueue<Runnable>();
+            routeQueue = makeQueue(config.getThreadPoolRouteExecCapacity());
             routeThreadPool = getThreadPool(services.getEngineURI(), "RouteExec", routeQueue, config.getThreadPoolRouteExecNumThreads());
         }
 
         if (isOutboundThreading)
         {
-            outboundQueue = new LinkedBlockingQueue<Runnable>();
+            outboundQueue = makeQueue(config.getThreadPoolOutboundCapacity());
             outboundThreadPool = getThreadPool(services.getEngineURI(), "Outbound", outboundQueue, config.getThreadPoolOutboundNumThreads());
+        }
+    }
+
+    private BlockingQueue<Runnable> makeQueue(Integer threadPoolTimerExecCapacity)
+    {
+        if ((threadPoolTimerExecCapacity == null) ||
+            (threadPoolTimerExecCapacity <= 0) ||
+            (threadPoolTimerExecCapacity == Integer.MAX_VALUE))
+        {
+            return new LinkedBlockingQueue<Runnable>();
+        }
+        else
+        {
+            return new ArrayBlockingQueue<Runnable>(threadPoolTimerExecCapacity);
         }
     }
 
     public void submitRoute(RouteUnitRunnable unit)
     {
-        routeQueue.add(unit);
+        try
+        {
+            routeQueue.put(unit);
+        }
+        catch (InterruptedException e)
+        {
+            log.info("Submit interrupted:" + e);
+        }
     }
 
     public void submitInbound(InboundUnitRunnable unit)
     {
-        inboundQueue.add(unit);
+        try
+        {
+            inboundQueue.put(unit);
+        }
+        catch (InterruptedException e)
+        {
+            log.info("Submit interrupted:" + e);
+        }
     }
 
     public void submitOutbound(OutboundUnitRunnable unit)
     {
-        outboundQueue.add(unit);
+        try
+        {
+            outboundQueue.put(unit);
+        }
+        catch (InterruptedException e)
+        {
+            log.info("Submit interrupted:" + e);
+        }
     }
 
     public void submitTimerWork(TimerUnit unit)
     {
-        timerQueue.add(unit);
+        try
+        {
+            timerQueue.put(unit);
+        }
+        catch (InterruptedException e)
+        {
+            log.info("Submit interrupted:" + e);
+        }
     }
 
-    public LinkedBlockingQueue<Runnable> getOutboundQueue()
+    public BlockingQueue<Runnable> getOutboundQueue()
     {
         return outboundQueue;
     }
@@ -133,7 +173,7 @@ public class ThreadingServiceImpl implements ThreadingService
         return outboundThreadPool;
     }
 
-    public LinkedBlockingQueue<Runnable> getRouteQueue()
+    public BlockingQueue<Runnable> getRouteQueue()
     {
         return routeQueue;
     }
@@ -143,7 +183,7 @@ public class ThreadingServiceImpl implements ThreadingService
         return routeThreadPool;
     }
 
-    public LinkedBlockingQueue<Runnable> getTimerQueue()
+    public BlockingQueue<Runnable> getTimerQueue()
     {
         return timerQueue;
     }
@@ -153,7 +193,7 @@ public class ThreadingServiceImpl implements ThreadingService
         return timerThreadPool;
     }
 
-    public LinkedBlockingQueue<Runnable> getInboundQueue()
+    public BlockingQueue<Runnable> getInboundQueue()
     {
         return inboundQueue;
     }
@@ -167,23 +207,23 @@ public class ThreadingServiceImpl implements ThreadingService
     {
         if (timerThreadPool != null)
         {
-            stopPool(timerThreadPool, "TimerExec");
+            stopPool(timerThreadPool, timerQueue, "TimerExec");
         }
         if (routeThreadPool != null)
         {
-            stopPool(routeThreadPool, "RouteExec");
+            stopPool(routeThreadPool, routeQueue, "RouteExec");
         }
         if (outboundThreadPool != null)
         {
-            stopPool(outboundThreadPool, "Outbound");
+            stopPool(outboundThreadPool, outboundQueue, "Outbound");
         }
         if (inboundThreadPool != null)
         {
-            stopPool(inboundThreadPool, "Inbound");
+            stopPool(inboundThreadPool, inboundQueue, "Inbound");
         }
     }
 
-    private ThreadPoolExecutor getThreadPool(String engineURI, String name, LinkedBlockingQueue<Runnable> queue, int numThreads)
+    private ThreadPoolExecutor getThreadPool(String engineURI, String name, BlockingQueue<Runnable> queue, int numThreads)
     {
         if (log.isInfoEnabled())
         {
@@ -199,15 +239,18 @@ public class ThreadingServiceImpl implements ThreadingService
         ThreadGroup threadGroup = new ThreadGroup(threadGroupName);
         ThreadPoolExecutor pool = new ThreadPoolExecutor(numThreads, numThreads, 1, TimeUnit.SECONDS, queue, new ThreadFactory(engineURI, name, threadGroup, Thread.NORM_PRIORITY));
         pool.prestartAllCoreThreads();
+
         return pool;
     }
 
-    private void stopPool(ThreadPoolExecutor threadPool, String name)
+    private void stopPool(ThreadPoolExecutor threadPool, BlockingQueue<Runnable> queue, String name)
     {
         if (log.isInfoEnabled())
         {
             log.info("Shutting down pool " + name);
         }
+
+        queue.clear();
 
         threadPool.shutdown();
         try

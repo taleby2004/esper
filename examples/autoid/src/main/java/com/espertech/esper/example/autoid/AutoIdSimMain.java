@@ -45,11 +45,19 @@ public class AutoIdSimMain {
             System.exit(-1);
         }
 
-        int events = 0;
+        int events;
         try {
             events = Integer.parseInt(args[0]);
         } catch (NullPointerException e) {
-            System.out.println("Invalid numberOfEvents:" + args[0]);
+            System.out.println("Invalid numberOfEvents: " + args[0]);
+            System.exit(-2);
+            return;
+        }
+
+        if (events > 1000)
+        {
+            System.out.println("Invalid numberOfEvents: " + args[0]);
+            System.out.println("The maxiumum for this example is 1000 events, since the example retains the last 60 seconds of events and each event is an XML document, and heap memory size is 256k for this example.");
             System.exit(-2);
             return;
         }

@@ -185,12 +185,12 @@ public class SimpleNumberCoercerFactory
     {
         public Number coerceBoxed(Number numToCoerce)
         {
-            return BigDecimal.valueOf(numToCoerce.longValue());
+            return new BigDecimal(numToCoerce.longValue());
         }
 
         public BigDecimal coerceBoxedBigDec(Number numToCoerce)
         {
-            return BigDecimal.valueOf(numToCoerce.longValue());
+            return new BigDecimal(numToCoerce.longValue());
         }
     }
 
@@ -198,12 +198,12 @@ public class SimpleNumberCoercerFactory
     {
         public Number coerceBoxed(Number numToCoerce)
         {
-            return BigDecimal.valueOf(numToCoerce.doubleValue());
+            return new BigDecimal(numToCoerce.doubleValue());
         }
 
         public BigDecimal coerceBoxedBigDec(Number numToCoerce)
         {
-            return BigDecimal.valueOf(numToCoerce.doubleValue());
+            return new BigDecimal(numToCoerce.doubleValue());
         }
     }
 

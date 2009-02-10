@@ -10,6 +10,33 @@ public class TestPropertyResolution extends TestCase
 {
     private EPServiceProvider epService;
 
+    public void testReservedKeywordEscape()
+    {
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        epService.initialize();
+        epService.getEPAdministrator().getConfiguration().addEventType("SomeKeywords", SupportBeanReservedKeyword.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("Order", SupportBeanReservedKeyword.class);
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select `seconds`, `order` from SomeKeywords");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        Object event = new SupportBeanReservedKeyword(1, 2);
+        epService.getEPRuntime().sendEvent(event);
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        assertEquals(1, eventBean.get("seconds"));
+        assertEquals(2, eventBean.get("order"));
+
+        stmt.destroy();
+        stmt = epService.getEPAdministrator().createEPL("select * from `Order`");
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(event);
+        eventBean = listener.assertOneGetNewAndReset();
+        assertEquals(1, eventBean.get("seconds"));
+        assertEquals(2, eventBean.get("order"));
+    }
+
     public void testWriteOnly()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());

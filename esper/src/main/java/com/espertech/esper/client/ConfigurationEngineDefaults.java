@@ -161,6 +161,10 @@ public class ConfigurationEngineDefaults implements Serializable
         private int threadPoolInboundNumThreads;
         private int threadPoolRouteExecNumThreads;
         private int threadPoolOutboundNumThreads;
+        private Integer threadPoolTimerExecCapacity;
+        private Integer threadPoolInboundCapacity;
+        private Integer threadPoolRouteExecCapacity;
+        private Integer threadPoolOutboundCapacity;
 
         /**
          * Ctor - sets up defaults.
@@ -498,6 +502,78 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setThreadPoolTimerExecNumThreads(int num)
         {
             this.threadPoolTimerExecNumThreads = num;
+        }
+
+        /**
+         * Returns the capacity of the timer execution queue, or null if none defined (the unbounded case, default).
+         * @return capacity or null if none defined
+         */
+        public Integer getThreadPoolTimerExecCapacity()
+        {
+            return threadPoolTimerExecCapacity;
+        }
+
+        /**
+         * Sets the capacity of the timer execution queue, or null if none defined (the unbounded case, default).
+         * @param capacity capacity or null if none defined
+         */
+        public void setThreadPoolTimerExecCapacity(Integer capacity)
+        {
+            this.threadPoolTimerExecCapacity = capacity;
+        }
+
+        /**
+         * Returns the capacity of the inbound execution queue, or null if none defined (the unbounded case, default).
+         * @return capacity or null if none defined
+         */
+        public Integer getThreadPoolInboundCapacity()
+        {
+            return threadPoolInboundCapacity;
+        }
+
+        /**
+         * Sets the capacity of the inbound queue, or null if none defined (the unbounded case, default).
+         * @param capacity capacity or null if none defined
+         */
+        public void setThreadPoolInboundCapacity(Integer capacity)
+        {
+            this.threadPoolInboundCapacity = capacity;
+        }
+
+        /**
+         * Returns the capacity of the route execution queue, or null if none defined (the unbounded case, default).
+         * @return capacity or null if none defined
+         */
+        public Integer getThreadPoolRouteExecCapacity()
+        {
+            return threadPoolRouteExecCapacity;
+        }
+
+        /**
+         * Sets the capacity of the route execution queue, or null if none defined (the unbounded case, default).
+         * @param capacity capacity or null if none defined
+         */
+        public void setThreadPoolRouteExecCapacity(Integer capacity)
+        {
+            this.threadPoolRouteExecCapacity = capacity;
+        }
+
+        /**
+         * Returns the capacity of the outbound queue, or null if none defined (the unbounded case, default).
+         * @return capacity or null if none defined
+         */
+        public Integer getThreadPoolOutboundCapacity()
+        {
+            return threadPoolOutboundCapacity;
+        }
+
+        /**
+         * Sets the capacity of the outbound queue, or null if none defined (the unbounded case, default).
+         * @param capacity capacity or null if none defined
+         */
+        public void setThreadPoolOutboundCapacity(Integer capacity)
+        {
+            this.threadPoolOutboundCapacity = capacity;
         }
 
         /**

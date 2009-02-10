@@ -14,7 +14,7 @@ import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
 import com.espertech.esper.epl.named.NamedWindowServiceImpl;
 import com.espertech.esper.epl.variable.VariableServiceImpl;
-import com.espertech.esper.epl.thread.ThreadingServiceImpl;
+import com.espertech.esper.core.thread.ThreadingServiceImpl;
 import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.ConfigurationEngineDefaults;

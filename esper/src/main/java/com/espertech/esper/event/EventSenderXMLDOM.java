@@ -12,9 +12,9 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventSender;
 import com.espertech.esper.core.EPRuntimeEventSender;
-import com.espertech.esper.epl.thread.InboundUnitSendWrapped;
-import com.espertech.esper.epl.thread.ThreadingOption;
-import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.core.thread.InboundUnitSendWrapped;
+import com.espertech.esper.core.thread.ThreadingOption;
+import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +32,7 @@ public class EventSenderXMLDOM implements EventSender
     private final BaseXMLEventType baseXMLEventType;
     private final boolean validateRootElement;
     private String getNodeName;
-    private final EventAdapterServiceImpl eventAdapterService;
+    private final EventAdapterService eventAdapterService;
     private final ThreadingService threadingService;
 
     /**
@@ -42,7 +42,7 @@ public class EventSenderXMLDOM implements EventSender
      * @param threadingService for inbound threading
      * @param eventAdapterService for event bean creation
      */
-    public EventSenderXMLDOM(EPRuntimeEventSender runtimeEventSender, BaseXMLEventType baseXMLEventType, EventAdapterServiceImpl eventAdapterService, ThreadingService threadingService)
+    public EventSenderXMLDOM(EPRuntimeEventSender runtimeEventSender, BaseXMLEventType baseXMLEventType, EventAdapterService eventAdapterService, ThreadingService threadingService)
     {
         this.runtimeEventSender = runtimeEventSender;
         this.baseXMLEventType = baseXMLEventType;

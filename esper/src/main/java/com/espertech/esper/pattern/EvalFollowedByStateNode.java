@@ -83,6 +83,13 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
             nodes.remove(fromNode);
         }
 
+        // the node may already have quit as a result of an outer state quitting this state,
+        // however the callback may still be received; It is fine to ignore this callback. 
+        if (index == null)
+        {
+            return;
+        }
+
         // If the match came from the very last filter, need to escalate
         int numChildNodes = getFactoryNode().getChildNodes().size();
         if (index == (numChildNodes - 1))

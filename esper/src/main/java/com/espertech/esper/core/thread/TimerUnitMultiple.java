@@ -1,14 +1,18 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.core.EPServicesContext;
 import com.espertech.esper.core.EPStatementHandle;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 /**
  * Timer unit for multiple callbacks for a statement.
  */
 public class TimerUnitMultiple implements TimerUnit
 {
+    private static final Log log = LogFactory.getLog(TimerUnitMultiple.class);
+
     private final EPServicesContext services;
     private final EPRuntimeImpl runtime;
     private final Object callbackObject;
@@ -31,12 +35,19 @@ public class TimerUnitMultiple implements TimerUnit
 
     public void run()
     {
-        EPRuntimeImpl.processStatementScheduleMultiple(handle, callbackObject, services);
+        try
+        {
+            EPRuntimeImpl.processStatementScheduleMultiple(handle, callbackObject, services);
 
-        // Let listeners know of results
-        runtime.dispatch();
+            // Let listeners know of results
+            runtime.dispatch();
 
-        // Work off the event queue if any events accumulated in there via a route()
-        runtime.processThreadWorkQueue();
+            // Work off the event queue if any events accumulated in there via a route()
+            runtime.processThreadWorkQueue();
+        }
+        catch (RuntimeException e)
+        {
+            log.error("Unexpected error processing multiple timer execution: " + e.getMessage(), e);
+        }
     }
 }

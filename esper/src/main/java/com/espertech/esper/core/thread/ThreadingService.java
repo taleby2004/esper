@@ -1,4 +1,4 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.core.EPServicesContext;

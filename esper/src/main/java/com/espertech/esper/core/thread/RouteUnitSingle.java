@@ -1,4 +1,4 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.EPRuntimeImpl;
@@ -42,7 +42,7 @@ public class RouteUnitSingle implements RouteUnitRunnable
         }
         catch (RuntimeException e)
         {
-            log.error(e); // TODO
+            log.error("Unexpected error processing route execution: " + e.getMessage(), e);
         }
     }
 

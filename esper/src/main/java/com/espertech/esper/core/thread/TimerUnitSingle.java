@@ -1,15 +1,18 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.EPServicesContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Timer unit for a single callback for a statement.
  */
 public class TimerUnitSingle implements TimerUnit
 {
+    private static final Log log = LogFactory.getLog(TimerUnitSingle.class);
+
     private final EPServicesContext services;
     private final EPRuntimeImpl runtime;
     private final EPStatementHandleCallback handleCallback;
@@ -29,10 +32,17 @@ public class TimerUnitSingle implements TimerUnit
 
     public void run()
     {
-        EPRuntimeImpl.processStatementScheduleSingle(handleCallback, services);
+        try
+        {
+            EPRuntimeImpl.processStatementScheduleSingle(handleCallback, services);
 
-        runtime.dispatch();
+            runtime.dispatch();
 
-        runtime.processThreadWorkQueue();
+            runtime.processThreadWorkQueue();
+        }
+        catch (RuntimeException e)
+        {
+            log.error("Unexpected error processing timer execution: " + e.getMessage(), e);
+        }
     }
 }

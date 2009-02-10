@@ -68,7 +68,7 @@ public class TestArithTypeEnum extends TestCase
     public void testBigNumberComputers()
     {
         Object[][] params = new Object[][] {
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.DIVIDE, BigDecimal.valueOf(3), BigDecimal.valueOf(2)},
+                {true, new BigDecimal(6), MathArithTypeEnum.DIVIDE, new BigDecimal(3), new BigDecimal(2)},
                 {false, BigInteger.valueOf(10), MathArithTypeEnum.ADD, BigInteger.valueOf(10), BigInteger.valueOf(20)},
                 {false, BigInteger.valueOf(100), MathArithTypeEnum.SUBTRACT, BigInteger.valueOf(10), BigInteger.valueOf(90)},
                 {false, BigInteger.valueOf(10), MathArithTypeEnum.MULTIPLY, BigInteger.valueOf(10), BigInteger.valueOf(100)},
@@ -79,25 +79,25 @@ public class TestArithTypeEnum extends TestCase
                 {false, BigInteger.valueOf(10), MathArithTypeEnum.DIVIDE, (long) 4, BigInteger.valueOf(2)},
                 {false, BigInteger.valueOf(6), MathArithTypeEnum.MULTIPLY, (byte)7, BigInteger.valueOf(42)},
 
-                {true, BigInteger.valueOf(6), MathArithTypeEnum.ADD, (double)7, BigDecimal.valueOf(13.0)},
-                {true, BigInteger.valueOf(6), MathArithTypeEnum.SUBTRACT, (double)5, BigDecimal.valueOf(1.0)},
-                {true, BigInteger.valueOf(6), MathArithTypeEnum.MULTIPLY, (double)5, BigDecimal.valueOf(30.0)},
-                {true, BigInteger.valueOf(6), MathArithTypeEnum.DIVIDE, (double)2, BigDecimal.valueOf(3)},
+                {true, BigInteger.valueOf(6), MathArithTypeEnum.ADD, (double)7, new BigDecimal(13.0)},
+                {true, BigInteger.valueOf(6), MathArithTypeEnum.SUBTRACT, (double)5, new BigDecimal(1.0)},
+                {true, BigInteger.valueOf(6), MathArithTypeEnum.MULTIPLY, (double)5, new BigDecimal(30.0)},
+                {true, BigInteger.valueOf(6), MathArithTypeEnum.DIVIDE, (double)2, new BigDecimal(3)},
 
-                {true, 9, MathArithTypeEnum.ADD, BigDecimal.valueOf(10), BigDecimal.valueOf(19)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.SUBTRACT, BigDecimal.valueOf(5), BigDecimal.valueOf(1)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.MULTIPLY, BigDecimal.valueOf(5), BigDecimal.valueOf(30)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.ADD, BigDecimal.valueOf(7), BigDecimal.valueOf(13)},
+                {true, 9, MathArithTypeEnum.ADD, new BigDecimal(10), new BigDecimal(19)},
+                {true, new BigDecimal(6), MathArithTypeEnum.SUBTRACT, new BigDecimal(5), new BigDecimal(1)},
+                {true, new BigDecimal(6), MathArithTypeEnum.MULTIPLY, new BigDecimal(5), new BigDecimal(30)},
+                {true, new BigDecimal(6), MathArithTypeEnum.ADD, new BigDecimal(7), new BigDecimal(13)},
 
-                {true, BigDecimal.valueOf(10), MathArithTypeEnum.ADD, (long) 8, BigDecimal.valueOf(18)},
-                {true, BigDecimal.valueOf(10), MathArithTypeEnum.DIVIDE, (long) 8, BigDecimal.valueOf(1.25)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.SUBTRACT, (byte)7, BigDecimal.valueOf(-1)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.MULTIPLY, (byte)7, BigDecimal.valueOf(42)},
+                {true, new BigDecimal(10), MathArithTypeEnum.ADD, (long) 8, new BigDecimal(18)},
+                {true, new BigDecimal(10), MathArithTypeEnum.DIVIDE, (long) 8, new BigDecimal(1.25)},
+                {true, new BigDecimal(6), MathArithTypeEnum.SUBTRACT, (byte)7, new BigDecimal(-1)},
+                {true, new BigDecimal(6), MathArithTypeEnum.MULTIPLY, (byte)7, new BigDecimal(42)},
 
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.MULTIPLY, (double)3, BigDecimal.valueOf(18.0)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.ADD, (double)2, BigDecimal.valueOf(8.0)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.DIVIDE, (double)4, BigDecimal.valueOf(1.5)},
-                {true, BigDecimal.valueOf(6), MathArithTypeEnum.SUBTRACT, (double)8, BigDecimal.valueOf(-2.0)},
+                {true, new BigDecimal(6), MathArithTypeEnum.MULTIPLY, (double)3, new BigDecimal(18.0)},
+                {true, new BigDecimal(6), MathArithTypeEnum.ADD, (double)2, new BigDecimal(8.0)},
+                {true, new BigDecimal(6), MathArithTypeEnum.DIVIDE, (double)4, new BigDecimal(1.5)},
+                {true, new BigDecimal(6), MathArithTypeEnum.SUBTRACT, (double)8, new BigDecimal(-2.0)},
                 };
 
         for (int i = 0; i < params.length; i++)

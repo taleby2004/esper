@@ -937,32 +937,36 @@ class ConfigurationParser {
             }
             if (subElement.getNodeName().equals("threadpool-inbound"))
             {
-                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
-                configuration.getEngineDefaults().getThreading().setThreadPoolInbound(result.getFirst());
-                configuration.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(result.getSecond());
+                ThreadPoolConfig result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolInbound(result.isEnabled());
+                configuration.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(result.getNumThreads());
+                configuration.getEngineDefaults().getThreading().setThreadPoolInboundCapacity(result.getCapacity());
             }
             if (subElement.getNodeName().equals("threadpool-outbound"))
             {
-                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
-                configuration.getEngineDefaults().getThreading().setThreadPoolOutbound(result.getFirst());
-                configuration.getEngineDefaults().getThreading().setThreadPoolOutboundNumThreads(result.getSecond());
+                ThreadPoolConfig result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolOutbound(result.isEnabled());
+                configuration.getEngineDefaults().getThreading().setThreadPoolOutboundNumThreads(result.getNumThreads());
+                configuration.getEngineDefaults().getThreading().setThreadPoolOutboundCapacity(result.getCapacity());
             }
             if (subElement.getNodeName().equals("threadpool-timerexec"))
             {
-                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
-                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExec(result.getFirst());
-                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExecNumThreads(result.getSecond());
+                ThreadPoolConfig result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExec(result.isEnabled());
+                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExecNumThreads(result.getNumThreads());
+                configuration.getEngineDefaults().getThreading().setThreadPoolTimerExecCapacity(result.getCapacity());
             }
             if (subElement.getNodeName().equals("threadpool-routeexec"))
             {
-                Pair<Boolean, Integer> result = parseThreadPoolConfig(subElement);
-                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExec(result.getFirst());
-                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExecNumThreads(result.getSecond());
+                ThreadPoolConfig result = parseThreadPoolConfig(subElement);
+                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExec(result.isEnabled());
+                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExecNumThreads(result.getNumThreads());
+                configuration.getEngineDefaults().getThreading().setThreadPoolRouteExecCapacity(result.getCapacity());
             }
         }
     }
 
-    private static Pair<Boolean, Integer> parseThreadPoolConfig(Element parentElement)
+    private static ThreadPoolConfig parseThreadPoolConfig(Element parentElement)
     {
         String enabled = getRequiredAttribute(parentElement, "enabled");
         boolean isEnabled = Boolean.parseBoolean(enabled);
@@ -970,7 +974,14 @@ class ConfigurationParser {
         String numThreadsStr = getRequiredAttribute(parentElement, "num-threads");
         int numThreads = Integer.parseInt(numThreadsStr);
 
-        return new Pair<Boolean, Integer>(isEnabled, numThreads);
+        String capacityStr = getOptionalAttribute(parentElement, "capacity");
+        Integer capacity = null;
+        if (capacityStr != null)
+        {
+            capacity = Integer.parseInt(capacityStr);
+        }
+
+        return new ThreadPoolConfig(isEnabled, numThreads, capacity);
     }
 
     private static void handleDefaultsViewResources(Configuration configuration, Element parentElement)
@@ -1302,6 +1313,35 @@ class ConfigurationParser {
             throw new ConfigurationException("Required attribute by name '" + key + "' not found");
         }
         return valueNode.getTextContent();
+    }
+
+    private static class ThreadPoolConfig
+    {
+        private boolean enabled;
+        private int numThreads;
+        private Integer capacity;
+
+        public ThreadPoolConfig(boolean enabled, int numThreads, Integer capacity)
+        {
+            this.enabled = enabled;
+            this.numThreads = numThreads;
+            this.capacity = capacity;
+        }
+
+        public boolean isEnabled()
+        {
+            return enabled;
+        }
+
+        public int getNumThreads()
+        {
+            return numThreads;
+        }
+
+        public Integer getCapacity()
+        {
+            return capacity;
+        }
     }
 
     private static Log log = LogFactory.getLog(ConfigurationParser.class);

@@ -359,9 +359,9 @@ public class JavaClassHelper
         {
             if (JavaClassHelper.isFloatingPointNumber(numToCoerce))
             {
-                return BigDecimal.valueOf(numToCoerce.doubleValue());
+                return new BigDecimal(numToCoerce.doubleValue());
             }
-            return BigDecimal.valueOf(numToCoerce.longValue());
+            return new BigDecimal(numToCoerce.longValue());
         }
         if (resultBoxedType == Float.class)
         {
@@ -617,10 +617,6 @@ public class JavaClassHelper
             return true;
         }
         if (clazzBoxed.equals(void.class))
-        {
-            return true;
-        }
-        if (clazzBoxed.equals(Object.class))
         {
             return true;
         }
@@ -1179,6 +1175,10 @@ public class JavaClassHelper
             return false;
         }
         if (propertyType == NodeList.class)
+        {
+            return false;
+        }
+        if (propertyType == Object.class)
         {
             return false;
         }

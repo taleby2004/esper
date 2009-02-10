@@ -702,6 +702,10 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         }
 
         GenericPropertyDesc genericProp = prop.getPropertyTypeGeneric(this, eventAdapterService);
+        if (genericProp == null)
+        {
+            return null;
+        }
         return EventBeanUtility.createNativeFragmentType(genericProp.getType(), genericProp.getGeneric(), eventAdapterService);
     }
 

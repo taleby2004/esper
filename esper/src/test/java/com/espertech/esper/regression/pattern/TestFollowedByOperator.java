@@ -378,32 +378,6 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         ArrayAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[] {events[1], events[2], events[3], events[4]});
     }
 
-    // TODO
-    public void testJIRA323()
-    {
-        Configuration config = new Configuration();
-        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
-
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
-        epService.initialize();
-        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
-
-        sendTimer(1000,epService);
-        String stmt = "SELECT * FROM pattern[ every ( ld =  SupportBean(string='S'))\n" +
-                "    -> (timer:interval(10 sec) or (eve1 = SupportBean(string='E1'))\n" +
-                    "    -> (timer:interval(10 sec) or (eve2 = SupportBean(string='E2')) )) ]";
-        epService.getEPAdministrator().createEPL(stmt);
-        
-        epService.getEPRuntime().sendEvent(new SupportBean("S", 1));
-        //epService.getEPRuntime().sendEvent(new CurrentTimeEvent(5000));
-        //epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        //epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        //epService.getEPRuntime().sendEvent(new CurrentTimeEvent(11000));
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(15000));
-    }
-
     private long dateToLong(String dateText) throws ParseException
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");

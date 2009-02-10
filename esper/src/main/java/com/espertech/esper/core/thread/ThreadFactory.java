@@ -1,4 +1,4 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

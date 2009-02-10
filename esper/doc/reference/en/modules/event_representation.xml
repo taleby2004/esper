@@ -176,14 +176,26 @@
 			Combinations are also possible. For example, a valid combination could be <literal>person.address('home').street[0]</literal>.
 		</para>
 
-		<para>
-			If your application uses <literal>java.util.Map</literal> or XML to represent events, then event property names may themselves contain the dot ('.') character. The backslash ('\') character can be used to escape dot characters in property names, allowing a property name to contain dot characters. 
-		</para>
-		
-		<para>
-			For example, the EPL as shown below expects a property by name <literal>part1.part2</literal> to exist on event type <literal>MyEvent</literal>:
-		</para>
-		<programlisting>select part1\.part2 from MyEvent</programlisting> 
+		<sect2 id="eventrep-properties-escaping">
+		   <title>Escape Characters</title>
+			<para>
+				If your application uses <literal>java.util.Map</literal> or XML to represent events, then event property names may themselves contain the dot ('.') character. The backslash ('\') character can be used to escape dot characters in property names, allowing a property name to contain dot characters. 
+			</para>
+			
+			<para>
+				For example, the EPL as shown below expects a property by name <literal>part1.part2</literal> to exist on event type <literal>MyEvent</literal>:
+			</para>
+			<programlisting>select part1\.part2 from MyEvent</programlisting> 
+
+			<para>
+				Sometimes your event properties may overlap with EPL language keywords. In this case you may use the backwards apostrophe <literal>`</literal> character to escape the property name.
+			</para>
+			
+			<para>
+				The next example assumes a <literal>Quote</literal> event that has a property by name <literal>order</literal>, while <literal>order</literal> is also a reserved keyword:
+			</para>
+			<programlisting>select `order` from Quote</programlisting> 
+		</sect2>
 	</sect1>
 		
 	<sect1 id="eventrep-dyncproperties">
@@ -371,7 +383,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 			</itemizedlist>
 		
 			<para>
-				Assume there is an <literal>NewEmployeeEvent</literal> event class as shown below. The mapped and indexed properties in this example return Java objects but could also return Java language primitive types (such as int or String). The Address object and Employee objects can themselves have properties that are nested within them, such as a street name in the <literal>Address</literal> object or a name of the employee in the <literal>Employee</literal> object.
+				Assume there is an <literal>NewEmployeeEvent</literal> event class as shown below. The mapped and indexed properties in this example return Java objects but could also return Java language primitive types (such as int or String). The <literal>Address</literal> object and <literal>Employee</literal> can themselves have properties that are nested within them, such as a street name in the <literal>Address</literal> object or a name of the employee in the <literal>Employee</literal> object.
 			</para>
 			
 			<programlisting><![CDATA[public class NewEmployeeEvent {
@@ -519,7 +531,7 @@ where address('work').streetName = 'Park Ave']]></programlisting>
 			</para>
 
 			<para>
-				An example event that have properties that are parameterized types is:
+				An example event that has properties that are parameterized types is:
 			</para>
 	
 			<programlisting><![CDATA[public class NewEmployeeEvent {
@@ -532,7 +544,7 @@ where address('work').streetName = 'Park Ave']]></programlisting>
 				A sample of valid property expressions for this event is shown next:
 			</para>
 			<programlisting><![CDATA[select name, education, education[0].date, addresses('home').street
-  from NewEmployeeEvent]]></programlisting>
+from NewEmployeeEvent]]></programlisting>
 		</sect2>
     </sect1>
     

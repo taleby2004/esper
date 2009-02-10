@@ -1,4 +1,4 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.core.EPRuntimeImpl;
 import com.espertech.esper.core.EPServicesContext;
@@ -6,11 +6,15 @@ import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Inbound work unit processing a map event.
  */
 public class InboundUnitSendMap implements InboundUnitRunnable
 {
+    private static final Log log = LogFactory.getLog(InboundUnitSendMap.class);
     private final Map map;
     private final String eventTypeName;
     private final EPServicesContext services;
@@ -33,7 +37,14 @@ public class InboundUnitSendMap implements InboundUnitRunnable
 
     public void run()
     {
-        EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeName);
-        runtime.processWrappedEvent(eventBean);
-    }    
+        try
+        {
+            EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeName);
+            runtime.processWrappedEvent(eventBean);
+        }
+        catch (RuntimeException e)
+        {
+            log.error("Unexpected error processing Map event: " + e.getMessage(), e);
+        }
+    }
 }

@@ -20,7 +20,7 @@ import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.epl.thread.*;
+import com.espertech.esper.core.thread.*;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;

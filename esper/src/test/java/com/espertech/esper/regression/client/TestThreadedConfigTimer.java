@@ -19,9 +19,6 @@ public class TestThreadedConfigTimer extends TestCase
 {
     private static final Log log = LogFactory.getLog(TestThreadedConfigTimer.class);
 
-    // TODO
-    //   runnable error logging
-
     public void testOp() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();

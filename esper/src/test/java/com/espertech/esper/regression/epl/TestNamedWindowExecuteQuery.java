@@ -35,7 +35,7 @@ public class TestNamedWindowExecuteQuery extends TestCase
         EPOnDemandPreparedQuery prepared = epService.getEPRuntime().prepareQuery(query);
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
         for (EventBean row : result.getArray()) {
-            System.out.println("name=" + row.get("name"));
+            // System.out.println("name=" + row.get("name"));
         }
         ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, null);
         ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, null);

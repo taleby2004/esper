@@ -25,12 +25,12 @@ public class BigDecimalSumAggregator implements AggregationMethod
      */
     public BigDecimalSumAggregator()
     {
-        sum = BigDecimal.valueOf(0.0);
+        sum = new BigDecimal(0.0);
     }
 
     public void clear()
     {
-        sum = BigDecimal.valueOf(0.0);
+        sum = new BigDecimal(0.0);
         numDataPoints = 0;
     }
 

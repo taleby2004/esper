@@ -1217,7 +1217,7 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 
 			<para>
-				This default configuration reduces the processing overhead associated with thread context switching, is lightweight and fast and works well in many environments such as J2EE, server or client. Latency and throughput requirements are largely use case dependant, and Esper provides facilities for controlling concurrency that are described next.
+				This default configuration reduces the processing overhead associated with thread context switching, is lightweight and fast and works well in many environments such as J2EE, server or client. Latency and throughput requirements are largely use case dependant, and Esper provides engine-level facilities for controlling concurrency that are described next.
 			</para>
 			
 			<para>
@@ -1229,15 +1229,15 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 
 			<para>
-				<emphasis>Timer Execution Threading</emphasis> means time-based event processing is performed by a pool of engine-managed threads. With this option the internal timer thread (or external timer event) serves only as a metronome, providing units-of-work to the engine-managed threads in the timer execution pool.
+				<emphasis>Timer Execution Threading</emphasis> means time-based event processing is performed by a pool of engine-managed threads. With this option the internal timer thread (or external timer event) serves only as a metronome, providing units-of-work to the engine-managed threads in the timer execution pool, pushing threading to the level of each statement for time-based execution.
 			</para>
 
 			<para>
-				<emphasis>Route Execution Threading</emphasis> means that the thread sending in an event via any of the <literal>sendEvent</literal> methods only identifies and pre-processes an event, and a pool of engine-managed threads handles the actual processing of the event for each statement.
+				<emphasis>Route Execution Threading</emphasis> means that the thread sending in an event via any of the <literal>sendEvent</literal> methods only identifies and pre-processes an event, and a pool of engine-managed threads handles the actual processing of the event for each statement, pushing threading to the level of each statement for event-arrival-based execution.
 			</para>
 
 			<para>
-				The engine starts engine-managed threads when the engine instance is first obtained. The engine stops engine-managed threads when the engine instance is destroyed via the <literal>destroy</literal> method. When the engine is initialized via the <literal>initialize</literal> method the existing engine-managed threads are stopped and new threads are created. 
+				The engine starts engine-managed threads as daemon threads when the engine instance is first obtained. The engine stops engine-managed threads when the engine instance is destroyed via the <literal>destroy</literal> method. When the engine is initialized via the <literal>initialize</literal> method the existing engine-managed threads are stopped and new threads are created. When shutting down your application, use the <literal>destroy</literal> method to stop engine-managed threads.
 			</para>
 
 			<para>
@@ -1253,7 +1253,7 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 
 			<para>
-				Care should be taken to consider arrival rates and queue depth. Threading options utilize unbound queues and may therefore introduce an overload situation to your application. You may use the service provider interface as outlined below to manage queue sizes, if required.
+				Care should be taken to consider arrival rates and queue depth. Threading options utilize unbound queues or capacity-bound queues with blocking-put, depending on configuration, and may therefore introduce an overload or blocking situation to your application. You may use the service provider interface as outlined below to manage queue sizes, if required, and to help tune the engine to your application needs.
 			</para>
 
 			<para>

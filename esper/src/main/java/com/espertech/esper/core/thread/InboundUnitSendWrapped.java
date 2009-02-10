@@ -1,13 +1,16 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.core.EPRuntimeEventSender;
 import com.espertech.esper.client.EventBean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Inbound unit for wrapped events.
  */
 public class InboundUnitSendWrapped implements InboundUnitRunnable
 {
+    private static final Log log = LogFactory.getLog(InboundUnitSendWrapped.class);
     private final EventBean eventBean;
     private final EPRuntimeEventSender runtime;
 
@@ -24,6 +27,13 @@ public class InboundUnitSendWrapped implements InboundUnitRunnable
 
     public void run()
     {
-        runtime.processWrappedEvent(eventBean);
+        try
+        {
+            runtime.processWrappedEvent(eventBean);
+        }
+        catch (RuntimeException e)
+        {
+            log.error("Unexpected error processing wrapped event: " + e.getMessage(), e);
+        }
     }
 }

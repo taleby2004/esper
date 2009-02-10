@@ -38,6 +38,10 @@ public class NamedWindowQueryMain
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
 
+        // This example initializes the engine instance as it is running within an overall test suite.
+        // This step would not be required unless re-using the same engine instance with different configurations. 
+        epService.initialize();
+
         // define event type - this example uses Map event representation
         //
         Map<String, Object> definition = new LinkedHashMap<String, Object>();

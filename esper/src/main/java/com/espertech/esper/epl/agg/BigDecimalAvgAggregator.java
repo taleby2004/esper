@@ -71,7 +71,7 @@ public class BigDecimalAvgAggregator implements AggregationMethod
         {
             return null;
         }
-        return sum.divide(BigDecimal.valueOf(numDataPoints));
+        return sum.divide(new BigDecimal(numDataPoints));
     }
 
     public Class getValueType()

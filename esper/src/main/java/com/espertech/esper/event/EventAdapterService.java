@@ -15,7 +15,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.event.xml.SchemaModel;
 import com.espertech.esper.event.bean.BeanEventTypeFactory;
 import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.core.thread.ThreadingService;
 import org.w3c.dom.Node;
 
 import java.io.Serializable;

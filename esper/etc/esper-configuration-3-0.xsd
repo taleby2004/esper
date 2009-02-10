@@ -401,24 +401,28 @@
 		<xs:complexType>
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+			<xs:attribute name="capacity" type="xs:int" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="threadpool-outbound">
 		<xs:complexType>
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+			<xs:attribute name="capacity" type="xs:int" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="threadpool-timerexec">
 		<xs:complexType>
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+			<xs:attribute name="capacity" type="xs:int" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="threadpool-routeexec">
 		<xs:complexType>
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 			<xs:attribute name="num-threads" type="xs:int" use="required"/>
+			<xs:attribute name="capacity" type="xs:int" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="class-property-resolution">

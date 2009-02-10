@@ -16,10 +16,9 @@ import com.espertech.esper.core.EPRuntimeEventSender;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.epl.thread.ThreadingService;
-import com.espertech.esper.epl.thread.ThreadingOption;
-import com.espertech.esper.epl.thread.InboundUnitSendEvent;
-import com.espertech.esper.epl.thread.InboundUnitSendWrapped;
+import com.espertech.esper.core.thread.ThreadingService;
+import com.espertech.esper.core.thread.ThreadingOption;
+import com.espertech.esper.core.thread.InboundUnitSendWrapped;
 
 import java.util.HashSet;
 import java.util.Set;

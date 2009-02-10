@@ -6,7 +6,7 @@ public class TestLevenshteinDistance extends TestCase
 {
     public void testDistance()
     {
-        int result = LevenshteinDistance.computeLevenshteinDistance("abc", "abcd");
-        System.out.println(result);
+        assertEquals(1, LevenshteinDistance.computeLevenshteinDistance("abc", "abcd"));
+        // System.out.println(result);
     }
 }

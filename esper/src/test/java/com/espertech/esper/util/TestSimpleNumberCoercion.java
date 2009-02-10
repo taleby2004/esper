@@ -19,11 +19,11 @@ public class TestSimpleNumberCoercion extends TestCase
         assertEquals((byte) 5, SimpleNumberCoercerFactory.getCoercer(Long.class, Byte.class).coerceBoxed((long) 5));
         assertEquals(8l, SimpleNumberCoercerFactory.getCoercer(Long.class, Long.class).coerceBoxed((long) 8));
         assertEquals(BigInteger.valueOf(8), SimpleNumberCoercerFactory.getCoercer(int.class, BigInteger.class).coerceBoxed(8));
-        assertEquals(BigDecimal.valueOf(9), SimpleNumberCoercerFactory.getCoercer(int.class, BigDecimal.class).coerceBoxed(9));
-        assertEquals(BigDecimal.valueOf(9.0d), SimpleNumberCoercerFactory.getCoercer(double.class, BigDecimal.class).coerceBoxed(9.0));
+        assertEquals(new BigDecimal(9), SimpleNumberCoercerFactory.getCoercer(int.class, BigDecimal.class).coerceBoxed(9));
+        assertEquals(new BigDecimal(9.0d), SimpleNumberCoercerFactory.getCoercer(double.class, BigDecimal.class).coerceBoxed(9.0));
 
-        assertEquals(BigDecimal.valueOf(9.0d), SimpleNumberCoercerFactory.getCoercerBigDecimal(double.class).coerceBoxedBigDec(9.0));
-        assertEquals(BigDecimal.valueOf(9), SimpleNumberCoercerFactory.getCoercerBigDecimal(long.class).coerceBoxedBigDec(9));
+        assertEquals(new BigDecimal(9.0d), SimpleNumberCoercerFactory.getCoercerBigDecimal(double.class).coerceBoxedBigDec(9.0));
+        assertEquals(new BigDecimal(9), SimpleNumberCoercerFactory.getCoercerBigDecimal(long.class).coerceBoxedBigDec(9));
         assertEquals(BigDecimal.TEN, SimpleNumberCoercerFactory.getCoercerBigDecimal(BigDecimal.class).coerceBoxedBigDec(BigDecimal.TEN));
 
         assertEquals(BigInteger.valueOf(9), SimpleNumberCoercerFactory.getCoercerBigInteger(long.class).coerceBoxedBigInt(9));

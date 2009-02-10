@@ -1333,7 +1333,7 @@ engine = EPServiceProviderManager.getDefaultProvider(config);]]></programlisting
   <defaults>
     <threading>
       <threadpool-inbound enabled="true" num-threads="2"/>
-      <threadpool-outbound enabled="true" num-threads="2"/>
+      <threadpool-outbound enabled="true" num-threads="2" capacity="1000"/>
       <threadpool-timerexec enabled="true" num-threads="2"/>
       <threadpool-routeexec enabled="true" num-threads="2"/>
     </threading>
@@ -1341,11 +1341,21 @@ engine = EPServiceProviderManager.getDefaultProvider(config);]]></programlisting
 </engine-settings>]]></programlisting>
 
 				<para>
+					By default, queues are unbound and backed by <literal>java.util.concurrent.LinkedBlockingQueue</literal>. 
+					The optional <literal>capacity</literal> attribute can be set to instruct the threading option to configure a capacity-bound queue with a sender-wait (blocking put) policy, backed <literal>ArrayBlockingQueue</literal>.
+				</para>
+
+				<para>
 					This example uses the API for configuring inbound threading :
 				</para>
 				<programlisting><![CDATA[Configuration config = new Configuration();
 config.getEngineDefaults().getThreading().setThreadPoolInbound(true);
 config.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(2);]]></programlisting>
+
+				<para>
+					With a bounded work queue, the queue size and pool size should be tuned together. A large queue coupled with a small pool can help reduce memory usage, CPU usage, and context switching, at the cost of potentially constraining throughput.
+				</para>
+
 			</sect3>
 		</sect2>
 

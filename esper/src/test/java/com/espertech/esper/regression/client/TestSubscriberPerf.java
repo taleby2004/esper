@@ -35,7 +35,7 @@ public class TestSubscriberPerf extends TestCase
             epService.getEPRuntime().sendEvent(new SupportBean("E1", 1000 + i));
         }
         long end = System.currentTimeMillis();
-        System.out.println("delta=" + (end - start));
+        // System.out.println("delta=" + (end - start));
     }
 
     /*
@@ -88,6 +88,6 @@ public class TestSubscriberPerf extends TestCase
         {
             ArrayAssertionUtil.assertEqualsAnyOrder(results.get(i), new Object[] {"E1", 1000 + i});
         }
-        System.out.println("delta=" + (end - start));
+        // System.out.println("delta=" + (end - start));
     }
 }

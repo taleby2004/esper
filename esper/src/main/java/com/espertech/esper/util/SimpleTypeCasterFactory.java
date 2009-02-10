@@ -194,7 +194,7 @@ public class SimpleTypeCasterFactory
         public Object cast(Object object)
         {
             long value = ((Number) object).longValue();
-            return BigDecimal.valueOf(value);
+            return new BigDecimal(value);
         }
 
         public boolean isNumericCast()
@@ -211,7 +211,7 @@ public class SimpleTypeCasterFactory
         public Object cast(Object object)
         {
             double value = ((Number) object).doubleValue();
-            return BigDecimal.valueOf(value);
+            return new BigDecimal(value);
         }
 
         public boolean isNumericCast()

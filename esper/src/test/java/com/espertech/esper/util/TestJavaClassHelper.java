@@ -121,8 +121,8 @@ public class TestJavaClassHelper extends TestCase
         assertEquals((byte) 5, JavaClassHelper.coerceBoxed((long) 5, Byte.class));
         assertEquals(8l, JavaClassHelper.coerceBoxed((long) 8, Long.class));
         assertEquals(BigInteger.valueOf(8), JavaClassHelper.coerceBoxed(8, BigInteger.class));
-        assertEquals(BigDecimal.valueOf(8), JavaClassHelper.coerceBoxed(8, BigDecimal.class));
-        assertEquals(BigDecimal.valueOf(8d), JavaClassHelper.coerceBoxed(8d, BigDecimal.class));
+        assertEquals(new BigDecimal(8), JavaClassHelper.coerceBoxed(8, BigDecimal.class));
+        assertEquals(new BigDecimal(8d), JavaClassHelper.coerceBoxed(8d, BigDecimal.class));
 
         try
         {
@@ -609,8 +609,8 @@ public class TestJavaClassHelper extends TestCase
     public void testIsJavaBuiltinDataType()
     {
         Class[] classesDataType = new Class[] {int.class, Long.class, double.class, boolean.class, Boolean.class,
-                char.class, Character.class, String.class, Object.class};
-        Class[] classesNotDataType = new Class[] {SupportBean.class, Math.class, Class.class};
+                char.class, Character.class, String.class};
+        Class[] classesNotDataType = new Class[] {SupportBean.class, Math.class, Class.class, Object.class};
 
         for (int i = 0; i < classesDataType.length; i++)
         {

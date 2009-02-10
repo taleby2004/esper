@@ -250,7 +250,7 @@ public class TestFilterPropertyExample extends TestCase
         JSONEventRenderer renderer = epService.getEPRuntime().getEventRenderer().getJSONRenderer(rows[0].getEventType());
         for (int i = 0; i < rows.length; i++)
         {
-            System.out.println(renderer.render("event#" + i, rows[i]));
+            // System.out.println(renderer.render("event#" + i, rows[i]));
         }
     }
 }

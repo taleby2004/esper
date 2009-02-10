@@ -19,7 +19,7 @@ public class SupportServiceStateListener implements EPServiceStateListener
         destroyedEvents.add(serviceProvider);
     }
 
-    public void onEPServiceInitialized(EPServiceProviderImpl serviceProvider)
+    public void onEPServiceInitialized(EPServiceProvider serviceProvider)
     {
         initializedEvents.add(serviceProvider);
     }

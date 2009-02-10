@@ -280,6 +280,10 @@ tokens
   	return parserKeywordSet;
   }
   
+  public String removeTicks(String tickedString) {
+  	return com.espertech.esper.epl.parse.ASTConstantHelper.removeTicks(tickedString);
+  }
+  
   public Map<Integer, String> getLexerTokenParaphrases() {
     if (lexerTokenParaphases.size() == 0) {
       	lexerTokenParaphases.put(IDENT, "an identifier");
@@ -423,7 +427,7 @@ tokens
 	parserTokenParaphases.put(TIMEPERIOD_MINUTES, "'minutes'");
 	parserTokenParaphases.put(TIMEPERIOD_SEC, "'sec'");
 	parserTokenParaphases.put(TIMEPERIOD_SECOND, "'second'");
-	parserTokenParaphases.put(TIMEPERIOD_SECONDS, "'seconds';");
+	parserTokenParaphases.put(TIMEPERIOD_SECONDS, "'seconds'");
 	parserTokenParaphases.put(TIMEPERIOD_MILLISEC, "'msec'");
 	parserTokenParaphases.put(TIMEPERIOD_MILLISECOND, "'millisecond'");
 	parserTokenParaphases.put(TIMEPERIOD_MILLISECONDS, "'milliseconds'");
@@ -1147,19 +1151,19 @@ patternFilterExpression
 
 classIdentifier
   @init { String identifier = ""; }
-	:	i1=IDENT { identifier = $i1.getText(); }
+	:	i1=escapableIdent { identifier = $i1.result; }
 	    ( 
-	    	 DOT i2=IDENT { identifier += "." + $i2.getText(); }
+	    	 DOT i2=escapableIdent { identifier += "." + $i2.result; }
 	    )* 
 	    -> ^(CLASS_IDENT[identifier])
 	;
 	
 classIdentifierNonGreedy
   @init { String identifier = ""; } 
-	:	i1=IDENT { identifier = $i1.getText(); }
+	:	i1=escapableIdent { identifier = $i1.result; }
 	    ( 
 	    	 options {greedy=false;} :
-	    	 DOT i2=IDENT { identifier += "." + $i2.getText(); }
+	    	 DOT i2=escapableIdent { identifier += "." + $i2.result; }
 	    )* 
 	    -> ^(CLASS_IDENT[identifier])
 	;
@@ -1267,55 +1271,59 @@ eventPropertyAtomic
 		
 eventPropertyIdent
   @init { String identifier = ""; } 
-	:	ipi=keywordAllowedIdent { identifier = ipi.getTree().toString(); }
+	:	ipi=keywordAllowedIdent { identifier = ipi.result; }
 		(
-		  ESCAPECHAR DOT ipi2=keywordAllowedIdent? { identifier += "."; if (ipi2 != null) identifier += ipi2.getTree().toString(); }
+		  ESCAPECHAR DOT ipi2=keywordAllowedIdent? { identifier += "."; if (ipi2 != null) identifier += ipi2.result; }
 		)*
 	    	-> ^(IDENT[identifier])
 	;
 	
-keywordAllowedIdent
-  @init { String identifier = ""; } 
-	:	i1=IDENT { identifier = $i1.getText(); }
-		|AT { identifier = "at"; }
-		|COUNT { identifier = "count"; }
-		|ESCAPE { identifier = "escape"; }
-    		|EVERY_EXPR { identifier = "every"; }
-		|SUM { identifier = "sum"; }
-		|AVG { identifier = "avg"; }
-		|MAX { identifier = "max"; }
-		|MIN { identifier = "min"; }
-		|COALESCE { identifier = "coalesce"; }
-		|MEDIAN { identifier = "median"; }
-		|STDDEV { identifier = "stddev"; }
-		|AVEDEV { identifier = "avedev"; }
-		|EVENTS { identifier = "events"; }
-		|FIRST { identifier = "first"; }
-		|LAST { identifier = "last"; }
-		|UNIDIRECTIONAL { identifier = "unidirectional"; }
-		|RETAINUNION { identifier = "retain-union"; }
-		|RETAININTERSECTION { identifier = "retain-intersection"; }
-		|UNTIL { identifier = "until"; }
-		|PATTERN { identifier = "pattern"; }
-		|SQL { identifier = "sql"; }
-		|METADATASQL { identifier = "metadatasql"; }
-		|PREVIOUS { identifier = "prev"; }
-		|PRIOR { identifier = "prior"; }
-		|WEEKDAY { identifier = "weekday"; }
-		|LW { identifier = "lastweekday"; }
-		|INSTANCEOF { identifier = "instanceof"; }
-		|CAST { identifier = "cast"; }
-		|SNAPSHOT { identifier = "snapshot"; }
-		|VARIABLE { identifier = "variable"; }		
-		|WINDOW { identifier = "window"; }
-		|LEFT { identifier = "left"; }
-		|RIGHT { identifier = "right"; }
-		|OUTER { identifier = "outer"; }
-		|FULL { identifier = "full"; }
-		|JOIN { identifier = "join"; }
-	-> ^(IDENT[identifier])
+keywordAllowedIdent returns [String result]
+	:	i1=IDENT { $result = $i1.getText(); }
+		|i2=TICKED_STRING_LITERAL { $result = removeTicks($i2.getText()); }
+		|AT { $result = "at"; }
+		|COUNT { $result = "count"; }
+		|ESCAPE { $result = "escape"; }
+    		|EVERY_EXPR { $result = "every"; }
+		|SUM { $result = "sum"; }
+		|AVG { $result = "avg"; }
+		|MAX { $result = "max"; }
+		|MIN { $result = "min"; }
+		|COALESCE { $result = "coalesce"; }
+		|MEDIAN { $result = "median"; }
+		|STDDEV { $result = "stddev"; }
+		|AVEDEV { $result = "avedev"; }
+		|EVENTS { $result = "events"; }
+		|FIRST { $result = "first"; }
+		|LAST { $result = "last"; }
+		|UNIDIRECTIONAL { $result = "unidirectional"; }
+		|RETAINUNION { $result = "retain-union"; }
+		|RETAININTERSECTION { $result = "retain-intersection"; }
+		|UNTIL { $result = "until"; }
+		|PATTERN { $result = "pattern"; }
+		|SQL { $result = "sql"; }
+		|METADATASQL { $result = "metadatasql"; }
+		|PREVIOUS { $result = "prev"; }
+		|PRIOR { $result = "prior"; }
+		|WEEKDAY { $result = "weekday"; }
+		|LW { $result = "lastweekday"; }
+		|INSTANCEOF { $result = "instanceof"; }
+		|CAST { $result = "cast"; }
+		|SNAPSHOT { $result = "snapshot"; }
+		|VARIABLE { $result = "variable"; }		
+		|WINDOW { $result = "window"; }
+		|LEFT { $result = "left"; }
+		|RIGHT { $result = "right"; }
+		|OUTER { $result = "outer"; }
+		|FULL { $result = "full"; }
+		|JOIN { $result = "join"; }
 	;
 		
+escapableIdent returns [String result]
+	:	i1=IDENT { $result = $i1.getText(); }
+		|i2=TICKED_STRING_LITERAL { $result = removeTicks($i2.getText()); }
+	;
+	
 timePeriod 	
 	:	
 	(	
@@ -1470,6 +1478,10 @@ SL_COMMENT
 // multiple-line comments
 ML_COMMENT
     :   '/*' ( options {greedy=false;} : . )* '*/' {$channel=HIDDEN;}
+    ;
+
+TICKED_STRING_LITERAL
+    :   '`' ( EscapeSequence | ~('\`'|'\\') )* '`'
     ;
 
 QUOTED_STRING_LITERAL

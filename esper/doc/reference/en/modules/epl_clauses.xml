@@ -165,8 +165,14 @@ select last, count(*) as count from MyEvent]]></programlisting>
 select insert from MyEvent]]></programlisting>
 
 			<para>
-				EPL does not offer an escape syntax for reserved keywords.
+				EPL offers an escape syntax for reserved keywords: Event properties as well as event or stream names may be escaped via the backwards apostrophe <literal>`</literal> (ASCII 96) character.
 			</para>
+
+			<para>
+				The next example queries an event type by name <literal>Order</literal> (a reserved keyword) that provides a property by name <literal>insert</literal> (a reserved keyword):
+			</para>
+			<programlisting><![CDATA[// valid
+select `insert` from `Order`]]></programlisting>
 		</sect2>
 
 		<sect2 id="epl-syntax-datatype">

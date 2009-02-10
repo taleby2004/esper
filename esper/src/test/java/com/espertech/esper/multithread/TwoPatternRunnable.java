@@ -62,7 +62,7 @@ public class TwoPatternRunnable implements Runnable
                 Assert.assertSame(matches.get(i), received[i].get("event1"));
             }
 
-            System.out.println("Found " + received.length + " matches in loop #" + countLoops);
+            // System.out.println("Found " + received.length + " matches in loop #" + countLoops);
             listener.reset();
         }
     }

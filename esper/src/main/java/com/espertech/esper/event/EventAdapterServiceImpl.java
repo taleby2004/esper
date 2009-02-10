@@ -21,7 +21,7 @@ import com.espertech.esper.event.xml.*;
 import com.espertech.esper.plugin.*;
 import com.espertech.esper.util.URIUtil;
 import com.espertech.esper.util.UuidGenerator;
-import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.core.thread.ThreadingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;

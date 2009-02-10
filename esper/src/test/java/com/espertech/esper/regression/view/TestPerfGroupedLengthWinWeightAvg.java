@@ -58,7 +58,7 @@ public class TestPerfGroupedLengthWinWeightAvg extends TestCase
         }
         long endTime = System.nanoTime();
         double delta = (endTime - startTime) / 1000d / 1000d / 1000d;
-        System.out.println("delta=" + delta);
+        // System.out.println("delta=" + delta);
         assertTrue(delta < 1);
     }
 

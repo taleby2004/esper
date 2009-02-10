@@ -40,23 +40,23 @@ public class TestBigNumberSupport extends TestCase
         sendBigNumEvent(-1, 2);
         assertFalse(listener.getAndClearIsInvoked());
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(2, 0, null, BigDecimal.valueOf(2), 0, 0));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(2, 0, null, new BigDecimal(2), 0, 0));
         assertTrue(listener.getAndClearIsInvoked());
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(3, 0, null, BigDecimal.valueOf(2), 0, 0));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(3, 0, null, new BigDecimal(2), 0, 0));
         assertFalse(listener.getAndClearIsInvoked());
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, null, BigDecimal.valueOf(3d), 3d, 0));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, null, new BigDecimal(3d), 3d, 0));
         assertTrue(listener.getAndClearIsInvoked());
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, null, BigDecimal.valueOf(3.9999d), 4d, 0));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, null, new BigDecimal(3.9999d), 4d, 0));
         assertFalse(listener.getAndClearIsInvoked());
 
         // test equals BigInteger
         stmt = epService.getEPAdministrator().createEPL("select * from SupportBeanNumeric where bigdec = bigint or bigint = intOne or bigint = 1");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, BigInteger.valueOf(2), BigDecimal.valueOf(2), 0, 0));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, BigInteger.valueOf(2), new BigDecimal(2), 0, 0));
         assertTrue(listener.getAndClearIsInvoked());
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, BigInteger.valueOf(3), BigDecimal.valueOf(2), 0, 0));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0, BigInteger.valueOf(3), new BigDecimal(2), 0, 0));
         assertFalse(listener.getAndClearIsInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(2, 0, BigInteger.valueOf(2), null, 0, 0));
@@ -89,7 +89,7 @@ public class TestBigNumberSupport extends TestCase
         sendBigNumEvent(0, 11);
         assertFalse(listener.getAndClearIsInvoked());
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(null, BigDecimal.valueOf(9.999)));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(null, new BigDecimal(9.999)));
         assertTrue(listener.getAndClearIsInvoked());
         stmt.destroy();
     }
@@ -124,7 +124,7 @@ public class TestBigNumberSupport extends TestCase
         sendBigNumEvent(0, 10);
         assertTrue(listener.getAndClearIsInvoked());
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(null, BigDecimal.valueOf(20d)));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(null, new BigDecimal(20d)));
         assertTrue(listener.getAndClearIsInvoked());
 
         sendBigNumEvent(99, 0);
@@ -184,7 +184,7 @@ public class TestBigNumberSupport extends TestCase
         sendBigNumEvent(1, 2);
         EventBean event = listener.assertOneGetNewAndReset();
         ArrayAssertionUtil.assertProps(event, "v1,v2,v3,v4,v5".split(","),
-                new Object[] {BigDecimal.valueOf(3), BigDecimal.valueOf(4), BigDecimal.valueOf(5d), BigInteger.valueOf(6), BigDecimal.valueOf(6d)});
+                new Object[] {new BigDecimal(3), new BigDecimal(4), new BigDecimal(5d), BigInteger.valueOf(6), new BigDecimal(6d)});
     }
 
     public void testAggregation()
@@ -204,12 +204,12 @@ public class TestBigNumberSupport extends TestCase
         sendBigNumEvent(1, 2);
         EventBean event = listener.assertOneGetNewAndReset();
         ArrayAssertionUtil.assertProps(event, fieldList,
-                new Object[] {BigInteger.valueOf(1), BigDecimal.valueOf(2d),        // sum
-                        BigDecimal.valueOf(1), BigDecimal.valueOf(2),               // avg
+                new Object[] {BigInteger.valueOf(1), new BigDecimal(2d),        // sum
+                        new BigDecimal(1), new BigDecimal(2),               // avg
                         1d, 2d,               // median
                         null, null,
                         0.0, 0.0,
-                        BigInteger.valueOf(1), BigDecimal.valueOf(2),
+                        BigInteger.valueOf(1), new BigDecimal(2),
                 });
     }
 
@@ -225,15 +225,15 @@ public class TestBigNumberSupport extends TestCase
 
         sendBigNumEvent(1, 2);
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList,
-                new Object[] {BigInteger.valueOf(1), BigInteger.valueOf(1), BigDecimal.valueOf(10), BigDecimal.valueOf(100d)});
+                new Object[] {BigInteger.valueOf(1), BigInteger.valueOf(1), new BigDecimal(10), new BigDecimal(100d)});
 
         sendBigNumEvent(40, 300);
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList,
-                new Object[] {BigInteger.valueOf(10), BigInteger.valueOf(10), BigDecimal.valueOf(300), BigDecimal.valueOf(300)});
+                new Object[] {BigInteger.valueOf(10), BigInteger.valueOf(10), new BigDecimal(300), new BigDecimal(300)});
 
         sendBigNumEvent(250, 200);
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList,
-                new Object[] {BigInteger.valueOf(10), BigInteger.valueOf(10),  BigDecimal.valueOf(200), BigDecimal.valueOf(250)});
+                new Object[] {BigInteger.valueOf(10), BigInteger.valueOf(10),  new BigDecimal(200), new BigDecimal(250)});
     }
 
     public void testFilterEquals()
@@ -247,17 +247,18 @@ public class TestBigNumberSupport extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBigNumEvent(0, 4);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigDecimal.valueOf(4)});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {new BigDecimal(4)});
 
         stmt.destroy();
         stmt = epService.getEPAdministrator().createEPL("select bigdec from SupportBeanNumeric(bigdec = 4d)");
         stmt.addListener(listener);
 
         sendBigNumEvent(0, 4);
-        assertFalse(listener.isInvoked());
+        assertTrue(listener.isInvoked());
+        listener.reset();
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(BigInteger.valueOf(0), BigDecimal.valueOf(4d)));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigDecimal.valueOf(4.0)});
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(BigInteger.valueOf(0), new BigDecimal(4d)));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {new BigDecimal(4d)});
 
         stmt.destroy();
         stmt = epService.getEPAdministrator().createEPL("select bigdec from SupportBeanNumeric(bigint = 4)");
@@ -267,7 +268,7 @@ public class TestBigNumberSupport extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBigNumEvent(4, 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigDecimal.valueOf(3)});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {new BigDecimal(3)});
     }
 
     public void testJoin()
@@ -280,11 +281,10 @@ public class TestBigNumberSupport extends TestCase
         sendSupportBean(2, 3);
         sendBigNumEvent(0, 2);
         sendBigNumEvent(2, 0);
-        sendBigNumEvent(2, 3);  // still no match, 3.0 != 3 for BigDecimal
         assertFalse(listener.isInvoked());
 
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(BigInteger.valueOf(2), BigDecimal.valueOf(3.0)));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigInteger.valueOf(2), BigDecimal.valueOf(3.0)});
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(BigInteger.valueOf(2), new BigDecimal(3d)));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigInteger.valueOf(2), new BigDecimal(3d)});
     }
 
     public void testCastAndUDF()
@@ -296,12 +296,12 @@ public class TestBigNumberSupport extends TestCase
 
         String[] fieldList = "v1,v2".split(",");
         sendBigNumEvent(0, 2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigInteger.valueOf(2), BigDecimal.valueOf(3.0)});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldList, new Object[] {BigInteger.valueOf(2), new BigDecimal(3.0)});
     }
 
-    private void sendBigNumEvent(int bigInt, int bigDec)
+    private void sendBigNumEvent(int bigInt, double bigDec)
     {
-        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(BigInteger.valueOf(bigInt), BigDecimal.valueOf(bigDec)));
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(BigInteger.valueOf(bigInt), new BigDecimal(bigDec)));
     }
 
     private void sendSupportBean(int intPrimitive, double doublePrimitive)

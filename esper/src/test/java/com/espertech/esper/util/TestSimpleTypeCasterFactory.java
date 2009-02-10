@@ -26,7 +26,7 @@ public class TestSimpleTypeCasterFactory extends TestCase
         }
         
         assertEquals(BigInteger.valueOf(100), SimpleTypeCasterFactory.getCaster(Long.class, BigInteger.class).cast(100L));
-        assertEquals(BigDecimal.valueOf(100), SimpleTypeCasterFactory.getCaster(Long.class, BigDecimal.class).cast(100L));
-        assertEquals(BigDecimal.valueOf(100d), SimpleTypeCasterFactory.getCaster(Double.class, BigDecimal.class).cast(100d));
+        assertEquals(new BigDecimal(100), SimpleTypeCasterFactory.getCaster(Long.class, BigDecimal.class).cast(100L));
+        assertEquals(new BigDecimal(100d), SimpleTypeCasterFactory.getCaster(Double.class, BigDecimal.class).cast(100d));
     }
 }

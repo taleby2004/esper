@@ -7,7 +7,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.ConfigurationEngineDefaults;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.epl.thread.ThreadingServiceImpl;
+import com.espertech.esper.core.thread.ThreadingServiceImpl;
 import junit.framework.TestCase;
 
 public class TestUpdateDispatchView extends TestCase

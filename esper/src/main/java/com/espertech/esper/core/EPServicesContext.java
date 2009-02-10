@@ -17,7 +17,7 @@ import com.espertech.esper.epl.db.DatabaseConfigService;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
-import com.espertech.esper.epl.thread.ThreadingService;
+import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.event.EventAdapterService;

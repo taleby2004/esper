@@ -117,7 +117,7 @@ public class TestXSDSchemaMapper extends TestCase
         for (int i = 0; i < elements.getLength(); i++)
         {
             XSObject object = elements.item(i);
-            System.out.println("name '" + object.getName() + "' namespace '" + object.getNamespace());
+            //System.out.println("name '" + object.getName() + "' namespace '" + object.getNamespace());
         }
 
         XSElementDeclaration dec = (XSElementDeclaration) elements.item(0);
@@ -137,7 +137,7 @@ public class TestXSDSchemaMapper extends TestCase
             XSAttributeUse attr = (XSAttributeUse)attrs.item(i);
             String name = attr.getAttrDeclaration().getName();
             QName qname = SchemaUtil.simpleTypeToQName(((XSSimpleTypeDecl) attr.getAttrDeclaration().getTypeDefinition()).getPrimitiveKind());
-            System.out.println(indent(indent) + "Attribute " + name + " qname " + qname.getLocalPart());
+            //System.out.println(indent(indent) + "Attribute " + name + " qname " + qname.getLocalPart());
         }
 
         if ((complexActualElement.getContentType() == XSComplexTypeDefinition.CONTENTTYPE_ELEMENT) ||
@@ -160,18 +160,18 @@ public class TestXSDSchemaMapper extends TestCase
                         if (decl.getTypeDefinition().getTypeCategory() == XSTypeDefinition.SIMPLE_TYPE) {
                             XSSimpleTypeDecl simpleTypeDecl = (XSSimpleTypeDecl) decl.getTypeDefinition();
                             QName type = SchemaUtil.simpleTypeToQName(simpleTypeDecl.getPrimitiveKind());
-                            System.out.println(indent(indent) + "Simple particle " + childParticle.getTerm().getName() + " type " + type.getLocalPart() + " " + print(childParticle));
+                            //System.out.println(indent(indent) + "Simple particle " + childParticle.getTerm().getName() + " type " + type.getLocalPart() + " " + print(childParticle));
                         }
 
                         if (decl.getTypeDefinition().getTypeCategory() == XSTypeDefinition.COMPLEX_TYPE)
                         {
-                            System.out.println(indent(indent) + "Complex particle " + childParticle.getTerm().getName()  + " " + print(childParticle));
+                            //System.out.println(indent(indent) + "Complex particle " + childParticle.getTerm().getName()  + " " + print(childParticle));
                             complexActualElement = (XSComplexTypeDefinition) decl.getTypeDefinition();
 
                             if (complexActualElement.getSimpleType() != null) {
                                 XSSimpleTypeDecl simpleTypeDecl = (XSSimpleTypeDecl) complexActualElement.getSimpleType();
                                 QName type = SchemaUtil.simpleTypeToQName(simpleTypeDecl.getPrimitiveKind());
-                                System.out.println(indent(indent+1) + "Simple type" + childParticle.getTerm().getName() + " type " + type.getLocalPart() + " " + print(childParticle));
+                                //System.out.println(indent(indent+1) + "Simple type" + childParticle.getTerm().getName() + " type " + type.getLocalPart() + " " + print(childParticle));
                             }
 
                             printSchemaDef(complexActualElement, indent + 4);

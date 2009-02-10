@@ -9,7 +9,7 @@ import com.espertech.esper.epl.spec.SelectClauseElementCompiled;
 import com.espertech.esper.epl.spec.SelectClauseElementWildcard;
 import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
-import com.espertech.esper.epl.thread.ThreadingServiceImpl;
+import com.espertech.esper.core.thread.ThreadingServiceImpl;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;

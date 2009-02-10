@@ -48,6 +48,7 @@ public class TestTimestampExpr extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean());
         event = listener.assertOneGetNewAndReset();
         assertResults(event, new Object[] {999l, 999l, 1000l});
+        assertEquals(event.get("current_timestamp()"), event.get("t0"));
     }
 
     public void testGetTimestamp_OM() throws Exception
@@ -101,7 +102,6 @@ public class TestTimestampExpr extends TestCase
 
     private void assertResults(EventBean event, Object[] result)
     {
-        assertEquals(event.get("current_timestamp()"), event.get("t0"));
         for (int i = 0; i < result.length; i++)
         {
             assertEquals("failed for index " + i, result[i], event.get("t" + i));

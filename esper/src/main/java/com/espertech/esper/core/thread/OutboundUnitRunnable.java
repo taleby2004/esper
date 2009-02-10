@@ -1,4 +1,4 @@
-package com.espertech.esper.epl.thread;
+package com.espertech.esper.core.thread;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
@@ -35,7 +35,7 @@ public class OutboundUnitRunnable implements Runnable
         }
         catch (RuntimeException e)
         {
-            log.error(e); // TODO
+            log.error("Unexpected error processing dispatch: " + e.getMessage(), e);
         }
     }
 }

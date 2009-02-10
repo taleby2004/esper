@@ -65,7 +65,7 @@ public class TestEventRendererXML extends TestCase
         assertEquals(removeNewline(expected), removeNewline(result));
 
         result = epService.getEPRuntime().getEventRenderer().renderXML("supportBean", statement.iterator().next(), new XMLRenderingOptions().setDefaultAsAttribute(true));
-        System.out.println(result);
+        // System.out.println(result);
         expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<supportBean boolPrimitive=\"false\" bytePrimitive=\"0\" charPrimitive=\"x\" doublePrimitive=\"0.0\" floatPrimitive=\"0.0\" intBoxed=\"992\" intPrimitive=\"1\" longPrimitive=\"0\" shortPrimitive=\"0\" string=\"a\\u000ac\">\n" +
                 "    <this boolPrimitive=\"false\" bytePrimitive=\"0\" charPrimitive=\"x\" doublePrimitive=\"0.0\" floatPrimitive=\"0.0\" intBoxed=\"992\" intPrimitive=\"1\" longPrimitive=\"0\" shortPrimitive=\"0\" string=\"a\\u000ac\"/>\n" +
@@ -108,7 +108,7 @@ public class TestEventRendererXML extends TestCase
         epService.getEPRuntime().sendEvent(dataOuter, "OuterMap");
 
         String result = epService.getEPRuntime().getEventRenderer().renderXML("outerMap", statement.iterator().next());
-        System.out.println(result);
+        // System.out.println(result);
         String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<outerMap>\n" +
                 "  <intarr>1</intarr>\n" +
@@ -134,7 +134,7 @@ public class TestEventRendererXML extends TestCase
         assertEquals(removeNewline(expected), removeNewline(result));
 
         result = epService.getEPRuntime().getEventRenderer().renderXML("outerMap xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", statement.iterator().next(), new XMLRenderingOptions().setDefaultAsAttribute(true));
-        System.out.println(result);
+        // System.out.println(result);
         expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<outerMap xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
                 "  <intarr>1</intarr>\n" +
