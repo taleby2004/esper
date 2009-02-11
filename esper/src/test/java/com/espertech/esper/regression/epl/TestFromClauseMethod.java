@@ -480,7 +480,7 @@ public class TestFromClauseMethod extends TestCase
     public void testInvalid()
     {
         tryInvalid("select * from SupportBean, method:.abc where 1=2",
-                   "Incorrect syntax near '.' expecting an identifier but found a dot '.' at line 1 column 34, please check the method invocation join within the from clause [select * from SupportBean, method:.abc where 1=2]");
+                   "Incorrect syntax near '.' at line 1 column 34, please check the method invocation join within the from clause [select * from SupportBean, method:.abc where 1=2]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayGen()",
                    "Error starting statement: Method footprint does not match the number or type of expression parameters, expecting no parameters in method: Could not find static method named 'fetchArrayGen' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib'  [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayGen()]");

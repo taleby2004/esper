@@ -12,7 +12,7 @@ import junit.framework.TestCase;
 public class TestNamedWindowExecuteQuery extends TestCase
 {
     private EPServiceProvider epService;
-    private final String[] fields = new String[] {"string", "intPrimitive"};
+    private String[] fields = new String[] {"string", "intPrimitive"};
 
     // test expressions + current timestamp
     public void setUp()
@@ -49,6 +49,30 @@ public class TestNamedWindowExecuteQuery extends TestCase
         result = epService.getEPRuntime().executeQuery(query);
         ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
         ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+    }
+
+    public void testExecuteCount() throws Exception
+    {
+        fields = new String[] {"cnt"};
+        String query = "select count(*) as cnt from MyWindow";
+        EPOnDemandPreparedQuery prepared = epService.getEPRuntime().prepareQuery(query);
+
+        EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
+        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{0L}});
+        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{0L}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        result = epService.getEPRuntime().executeQuery(query);
+        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{1L}});
+        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{1L}});
+        result = epService.getEPRuntime().executeQuery(query);
+        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{1L}});
+        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{1L}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        result = epService.getEPRuntime().executeQuery(query);
+        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{2L}});
+        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{2L}});
     }
 
     public void testExecuteFilter() throws Exception

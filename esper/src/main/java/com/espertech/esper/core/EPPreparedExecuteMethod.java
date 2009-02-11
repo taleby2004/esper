@@ -133,6 +133,8 @@ public class EPPreparedExecuteMethod
             }
         }
 
+        resultSetProcessor.clear();
+
         UniformPair<EventBean[]> results;
         if (numStreams == 1)
         {
