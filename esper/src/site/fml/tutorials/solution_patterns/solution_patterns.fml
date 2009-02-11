@@ -1011,7 +1011,7 @@ epService.getEPRuntime().sendEvent(new SensorQueryEvent(80));</pre></div>
 	&lt;lang:inline-script&gt;
 	    package org.springframework.scripting.groovy;
 	    import com.espertech.esper.client.UpdateListener
-	    import com.espertech.esper.event.EventBean;
+	    import com.espertech.esper.client.EventBean;
 
 	    class GroovyMessenger implements UpdateListener {
 		public void update(EventBean[] eventBeans, EventBean[] eventBeans1) {

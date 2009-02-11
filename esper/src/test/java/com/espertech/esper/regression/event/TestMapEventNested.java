@@ -443,6 +443,54 @@ public class TestMapEventNested extends TestCase
         assertEquals(int[].class, stmt.getEventType().getPropertyType("e"));
     }
 
+    public void testMappedProperty()
+    {
+        EPServiceProvider epService = getEngineInitialized(null, null);
+
+        // test map containing first-level property that is an array of primitive or Class
+        Map<String, Object> mappedDef = makeMap(new Object[][] {{"p0", Map.class}});
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMappedPropertyMap", mappedDef);
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select p0('k1') as a from MyMappedPropertyMap");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        Map<String, Object> eventVal = new HashMap<String, Object>();
+        eventVal.put("k1", "v1");
+        Map<String, Object> event = makeMap(new Object[][] {{"p0", eventVal}});
+        epService.getEPRuntime().sendEvent(event, "MyMappedPropertyMap");
+
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a".split(","), new Object[] {"v1"});
+        assertEquals(Object.class, stmt.getEventType().getPropertyType("a"));
+        stmt.destroy();
+
+        // test map at the second level of a nested map that is an array of primitive or Class
+        Map<String, Object> mappedDefOuter = makeMap(new Object[][] {{"outer", mappedDef}});
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMappedPropertyMapOuter", mappedDefOuter);
+
+        stmt = epService.getEPAdministrator().createEPL("select outer.p0('k1') as a from MyMappedPropertyMapOuter");
+        stmt.addListener(listener);
+
+        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", event}});
+        epService.getEPRuntime().sendEvent(eventOuter, "MyMappedPropertyMapOuter");
+
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a".split(","), new Object[] {"v1"});
+        assertEquals(Object.class, stmt.getEventType().getPropertyType("a"));
+
+        // test map that contains a bean which has a map property
+        Map<String, Object> mappedDefOuterTwo = makeMap(new Object[][] {{"outerTwo", SupportBeanComplexProps.class}});
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMappedPropertyMapOuterTwo", mappedDefOuterTwo);
+
+        stmt = epService.getEPAdministrator().createEPL("select outerTwo.mapProperty('xOne') as a from MyMappedPropertyMapOuterTwo");
+        stmt.addListener(listener);
+
+        Map<String, Object> eventOuterTwo = makeMap(new Object[][] {{"outerTwo", SupportBeanComplexProps.makeDefaultBean()}});
+        epService.getEPRuntime().sendEvent(eventOuterTwo, "MyMappedPropertyMapOuterTwo");
+
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a".split(","), new Object[] {"yOne"});
+        assertEquals(String.class, stmt.getEventType().getPropertyType("a"));        
+    }
+
     public void testMapNamePropertyNested()
     {
         EPServiceProvider epService = getEngineInitialized(null, null);

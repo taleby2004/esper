@@ -13,6 +13,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.SerializableObjectCopier;
 
@@ -32,6 +33,24 @@ public class TestStaticFunctions extends TestCase
 	    epService.initialize();
 	    stream = " from " + SupportMarketDataBean.class.getName() +".win:length(5) ";
 	}
+
+    public void testReturnsMapIndexProperty()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class.getName());
+
+        statementText = "insert into ABCStream select SupportStaticMethodLib.myMapFunc() as mymap, SupportStaticMethodLib.myArrayFunc() as myindex from SupportBean";
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(statementText);
+
+        statementText = "select mymap('A') as v0, myindex[1] as v1 from ABCStream";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(statementText);
+        listener = new SupportUpdateListener();
+        stmtTwo.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "v0,v1".split(","), new Object[] {"A1", 200});
+    }
 
     public void testPattern()
     {

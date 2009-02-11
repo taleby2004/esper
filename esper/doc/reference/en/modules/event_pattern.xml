@@ -93,6 +93,10 @@
 			Pattern expressions can be nested arbitrarily deep by including the nested expression(s) in <literal>()</literal> round parenthesis.
          </para>
 
+        <para>
+			Underlying the pattern matching is a state machine that transitions between states based on arriving events and based on time advancing. A single event or advancing time may 
+			cause a reaction in multiple parts of your active pattern state.
+         </para>
     </sect1>
 
     <sect1 id="pattern-how-to-use">
@@ -1096,12 +1100,12 @@ from pattern [ every [2] a=A ] ]]></programlisting>
             </para>
             
             <para>
-				Pattern matches when both an A event and a B event are found.
+				This pattern matches when both an A event and a B event arrive, at the time the last of the two events arrive:
             </para>
 			<programlisting><![CDATA[A and B]]></programlisting>
 
             <para>
-				Pattern matches on any sequence A followed by B and C followed by D, or C followed by D and A followed by B
+				This pattern matches on any sequence of an A event followed by a B event and then a C event followed by a D event, or a C event followed by a D and an A event followed by a B event:
             </para>
 			<programlisting><![CDATA[(A -> B) and (C -> D)]]></programlisting>
             
@@ -1119,6 +1123,21 @@ a=A -> B(id = a.id)
 // another example using 'and'...
 a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
 
+            <para>
+				Consider a pattern that looks for the same event:
+            </para>
+			<programlisting><![CDATA[A and A]]></programlisting>
+
+            <para>
+				The pattern above fires when a single A event arrives. The first arriving A event triggers a state transition in both the left and the right hand side expression.
+            </para>
+            
+            <para>
+				In order to match after two A events arrive in any order, there are two options to express this pattern. The followed-by operator is one option and the repeat operator is the second option, as the next two patterns show:
+            </para>
+			<programlisting><![CDATA[A -> A
+// ... or ...
+[2] A]]></programlisting>
         </sect2>
 
         <sect2 id="pattern-logical-or" >

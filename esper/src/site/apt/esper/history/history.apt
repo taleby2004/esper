@@ -12,6 +12,107 @@ Change History
 	[]
 
 
+Version 3.0.0
+
+	Released February 11, 2009
+	
+	Built with Sun JDK 5.0 Update 16; Also tested for JDK 6 Update 10
+
+* API changes
+
+  * Please consult {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+2.x+to+3.0}Migrating Esper 2.x to Esper 3}}
+    for detailed information.
+
+    The summary of changes are:
+      
+      * Upgraded version of dependent jar files 
+      
+      * Moved EventType, EventBean and related exception classes from package com.espertech.esper.event to com.espertech.esper.client
+      
+      * Several minor rename of methods in the Configuration API related to event type name retiring "alias" as a word in method names
+      
+      * EPL division expressions yield double-type results
+      
+      * EPL view and pattern parameters strongly distinquish between string constant and property name
+      
+      * EPL join statements for certain stream types now require a data window declaration
+      
+      * EPL when using multiple data windows defaults to intersection semantics
+      
+      * Extension API for views, pattern objects and event representations have additional or slighly changed signatures
+      
+      []
+  []
+    
+* Major changes
+    
+  * The view parameters and pattern object parameters are now expressions. Thereby they gain certain new features: 
+    
+    * Variables may be used to parameterize views or pattern objects; 
+
+    * Prepared statements may use substitution parameters to parameterize views and pattern objects;
+
+    * Pattern objects may be parameterized by prior events;
+
+    * The syntax for views namespace.name('property') is no longer supported.
+    
+    []
+
+  * Added a syntax to support contained-event selection, for use with coarse-grained events that contain finer-grained events or rows.
+      This allows convenient extraction and analysis of information from business-level composite events.    
+
+  * Added XML and JSON renderers for output events
+
+  * When using multiple data windows for the same stream in EPL, the default policy is intersection of data windows, and a union-policy is also available via keyword. 
+      This allows concise declaration and combination of multiple expiry policies and well-defined semantics.
+
+  * We have made substantial internal enhancements to the type system to simplify and support transposing from any type of stream to an event property in a further stream.
+
+  * Enhanced the XML DOM event to support: The changes gained features to transposing XPath expression results between statements and including arrays,
+      as well as transposing property expression results. The changes also correct a problem in which an expression "index[1]" accessed the firs element in a collection and not the second.
+
+  * Added a new method for statements to add a listener with replay in one transaction, by name "addListenerWithReplay".
+
+  * The EPL now returns a double-type result for division expressions where both operands to a division were non-FP types, such as "1/2", i.e. double 0.5. 
+      This follows SQL standards and makes EPL easier to read and use. Esper 2.x returned an integer value following Java standards (i.e. zero).
+
+  * The EPL does no longer assume keep-all semantics if no data window is specified for a filter-based or pattern-based stream in a join. 
+      EPL now requires a data window to be explicitly defined to applicable streams.   
+
+  * Added support for SQL-standard ANY, SOME and ALL keywords in group comparison.  
+
+  * Added advanced threading options to configuration for use with inbound, outbound and execution threadings at engine-level.  
+
+  * Improved support for Java-object event representation with parameterized types (Java generics), List and Iterable properties.  
+
+  * Added support for escaping property names and event type names in case an overlap occurs with keywords.
+
+  * New configuration options to change the caching behavior for UDF invocations.
+  
+  []
+
+* Minor changes	    	
+
+  * Removed "stat:cube" view.
+
+  * Removed "indicator.jmx" package.
+
+  * Removed "emit" method from EPRuntime and EmittedListener.
+    
+  * Removed examples LinearRoad, RSI and ATM.
+
+  * The Maven build no longer compiles the grammar. The grammar is now compiled via "esper/grammar/antlrtool.bat" or "antlrtool.sh". The resulting parser is
+      part of the source code base.
+
+  * Added new examples for named window and OHLC; We restructured the examples directory structure and added Eclipse projects.
+
+  * Documentation and performance enhancements
+
+  * Bug fixes: see JIRA list of resolved issues for release 3.0
+
+  []
+
+
 Version 2.3.0
 
 	Released November 9, 2008

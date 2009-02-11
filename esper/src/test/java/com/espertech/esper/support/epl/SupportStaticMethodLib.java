@@ -386,4 +386,17 @@ public class SupportStaticMethodLib
     {
         return val;
     }
+
+    public static Map<String, String> myMapFunc()
+    {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("A", "A1");
+        map.put("B", "B1");
+        return map;
+    }
+
+    public static int[] myArrayFunc()
+    {
+        return new int[] {100, 200, 300};
+    }
 }

@@ -106,6 +106,13 @@ select * from MarketData(ticker='$')]]></programlisting>
 			</para>
 		</sect2>
 
+		<sect2 id="perf-tips-3-a">
+			<title>Advanced Theading</title>
+			<para>
+				Esper provides the configuration option to use engine-level queues and threadpools for inbound, outbound and internal executions. See <xref linkend="api-threading-advanced"/> for more information.
+			</para>
+		</sect2>
+
 		<sect2 id="perf-tips-4">
 			<title>Select the underlying event rather than individual fields</title>
 			

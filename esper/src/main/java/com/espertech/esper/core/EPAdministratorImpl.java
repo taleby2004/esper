@@ -114,6 +114,16 @@ public class EPAdministratorImpl implements EPAdministrator
         return createEPLStmt(eplStatement, statementName, userObject);
     }
 
+    public EPStatement createPattern(String expression, Object userObject) throws EPException
+    {
+        return createPatternStmt(expression, null, userObject);
+    }
+
+    public EPStatement createEPL(String eplStatement, Object userObject) throws EPException
+    {
+        return createEPLStmt(eplStatement, null, userObject);
+    }
+
     private EPStatement createPatternStmt(String expression, String statementName, Object userObject) throws EPException
     {
         StatementSpecRaw rawPattern = compilePattern(expression);

@@ -2,21 +2,21 @@ Building Esper
 ~~~~~~~~~~~~~~
   
   You can start using Esper with the binary jar that is included in all distributions. 
-  There is no need to build your own kit at all unless your goal is to contribute - which would be very welcome of course.
+  There is no need to build your own kit at all unless your goal is to contribute.
 
   You also do not need to build Esper to run the examples. Please follow the instructions in the readme file in the "examples/etc" folder
   to run the examples.
 
   In Esper, all module builds are managed by Apache Maven 2.0 or above. The Esper engine itself can be build and unit tested
-  via the below commands. The instructions below have last been tried using Maven 2.0.4. Maven can be
+  via the below commands. The instructions below have last been tried using Maven 2.0.9. Maven can be
   downloaded from {{http://maven.apache.org/}}.
              
   Once you unpack Esper then open a command window and change directory into the Esper top directory where the Maven project model file "pom.xml" 
   is located. The file is in the directory "esper/esper".
   
   If you have a filewall, you will need to change the proxy entry in Maven's setting.xml under your Maven installation directory. 
-  Sometimes Maven appears to have problems downloading repository library files, in that case please give the build a second try.
   
+  As a prerequisite, you should have a version of Java JDK 5 installed and set up.
  
   The commands to compile Esper, run all tests and install a jar file into Maven's repository is:
   
@@ -24,15 +24,6 @@ Building Esper
 cd esper/esper
 mvn install
 ----------------------------------------	
-
-  <Since release 2.0>, the new version of ANTLR 3 and Maven plug-in for building ANTLR grammar files may return an error on the first build:
-  
-----------------------------------------
-error(3):  cannot find tokens file esper/target/generated-sources/antlr/com/espertech/esper/epl/generated/EsperEPL2Grammar...
-----------------------------------------
-
-  If you see the above error which is due to the Maven plug-in not recognizing a grammar build order, then please change 
-  directory to esper/target/generated-sources/antlr/com/espertech/esper/epl/generated and remove all files except the *token* files, and build again.
 
   <Note>, in order to run all tests successfully, the following preconditions must be met:
   
@@ -58,4 +49,3 @@ mvn install
 cd esper/examples
 mvn test
 ----------------------------------------	
-

@@ -323,7 +323,11 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
             // we can't set read-only properties for bean
             if(!eventType.getUnderlyingType().equals(Map.class)) {
             	PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(beanClass, property);
-            	if (pd.getWriteMethod() == null) {
+                if (pd == null)
+                {
+                    continue;
+                }
+                if (pd.getWriteMethod() == null) {
             		if (propertyTypesGiven == null) {
             			continue;
             		}

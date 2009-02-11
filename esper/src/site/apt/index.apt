@@ -44,6 +44,8 @@ Features
 	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing)
 
 	* Tumbling windows: time, length and multi-policy; first-event
+	
+	* Combine windows with intersection and union semantics.
 
 	* Grouping, aggregation, sorting, filtering and merging of event streams
 
@@ -166,7 +168,7 @@ Features
     	
     	* Create, start and stop statements during operation without adversely impacting performance
     	
-    	* Applications can retain full control over threading
+    	* Applications can retain full control over threading; Inbound, outbound and execution threading configurable
     	
     	* Efficiently sharing resources between statements and low thread blocking 
     	
@@ -187,6 +189,9 @@ Features
     
     * Support for all Java data types including BigInteger and BigDecimal
     
+    * <<Contained-Event>> select syntax for easy handling of coarse-grained, business-level events that themselves contain events
+    
+    * JSON and XML output event rendering without syntax to learn
             
     []		
     

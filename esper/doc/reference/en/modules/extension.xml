@@ -970,7 +970,7 @@ public EventType getEventType() {
 			</orderedlist>
 				
 			<para>
-				The implementation of the <literal>PlugInEventRepresentation</literal> interface must provide implementations for two key interfaces: <literal>com.espertech.esper.event.EventType</literal> and <literal>EventBean</literal>. It must also implement several other related interfaces as described below.
+				The implementation of the <literal>PlugInEventRepresentation</literal> interface must provide implementations for two key interfaces: <literal>com.espertech.esper.client.EventType</literal> and <literal>EventBean</literal>. It must also implement several other related interfaces as described below.
 			</para>
 
 			<para>
@@ -1117,6 +1117,10 @@ public EventType getEventType() {
         MyPlugInPropertiesEventBean propBean = (MyPlugInPropertiesEventBean) eventBean;
         return propBean.getProperties().getProperty(propertyName) != null;
       }
+      
+      public Object getFragment(EventBean eventBean) {
+	    return null;	// The property is not a fragment
+      }
     };
   }]]></programlisting>
 
@@ -1124,12 +1128,34 @@ public EventType getEventType() {
 				  Our sample <literal>EventType</literal> does not have supertypes. Supertypes represent an extends-relationship between event types, and subtypes are expected to exhibit the same event property names and types as each of their supertypes combined:
 				</para>
 				<programlisting><![CDATA[  public EventType[] getSuperTypes() {
-    return null;
+    return null;	// no supertype for this example
   }
 
   public Iterator<EventType> getDeepSuperTypes() {
     return null;
+  }
+  
+  public String getName() {
+    return name;
+  }
+
+  public EventPropertyDescriptor[] getPropertyDescriptors() {
+    Collection<EventPropertyDescriptor> descriptorColl = descriptors.values();
+    return descriptorColl.toArray(new EventPropertyDescriptor[descriptors.size()]);
+  }
+
+  public EventPropertyDescriptor getPropertyDescriptor(String propertyName) {
+    return descriptors.get(propertyName);
+  }
+
+  public FragmentEventType getFragmentType(String property) {
+    return null;  // sample does not provide any fragments
   }]]></programlisting>
+  
+		  <para>
+			The example event type as above does not provide fragments, which are properties of the event that can themselves be represented as an event, to keep the example simple.
+		  </para>
+		  
 		  </sect3>
 
 			<sect3 id="custom-eventrep-example-eventbean" revision="1">
@@ -1155,6 +1181,14 @@ public EventType getEventType() {
   public Object get(String property) throws PropertyAccessException {
     EventPropertyGetter getter = eventType.getGetter(property);
     return getter.get(this);
+  }
+
+  public Object getFragment(String property) {
+    EventPropertyGetter getter = eventType.getGetter(property);
+    if (getter != null) {
+      return getter.getFragment(this);
+    }
+    return null;
   }
 
   public Object getUnderlying() {

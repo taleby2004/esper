@@ -185,8 +185,8 @@ public class TestAxiom extends TestCase
     {
         Configuration configuration = getConfiguration();
         ConfigurationEventTypeAxiom desc = new ConfigurationEventTypeAxiom();
-        desc.addXPathProperty("event.type", "/event/@type", XPathConstants.STRING);
-        desc.addXPathProperty("event.uid", "/event/@uid", XPathConstants.STRING);
+        desc.addXPathProperty("eventtype", "/event/@type", XPathConstants.STRING);
+        desc.addXPathProperty("eventuid", "/event/@uid", XPathConstants.STRING);
         desc.setRootElementName("event");
         configuration.addPlugInEventType("MyEvent", new URI[] {new URI(AXIOM_URI)}, desc);
 
@@ -194,7 +194,7 @@ public class TestAxiom extends TestCase
         epService.initialize();
         updateListener = new SupportUpdateListener();
 
-        String stmt = "select event.type as type, event.uid as uid from MyEvent";
+        String stmt = "select eventtype as type, eventuid as uid from MyEvent";
         EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
