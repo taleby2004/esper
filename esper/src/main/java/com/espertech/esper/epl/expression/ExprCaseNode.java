@@ -174,7 +174,7 @@ public class ExprCaseNode extends ExprNode
             }
             whenThenNodeList.add(new UniformPair<ExprNode>(whenExpr, thenExpr));
         }
-        if (children.length % 2 == 1)
+        if (children.length % 2 != 0)
         {
             optionalElseExprNode = children[children.length - 1];
         }

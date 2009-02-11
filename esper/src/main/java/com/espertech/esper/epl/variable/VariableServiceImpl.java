@@ -348,7 +348,7 @@ public class VariableServiceImpl implements VariableService
     {
         if (newValue == null)
         {
-            write(variableNumber, newValue);
+            write(variableNumber, null);
             return;
         }
 

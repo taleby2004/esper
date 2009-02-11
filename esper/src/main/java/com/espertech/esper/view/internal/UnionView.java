@@ -158,7 +158,7 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
             {
                 for (View view : views)
                 {
-                    view.update(newData, oldData);
+                    view.update(null, oldData);
                 }
             }
             finally

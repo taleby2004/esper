@@ -45,7 +45,7 @@ public class CaseSwitchExpression extends ExpressionBase
     public CaseSwitchExpression add(Expression when, Expression then)
     {
         int size = this.getChildren().size();
-        if (size % 2 == 1)
+        if (size % 2 != 0)
         {
             this.addChild(when);
             this.addChild(then);
@@ -69,7 +69,7 @@ public class CaseSwitchExpression extends ExpressionBase
     {
         int size = this.getChildren().size();
         // remove last node representing the else
-        if (size % 2 != 1)
+        if (size % 2 == 0)
         {
             this.getChildren().remove(size - 1);
         }

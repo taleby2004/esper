@@ -76,7 +76,7 @@ public class ASTUtil
 
         if (ast == null)
         {
-            renderNode(identChars, ast, printer);
+            renderNode(identChars, null, printer);
             return;
         }
         for (int i = 0; i < ast.getChildCount(); i++)

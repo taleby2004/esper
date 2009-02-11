@@ -49,6 +49,7 @@ Minor changes
   - The Maven build no longer compiles the grammar. The grammar is now compiled via "esper/grammar/antlrtool.bat" or "antlrtool.sh". The resulting parser is
     part of the source code base.
   - Added new examples for named window and OHLC; We restructured the examples directory structure and added Eclipse projects.
+  - Fixed issue ESPER-326 Prepared On-Demand Query on named window returns incorrect count(*) 
   - Fixed issue ESPER-324 EPServiceStateListener exposes EPServiceProviderImpl
   - Fixed issue ESPER-323 Timer thread caught unhandled exception: null
   - Fixed issue ESPER-321 stat:linest has more derived properties than what documented

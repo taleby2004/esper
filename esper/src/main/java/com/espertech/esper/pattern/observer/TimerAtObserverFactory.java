@@ -26,6 +26,8 @@ import java.io.Serializable;
  */
 public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -4463261229142331396L;
+
     /**
      * Parameters.
      */
@@ -34,13 +36,12 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
     /**
      * Convertor.
      */
-    protected MatchedEventConvertor convertor;
+    protected transient MatchedEventConvertor convertor;
 
     /**
      * The schedule specification for the timer-at.
      */
     protected ScheduleSpec spec = null;
-    private static final long serialVersionUID = -4463261229142331396L;
 
     public void setObserverParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws ObserverParameterException
     {

@@ -69,29 +69,7 @@ public enum ViewFieldEnum
     /**
      * Size.
      */
-    SIZE_VIEW__SIZE ("size"),
-
-    /**
-     * Cube.
-     */
-    MULTIDIM_OLAP__CUBE ("cube");
-
-    /**
-     * Measures in an OLAP cube.
-     */
-    public static final String[] MULTIDIM_OLAP__MEASURES = {
-            ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.name,
-            ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.name,
-            ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.name,
-            ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.name,
-            ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.name,
-            ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.name
-        };
-
-    static
-    {
-        Arrays.sort(MULTIDIM_OLAP__MEASURES);
-    }
+    SIZE_VIEW__SIZE ("size");
 
     private final String name;
 

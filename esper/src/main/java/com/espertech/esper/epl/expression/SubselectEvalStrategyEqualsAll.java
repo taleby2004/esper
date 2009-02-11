@@ -99,14 +99,6 @@ public class SubselectEvalStrategyEqualsAll implements SubselectEvalStrategy
                     rightResult = events[0].getUnderlying();
                 }
 
-                if (leftResult == null)
-                {
-                    if (rightResult != null)
-                    {
-                        return null;
-                    }
-                    continue;
-                }
                 if (rightResult != null)
                 {
                     hasNonNullRow = true;
@@ -170,15 +162,6 @@ public class SubselectEvalStrategyEqualsAll implements SubselectEvalStrategy
                 else
                 {
                     rightResult = events[0].getUnderlying();
-                }
-
-                if (leftResult == null)
-                {
-                    if (rightResult == null)
-                    {
-                        continue;
-                    }
-                    return false;
                 }
 
                 if (rightResult != null)

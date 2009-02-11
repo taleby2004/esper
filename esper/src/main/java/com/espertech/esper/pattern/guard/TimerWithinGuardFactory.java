@@ -25,6 +25,8 @@ import java.io.Serializable;
  */
 public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -1026320055174163611L;
+
     /**
      * Number of milliseconds.
      */
@@ -33,8 +35,7 @@ public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Seria
     /**
      * For converting matched-events maps to events-per-stream.
      */
-    protected MatchedEventConvertor convertor;
-    private static final long serialVersionUID = -1026320055174163611L;
+    protected transient MatchedEventConvertor convertor;
 
     public void setGuardParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws GuardParameterException
     {

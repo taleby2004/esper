@@ -237,7 +237,7 @@ public class ThreadingServiceImpl implements ThreadingService
 
         String threadGroupName = "com.espertech.esper." + engineURI + "-" + name;
         ThreadGroup threadGroup = new ThreadGroup(threadGroupName);
-        ThreadPoolExecutor pool = new ThreadPoolExecutor(numThreads, numThreads, 1, TimeUnit.SECONDS, queue, new ThreadFactory(engineURI, name, threadGroup, Thread.NORM_PRIORITY));
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(numThreads, numThreads, 1, TimeUnit.SECONDS, queue, new EngineThreadFactory(engineURI, name, threadGroup, Thread.NORM_PRIORITY));
         pool.prestartAllCoreThreads();
 
         return pool;

@@ -26,6 +26,8 @@ import java.io.Serializable;
  */
 public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -2808651894497586884L;
+
     /**
      * Parameters.
      */
@@ -34,13 +36,12 @@ public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefIte
     /**
      * Convertor to events-per-stream.
      */
-    protected MatchedEventConvertor convertor;
+    protected transient MatchedEventConvertor convertor;
 
     /**
      * Number of milliseconds after which the interval should fire.
      */
     protected long milliseconds;
-    private static final long serialVersionUID = -2808651894497586884L;
 
     public void setObserverParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws ObserverParameterException
     {

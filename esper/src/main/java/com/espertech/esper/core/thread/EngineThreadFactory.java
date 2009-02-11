@@ -6,9 +6,9 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Thread factory for threading options.
  */
-public class ThreadFactory implements java.util.concurrent.ThreadFactory
+public class EngineThreadFactory implements java.util.concurrent.ThreadFactory
 {
-    private static final Log log = LogFactory.getLog(ThreadFactory.class);
+    private static final Log log = LogFactory.getLog(EngineThreadFactory.class);
     private final String engineURI;
     private final String prefix;
     private final ThreadGroup threadGroup;
@@ -22,7 +22,7 @@ public class ThreadFactory implements java.util.concurrent.ThreadFactory
      * @param threadGroup thread group
      * @param threadPrio priority to use
      */
-    public ThreadFactory(String engineURI, String prefix, ThreadGroup threadGroup, int threadPrio)
+    public EngineThreadFactory(String engineURI, String prefix, ThreadGroup threadGroup, int threadPrio)
     {
         if (engineURI == null)
         {

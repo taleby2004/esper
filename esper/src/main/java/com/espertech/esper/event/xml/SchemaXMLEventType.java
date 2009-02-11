@@ -158,7 +158,7 @@ public class SchemaXMLEventType extends BaseXMLEventType
         String eventTypeName = eventTypeNameBuilder.toString();
 
         // check if the type exists, use the existing type if found
-        EventType existingType = this.getEventAdapterService().getExistsTypeByName(eventTypeName.toString());
+        EventType existingType = this.getEventAdapterService().getExistsTypeByName(eventTypeName);
         if (existingType != null)
         {
             return new FragmentEventType(existingType, complex.isArray(), false);

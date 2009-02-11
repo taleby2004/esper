@@ -29,10 +29,10 @@ import java.util.List;
 public class ExprArrayNode extends ExprNode
 {
     private Class arrayReturnType;
-    private SimpleNumberCoercer coercer;
+    private transient SimpleNumberCoercer coercer;
     private boolean mustCoerce;
     private int length;
-    private Object constantResult;
+    private transient Object constantResult;
 
     /**
      * Ctor.

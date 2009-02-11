@@ -262,11 +262,10 @@ public class ExprRelationalOpAllAnyNode extends ExprNode
                 }
                 else if (!(valueRight instanceof Number))
                 {
-                    if (isAll && valueRight == null)
+                    if (isAll)
                     {
                         return null;
                     }
-                    continue;
                 }
                 else
                 {
