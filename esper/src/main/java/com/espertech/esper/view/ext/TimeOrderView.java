@@ -256,14 +256,8 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
             else
             {
                 Set<EventBean> oldDataSet = new HashSet<EventBean>();
-                for (EventBean old : postOldEventsArray)
-                {
-                    oldDataSet.add(old);
-                }
-                for (EventBean old : oldData)
-                {
-                    oldDataSet.add(old);
-                }
+                oldDataSet.addAll(Arrays.asList(postOldEventsArray));
+                oldDataSet.addAll(Arrays.asList(oldData));
                 postOldEventsArray = oldDataSet.toArray(new EventBean[oldDataSet.size()]);
             }
         }

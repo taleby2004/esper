@@ -273,8 +273,7 @@ public class IndexedProperty extends PropertyBase
             {
                 return null;
             }
-            Class componentType = ((Class) type).getComponentType();
-            return componentType;            
+            return ((Class) type).getComponentType();
         }
     }
 

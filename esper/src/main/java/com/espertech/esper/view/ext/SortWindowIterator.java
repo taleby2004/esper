@@ -36,7 +36,7 @@ public final class SortWindowIterator implements Iterator<EventBean>
         keyIterator = window.keySet().iterator();
         if (keyIterator.hasNext())
         {
-            MultiKeyUntyped initialKey = (MultiKeyUntyped) keyIterator.next();
+            MultiKeyUntyped initialKey = keyIterator.next();
             currentListIterator = window.get(initialKey).iterator();
         }
     }
@@ -55,7 +55,7 @@ public final class SortWindowIterator implements Iterator<EventBean>
             currentListIterator = null;
             if (keyIterator.hasNext())
             {
-                MultiKeyUntyped nextKey = (MultiKeyUntyped) keyIterator.next();
+                MultiKeyUntyped nextKey = keyIterator.next();
                 currentListIterator = window.get(nextKey).iterator();
             }
         }
@@ -76,13 +76,8 @@ public final class SortWindowIterator implements Iterator<EventBean>
         }
 
         currentListIterator = null;
+        return keyIterator.hasNext();
 
-        if (!keyIterator.hasNext())
-        {
-            return false;
-        }
-
-        return true;
     }
 
     public final void remove()

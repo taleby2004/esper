@@ -696,7 +696,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
             classes.add(classIdent.getText());
         }
 
-        String idents[] = classes.toArray(new String[0]);
+        String idents[] = classes.toArray(new String[classes.size()]);
         ExprInstanceofNode instanceofNode = new ExprInstanceofNode(idents);
         astExprNodeMap.put(node, instanceofNode);
     }
@@ -1708,8 +1708,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 addLeft.add((ExprIdentNode)astExprNodeMap.remove(child));
                 addRight.add((ExprIdentNode)astExprNodeMap.remove(node.getChild(i + 1)));
             }
-            addLeftArr = addLeft.toArray(new ExprIdentNode[0]);
-            addRightArr = addRight.toArray(new ExprIdentNode[0]);
+            addLeftArr = addLeft.toArray(new ExprIdentNode[addLeft.size()]);
+            addRightArr = addRight.toArray(new ExprIdentNode[addRight.size()]);
         }
 
         OuterJoinDesc outerJoinDesc = new OuterJoinDesc(joinType, left, right, addLeftArr, addRightArr);

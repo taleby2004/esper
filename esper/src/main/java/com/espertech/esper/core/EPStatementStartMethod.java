@@ -1468,7 +1468,7 @@ public class EPStatementStartMethod
 
         if (joinProps.size() != 0)
         {
-            String indexedProps[] = joinProps.keySet().toArray(new String[0]);
+            String indexedProps[] = joinProps.keySet().toArray(new String[joinProps.keySet().size()]);
             int[] keyStreamNums = JoinedPropDesc.getKeyStreamNums(joinProps.values());
             String[] keyProps = JoinedPropDesc.getKeyProperties(joinProps.values());
 

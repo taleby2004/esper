@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch if either one of these
@@ -161,10 +162,7 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         }
 
         // Add data points
-        for (int i = 0; i < newData.length; i++)
-        {
-            currentBatch.add(newData[i]);
-        }
+        currentBatch.addAll(Arrays.asList(newData));
 
         // We are done unless we went over the boundary
         if (currentBatch.size() < numberOfEvents)

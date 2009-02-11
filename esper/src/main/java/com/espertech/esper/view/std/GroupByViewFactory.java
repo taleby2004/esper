@@ -110,7 +110,7 @@ public class GroupByViewFactory implements ViewFactory
                 }
                 fields.add((String) param);
             }
-            fieldNames = fields.toArray(new String[0]);
+            fieldNames = fields.toArray(new String[fields.size()]);
         }
         else
         {

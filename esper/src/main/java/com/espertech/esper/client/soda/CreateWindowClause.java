@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Create a named window, defining the parameter of the named window such as window name and data window view name(s).
@@ -96,10 +97,7 @@ public class CreateWindowClause implements Serializable
         views = new ArrayList<View>();
         if (viewArr != null)
         {
-            for (View view : viewArr)
-            {
-                views.add(view);
-            }
+            views.addAll(Arrays.asList(viewArr));
         }
     }
 

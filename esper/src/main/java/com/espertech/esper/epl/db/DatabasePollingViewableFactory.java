@@ -10,12 +10,12 @@ package com.espertech.esper.epl.db;
 
 import com.espertech.esper.antlr.NoCaseSensitiveStream;
 import com.espertech.esper.client.ConfigurationDBRef;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.epl.spec.DBStatementStreamSpec;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.*;
 import com.espertech.esper.view.HistoricalEventViewable;
 import org.antlr.runtime.CharStream;
@@ -234,10 +234,7 @@ public class DatabasePollingViewableFactory
     {
         // Simply add up all input parameters
         List<String> inputParameters = new LinkedList<String>();
-        for (int i = 0; i < parameters.length; i++)
-        {
-            inputParameters.add(parameters[i]);
-        }
+        inputParameters.addAll(Arrays.asList(parameters));
 
         Statement statement;
         try
@@ -471,10 +468,7 @@ public class DatabasePollingViewableFactory
         try
         {
             ParameterMetaData parameterMetaData = prepared.getParameterMetaData();
-            for (int i = 0; i < parameterMetaData.getParameterCount(); i++)
-            {
-                inputParameters.add(parameters[i]);
-            }
+            inputParameters.addAll(Arrays.asList(parameters).subList(0, parameterMetaData.getParameterCount()));
         }
         catch (Exception ex)
         {
@@ -581,23 +575,18 @@ public class DatabasePollingViewableFactory
     private static SQLParameterDesc getParameters(List<PlaceholderParser.Fragment> parseFragements)
     {
         List<String> eventPropertyParams = new LinkedList<String>();
-        List<String> builtinParams = new LinkedList<String>();
         for (PlaceholderParser.Fragment fragment : parseFragements)
         {
             if (fragment.isParameter())
             {
-                if (fragment.getValue().equals(SAMPLE_WHERECLAUSE_PLACEHOLDER))
-                {
-                    builtinParams.add(fragment.getValue());
-                }
-                else
+                if (!fragment.getValue().equals(SAMPLE_WHERECLAUSE_PLACEHOLDER))
                 {
                     eventPropertyParams.add(fragment.getValue());
                 }
             }
         }
-        String[] params = eventPropertyParams.toArray(new String[0]);
-        String[] builtin = eventPropertyParams.toArray(new String[0]);
+        String[] params = eventPropertyParams.toArray(new String[eventPropertyParams.size()]);
+        String[] builtin = eventPropertyParams.toArray(new String[eventPropertyParams.size()]);
         return new SQLParameterDesc(params, builtin);
     }
 

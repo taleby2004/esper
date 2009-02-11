@@ -9,10 +9,7 @@ import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A view that represents an intersection of multiple data windows.
@@ -106,10 +103,7 @@ public class IntersectView extends ViewSupport implements LastPostObserver, Clon
                     oldEventsPerView[i] = null;  // clear entry
 
                     // add each event to the set of events removed
-                    for (EventBean old : viewOldData)
-                    {
-                        removalEvents.add(old);
-                    }
+                    removalEvents.addAll(Arrays.asList(viewOldData));
 
                     isDiscardObserverEvents = true;
                     try

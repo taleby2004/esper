@@ -205,10 +205,7 @@ public class PropertyUtility
     protected static String[] uniqueExclusiveSort(String[] values, String[] removeValues)
     {
         Set<String> unique = new HashSet<String>();
-        for (String value : values)
-        {
-            unique.add(value);
-        }
+        unique.addAll(Arrays.asList(values));
         for (String removeValue : removeValues)
         {
             unique.remove(removeValue);

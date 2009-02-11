@@ -589,7 +589,7 @@ public class StatementSpecMapper
         }
         model.setInsertInto(
                 InsertIntoClause.create(insertIntoDesc.getEventTypeName(),
-                        insertIntoDesc.getColumnNames().toArray(new String[0]), s));
+                        insertIntoDesc.getColumnNames().toArray(new String[insertIntoDesc.getColumnNames().size()]), s));
     }
 
     private static void mapCreateWindow(CreateWindowClause createWindow, StatementSpecRaw raw, StatementSpecMapContext mapContext)

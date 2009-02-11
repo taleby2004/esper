@@ -71,7 +71,7 @@ public class LookupInstructionQueryPlanNode extends QueryPlanNode
         }
 
         return new LookupInstructionExecNode(rootStream, rootStreamName,
-                numStreams, execs, requiredPerStream, assemblyInstructions.toArray(new BaseAssemblyNode[0]));
+                numStreams, execs, requiredPerStream, assemblyInstructions.toArray(new BaseAssemblyNode[assemblyInstructions.size()]));
     }
 
     protected void print(IndentWriter writer)

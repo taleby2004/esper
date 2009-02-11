@@ -53,11 +53,6 @@ public final class UnivariateStatisticsView extends ViewSupport implements Clone
         return new UnivariateStatisticsView(statementContext, fieldExpression);
     }
 
-    public void setParent(Viewable parent)
-    {
-        super.setParent(parent);
-    }
-
     /**
      * Returns field name of the field to report statistics on.
      * @return field name

@@ -67,6 +67,7 @@ public class ExprVariableNode extends ExprNode
         }
         catch (PropertyNotFoundException e)
         {
+            // expected
         }
 
         variableType = reader.getType();

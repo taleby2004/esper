@@ -49,7 +49,6 @@ public class WrapperEventType implements EventTypeSPI
 
     private final int hashCode;
     private final boolean isNoMapProperties;
-    private final String typeName;
     private final Map<String, EventPropertyGetter> propertyGetterCache;
     private final EventAdapterService eventAdapterService;
 
@@ -75,15 +74,9 @@ public class WrapperEventType implements EventTypeSPI
         propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
         List<String> propertyNames = new ArrayList<String>();
-		for(String eventProperty : underlyingEventType.getPropertyNames())
-		{
-			propertyNames.add(eventProperty);
-		}
-		for(String mapProperty : underlyingMapType.getPropertyNames())
-		{
-			propertyNames.add(mapProperty);
-		}
-		this.propertyNames = propertyNames.toArray(new String[0]);
+        propertyNames.addAll(Arrays.asList(underlyingEventType.getPropertyNames()));
+        propertyNames.addAll(Arrays.asList(underlyingMapType.getPropertyNames()));
+		this.propertyNames = propertyNames.toArray(new String[propertyNames.size()]);
 
         List<EventPropertyDescriptor> propertyDesc = new ArrayList<EventPropertyDescriptor>();
         propertyDescriptorMap = new HashMap<String, EventPropertyDescriptor>();
@@ -98,8 +91,6 @@ public class WrapperEventType implements EventTypeSPI
             propertyDescriptorMap.put(mapProperty.getPropertyName(), mapProperty);
 		}
 		this.propertyDesc = propertyDesc.toArray(new EventPropertyDescriptor[propertyDesc.size()]);
-
-        this.typeName = typeName;
     }
 
 	public Iterator<EventType> getDeepSuperTypes()

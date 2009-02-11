@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Arrays;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch when a maximum number of events has
@@ -100,10 +101,7 @@ public final class LengthBatchView extends ViewSupport implements CloneableView,
         }
 
         // add data points to the current batch
-        for (int i = 0; i < newData.length; i++)
-        {
-            currentBatch.add(newData[i]);
-        }
+        currentBatch.addAll(Arrays.asList(newData));
 
         // check if we reached the minimum size
         if (currentBatch.size() < size)

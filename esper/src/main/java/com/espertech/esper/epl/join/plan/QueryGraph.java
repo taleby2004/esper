@@ -127,9 +127,9 @@ public class QueryGraph
 
         if (streamLookup > streamIndexed)
         {
-            return value.getPropertiesLeft().toArray(new String[0]);
+            return value.getPropertiesLeft().toArray(new String[value.getPropertiesLeft().size()]);
         }
-        return value.getPropertiesRight().toArray(new String[0]);
+        return value.getPropertiesRight().toArray(new String[value.getPropertiesRight().size()]);
     }
 
     /**
@@ -150,9 +150,9 @@ public class QueryGraph
 
         if (streamLookup > streamIndexed)
         {
-            return value.getPropertiesRight().toArray(new String[0]);
+            return value.getPropertiesRight().toArray(new String[value.getPropertiesRight().size()]);
         }
-        return value.getPropertiesLeft().toArray(new String[0]);
+        return value.getPropertiesLeft().toArray(new String[value.getPropertiesLeft().size()]);
     }
 
     /**

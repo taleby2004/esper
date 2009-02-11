@@ -19,6 +19,7 @@ import com.espertech.esper.collection.ViewUpdatedCollection;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Arrays;
 
 /**
  * This view is a keep-all data window that simply keeps all events added.
@@ -75,10 +76,7 @@ public final class KeepAllView extends ViewSupport implements DataWindowView, Cl
     {
         if (newData != null)
         {
-            for (EventBean aNewData : newData)
-            {
-                indexedEvents.add(aNewData);
-            }
+            indexedEvents.addAll(Arrays.asList(newData));
         }
 
         if (oldData != null)

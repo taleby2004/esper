@@ -25,6 +25,7 @@ import com.espertech.esper.client.EPException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Arrays;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -153,10 +154,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
         }
 
         // add data points to the window
-        for (int i = 0; i < newData.length; i++)
-        {
-            currentBatch.add(newData[i]);
-        }
+        currentBatch.addAll(Arrays.asList(newData));
 
         // forward insert stream to child views
         if (viewUpdatedCollection != null)

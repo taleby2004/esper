@@ -68,7 +68,8 @@ public class OutputValueRendererJSONString implements OutputValueRenderer
                 if (c < ' ')
                 {
                     t = "000" + Integer.toHexString(c);
-                    sb.append("\\u" + t.substring(t.length() - 4));
+                    sb.append("\\u");
+                    sb.append(t.substring(t.length() - 4));
                 }
                 else
                 {

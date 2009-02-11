@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Arrays;
 
 /**
 * Same as the {@link LengthBatchView}, this view also supports fast-remove from the batch for remove stream events.
@@ -92,10 +93,7 @@ public final class LengthBatchViewRStream extends ViewSupport implements Cloneab
         }
 
         // add data points to the current batch
-        for (int i = 0; i < newData.length; i++)
-        {
-            currentBatch.add(newData[i]);
-        }
+        currentBatch.addAll(Arrays.asList(newData));
 
         // check if we reached the minimum size
         if (currentBatch.size() < size)

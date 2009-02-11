@@ -16,10 +16,7 @@ import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
 import com.espertech.esper.view.DataWindowView;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This view is a moving window extending the specified number of elements into the past,
@@ -83,10 +80,7 @@ public final class LengthWindowViewRStream extends ViewSupport implements DataWi
         // we don't care about removed data from a prior view
         if (newData != null)
         {
-            for (int i = 0; i < newData.length; i++)
-            {
-                indexedEvents.add(newData[i]);
-            }
+            indexedEvents.addAll(Arrays.asList(newData));
         }
 
         EventBean[] expiredArr = null;
@@ -120,14 +114,8 @@ public final class LengthWindowViewRStream extends ViewSupport implements DataWi
             else
             {
                 Set<EventBean> oldDataSet = new HashSet<EventBean>();
-                for (EventBean old : expiredArr)
-                {
-                    oldDataSet.add(old);
-                }
-                for (EventBean old : oldData)
-                {
-                    oldDataSet.add(old);
-                }
+                oldDataSet.addAll(Arrays.asList(expiredArr));
+                oldDataSet.addAll(Arrays.asList(oldData));
                 expiredArr = oldDataSet.toArray(new EventBean[oldDataSet.size()]);
             }
         }

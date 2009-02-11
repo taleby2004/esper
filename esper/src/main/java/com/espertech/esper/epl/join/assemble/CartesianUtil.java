@@ -11,6 +11,7 @@ package com.espertech.esper.epl.join.assemble;
 import com.espertech.esper.client.EventBean;
 
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Helper class to compute the cartesian product of the events from two streams.
@@ -121,10 +122,7 @@ public class CartesianUtil
         }
 
         // Add results
-        for (EventBean[] result : results)
-        {
-            resultList.add(result);
-        }
+        resultList.addAll(Arrays.asList(results));
     }
 
     private static void copyToEach(int[] subStreamNums, EventBean[] sourceRow, List<EventBean[]> destRows)

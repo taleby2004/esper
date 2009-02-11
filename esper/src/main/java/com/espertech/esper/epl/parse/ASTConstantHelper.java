@@ -28,8 +28,7 @@ public class ASTConstantHelper
         int indexLast = tickedString.lastIndexOf('`');
         if ((indexFirst != indexLast) && (indexFirst != -1) && (indexLast != -1))
         {
-            String result = tickedString.substring(indexFirst+1, indexLast);
-            return result;
+            return tickedString.substring(indexFirst+1, indexLast);
         }
         return tickedString;
     }

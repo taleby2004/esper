@@ -184,7 +184,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
         // Get column names
         if ((insertIntoDesc != null) && (!insertIntoDesc.getColumnNames().isEmpty()))
         {
-            columnNames = insertIntoDesc.getColumnNames().toArray(new String[0]);
+            columnNames = insertIntoDesc.getColumnNames().toArray(new String[insertIntoDesc.getColumnNames().size()]);
         }
         else
         {

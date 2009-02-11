@@ -47,7 +47,6 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
     private final boolean[] isDescendingValues;
     private final int sortWindowSize;
     private final IStreamSortedRandomAccess optionalSortedRandomAccess;
-    private final boolean isSortUsingCollator;
 
     private TreeMap<MultiKeyUntyped, LinkedList<EventBean>> sortedEvents;
     private int eventCount;
@@ -74,7 +73,6 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         this.isDescendingValues = descendingValues;
         this.sortWindowSize = sortWindowSize;
         this.optionalSortedRandomAccess = optionalSortedRandomAccess;
-        this.isSortUsingCollator = isSortUsingCollator;
 
         // determine string-type sorting
         boolean hasStringTypes = false;
@@ -158,7 +156,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
             dumpUpdateParams("SortWindowView", newData, oldData);
         }
 
-        List<Object> removedEvents = new LinkedList<Object>();
+        List<EventBean> removedEvents = new LinkedList<EventBean>();
 
         // Remove old data
         if (oldData != null)

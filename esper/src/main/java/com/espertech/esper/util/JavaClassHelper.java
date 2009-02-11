@@ -724,11 +724,7 @@ public class JavaClassHelper
         boolean isAllNumeric = true;
         for (Class type : types)
         {
-            if (isNumeric(type))
-            {
-                continue;
-            }
-            else if (!isJavaBuiltinDataType(type))
+            if (!isNumeric(type) && (!isJavaBuiltinDataType(type)))
             {
                 isAllBuiltinTypes = false;
             }
@@ -856,6 +852,7 @@ public class JavaClassHelper
         }
         catch (ClassNotFoundException ex)
         {
+            // expected
         }
 
         boxedClassName = JavaClassHelper.getBoxedClassName(className.toLowerCase().trim());

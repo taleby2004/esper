@@ -15,7 +15,6 @@ import com.espertech.esper.client.EventPropertyGetter;
  */
 public class RevisionGetterParameters
 {
-    private final String propertyName;
     private final int propertyNumber;
     private final EventPropertyGetter baseGetter;
     private final int[] propertyGroups;
@@ -29,7 +28,6 @@ public class RevisionGetterParameters
      */
     public RevisionGetterParameters(String propertyName, int propertyNumber, EventPropertyGetter fullGetter, int[] authoritySets)
     {
-        this.propertyName = propertyName;
         this.propertyNumber = propertyNumber;
         this.baseGetter = fullGetter;
         this.propertyGroups = authoritySets;

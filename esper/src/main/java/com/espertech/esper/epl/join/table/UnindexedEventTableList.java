@@ -13,6 +13,7 @@ import com.espertech.esper.collection.NullIterator;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Simple table of events without an index, based on a List implementation rather then a set
@@ -39,10 +40,7 @@ public class UnindexedEventTableList implements EventTable
             return;
         }
 
-        for (EventBean addEvent : addEvents)
-        {
-            eventSet.add(addEvent);
-        }
+        eventSet.addAll(Arrays.asList(addEvents));
     }
 
     public void remove(EventBean[] removeEvents)

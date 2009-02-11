@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * The group-by clause consists of a list of expressions that provide the grouped-by values.
@@ -78,10 +79,7 @@ public class GroupByClause implements Serializable
     public GroupByClause(Expression ...expressions)
     {
         this();
-        for (int i = 0; i < expressions.length; i++)
-        {
-            groupByExpressions.add(expressions[i]);
-        }
+        groupByExpressions.addAll(Arrays.asList(expressions));
     }
 
     /**

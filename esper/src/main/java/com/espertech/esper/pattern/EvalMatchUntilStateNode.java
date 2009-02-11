@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Arrays;
 
 /**
  * This class represents the state of a match-until node in the evaluation state tree.
@@ -110,10 +111,7 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
                     }
                     else {
                         EventBean[] arrayEvents = (EventBean[]) event;
-                        for (int index = 0; index < arrayEvents.length; index++)
-                        {
-                            matchedEventArrays[i].add(arrayEvents[index]);
-                        }
+                        matchedEventArrays[i].addAll(Arrays.asList(arrayEvents));
                     }
 
                 }

@@ -12,7 +12,6 @@ import org.w3c.dom.Node;
  */
 public class DOMConvertingGetter implements EventPropertyGetter
 {
-    private final String propertyExpression;
     private final DOMPropertyGetter getter;
     private final SimpleTypeParser parser;
 
@@ -24,7 +23,6 @@ public class DOMConvertingGetter implements EventPropertyGetter
      */
     public DOMConvertingGetter(String propertyExpression, DOMPropertyGetter domPropertyGetter, Class returnType)
     {
-        this.propertyExpression = propertyExpression;
         this.getter = domPropertyGetter;
         this.parser = SimpleTypeParserFactory.getParser(returnType);
     }

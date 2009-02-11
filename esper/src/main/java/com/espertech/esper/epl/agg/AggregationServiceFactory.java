@@ -136,7 +136,6 @@ public class AggregationServiceFactory
     {
         final int size = childNodes.size();
         final List<ExprNode> exprNodes = childNodes;
-        final boolean[] isConstant = new boolean[size];
         final Object[] prototype = new Object[size];
 
         // determine constant nodes
@@ -145,7 +144,6 @@ public class AggregationServiceFactory
         {
             if (node.isConstantResult())
             {
-                isConstant[count] = true;
                 prototype[count] = node.evaluate(null, true);
             }
             count++;

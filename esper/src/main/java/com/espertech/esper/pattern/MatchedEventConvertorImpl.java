@@ -26,7 +26,6 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
     private final EventBean[] eventsPerStream;
     private final LinkedHashMap<String, Pair<EventType, String>> filterTypes;
     private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;
-    private final EventAdapterService eventAdapterService;
 
     /**
      * Ctor.
@@ -45,7 +44,6 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
         this.eventsPerStream = new EventBean[size];
         this.filterTypes = new LinkedHashMap<String, Pair<EventType, String>>(filterTypes);
         this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>(arrayEventTypes);
-        this.eventAdapterService = eventAdapterService;
     }
 
     public EventBean[] convert(MatchedEventMap events)

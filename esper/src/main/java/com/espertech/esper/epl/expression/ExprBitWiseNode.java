@@ -108,7 +108,7 @@ public class ExprBitWiseNode extends ExprNode {
         }
 
         // bitWiseOpEnumComputer is initialized by validation
-        return bitWiseOpEnumComputer.compute((Object) valueChildOne, (Object) valueChildTwo);
+        return bitWiseOpEnumComputer.compute(valueChildOne, valueChildTwo);
     }
 
     public boolean equalsNode(ExprNode node)

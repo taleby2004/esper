@@ -144,14 +144,8 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
             else
             {
                 Set<EventBean> oldDataPost = new HashSet<EventBean>();
-                for (EventBean old : oldData)
-                {
-                    oldDataPost.add(old);
-                }
-                for (EventBean old : oldDataUpdate)
-                {
-                    oldDataPost.add(old);
-                }
+                oldDataPost.addAll(Arrays.asList(oldData));
+                oldDataPost.addAll(Arrays.asList(oldDataUpdate));
                 oldDataUpdate = oldDataPost.toArray(new EventBean[oldDataPost.size()]);
             }
         }

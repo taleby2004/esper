@@ -27,7 +27,6 @@ public class MergeViewFactory implements ViewFactory
     private List<ExprNode> viewParameters;
 
     private ExprNode[] criteriaExpressions;
-    private String[] fieldNames;
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
@@ -72,7 +71,7 @@ public class MergeViewFactory implements ViewFactory
 
         // If the parent event type contains the merge fields, we use the same event type
         boolean parentContainsMergeKeys = true;
-        fieldNames = new String[criteriaExpressions.length];
+        String[] fieldNames = new String[criteriaExpressions.length];
         for (int i = 0; i < criteriaExpressions.length; i++)
         {
             String name = criteriaExpressions[i].toExpressionString();

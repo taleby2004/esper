@@ -10,6 +10,7 @@ import com.espertech.esper.epl.expression.ExprNodeUtility;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,10 +83,7 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
                     }
                     else
                     {
-                        for (EventBean event : fragments)
-                        {
-                            events.add(event);
-                        }
+                        events.addAll(Arrays.asList(fragments));
                     }
                 }
                 else

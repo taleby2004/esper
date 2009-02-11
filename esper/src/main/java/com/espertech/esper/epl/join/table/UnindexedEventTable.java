@@ -13,6 +13,7 @@ import com.espertech.esper.client.EventBean;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * Simple table of events without an index.
@@ -43,10 +44,7 @@ public class UnindexedEventTable implements EventTable
             return;
         }
 
-        for (int i = 0; i < addEvents.length; i++)
-        {
-            eventSet.add(addEvents[i]);
-        }
+        eventSet.addAll(Arrays.asList(addEvents));
     }
 
     public void remove(EventBean[] removeEvents)

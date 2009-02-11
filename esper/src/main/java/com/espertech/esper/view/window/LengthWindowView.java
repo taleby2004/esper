@@ -19,6 +19,7 @@ import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
 
 import java.util.Iterator;
+import java.util.Arrays;
 
 /**
  * This view is a moving window extending the specified number of elements into the past.
@@ -92,10 +93,7 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         // we don't care about removed data from a prior view
         if (newData != null)
         {
-            for (int i = 0; i < newData.length; i++)
-            {
-                events.add(newData[i]);
-            }
+            events.addAll(Arrays.asList(newData));
         }
 
         // Check for any events that get pushed out of the window

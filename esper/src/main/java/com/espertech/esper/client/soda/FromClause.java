@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * The from-clause names the streams to select upon.
@@ -87,10 +88,7 @@ public class FromClause implements Serializable
     {
         streams = new ArrayList<Stream>();
         outerJoinQualifiers = new ArrayList<OuterJoinQualifier>();
-        for (int i = 0; i < streamsList.length; i++)
-        {
-            streams.add(streamsList[i]);
-        }
+        streams.addAll(Arrays.asList(streamsList));
     }
 
     /**

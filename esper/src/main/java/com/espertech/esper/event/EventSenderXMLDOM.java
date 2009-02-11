@@ -31,7 +31,6 @@ public class EventSenderXMLDOM implements EventSender
     private final EPRuntimeEventSender runtimeEventSender;
     private final BaseXMLEventType baseXMLEventType;
     private final boolean validateRootElement;
-    private String getNodeName;
     private final EventAdapterService eventAdapterService;
     private final ThreadingService threadingService;
 
@@ -79,7 +78,7 @@ public class EventSenderXMLDOM implements EventSender
 
         if (validateRootElement)
         {
-            getNodeName = namedNode.getLocalName();
+            String getNodeName = namedNode.getLocalName();
             if (getNodeName == null)
             {
                 getNodeName = namedNode.getNodeName();

@@ -502,10 +502,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
         // add interfaces
         Class interfaces[] = clazz.getInterfaces();
-        for (int i = 0; i < interfaces.length; i++)
-        {
-            superclasses.add(interfaces[i]);
-        }
+        superclasses.addAll(Arrays.asList(interfaces));
 
         // Build event types, ignoring java language types
         List<EventType> superTypes = new LinkedList<EventType>();

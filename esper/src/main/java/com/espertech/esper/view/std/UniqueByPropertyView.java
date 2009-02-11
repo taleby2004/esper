@@ -65,11 +65,6 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
         return new UniqueByPropertyView(criteriaExpressions);
     }
 
-    public void setParent(Viewable parent)
-    {
-        super.setParent(parent);
-    }
-
     /**
      * Returns the name of the field supplying the unique value to keep the most recent record for.
      * @return expressions for unique value

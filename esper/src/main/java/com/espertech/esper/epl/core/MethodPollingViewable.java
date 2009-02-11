@@ -36,7 +36,6 @@ import java.util.*;
 public class MethodPollingViewable implements HistoricalEventViewable
 {
     private final MethodStreamSpec methodStreamSpec;
-    private final int myStreamNumber;
     private final PollExecStrategy pollExecStrategy;
     private final List<ExprNode> inputParameters;
     private final DataCache dataCache;
@@ -77,7 +76,6 @@ public class MethodPollingViewable implements HistoricalEventViewable
                            EventType eventType)
     {
         this.methodStreamSpec = methodStreamSpec;
-        this.myStreamNumber = myStreamNumber;
         this.inputParameters = inputParameters;
         this.pollExecStrategy = pollExecStrategy;
         this.dataCache = dataCache;

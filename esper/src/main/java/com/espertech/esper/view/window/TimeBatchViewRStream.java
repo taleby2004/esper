@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Arrays;
 
 /**
  * Same as the {@link TimeBatchView}, this view also supports fast-remove from the batch for remove stream events.
@@ -175,10 +176,7 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
         }
 
         // add data points to the timeWindow
-        for (int i = 0; i < newData.length; i++)
-        {
-            currentBatch.add(newData[i]);
-        }
+        currentBatch.addAll(Arrays.asList(newData));
 
         // We do not update child views, since we batch the events.
     }

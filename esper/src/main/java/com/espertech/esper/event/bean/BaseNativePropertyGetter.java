@@ -24,7 +24,6 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
 {
     private final EventAdapterService eventAdapterService;
     private volatile BeanEventType fragmentEventType;
-    private final Class genericType;
     private final Class fragmentClassType;
     private boolean isFragmentable;
     private final boolean isArray;
@@ -38,7 +37,6 @@ public abstract class BaseNativePropertyGetter implements EventPropertyGetter
      */
     public BaseNativePropertyGetter(EventAdapterService eventAdapterService, Class returnType, Class genericType)
     {
-        this.genericType = genericType;
         this.eventAdapterService = eventAdapterService;
         if (returnType.isArray())
         {

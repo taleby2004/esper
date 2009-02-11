@@ -10,6 +10,7 @@ package com.espertech.esper.view.window;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -192,10 +193,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
         }
 
         // add data points to the timeWindow
-        for (int i = 0; i < newData.length; i++)
-        {
-            currentBatch.add(newData[i]);
-        }
+        currentBatch.addAll(Arrays.asList(newData));
 
         // We do not update child views, since we batch the events.
     }

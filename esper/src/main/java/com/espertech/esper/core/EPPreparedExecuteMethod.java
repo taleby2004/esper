@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.ResultSetProcessor;
@@ -22,8 +24,6 @@ import com.espertech.esper.epl.spec.NamedWindowConsumerStreamSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StreamSpecCompiled;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,11 +149,9 @@ public class EPPreparedExecuteMethod
         {
             EventBean[][] oldDataPerStream = new EventBean[numStreams][];
             EventBean[][] newDataPerStream = new EventBean[numStreams][];
-            Viewable[] viewablePerStream = new Viewable[numStreams];
             for (int i = 0; i < numStreams; i++)
             {
                 newDataPerStream[i] = snapshots[i].toArray(new EventBean[snapshots[i].size()]);
-                viewablePerStream[i] = processors[i].getTailView();
             }
             UniformPair<Set<MultiKey<EventBean>>> result = joinComposer.join(newDataPerStream, oldDataPerStream);
             results = resultSetProcessor.processJoinResult(result.getFirst(), null, true);

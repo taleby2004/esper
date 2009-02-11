@@ -250,7 +250,12 @@ public class XPathPropertyGetter implements EventPropertyGetter
                 arrayItem = simpleTypeParser.parse(textContent);
             }
             catch (Exception ex)
-            {}
+            {
+                if (log.isInfoEnabled())
+                {
+                    log.info("Parse error for text content " + nodeList.item(i).getTextContent() + " for expression " + expression);
+                }
+            }
             Array.set(array, i, arrayItem);
         }
         

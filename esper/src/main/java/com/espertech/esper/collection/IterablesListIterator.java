@@ -90,7 +90,7 @@ public final class IterablesListIterator implements Iterator<EventBean>
     {
         while(listIterator.hasNext())
         {
-            Iterable<EventBean> iterable = (Iterable<EventBean>) listIterator.next();
+            Iterable<EventBean> iterable = listIterator.next();
             currentIterator = iterable.iterator();
             if (currentIterator.hasNext())
             {
@@ -101,4 +101,5 @@ public final class IterablesListIterator implements Iterator<EventBean>
         currentIterator = null;
     }
 }
+
 

@@ -383,10 +383,7 @@ public class NestedProperty implements Property
         for (Property property : properties)
         {
             String[] nested = property.toPropertyArray();
-            for (String aNested : nested)
-            {
-                propertyNames.add(aNested);
-            }
+            propertyNames.addAll(Arrays.asList(nested));
         }
         return propertyNames.toArray(new String[propertyNames.size()]);
     }
@@ -484,8 +481,7 @@ public class NestedProperty implements Property
             }
         }
 
-        SchemaItem finalPropertyType = lastProperty.getPropertyTypeSchema(complexElement, eventAdapterService);
-        return finalPropertyType;
+        return lastProperty.getPropertyTypeSchema(complexElement, eventAdapterService);
     }
 
     private static String toPropertyEPL(List<Property> property, int startFromIndex)
