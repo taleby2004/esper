@@ -29,7 +29,7 @@ News
     
     []
 
-  * Added a syntax to support contained-event selection, for use with coarse-grained events that contain finer-grained events or rows.
+  * New syntax to support contained-event selection, for use with coarse-grained events that contain finer-grained events or rows.
       This allows convenient extraction and analysis of information from business-level composite events.    
 
   * Added XML and JSON renderers for output events
@@ -46,7 +46,7 @@ News
 
   * Added support for SQL-standard ANY, SOME and ALL keywords in group comparison.  
 
-  * Added advanced threading options to configuration for use with inbound, outbound and execution threadings at engine-level.  
+  * Added advanced threading options to configuration for use with inbound, outbound and execution threading at engine-level.  
 
   * Improved support for Java-object event representation with parameterized types (Java generics), List and Iterable properties.  
 

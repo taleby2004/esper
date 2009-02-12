@@ -73,7 +73,6 @@
 		<property name="zip-file" value=""/>
 		<zip zipfile="${dist.dir}/${fullname}-src.zip">
             		<zipfileset dir="esper/src/main/java" includes="**"/>
-            		<zipfileset dir="esper/target/generated-sources/antlr" includes="**"/>
         	</zip>
 		<zip zipfile="${dist.dir}/${fullnameio}-src.zip">
             		<zipfileset dir="esperio/src/main/java" includes="**"/>

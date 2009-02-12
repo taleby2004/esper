@@ -22,7 +22,7 @@ New Features
     - Prepared statements may use substitution parameters to parameterize views and pattern objects;
     - Pattern objects may be parameterized by prior events;
     - The syntax for views namespace.name('property') is no longer supported.
-  - Added a syntax to support contained-event selection, for use with coarse-grained events that contain finer-grained events or rows.
+  - New syntax to support contained-event selection, for use with coarse-grained events that contain finer-grained events or rows.
     This allows convenient extraction and analysis of information from business-level composite events.    
   - Added XML and JSON renderers for output events
   - When using multiple data windows for the same stream in EPL, the default policy is intersection of data windows, and a union-policy is also available via keyword. 
@@ -36,7 +36,7 @@ New Features
   - The EPL does no longer assume keep-all semantics if no data window is specified for a filter-based or pattern-based stream in a join. 
     EPL now requires a data window to be explicitly defined to applicable streams.   
   - Added support for SQL-standard ANY, SOME and ALL keywords in group comparison.  
-  - Added advanced threading options to configuration for use with inbound, outbound and execution threadings at engine-level.  
+  - Added advanced threading options to configuration for use with inbound, outbound and execution threading at engine-level.  
   - Improved support for Java-object event representation with parameterized types (Java generics), List and Iterable properties.  
   - Added support for escaping property names and event type names in case an overlap occurs with keywords.
   - New configuration options to change the caching behavior for UDF invocations.
