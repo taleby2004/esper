@@ -1108,6 +1108,93 @@ esperBean.sendEvent("Test Event");
 appContext.destroy();</pre></div>
       </answer>
     </faq>    
+
+
+    <faq id="our-own-functions-library">
+      <question>We have our own math library, what are the options of utilizing it? How can I make calls out of the EPL into our own existing code?</question>
+      <answer>
+        <p>
+          There are several options. The best choice among the options depends on what you want to accomplish, and
+          how the existing library, function or other system exposes its functionality (static methods, service or POJO etc.).
+        </p>
+
+        <p>
+          The first option is the user-defined method. You can invoke a user-defined method in any expression directly without any configuration. You 
+          can import a class via configuration to avoid package names in EPL. For example, assuming that the "com.mycompany.MyLibrary" class provides a static
+          method by name "computeDistance":
+        </p>
+	<div class="source"><pre>select com.mycompany.MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent
+// ... or after MyLibrary is imported via configuration
+select MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent</pre></div>
+        
+        <p>
+          The second option is to invoke a method on your event object itself. This works only if your event representation is a Java object. An example, assuming that the "MyCoordinateEvent" event underlying class provides a 
+          method by name "computeDistance":
+        </p>
+	<div class="source"><pre>select myevent.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent as myevent</pre></div>
+
+        <p>
+          The third option is to provide a custom aggregation function via the extension API. A custom aggregation function can take many parameters and returns only one value, i.e. cannot return multiple values,
+          however the value returned can be any object. Please consult the documentation for examples. A sample EPL statement is as follows, assuming that the "myTrendFunction" custom aggregation function has been created and configured:
+        </p>
+	<div class="source"><pre>select myTrendFunction(price) from OrderEvent group by productId</pre></div>
+
+        <p>
+          The forth option is to provide a custom view via the extension API. A custom view takes parameters as well as an input stream of events and generates a result stream of events. 
+          Please consult the documentation for examples. A sample EPL statement is as follows, assuming that the "mathlib:volatility" custom view has been created and configured:
+        </p>
+	<div class="source"><pre>select * from OrderEvent(symbol='IBM').mathlib:volatility()</pre></div>
+
+        <p>
+          The fifth option is to use a method invocation. A method invocation is a function that acts alone or in a join and returns rows. Please consult the documentation for examples.
+          Here is a sample EPL that utilizes a join, assuming that the "cacheLookup" function is provided by class "com.mycompany.MyLibrary":
+        </p>
+	<div class="source"><pre>select * from RFIDEvent, method:com.mycompany.MyLibrary.cacheLookup(assetId)</pre></div>
+
+        <p>
+          The last option is to have your listener or subscriber code invoke the library. Results can be send back into the engine by you listener via a further event, if needed.
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="soap-rest">
+      <question>Can I use SOAP, WS-*, RESTful, JMS, RPC or other remote calls?</question>
+      <answer>
+        <p>
+          The previous FAQ had outlined how to invoke an external function. Your external function may invoke internal or external resource as
+          part of its evaluation using any of the standards.
+        </p>
+        <p>
+          Also, Esper provides certain input and output adapters as described in the EsperIO documentation.
+        </p>
+        <p>
+          You may also want to consider creating your own event representation via the extension API if your transport or event repository already
+          has event metadata available that you want to reuse.
+        </p>
+        <p>
+          In the design you should keep in mind that blocking calls may reduce throughput.
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="distributed-cache">
+      <question>Can Esper support a distributed cache or data grid?</question>
+      <answer>
+        <p>
+	We see it as rather trivial to consume from grid and publish to grid
+	already in Esper, using a grid map listener implementation
+	and other APIs. You can also do stream-to-grid joins using the EPL
+	method invocation joins capabilities.
+        </p>
+        <p>
+	High availability and failover is implemented in EsperHA out of the
+	box (http://www.espertech.com). EsperHA also provides pluggable event
+	store so that events retained in windows can be stored (and possibly
+	shared and computed against) in a grid.
+        </p>
+      </answer>
+    </faq>    
+
   </part>
 
 </faqs>
