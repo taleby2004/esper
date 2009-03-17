@@ -356,6 +356,18 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 		</sect2>
 
 		<sect2 id="perf-tips-13">
+			<title>High-Arrival-Rate Streams and Single Statements</title>
+
+			<para>
+				A statement is associated with certain statement state that consists of current aggregation values, partial pattern matches, data windows or other view state depending on whether your statement uses such constructs. When an engine receives events it updates statement state under locking such that statement state remains consistent under concurrent multi-threaded access.
+			</para>
+			
+			<para>
+				For high-volume streams, the locking required to protected statement state may slow down or introduce blocking for very high arrival rates of events that apply to the very same statement and its state. You may want to consider splitting a single statement into multiple statements that each look for a certain subset of the high-arrival-rate stream. There is very little cost in terms of memory or CPU resources per statement, the engine can handle larger number of statements usually as efficiently as single statements.
+			</para>
+		</sect2>
+
+		<sect2 id="perf-tips-14">
 
 			<title>Performance, JVM, OS and hardware</title>
 
@@ -379,7 +391,6 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 				The benchmark kit can help test out some requirements and establish baselines, and for more complex use cases
 				a simulation or proof of concept would certainly works best.
 				<ulink url="http://www.espertech.com/support/services.php">EsperTech' experts</ulink> can be available to help write interfaces in a consulting relationship.
-
 			</para>
 		</sect2>
 

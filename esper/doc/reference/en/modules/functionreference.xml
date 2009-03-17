@@ -681,16 +681,31 @@ from StockTick.win:time(30 sec)]]></programlisting>
 		 </para> 
 		<programlisting><![CDATA[select MyLib.mapEvents(e1, e2) from pattern [every e1=E1 -> e2=E2]]]></programlisting>
 
-		 <para>
-			 A function that converts from one event type to another event type is shown in the next example. The first statement declares a stream that consists of MyEvent events. The second statement employs a conversion function to convert MyOtherEvent events to events of type MyEvent:
-		 </para> 
-		<programlisting><![CDATA[insert into MyStream select * from MyEvent
-insert into MyStream select MyLib.convert(other) from MyOtherEvent as other]]></programlisting>
+		<sect3 id="epl-function-user-defined-converting">
+			<title>Event Type Conversion via User-Defined Function</title>
+			 <para>
+				 A function that converts from one event type to another event type is shown in the next example. The first statement declares a stream that consists of MyEvent events. The second statement employs a conversion function to convert MyOtherEvent events to events of type MyEvent:
+			 </para> 
+			<programlisting><![CDATA[insert into MyStream select * from MyEvent
+	insert into MyStream select MyLib.convert(other) from MyOtherEvent as other]]></programlisting>
+	
+			 <para>
+				 In the example above, assuming the event classes MyEvent and MyOtherEvent are Java classes, the static method should have the following footprint:
+			 </para> 
+			 <programlisting><![CDATA[public static MyEvent convert(MyOtherEvent otherEvent)]]></programlisting>
+		</sect3>
+		
+		<sect3 id="epl-function-user-defined-cached">
+			<title>User-Defined Function Result Cache</title>
+			 <para>
+				 For user-defined functions that take no parameters or only constants as parameters the engine automatically caches the return result of the function, and invokes the function only once. This is beneficial to performance 
+				 if your function indeed returns the same result for the same input parameters.
+			</para>
+			 <para>
+				 You may disable caching of return values of user-defined functions via configuration as described in <xref linkend="config-engine-expression-udfcache"/>.
+			</para>
+		</sect3>
 
-		 <para>
-			 In the example above, assuming the event classes MyEvent and MyOtherEvent are Java classes, the static method should have the following footprint:
-		 </para> 
-		 <programlisting><![CDATA[public static MyEvent convert(MyOtherEvent otherEvent)]]></programlisting>
 	</sect1>
 
 </chapter>
