@@ -982,7 +982,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 		   </para>
 
 		   <para>
-				As you can see, it is the remove stream that the combined multiple data windows provide which differs when retaining an intersection and retaining a union, the insert stream is the same to all data windows and their staggered views.
+				As you can see, it is the remove stream that the combined multiple data windows provide which differs when retaining an intersection and retaining a union, the insert stream is the same to all data windows and their staggered views. Therefore, when coming batching data windows with further data windows, the insert stream still remains the insert stream of the set overall (not batched). Consider using <literal>output snapshot</literal> to obtain regular updates instead of combining batch and other data windows.
 		   </para>
 
 		   <para>

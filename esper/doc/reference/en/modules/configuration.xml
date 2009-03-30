@@ -1795,7 +1795,7 @@ config.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(true);]]
 				</listitem>
 				<listitem>
 					<para>
-						One or more property names that supply the key values that tie base and delta events to existing revision events.
+						One or more property names that supply the key values that tie base and delta events to existing revision events. Properties must exist on the event type as simple properties. Nested, indexed or mapped properties are not allowed.
 					</para>
 				</listitem>
 				<listitem>
