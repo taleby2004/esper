@@ -327,6 +327,9 @@ output every 5 seconds</pre></div>
       <question>How do I delay data? How do I compare against previous events?</question>
       <answer>
         <p>
+          There are a few different approaches that this section outlines.
+        </p>
+        <p>
           Your application may need to delay events for a certain time. A simple way to delay data is to enter the data into a time window
           and select the remove stream which is the data leaving the window:
         </p>
@@ -355,6 +358,22 @@ output snapshot every 1 minute</pre></div>
         </p>
 	<div class="source"><pre>select task, measurement, rate - prev(4, rate) as delta
 from CurrentStream.win:time(5 min)</pre></div>      
+        <p>
+          The "prev" previous-event function also works well with the "std:groupby" view in that is operates per-group when used with this view, for example:
+        </p>
+	<div class="source"><pre>select rate, prev(1, rate) from MyStream.std:groupby(task).win:length(2)</pre></div>      
+        <p>
+          A pattern statement can also be a great approach to form pairs or triplets (or any other combination of old and current events) and insert the pattern-matched events into
+          a new stream for further processing, or use the select-clause to determine deltas as this sample statement shows:
+        </p>
+	<div class="source"><pre>select a.qty - b.qty, a.acct, a.instr from pattern  [
+  every a=OrderStatus -> b=OrderStatus(acct=a.acct, instr=a.instr)
+]</pre></div>      
+        <p>
+          ...or...
+        </p>
+	<div class="source"><pre>insert into MyStream select a, b from pattern [every a=OrderStatus -> b=OrderStatus(acct=a.acct, instr=a.instr)]
+select a.qty - b.qty from MyStream</pre></div>      
       </answer>
     </faq>    
 
@@ -1192,6 +1211,58 @@ select MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent</pre></d
 	store so that events retained in windows can be stored (and possibly
 	shared and computed against) in a grid.
         </p>
+      </answer>
+    </faq>    
+
+    <faq id="">
+      <question>What to do if my events are not JavaBeans, not well-defined, their properties are not known in advance and may differ wildly, and are nested?</question>
+      <answer>
+        <p>
+	  Here is an actual user question: 
+        </p>
+		  <blockquote><i>
+		  Each data item implements an interface, but the properties available on the concrete objects differ wildly.   
+		  Also, each data item can be considered to be composed of multiple levels of these data items.  
+		  One of the fields on the interface is a getParent field, which returns the data item one level up.  
+		  For example: If X is the object which we have a direct handle to, X.parent = Y, and Y.parent = Z, we often want to look at 
+		  Z.field as part of our filter. Also, my events do not describe the property set of the event (not a JavaBean).  
+		  Thus, I don't directly know that X's parent is Y, whose parent is of type Z, which then has a property named 'foo'.  
+		  (Beans here are essentially user-defined structures for contributed code, and thus we have no real way of knowing what properties 
+		  are on a bean until we receive the bean.  When the users use the beans, they obviously know which bean they're working with.  
+		  For us, we're getting it downstream, and that bean could be any of a dynamically growing variety.
+		</i></blockquote>
+        <p>
+	  	Dynamic properties are weakly-typed dynamically-resolved properties that use a '?' syntax to denote the dynamic part of a property expression, for example:
+        </p>
+	<div class="source"><pre>select parent?.parent.foo from XEvent</pre></div>
+        <p>
+	  	The above query returns the value of "foo" property of the object provided by the "parent" property (if present) and its parent property (if present) of a XEvent. 
+	  	The value returned is of type Object and probably requires the use of the EPL "cast" or "instanceof" functions depending on what to do with the value.
+        </p>  
+        <p>
+	  	By moving the '?' operator into a different position the query can indicate which properties in the nesting level must exist. The next query 
+	  	checks that the "parent" propery exists upon compilation:
+        </p>
+	<div class="source"><pre>select parent.parent.foo? from XEvent</pre></div>
+        <p>
+	  	Dynamic properties can be used in combination with indexed and mapped properties as well.
+        </p>
+        <p>
+	  	Another approach is to map such Java objects to Map event types: these also allow inheritance, nesting and dynamic properties and are easy to generate 
+	  	programmatically and its easier to change the event type at runtime based on the available metadata or the actually arriving events, through
+	  	the runtime configuration API.
+        </p>
+        <p>
+	  	Another possible approach is to create a custom event representation plug-in.
+        </p>
+        <p>
+	  	The best approach generally is to use event inheritance (Java object and Map event representations) when possible, nested properties (all event representations) when possible,
+	  	and strongly-typed properties to keep statements simple and easy to read.
+        </p>
+        <p>
+	  	There a number of options available in the configuration to handle Java classes that may not adhere to JavaBean conventions.
+        </p>
+
       </answer>
     </faq>    
 

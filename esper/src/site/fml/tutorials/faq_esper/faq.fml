@@ -233,6 +233,25 @@
       </answer>
     </faq>    
 
+    <faq id="number_of_statements">
+      <question>Can Esper handle a large number of statements?</question>
+      <answer>
+        <p>
+        	The answer will depend on the types of statements required. The best approach may thus be to get familiar with the benchmark kit
+        	and use or customize it to test the specific type of statements needed.
+        </p>
+        <p>
+		The observation will likely be that a larger number of statements have very little implication on Esper itself 
+		- although the memory footprint due to internal bookkeeping will slightly increase.
+        </p>
+        <p>
+		The time to create new statements is usually very small, likely less then 1 millisecond per statement.
+		The engine has been tested with a very large number of statements (large > 100k). 
+		The engine is very efficient in matching incoming events to the statement(s) that need to see an event.  
+		Also note the performance tips section in the documentation that provides additional hints.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
   <part id="howdoesitwork">
