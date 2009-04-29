@@ -190,7 +190,8 @@
           for most applications.
         </p>
         <p>
-	  Esper is fully multi-thread safe and typically able to leverage all available CPUs. 
+	  Esper is fully multi-thread safe and typically able to leverage all available CPUs. The engine provides advanced threading options for inbound threading, outbound threading, timer execution threading
+	  and route (internal event) threading. 
         </p>
         <p>
 	  Esper does not provide any transports or protocols to bring events into the engine or to handle outgoing events. Most applications find event input and event output a bottleneck. 
@@ -526,7 +527,7 @@
       <question>What is the policy you recommend on UpdateListener (or Observer) if UpdateListener does long processing? For example, why don't you create a thread or attach a JMS queue for output in some examples?</question>
       <answer>
         <p>
-			A blocking UpdateListener or subscriber blocks event processing for that thread.
+			A blocking UpdateListener or subscriber blocks event processing for that thread, unless configuring the outbound threading option that the engine provides.
 			Decoupling output processing via a further threadpool may have an advantage if output listener processing can be very slow, but incurs the cost of further threads and context switching.		
 		</p>
 
