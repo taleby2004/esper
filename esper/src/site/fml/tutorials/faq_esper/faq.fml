@@ -396,6 +396,20 @@
 		</p>
       </answer>  
     </faq>
+    <faq id="window_nowindow">
+      <question>What is the difference between "select * from MyEvent" and "select * from MyEvent.win:length(1)" and "select * from MyEvent.win:keepall()" ?</question>
+      <answer>
+        <p>
+			The statement "select * from MyEvent" retains no event data,  posts an insert stream and does not post a remove stream. If adding an aggregation function such as "select sum(qty) from MyEvent" then the statement returns the total quantity since the statement was started. The iterator method when used on the statement returns no events. The "previous" function is not available.
+		</p>
+        <p>
+			The statement "select * from MyEvent.win:length(1)" retains the last event and posts an insert and remove stream. If adding an aggregation function such as "select sum(qty) from MyEvent.win:length(1)" then the statement returns the quantity of the last event. The iterator method when used on the statement returns the last event. The "previous" function is available and can query the immediately previous event only.
+		</p>
+        <p>
+			The statement "select * from MyEvent.win:keepall()" retains all events since the statement was started. When using a named window, via on-select or on-delete one can do queries on such retained data. If adding an aggregation function such as "select sum(qty) from MyEvent.win:keepall()" then the statement returns the total quantity since the statement was started. The iterator method when used on the statement returns all events since statement start. The "previous" function is available and can query any depth of previous events.
+		</p>
+      </answer>  
+    </faq>
   </part>
 
   <part id="integration">
