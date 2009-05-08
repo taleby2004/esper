@@ -729,6 +729,44 @@ where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
       </answer>
     </faq>    
 
+    <faq id="remove-from-stream">
+      <question>How do I remove events from a stream? I have a dynamic set of negative filters?</question>
+      <answer>
+        <p>
+          Let's assume you have a stream of events and you want to remove events from the stream before further processing of the remaining events by other
+          statements.
+        </p>
+        <p>
+          Named windows and the on-delete and on-insert/select clauses can address this need, and there are other perhaps simpler ways described at the end of this FAQ.
+        </p>
+        <p>
+          First, create a named window:
+        </p>
+		<div class="source"><pre>create window MyWindow.std:lastevent() as select * from IncomingEvent</pre></div>      
+        <p>
+          Populate the named window from all arriving MyEvent events:
+        </p>
+		<div class="source"><pre>insert into MyWindow select * from IncomingEvent</pre></div>      
+        <p>
+          Define the negative filters. These sort of statements (like any others) can be added and removed during runtime at will. Here are two sample negative filters:
+        </p>
+		<div class="source"><pre>on MyWindow delete from MyWindow as win where win.emitter = 'Device1'
+on MyWindow delete from MyWindow as win where win.attribute1 = false</pre></div>      
+        <p>
+          Finally, take the arrival of a new event in the named window to create an event that selects from the named window, populating
+          the filtered stream that further statements can use:
+        </p>
+		<div class="source"><pre>on MyWindow insert into TriggerSelectEvent select 1 from MyWindow
+on TriggerSelectEvent insert into FilteredStream select win.* from MyWindow as win</pre></div>      
+        <p>
+          Disregard the order in which the statements are created, the insert-into of the trigger event ensures it is processed after the on-delete negative filters.
+        </p>
+        <p>
+          Other ways of solving this use case could be to use the UnmatchedListener to catch unmatched events or use the EPL split-stream syntax.
+        </p>
+      </answer>
+    </faq>    
+
     <faq id="pattern_succes_fail">
       <question>How do I detect a specific sequence of events and get all events that take part in this sequence?</question>
       <answer>
