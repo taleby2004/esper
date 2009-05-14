@@ -48,10 +48,11 @@ public class SelectExprProcessorFactory
                                                    EventAdapterService eventAdapterService,
                                                    StatementResultService statementResultService,
                                                    ValueAddEventService valueAddEventService,
-                                                   SelectExprEventTypeRegistry selectExprEventTypeRegistry)
+                                                   SelectExprEventTypeRegistry selectExprEventTypeRegistry,
+                                                   MethodResolutionService methodResolutionService)
         throws ExprValidationException
     {
-        SelectExprProcessor synthetic = getProcessorInternal(selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry);
+        SelectExprProcessor synthetic = getProcessorInternal(selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService);
 
         // Handle binding as an optional service
         if (statementResultService != null)
@@ -71,7 +72,8 @@ public class SelectExprProcessorFactory
                                                    StreamTypeService typeService,
                                                    EventAdapterService eventAdapterService,
                                                    ValueAddEventService valueAddEventService,
-                                                   SelectExprEventTypeRegistry selectExprEventTypeRegistry)
+                                                   SelectExprEventTypeRegistry selectExprEventTypeRegistry,
+                                                   MethodResolutionService methodResolutionService)
         throws ExprValidationException
     {
         // Wildcard not allowed when insert into specifies column order
@@ -87,7 +89,7 @@ public class SelectExprProcessorFactory
             if (typeService.getStreamNames().length > 1)
             {
                 log.debug(".getProcessor Using SelectExprJoinWildcardProcessor");
-                return new SelectExprJoinWildcardProcessor(typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, insertIntoDesc, selectExprEventTypeRegistry);
+                return new SelectExprJoinWildcardProcessor(typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, insertIntoDesc, selectExprEventTypeRegistry, methodResolutionService);
             }
             // Single-table selects with no insert-into
             // don't need extra processing
@@ -108,7 +110,7 @@ public class SelectExprProcessorFactory
         if (streamWildcards.size() == 0)
         {
             // This one only deals with wildcards and expressions in the selection
-            return new SelectExprEvalProcessor(expressionList, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry);
+            return new SelectExprEvalProcessor(expressionList, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService);
         }
         else
         {

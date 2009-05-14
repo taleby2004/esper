@@ -19,12 +19,19 @@ import com.espertech.esper.view.Viewable;
 
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.lang.annotation.Annotation;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Statement implementation for EPL statements.
  */
 public class EPStatementImpl implements EPStatementSPI
 {
+    private static Log log = LogFactory.getLog(EPStatementImpl.class);
+
     private final EPStatementListenerSet statementListenerSet;
     private final String statementId;
     private final String statementName;
@@ -42,6 +49,7 @@ public class EPStatementImpl implements EPStatementSPI
     private StatementResultService statementResultService;
     private StatementMetadata statementMetadata;
     private Object userObject;
+    private Annotation[] annotations;
 
     /**
      * Ctor.
@@ -61,6 +69,7 @@ public class EPStatementImpl implements EPStatementSPI
      * @param timeSourceService time source provider
      * @param statementMetadata statement metadata
      * @param userObject the application define user object associated to each statement, if supplied
+     * @param annotations annotations associated to statement
      */
     public EPStatementImpl(String statementId,
                               String statementName,
@@ -77,7 +86,8 @@ public class EPStatementImpl implements EPStatementSPI
                               StatementResultService statementResultService,
                               TimeSourceService timeSourceService,
                               StatementMetadata statementMetadata,
-                              Object userObject)
+                              Object userObject,
+                              Annotation[] annotations)
     {
         this.isPattern = isPattern;
         this.statementId = statementId;
@@ -107,6 +117,7 @@ public class EPStatementImpl implements EPStatementSPI
         this.statementResultService = statementResultService;
         this.statementMetadata = statementMetadata;
         this.userObject = userObject;
+        this.annotations = annotations;
         statementResultService.setUpdateListeners(statementListenerSet);
     }
 
@@ -300,7 +311,16 @@ public class EPStatementImpl implements EPStatementSPI
             Iterator<EventBean> it = iterator();
             if (it == null)
             {
-                listener.update(null, null);
+                try
+                {
+                    listener.update(null, null);
+                }
+                catch (Throwable t)
+                {
+                    String message = "Unexpected exception invoking listener update method for replay on listener class '" + listener.getClass().getSimpleName() +
+                            "' : " + t.getClass().getSimpleName() + " : " + t.getMessage();
+                    log.error(message, t);
+                }
                 return;
             }
 
@@ -312,12 +332,30 @@ public class EPStatementImpl implements EPStatementSPI
 
             if (events.isEmpty())
             {
-                listener.update(null, null);
+                try
+                {
+                    listener.update(null, null);
+                }
+                catch (Throwable t)
+                {
+                    String message = "Unexpected exception invoking listener update method for replay on listener class '" + listener.getClass().getSimpleName() +
+                            "' : " + t.getClass().getSimpleName() + " : " + t.getMessage();
+                    log.error(message, t);
+                }
             }
             else
             {
                 EventBean[] iteratorResult = events.toArray(new EventBean[events.size()]);
-                listener.update(iteratorResult, null);
+                try
+                {
+                    listener.update(iteratorResult, null);
+                }
+                catch (Throwable t)
+                {
+                    String message = "Unexpected exception invoking listener update method for replay on listener class '" + listener.getClass().getSimpleName() +
+                            "' : " + t.getClass().getSimpleName() + " : " + t.getMessage();
+                    log.error(message, t);
+                }
             }
         }
         finally
@@ -434,5 +472,10 @@ public class EPStatementImpl implements EPStatementSPI
     public Object getUserObject()
     {
         return userObject;
+    }
+
+    public Annotation[] getAnnotations()
+    {
+        return annotations;
     }
 }

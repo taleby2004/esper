@@ -287,6 +287,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case EVERY_EXPR:
                 leaveEvery(node);
                 break;
+            case EVERY_DISTINCT_EXPR:
+                leaveEveryDistinct(node);
+                break;
             case FOLLOWED_BY_EXPR:
                 leaveFollowedBy(node);
                 break;
@@ -398,6 +401,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 break;
             case OBJECT_PARAM_ORDERED_EXPR:
                 leaveObjectParamOrderedExpression(node);
+                break;
+            case ANNOTATION:
+                leaveAnnotation(node);
                 break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
@@ -598,7 +604,28 @@ public class EPLTreeWalker extends EsperEPL2Ast
         {
             // The ON_EXPR_FROM contains the window name
             UniformPair<String> windowName = getWindowName(typeChildNode);
-            statementSpec.setOnTriggerDesc(new OnTriggerWindowDesc(windowName.getFirst(), windowName.getSecond(), isOnDelete));
+            if (windowName == null)
+            {
+                // on the statement spec, the deepest spec is the outermost
+                List<OnTriggerSplitStream> splitStreams = new ArrayList<OnTriggerSplitStream>();
+                for (int i = 1; i <= statementSpecStack.size() - 1; i++)
+                {
+                    StatementSpecRaw raw = statementSpecStack.get(i);
+                    splitStreams.add(new OnTriggerSplitStream(raw.getInsertIntoDesc(), raw.getSelectClauseSpec(), raw.getFilterExprRootNode()));
+                }
+                splitStreams.add(new OnTriggerSplitStream(statementSpec.getInsertIntoDesc(), statementSpec.getSelectClauseSpec(), statementSpec.getFilterExprRootNode()));
+                if (!statementSpecStack.isEmpty())
+                {
+                    statementSpec = statementSpecStack.get(0);
+                }
+                boolean isFirst = isSelectInsertFirst(node);
+                statementSpec.setOnTriggerDesc(new OnTriggerSplitStreamDesc(OnTriggerType.ON_SPLITSTREAM, isFirst, splitStreams));
+                statementSpecStack.clear();
+            }
+            else
+            {
+                statementSpec.setOnTriggerDesc(new OnTriggerWindowDesc(windowName.getFirst(), windowName.getSecond(), isOnDelete));
+            }
         }
         else
         {
@@ -662,7 +689,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
         if (windowName == null)
         {
-            throw new IllegalStateException("Could not determine on-expr from-clause named window name");
+            return null;
         }
         return new UniformPair<String>(windowName, windowStreamName);
     }
@@ -824,6 +851,12 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
         ExprOrderedExpr exprNode = new ExprOrderedExpr(isDescending);
         astExprNodeMap.put(node, exprNode);
+    }
+
+    private void leaveAnnotation(Tree node)
+    {
+        log.debug(".leaveAnnotation");
+        statementSpec.getAnnotations().add(ASTAnnotationHelper.walk(node, this.engineImportService));
     }
 
     private void leaveArray(Tree node)
@@ -1819,6 +1852,14 @@ public class EPLTreeWalker extends EsperEPL2Ast
         astPatternNodeMap.put(node, everyNode);
     }
 
+    private void leaveEveryDistinct(Tree node)
+    {
+        log.debug(".leaveEveryDistinct");
+        List<ExprNode> exprNodes = getExprNodes(node.getChild(0), 0);
+        EvalEveryDistinctNode everyNode = new EvalEveryDistinctNode(exprNodes, null);
+        astPatternNodeMap.put(node, everyNode);
+    }
+
     private void leaveStreamFilter(Tree node)
     {
         log.debug(".leaveStreamFilter");
@@ -2132,6 +2173,21 @@ public class EPLTreeWalker extends EsperEPL2Ast
             astExprNodeMap.remove(currentNode);
         }
         return exprNodes;
+    }
+
+    private boolean isSelectInsertFirst(Tree child)
+    {
+        for (int i = 0; i < child.getChildCount(); i++)
+        {
+            if (child.getChild(i).getType() == ON_SELECT_INSERT_OUTPUT)
+            {
+                if (child.getChild(i).getChild(0).getType() == ALL)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private static final Log log = LogFactory.getLog(EPLTreeWalker.class);

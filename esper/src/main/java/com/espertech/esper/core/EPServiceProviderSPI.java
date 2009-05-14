@@ -28,6 +28,12 @@ public interface EPServiceProviderSPI extends EPServiceProvider
 {
     /**
      * For the default provider instance, which carries a null provider URI,
+     * the URI value is "default".
+     */
+    public static final String DEFAULT_ENGINE_URI = "default";
+
+    /**
+     * For the default provider instance, which carries a "default" provider URI,
      * the property name qualification and stream name qualification may use "default".
      */
     public static final String DEFAULT_ENGINE_URI__QUALIFIER = "default";
@@ -109,4 +115,10 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      * @return the ThreadingService
      */
     public ThreadingService getThreadingService();
+
+    /**
+     * Returns engine environment context such as plugin loader references. 
+     * @return environment context
+     */
+    public EngineEnvContext getEngineEnvContext();
 }

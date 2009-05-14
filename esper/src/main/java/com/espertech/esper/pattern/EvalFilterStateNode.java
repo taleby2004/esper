@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterValueSet;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -132,7 +132,9 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
         // and the all node would newState a new listener. The remove operation and the add operation
         // therefore don't take place if the EvalEveryStateNode node sits on top of a EvalFilterStateNode node.
         boolean isQuitted = false;
-        if (!(this.getParentEvaluator() instanceof EvalEveryStateNode))
+        if (!(this.getParentEvaluator() instanceof EvalEveryStateNode) &&
+            !(this.getParentEvaluator() instanceof EvalMatchUntilStateNode) &&
+            !(this.getParentEvaluator() instanceof EvalEveryDistinctStateNode))
         {
             stopFiltering();
             isQuitted = true;

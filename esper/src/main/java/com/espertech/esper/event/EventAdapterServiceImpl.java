@@ -11,10 +11,7 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.EPRuntimeEventSender;
-import com.espertech.esper.event.bean.BeanEventAdapter;
-import com.espertech.esper.event.bean.BeanEventBean;
-import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.event.bean.BeanEventTypeFactory;
+import com.espertech.esper.event.bean.*;
 import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.*;
@@ -22,6 +19,7 @@ import com.espertech.esper.plugin.*;
 import com.espertech.esper.util.URIUtil;
 import com.espertech.esper.util.UuidGenerator;
 import com.espertech.esper.core.thread.ThreadingService;
+import com.espertech.esper.epl.core.MethodResolutionService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -32,6 +30,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import net.sf.cglib.reflect.FastClass;
 
 /**
  * Implementation for resolving event name to event type.
@@ -72,6 +72,67 @@ public class EventAdapterServiceImpl implements EventAdapterService
         typesPerJavaBean = new ConcurrentHashMap<Class, BeanEventType>();
         beanEventAdapter = new BeanEventAdapter(typesPerJavaBean, this);
         plugInRepresentations = new HashMap<URI, PlugInEventRepresentation>();
+    }
+
+    public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType)
+    {
+        if (!(eventType instanceof EventTypeSPI))
+        {
+            return null;
+        }
+        EventTypeSPI typeSPI = (EventTypeSPI) eventType;
+        if (!typeSPI.getMetadata().isApplicationConfigured())
+        {
+            return null;
+        }
+        if (eventType instanceof BeanEventType)
+        {
+            BeanEventType beanEventType = (BeanEventType) eventType;
+            FastClass fastClass = beanEventType.getFastClass();
+            return PropertyHelper.getWritableProperties(fastClass.getJavaClass());
+        }
+        else if (eventType instanceof MapEventType)
+        {
+            Map<String, Object> mapdef = ((MapEventType) eventType).getTypes();
+            Set<WriteablePropertyDescriptor> writables = new HashSet<WriteablePropertyDescriptor>();
+            for (Map.Entry<String, Object> types : mapdef.entrySet())
+            {
+                if (types.getValue() instanceof Class)
+                {
+                    writables.add(new WriteablePropertyDescriptor(types.getKey(), (Class) types.getValue(), null));
+                }
+            }
+            return writables;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, MethodResolutionService methodResolutionService)
+            throws EventBeanManufactureException
+    {
+        if (!(eventType instanceof EventTypeSPI))
+        {
+            return null;
+        }
+        EventTypeSPI typeSPI = (EventTypeSPI) eventType;
+        if (!typeSPI.getMetadata().isApplicationConfigured())
+        {
+            return null;
+        }
+        if (eventType instanceof BeanEventType)
+        {
+            BeanEventType beanEventType = (BeanEventType) eventType;
+            return new EventBeanManufacturerBean(beanEventType, this, properties, methodResolutionService);
+        }
+        else if (eventType instanceof MapEventType)
+        {
+            MapEventType mapEventType = (MapEventType) eventType;
+            return new EventBeanManufacturerMap(mapEventType, this, properties);
+        }
+        return null;
     }
 
     public EventType[] getAllTypes()
@@ -516,7 +577,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             return existingType;
         }
 
-        EventTypeMetadata metadata = EventTypeMetadata.createXMLType(eventTypeName);
+        EventTypeMetadata metadata = EventTypeMetadata.createXMLType(eventTypeName, configurationEventTypeXMLDOM.getSchemaResource() == null);
         EventType type;
         if (configurationEventTypeXMLDOM.getSchemaResource() == null)
         {
@@ -558,7 +619,13 @@ public class EventAdapterServiceImpl implements EventAdapterService
             propertyTypes = propertiesSuperset;
         }
 
-        EventTypeMetadata metadata = EventTypeMetadata.createWrapper(eventTypeName, isNamedWindow, isInsertInto);
+        boolean isPropertyAgnostic = false;
+        if (underlyingEventType instanceof EventTypeSPI)
+        {
+            isPropertyAgnostic = ((EventTypeSPI) underlyingEventType).getMetadata().isPropertyAgnostic();
+        }
+
+        EventTypeMetadata metadata = EventTypeMetadata.createWrapper(eventTypeName, isNamedWindow, isInsertInto, isPropertyAgnostic);
         WrapperEventType newEventType = new WrapperEventType(metadata, eventTypeName, underlyingEventType, propertyTypes, this);
 
 	    EventType existingType = nameToTypeMap.get(eventTypeName);

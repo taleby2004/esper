@@ -32,6 +32,8 @@ public class EPStatementHandle implements MetaDefItem, Serializable
     // such that the internal dispatching must occur after both matches are processed
     private boolean canSelfJoin;
     private boolean hasVariables;
+    private final int priority;
+    private final boolean preemptive;
     private transient InsertIntoLatchFactory insertIntoLatchFactory;
     private transient StatementMetricHandle metricsHandle;
 
@@ -43,12 +45,14 @@ public class EPStatementHandle implements MetaDefItem, Serializable
      * @param hasVariables indicator whether the statement uses variables
      * @param metricsHandle handle for metrics reporting
      */
-    public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText, boolean hasVariables, StatementMetricHandle metricsHandle)
+    public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText, boolean hasVariables, StatementMetricHandle metricsHandle, int priority, boolean preemptive)
     {
         this.statementId = statementId;
         this.statementLock = statementLock;
         this.hasVariables = hasVariables;
         this.metricsHandle = metricsHandle;
+        this.priority = priority;
+        this.preemptive = preemptive;
         hashCode = expressionText.hashCode() ^ statementLock.hashCode();
     }
 
@@ -130,6 +134,16 @@ public class EPStatementHandle implements MetaDefItem, Serializable
         {
             optionalDispatchable.execute();
         }
+    }
+
+    public int getPriority()
+    {
+        return priority;
+    }
+
+    public boolean isPreemptive()
+    {
+        return preemptive;
     }
 
     public boolean equals(Object otherObj)

@@ -9,7 +9,9 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.annotation.Name;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
@@ -30,6 +32,7 @@ import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -123,8 +126,24 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      */
     protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
     {
-        // Determine a statement name, i.e. use the id or use/generate one for the name passed in
         String statementName = statementId;
+
+        // find name annotation
+        if ((statementSpec.getAnnotations() != null) && (!statementSpec.getAnnotations().isEmpty()))
+        {
+            for (AnnotationDesc desc : statementSpec.getAnnotations())
+            {
+                if ((desc.getName().equals(Name.class.getSimpleName())) || (desc.getName().equals(Name.class.getName())))
+                {
+                    if (desc.getAttributes().get(0) != null)
+                    {
+                        optStatementName = desc.getAttributes().get(0).getSecond().toString();
+                    }
+                }
+            }
+        }
+
+        // Determine a statement name, i.e. use the id or use/generate one for the name passed in
         if (optStatementName != null)
         {
             statementName = getUniqueStatementName(optStatementName, statementId);
@@ -151,11 +170,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
 
-        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc(), false);
+        Annotation[] annotations = AnnotationUtil.compileAnnotations(statementSpec.getAnnotations(), services.getEngineImportService(), expression);
+        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc(), false, annotations);
         StatementSpecCompiled compiledSpec;
         try
         {
-            compiledSpec = compile(statementSpec, expression, statementContext, false);
+            compiledSpec = compile(statementSpec, expression, statementContext, false, annotations);
         }
         catch (EPStatementException ex)
         {
@@ -228,7 +248,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, isPattern,
                     services.getDispatchService(), this, timeLastStateChange, preserveDispatchOrder, isSpinLocks, blockingTimeout,
                     statementContext.getEpStatementHandle(), statementContext.getVariableService(), statementContext.getStatementResultService(),
-                    services.getTimeSource(), new StatementMetadata(statementType), userObject);
+                    services.getTimeSource(), new StatementMetadata(statementType), userObject, compiledSpec.getAnnotations());
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
             statementContext.getStatementResultService().setContext(statement, epServiceProvider,
@@ -636,7 +656,13 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      */
     public EPStatementSPI getStatementById(String id)
     {
-        return this.stmtIdToDescMap.get(id).getEpStatement();
+        EPStatementDesc statementDesc = this.stmtIdToDescMap.get(id);
+        if (statementDesc == null)
+        {
+            log.warn("Could not locate statement descriptor for statement id '" + id + "'");
+            return null;
+        }
+        return statementDesc.getEpStatement();
     }
 
     public synchronized String[] getStatementNames()
@@ -747,7 +773,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @return compiled statement
      * @throws EPStatementException if the statement cannot be compiled
      */
-    protected static StatementSpecCompiled compile(StatementSpecRaw spec, String eplStatement, StatementContext statementContext, boolean isSubquery) throws EPStatementException
+    protected static StatementSpecCompiled compile(StatementSpecRaw spec, String eplStatement, StatementContext statementContext, boolean isSubquery, Annotation[] annotations) throws EPStatementException
     {
         List<StreamSpecCompiled> compiledStreams;
         Set<String> eventTypeReferences = new HashSet<String>();
@@ -795,7 +821,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
         catch (ExprValidationException ex)
         {
-            log.error("Failed to compile statement: " + ex.getMessage(), ex);
+            log.info("Failed to compile statement: " + ex.getMessage(), ex);
             if (ex.getMessage() == null)
             {
                 throw new EPStatementException("Unexpected exception compiling statement, please consult the log file and report the exception", eplStatement);
@@ -904,7 +930,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         for (ExprSubselectNode subselect : visitor.getSubselects())
         {
             StatementSpecRaw raw = subselect.getStatementSpecRaw();
-            StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext, true);
+            StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext, true, new Annotation[0]);
             subselect.setStatementSpecCompiled(compiled);
         }
 
@@ -925,8 +951,46 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 visitor.getSubselects(),
                 spec.isHasVariables(),
                 spec.getRowLimitSpec(),
-                eventTypeReferences
+                eventTypeReferences,
+                annotations
                 );
+    }
+
+    public static SelectClauseSpecCompiled compileSelectNoSubselect(SelectClauseSpecRaw spec) throws ExprValidationException
+    {
+        // Look for expressions with sub-selects in select expression list and filter expression
+        // Recursively compile the statement within the statement.
+        ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+        List<SelectClauseElementCompiled> selectElements = new ArrayList<SelectClauseElementCompiled>();
+        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements);
+        for (SelectClauseElementRaw raw : spec.getSelectExprList())
+        {
+            if (raw instanceof SelectClauseExprRawSpec)
+            {
+                SelectClauseExprRawSpec rawExpr = (SelectClauseExprRawSpec) raw;
+                rawExpr.getSelectExpression().accept(visitor);
+                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName()));
+            }
+            else if (raw instanceof SelectClauseStreamRawSpec)
+            {
+                SelectClauseStreamRawSpec rawExpr = (SelectClauseStreamRawSpec) raw;
+                selectElements.add(new SelectClauseStreamCompiledSpec(rawExpr.getStreamName(), rawExpr.getOptionalAsName()));
+            }
+            else if (raw instanceof SelectClauseElementWildcard)
+            {
+                SelectClauseElementWildcard wildcard = (SelectClauseElementWildcard) raw;
+                selectElements.add(wildcard);
+            }
+            else
+            {
+                throw new IllegalStateException("Unexpected select clause element class : " + raw.getClass().getName());
+            }
+        }
+        if (!visitor.getSubselects().isEmpty())
+        {
+            throw new ExprValidationException("Subselects are not allowed in this context");
+        }
+        return selectClauseCompiled;
     }
 
     // The create window command:

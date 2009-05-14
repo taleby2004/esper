@@ -22,6 +22,7 @@ tokens
 	AND_EXPR='and';
 	NOT_EXPR='not';
     	EVERY_EXPR='every';
+    	EVERY_DISTINCT_EXPR='every-distinct';
 	WHERE='where';
 	AS='as';	
 	SUM='sum';
@@ -114,6 +115,7 @@ tokens
    	ARRAY_PARAM_LIST;
    	PATTERN_FILTER_EXPR;
    	PATTERN_NOT_EXPR;
+   	PATTERN_EVERY_DISTINCT_EXPR;
    	EVENT_FILTER_EXPR;
    	EVENT_FILTER_PROPERTY_EXPR;
    	EVENT_FILTER_PROPERTY_EXPR_ATOM;
@@ -206,6 +208,8 @@ tokens
 	ON_EXPR;
 	ON_DELETE_EXPR;
 	ON_SELECT_EXPR;
+	ON_SELECT_INSERT_EXPR;
+	ON_SELECT_INSERT_OUTPUT;
 	ON_EXPR_FROM;
 	ON_SET_EXPR;
 	CREATE_VARIABLE_EXPR;
@@ -218,6 +222,9 @@ tokens
 	CREATE_WINDOW_COL_TYPE_LIST;
 	CREATE_WINDOW_COL_TYPE;
 	NUMBERSETSTAR;
+	ANNOTATION;
+	ANNOTATION_ARRAY;
+	ANNOTATION_VALUE;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -353,6 +360,7 @@ tokens
 	parserTokenParaphases.put(AND_EXPR, "'and'");
 	parserTokenParaphases.put(NOT_EXPR, "'not'");
 	parserTokenParaphases.put(EVERY_EXPR, "'every'");
+	parserTokenParaphases.put(EVERY_DISTINCT_EXPR, "'every-distinct'");
 	parserTokenParaphases.put(WHERE, "'where'");
 	parserTokenParaphases.put(AS, "'as'");	
 	parserTokenParaphases.put(SUM, "'sum'");
@@ -383,7 +391,6 @@ tokens
 	parserTokenParaphases.put(BY, "'by'");
 	parserTokenParaphases.put(GROUP, "'group'");
 	parserTokenParaphases.put(HAVING, "'having'");
-	parserTokenParaphases.put(DISTINCT, "'distinct'");
 	parserTokenParaphases.put(ALL, "'all'");
 	parserTokenParaphases.put(ANY, "'any'");
 	parserTokenParaphases.put(SOME, "'some'");
@@ -469,14 +476,16 @@ tokens
 }
 
 startPatternExpressionRule
-	:	patternExpression
+	:	annotationNoEnum*
+		patternExpression
 		EOF!
 	;
 	
 startEPLExpressionRule 
-	:	eplExpression
+	:	annotationEnum*	
+		eplExpression
 		EOF
-		-> ^(EPL_EXPR eplExpression) 
+		-> ^(EPL_EXPR annotationEnum* eplExpression) 
 	;
 
 startEventPropertyRule 
@@ -484,6 +493,60 @@ startEventPropertyRule
 		EOF!
 	;
 
+//----------------------------------------------------------------------------
+// Annotations
+//----------------------------------------------------------------------------
+annotationNoEnum
+    :   '@' classIdentifier ( '(' ( elementValuePairsNoEnum | elementValueNoEnum )? ')' )?
+	-> ^(ANNOTATION classIdentifier elementValuePairsNoEnum? elementValueNoEnum?)
+    ;
+    
+annotationEnum
+    :   '@' classIdentifier ( '(' ( elementValuePairsEnum | elementValueEnum )? ')' )?
+	-> ^(ANNOTATION classIdentifier elementValuePairsEnum? elementValueEnum?)
+    ;
+    
+elementValuePairsNoEnum
+    :   elementValuePairNoEnum (COMMA! elementValuePairNoEnum)*
+    ;
+
+elementValuePairsEnum
+    :   elementValuePairEnum (COMMA! elementValuePairEnum)*
+    ;
+
+elementValuePairNoEnum
+    :   i=IDENT '=' elementValueNoEnum
+	-> ^(ANNOTATION_VALUE $i elementValueNoEnum)
+    ;
+    
+elementValuePairEnum
+    :   i=IDENT '=' elementValueEnum
+	-> ^(ANNOTATION_VALUE $i elementValueEnum)
+    ;
+
+elementValueNoEnum
+    :   annotationEnum
+    |   (elementValueArrayNoEnum) -> elementValueArrayNoEnum
+    |	constant
+    ;
+    
+elementValueEnum
+    :   annotationEnum
+    |   (elementValueArrayEnum) -> elementValueArrayEnum
+    |	constant
+    |	classIdentifier	
+    ;
+
+elementValueArrayNoEnum
+    :   '{' (elementValueNoEnum (',' elementValueNoEnum)*)? (',')? '}'
+	-> ^(ANNOTATION_ARRAY elementValueNoEnum*)
+    ;
+
+elementValueArrayEnum
+    :   '{' (elementValueEnum (',' elementValueEnum)*)? (',')? '}'
+	-> ^(ANNOTATION_ARRAY elementValueEnum*)
+    ;
+    
 //----------------------------------------------------------------------------
 // EPL expression
 //----------------------------------------------------------------------------
@@ -508,8 +571,8 @@ selectExpr
 	
 onExpr 
 	:	ON (eventFilterExpression | patternInclusionExpression) (AS i=IDENT | i=IDENT)? 
-		(onDeleteExpr | onSelectExpr | onSetExpr)
-		-> ^(ON_EXPR eventFilterExpression? patternInclusionExpression? $i? onDeleteExpr? onSelectExpr? onSetExpr?)
+		(onDeleteExpr | onSelectExpr (onSelectInsertExpr+ outputClauseInsert?)? | onSetExpr)
+		-> ^(ON_EXPR eventFilterExpression? patternInclusionExpression? $i? onDeleteExpr? onSelectExpr? onSelectInsertExpr* outputClauseInsert? onSetExpr?)
 	;
 	
 onSelectExpr	
@@ -517,12 +580,26 @@ onSelectExpr
 @after { paraphrases.pop(); }
 	:	(INSERT insertIntoExpr)?
 		SELECT selectionList
-		onExprFrom
+		onExprFrom?
 		(WHERE whereClause)?		
 		(GROUP BY groupByListExpr)?
 		(HAVING havingClause)?
 		(ORDER BY orderByListExpr)?
-		-> ^(ON_SELECT_EXPR insertIntoExpr? selectionList onExprFrom whereClause? groupByListExpr? havingClause? orderByListExpr?)
+		-> ^(ON_SELECT_EXPR insertIntoExpr? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr?)
+	;
+	
+onSelectInsertExpr
+@init  { paraphrases.push("on-select-insert clause"); }
+@after { paraphrases.pop(); }
+	:	INSERT insertIntoExpr
+		SELECT selectionList
+		(WHERE whereClause)?		
+		-> ^(ON_SELECT_INSERT_EXPR insertIntoExpr selectionList whereClause?)
+	;
+	
+outputClauseInsert
+	:	OUTPUT (f=FIRST | a=ALL)
+		-> ^(ON_SELECT_INSERT_OUTPUT $f? $a?)	
 	;
 	
 onDeleteExpr	
@@ -1042,13 +1119,26 @@ matchUntilExpression
 	;
 
 qualifyExpression
-	:	(e=EVERY_EXPR | n=NOT_EXPR)?
+	:	((e=EVERY_EXPR | n=NOT_EXPR | d=EVERY_DISTINCT_EXPR distinctExpressionList) (r=matchUntilRange)? )?
 		guardPostFix
-		-> {e != null}? ^(EVERY_EXPR guardPostFix)
-		-> {n != null}? ^(PATTERN_NOT_EXPR guardPostFix)
+		-> {e != null && r == null}? ^(EVERY_EXPR guardPostFix)
+		-> {n != null && r == null}? ^(PATTERN_NOT_EXPR guardPostFix)
+		-> {d != null && r == null}? ^(EVERY_DISTINCT_EXPR distinctExpressionList guardPostFix)
+		-> {e != null && r != null}? ^(EVERY_EXPR ^(MATCH_UNTIL_EXPR matchUntilRange guardPostFix) )
+		-> {n != null && r != null}? ^(PATTERN_NOT_EXPR ^(MATCH_UNTIL_EXPR matchUntilRange guardPostFix) )
+		-> {d != null && r != null}? ^(EVERY_DISTINCT_EXPR distinctExpressionList ^(MATCH_UNTIL_EXPR matchUntilRange guardPostFix) )
 		-> guardPostFix
 	;
 	
+distinctExpressionList
+	:	LPAREN distinctExpressionAtom (COMMA distinctExpressionAtom)* RPAREN
+		-> ^(PATTERN_EVERY_DISTINCT_EXPR distinctExpressionAtom+) 
+	;
+
+distinctExpressionAtom
+	:	expression
+   	;
+
 guardPostFix
 	:	(atomicExpression | l=LPAREN patternExpression RPAREN) (w=WHERE guardExpression)?
 		-> {$w != null}? ^(GUARD_EXPR atomicExpression? patternExpression? guardExpression) 
@@ -1148,6 +1238,7 @@ patternFilterExpression
        	propertyExpression?
        	-> ^(PATTERN_FILTER_EXPR $i? classIdentifier propertyExpression? expressionList?)
     ;
+    
 
 classIdentifier
   @init { String identifier = ""; }

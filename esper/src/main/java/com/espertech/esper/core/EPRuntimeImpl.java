@@ -16,11 +16,12 @@ import com.espertech.esper.client.util.EventRenderer;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.collection.ThreadWorkQueue;
+import com.espertech.esper.core.thread.*;
+import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.core.thread.*;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;
@@ -32,10 +33,9 @@ import com.espertech.esper.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.annotation.Annotation;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -48,10 +48,13 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private boolean isLatchStatementInsertStream;
     private boolean isUsingExternalClocking;
     private boolean isSubselectPreeval;
+    private boolean isPrioritized;
     private volatile UnmatchedListener unmatchedListener;
     private AtomicLong routedInternal;
     private AtomicLong routedExternal;
     private EventRenderer eventRenderer;
+    private ThreadLocal<Map<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>> matchesPerStmtThreadLocal;
+    private ThreadLocal<Map<EPStatementHandle, Object>> schedulePerStmtThreadLocal;
 
     private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
     {
@@ -61,29 +64,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
     };
 
-    private ThreadLocal<HashMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>> matchesPerStmtThreadLocal =
-            new ThreadLocal<HashMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>>()
-    {
-        protected synchronized HashMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>> initialValue()
-        {
-            return new HashMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>(10000);
-        }
-    };
-
     private ThreadLocal<ArrayBackedCollection<ScheduleHandle>> scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
     {
         protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
         {
             return new ArrayBackedCollection<ScheduleHandle>(100);
-        }
-    };
-
-    private ThreadLocal<HashMap<EPStatementHandle, Object>> schedulePerStmtThreadLocal =
-            new ThreadLocal<HashMap<EPStatementHandle, Object>>()
-    {
-        protected synchronized HashMap<EPStatementHandle, Object> initialValue()
-        {
-            return new HashMap<EPStatementHandle, Object>(10000);
         }
     };
 
@@ -97,8 +82,62 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         isLatchStatementInsertStream = this.services.getEngineSettingsService().getEngineSettings().getThreading().isInsertIntoDispatchPreserveOrder();
         isUsingExternalClocking = !this.services.getEngineSettingsService().getEngineSettings().getThreading().isInternalTimerEnabled();
         isSubselectPreeval = services.getEngineSettingsService().getEngineSettings().getExpression().isSelfSubselectPreeval();
+        isPrioritized = services.getEngineSettingsService().getEngineSettings().getExecution().isPrioritized();
         routedInternal = new AtomicLong();
         routedExternal = new AtomicLong();
+
+        matchesPerStmtThreadLocal =
+            new ThreadLocal<Map<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>>()
+            {
+                protected synchronized Map<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>> initialValue()
+                {
+                    if (isPrioritized)
+                    {
+                        return new TreeMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>(new Comparator<EPStatementHandle>()
+                        {
+                            // sorted descending order
+                            public int compare(EPStatementHandle o1, EPStatementHandle o2)
+                            {
+                                if (o1.getPriority() == o2.getPriority())
+                                {
+                                    return 0;
+                                }
+                                return o1.getPriority() > o2.getPriority() ? -1 : 1;
+                            }
+                        });
+                    }
+                    else
+                    {
+                        return new HashMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>(10000);
+                    }
+                }
+            };
+
+        schedulePerStmtThreadLocal = new ThreadLocal<Map<EPStatementHandle, Object>>()
+            {
+                protected synchronized Map<EPStatementHandle, Object> initialValue()
+                {
+                    if (isPrioritized)
+                    {
+                        return new TreeMap<EPStatementHandle, Object>(new Comparator<EPStatementHandle>()
+                        {
+                            // sorted descending order
+                            public int compare(EPStatementHandle o1, EPStatementHandle o2)
+                            {
+                                if (o1.getPriority() == o2.getPriority())
+                                {
+                                    return 0;
+                                }
+                                return o1.getPriority() > o2.getPriority() ? -1 : 1;
+                            }
+                        });
+                    }
+                    else
+                    {
+                        return new HashMap<EPStatementHandle, Object>(10000);
+                    }
+                }
+            };
 
         services.getThreadingService().initThreading(services, this);
     }
@@ -468,7 +507,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         int entryCount = handles.size();
 
         // sort multiple matches for the event into statements
-        HashMap<EPStatementHandle, Object> stmtCallbacks = schedulePerStmtThreadLocal.get();
+        Map<EPStatementHandle, Object> stmtCallbacks = schedulePerStmtThreadLocal.get();
         stmtCallbacks.clear();
         for (int i = 0; i < entryCount; i++)    // need to use the size of the collection
         {
@@ -531,6 +570,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                     processStatementScheduleMultiple(handle, callbackObject, services);
                 }
             }
+
+            if ((isPrioritized) && (handle.isPreemptive()))
+            {
+                break;
+            }            
         }
     }
 
@@ -685,7 +729,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             return;
         }
 
-        HashMap<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>> stmtCallbacks = matchesPerStmtThreadLocal.get();
+        Map<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>> stmtCallbacks = matchesPerStmtThreadLocal.get();
         Object[] matchArray = matches.getArray();
         int entryCount = matches.size();
 
@@ -694,8 +738,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             EPStatementHandleCallback handleCallback = (EPStatementHandleCallback) matchArray[i];
             EPStatementHandle handle = handleCallback.getEpStatementHandle();
 
-            // Self-joins require that the internal dispatch happens after all streams are evaluated
-            if (handle.isCanSelfJoin())
+            // Self-joins require that the internal dispatch happens after all streams are evaluated.
+            // Priority or preemptive settings also require special ordering.
+            if (handle.isCanSelfJoin() || isPrioritized)
             {
                 ArrayDequeJDK6Backport<FilterHandleCallback> callbacks = stmtCallbacks.get(handle);
                 if (callbacks == null)
@@ -765,6 +810,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 else
                 {
                     processStatementFilterMultiple(handle, callbackList, event);
+                }
+
+                if ((isPrioritized) && (handle.isPreemptive()))
+                {
+                    break;
                 }
             }
         }
@@ -1131,8 +1181,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         try
         {
             StatementSpecRaw spec = EPAdministratorImpl.compileEPL(epl, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
-            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true);
-            StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true);
+            Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
+            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations);
+            StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations);
             return new EPPreparedExecuteMethod(compiledSpec, services, statementContext);
         }
         catch (EPStatementException ex)

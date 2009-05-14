@@ -8,11 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.epl.spec.FilterSpecRaw;
+import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.util.ExecutionPathDebugLog;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class represents a filter of events in the evaluation tree representing any event expressions.
@@ -23,6 +23,19 @@ public final class EvalFilterNode extends EvalNode
     private final FilterSpecRaw rawFilterSpec;
     private final String eventAsName;
     private transient FilterSpecCompiled filterSpec;
+
+    /**
+     * Constructor.
+     * @param filterSpecification specifies the filter properties
+     * @param eventAsName is the name to use for adding matching events to the MatchedEventMap
+     * table used when indicating truth value of true.
+     */
+    public EvalFilterNode(FilterSpecRaw filterSpecification,
+                                String eventAsName)
+    {
+        this.rawFilterSpec = filterSpecification;
+        this.eventAsName = eventAsName;
+    }
 
     public final EvalStateNode newState(Evaluator parentNode,
                                         MatchedEventMap beginState,
@@ -40,19 +53,6 @@ public final class EvalFilterNode extends EvalNode
         }
 
         return context.getPatternStateFactory().makeFilterStateNode(parentNode, this, beginState, stateNodeId);
-    }
-
-    /**
-     * Constructor.
-     * @param filterSpecification specifies the filter properties
-     * @param eventAsName is the name to use for adding matching events to the MatchedEventMap
-     * table used when indicating truth value of true.
-     */
-    public EvalFilterNode(FilterSpecRaw filterSpecification,
-                                String eventAsName)
-    {
-        this.rawFilterSpec = filterSpecification;
-        this.eventAsName = eventAsName;
     }
 
     /**

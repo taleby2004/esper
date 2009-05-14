@@ -17,6 +17,10 @@ import com.espertech.esper.util.ExecutionPathDebugLog;
  */
 public final class EvalEveryNode extends EvalNode
 {
+    public EvalEveryNode()
+    {
+    }
+
     public final EvalStateNode newState(Evaluator parentNode,
                                         MatchedEventMap beginState,
                                         PatternContext context, Object stateNodeId)

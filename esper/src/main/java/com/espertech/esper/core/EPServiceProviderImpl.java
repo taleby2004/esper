@@ -29,6 +29,7 @@ import javax.naming.NamingException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.Hashtable;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
@@ -50,7 +51,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     /**
      * Constructor - initializes services.
      * @param configuration is the engine configuration
-     * @param engineURI is the engine URI or null if this is the default provider
+     * @param engineURI is the engine URI or "default" (or null which it assumes as "default") if this is the default provider
      * @throws ConfigurationException is thrown to indicate a configuraton error
      */
     public EPServiceProviderImpl(Configuration configuration, String engineURI) throws ConfigurationException
@@ -59,11 +60,51 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         {
             throw new NullPointerException("Unexpected null value received for configuration");
         }
+        if (engineURI == null)
+        {
+        	throw new NullPointerException("Engine URI should not be null at this stage");
+        }
         this.engineURI = engineURI;
+        verifyConfiguration(configuration);
         configSnapshot = takeSnapshot(configuration);
         serviceListeners = new CopyOnWriteArraySet<EPServiceStateListener>();
         statementListeners = new CopyOnWriteArraySet<EPStatementStateListener>();
-        initialize();
+        doInitialize();
+    }
+
+    /**
+     * Invoked after an initialize operation.
+     */
+    public void postInitialize()
+    {
+        try
+        {
+            Hashtable table = engine.getServices().getEngineEnvContext().getEnvironment();
+
+            for (Object key : table.keySet())
+            {
+                if (key.toString().startsWith("plugin-loader/"))
+                {
+                    Object value = table.get(key);
+                    if (value instanceof PluginLoader)
+                    {
+                        try
+                        {
+                            ((PluginLoader) value).postInitialize();
+                        }
+                        catch (Throwable t)
+                        {
+                            log.error("Error post-initializing plugin class " + value.getClass().getSimpleName(), t);
+                        }
+                    }
+                }
+            }
+        }
+        catch (NamingException e)
+        {
+            throw new EPException("Failed to use context to bind adapter loader", e);
+        }
+
     }
 
     /**
@@ -72,7 +113,20 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      */
     public void setConfiguration(Configuration configuration)
     {
+        verifyConfiguration(configuration);
         configSnapshot = takeSnapshot(configuration);
+    }
+
+    private void verifyConfiguration(Configuration configuration)
+    {
+        if (configuration.getEngineDefaults().getExecution().isPrioritized())
+        {
+            if (!configuration.getEngineDefaults().getViewResources().isShareViews())
+            {
+                log.info("Setting engine setting for share-views to false as execution is prioritized");
+            }
+            configuration.getEngineDefaults().getViewResources().setShareViews(false);
+        }
     }
 
     public String getURI()
@@ -148,6 +202,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         return engine.getServices().getStatementEventTypeRefService();
     }
 
+    public EngineEnvContext getEngineEnvContext()
+    {
+        return engine.getServices().getEngineEnvContext();
+    }
+
     public Context getContext()
     {
         return engine.getServices().getEngineEnvContext();
@@ -180,9 +239,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 Thread.currentThread().interrupt();
             }
 
-            engine.getRuntime().destroy();
             // plugin-loaders
-            List<ConfigurationPluginLoader> pluginLoaders = configSnapshot.getPluginLoaders();
+            List<ConfigurationPluginLoader> pluginLoaders = engine.getServices().getConfigSnapshot().getPluginLoaders();
             for (ConfigurationPluginLoader config : pluginLoaders) {
                 PluginLoader plugin = null;
                 try {
@@ -193,6 +251,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                     // expected
                 }
             }
+            
+            engine.getRuntime().destroy();
             engine.getAdmin().destroy();
             engine.getServices().destroy();
 
@@ -208,6 +268,15 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     }
 
     public void initialize()
+    {
+        doInitialize();
+        postInitialize();
+    }
+
+    /**
+     * Performs the initialization.
+     */
+    protected void doInitialize()
     {
         // This setting applies to all engines in a given VM
         ExecutionPathDebugLog.setDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableExecutionDebug());

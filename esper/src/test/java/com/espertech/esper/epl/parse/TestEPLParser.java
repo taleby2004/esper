@@ -200,6 +200,11 @@ public class TestEPLParser extends TestCase
         assertIsInvalid("on MyEvent select * from MyNamedWindow.win:time(30)");
         assertIsInvalid("on MyEvent select * from MyNamedWindow where");
         assertIsInvalid("on MyEvent insert into select * from MyNamedWindow");
+        assertIsInvalid("on MyEvent select a,c,b where a=y select 1,2,2,2 where 2=4");
+        assertIsInvalid("on MyEvent insert into A select a,c,b where a=y select 1,2,2,2 where 2=4");
+        assertIsInvalid("on MyEvent insert into A select a,c,b where a=y insert into D where 2=4");
+        assertIsInvalid("on MyEvent insert into A select a,c,b where a=y insert into D where 2=4 output xyz");
+        assertIsInvalid("on MyEvent insert into A select a,c,b where a=y insert into D where 2=4 output");
 
         // on-set statement
         assertIsInvalid("on MyEvent set");
@@ -586,6 +591,12 @@ public class TestEPLParser extends TestCase
         assertIsValid("on MyEvent insert into YooStream select a, b, c from MyNamedWindow");
         assertIsValid("on MyEvent insert into YooStream (p, q) select a, b, c from MyNamedWindow");
         assertIsValid("on MyEvent select a, b, c from MyNamedWindow where a=b group by c having d>e order by f");
+        assertIsValid("on MyEvent insert into A select * where 1=2 insert into B select * where 2=4");
+        assertIsValid("on MyEvent insert into A select * where 1=2 insert into B select * where 2=4 insert into C select *");
+        assertIsValid("on MyEvent insert into A select a,c,b insert into G select 1,2,2,2 where 2=4 insert into C select * where a=x");
+        assertIsValid("on MyEvent insert into A select a,c,b where a=y group by p having q>r order by x,y insert into G select 1,2,2,2 where 2=4 insert into C select * where a=x");
+        assertIsValid("on MyEvent insert into A select a,c,b where a=y insert into D select * where 2=4 output first");
+        assertIsValid("on MyEvent insert into A select a,c,b where a=y insert into D select * where 2=4 output all");
 
         // on-set statement
         assertIsValid("on MyEvent set var=1");
@@ -640,6 +651,40 @@ public class TestEPLParser extends TestCase
         assertIsValid("select * from A where exp > ANY (select a from B)");
         assertIsValid("select * from A where 1 <= ANY (select a from B)");
         assertIsValid("select * from A where {1,2,3} > ALL (1,2,3)");
+
+        // annotations
+        assertIsValid("@SOMEANNOTATION select * from B");
+        assertIsValid("@SomeOther(a=1, b=true, c='a', d=\"alal\") select * from B");
+        assertIsValid("@SomeOther(@inner2(a=3)) select * from B");
+        assertIsValid("@SomeOther(@inner1) select * from B");
+        assertIsValid("@SomeOther(a=com.myenum.VAL1,b=a.VAL2) select * from B");
+        assertIsValid("@SomeOther(tags=@inner1(a=4), moretags=@inner2(a=3)) select * from B");
+        assertIsValid("@SomeOther(innerdata={1, 2, 3}) select * from B");
+        assertIsValid("@SomeOther(innerdata={1, 2, 3}) select * from B");
+        String text = "@EPL(\n" +
+                "  name=\"MyStmtName\", \n" +
+                "  description=\"Selects all fields\", \n" +
+                "  onUpdate=\"some test\", \n" +
+                "  onUpdateRemove=\"some text\", \n" +
+                "  tags=@Tags" +
+                ")\n" +
+                "select * from MyField";
+        assertIsValid(text);
+        text = "@EPL(name=\"MyStmtName\"," +
+                "  tags=@Tags(" +
+                "    {@Tag(name=\"vehicleId\", type='int', value=100), " +
+                "     @Tag(name=\"vehicleId\", type='int', value=100)" +
+                "    } " +
+                "  )" +
+                ")\n" +
+                "select * from MyField";
+        assertIsValid(text);
+
+        // much simpler
+        assertIsValid("@Name('MyStatementName')\n" +
+                      "@Description('This statement does ABC')\n" +
+                      "@Tag(name='abc', value='cde')\n" +
+                      "select a from B");
     }
 
     public void testBitWiseCases() throws Exception

@@ -9,7 +9,9 @@
 package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.event.*;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyType;
+import com.espertech.esper.event.WriteablePropertyDescriptor;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
@@ -80,6 +82,25 @@ public class PropertyHelper
         return getPropertiesForClasses(propertyOrigClasses);
     }
 
+    /**
+     * Introspects the given class and returns event property descriptors for each writable property found
+     * in the class itself, it's superclasses and all interfaces this class and the superclasses implements.
+     * @param clazz is the Class to introspect
+     * @return list of properties
+     */
+    public static Set<WriteablePropertyDescriptor> getWritableProperties(Class clazz)
+    {
+        // Determine all interfaces implemented and the interface's parent interfaces if any
+        Set<Class> propertyOrigClasses = new HashSet<Class>();
+        getImplementedInterfaceParents(clazz, propertyOrigClasses);
+
+        // Add class itself
+        propertyOrigClasses.add(clazz);
+
+        // Get the set of property names for all classes
+        return getWritablePropertiesForClasses(propertyOrigClasses);
+    }
+
     private static void getImplementedInterfaceParents(Class clazz, Set<Class> classesResult)
     {
         Class[] interfaces = clazz.getInterfaces();
@@ -94,6 +115,18 @@ public class PropertyHelper
             classesResult.add(interfaces[i]);
             getImplementedInterfaceParents(interfaces[i], classesResult);
         }
+    }
+
+    private static Set<WriteablePropertyDescriptor> getWritablePropertiesForClasses(Set<Class> propertyClasses)
+    {
+    	Set<WriteablePropertyDescriptor> result = new HashSet<WriteablePropertyDescriptor>();
+
+        for (Class clazz : propertyClasses)
+        {
+        	addIntrospectPropertiesWritable(clazz, result);
+        }
+
+        return result;
     }
 
     private static List<InternalEventPropDescriptor> getPropertiesForClasses(Set<Class> propertyClasses)
@@ -194,6 +227,24 @@ public class PropertyHelper
             }
 
             result.add(new InternalEventPropDescriptor(propertyName, readMethod, type));
+        }
+    }
+
+    protected static void addIntrospectPropertiesWritable(Class clazz, Set<WriteablePropertyDescriptor> result)
+    {
+        PropertyDescriptor properties[] = introspect(clazz);
+        for (int i = 0; i < properties.length; i++)
+        {
+            PropertyDescriptor property = properties[i];
+        	String propertyName = property.getName();
+        	Method writeMethod = property.getWriteMethod();
+
+            if (writeMethod == null)
+            {
+                continue;
+            }
+
+            result.add(new WriteablePropertyDescriptor(propertyName, writeMethod.getParameterTypes()[0], writeMethod));
         }
     }
 

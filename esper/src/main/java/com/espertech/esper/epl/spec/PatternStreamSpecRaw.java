@@ -17,6 +17,7 @@ import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprValidationPropertyException;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.property.PropertyEvaluatorFactory;
 import com.espertech.esper.epl.property.PropertyEvaluator;
@@ -120,6 +121,27 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             }
         }
 
+        for (EvalEveryDistinctNode distinctNode : evalNodeAnalysisResult.getDistinctNodes())
+        {
+            MatchEventSpec matchEventFromChildNodes = analyzeMatchEvent(distinctNode);
+            StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getEventAdapterService(), matchEventFromChildNodes.getTaggedEventTypes(), matchEventFromChildNodes.getArrayEventTypes());
+            List<ExprNode> validated;
+            try
+            {
+                validated = validateExpressions(distinctNode.getExpressions(),
+                    streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService());
+            }
+            catch (ExprValidationPropertyException ex)
+            {
+                throw new ExprValidationPropertyException(ex.getMessage() + ", every-distinct requires that all properties resolve from sub-expressions to the every-distinct", ex.getCause());
+            }
+
+            MatchedEventConvertor convertor = new MatchedEventConvertorImpl(matchEventFromChildNodes.getTaggedEventTypes(), matchEventFromChildNodes.getArrayEventTypes(), context.getEventAdapterService());
+
+            distinctNode.setConvertor(convertor);
+            distinctNode.setExpressions(validated);
+        }
+        
         return new PatternStreamSpecCompiled(evalNode, taggedEventTypes, arrayEventTypes, this.getViewSpecs(), this.getOptionalStreamName(), this.getOptions());
     }
 
@@ -322,5 +344,73 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         }
 
         return new StreamTypeServiceImpl(filterTypes, engineURI, true, false);
+    }
+
+    private MatchEventSpec analyzeMatchEvent(EvalNode relativeNode)
+    {
+        LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
+        LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
+
+        // Determine all the filter nodes used in the pattern
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(relativeNode);
+
+        // collect all filters underneath
+        for (EvalFilterNode filterNode : evalNodeAnalysisResult.getFilterNodes())
+        {
+            String optionalTag = filterNode.getEventAsName();
+            if (optionalTag != null)
+            {
+                taggedEventTypes.put(optionalTag, new Pair<EventType, String>(filterNode.getFilterSpec().getFilterForEventType(), filterNode.getFilterSpec().getFilterForEventTypeName()));
+            }
+        }
+
+        // collect those filters under a repeat since they are arrays
+        Set<String> arrayTags = new HashSet<String>();
+        for (EvalMatchUntilNode matchUntilNode : evalNodeAnalysisResult.getRepeatNodes())
+        {
+            EvalNodeAnalysisResult matchUntilAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(matchUntilNode.getChildNodes().get(0));
+            for (EvalFilterNode filterNode : matchUntilAnalysisResult.getFilterNodes())
+            {
+                String optionalTag = filterNode.getEventAsName();
+                if (optionalTag != null)
+                {
+                    arrayTags.add(optionalTag);
+                }
+            }
+        }
+
+        // for each array tag change collection
+        for (String arrayTag : arrayTags)
+        {
+            if (taggedEventTypes.get(arrayTag) != null)
+            {
+                arrayEventTypes.put(arrayTag, taggedEventTypes.get(arrayTag));
+                taggedEventTypes.remove(arrayTag);
+            }
+        }
+
+        return new MatchEventSpec(taggedEventTypes, arrayEventTypes);
+    }
+
+    private class MatchEventSpec
+    {
+        private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;
+        private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;
+
+        public MatchEventSpec(LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+        {
+            this.taggedEventTypes = taggedEventTypes;
+            this.arrayEventTypes = arrayEventTypes;
+        }
+
+        public LinkedHashMap<String, Pair<EventType, String>> getArrayEventTypes()
+        {
+            return arrayEventTypes;
+        }
+
+        public LinkedHashMap<String, Pair<EventType, String>> getTaggedEventTypes()
+        {
+            return taggedEventTypes;
+        }
     }
 }

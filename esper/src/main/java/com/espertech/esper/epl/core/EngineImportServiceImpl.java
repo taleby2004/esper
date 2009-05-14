@@ -15,10 +15,8 @@ import com.espertech.esper.client.ConfigurationMethodRef;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -139,16 +137,16 @@ public class EngineImportServiceImpl implements EngineImportService
         }
         catch (ClassNotFoundException e)
         {
-            throw new EngineImportException("Could not load class by name '" + className + "' ", e);
+            throw new EngineImportException("Could not load class by name '" + className + "', please check imports", e);
         }
 
         try
         {
             return MethodResolver.resolveMethod(clazz, methodName, paramTypes, false);
         }
-        catch (NoSuchMethodException e)
+        catch (EngineNoSuchMethodException e)
         {
-            throw new EngineImportException("Could not find static method named '" + methodName + "' in class '" + className + "' ", e);
+            throw convert(clazz, methodName, e);
         }
     }
 
@@ -162,7 +160,7 @@ public class EngineImportServiceImpl implements EngineImportService
         }
         catch (ClassNotFoundException e)
         {
-            throw new EngineImportException("Could not load class by name '" + className + "' ", e);
+            throw new EngineImportException("Could not load class by name '" + className + "', please check imports", e);
         }
 
         Method methods[] = clazz.getMethods();
@@ -202,7 +200,7 @@ public class EngineImportServiceImpl implements EngineImportService
         }
         catch (ClassNotFoundException e)
         {
-            throw new EngineImportException("Could not load class by name '" + className + "' ", e);
+            throw new EngineImportException("Could not load class by name '" + className + "', please check imports", e);
         }
 
         return clazz;
@@ -293,11 +291,22 @@ public class EngineImportServiceImpl implements EngineImportService
         {
             return MethodResolver.resolveMethod(clazz, methodName, paramTypes, true);
         }
-        catch (NoSuchMethodException e)
+        catch (EngineNoSuchMethodException e)
         {
-            throw new EngineImportException("Could not find a method named '" + methodName + "' in class '" + clazz.getName() + "' and matching the required parameter types", e);
+            throw convert(clazz, methodName, e);
         }
     }
+
+    private EngineImportException convert(Class clazz, String methodName, EngineNoSuchMethodException e)
+    {
+        String message = "Could not find static method named '" + methodName + "' in class '" + clazz.getName() + "' with matching parameter number and types";
+        if (e.getNearestMissMethod() != null)
+        {
+            message += (" (nearest match found was '" + e.getNearestMissMethod().getName() + "' taking " + JavaClassHelper.getParameterAsString(e.getNearestMissMethod().getParameterTypes()) + ")");
+        }
+        return new EngineImportException(message, e);
+    }
+
 
     /**
      * For testing, returns imports.

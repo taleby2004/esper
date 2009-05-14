@@ -363,6 +363,7 @@ class ConfigurationParser {
         String accessorStyle = xmldomElement.getAttributes().getNamedItem("accessor-style").getTextContent();
         String codeGeneration = xmldomElement.getAttributes().getNamedItem("code-generation").getTextContent();
         String propertyResolution = xmldomElement.getAttributes().getNamedItem("property-resolution-style").getTextContent();
+        String factoryMethod = getOptionalAttribute(xmldomElement, "factory-method");
 
         ConfigurationEventTypeLegacy legacyDesc = new ConfigurationEventTypeLegacy();
         if (accessorStyle != null)
@@ -376,6 +377,10 @@ class ConfigurationParser {
         if (propertyResolution != null)
         {
             legacyDesc.setPropertyResolutionStyle(Configuration.PropertyResolutionStyle.valueOf(propertyResolution.toUpperCase()));
+        }
+        if (factoryMethod != null)
+        {
+            legacyDesc.setFactoryMethod(factoryMethod);
         }
         configuration.addEventType(name, className, legacyDesc);
 
@@ -877,6 +882,10 @@ class ConfigurationParser {
             {
                 handleExpression(configuration, subElement);
             }
+            if (subElement.getNodeName().equals("execution"))
+            {
+                handleExecution(configuration, subElement);
+            }
         }
     }
 
@@ -1204,6 +1213,16 @@ class ConfigurationParser {
         {
             boolean isSelfSubselectPreeval = Boolean.parseBoolean(selfSubselectPreeval);
             configuration.getEngineDefaults().getExpression().setSelfSubselectPreeval(isSelfSubselectPreeval);
+        }
+    }
+
+    private static void handleExecution(Configuration configuration, Element parentElement)
+    {
+        String prioritizedStr = getOptionalAttribute(parentElement, "prioritized");
+        if (prioritizedStr != null)
+        {
+            boolean isPrioritized = Boolean.parseBoolean(prioritizedStr);
+            configuration.getEngineDefaults().getExecution().setPrioritized(isPrioritized);
         }
     }
 

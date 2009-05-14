@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
+import java.lang.annotation.Annotation;
 
 /**
  * Specification object representing a complete EPL statement including all EPL constructs.
@@ -24,9 +25,9 @@ public class StatementSpecCompiled
     private final OnTriggerDesc onTriggerDesc;
     private final CreateWindowDesc createWindowDesc;
     private final CreateVariableDesc createVariableDesc;
-    private final InsertIntoDesc insertIntoDesc;
+    private InsertIntoDesc insertIntoDesc;
     private SelectClauseStreamSelectorEnum selectStreamDirEnum;
-    private final SelectClauseSpecCompiled selectClauseSpec;
+    private SelectClauseSpecCompiled selectClauseSpec;
     private final List<StreamSpecCompiled> streamSpecs;
     private final List<OuterJoinDesc> outerJoinDescList;
     private ExprNode filterExprRootNode;
@@ -38,6 +39,7 @@ public class StatementSpecCompiled
     private final boolean hasVariables;
     private final RowLimitSpec rowLimitSpec;
     private final Set<String> eventTypeReferences;
+    private final Annotation[] annotations;
 
     /**
      * Ctor.
@@ -58,6 +60,7 @@ public class StatementSpecCompiled
      * @param hasVariables indicator whether the statement uses variables
      * @param rowLimitSpec row limit specification, or null if none supplied
      * @param eventTypeReferences event type names statically determined
+     * @param annotations statement annotations
      */
     public StatementSpecCompiled(OnTriggerDesc onTriggerDesc,
                                  CreateWindowDesc createWindowDesc,
@@ -75,7 +78,8 @@ public class StatementSpecCompiled
                                  List<ExprSubselectNode> subSelectExpressions,
                                  boolean hasVariables,
                                  RowLimitSpec rowLimitSpec,
-                                 Set<String> eventTypeReferences)
+                                 Set<String> eventTypeReferences,
+                                 Annotation[] annotations)
     {
         this.onTriggerDesc = onTriggerDesc;
         this.createWindowDesc = createWindowDesc;
@@ -94,6 +98,7 @@ public class StatementSpecCompiled
         this.hasVariables = hasVariables;
         this.rowLimitSpec = rowLimitSpec;
         this.eventTypeReferences = eventTypeReferences;
+        this.annotations = annotations;
     }
 
     /**
@@ -118,6 +123,7 @@ public class StatementSpecCompiled
         hasVariables = false;
         rowLimitSpec = null;
         eventTypeReferences = new HashSet<String>();
+        annotations = new Annotation[0];
     }
 
     /**
@@ -287,5 +293,24 @@ public class StatementSpecCompiled
     public Set<String> getEventTypeReferences()
     {
         return eventTypeReferences;
+    }
+
+    /**
+     * Returns annotations or empty array if none.
+     * @return annotations
+     */
+    public Annotation[] getAnnotations()
+    {
+        return annotations;
+    }
+
+    public void setInsertIntoDesc(InsertIntoDesc insertIntoDesc)
+    {
+        this.insertIntoDesc = insertIntoDesc;
+    }
+
+    public void setSelectClauseSpec(SelectClauseSpecCompiled selectClauseSpec)
+    {
+        this.selectClauseSpec = selectClauseSpec;
     }
 }

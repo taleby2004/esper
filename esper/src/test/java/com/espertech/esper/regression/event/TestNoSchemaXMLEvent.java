@@ -36,6 +36,24 @@ public class TestNoSchemaXMLEvent extends TestCase
         "  <element4><element41>VAL4-1</element41></element4>\n" +
         "</myevent>";
 
+    public void testVariableResolution() throws Exception
+    {
+        // test for ESPER-341 
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.addVariable("var", int.class, 0);
+
+        ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
+        xmlDOMEventTypeDesc.setRootElementName("myevent");
+        configuration.addEventType("TestXMLNoSchemaType", xmlDOMEventTypeDesc);
+
+        epService = EPServiceProviderManager.getProvider("TestNoSchemaXML", configuration);
+        epService.initialize();
+        updateListener = new SupportUpdateListener();
+
+        String stmtText = "select var from TestXMLNoSchemaType.win:length(100)";
+        epService.getEPAdministrator().createEPL(stmtText);
+    }
+
     public void testSimpleXMLXPathProperties() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
@@ -456,6 +474,7 @@ public class TestNoSchemaXMLEvent extends TestCase
 
     private static final Log log = LogFactory.getLog(TestNoSchemaXMLEvent.class);
 }
+
 
 
 

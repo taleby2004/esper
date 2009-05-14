@@ -52,10 +52,28 @@ options
 }
 
 //----------------------------------------------------------------------------
+// Annotations
+//----------------------------------------------------------------------------
+annotation[boolean isLeaveNode]
+	:	^(a=ANNOTATION CLASS_IDENT elementValuePair* elementValue?) { if ($isLeaveNode) leaveNode($a); }
+	;
+
+elementValuePair
+	:	^(a=ANNOTATION_VALUE IDENT elementValue)
+    	;
+    
+elementValue
+    	:   	annotation[false]
+	|	 ^(ANNOTATION_ARRAY elementValue*)
+    	|	constant[false]
+    	|	CLASS_IDENT
+    	;    
+
+//----------------------------------------------------------------------------
 // EPL expression
 //----------------------------------------------------------------------------
 startEPLExpressionRule
-	:	^(EPL_EXPR eplExpressionRule) { end(); }		
+	:	^(EPL_EXPR annotation[true]* eplExpressionRule) { end(); }		
 	;
 
 eplExpressionRule
@@ -64,7 +82,7 @@ eplExpressionRule
 
 onExpr 
 	:	^(i=ON_EXPR (eventFilterExpr | patternInclusionExpression) IDENT? 
-		(onDeleteExpr | onSelectExpr | onSetExpr)
+		(onDeleteExpr | onSelectExpr (onSelectInsertExpr+ onSelectInsertOutput?)? | onSetExpr)
 		{ leaveNode($i); } )
 	;
 	
@@ -73,9 +91,17 @@ onDeleteExpr
 	;	
 
 onSelectExpr
-	:	^(ON_SELECT_EXPR (insertIntoExpr)? selectionList onExprFrom (whereClause)? (groupByClause)? (havingClause)? (orderByClause)?)
+	:	^(ON_SELECT_EXPR insertIntoExpr? selectionList onExprFrom? whereClause? groupByClause? havingClause? orderByClause?)
+	;	
+
+onSelectInsertExpr
+	:	{pushStmtContext();} ^(ON_SELECT_INSERT_EXPR insertIntoExpr selectionList whereClause?)
 	;	
 	
+onSelectInsertOutput
+	:	^(ON_SELECT_INSERT_OUTPUT (ALL|FIRST))	
+	;
+
 onSetExpr
 	:	^(ON_SET_EXPR onSetAssignment (onSetAssignment)*)
 	;
@@ -432,16 +458,22 @@ libFunc
 // pattern expression
 //----------------------------------------------------------------------------
 startPatternExpressionRule
-	:	exprChoice { endPattern(); end(); }
+	:	annotation[true]* exprChoice { endPattern(); end(); }
 	;
 
 exprChoice
 	: 	atomicExpr
 	|	patternOp
 	| 	^( a=EVERY_EXPR exprChoice { leaveNode($a); } )
+	| 	^( a=EVERY_DISTINCT_EXPR distinctExpressions exprChoice { leaveNode($a); } )
 	| 	^( n=PATTERN_NOT_EXPR exprChoice { leaveNode($n); } )
 	| 	^( g=GUARD_EXPR exprChoice IDENT IDENT valueExprWithTime* { leaveNode($g); } )
 	|	^( m=MATCH_UNTIL_EXPR matchUntilRange? exprChoice exprChoice? { leaveNode($m); } )
+	;
+	
+	
+distinctExpressions
+	:	^( PATTERN_EVERY_DISTINCT_EXPR valueExpr+ )
 	;
 	
 patternOp
