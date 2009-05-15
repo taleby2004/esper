@@ -730,39 +730,19 @@ where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
     </faq>    
 
     <faq id="remove-from-stream">
-      <question>How do I remove events from a stream? I have a dynamic set of negative filters?</question>
+      <question>How do I remove or drop events from a stream? I have a dynamic set of negative filters?</question>
       <answer>
         <p>
           Let's assume you have a stream of events and you want to remove events from the stream before further processing of the remaining events by other
           statements.
         </p>
         <p>
-          Named windows and the on-delete and on-insert/select clauses can address this need, and there are other perhaps simpler ways described at the end of this FAQ.
+          The @Drop annotation marks statements that preempt further processing of an event, if an event matches multiple statements. The @Priority annotation
+          is also useful to specify, when an event matches multiple statements, which statements to process first.
+          Note that @Drop and @Priority require an engine-level configuration setting that is off by default, please see the documentation for further details.
         </p>
         <p>
-          First, create a named window:
-        </p>
-		<div class="source"><pre>create window MyWindow.std:lastevent() as select * from IncomingEvent</pre></div>      
-        <p>
-          Populate the named window from all arriving MyEvent events:
-        </p>
-		<div class="source"><pre>insert into MyWindow select * from IncomingEvent</pre></div>      
-        <p>
-          Define the negative filters. These sort of statements (like any others) can be added and removed during runtime at will. Here are two sample negative filters:
-        </p>
-		<div class="source"><pre>on MyWindow delete from MyWindow as win where win.emitter = 'Device1'
-on MyWindow delete from MyWindow as win where win.attribute1 = false</pre></div>      
-        <p>
-          Finally, take the arrival of a new event in the named window to create an event that selects from the named window, populating
-          the filtered stream that further statements can use:
-        </p>
-		<div class="source"><pre>on MyWindow insert into TriggerSelectEvent select 1 from MyWindow
-on TriggerSelectEvent insert into FilteredStream select win.* from MyWindow as win</pre></div>      
-        <p>
-          Disregard the order in which the statements are created, the insert-into of the trigger event ensures it is processed after the on-delete negative filters.
-        </p>
-        <p>
-          Other ways of solving this use case could be to use the UnmatchedListener to catch unmatched events or use the EPL split-stream syntax.
+          Other ways of solving this use case could be to use the UnmatchedListener to catch unmatched events or to use the EPL split-stream syntax.
         </p>
       </answer>
     </faq>    

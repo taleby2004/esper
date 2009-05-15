@@ -79,6 +79,7 @@ public class TestBeanEventType extends TestCase
             new EventPropertyDescriptor("indexed", int.class, true, false, true, false, false),
             new EventPropertyDescriptor("nested", SupportBeanComplexProps.SupportBeanSpecialGetterNested.class, false, false, false, false, true),
             new EventPropertyDescriptor("arrayProperty", int[].class, false, false, true, false, false),
+            new EventPropertyDescriptor("objectArray", Object[].class, false, false, true, false, false),
            }, eventTypeComplex.getPropertyDescriptors());
 
         properties = eventTypeNested.getPropertyNames();

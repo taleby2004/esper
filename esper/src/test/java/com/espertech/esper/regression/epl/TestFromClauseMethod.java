@@ -486,7 +486,7 @@ public class TestFromClauseMethod extends TestCase
                    "Error starting statement: Method footprint does not match the number or type of expression parameters, expecting no parameters in method: Could not find static method named 'fetchArrayGen' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib' with matching parameter number and types (nearest match found was 'fetchArrayGen' taking int) [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchArrayGen()]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchObjectAndSleep(1)",
-                   "Error starting statement: Method footprint does not match the number or type of expression parameters, expecting a method where parameters are typed '[class java.lang.Integer]': Could not find static method named 'fetchObjectAndSleep' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib'  [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchObjectAndSleep(1)]");
+                   "Error starting statement: Method footprint does not match the number or type of expression parameters, expecting a method where parameters are typed '[class java.lang.Integer]': Could not find static method named 'fetchObjectAndSleep' in class 'com.espertech.esper.support.epl.SupportStaticMethodLib' with matching parameter number and types (nearest match found was 'fetchObjectAndSleep' taking String, int, long) [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.fetchObjectAndSleep(1)]");
 
         tryInvalid("select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.sleep(100) where 1=2",
                    "Error starting statement: Invalid return type for static method 'sleep' of class 'com.espertech.esper.support.epl.SupportStaticMethodLib', expecting a Java class [select * from SupportBean, method:com.espertech.esper.support.epl.SupportStaticMethodLib.sleep(100) where 1=2]");
@@ -495,7 +495,7 @@ public class TestFromClauseMethod extends TestCase
                    "Incorrect syntax near 'where' (a reserved keyword) expecting an identifier but found 'where' at line 1 column 42, please check the view specifications within the from clause [select * from SupportBean, method:AClass. where 1=2]");
 
         tryInvalid("select * from SupportBean, method:Dummy.abc where 1=2",
-                   "Error starting statement: Could not load class by name 'Dummy'  [select * from SupportBean, method:Dummy.abc where 1=2]");
+                   "Error starting statement: Could not load class by name 'Dummy', please check imports [select * from SupportBean, method:Dummy.abc where 1=2]");
 
         tryInvalid("select * from SupportBean, method:Math where 1=2",
                    "No method name specified for method-based join [select * from SupportBean, method:Math where 1=2]");

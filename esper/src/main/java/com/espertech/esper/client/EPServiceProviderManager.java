@@ -23,7 +23,7 @@ public final class EPServiceProviderManager
     private static Map<String, EPServiceProviderImpl> runtimes = new ConcurrentHashMap<String, EPServiceProviderImpl>();
 
     /**
-     * Returns the default EPServiceProvider.
+     * Returns the default EPServiceProvider. The URI value for the service returned is "default".
      * @return default instance of the service.
      */
     public static EPServiceProvider getDefaultProvider()
@@ -32,7 +32,7 @@ public final class EPServiceProviderManager
     }
 
     /**
-     * Returns the default EPServiceProvider.
+     * Returns the default EPServiceProvider. The URI value for the service returned is "default".
      * @param configuration is the configuration for the service
      * @return default instance of the service.
      * @throws ConfigurationException to indicate a configuration problem
@@ -44,6 +44,8 @@ public final class EPServiceProviderManager
 
     /**
      * Returns an EPServiceProvider for a given provider URI.
+     * <p>
+     * Use the URI of "default" or null to return the default service provider.
      * @param providerURI - the provider URI
      * @return EPServiceProvider for the given provider URI.
      */
@@ -54,6 +56,7 @@ public final class EPServiceProviderManager
 
     /**
      * Returns an EPServiceProvider for a given provider URI.
+     * Use the URI of "default" or null to return the default service provider.
      * @param providerURI - the provider URI. If null provided it assumes "default".
      * @param configuration is the configuration for the service
      * @return EPServiceProvider for the given provider URI.
@@ -89,7 +92,7 @@ public final class EPServiceProviderManager
     /**
      * Returns a list of known provider URIs.
      * <p>
-     * Returns a null-value for the default provider, or if no URI has been supplied when obtaining a service instance.
+     * Returns a the value "default" for the default provider.
      * <p>
      * Returns URIs for all engine instances including destroyed instances.
      * @return array of URI strings

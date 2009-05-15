@@ -44,18 +44,18 @@ public class TestAdapterLoader extends TestCase
     }
 
     public void testDestroy() {
-        Configuration cf = new Configuration();
+        Configuration cf = SupportConfigFactory.getConfiguration();
         cf.addPluginLoader("AP", SupportPluginLoader.class.getName(), null);
-        EPServiceProvider ep = EPServiceProviderManager.getDefaultProvider(cf);
+        EPServiceProvider ep = EPServiceProviderManager.getProvider("TestAdapterLoader", cf);
         ep.destroy();
         assertEquals(1, SupportPluginLoader.getDestroys().size());
     }
 
     public void testDestroyObtainTwice() {
-        Configuration cf = new Configuration();
+        Configuration cf = SupportConfigFactory.getConfiguration();
         cf.addPluginLoader("AP", SupportPluginLoader.class.getName(), null);
-        EPServiceProviderManager.getDefaultProvider(cf);
-        EPServiceProvider ep = EPServiceProviderManager.getProvider(EPServiceProviderSPI.DEFAULT_ENGINE_URI);
+        EPServiceProviderManager.getProvider("TestAdapterLoader", cf);
+        EPServiceProvider ep = EPServiceProviderManager.getProvider("TestAdapterLoader");
         ep.destroy();
         assertEquals(1, SupportPluginLoader.getDestroys().size());
     }

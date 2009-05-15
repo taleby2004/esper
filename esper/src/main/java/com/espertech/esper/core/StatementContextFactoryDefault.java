@@ -103,27 +103,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
             stmtMetric = engineServices.getMetricsReportingService().getStatementHandle(statementId, statementName);
         }
 
-        boolean preemptive = false;
-        int priority = 0;
-        boolean hasPrioritySetting = false;
-        for (Annotation annotation : annotations)
-        {
-            if (annotation instanceof Priority)
-            {
-                priority = ((Priority) annotation).value();
-                hasPrioritySetting = true;
-            }
-            if (annotation instanceof Drop)
-            {
-                preemptive = true;
-            }
-        }
-        if (!hasPrioritySetting && preemptive)
-        {
-            priority = 1;
-        }
-        
-        EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementResourceLock, expression, hasVariables, stmtMetric, priority, preemptive);
+        AnnotationAnalysisResult annotationData = AnnotationAnalysisResult.analyzeAnnotations(annotations);
+        EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementResourceLock, expression, hasVariables, stmtMetric, annotationData.getPriority(), annotationData.isPremptive());
 
         MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getConfigSnapshot().getEngineDefaults().getExpression().isUdfCache());
 
@@ -157,5 +138,51 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getEngineSettingsService().getPlugInEventTypeResolutionURIs(),
                 engineServices.getValueAddEventService(),
                 engineServices.getConfigSnapshot());
+    }
+
+    public static class AnnotationAnalysisResult
+    {
+        private int priority;
+        private boolean isPremptive;
+
+        private AnnotationAnalysisResult(int priority, boolean premptive)
+        {
+            this.priority = priority;
+            isPremptive = premptive;
+        }
+
+        public int getPriority()
+        {
+            return priority;
+        }
+
+        public boolean isPremptive()
+        {
+            return isPremptive;
+        }
+
+        public static AnnotationAnalysisResult analyzeAnnotations(Annotation[] annotations)
+        {
+            boolean preemptive = false;
+            int priority = 0;
+            boolean hasPrioritySetting = false;
+            for (Annotation annotation : annotations)
+            {
+                if (annotation instanceof Priority)
+                {
+                    priority = ((Priority) annotation).value();
+                    hasPrioritySetting = true;
+                }
+                if (annotation instanceof Drop)
+                {
+                    preemptive = true;
+                }
+            }
+            if (!hasPrioritySetting && preemptive)
+            {
+                priority = 1;
+            }
+            return new AnnotationAnalysisResult(priority, preemptive);
+        }
     }
 }

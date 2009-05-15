@@ -10,11 +10,43 @@ Major API changes
     For example, the expression:
       every(A -> (B where timer:within(5 sec)))
     ... When no B event arrives after an A event, the "every" restarts the subexpression looking for the next A followed by B within 5 sec.
-  - com.espertech.esper.plugin.PluginLoader interface has a new method that must be implemented to allow plugins to initialize only after complete Esper engine initialization.
-  - the default engine URI is now "default" instead of null (EPServiceProviderManager.getDefaultProvider().getURI()), for consistency with the default engine qualifier for (optional) use in stream and property name qualification
+  - The PluginLoader interface for writing adapters has a new required method that must be implemented to allow plugins to initialize after complete Esper engine initialization.
+  - The provider URI of the default engine instance is now "default" instead of null.
+    Therefore (EPServiceProviderManager.getDefaultProvider().getURI()), for consistency with the default engine qualifier for (optional) use in stream and property name qualification.
+
+New Features
+  - A new "every-distinct" operator has been introduced to the pattern language. Very similar to the "every" operator, this operator
+    suppresses duplicate results received from sub-expressions based on a set of expressions returning distinct-values.
+  - The EPL language now understands annotations following the annotation syntax standard.
+    An annotation is an addition made to information in a statement. Esper provides certain built-in annotations for
+    defining statement name (@Name), adding a statement description (@Description) or for tagging statements.
+    Applications can provide their own annotation classes that the EPL compiler can populate.
+  - The engine now provides a way to prioritize and preempt processing of an event when multiple statements must process the event,
+    via the @Priority and @Drop annotations.
+  - The insert-into clause can now directly populate an underlying event object from a select clause.
+  - We have extended the on-insert syntax by a new split-stream syntax. This allows to list multiple insert-into, select clauses and where-clauses
+    thereby making it easy to split or duplicate an event stream into multiple further event streams.
 
 Minor changes  
-  - Fixed Issue ESPER-352 "default" named engine and unamed engine should be same
+  - Fixed Issue ESPER-350 Timer-Within should evaluate to permanently false allowing every to restart the expression
+  - Fixed Issue ESPER-349 Exception barrier to lock taken missing from filter processing potentially causing deadlock after an exception occurs
+  - Fixed Issue ESPER-348 XML event type fails to be configured with XSD on Java 6
+  - Fixed Issue ESPER-347 NullPointer with time_batch and START_EAGER with named window
+  - Fixed Issue ESPER-346 NullPointerException in on-select with aggregation and empty window
+  - Fixed Issue ESPER-345 NPE is thrown when evaluating statement with 'OR' in its having-clause.
+  - Fixed Issue ESPER-344 Pattern cleanup incomplete causing memory leaks
+  - Fixed Issue ESPER-343 Esper shouldn't log ExprValidationException
+  - Fixed Issue ESPER-341 Variable used with XML no-schema event in same statement creates ambigous property exception
+  - Fixed Issue ESPER-340 Lost of precision using BigDecimal for arithematic operation
+  - Fixed Issue ESPER-339 Parse error when using "every" in combination with repeat
+  - Fixed Issue ESPER-336 pluginloader stop not properly called - issue with EPserviceProviderManager.getProvider("existing")
+  - Fixed Issue ESPER-335 pluginloader stop called after engine runtime destroy
+  - Fixed Issue ESPER-334 PluginLoader reentrancy on Configuration
+  - Fixed Issue ESPER-333 Pattern followed-by expression to detect when no subexpressions are alive and indicate permanently false so "every" can restart
+  - Fixed Issue ESPER-332 NullPointerException in on-select with having clause for timer excution
+  - Fixed Issue ESPER-331 Runtime exception barrier for listener and subscriber
+  - Fixed Issue ESPER-328 Aggregation function nested created NPE in Timer thread
+  
 
 Changes in version 3.0.0
 ------------------------
@@ -527,6 +559,7 @@ This enabled event patterns and EQL to use short event names not requiring makin
 version 0.7.0
 -------------
 Initial alpha version
+
 
 
 

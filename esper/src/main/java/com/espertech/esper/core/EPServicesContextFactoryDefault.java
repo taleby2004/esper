@@ -137,9 +137,9 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         if (configSnapshot.getEngineDefaults().getTimeSource().getTimeSourceType() == ConfigurationEngineDefaults.TimeSourceType.NANO)
         {
             // this is a static variable to keep overhead down for getting a current time
-            TimeSourceService.IS_SYSTEM_CURRENT_TIME = false;
+            TimeSourceServiceImpl.IS_SYSTEM_CURRENT_TIME = false;
         }
-        return new TimeSourceService();
+        return new TimeSourceServiceImpl();
     }
 
     /**

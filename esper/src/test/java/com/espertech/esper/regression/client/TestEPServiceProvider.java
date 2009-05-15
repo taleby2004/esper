@@ -11,6 +11,8 @@ import com.espertech.esper.core.EPServiceProviderSPI;
 import com.espertech.esper.core.StatementLifecycleEvent;
 import com.espertech.esper.client.EventBean;
 
+import java.util.Arrays;
+
 public class TestEPServiceProvider extends TestCase
 {
     private EPServiceProvider epService;
@@ -25,6 +27,24 @@ public class TestEPServiceProvider extends TestCase
         Configuration config = SupportConfigFactory.getConfiguration();
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+    }
+
+    public void testDefaultEngine()
+    {
+        assertEquals("default", EPServiceProviderManager.getDefaultProvider().getURI());
+        EPServiceProvider engineDefault = EPServiceProviderManager.getDefaultProvider();
+
+        EPServiceProvider engine = EPServiceProviderManager.getProvider("default");
+        assertSame(engineDefault, engine);
+
+        engine = EPServiceProviderManager.getProvider(null);
+        assertSame(engineDefault, engine);
+
+        engine = EPServiceProviderManager.getProvider(null, SupportConfigFactory.getConfiguration());
+        assertSame(engineDefault, engine);
+
+        String[] uris = EPServiceProviderManager.getProviderURIs();
+        assertTrue(Arrays.asList(uris).contains("default"));
     }
 
     public void testListenerStateChange()
@@ -75,7 +95,6 @@ public class TestEPServiceProvider extends TestCase
         observer.flush();
         stmt.addListener(new UpdateListener() {
             public void update(EventBean[] newEvents, EventBean[] oldEvents) {
-                ;
             }
         });
         assertEquals("LISTENER_ADD;", observer.getEventsAsString());

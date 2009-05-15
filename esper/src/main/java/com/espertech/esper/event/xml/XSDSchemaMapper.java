@@ -98,7 +98,7 @@ public class XSDSchemaMapper
             }
 
             XSElementDeclaration decl = (XSElementDeclaration) elements.item(i);
-            if (isComplexTypeCategory(decl.getTypeDefinition().getTypeCategory()))
+            if (!isComplexTypeCategory(decl.getTypeDefinition().getTypeCategory()))
             {
                 continue;
             }            

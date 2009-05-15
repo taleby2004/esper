@@ -9,10 +9,10 @@ import java.util.HashMap;
 public class EventBeanManufacturerMap implements EventBeanManufacturer
 {
     private final MapEventType mapEventType;
-    private final EventAdapterServiceImpl eventAdapterService;
+    private final EventAdapterService eventAdapterService;
     private final WriteablePropertyDescriptor[] writables;
 
-    public EventBeanManufacturerMap(MapEventType mapEventType, EventAdapterServiceImpl eventAdapterService, WriteablePropertyDescriptor[] properties)
+    public EventBeanManufacturerMap(MapEventType mapEventType, EventAdapterService eventAdapterService, WriteablePropertyDescriptor[] properties)
     {
         this.eventAdapterService = eventAdapterService;
         this.mapEventType = mapEventType;

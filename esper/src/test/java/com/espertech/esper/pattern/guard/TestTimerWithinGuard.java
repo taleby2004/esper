@@ -9,6 +9,7 @@ import com.espertech.esper.support.guard.SupportQuitable;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.timer.TimeSourceService;
+import com.espertech.esper.timer.TimeSourceServiceImpl;
 
 public class TestTimerWithinGuard extends TestCase
 {
@@ -18,7 +19,7 @@ public class TestTimerWithinGuard extends TestCase
 
     public void setUp()
     {
-        StatementContext stmtContext = SupportStatementContextFactory.makeContext(new SchedulingServiceImpl(new TimeSourceService()));
+        StatementContext stmtContext = SupportStatementContextFactory.makeContext(new SchedulingServiceImpl(new TimeSourceServiceImpl()));
         PatternContext context = new PatternContext(stmtContext, 1, null);
         scheduleService = stmtContext.getSchedulingService();
 

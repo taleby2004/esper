@@ -15,6 +15,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
 import com.espertech.esper.timer.TimeSourceService;
+import com.espertech.esper.timer.TimeSourceServiceImpl;
 import com.espertech.esper.client.EventType;
 
 import java.util.List;
@@ -356,7 +357,7 @@ public class SupportExprNodeFactory
         }
         ViewResourceDelegateImpl viewResources = new ViewResourceDelegateImpl(factoriesPerStream, SupportStatementContextFactory.makeContext());
 
-        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceService()), null);
+        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), null);
         variableService.createNewVariable("intPrimitive", Integer.class, 10, null);
         variableService.createNewVariable("var1", String.class, "my_variable_value", null);
 

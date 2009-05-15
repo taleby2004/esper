@@ -14,7 +14,7 @@ public class TestTimeSource extends TestCase
 {
     public void tearDown()
     {
-        TimeSourceService.IS_SYSTEM_CURRENT_TIME = true;
+        TimeSourceServiceImpl.IS_SYSTEM_CURRENT_TIME = true;
     }
 
     public void testWallClock() throws InterruptedException
@@ -23,8 +23,8 @@ public class TestTimeSource extends TestCase
         final long TOLERANCE_MILLISECS = 20, DELAY_MILLISECS = 100;
 
         // This is a smoke test
-        TimeSourceService nanos = new TimeSourceService();
-        TimeSourceService millis = new TimeSourceService();
+        TimeSourceService nanos = new TimeSourceServiceImpl();
+        TimeSourceService millis = new TimeSourceServiceImpl();
 
         assertTimeWithinTolerance(TOLERANCE_MILLISECS, nanos, millis);
         Thread.sleep(DELAY_MILLISECS);
@@ -38,10 +38,10 @@ public class TestTimeSource extends TestCase
 	private void assertTimeWithinTolerance(final long TOLERANCE_MILLISECS,
 			TimeSourceService nanos, TimeSourceService millis) {
 
-        TimeSourceService.IS_SYSTEM_CURRENT_TIME = true;
+        TimeSourceServiceImpl.IS_SYSTEM_CURRENT_TIME = true;
 		long nanosWallClockTime = nanos.getTimeMillis();
 
-        TimeSourceService.IS_SYSTEM_CURRENT_TIME = false;
+        TimeSourceServiceImpl.IS_SYSTEM_CURRENT_TIME = false;
         long millisWallClockTime = millis.getTimeMillis();
 
         long diff = nanosWallClockTime - millisWallClockTime;

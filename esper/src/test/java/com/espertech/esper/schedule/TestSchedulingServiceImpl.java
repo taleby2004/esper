@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import com.espertech.esper.support.schedule.SupportScheduleCallback;
 import com.espertech.esper.type.ScheduleUnit;
 import com.espertech.esper.timer.TimeSourceService;
+import com.espertech.esper.timer.TimeSourceServiceImpl;
 
 import java.util.Calendar;
 import java.util.Collection;
@@ -18,7 +19,7 @@ public class TestSchedulingServiceImpl extends TestCase
 
     public void setUp()
     {
-        service = new SchedulingServiceImpl(new TimeSourceService());
+        service = new SchedulingServiceImpl(new TimeSourceServiceImpl());
 
         // 2-by-2 table of buckets and slots
         ScheduleBucket[] buckets = new ScheduleBucket[3];
@@ -210,7 +211,7 @@ public class TestSchedulingServiceImpl extends TestCase
 
     public void testIncorrectRemove()
     {
-        SchedulingServiceImpl evaluator = new SchedulingServiceImpl(new TimeSourceService());
+        SchedulingServiceImpl evaluator = new SchedulingServiceImpl(new TimeSourceServiceImpl());
         SupportScheduleCallback callback = new SupportScheduleCallback();
         evaluator.remove(callback, null);
     }

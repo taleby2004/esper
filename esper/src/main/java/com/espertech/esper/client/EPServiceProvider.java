@@ -47,7 +47,7 @@ public interface EPServiceProvider
     public void initialize();
 
     /**
-     * Returns the provider URI, or null if this is the default provider.
+     * Returns the provider URI, or "default" if this is the default provider.
      * @return provider URI
      */
     public String getURI();
