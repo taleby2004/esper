@@ -78,7 +78,8 @@ public class DBStatementStreamSpec extends StreamSpecBase implements StreamSpecR
     }
 
     public StreamSpecCompiled compile(StatementContext statementContext,
-                                      Set<String> eventTypeReferences)
+                                      Set<String> eventTypeReferences,
+                                      boolean isInsertInto)
     {
         return this;
     }

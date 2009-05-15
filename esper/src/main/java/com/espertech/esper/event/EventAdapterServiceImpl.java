@@ -686,7 +686,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
     	return new WrapperEventType(metadata, name, underlyingEventType, propertyTypes, this);
     }
 
-	public final EventBean adaptorForWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
+	public final EventBean adaptorForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
 	{
         if (event instanceof DecoratingEventBean)
         {
@@ -762,7 +762,20 @@ public class EventAdapterServiceImpl implements EventAdapterService
             if (event instanceof DecoratingEventBean)
             {
                 DecoratingEventBean wrapper = (DecoratingEventBean) event;
-                converted = adaptorForWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
+                if (targetType instanceof MapEventType)
+                {
+                    Map<String, Object> props = new HashMap<String, Object>();
+                    props.putAll(wrapper.getDecoratingProperties());
+                    for (EventPropertyDescriptor propDesc : wrapper.getUnderlyingEvent().getEventType().getPropertyDescriptors())
+                    {
+                        props.put(propDesc.getPropertyName(), wrapper.getUnderlyingEvent().get(propDesc.getPropertyName()));
+                    }
+                    converted = adaptorForTypedMap(props, targetType);
+                }
+                else
+                {
+                    converted = adaptorForTypedWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
+                }
             }
             else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof MapEventType))
             {
@@ -771,7 +784,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             }
             else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof WrapperEventType))
             {
-                converted = this.adaptorForWrapper(event, Collections.EMPTY_MAP, targetType);
+                converted = this.adaptorForTypedWrapper(event, Collections.EMPTY_MAP, targetType);
             }
             else
             {

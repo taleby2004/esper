@@ -11,9 +11,11 @@ package com.espertech.esper.epl.spec;
 import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.List;
+import java.io.Serializable;
 
-public class OnTriggerSplitStream
+public class OnTriggerSplitStream implements Serializable
 {
+    private static final long serialVersionUID = 7836326460852522622L;
     private InsertIntoDesc insertInto;
     private SelectClauseSpecRaw selectClause;
     private ExprNode whereClause;

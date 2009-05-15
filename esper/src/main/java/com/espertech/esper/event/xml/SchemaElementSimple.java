@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 public class SchemaElementSimple implements SchemaElement, Serializable
 {
+    private static final long serialVersionUID = 7822657793312617963L;
     private final String name;
     private final String namespace;
     private final short xsSimpleType;     // Types from XSSimpleType

@@ -202,7 +202,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
             values.put(propertyNames[i], propertyValues[i]);
         }
 
-        return eventAdapterService.adaptorForWrapper(originalEvent, values, targetEventType);
+        return eventAdapterService.adaptorForTypedWrapper(originalEvent, values, targetEventType);
     }
 
     public final String toString()

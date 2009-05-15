@@ -65,7 +65,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
     }
 
     public StreamSpecCompiled compile(StatementContext context,
-                                      Set<String> eventTypeReferences)
+                                      Set<String> eventTypeReferences,
+                                      boolean isInsertInto)
             throws ExprValidationException
     {
         // Determine all the filter nodes used in the pattern
@@ -103,7 +104,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         {
             if (activeNode instanceof EvalFilterNode)
             {
-                handleFilterNode((EvalFilterNode) activeNode, context, eventTypeReferences, matchUntilArrayTags, taggedEventTypes, arrayEventTypes);
+                handleFilterNode((EvalFilterNode) activeNode, context, eventTypeReferences, matchUntilArrayTags, taggedEventTypes, arrayEventTypes, isInsertInto);
             }
 
             if (activeNode instanceof EvalObserverNode)
@@ -202,7 +203,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
                                   Set<String> eventTypeReferences,
                                   Set<String> matchUntilArrayTags,
                                   LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
-                                  LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+                                  LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
+                                  boolean isInsertInto)
             throws ExprValidationException
     {
         String eventName = filterNode.getRawFilterSpec().getEventTypeName();
@@ -284,7 +286,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         if (arrayEventTypes != null)
         {
             arrayCompositeEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
-            EventType arrayTagCompositeEventType = context.getEventAdapterService().createSemiAnonymousMapType(new HashMap(), arrayEventTypes, false);
+            EventType arrayTagCompositeEventType = context.getEventAdapterService().createSemiAnonymousMapType(new HashMap(), arrayEventTypes, isInsertInto);
             for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
             {
                 String tag = entry.getKey();

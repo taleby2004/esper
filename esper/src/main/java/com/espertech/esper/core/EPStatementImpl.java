@@ -13,17 +13,14 @@ import com.espertech.esper.collection.SafeIteratorImpl;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.timer.TimeSourceService;
 import com.espertech.esper.view.Viewable;
-
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.lang.annotation.Annotation;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Statement implementation for EPL statements.
@@ -401,7 +398,6 @@ public class EPStatementImpl implements EPStatementSPI
 
         statementListenerSet.addListener(listener);
         statementResultService.setUpdateListeners(statementListenerSet);
-        //statementLifecycleSvc.updatedListeners(statementId, statementName, statementListenerSet);
         statementLifecycleSvc.dispatchStatementLifecycleEvent(
                 new StatementLifecycleEvent(this, StatementLifecycleEvent.LifecycleEventType.LISTENER_ADD, listener));
     }

@@ -35,7 +35,8 @@ public interface StreamSpecRaw extends StreamSpec
      * @throws ExprValidationException to indicate validation errors
      */
     public StreamSpecCompiled compile(StatementContext statementContext,
-                                      Set<String> eventTypeReferences)
+                                      Set<String> eventTypeReferences,
+                                      boolean isInsertInto)
         throws ExprValidationException;
 
 }

@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 public class SchemaItemAttribute implements SchemaItem, Serializable
 {
+    private static final long serialVersionUID = 127082800205223116L;
     private final String namespace;
     private final String name;
     private final short xsSimpleType;     // Types from XSSimpleType

@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class SchemaElementComplex implements SchemaElement, Serializable
 {
+    private static final long serialVersionUID = 1636920955323577240L;
     private String name;
     private String namespace;
     private List<SchemaItemAttribute> attributes;

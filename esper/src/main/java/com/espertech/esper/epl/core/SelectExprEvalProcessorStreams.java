@@ -346,7 +346,7 @@ public class SelectExprEvalProcessorStreams implements SelectExprProcessor
 
             // Using a wrapper bean since we cannot use the same event type else same-type filters match.
             // Wrapping it even when not adding properties is very inexpensive.
-            return eventAdapterService.adaptorForWrapper(event, props, resultEventType);
+            return eventAdapterService.adaptorForTypedWrapper(event, props, resultEventType);
         }
         else
         {

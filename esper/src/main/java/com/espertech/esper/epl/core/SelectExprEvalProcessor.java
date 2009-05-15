@@ -461,7 +461,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
             {
                 // Using a wrapper bean since we cannot use the same event type else same-type filters match.
                 // Wrapping it even when not adding properties is very inexpensive.
-                return eventAdapterService.adaptorForWrapper(event, props, resultEventType);
+                return eventAdapterService.adaptorForTypedWrapper(event, props, resultEventType);
             }
         }
         else
@@ -481,11 +481,11 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
                 props.clear();
                 if (!isRevisionEvent)
                 {
-                    return eventAdapterService.adaptorForWrapper(wrappedEvent, props, resultEventType);
+                    return eventAdapterService.adaptorForTypedWrapper(wrappedEvent, props, resultEventType);
                 }
                 else
                 {
-                    return vaeProcessor.getValueAddEventBean(eventAdapterService.adaptorForWrapper(wrappedEvent, props, vaeInnerEventType));
+                    return vaeProcessor.getValueAddEventBean(eventAdapterService.adaptorForTypedWrapper(wrappedEvent, props, vaeInnerEventType));
                 }
             }
             else

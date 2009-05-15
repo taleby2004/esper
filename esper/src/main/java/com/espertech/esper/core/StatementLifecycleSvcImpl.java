@@ -759,7 +759,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return finalStatementName;
     }
 
-    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners)
+    public void updatedListeners(EPStatement statement, EPStatementListenerSet listeners)
     {
         log.debug(".updatedListeners No action for base implementation");
     }
@@ -815,7 +815,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             compiledStreams = new ArrayList<StreamSpecCompiled>();
             for (StreamSpecRaw rawSpec : spec.getStreamSpecs())
             {
-                StreamSpecCompiled compiled = rawSpec.compile(statementContext, eventTypeReferences);
+                StreamSpecCompiled compiled = rawSpec.compile(statementContext, eventTypeReferences, spec.getInsertIntoDesc() != null);
                 compiledStreams.add(compiled);
             }
         }

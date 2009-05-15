@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 public class DistinctEvalSpec implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 8755273892947838423L;
     private List<ExprNode> atoms;
 
     /**

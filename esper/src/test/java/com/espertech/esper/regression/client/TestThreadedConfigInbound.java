@@ -57,7 +57,7 @@ public class TestThreadedConfigInbound extends TestCase
         }
         long end = System.nanoTime();
         long delta = (end - start) / 1000000;
-        assertTrue(delta < 100);
+        assertTrue(delta < 500);
 
         Thread.sleep(1000);
         assertEquals(4, listenerOne.getNewEvents().size());

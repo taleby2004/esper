@@ -107,11 +107,10 @@ public interface StatementLifecycleSvc
 
     /**
      * Statements indicate that listeners have been added through this method.
-     * @param statementId is the statement id for which listeners were added
-     * @param statementName is the statement name
+     * @param stmt is the statement for which listeners were added
      * @param listeners is the set of listeners after adding the new listener
      */
-    public void updatedListeners(String statementId, String statementName, EPStatementListenerSet listeners);
+    public void updatedListeners(EPStatement stmt, EPStatementListenerSet listeners);
 
     /**
      * Destroy the service.

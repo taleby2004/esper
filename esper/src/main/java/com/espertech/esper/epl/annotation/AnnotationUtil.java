@@ -37,7 +37,7 @@ public class AnnotationUtil
         }
         catch (RuntimeException ex)
         {
-            String message = "Unexpected exception compiling annotations in statement, please consult the log file and report the exception";
+            String message = "Unexpected exception compiling annotations in statement, please consult the log file and report the exception: " + ex.getMessage();
             log.error(message, ex);
             throw new EPStatementException(message, eplStatement);
         }

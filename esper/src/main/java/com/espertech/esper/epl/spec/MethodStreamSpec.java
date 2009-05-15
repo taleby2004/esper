@@ -82,7 +82,7 @@ public class MethodStreamSpec extends StreamSpecBase implements StreamSpecRaw, S
         return expressions;
     }
 
-    public StreamSpecCompiled compile(StatementContext context, Set<String> eventTypeReferences) throws ExprValidationException
+    public StreamSpecCompiled compile(StatementContext context, Set<String> eventTypeReferences, boolean isInsertInto) throws ExprValidationException
     {
         if (!ident.equals("method"))
         {

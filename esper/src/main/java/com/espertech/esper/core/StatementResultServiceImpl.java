@@ -128,7 +128,7 @@ public class StatementResultServiceImpl implements StatementResultService
         // indicate that listeners were updated for potential persistence of listener set, once the statement context is known
         if (epStatement != null)
         {
-            this.statementLifecycleSvc.updatedListeners(epStatement.getStatementId(), epStatement.getName(), statementListenerSet);
+            this.statementLifecycleSvc.updatedListeners(epStatement, statementListenerSet);
         }
 
         this.statementListenerSet = statementListenerSet;

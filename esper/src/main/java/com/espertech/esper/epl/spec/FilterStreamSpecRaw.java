@@ -68,7 +68,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         return rawFilterSpec;
     }
 
-    public StreamSpecCompiled compile(StatementContext context, Set<String> eventTypeReferences)
+    public StreamSpecCompiled compile(StatementContext context, Set<String> eventTypeReferences, boolean isInsertInto)
             throws ExprValidationException
     {
         // Determine the event type

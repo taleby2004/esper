@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class SchemaModel implements Serializable
 {
+    private static final long serialVersionUID = -8949230627736368311L;
     private List<SchemaElementComplex> components;
     private List<String> namespaces;
 

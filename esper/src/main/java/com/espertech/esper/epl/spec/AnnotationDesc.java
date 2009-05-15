@@ -1,14 +1,17 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.util.MetaDefItem;
 
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Describes an annotation.
  */
-public class AnnotationDesc
+public class AnnotationDesc implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 5474641956626793366L;
     private String name;
 
     // Map of Identifier and value={constant, array of value (Object[]), AnnotationDesc} (exclusive with value)
