@@ -31,7 +31,6 @@ public class NamedWindowProcessor
     private final EventType eventType;
     private final String eplExpression;
     private final String statementName;
-    private final boolean isPrioritized;
 
     /**
      * Ctor.
@@ -50,7 +49,6 @@ public class NamedWindowProcessor
         this.eventType = eventType;
         this.eplExpression = eplExpression;
         this.statementName = statementName;
-        this.isPrioritized = isPrioritized;
 
         rootView = new NamedWindowRootView(revisionProcessor);
         tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle, statementResultService, revisionProcessor, isPrioritized);

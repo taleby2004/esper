@@ -21,7 +21,7 @@ import java.util.Arrays;
  */
 public class UnindexedEventTableList implements EventTable
 {
-    private static NullIterator<EventBean> emptyIterator = new NullIterator<EventBean>();
+    private static final NullIterator<EventBean> emptyIterator = new NullIterator<EventBean>();
     private List<EventBean> eventSet;
 
     /**

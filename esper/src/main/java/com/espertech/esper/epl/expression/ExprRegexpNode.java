@@ -127,7 +127,7 @@ public class ExprRegexpNode extends ExprNode
             evalValue = evalValue.toString();
         }
 
-        Boolean result = pattern.matcher((String) evalValue).matches();
+        Boolean result = pattern.matcher((CharSequence) evalValue).matches();
 
         if (isNot)
         {

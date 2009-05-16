@@ -168,7 +168,7 @@ public class SelectExprInsertEventBean
                 Object columnType = expressionReturnTypes[i];
                 if (columnType == null)
                 {
-                    checkAssignment(columnNames[i], (Class) columnType, desc);
+                    checkAssignment(columnNames[i], null, desc);
                 }
                 else if (columnType instanceof EventType)
                 {
@@ -299,12 +299,11 @@ public class SelectExprInsertEventBean
     private TypeWidener checkAssignment(String columnName, Class columnType, WriteablePropertyDescriptor desc)
             throws ExprValidationException
     {
-        Class columnClass = (Class) columnType;
-        Class columnClassBoxed = JavaClassHelper.getBoxedType((Class) columnType);
+        Class columnClassBoxed = JavaClassHelper.getBoxedType(columnType);
         Class targetClass = desc.getType();
         Class targetClassBoxed = JavaClassHelper.getBoxedType(desc.getType());
 
-        if (columnClass == null)
+        if (columnType == null)
         {
             if (targetClass.isPrimitive())
             {
@@ -324,14 +323,14 @@ public class SelectExprInsertEventBean
             else if (!JavaClassHelper.isAssignmentCompatible(columnClassBoxed, targetClassBoxed))
             {
                 String message = "Invalid assignment of column '" + columnName +
-                        "' of type '" + columnClass.getName() +
+                        "' of type '" + columnType.getName() +
                         "' to event property '" + desc.getPropertyName() +
                         "' typed as '" + desc.getType().getName() +
                         "', column and parameter types mismatch";
                 throw new ExprValidationException(message);
             }
 
-            if (!columnClass.isPrimitive() && JavaClassHelper.isNumeric(targetClass))
+            if (!columnType.isPrimitive() && JavaClassHelper.isNumeric(targetClass))
             {
                 final SimpleNumberCoercer coercer = SimpleNumberCoercerFactory.getCoercer(columnClassBoxed, targetClassBoxed);
                 return new TypeWidener()
@@ -370,7 +369,7 @@ public class SelectExprInsertEventBean
         return eventManufacturer.make(values);
     }
 
-    private class StringToCharCoercer implements TypeWidener
+    private static class StringToCharCoercer implements TypeWidener
     {
         public Object widen(Object input)
         {

@@ -45,7 +45,7 @@ public class SortedRefCountedSet<K>
         Integer value = refSet.get(key);
         if (value == null)
         {
-            refSet.put(key, Integer.valueOf(1));
+            refSet.put(key, 1);
             return;
         }
 

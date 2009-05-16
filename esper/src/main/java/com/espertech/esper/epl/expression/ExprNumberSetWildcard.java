@@ -13,7 +13,7 @@ import com.espertech.esper.type.WildcardParameter;
  */
 public class ExprNumberSetWildcard extends ExprNode
 {
-    private static WildcardParameter wildcardParameter = new WildcardParameter();
+    private static final WildcardParameter wildcardParameter = new WildcardParameter();
     public String toExpressionString()
     {
         return "*";

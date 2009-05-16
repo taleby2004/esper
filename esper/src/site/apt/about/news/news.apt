@@ -1,5 +1,34 @@
 News
 
+* May 16, 2009  -  Esper 3.1.0
+
+  * The new "every-distinct" operator has been introduced to the pattern language. Very similar to the "every" operator, this operator
+    suppresses duplicate results received from sub-expressions based on a set of expressions returning distinct-values. 
+
+  * The EPL language now understands annotations following the annotation syntax standard.
+    An annotation is an addition made to information in a statement. Esper provides certain built-in annotations for
+    defining statement name (@Name), adding a statement description (@Description) or for tagging statements.
+    Applications can provide their own annotation classes that the EPL compiler can populate.
+    
+  * The engine now provides a way to prioritize and preempt processing of an event when multiple statements must process the event,
+    via the @Priority and @Drop annotations.
+    
+  * The insert-into clause can now directly populate an underlying event object from a select clause, i.e. populate your object or Map type.
+  
+  * We have extended the on-insert syntax by a new split-stream syntax. This allows to list multiple insert-into, select clauses and where-clauses
+    thereby making it easy to split or duplicate an event stream into multiple further event streams.
+
+  * The behavior of "timer:within" when used within an "every" in a pattern has changed slightly: The sub-expression qualified by "timer-within" upon expiry 
+    of the timer now evaluates to permanently false, while previously it simple stopped. This allows the "every" operator to restart such sub-expression.
+    For example, the expression:
+      every(A -> (B where timer:within(5 sec)))
+    ... When no B event arrives after an A event, the "every" restarts the subexpression looking for the next A followed by B within 5 sec.
+    
+  * Other performance and documentation improvements as well as bug fixes are listed under history.
+  
+  []
+
+
 * February 11, 2009  -  Esper 3.0.0
 
   * Please consult {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+2.x+to+3.0}Migrating Esper 2.x to Esper 3}}

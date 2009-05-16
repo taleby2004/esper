@@ -394,7 +394,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         return new MatchEventSpec(taggedEventTypes, arrayEventTypes);
     }
 
-    private class MatchEventSpec
+    private static class MatchEventSpec
     {
         private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;
         private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;

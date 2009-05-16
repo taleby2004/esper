@@ -200,7 +200,7 @@ public class EPPreparedExecuteMethod
                 Boolean result = (Boolean) filter.evaluate(eventsPerStream, true);
                 if (result != null)
                 {
-                    if (!result.booleanValue())
+                    if (!result)
                     {
                         pass = false;
                         break;

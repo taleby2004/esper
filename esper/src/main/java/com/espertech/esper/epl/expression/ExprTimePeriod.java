@@ -267,11 +267,11 @@ public class ExprTimePeriod extends ExprNode
         }
         if (value instanceof BigDecimal)
         {
-            return ((BigDecimal) value).doubleValue();
+            return ((Number) value).doubleValue();
         }
         if (value instanceof BigInteger)
         {
-            return ((BigInteger) value).doubleValue();
+            return ((Number) value).doubleValue();
         }
         return ((Number) value).doubleValue();
     }
