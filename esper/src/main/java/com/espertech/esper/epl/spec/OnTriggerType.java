@@ -23,6 +23,9 @@ public enum OnTriggerType
      */
     ON_SELECT,
 
+    /**
+     * For the on-insert split-stream syntax allowing multiple insert-into streams.
+     */
     ON_SPLITSTREAM,
 
     /**

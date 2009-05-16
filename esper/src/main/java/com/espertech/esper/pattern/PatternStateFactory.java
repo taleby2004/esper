@@ -121,12 +121,14 @@ public interface PatternStateFactory
     public EvalStateNode makeEveryStateNode(Evaluator parentNode, EvalEveryNode evalEveryNode, MatchedEventMap beginState, PatternContext context, Object stateNodeId);
 
     /**
-     * Makes a every-state node.
+     * Makes a every-distinct state node.
      * @param parentNode is the parent evaluator
      * @param evalEveryNode is the factory node
      * @param beginState is the begin state
      * @param stateNodeId is the state node's object id
      * @param context is the pattern context
+     * @param convertor converts between match-event map and events-per-stream
+     * @param expressions distinct-value expressions 
      * @return state node
      */
     public EvalStateNode makeEveryDistinctStateNode(Evaluator parentNode, EvalEveryDistinctNode evalEveryNode, MatchedEventMap beginState, PatternContext context, Object stateNodeId, List<ExprNode> expressions, MatchedEventConvertor convertor);

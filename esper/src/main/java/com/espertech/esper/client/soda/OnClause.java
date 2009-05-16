@@ -30,6 +30,10 @@ public abstract class OnClause implements Serializable
         return OnDeleteClause.create(windowName, asName);
     }
 
+    /**
+     * Creates a split-stream clause.
+     * @return split-stream on-insert clause
+     */
     public static OnInsertSplitStreamClause createOnInsertSplitStream()
     {
         return OnInsertSplitStreamClause.create();

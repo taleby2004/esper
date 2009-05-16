@@ -1018,7 +1018,7 @@ public class EPStatementStartMethod
      * @param statementContext the statement services
      * @param typeService the event types for streams
      * @param viewResourceDelegate the delegate to verify expressions that use view resources
-     * @param allowSubqueryWhere
+     * @param allowSubqueryWhere true to allow subqueries
      */
     protected static void validateNodes(StatementSpecCompiled statementSpec,
                                         StatementContext statementContext,

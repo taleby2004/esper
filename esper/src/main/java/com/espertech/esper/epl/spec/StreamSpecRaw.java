@@ -31,6 +31,7 @@ public interface StreamSpecRaw extends StreamSpec
      * to an validated, optimized form for use with filter service
      * @param eventTypeReferences event type names used by the statement
      * @param statementContext statement-level services
+     * @param isInsertInto true for insert-into 
      * @return compiled stream
      * @throws ExprValidationException to indicate validation errors
      */

@@ -304,11 +304,19 @@ public class StatementSpecCompiled
         return annotations;
     }
 
+    /**
+     * Sets the insert-into clause.
+     * @param insertIntoDesc insert-into clause.
+     */
     public void setInsertIntoDesc(InsertIntoDesc insertIntoDesc)
     {
         this.insertIntoDesc = insertIntoDesc;
     }
 
+    /**
+     * Sets the select clause.
+     * @param selectClauseSpec select clause
+     */
     public void setSelectClauseSpec(SelectClauseSpecCompiled selectClauseSpec)
     {
         this.selectClauseSpec = selectClauseSpec;

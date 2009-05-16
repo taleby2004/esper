@@ -11,12 +11,24 @@ import com.espertech.esper.view.ViewSupport;
 
 import java.util.Iterator;
 
+/**
+ * View for processing split-stream syntax.
+ */
 public class RouteResultView extends ViewSupport
 {
     private final static NullIterator nullIterator = new NullIterator();
     private final EventType eventType;
     private RouteResultViewHandler handler;
 
+    /**
+     * Ctor.
+     * @param isFirst true for the first-where clause, false for all where-clauses
+     * @param eventType output type
+     * @param epStatementHandle handle
+     * @param internalEventRouter routining output events
+     * @param processors processors for select clauses
+     * @param whereClauses where expressions
+     */
     public RouteResultView(boolean isFirst, EventType eventType, EPStatementHandle epStatementHandle, InternalEventRouter internalEventRouter, ResultSetProcessor[] processors, ExprNode[] whereClauses)
     {
         if (whereClauses.length != processors.length)

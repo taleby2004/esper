@@ -13,6 +13,9 @@ import com.espertech.esper.epl.expression.ExprNode;
 import java.util.List;
 import java.io.Serializable;
 
+/**
+ * Split-stream description.
+ */
 public class OnTriggerSplitStream implements Serializable
 {
     private static final long serialVersionUID = 7836326460852522622L;
@@ -20,6 +23,12 @@ public class OnTriggerSplitStream implements Serializable
     private SelectClauseSpecRaw selectClause;
     private ExprNode whereClause;
 
+    /**
+     * Ctor.
+     * @param insertInto the insert-into clause
+     * @param selectClause the select-clause
+     * @param whereClause where-expression or null
+     */
     public OnTriggerSplitStream(InsertIntoDesc insertInto, SelectClauseSpecRaw selectClause, ExprNode whereClause)
     {
         this.insertInto = insertInto;
@@ -27,16 +36,28 @@ public class OnTriggerSplitStream implements Serializable
         this.whereClause = whereClause;
     }
 
+    /**
+     * Returns the insert-into clause.
+     * @return insert-into
+     */
     public InsertIntoDesc getInsertInto()
     {
         return insertInto;
     }
 
+    /**
+     * Returns the select clause.
+     * @return select
+     */
     public SelectClauseSpecRaw getSelectClause()
     {
         return selectClause;
     }
 
+    /**
+     * Returns the where clause or null if not defined
+     * @return where clause
+     */
     public ExprNode getWhereClause()
     {
         return whereClause;

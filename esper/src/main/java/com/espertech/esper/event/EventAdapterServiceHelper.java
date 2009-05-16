@@ -20,8 +20,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Helper for writeable events.
+ */
 public class EventAdapterServiceHelper
 {
+    /**
+     * Returns descriptors for all writable properties.
+     * @param eventType to reflect on
+     * @return list of writable properties
+     */
     public static Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType)
     {
         if (!(eventType instanceof EventTypeSPI))
@@ -58,6 +66,15 @@ public class EventAdapterServiceHelper
         }
     }
 
+    /**
+     * Returns a factory for creating and populating event object instances for the given type.
+     * @param eventType to create underlying objects for
+     * @param properties to write
+     * @param methodResolutionService for resolving methods
+     * @param eventAdapterService fatory for event
+     * @return factory
+     * @throws EventBeanManufactureException if a factory cannot be created for the type
+     */
     public static EventBeanManufacturer getManufacturer(EventAdapterService eventAdapterService, EventType eventType, WriteablePropertyDescriptor[] properties, MethodResolutionService methodResolutionService)
             throws EventBeanManufactureException
     {

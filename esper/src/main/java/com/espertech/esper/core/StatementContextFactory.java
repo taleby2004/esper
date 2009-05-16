@@ -30,6 +30,7 @@ public interface StatementContextFactory
      * @param optCreateWindowDesc the create-window statement descriptor for named window context creation
      * @param hasVariables indicator whether the statement uses variables anywhere in the statement
      * @param isFireAndForget if the statement context is for a fire-and-forget statement
+     * @param annotations statement annotations
      * @return statement context
      */
     public StatementContext makeContext(String statementId,

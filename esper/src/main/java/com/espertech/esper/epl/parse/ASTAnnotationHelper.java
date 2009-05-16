@@ -19,6 +19,7 @@ public class ASTAnnotationHelper
     /**
      * Walk an annotation root name or child node (nested annotations).
      * @param node annotation walk node
+     * @param engineImportService for engine imports
      * @return annotation descriptor
      * @throws ASTWalkException if the walk failed
      */

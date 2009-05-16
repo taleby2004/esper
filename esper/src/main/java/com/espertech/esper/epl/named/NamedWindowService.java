@@ -55,6 +55,7 @@ public interface NamedWindowService
      * @param revisionProcessor handles update events
      * @param eplExpression is the expression
      * @param statementName the name of the statement
+     * @param isPrioritized if the engine is running with prioritized execution
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */

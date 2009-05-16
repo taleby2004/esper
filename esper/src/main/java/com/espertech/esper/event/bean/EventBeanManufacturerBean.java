@@ -15,6 +15,9 @@ import org.apache.commons.logging.LogFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Factory for event beans created and populate anew from a set of values.
+ */
 public class EventBeanManufacturerBean implements EventBeanManufacturer
 {
     private static Log log = LogFactory.getLog(EventBeanManufacturerBean.class);
@@ -25,6 +28,14 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
     private final FastMethod[] writeMethods;
     private final FastMethod factoryMethod;
 
+    /**
+     * Ctor.
+     * @param beanEventType target type
+     * @param service factory for events
+     * @param properties written properties
+     * @param methodResolutionService for resolving write methods
+     * @throws EventBeanManufactureException if the write method lookup fail
+     */
     public EventBeanManufacturerBean(BeanEventType beanEventType,
                                      EventAdapterService service,
                                      WriteablePropertyDescriptor[] properties,

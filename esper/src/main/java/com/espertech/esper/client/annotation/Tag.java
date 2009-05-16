@@ -1,7 +1,7 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Annotation to tag a statement with a name-value pair.
+ * Annotation for use in EPL statement to tag a statement with a name-value pair.
  */
 public @interface Tag
 {

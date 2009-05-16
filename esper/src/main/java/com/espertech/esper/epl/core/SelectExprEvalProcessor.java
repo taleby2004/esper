@@ -56,6 +56,7 @@ public class SelectExprEvalProcessor implements SelectExprProcessor
      * @param eventAdapterService - service for generating events and handling event types
      * @param revisionService - service that handles update events
      * @param selectExprEventTypeRegistry - service for statement to type registry
+     * @param methodResolutionService - for resolving methods
      * @throws com.espertech.esper.epl.expression.ExprValidationException thrown if any of the expressions don't validate
      */
     public SelectExprEvalProcessor(List<SelectClauseExprCompiledSpec> selectionList,

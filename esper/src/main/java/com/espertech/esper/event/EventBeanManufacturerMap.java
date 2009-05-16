@@ -6,12 +6,21 @@ import com.espertech.esper.client.EventBean;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * Factory for Map-underlying events.
+ */
 public class EventBeanManufacturerMap implements EventBeanManufacturer
 {
     private final MapEventType mapEventType;
     private final EventAdapterService eventAdapterService;
     private final WriteablePropertyDescriptor[] writables;
 
+    /**
+     * Ctor.
+     * @param mapEventType type to create
+     * @param eventAdapterService event factory
+     * @param properties written properties
+     */
     public EventBeanManufacturerMap(MapEventType mapEventType, EventAdapterService eventAdapterService, WriteablePropertyDescriptor[] properties)
     {
         this.eventAdapterService = eventAdapterService;

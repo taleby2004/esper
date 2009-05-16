@@ -138,6 +138,11 @@ public class ConfigurationEngineDefaults implements Serializable
         return expression;
     }
 
+    /**
+     * Returns statement execution-related settings, settings that
+     * influence event/schedule to statement processing.
+     * @return execution settings
+     */
     public Execution getExecution()
     {
         return execution;
@@ -1070,11 +1075,21 @@ public class ConfigurationEngineDefaults implements Serializable
             prioritized = false;
         }
 
+        /**
+         * Returns false (the default) if the engine does not consider statement priority and preemptive instructions,
+         * or true to enable priority-based statement execution order.
+         * @return false by default to indicate unprioritized statement execution
+         */
         public boolean isPrioritized()
         {
             return prioritized;
         }
 
+        /**
+         * Set to false (the default) if the engine does not consider statement priority and preemptive instructions,
+         * or true for enable priority-based statement execution order.
+         * @param prioritized false by default to indicate unprioritized statement execution
+         */
         public void setPrioritized(boolean prioritized)
         {
             this.prioritized = prioritized;

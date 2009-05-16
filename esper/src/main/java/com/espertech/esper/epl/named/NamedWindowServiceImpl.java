@@ -53,6 +53,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
      * Ctor.
      * @param statementLockFactory statement lock factory
      * @param variableService is for variable access
+     * @param isPrioritized if the engine is running with prioritized execution
      */
     public NamedWindowServiceImpl(StatementLockFactory statementLockFactory, VariableService variableService, boolean isPrioritized)
     {

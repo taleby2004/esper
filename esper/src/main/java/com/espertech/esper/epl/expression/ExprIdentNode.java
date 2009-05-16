@@ -182,7 +182,7 @@ public class ExprIdentNode extends ExprNode
      * @param unresolvedPropertyName - property name
      * @param streamOrPropertyName - stream name, this can also be the first part of the property name
      * @return pair of stream number and property type
-     * @throws ExprValidationException if no such property exists
+     * @throws ExprValidationPropertyException if no such property exists
      */
     protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName)
         throws ExprValidationPropertyException

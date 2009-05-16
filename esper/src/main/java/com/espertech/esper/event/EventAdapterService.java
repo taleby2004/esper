@@ -30,7 +30,21 @@ import java.util.Set;
  */
 public interface EventAdapterService
 {
+    /**
+     * Returns descriptors for all writable properties.
+     * @param eventType to reflect on
+     * @return list of writable properties
+     */
     public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType);
+
+    /**
+     * Returns a factory for creating and populating event object instances for the given type. 
+     * @param eventType to create underlying objects for
+     * @param properties to write
+     * @param methodResolutionService for resolving methods
+     * @return factory
+     * @throws EventBeanManufactureException if a factory cannot be created for the type
+     */
     public EventBeanManufacturer getManufacturer(EventType eventType, WriteablePropertyDescriptor[] properties, MethodResolutionService methodResolutionService)
         throws EventBeanManufactureException;
 

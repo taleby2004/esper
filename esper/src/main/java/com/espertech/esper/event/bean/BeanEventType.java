@@ -88,6 +88,10 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         return propertyDescriptorMap.get(propertyName);
     }
 
+    /**
+     * Returns the factory methods name, or null if none defined.
+     * @return factory methods name
+     */
     public String getFactoryMethodName()
     {
         return factoryMethodName;

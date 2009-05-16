@@ -17,6 +17,9 @@ import com.espertech.esper.util.ExecutionPathDebugLog;
  */
 public final class EvalEveryNode extends EvalNode
 {
+    /**
+     * Ctor.
+     */
     public EvalEveryNode()
     {
     }

@@ -36,6 +36,8 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
      * @param beginState contains the events that make up prior matches
      * @param context contains handles to services required
      * @param everyNode is the factory node associated to the state
+     * @param expressions distinct-value expressions
+     * @param matchedEventConvertor converts match-event map to events-per-stream
      */
     public EvalEveryDistinctStateNode(Evaluator parentNode,
                                   EvalEveryDistinctNode everyNode,

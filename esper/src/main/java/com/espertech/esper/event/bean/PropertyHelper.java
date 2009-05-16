@@ -229,8 +229,8 @@ public class PropertyHelper
             result.add(new InternalEventPropDescriptor(propertyName, readMethod, type));
         }
     }
-
-    protected static void addIntrospectPropertiesWritable(Class clazz, Set<WriteablePropertyDescriptor> result)
+   
+    private static void addIntrospectPropertiesWritable(Class clazz, Set<WriteablePropertyDescriptor> result)
     {
         PropertyDescriptor properties[] = introspect(clazz);
         for (int i = 0; i < properties.length; i++)

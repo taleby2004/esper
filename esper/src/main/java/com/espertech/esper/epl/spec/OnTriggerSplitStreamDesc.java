@@ -18,6 +18,12 @@ public class OnTriggerSplitStreamDesc extends OnTriggerDesc
     private boolean isFirst;
     private final List<OnTriggerSplitStream> splitStreams;
 
+    /**
+     * Ctor.
+     * @param onTriggerType type of trigger
+     * @param isFirst true for use the first-matching where clause, false for all
+     * @param splitStreams streams
+     */
     public OnTriggerSplitStreamDesc(OnTriggerType onTriggerType, boolean isFirst, List<OnTriggerSplitStream> splitStreams)
     {
         super(onTriggerType);
@@ -25,11 +31,19 @@ public class OnTriggerSplitStreamDesc extends OnTriggerDesc
         this.splitStreams = splitStreams;
     }
 
+    /**
+     * Returns the remaining insert-into and select-clauses in the split-stream clause.
+     * @return clauses.
+     */
     public List<OnTriggerSplitStream> getSplitStreams()
     {
         return splitStreams;
     }
 
+    /**
+     * Returns indicator whether only the first or all where-clauses are triggering.
+     * @return first or all
+     */
     public boolean isFirst()
     {
         return isFirst;

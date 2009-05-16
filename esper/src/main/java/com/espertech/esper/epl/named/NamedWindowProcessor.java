@@ -43,6 +43,7 @@ public class NamedWindowProcessor
      * @param revisionProcessor for revision processing
      * @param eplExpression epl expression
      * @param statementName statement name
+     * @param isPrioritized if the engine is running with prioritized execution
      */
     public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized)
     {

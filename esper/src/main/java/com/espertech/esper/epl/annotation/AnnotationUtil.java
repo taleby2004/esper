@@ -24,6 +24,13 @@ public class AnnotationUtil
 {
     private static final Log log = LogFactory.getLog(AnnotationUtil.class);
 
+    /**
+     * Compile annotation objects from descriptors.
+     * @param annotationSpec spec for annotations
+     * @param engineImportService engine imports
+     * @param eplStatement statement expression
+     * @return annotations
+     */
     public static Annotation[] compileAnnotations(List<AnnotationDesc> annotationSpec, EngineImportService engineImportService, String eplStatement)
     {
         Annotation[] annotations;

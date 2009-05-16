@@ -1,7 +1,7 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Annotation to define a statement name.
+ * Annotation for use in EPL statement to define a statement name.
  */
 public @interface Name
 {

@@ -172,11 +172,23 @@ public class ConfigurationEventTypeLegacy implements Serializable
         this.propertyResolutionStyle = propertyResolutionStyle;
     }
 
+    /**
+     * Returns the name of the factory method, either fully-qualified or just a method name if the
+     * method is on the same class as the configured class, to use when instantiating
+     * objects of the type.
+     * @return factory methods
+     */
     public String getFactoryMethod()
     {
         return factoryMethod;
     }
 
+    /**
+     * Returns the name of the factory method, either fully-qualified or just a method name if the
+     * method is on the same class as the configured class, to use when instantiating
+     * objects of the type.
+     * @param factoryMethod factory methods
+     */
     public void setFactoryMethod(String factoryMethod)
     {
         this.factoryMethod = factoryMethod;

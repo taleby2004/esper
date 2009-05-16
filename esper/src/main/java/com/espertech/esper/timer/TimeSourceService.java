@@ -15,5 +15,9 @@ package com.espertech.esper.timer;
  */
 public interface TimeSourceService
 {
-	public long getTimeMillis();
+    /**
+     * Returns time in millis.
+     * @return time in millis
+     */
+    public long getTimeMillis();
 }

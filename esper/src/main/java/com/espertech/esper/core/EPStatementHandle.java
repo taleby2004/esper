@@ -44,6 +44,8 @@ public class EPStatementHandle implements MetaDefItem, Serializable
      * @param expressionText is the expression
      * @param hasVariables indicator whether the statement uses variables
      * @param metricsHandle handle for metrics reporting
+     * @param priority priority, zero is default
+     * @param preemptive true for drop after done
      */
     public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText, boolean hasVariables, StatementMetricHandle metricsHandle, int priority, boolean preemptive)
     {
@@ -136,11 +138,19 @@ public class EPStatementHandle implements MetaDefItem, Serializable
         }
     }
 
+    /**
+     * Returns the statement priority.
+     * @return priority, default 0
+     */
     public int getPriority()
     {
         return priority;
     }
 
+    /**
+     * True for preemptive (drop) statements.
+     * @return preemptive indicator
+     */
     public boolean isPreemptive()
     {
         return preemptive;

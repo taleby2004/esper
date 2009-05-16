@@ -36,6 +36,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
      * @param eventAdapterService - service for generating events and handling event types
      * @param insertIntoDesc - describes the insert-into clause
      * @param selectExprEventTypeRegistry - registry for event type to statements
+     * @param methodResolutionService - for resolving writable properties
      * @throws ExprValidationException if the expression validation failed 
      */
     public SelectExprJoinWildcardProcessor(String[] streamNames, EventType[] streamTypes, EventAdapterService eventAdapterService, InsertIntoDesc insertIntoDesc, SelectExprEventTypeRegistry selectExprEventTypeRegistry, MethodResolutionService methodResolutionService) throws ExprValidationException

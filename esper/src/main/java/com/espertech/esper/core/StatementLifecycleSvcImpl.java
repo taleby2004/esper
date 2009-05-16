@@ -770,6 +770,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param eplStatement the statement to compile
      * @param statementContext the statement services
      * @param isSubquery is true for subquery compilation or false for statement compile
+     * @param annotations statement annotations
      * @return compiled statement
      * @throws EPStatementException if the statement cannot be compiled
      */
@@ -956,6 +957,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 );
     }
 
+    /**
+     * Compile a select clause disallowing subselects.
+     * @param spec to compile
+     * @return select clause compiled
+     * @throws ExprValidationException when validation fails
+     */
     public static SelectClauseSpecCompiled compileSelectNoSubselect(SelectClauseSpecRaw spec) throws ExprValidationException
     {
         // Look for expressions with sub-selects in select expression list and filter expression

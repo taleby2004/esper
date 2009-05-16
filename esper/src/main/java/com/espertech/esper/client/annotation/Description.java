@@ -1,7 +1,7 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Annotation to add a description.
+ * Annotation for use in EPL statements to add a description.
  */
 public @interface Description
 {

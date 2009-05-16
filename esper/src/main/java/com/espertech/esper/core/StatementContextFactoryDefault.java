@@ -140,27 +140,48 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getConfigSnapshot());
     }
 
+    /**
+     * Analysis result of analysing annotations for a statement.
+     */
     public static class AnnotationAnalysisResult
     {
         private int priority;
         private boolean isPremptive;
 
+        /**
+         * Ctor.
+         * @param priority priority
+         * @param premptive preemptive indicator
+         */
         private AnnotationAnalysisResult(int priority, boolean premptive)
         {
             this.priority = priority;
             isPremptive = premptive;
         }
 
+        /**
+         * Returns execution priority.
+         * @return priority.
+         */
         public int getPriority()
         {
             return priority;
         }
 
+        /**
+         * Returns preemptive indicator (drop or normal).
+         * @return true for drop
+         */
         public boolean isPremptive()
         {
             return isPremptive;
         }
 
+        /**
+         * Analyze the annotations and return priority and drop settings.
+         * @param annotations to analyze
+         * @return analysis result
+         */
         public static AnnotationAnalysisResult analyzeAnnotations(Annotation[] annotations)
         {
             boolean preemptive = false;

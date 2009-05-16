@@ -20,6 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Helper for processing insert-into clauses and their select expression for writing from the
+ * insert-into to an event underlying object.
+ */
 public class SelectExprInsertEventBean
 {
     private static Log log = LogFactory.getLog(SelectExprInsertEventBean.class);
@@ -33,6 +37,12 @@ public class SelectExprInsertEventBean
     private ExprEvaluator[] expressionNodes;
     private TypeWidener[] wideners;
 
+    /**
+     * Ctor.
+     * @param eventAdapterService event factory
+     * @param eventType event type to produce
+     * @return helper instance or null if the type's underlying cannot be populated
+     */
     public static SelectExprInsertEventBean getInsertUnderlying(EventAdapterService eventAdapterService, EventType eventType)
     {
         Set<WriteablePropertyDescriptor> writableProps = eventAdapterService.getWriteableProperties(eventType);
@@ -49,6 +59,14 @@ public class SelectExprInsertEventBean
         this.writables = writables;
     }
 
+    /**
+     * Initialize, validating writable properties and assigning a factory.
+     * @param streamNames names of streams
+     * @param streamTypes types
+     * @param methodResolutionService for resolving write methods
+     * @param eventAdapterService event factory
+     * @throws ExprValidationException if validation fails
+     */
     public void initializeJoinWildcard(String[] streamNames, EventType[] streamTypes, MethodResolutionService methodResolutionService, EventAdapterService eventAdapterService)
             throws ExprValidationException
     {
@@ -115,6 +133,17 @@ public class SelectExprInsertEventBean
         }
     }
 
+    /**
+     * Initialize, validating writable properties and assigning a factory.
+     * @param isUsingWildcard when wildcard is present
+     * @param typeService event types
+     * @param expressionNodes select-clause expressions
+     * @param columnNames column names
+     * @param expressionReturnTypes return types of expressions
+     * @param methodResolutionService for resolving write methods
+     * @param eventAdapterService event factory
+     * @throws ExprValidationException if validation fails
+     */
     public void initialize(boolean isUsingWildcard, StreamTypeService typeService, ExprEvaluator[] expressionNodes, String[] columnNames, Object[] expressionReturnTypes, MethodResolutionService methodResolutionService, EventAdapterService eventAdapterService)
             throws ExprValidationException
     {
@@ -318,6 +347,12 @@ public class SelectExprInsertEventBean
         return null;
     }
 
+    /**
+     * Manufacture an event for events-per-stream.
+     * @param eventsPerStream result events
+     * @param newData flag whether insert or remove stream
+     * @return manufactured event
+     */
     public EventBean manufacture(EventBean[] eventsPerStream, boolean newData)
     {
         Object[] values = new Object[writableProperties.length];

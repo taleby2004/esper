@@ -1339,6 +1339,14 @@ public class JavaClassHelper
         return (Class) typeParam;
     }
 
+    /**
+     * Resolve a string constant as a possible enumeration value, returning null if not resolved.
+     * @param constant to resolve
+     * @param methodResolutionService for statement-level use to resolve enums, can be null
+     * @param engineImportService for engine-level use to resolve enums, can be null
+     * @return null or enumeration value
+     * @throws ExprValidationException if there is an error accessing the enum
+     */
     public static Object resolveIdentAsEnumConst(String constant, MethodResolutionService methodResolutionService, EngineImportService engineImportService)
             throws ExprValidationException
         {

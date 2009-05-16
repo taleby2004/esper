@@ -7,6 +7,9 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprNode;
 
+/**
+ * Handler for split-stream evaluating the first where-clause matching select-clause.
+ */
 public class RouteResultViewHandlerFirst implements RouteResultViewHandler
 {
     private final InternalEventRouter internalEventRouter;
@@ -15,6 +18,13 @@ public class RouteResultViewHandlerFirst implements RouteResultViewHandler
     private final ExprNode[] whereClauses;
     private final EventBean[] eventsPerStream = new EventBean[1];
 
+    /**
+     * Ctor.
+     * @param epStatementHandle handle
+     * @param internalEventRouter routes generated events
+     * @param processors select clauses
+     * @param whereClauses where clauses
+     */
     public RouteResultViewHandlerFirst(EPStatementHandle epStatementHandle, InternalEventRouter internalEventRouter, ResultSetProcessor[] processors, ExprNode[] whereClauses)
     {
         this.internalEventRouter = internalEventRouter;
