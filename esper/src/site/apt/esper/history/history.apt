@@ -12,6 +12,55 @@ Change History
 	[]
 
 
+Version 3.1.0
+
+	Released May 16, 2009
+	
+	Built with Sun JDK 5.0 Update 16; Also tested for JDK 6 Update 10
+
+* API changes
+
+  * None.
+    
+* Major changes
+  
+  * The new "every-distinct" operator has been introduced to the pattern language. Very similar to the "every" operator, this operator
+    suppresses duplicate results received from sub-expressions based on a set of expressions returning distinct-values. 
+
+  * The EPL language now understands annotations following the annotation syntax standard.
+    An annotation is an addition made to information in a statement. Esper provides certain built-in annotations for
+    defining statement name (@Name), adding a statement description (@Description) or for tagging statements.
+    Applications can provide their own annotation classes that the EPL compiler can populate.
+    
+  * The engine now provides a way to prioritize and preempt processing of an event when multiple statements must process the event,
+    via the @Priority and @Drop annotations.
+    
+  * The insert-into clause can now directly populate an underlying event object from a select clause, i.e. populate your object or Map type.
+  
+  * We have extended the on-insert syntax by a new split-stream syntax. This allows to list multiple insert-into, select clauses and where-clauses
+    thereby making it easy to split or duplicate an event stream into multiple further event streams.
+
+  * The behavior of "timer:within" when used within an "every" in a pattern has changed slightly: The sub-expression qualified by "timer-within" upon expiry 
+    of the timer now evaluates to permanently false, while previously it simple stopped. This allows the "every" operator to restart such sub-expression.
+    For example, the expression:
+      every(A -> (B where timer:within(5 sec)))
+    ... When no B event arrives after an A event, the "every" restarts the subexpression looking for the next A followed by B within 5 sec.
+    
+  []
+    
+* Minor changes
+
+  * The provider URI of the default engine instance is now "default" instead of null.
+    This is for consistency with the default engine qualifier for optional use in stream and property name qualification, which is also "default".
+    Therefore EPServiceProviderManager.getDefaultProvider().getURI() returns "default", and passing null to the EPServiceProviderManager still returns the default instance.
+
+  * The PluginLoader interface for writing adapters has a new required method that must be implemented to allow plugins to initialize after complete Esper engine initialization.
+    
+  * Bug fixes: see JIRA list of resolved issues for release 3.1
+
+  []
+
+
 Version 3.0.0
 
 	Released February 11, 2009

@@ -47,7 +47,7 @@ Features
 	
 	* Combine windows with intersection and union semantics.
 
-	* Grouping, aggregation, sorting, filtering and merging of event streams
+	* Grouping, aggregation, sorting, filtering, merging, splitting or duplicating of event streams
 
 	* Tailored SQL-like query language using <insert into>, <select>, <from>, <where>, <group-by>, <having> and <order-by> clauses
 
@@ -66,6 +66,7 @@ Features
 		* Support for predefined query execution optimized by indexed access, via on-select
 		
 		[]
+			
 	[]
 		
         
@@ -75,7 +76,7 @@ Features
 
 	* Crontab-like timer <'at'> operator
 
-	* Lifecycle of pattern can be controlled by timer and via operators, repeat-number and repeat-until
+	* Lifecycle of pattern can be controlled by timer and via operators, repeat-number and repeat-until, every-distinct
 
         * Pattern-matched events provided to listeners
 
@@ -92,6 +93,8 @@ Features
         * Dynamic properties allow dynamic typing of properties, supported by <cast>, <instanceof> and <exists> functions
 
         * Applications can plug-in their own event representation and dynamic type resolution
+        
+        * Insert-into can directly populate a plain or legacy Java object or Map from a select-clause
 
         []
         
@@ -193,6 +196,10 @@ Features
     
     * JSON and XML output event rendering without syntax to learn
             
+    * <<Annotations>> allow adding informaton to EPL statements specific to your application
+    
+    * Assign a <<priority>> to your statement; Identify <<preemptive>> statements that cause an event to drop in face of multiple statements matching filters.
+        
     []		
     
 * Excellent documentation 

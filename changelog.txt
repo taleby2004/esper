@@ -12,7 +12,8 @@ Major API changes
     ... When no B event arrives after an A event, the "every" restarts the subexpression looking for the next A followed by B within 5 sec.
   - The PluginLoader interface for writing adapters has a new required method that must be implemented to allow plugins to initialize after complete Esper engine initialization.
   - The provider URI of the default engine instance is now "default" instead of null.
-    Therefore (EPServiceProviderManager.getDefaultProvider().getURI()), for consistency with the default engine qualifier for (optional) use in stream and property name qualification.
+    This is for consistency with the default engine qualifier for optional use in stream and property name qualification, which is also "default".
+    Therefore EPServiceProviderManager.getDefaultProvider().getURI() returns "default", and passing null to the EPServiceProviderManager still returns the default instance.
 
 New Features
   - A new "every-distinct" operator has been introduced to the pattern language. Very similar to the "every" operator, this operator
