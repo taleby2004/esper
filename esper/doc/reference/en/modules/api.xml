@@ -1362,7 +1362,7 @@ ThreadPoolExecutor threadpool = spi.getThreadingService().getInboundThreadPool()
         </para>
 
         <para>
-			The internal timer relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. The next section describes timer resolution for the internal timer, by default set to 100 milliseconds. When using externally-controlled time the timer resolution is in your control.
+			The internal timer relies on the <literal>java.util.concurrent.ScheduledThreadPoolExecutor</literal> class for time tick events. The next section describes timer resolution for the internal timer, by default set to 100 milliseconds but is configurable via the threading options. When using externally-controlled time the timer resolution is in your control.
         </para>
 
         <para>
@@ -1438,7 +1438,7 @@ epRuntime().sendEvent(new CurrentTimeEvent(6000));]]></programlisting>
 		<indexterm><primary>time</primary><secondary>resolution</secondary></indexterm>
         <para>
 			The minimum resolution that all data windows, patterns and output rate limiting operate at is the millisecond. 
-			Parameters to time window views, pattern operators or the <literal>output</literal> clause that are less then 1 millisecond are not allowed. As stated earlier, the default frequency at which the internal timer operates is 100 milliseconds.
+			Parameters to time window views, pattern operators or the <literal>output</literal> clause that are less then 1 millisecond are not allowed. As stated earlier, the default frequency at which the internal timer operates is 100 milliseconds (configurable).
         </para>
         
         <para>
