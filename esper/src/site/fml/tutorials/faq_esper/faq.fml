@@ -608,6 +608,15 @@ Thread.currentThread().setContextClassLoader(this.class.getClassLoader());
 
 	</answer>
     </faq>    
+
+    <faq id="small_devices">
+      <question>Can Esper run on small devices?</question>
+      <answer>
+        <p>
+Esper is a 100% Java component and works anywhere Java 5 or 6 is fully supported. The list of dependencies is fairly small and it is also possible to reduce Esper jar itself to the minimal classes needed, if required. It has no disk or other device or storage dependency and its memory and CPU use requirements depend only on what statements are needed.
+	</p>
+	</answer>
+    </faq>    
   </part>
 
 </faqs>
