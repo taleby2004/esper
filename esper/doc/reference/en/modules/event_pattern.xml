@@ -973,7 +973,7 @@ a=A -> every-distinct(a.aprop) b=B]]></programlisting>
 		   <para>
 			   Consider the following pattern that demonstrates the behavior when a pattern subexpression becomes permanently false:
 		   </para>
-			<programlisting><![CDATA[[2] (A and not C)]]></programlisting>
+			<programlisting><![CDATA[[2] (a=A and not C)]]></programlisting>
 
 		   <para>
 			   In the case where a C event arrives before 2 A events arrive, the pattern above becomes permanently false.
@@ -982,7 +982,12 @@ a=A -> every-distinct(a.aprop) b=B]]></programlisting>
 		   <para>
 			   Lets add an <literal>every</literal> operator to restart the pattern and thus keep matching for all pairs of A events that arrive without a C event in between each pair:
 		   </para>
-			<programlisting><![CDATA[every [2] (A and not C)]]></programlisting>
+			<programlisting><![CDATA[every [2] (a=A and not C)]]></programlisting>
+
+		   <para>
+			   Since pattern matches return multiple A events, your select clause should use tag <literal>a</literal> as an array, for example:
+		   </para>
+			<programlisting><![CDATA[select a[0].id, a[1].id from pattern [every [2] (a=A and not C)]]]></programlisting>
 		</sect2>
 			
 		<sect2 id="pattern-repeatuntil" >
