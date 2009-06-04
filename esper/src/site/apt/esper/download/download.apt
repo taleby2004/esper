@@ -12,6 +12,19 @@ Download Esper
 *------------------------+----------------------------------------------------------------------------+-----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------+---------------------------+
 
 
+* Maven Repository Information
+	
+	Each release gets published to the {{{http://repository.codehaus.org/com/espertech/esper}Codehaus Maven repository}} which synchronizes in time with other repositories.
+	Use the following dependency in your Maven POM:
+	
+----------------------------------------
+	<dependency>
+		<groupId>com.espertech</groupId>
+		<artifactId>esper</artifactId>
+		<version> ... </version>
+	</dependency>
+----------------------------------------
+
 * Bug Fix Service Packs
 	
 	Please navigate to {{{http://jira.codehaus.org/browse/ESPER}JIRA}} and select Resolved on the right hand side to see resolved issues for the current release.
