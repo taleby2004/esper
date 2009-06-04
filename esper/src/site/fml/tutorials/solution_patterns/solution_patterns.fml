@@ -229,7 +229,7 @@ having avg(waitTime) > 60</pre></div>
         <p>
           This example EPL removes non-unique rows by category, so that only the last event for each category stays in the named window. It therefore selects the remove stream (rstream) of the unique window:
         </p>
-		<div class="source"><pre>insert into MyNonUnique select rstream id from MyEvent.std:unique(category)
+		<div class="source"><pre>insert rstream into MyNonUnique select rstream id from MyEvent.std:unique(category)
 		
 on MyNonUnique as d delete from MyWindow as w where w.id = d.id</pre></div>
         <p>
@@ -333,7 +333,7 @@ output every 5 seconds</pre></div>
           Your application may need to delay events for a certain time. A simple way to delay data is to enter the data into a time window
           and select the remove stream which is the data leaving the window:
         </p>
-	<div class="source"><pre>insert into DelayedStream select rstream task, measurement, rate from CurrentStream.win:time(10 min)</pre></div>      
+	<div class="source"><pre>insert rstream into DelayedStream select rstream task, measurement, rate from CurrentStream.win:time(10 min)</pre></div>      
         <p>
           In order to compare current data with delayed data, one possible way is to join delayed data and current data.
           For example:
