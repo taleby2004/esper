@@ -11,8 +11,7 @@ Building Esper
   via the below commands. The instructions below have last been tried using Maven 2.0.9. Maven can be
   downloaded from {{http://maven.apache.org/}}.
              
-  Once you unpack Esper then open a command window and change directory into the Esper top directory where the Maven project model file "pom.xml" 
-  is located. The file is in the directory "esper/esper".
+  You will need to perform a checkout from the Subversion source code control system (see Source Repository page). 
   
   If you have a filewall, you will need to change the proxy entry in Maven's setting.xml under your Maven installation directory. 
   
@@ -21,7 +20,7 @@ Building Esper
   The commands to compile Esper, run all tests and install a jar file into Maven's repository is:
   
 ----------------------------------------
-cd esper/esper
+cd esper
 mvn install
 ----------------------------------------	
 
