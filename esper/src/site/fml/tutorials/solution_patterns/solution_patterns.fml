@@ -1232,7 +1232,7 @@ select MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent</pre></d
       </answer>
     </faq>    
 
-    <faq id="">
+    <faq id="application-object-variations">
       <question>What to do if my events are not JavaBeans, not well-defined, their properties are not known in advance and may differ wildly, and are nested?</question>
       <answer>
         <p>
@@ -1281,6 +1281,80 @@ select MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent</pre></d
 	  	There a number of options available in the configuration to handle Java classes that may not adhere to JavaBean conventions.
         </p>
 
+      </answer>
+    </faq>    
+
+    <faq id="contained-events">
+      <question>How do I query nested indexed events? Or more generally, event objects contained in event objects?</question>
+      <answer>
+        <p>
+    	  Your application may have a parent event that contains multiple subevents. You want to perform aggregation or pattern matching 
+    	  on the subevents plus information on the parent event. 
+        </p>
+    	<p>
+    	  Under the term contained-event selection the Esper engine 
+    	  can handle events that contain properties that are themselves events. 
+    	  For example when application events are coarse-grained structures and you need to perform bulk operations on the rows of the 
+    	  property graph in an event, with any number of nesting level.
+        </p>
+        <p>
+    	  In this example that a user has provided, a parent ResponseTime event contains multiple subevents that each measure 
+    	  individual operations (a database or JMS operation, for example) that are part of a larger operation, represented by a ResponseTime event.
+    	  Each ResponseTime event has a one or more SubEvent object that provide a subevent type and number of milliseconds for the operation.
+        </p>
+        <p>
+    	  The example here uses Java objects. The example works the same for XML or Map-based events, we are picking a Java event object here for demonstration. See the docs for further examples.
+        </p>
+        <p>
+    	  The sample ResponseEvent event and SubEvent definitions are:
+        </p>
+	<div class="source"><pre>public class ResponseEvent {
+  private String category;
+  private SubEvent[] subEvents;
+
+  public ResponseEvent(String category, SubEvent[] subEvents) {
+    this.category = category;
+    this.subEvents = subEvents;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public SubEvent[] getSubEvents() {
+    return subEvents;
+  }
+}
+
+public class SubEvent {
+  private long responseTimeMillis;
+  private String subEventType;
+
+  public SubEvent(long responseTimeMillis, String subEventType) {
+    this.responseTimeMillis = responseTimeMillis;
+    this.subEventType = subEventType;
+  }
+
+  public long getResponseTimeMillis() {
+    return responseTimeMillis;
+  }
+
+  public String getSubEventType() {
+    return subEventType;
+  }
+}</pre></div>
+
+    	<p>
+    	  The next sample code snip adds the parent event type to the known types, here via configuration API but configuration XML would work just as well:
+        </p>    	
+	<div class="source"><pre>epService.getEPAdministrator().getConfiguration().addEventType("ResponseEvent", ResponseEvent.class);</pre></div>
+
+    	<p>
+    	  This is a sample query to continuously output the average response time per category and subevent-type:
+        </p>    	
+	<div class="source"><pre>select category, subEventType, avg(responseTimeMillis) as avgTime 
+from ResponseEvent[select category, * from subEvents].win:time(1 min) 
+group by category, subEventType</pre></div>
       </answer>
     </faq>    
 
