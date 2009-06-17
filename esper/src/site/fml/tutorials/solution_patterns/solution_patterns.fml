@@ -1,6 +1,144 @@
 <?xml version="1.0"?>
 <faqs id="Solution-Patterns" title="Solution Patterns">
 
+  <part id="concepts">
+    <title>Key Concepts</title>
+  
+    <faq id="CEP">
+      <question>What is an CEP?</question>
+      <answer>
+      	<p>
+      	  Complex Event Processing, or CEP, is primarily
+	    an event processing concept that deals with the task
+	    of processing multiple events with the goal of
+	    identifying the meaningful events within the event cloud.
+      	</p>
+        <p>
+          CEP employs techniques such as detection of
+  complex patterns of many events, event correlation
+  and abstraction, event hierarchies, and
+  relationships between events such as causality,
+  membership, and timing, and event-driven processes.
+      	</p>
+      	<p>
+      	    (source: wikipedia.org).
+      	</p>
+      </answer>
+    </faq>
+
+    <faq id="event">
+      <question>What is an event?</question>
+      <answer>
+      	<p>
+      	  An event is an immutable record of a past occurrence of an action or state change. Event properties capture the useful information for an event.
+      	</p>
+        <p>
+          Or.... "Something that happens"  (source: webster.com).
+      	</p>
+      	<p>
+      	  Typically, the following is true for an event:
+      	</p>
+      	<UL>
+	<LI>It's anchored in time.</LI>
+	<LI>It's not under your control.</LI>
+	</UL>
+      	<p>
+      	  An event can itself contain further events. Event properties contain may contain rich and nested domain-specific information.
+      	</p>
+      </answer>
+    </faq>
+
+    <faq id="stream">
+      <question>What is an event stream or simply "stream"?</question>
+      <answer>
+      	<p>
+      	  A time ordered sequence of events in time.
+      	</p>
+        <p>
+          A stream is append-only, one cannot remove events (conceptually), one can just add them to the sequence.
+      	</p>
+      	<p>
+      	  A stream is unbounded, i.e. there is no end to the sequence {event1, event2, event3, event4, ..., eventN}.
+      	</p>
+      </answer>
+    </faq>
+    
+    <faq id="event_cloud">
+      <question>What is an event cloud compared to a stream?</question>
+      <answer>
+      	<p>
+      	  A stream is a time ordered sequence of events in time, while a cloud is unordered.
+      	</p>
+        <p>
+          For example, as valid stream is {{1s, event1}, {2s, event2}, {4s, event3}}.
+      	</p>
+        <p>
+          A cloud is unordered e.g. {{1s, event1}, {4s, event2}, {2s, event3}}.
+      	</p>
+      </answer>
+    </faq>
+
+  </part>
+
+
+  <part id="introductory">
+    <title>Introductory</title>
+  	
+    <faq id="Event Filtering">
+      <question>How do I look for specific events on a stream, dropping the unwanted events?</question>
+      <answer>
+        <p>
+          Consider a stream of temperature sensor events that provide a temperature value. This query looks for 
+          all sensor events (named SensorEvent) where the temperature is greater then 90:
+        </p>
+	<div class="source"><pre>select * from SensorEvent where temperature > 90</pre></div>      
+      </answer>
+    </faq>   
+    
+    <faq id="Event Aggregation">
+      <question>How do I aggregate several (simple) events from a stream into a single new (complex) event summarizing
+event properties of the simple events?</question>
+      <answer>
+        <p>
+          This sample outputs the average temperature of all sensor events received from the start of the query:
+        </p>
+	<div class="source"><pre>select avg(temperature) from SensorEvent</pre></div>      
+      </answer>
+    </faq>   
+
+    <faq id="Data Windows">
+      <question>How do I limit the unbounded events of a stream to a defined timespan or number of events?</question>
+      <answer>
+        <p>
+          There is many different flavors of data windows, which serve to limit the view on the unbound stream of data.
+        </p>
+        <p>
+          The next sample outputs the average temperature of all sensor events received within the last 1 minute:
+        </p>
+	<div class="source"><pre>select avg(temperature) from SensorEvent.win:time(1 min)</pre></div>      
+      </answer>
+    </faq>   
+
+    <faq id="Event Correlation">
+      <question>How do I correlate events from one or several streams on a common set of values?</question>
+      <answer>
+        <p>
+          Consider the stream of sensor events and a stream of sensor location events, assuming our sensors can move around geographically.
+        </p>
+        <p>
+          This sample query joins the last sensor event with the last sensor location (SensorLocationEvent) for each sensor identified by a sensor id (sensorId):
+        </p>
+	<div class="source"><pre>select temperature, coordinates 
+from SensorEvent.std:lastevent() as sensor,
+     SensorLocationEvent.std:lastevent() as loc
+where sensor.sensorId = loc.sensorId</pre></div>
+	<p>
+	  You may ask why the "std:lastevent()" is needed here. When joining two streams, in this example and as is often the case we are simply looking to join the last event of each stream.
+	</p>
+      </answer>
+    </faq>   
+  </part>
+
   <part id="general">
   	<title>General</title>
   	
@@ -213,13 +351,13 @@ having avg(waitTime) > 60</pre></div>
           The documentation outlines the built-in views, some of which combine length and time based expiry.
         </p>
         <p>
-          Another good place to look at is a named window. Named windows provide an on-delete clause that helps to build or combine a custom stategy for when to remove events.
+          Another good place to look at is a named window. Named windows provide an on-delete clause that helps to build or combine a custom strategy for when to remove events.
         </p>
         <p>
           In addition, multiple data windows can also be combined via the retain-union and retain-intersection keywords.
         </p>
         <p>
-          Next, we'll show the named window and on-delete option. Lets start with a named window that keeps the last 1 minute of events:
+          Next, we'll show the named window and on-delete option. Let's start with a named window that keeps the last 1 minute of events:
         </p>
 		<div class="source"><pre>create window MyWindow.win:time(1 min) select * from MyEvent</pre></div>
         <p>
@@ -278,7 +416,7 @@ group by symbol, location</pre></div>
         <p>
           Let's consider another possible way of using a separate window of events per category.
           In some use cases we may need to compute not an average per group, but an average over all groups that considers only the last N events per group.
-          This can be accpmlished by leaving the group-by clause off. Now the engine computes the average price over all symbols, considering only the last 10 events per symbol:
+          This can be accomplished by leaving the group-by clause off. Now the engine computes the average price over all symbols, considering only the last 10 events per symbol:
         </p>
 <div class="source"><pre>select symbol, location, avg(price) as avgPrice 
 from StockTick.std:groupby(symbol).win:length(10)</pre></div>
