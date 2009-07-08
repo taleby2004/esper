@@ -125,13 +125,21 @@
 	
 	<target name="dist_maven" description="Maven distribution artifacts" >
 		<echo message="Building Maven distribution files" />
-		<checksum file="maven-metadata.xml" algorithm="MD5" fileext=".md5"/>
-		<checksum file="maven-metadata.xml" algorithm="SHA" fileext=".asc"/>		
+		<checksum file="esper/maven-metadata.xml" algorithm="MD5" fileext=".md5"/>
+		<checksum file="esper/maven-metadata.xml" algorithm="SHA" fileext=".asc"/>		
+		<checksum file="esperio/maven-metadata.xml" algorithm="MD5" fileext=".md5"/>
+		<checksum file="esperio/maven-metadata.xml" algorithm="SHA" fileext=".asc"/>		
 		<copy file="esper/pom.xml" tofile="${dist.dir}/esper-${version}.pom"/>		
 		<checksum file="${dist.dir}/esper-${version}.pom" algorithm="MD5" fileext=".md5"/>
 		<checksum file="${dist.dir}/esper-${version}.pom" algorithm="SHA" fileext=".sha1"/>		
 		<copy file="esperio/pom.xml" tofile="${dist.dir}/esperio-${version}.pom"/>		
 		<checksum file="${dist.dir}/esperio-${version}.pom" algorithm="MD5" fileext=".md5"/>
 		<checksum file="${dist.dir}/esperio-${version}.pom" algorithm="SHA" fileext=".sha1"/>		
+		<copy file="esper-${version}.jar" tofile="${dist.dir}/esper-${version}.jar"/>		
+		<checksum file="${dist.dir}/esper-${version}.jar" algorithm="MD5" fileext=".md5"/>
+		<checksum file="${dist.dir}/esper-${version}.jar" algorithm="SHA" fileext=".sha1"/>		
+		<copy file="esperio-${version}.jar" tofile="${dist.dir}/esperio-${version}.jar"/>		
+		<checksum file="${dist.dir}/esperio-${version}.jar" algorithm="MD5" fileext=".md5"/>
+		<checksum file="${dist.dir}/esperio-${version}.jar" algorithm="SHA" fileext=".sha1"/>		
 	</target>
 </project>

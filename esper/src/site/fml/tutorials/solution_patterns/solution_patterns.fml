@@ -5,7 +5,7 @@
     <title>Key Concepts</title>
   
     <faq id="CEP">
-      <question>What is an CEP?</question>
+      <question>What is CEP?</question>
       <answer>
       	<p>
       	  Complex Event Processing, or CEP, is primarily
