@@ -9,6 +9,8 @@ Presentations, Articles and Books
 *------------------------+----------------------------------------------------------------------------+
 | Presentation                       | Date
 *------------------------+----------------------------------------------------------------------------+
+| {{{http://dist.codehaus.org/esper/FISL_IntelligentMonitoring.pdf} About Intelligent Monitoring (PDF)}} {{{http://www.slideshare.net/denao/fisl-monitoracao-inteligente} (click here for Portuguese)}} | June, 2009
+*------------------------+-------------+---------------------------------------------------------------+
 | {{{http://www.slideshare.net/prabathsiriwardena/complex-event-processing-with-esper-and-wso2-esb/}Complex Event Processing with Esper and WSO2 ESB}}
 and {{{http://www.slideshare.net/pizak/fast-soa-with-apache-synapse}Fast SOA With Apache Synapse}} | July, 2008
 *------------------------+-------------+---------------------------------------------------------------+
@@ -42,10 +44,12 @@ and {{{http://www.slideshare.net/pizak/fast-soa-with-apache-synapse}Fast SOA Wit
 *------------------------+-----------+-----------------------------------------------------------------+
 
 
-    There are researchers exploring advanced Complex Event Processing with Esper.
+    There are researchers and other groups exploring advanced Complex Event Processing with Esper.
 
 *------------------------+-----------+-----------------------------------------------------------------+
 | Publication | Organization | Date
+*------------------------+-----------+-----------------------------------------------------------------+
+| {{{http://www.slideshare.net/opher.etzion/debs2009-event-processing-languages-tutorial} DEBS conference 2009 Event Processing Languages Tutorial}} | DEBS conference | June, 2009
 *------------------------+-----------+-----------------------------------------------------------------+
 | {{{http://www.dfrc.ch/esper/}Data Fusion with Esper for aircraft flight path identification}} {{{http://dist.codehaus.org/esper/EsperDataFusion.jnlp}(Run live demo)}} | {{{http://www.dfrc.ch/}Data Fusion Research Center AG}} | October, 2008
 *------------------------+-----------+-----------------------------------------------------------------+
