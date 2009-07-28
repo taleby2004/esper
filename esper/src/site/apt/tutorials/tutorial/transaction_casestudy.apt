@@ -150,10 +150,10 @@ select customerId, min(latencyAC) as minLatencyAC, max(latencyAC) as maxLatencyA
 	
 ** Finding Missing Events
 
-	An <outer join> allows us to detect a transaction that did not make it through all three events.
+	An <outer join> allows us to detect a transaction that did not make it through all three events (see solution patterns for further ways to detect missing events).
 	
 ----------------------------------------
-select * 
+select rstream * 
   from TxnEventA.win:time(30 minutes) A 
        full outer join TxnEventC.win:time(60 minutes) C on A.transactionId = C.transactionId
        full outer join TxnEventB.win:time(30 minutes) B on B.transactionId = C.transactionId
@@ -161,7 +161,8 @@ select *
 ----------------------------------------
 
 	When TxnEventA or TxnEventB events leave their respective time windows consisting of the last 30 minutes of events, Esper
-	filters out rows in which no EventC row was found.
+	filters out rows in which no EventC row was found. The "rstream" keyword selects the remove stream, meaning events that leave the window
+	(by default and without the rstream keyword a listener receives only insert stream events).
 
 
 * Using the API
