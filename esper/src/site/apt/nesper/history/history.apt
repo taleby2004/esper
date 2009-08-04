@@ -12,6 +12,39 @@ NEsper Change History
 	[]
 
 
+NEsper 3.0.0
+
+  Released August 3, 2009
+
+* API changes
+
+    * Esper for .NET - feature equivalent to Esper 3.0.0
+  
+    * When migrating from NEsper 2.1 to NEsper 3.0, please follow {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+2.x+to+3.0}Migrating Esper 2.x to Esper 3}}
+
+    * The Destroy() method has been changed to Dispose(). Of course this implies that the objects now implement IDisposable ... so if you have language bindings, now you can use them.
+  
+    * The statement listeners have been augmented by true EventHandlers (delegates). So you don't need to implement an interface and you don't need to use proxies from previous versions.
+      
+    []
+    
+* Major changes
+
+    * Feature equivalent with Esper 3.0.0
+        
+    * XML support is now a part of NEsper. Includes XML schema normalization and XPath.
+
+    * The strict Map requirement has been replaced with a general infrastructure for handling IDictionary - if you choose not to use that structure, but instead use IDictionary it will now do automatic translation under the covers for you.
+
+    * Full support for string indexing was added to NEsper (the Java version doesn't support this).
+
+    []
+
+* Minor changes	
+    
+    * see Esper 3.0.0 release notes
+
+
 NEsper 2.1.0
 
   Released September 27, 2008

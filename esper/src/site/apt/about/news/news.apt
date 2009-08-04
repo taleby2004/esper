@@ -1,5 +1,24 @@
 News
 
+* August 3, 2009  -  NEsper 3.0.0 for .NET
+
+  * Esper for .NET - feature equivalent to Esper 3.0.0
+  
+  * When migrating from NEsper 2.1 to NEsper 3.0, please follow {{{http://docs.codehaus.org/display/ESPER/Migrating+Esper+2.x+to+3.0}Migrating Esper 2.x to Esper 3}}
+
+  * The Destroy() method has been changed to Dispose(). Of course this implies that the objects now implement IDisposable ... so if you have language bindings, now you can use them.
+  
+  * The statement listeners have been augmented by true EventHandlers (delegates). So you don't need to implement an interface and you don't need to use proxies from previous versions.
+  
+  * The strict Map requirement has been replaced with a general infrastructure for handling IDictionary - if you choose not to use that structure, but instead use IDictionary it will now do automatic translation under the covers for you.
+  
+  * Full support for string indexing was added to NEsper (the Java version doesn't support this).
+  
+  * XML support is now a part of NEsper. Includes XML schema normalization and XPath.
+
+  []
+
+
 * May 16, 2009  -  Esper 3.1.0
 
   * The new "every-distinct" operator has been introduced to the pattern language. Very similar to the "every" operator, this operator
