@@ -1178,7 +1178,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 		   </para>
 		   
 		   <para>
-			   EPL allows the freedom to use multiple data window views onto a stream and thus combine expiry policies. Combining data windows into a intersection (the default) or a union can achieve a useful strategy for retaining events and expiring events that are no longer of interest. Named windows and the <literal>on-delete</literal> syntax provide an additional degree of freedom.
+			   EPL allows the freedom to use multiple data window views onto a stream and thus combine expiry policies. Combining data windows into an intersection (the default) or a union can achieve a useful strategy for retaining events and expiring events that are no longer of interest. Named windows and the <literal>on-delete</literal> syntax provide an additional degree of freedom.
 		   </para>
 
 		   <para>
@@ -1198,7 +1198,7 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 		   </para>
 
 		   <para>
-				As you can see, it is the remove stream that the combined multiple data windows provide which differs when retaining an intersection and retaining a union, the insert stream is the same to all data windows and their staggered views. Therefore, when coming batching data windows with further data windows, the insert stream still remains the insert stream of the set overall (not batched). Consider using <literal>output snapshot</literal> to obtain regular updates instead of combining batch and other data windows.
+				As you can see, it is the remove stream that the combined multiple data windows provide which differs when retaining an intersection and retaining a union, the insert stream is the same to all data windows and their staggered views. Therefore, when combining batching data windows with further data windows, the insert stream still remains the insert stream of the set overall (not batched). Consider using <literal>output snapshot</literal> to obtain regular updates instead of combining batch and other data windows.
 		   </para>
 
 		   <para>
