@@ -246,10 +246,31 @@
 		- although the memory footprint due to internal bookkeeping will slightly increase.
         </p>
         <p>
-		The time to create new statements is usually very small, likely less then 1 millisecond per statement.
+		The time to create new statements is usually very small, likely less then 1 millisecond or perhaps 2 to 3 milliseconds per statement.
 		The engine has been tested with a very large number of statements (large > 100k). 
 		The engine is very efficient in matching incoming events to the statement(s) that need to see an event.  
 		Also note the performance tips section in the documentation that provides additional hints.
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="cost_of_stopped_statements">
+      <question>What is cost for statements which are stopped?</question>
+      <answer>
+        <p>
+	 One question was raised in the past: "<i>I am running an app which has the need to create statements according to conditions of stocks (500), but I'm finding that the up-front cost of adding a statement can be 2-3 milliseconds on a really fast computer. If I'm creating 20 new statements at about the same time, it can put me behind the curve. Would it make sense to pre-create every possible statement (several thousand) and start them as necessary? Or would I be better off creating 50-60 and utilize variables for the
+variable factor in the statements?</i>".
+        </p>
+        <p>
+	  There is no CPU cost for stopped statements for processing events (sendEvent and related methods). Stopped statements are entirely 
+	  removed form the event processing path and their status is not checked. Thus pre-creating statements can be a smart move if one cares about the latency that dynamic statement creation can incur.	  
+        </p>
+        <p>
+	  Prepared statements could also help as via a prepared statement the parse time of an EPL text string is eliminated. 
+        </p>
+        <p>
+	  The statement object model is a further approach available which requires no parse time and can make it easier to programmatically
+	  generate EPL statements without string manipulation and without parameterization as required for prepared statements.
         </p>
       </answer>
     </faq>    
