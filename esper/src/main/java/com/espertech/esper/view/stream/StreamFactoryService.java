@@ -36,7 +36,7 @@ public interface StreamFactoryService
      * @return event stream representing active filter
      */
     public Pair<EventStream, ManagedLock> createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
-                                    boolean isJoin, boolean isSubSelect);
+                                    boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger);
 
     /**
      * Drop the event stream associated with the filter passed in.
@@ -47,7 +47,7 @@ public interface StreamFactoryService
      * necessary for stream reuse and multithreading concerns
      * @param isSubSelect true for subselects
      */
-    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect);
+    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger);
 
     /**
      * Destroy the service.

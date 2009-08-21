@@ -86,7 +86,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      * @param epStatementHandle is the statement resource lock
      * @return newly createdStatement event stream, not reusing existing instances
      */
-    public Pair<EventStream, ManagedLock> createStream(final FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin, final boolean isSubSelect)
+    public Pair<EventStream, ManagedLock> createStream(final FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin, final boolean isSubSelect, boolean isNamedWindowTrigger)
     {
         if (log.isDebugEnabled())
         {
@@ -95,7 +95,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
 
         // Check if a stream for this filter already exists
         Pair<EventStream, EPStatementHandleCallback> pair = null;
-        boolean forceNewStream = (isJoin) || (!isReuseViews) || (isSubSelect);
+        boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger;
         if (forceNewStream)
         {
             pair = eventStreamsIdentity.get(filterSpec);
@@ -184,10 +184,10 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      * See the method of the same name in {@link com.espertech.esper.view.stream.StreamFactoryService}.
      * @param filterSpec is the filter definition
      */
-    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect)
+    public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger)
     {
         Pair<EventStream, EPStatementHandleCallback> pair = null;
-        boolean forceNewStream = (isJoin) || (!isReuseViews) || (isSubSelect);
+        boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger;
 
         if (forceNewStream)
         {
