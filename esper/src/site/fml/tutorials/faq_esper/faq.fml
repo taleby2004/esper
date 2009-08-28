@@ -455,6 +455,18 @@ variable factor in the statements?</i>".
 	</p>	
       </answer>  
     </faq>
+    <faq id="">
+      <question>What happens if I send events to which no query is created yet? Can a time-to-live be specified to retry matching an event?</question>
+      <answer>
+        <p>
+	  Events that are of no interest to any started EPL statement are simply dropped. There is no internal queue they are retained in. There is also no concept of time-to-live for unmatched events.
+	</p>
+        <p>
+    	  Your application can use the UnmatchedEventListener interface to catch an event that is dropped because no EPL statement needs to see it. 
+    	  Your application would need to retain and retry such unmatched events to achieve a time-to-live for unmatched events.
+	</p>
+      </answer>  
+    </faq>
   </part>
 
   <part id="integration">
