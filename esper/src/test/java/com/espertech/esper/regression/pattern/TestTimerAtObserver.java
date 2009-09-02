@@ -337,10 +337,18 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
                 invocations.add(cal.getTime().toString());
             }
         }
-
-        ArrayAssertionUtil.assertEqualsExactOrder(invocations.toArray(), new 
-                String[] {"Mon Aug 04 08:00:00 EDT 2008", "Tue Aug 05 08:00:00 EDT 2008", "Wed Aug 06 08:00:00 EDT 2008",
-                            "Thu Aug 07 08:00:00 EDT 2008", "Fri Aug 08 08:00:00 EDT 2008"});
+        String expectedResult[] = new String[5];
+        cal.set(2008, 7, 4, 8, 0, 0); //"Mon Aug 04 08:00:00 EDT 2008"
+        expectedResult[0] = cal.getTime().toString();
+        cal.set(2008, 7, 5, 8, 0, 0); //"Tue Aug 05 08:00:00 EDT 2008"
+        expectedResult[1] = cal.getTime().toString();
+        cal.set(2008, 7, 6, 8, 0, 0); //"Wed Aug 06 08:00:00 EDT 2008"
+        expectedResult[2] = cal.getTime().toString();
+        cal.set(2008, 7, 7, 8, 0, 0); //"Thu Aug 07 08:00:00 EDT 2008"
+        expectedResult[3] = cal.getTime().toString();
+        cal.set(2008, 7, 8, 8, 0, 0); //"Fri Aug 08 08:00:00 EDT 2008"
+        expectedResult[4] = cal.getTime().toString();
+        ArrayAssertionUtil.assertEqualsExactOrder(invocations.toArray(), expectedResult);
     }
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
