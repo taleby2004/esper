@@ -17,6 +17,8 @@ import com.espertech.esper.epl.core.StreamTypeService;
  */
 public class ExprAvedevNode extends ExprAggregateNode
 {
+    private static final long serialVersionUID = 252403936366503567L;
+
     /**
      * Ctor.
      * @param distinct - flag indicating unique or non-unique value aggregation
@@ -26,7 +28,7 @@ public class ExprAvedevNode extends ExprAggregateNode
         super(distinct);
     }
 
-    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService) throws ExprValidationException
+    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         super.validateSingleNumericChild(streamTypeService);
         return methodResolutionService.makeAvedevAggregator();

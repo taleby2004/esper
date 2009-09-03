@@ -27,6 +27,7 @@ import com.espertech.esper.type.RelationalOpEnum;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -57,6 +58,7 @@ public class StatementSpecMapper
     private static StatementSpecRaw map(EPStatementObjectModel sodaStatement, StatementSpecMapContext mapContext)
     {
         StatementSpecRaw raw = new StatementSpecRaw(SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        mapUpdateClause(sodaStatement.getUpdateClause(), raw, mapContext);
         mapCreateWindow(sodaStatement.getCreateWindow(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
         mapOnTrigger(sodaStatement.getOnExpr(), raw, mapContext);
@@ -85,6 +87,7 @@ public class StatementSpecMapper
         EPStatementObjectModel model = new EPStatementObjectModel();
         unmapCreateWindow(statementSpec.getCreateWindowDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
+        unmapUpdateClause(statementSpec.getStreamSpecs(), statementSpec.getUpdateDesc(), model, unmapContext);
         unmapOnClause(statementSpec.getOnTriggerDesc(), model, unmapContext);
         InsertIntoClause insertIntoClause = unmapInsertInto(statementSpec.getInsertIntoDesc());
         model.setInsertInto(insertIntoClause);
@@ -145,6 +148,28 @@ public class StatementSpecMapper
             }
             model.setOnExpr(clause);
         }
+    }
+
+    private static void unmapUpdateClause(List<StreamSpecRaw> desc, UpdateDesc updateDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (updateDesc == null)
+        {
+            return;
+        }
+        String type = ((FilterStreamSpecRaw) desc.get(0)).getRawFilterSpec().getEventTypeName();
+        UpdateClause clause = new UpdateClause(type, updateDesc.getOptionalStreamName());
+        for (OnTriggerSetAssignment assignment : updateDesc.getAssignments())
+        {
+            Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
+            clause.addAssignment(assignment.getVariableName(), expr);
+        }
+        model.setUpdateClause(clause);
+
+        if (updateDesc.getOptionalWhereClause() != null)
+        {
+            Expression expr = unmapExpressionDeep(updateDesc.getOptionalWhereClause(), unmapContext);
+            model.getUpdateClause().setOptionalWhereClause(expr);
+        }        
     }
 
     private static void unmapCreateWindow(CreateWindowDesc createWindowDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -228,6 +253,19 @@ public class StatementSpecMapper
             TimePeriodExpression timePeriod = (TimePeriodExpression) unmapExpressionDeep(outputLimitSpec.getTimePeriodExpr(), unmapContext);
             clause = new OutputLimitClause(selector, timePeriod);
         }
+        else if (outputLimitSpec.getRateType() == OutputLimitRateType.AFTER)
+        {
+            unit = OutputLimitUnit.AFTER;
+            if (outputLimitSpec.getAfterTimePeriodExpr() != null)
+            {
+                TimePeriodExpression after = (TimePeriodExpression) unmapExpressionDeep(outputLimitSpec.getAfterTimePeriodExpr(), unmapContext);
+                clause = new OutputLimitClause(OutputLimitSelector.DEFAULT, OutputLimitUnit.AFTER, after, null);
+            }
+            else
+            {
+                clause = new OutputLimitClause(OutputLimitSelector.DEFAULT, OutputLimitUnit.AFTER, null, outputLimitSpec.getAfterNumberOfEvents());
+            }
+        }
         else if (outputLimitSpec.getRateType() == OutputLimitRateType.WHEN_EXPRESSION)
         {
             unit = OutputLimitUnit.WHEN_EXPRESSION;
@@ -309,6 +347,10 @@ public class StatementSpecMapper
         {
             rateType = OutputLimitRateType.WHEN_EXPRESSION;
         }
+        else if (outputLimitClause.getUnit() == OutputLimitUnit.AFTER)
+        {
+            rateType = OutputLimitRateType.AFTER;
+        }
         else
         {
             throw new IllegalArgumentException("Unknown output limit unit " + outputLimitClause.getUnit());
@@ -348,7 +390,13 @@ public class StatementSpecMapper
             timePeriod = (ExprTimePeriod) mapExpressionDeep(outputLimitClause.getTimePeriodExpression(), mapContext);
         }
 
-        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, timerAtExprList, timePeriod);
+        ExprTimePeriod afterTimePeriod = null;
+        if (outputLimitClause.getAfterTimePeriodExpression() != null)
+        {
+            afterTimePeriod = (ExprTimePeriod) mapExpressionDeep(outputLimitClause.getAfterTimePeriodExpression(), mapContext);
+        }
+
+        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, timerAtExprList, timePeriod, afterTimePeriod, outputLimitClause.getAfterNumberOfEvents());
         raw.setOutputLimitSpec(spec);
     }
 
@@ -608,6 +656,7 @@ public class StatementSpecMapper
                 throw new IllegalStateException("Unexpected select clause element typed " + raw.getClass().getName());
             }
         }
+        clause.setDistinct(selectClauseSpec.isDistinct());
         return clause;
     }
 
@@ -639,6 +688,29 @@ public class StatementSpecMapper
             insertFromWhereExpr = mapExpressionDeep(createWindow.getInsertWhereClause(), mapContext);
         }
         raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews(), mapContext), new StreamSpecOptions(), createWindow.isInsert(), insertFromWhereExpr));
+    }
+
+    private static void mapUpdateClause(UpdateClause updateClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    {
+        if (updateClause == null)
+        {
+            return;
+        }
+        List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
+        for (Pair<String, Expression> pair : updateClause.getAssignments())
+        {
+            ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
+            assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+        }
+        ExprNode whereClause = null;
+        if (updateClause.getOptionalWhereClause() != null)
+        {
+            whereClause = mapExpressionDeep(updateClause.getOptionalWhereClause(), mapContext);
+        }
+        UpdateDesc desc = new UpdateDesc(updateClause.getOptionalAsClauseStreamName(), assignments, whereClause);
+        raw.setUpdateDesc(desc);
+        FilterSpecRaw filterSpecRaw = new FilterSpecRaw(updateClause.getEventType(), Collections.EMPTY_LIST, null);
+        raw.getStreamSpecs().add(new FilterStreamSpecRaw(filterSpecRaw, Collections.EMPTY_LIST, null, new StreamSpecOptions()));
     }
 
     private static void mapCreateVariable(CreateVariableClause createVariable, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -710,6 +782,7 @@ public class StatementSpecMapper
                 spec.add(rawElement);
             }
         }
+        spec.setDistinct(selectClause.isDistinct());
         return spec;
     }
 

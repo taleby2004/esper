@@ -12,6 +12,7 @@ import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprTimePeriod;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.VariableService;
@@ -35,10 +36,11 @@ public class ASTOutputLimitHelper
      * @param astExprNodeMap is the map of current AST tree nodes to their respective expression root node
      * @param engineURI the engine uri
      * @param timeProvider provides time
-     * @param variableService provides variable resolution 
+     * @param variableService provides variable resolution
+     * @param exprEvaluatorContext context for expression evaluatiom
      * @return output limit spec
      */
-    public static OutputLimitSpec buildOutputLimitSpec(Tree node, Map<Tree, ExprNode> astExprNodeMap, VariableService variableService, String engineURI, TimeProvider timeProvider)
+    public static OutputLimitSpec buildOutputLimitSpec(Tree node, Map<Tree, ExprNode> astExprNodeMap, VariableService variableService, String engineURI, TimeProvider timeProvider, ExprEvaluatorContext exprEvaluatorContext)
     {
         int count = 0;
         Tree child = node.getChild(count);
@@ -76,9 +78,9 @@ public class ASTOutputLimitHelper
 
         if (node.getType() == EsperEPL2GrammarParser.WHEN_LIMIT_EXPR)
         {
-            Tree expressionNode = node.getChild(count);// was 0
+            Tree expressionNode = node.getChild(count);
             whenExpression = astExprNodeMap.remove(expressionNode);
-            if (node.getChildCount() > count+1)//was 1
+            if (node.getChildCount() > count+1)
             {
                 thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(node.getChild(1), astExprNodeMap);
             }
@@ -97,6 +99,10 @@ public class ASTOutputLimitHelper
                 crontabScheduleSpec.add(astExprNodeMap.remove(parent.getChild(i)));
             }
         }
+        else if (node.getType() == EsperEPL2GrammarParser.AFTER_LIMIT_EXPR)
+        {
+            // no action here, since AFTER time may occur in all
+        }
         else
         {
             if (child.getType() == EsperEPL2GrammarParser.IDENT)
@@ -108,7 +114,7 @@ public class ASTOutputLimitHelper
                 ExprNode expression = astExprNodeMap.remove(child);
 
                 try {
-                    timePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI), null, null, timeProvider, variableService);
+                    timePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI), null, null, timeProvider, variableService, exprEvaluatorContext);
                 }
                 catch (ExprValidationException ex)
                 {
@@ -121,16 +127,44 @@ public class ASTOutputLimitHelper
             }
         }
 
+        // get the AFTER time period
+        ExprTimePeriod afterTimePeriodExpr = null;
+        Integer afterNumberOfEvents = null;
+        for (int i = 0; i < node.getChildCount(); i++)
+        {
+            if (node.getChild(i).getType() == EsperEPL2GrammarParser.AFTER)
+            {
+                ExprNode expression = astExprNodeMap.remove(node.getChild(i).getChild(0));
+                if (expression != null)
+                {
+                    try {
+                        afterTimePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI), null, null, timeProvider, variableService, exprEvaluatorContext);
+                    }
+                    catch (ExprValidationException ex)
+                    {
+                        throw new ASTWalkException("Invalid time period expresion: " + ex.getMessage(), ex);
+                    }
+                }
+                else
+                {
+                    Object constant = ASTConstantHelper.parse(node.getChild(i).getChild(0));
+                    afterNumberOfEvents = ((Number) constant).intValue();
+                }
+            }
+        }
+
         switch (node.getType())
         {
             case EsperEPL2GrammarParser.EVENT_LIMIT_EXPR:
-                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.EVENTS, displayLimit, null, null, null, null);
+                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.EVENTS, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents);
             case EsperEPL2GrammarParser.TIMEPERIOD_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.TIME_PERIOD, displayLimit, null, null, null, timePeriodExpr);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.TIME_PERIOD, displayLimit, null, null, null, timePeriodExpr, afterTimePeriodExpr, afterNumberOfEvents);
             case EsperEPL2GrammarParser.CRONTAB_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.CRONTAB, displayLimit, null, null, crontabScheduleSpec, null);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.CRONTAB, displayLimit, null, null, crontabScheduleSpec, null, afterTimePeriodExpr, afterNumberOfEvents);
             case EsperEPL2GrammarParser.WHEN_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.WHEN_EXPRESSION, displayLimit, whenExpression, thenExpressions, null, null);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.WHEN_EXPRESSION, displayLimit, whenExpression, thenExpressions, null, null, afterTimePeriodExpr, afterNumberOfEvents);
+            case EsperEPL2GrammarParser.AFTER_LIMIT_EXPR:
+                return new OutputLimitSpec(null, null, OutputLimitRateType.AFTER, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents);
             default:
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized output limit type");
 		 }

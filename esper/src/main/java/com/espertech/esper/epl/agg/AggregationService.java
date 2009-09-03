@@ -10,6 +10,7 @@ package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * Service for maintaing aggregation state. Processes events entering (a window, a join etc,) and
@@ -22,16 +23,18 @@ public interface AggregationService extends AggregationResultFuture
      * @param eventsPerStream - events for each stream entering window
      * @param optionalGroupKeyPerRow - can be null if grouping without keys is desired, else the keys
      * to use for grouping, each distinct key value results in a new row of aggregation state.
+     * @param exprEvaluatorContext context for expression evaluatiom
      */
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow);
+    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Apply events as leaving a window (old events).
      * @param eventsPerStream - events for each stream entering window
      * @param optionalGroupKeyPerRow - can be null if grouping without keys is desired, else the keys
      * to use for grouping, each distinct key value results in a new row of aggregation state.
+     * @param exprEvaluatorContext context for expression evaluatiom
      */
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow);
+    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Set the current aggregation state row - for use when evaluation nodes are asked to evaluate.

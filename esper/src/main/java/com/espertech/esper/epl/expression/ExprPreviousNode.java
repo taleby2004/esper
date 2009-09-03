@@ -17,7 +17,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.view.window.RandomAccessByIndex;
 import com.espertech.esper.view.window.RelativeAccessByEventNIndex;
 import com.espertech.esper.view.window.RandomAccessByIndexGetter;
-import com.espertech.esper.view.window.RelativeAccessByEventNIndexGetter;
+import com.espertech.esper.view.window.RelativeAccessByEventNIndexMap;
 import com.espertech.esper.view.ViewCapDataWindowAccess;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.schedule.TimeProvider;
@@ -35,20 +35,36 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
     private boolean isConstantIndex;
 
     private transient RandomAccessByIndexGetter randomAccessGetter;
-    private transient RelativeAccessByEventNIndexGetter relativeAccessGetter;
+    private transient RelativeAccessByEventNIndexMap relativeAccessGetter;
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
-        if (this.getChildNodes().size() != 2)
+        if ((this.getChildNodes().size() > 2) || (this.getChildNodes().isEmpty()))
         {
-            throw new ExprValidationException("Previous node must have 2 child nodes");
+            throw new ExprValidationException("Previous node must have 1 or 2 child nodes");
         }
 
+        // add constant of 1 for previous index
+        if (this.getChildNodes().size() == 1)
+        {
+            this.getChildNodes().add(0, new ExprConstantNode(1));
+        }
+
+        // the row recognition patterns allows "prev(prop, index)", we switch index the first position
+        if (this.getChildNodes().get(1) instanceof ExprConstantNode)
+        {
+            ExprNode first = this.getChildNodes().get(0);
+            ExprNode second = this.getChildNodes().get(1);
+            this.getChildNodes().clear();
+            this.getChildNodes().add(second);
+            this.getChildNodes().add(first);
+        }
+        
         // Determine if the index is a constant value or an expression to evaluate
         if (this.getChildNodes().get(0).isConstantResult())
         {
             ExprNode constantNode = this.getChildNodes().get(0);
-            Object value = constantNode.evaluate(null, false);
+            Object value = constantNode.evaluate(null, false, exprEvaluatorContext);
             if (!(value instanceof Number))
             {
                 throw new ExprValidationException("Previous function requires an integer index parameter or expression");
@@ -65,6 +81,10 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         }
 
         // Determine stream number
+        if (!(this.getChildNodes().get(1) instanceof ExprIdentNode))
+        {
+            throw new ExprValidationException("Previous function requires an event property as parameter");
+        }
         ExprIdentNode identNode = (ExprIdentNode) this.getChildNodes().get(1);
         streamNumber = identNode.getStreamId();
         resultType = this.getChildNodes().get(1).getType();
@@ -91,7 +111,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         return false;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         Integer index;
 
@@ -103,7 +123,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         else
         {
             // evaluate first child, which returns the index
-            Object indexResult = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
+            Object indexResult = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
             if (indexResult == null)
             {
                 return null;
@@ -138,7 +158,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         // Substitute original event with prior event, evaluate inner expression
         EventBean originalEvent = eventsPerStream[streamNumber];
         eventsPerStream[streamNumber] = substituteEvent;
-        Object evalResult = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
+        Object evalResult = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         eventsPerStream[streamNumber] = originalEvent;
 
         return evalResult;
@@ -171,9 +191,9 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback
         {
             randomAccessGetter = (RandomAccessByIndexGetter) resource;
         }
-        else if (resource instanceof RelativeAccessByEventNIndexGetter)
+        else if (resource instanceof RelativeAccessByEventNIndexMap)
         {
-            relativeAccessGetter = (RelativeAccessByEventNIndexGetter) resource;
+            relativeAccessGetter = (RelativeAccessByEventNIndexMap) resource;
         }
         else
         {

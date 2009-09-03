@@ -32,6 +32,7 @@ import com.espertech.esper.view.Viewable;
 import com.espertech.esper.core.InternalEventRouter;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.StatementContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -132,9 +133,11 @@ public class NamedWindowRootView extends ViewSupport
      * @param statementHandle is the handle to the statement, used for routing/insert-into
      * @param joinExpr is the join expression or null if there is none
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
+     * @param statementContext statement services
+     * @param isDistinct is true for distinct output
      * @return base view for on-trigger expression
      */
-    public NamedWindowOnExprBaseView addOnExpr(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType, StatementStopService statementStopService, InternalEventRouter internalEventRouter, ResultSetProcessor resultSetProcessor, EPStatementHandle statementHandle, StatementResultService statementResultService)
+    public NamedWindowOnExprBaseView addOnExpr(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType, StatementStopService statementStopService, InternalEventRouter internalEventRouter, ResultSetProcessor resultSetProcessor, EPStatementHandle statementHandle, StatementResultService statementResultService, StatementContext statementContext, boolean isDistinct)
     {
         // Determine strategy for deletion and index table to use (if any)
         Pair<LookupStrategy,PropertyIndexedEventTable> strategy = getStrategyPair(onTriggerDesc, joinExpr, filterEventType);
@@ -147,11 +150,11 @@ public class NamedWindowRootView extends ViewSupport
 
         if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_DELETE)
         {
-            return new NamedWindowOnDeleteView(statementStopService, strategy.getFirst(), this, statementResultService);
+            return new NamedWindowOnDeleteView(statementStopService, strategy.getFirst(), this, statementResultService, statementContext);
         }
         else
         {
-            return new NamedWindowOnSelectView(statementStopService, strategy.getFirst(), this, internalEventRouter, resultSetProcessor, statementHandle, statementResultService);
+            return new NamedWindowOnSelectView(statementStopService, strategy.getFirst(), this, internalEventRouter, resultSetProcessor, statementHandle, statementResultService, statementContext, isDistinct);
         }
     }
 

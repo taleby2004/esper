@@ -1,6 +1,8 @@
 package com.espertech.esper.epl.annotation;
 
 import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.annotation.Hint;
+import com.espertech.esper.client.annotation.HintEnum;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
@@ -65,7 +67,12 @@ public class AnnotationUtil
         for (int i = 0; i < desc.size(); i++)
         {
             annotations[i] = createProxy(desc.get(i), engineImportService);
+            if (annotations[i] instanceof Hint)
+            {
+                HintEnum.validate(annotations[i]);
+            }
         }
+
         return annotations;
     }
 
@@ -86,7 +93,7 @@ public class AnnotationUtil
         // obtain Annotation class properties
         List<AnnotationAttribute> annotationAttributeLists = getAttributes(annotationClass);
         Set<String> allAttributes = new HashSet<String>();
-        Set<String> requiredAttributes = new HashSet<String>();
+        Set<String> requiredAttributes = new LinkedHashSet<String>();
         for (AnnotationAttribute annotationAttribute : annotationAttributeLists)
         {
             allAttributes.add(annotationAttribute.getName());
@@ -147,8 +154,7 @@ public class AnnotationUtil
         }
 
         // return handler
-        final String toStringResult = "@" + desc.getName();
-        InvocationHandler handler = new EPLAnnotationInvocationHandler(annotationClass, properties, toStringResult);
+        InvocationHandler handler = new EPLAnnotationInvocationHandler(annotationClass, properties);
         return (Annotation) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[] {annotationClass}, handler);
     }
 
@@ -251,6 +257,14 @@ public class AnnotationUtil
 
             props.add(new AnnotationAttribute(methods[i].getName(), methods[i].getReturnType(), methods[i].getDefaultValue()));
         }
+
+        Collections.sort(props, new Comparator<AnnotationAttribute>()
+        {
+            public int compare(AnnotationAttribute o1, AnnotationAttribute o2)
+            {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         return props;
     }
 }

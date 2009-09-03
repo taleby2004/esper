@@ -11,8 +11,7 @@ package com.espertech.esper.filter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,7 +22,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class EventTypeIndexBuilder
 {
-    private final Map<FilterHandle, Pair<EventType, IndexTreePath>> callbacks;
+    private final Map<FilterHandle, Pair<FilterValueSet, IndexTreePath>> callbacks;
     private final Lock callbacksLock;
     private final EventTypeIndex eventTypeIndex;
 
@@ -35,7 +34,7 @@ public class EventTypeIndexBuilder
     {
         this.eventTypeIndex = eventTypeIndex;
 
-        this.callbacks = new HashMap<FilterHandle, Pair<EventType, IndexTreePath>>();
+        this.callbacks = new HashMap<FilterHandle, Pair<FilterValueSet, IndexTreePath>>();
         this.callbacksLock = new ReentrantLock();
     }
 
@@ -100,7 +99,7 @@ public class EventTypeIndexBuilder
         callbacksLock.lock();
         try
         {
-            callbacks.put(filterCallback, new Pair<EventType, IndexTreePath>(eventType, path));
+            callbacks.put(filterCallback, new Pair<FilterValueSet, IndexTreePath>(filterValueSet, path));
         }
         finally
         {
@@ -114,7 +113,7 @@ public class EventTypeIndexBuilder
      */
     public final void remove(FilterHandle filterCallback)
     {
-        Pair<EventType, IndexTreePath> pair = null;
+        Pair<FilterValueSet, IndexTreePath> pair = null;
         callbacksLock.lock();
         try
         {
@@ -130,7 +129,7 @@ public class EventTypeIndexBuilder
             throw new IllegalArgumentException("Filter callback to be removed not found");
         }
 
-        FilterHandleSetNode rootNode = eventTypeIndex.get(pair.getFirst());
+        FilterHandleSetNode rootNode = eventTypeIndex.get(pair.getFirst().getEventType());
 
         // Now remove from tree
         IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
@@ -145,6 +144,57 @@ public class EventTypeIndexBuilder
         finally
         {
             callbacksLock.unlock();
+        }
+    }
+
+    /**
+     * Returns filters for the statement ids.
+     * @param statementIds ids to take
+     * @return set of filters for taken statements
+     */
+    public final FilterSet take(Set<String> statementIds)
+    {
+        List<FilterSetEntry> list = new ArrayList<FilterSetEntry>();
+        callbacksLock.lock();
+        try
+        {
+            for (Map.Entry<FilterHandle, Pair<FilterValueSet, IndexTreePath>> entry : callbacks.entrySet())
+            {
+                Pair<FilterValueSet, IndexTreePath> pair = entry.getValue();
+                if (statementIds.contains(entry.getKey().getStatementId()))
+                {
+                    list.add(new FilterSetEntry(entry.getKey(), pair.getFirst()));
+
+                    FilterHandleSetNode rootNode = eventTypeIndex.get(pair.getFirst().getEventType());
+
+                    // Now remove from tree
+                    IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
+                    treeBuilder.remove(entry.getKey(), pair.getSecond(), rootNode);
+                }
+            }
+            
+            for (FilterSetEntry removed : list)
+            {
+                callbacks.remove(removed.getHandle());
+            }
+        }
+        finally
+        {
+            callbacksLock.unlock();
+        }
+
+        return new FilterSet(list);
+    }
+
+    /**
+     * Add the filters, from previously-taken filters.
+     * @param filterSet to add
+     */
+    public void apply(FilterSet filterSet)
+    {
+        for (FilterSetEntry entry : filterSet.getFilters())
+        {
+            add(entry.getFilterValueSet(), entry.getHandle());
         }
     }
 }

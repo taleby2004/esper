@@ -8,7 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
+import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.JoinSetComposerFactory;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.variable.VariableService;
@@ -18,11 +20,12 @@ import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.pattern.PatternContextFactory;
 import com.espertech.esper.pattern.PatternObjectResolutionService;
+import com.espertech.esper.schedule.ScheduleAdjustmentService;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewResolutionService;
-import com.espertech.esper.client.ConfigurationInformation;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -30,14 +33,14 @@ import java.util.HashSet;
 /**
  * Contains handles to the implementation of the the scheduling service for use in view evaluation.
  */
-public final class StatementContext
+public final class StatementContext implements ExprEvaluatorContext
 {
     private final String engineURI;
     private final String engineInstanceId;
     private final String statementId;
     private final String statementName;
     private final String expression;
-    private final SchedulingService schedulingService;
+    private SchedulingService schedulingService;
     private final ScheduleBucket scheduleBucket;
     private final EventAdapterService eventAdapterService;
     private final EPStatementHandle epStatementHandle;
@@ -47,7 +50,8 @@ public final class StatementContext
     private final StatementStopService statementStopService;
     private final MethodResolutionService methodResolutionService;
     private final PatternContextFactory patternContextFactory;
-    private final FilterService filterService;
+    private FilterService filterService;
+    private InternalEventRouteDest internalEventEngineRouteDest;
     private final JoinSetComposerFactory joinSetComposerFactory;
     private final OutputConditionFactory outputConditionFactory;
     private final NamedWindowService namedWindowService;
@@ -57,6 +61,7 @@ public final class StatementContext
     private final ValueAddEventService valueAddEventService;
     private final HashSet<String> dynamicReferenceEventTypes;
     private final ConfigurationInformation configSnapshot;
+    private final ScheduleAdjustmentService scheduleAdjustmentService;
 
     /**
      * Constructor.
@@ -84,6 +89,7 @@ public final class StatementContext
      * @param plugInTypeResolutionURIs is URIs for resolving the event name against plug-inn event representations, if any
      * @param valueAddEventService - service that handles update events
      * @param configSnapshot configuration snapshot
+     * @param internalEventEngineRouteDest routing destination
      */
     public StatementContext(String engineURI,
                             String engineInstanceId,
@@ -108,7 +114,8 @@ public final class StatementContext
                               StatementResultService statementResultService,
                               URI[] plugInTypeResolutionURIs,
                               ValueAddEventService valueAddEventService,
-                              ConfigurationInformation configSnapshot)
+                              ConfigurationInformation configSnapshot,
+                              InternalEventRouteDest internalEventEngineRouteDest)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -135,6 +142,8 @@ public final class StatementContext
         this.valueAddEventService = valueAddEventService;
         this.dynamicReferenceEventTypes = new HashSet<String>();
         this.configSnapshot = configSnapshot;
+        this.internalEventEngineRouteDest = internalEventEngineRouteDest;
+        this.scheduleAdjustmentService = new ScheduleAdjustmentService();
     }
 
     /**
@@ -369,6 +378,60 @@ public final class StatementContext
     public ConfigurationInformation getConfigSnapshot()
     {
         return configSnapshot;
+    }
+
+    /**
+     * Sets the scheduling service
+     * @param schedulingService service
+     */
+    public void setSchedulingService(SchedulingService schedulingService)
+    {
+        this.schedulingService = schedulingService;
+    }
+
+    /**
+     * Sets the filter service
+     * @param filterService filter service
+     */
+    public void setFilterService(FilterService filterService)
+    {
+        this.filterService = filterService;
+    }
+
+    /**
+     * Returns the internal event router.
+     * @return router
+     */
+    public InternalEventRouteDest getInternalEventEngineRouteDest()
+    {
+        return internalEventEngineRouteDest;
+    }
+
+    /**
+     * Sets the internal event router.
+     * @param internalEventEngineRouteDest router
+     */
+    public void setInternalEventEngineRouteDest(InternalEventRouteDest internalEventEngineRouteDest)
+    {
+        this.internalEventEngineRouteDest = internalEventEngineRouteDest;
+    }
+
+    /**
+     * Return the service for adjusting schedules.
+     * @return service for adjusting schedules
+     */
+    public ScheduleAdjustmentService getScheduleAdjustmentService()
+    {
+        return scheduleAdjustmentService;
+    }
+
+    /**
+     * Returns the time provider.
+     * @return time provider
+     */
+    public TimeProvider getTimeProvider()
+    {
+        return schedulingService;
     }
 
     public String toString()

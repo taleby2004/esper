@@ -8,11 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +24,7 @@ import java.util.Set;
 
 /**
  * Output process view that does not enforce any output policies and may simply
- * hand over events to child views.
+ * hand over events to child views, does not handle distinct.
  */
 public class OutputProcessViewDirect extends OutputProcessView
 {
@@ -32,11 +35,14 @@ public class OutputProcessViewDirect extends OutputProcessView
      * @param resultSetProcessor is processing the result set for publishing it out
      * @param outputStrategy is the execution of output to sub-views or natively
      * @param isInsertInto is true if the statement is a insert-into
-     * @param statementResultService service for managing listener/subscribers and result generation needs
+     * @param statementContext statement services
+     * @param isDistinct true for distinct
+     * @param afterTimePeriod after-keyword time period
+     * @param afterConditionNumberOfEvents after-keyword number of events
      */
-    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, OutputStrategy outputStrategy, boolean isInsertInto, StatementResultService statementResultService)
+    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, OutputStrategy outputStrategy, boolean isInsertInto, StatementContext statementContext, boolean isDistinct, ExprTimePeriod afterTimePeriod, Integer afterConditionNumberOfEvents)
     {
-        super(resultSetProcessor, outputStrategy, isInsertInto, statementResultService);
+        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext, isDistinct, afterTimePeriod, afterConditionNumberOfEvents);
 
         log.debug(".ctor");
         if (resultSetProcessor == null)
@@ -88,7 +94,7 @@ public class OutputProcessViewDirect extends OutputProcessView
      * @param newEvents - new events
      * @param oldEvents - old events
      */
-    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
+    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {

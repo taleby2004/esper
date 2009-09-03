@@ -26,6 +26,7 @@ import java.util.Set;
 public class ExprSubselectRowNode extends ExprSubselectNode
 {
     private static final Log log = LogFactory.getLog(ExprSubselectRowNode.class);
+    private static final long serialVersionUID = -7865711714805807559L;
 
     /**
      * Ctor.
@@ -45,11 +46,11 @@ public class ExprSubselectRowNode extends ExprSubselectNode
         return selectClause.getType();
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (matchingEvents == null)
         {
@@ -77,7 +78,7 @@ public class ExprSubselectRowNode extends ExprSubselectNode
                 // Prepare filter expression event list
                 events[0] = subselectEvent;
 
-                Boolean pass = (Boolean) filterExpr.evaluate(events, true);
+                Boolean pass = (Boolean) filterExpr.evaluate(events, true, exprEvaluatorContext);
                 if ((pass != null) && (pass))
                 {
                     if (subSelectResult != null)
@@ -104,7 +105,7 @@ public class ExprSubselectRowNode extends ExprSubselectNode
 
         if (selectClause != null)
         {
-            result = selectClause.evaluate(events, true);
+            result = selectClause.evaluate(events, true, exprEvaluatorContext);
         }
         else
         {

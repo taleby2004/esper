@@ -40,6 +40,8 @@ public class StatementSpecCompiled
     private final RowLimitSpec rowLimitSpec;
     private final Set<String> eventTypeReferences;
     private final Annotation[] annotations;
+    private final UpdateDesc updateSpec;
+    private final MatchRecognizeSpec matchRecognizeSpec;
 
     /**
      * Ctor.
@@ -61,6 +63,8 @@ public class StatementSpecCompiled
      * @param rowLimitSpec row limit specification, or null if none supplied
      * @param eventTypeReferences event type names statically determined
      * @param annotations statement annotations
+     * @param updateSpec update specification if used
+     * @param matchRecognizeSpec if provided
      */
     public StatementSpecCompiled(OnTriggerDesc onTriggerDesc,
                                  CreateWindowDesc createWindowDesc,
@@ -79,7 +83,9 @@ public class StatementSpecCompiled
                                  boolean hasVariables,
                                  RowLimitSpec rowLimitSpec,
                                  Set<String> eventTypeReferences,
-                                 Annotation[] annotations)
+                                 Annotation[] annotations,
+                                 UpdateDesc updateSpec,
+                                 MatchRecognizeSpec matchRecognizeSpec)
     {
         this.onTriggerDesc = onTriggerDesc;
         this.createWindowDesc = createWindowDesc;
@@ -99,6 +105,8 @@ public class StatementSpecCompiled
         this.rowLimitSpec = rowLimitSpec;
         this.eventTypeReferences = eventTypeReferences;
         this.annotations = annotations;
+        this.updateSpec = updateSpec;
+        this.matchRecognizeSpec = matchRecognizeSpec;
     }
 
     /**
@@ -111,7 +119,7 @@ public class StatementSpecCompiled
         createVariableDesc = null;
         insertIntoDesc = null;
         selectStreamDirEnum = SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH;
-        selectClauseSpec = new SelectClauseSpecCompiled();
+        selectClauseSpec = new SelectClauseSpecCompiled(false);
         streamSpecs = new ArrayList<StreamSpecCompiled>();
         outerJoinDescList = new ArrayList<OuterJoinDesc>();
         filterExprRootNode = null;
@@ -124,6 +132,8 @@ public class StatementSpecCompiled
         rowLimitSpec = null;
         eventTypeReferences = new HashSet<String>();
         annotations = new Annotation[0];
+        updateSpec = null;
+        matchRecognizeSpec = null;
     }
 
     /**
@@ -321,4 +331,22 @@ public class StatementSpecCompiled
     {
         this.selectClauseSpec = selectClauseSpec;
     }
+
+    /**
+     * Returns the update spec if update clause is used.
+     * @return update desc
+     */
+    public UpdateDesc getUpdateSpec()
+    {
+        return updateSpec;
+    }
+
+    /**
+     * Returns the match recognize spec, if used
+     * @return match recognize spec
+     */
+    public MatchRecognizeSpec getMatchRecognizeSpec() {
+        return matchRecognizeSpec;
+    }
+
 }

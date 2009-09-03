@@ -65,6 +65,7 @@ public final class FilterSpecCompiler
      * @param optionalStreamName - the stream name, if provided
      * @param engineURI - the engine uri
      * @param optionalPropertyEvalSpec - specification for evaluating properties
+     * @param exprEvaluatorContext context for expression evalauation
      * @return compiled filter specification
      * @throws ExprValidationException if the expression or type validations failed
      */
@@ -80,12 +81,13 @@ public final class FilterSpecCompiler
                                                     VariableService variableService,
                                                     EventAdapterService eventAdapterService,
                                                     String engineURI,
-                                                    String optionalStreamName)
+                                                    String optionalStreamName,
+                                                    ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         // Validate all nodes, make sure each returns a boolean and types are good;
         // Also decompose all AND super nodes into individual expressions
-        List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService, timeProvider, variableService);
+        List<ExprNode> constituents = FilterSpecCompiler.validateAndDecompose(filterExpessions, streamTypeService, methodResolutionService, timeProvider, variableService, exprEvaluatorContext);
 
         // From the constituents make a filter specification
         FilterParamExprMap filterParamExprMap = new FilterParamExprMap();
@@ -93,7 +95,7 @@ public final class FilterSpecCompiler
         // Make filter parameter for each expression node, if it can be optimized
         for (ExprNode constituent : constituents)
         {
-            FilterSpecParam param = makeFilterParam(constituent, taggedEventTypes, arrayEventTypes);
+            FilterSpecParam param = makeFilterParam(constituent, taggedEventTypes, arrayEventTypes, exprEvaluatorContext);
             filterParamExprMap.put(constituent, param); // accepts null values as the expression may not be optimized
         }
 
@@ -174,10 +176,11 @@ public final class FilterSpecCompiler
      * @param methodResolutionService for resolving functions
      * @param timeProvider for providing current time
      * @param variableService provides access to variables
+     * @param exprEvaluatorContext context for expression evalauation
      * @return list of validated expression nodes
      * @throws ExprValidationException for validation errors
      */
-    public static List<ExprNode> validateDisallowSubquery(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider, VariableService variableService)
+    public static List<ExprNode> validateDisallowSubquery(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         List<ExprNode> validatedNodes = new ArrayList<ExprNode>();
@@ -192,7 +195,7 @@ public final class FilterSpecCompiler
                 throw new ExprValidationException("Subselects not allowed within filters");
             }
 
-            ExprNode validated = node.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService);
+            ExprNode validated = node.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext);
             validatedNodes.add(validated);
 
             if ((validated.getType() != Boolean.class) && ((validated.getType() != boolean.class)))
@@ -204,10 +207,10 @@ public final class FilterSpecCompiler
         return validatedNodes;
     }
 
-    private static List<ExprNode> validateAndDecompose(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider, VariableService variableService)
+    private static List<ExprNode> validateAndDecompose(List<ExprNode> exprNodes, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
-        List<ExprNode> validatedNodes = validateDisallowSubquery(exprNodes, streamTypeService, methodResolutionService, timeProvider, variableService);
+        List<ExprNode> validatedNodes = validateDisallowSubquery(exprNodes, streamTypeService, methodResolutionService, timeProvider, variableService, exprEvaluatorContext);
 
         // Break a top-level AND into constituent expression nodes
         List<ExprNode> constituents = new ArrayList<ExprNode>();
@@ -324,17 +327,18 @@ public final class FilterSpecCompiler
      * @param constituent is the expression to look at
      * @param taggedEventTypes event types and their tags
      * @param arrayEventTypes @return filter parameter representing the expression, or null
+     * @param exprEvaluatorContext context for expression evalauation
      * @throws ExprValidationException if the expression is invalid
      * @return FilterSpecParam filter param
      */
-    protected static FilterSpecParam makeFilterParam(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+    protected static FilterSpecParam makeFilterParam(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         // Is this expresson node a simple compare, i.e. a=5 or b<4; these can be indexed
         if ((constituent instanceof ExprEqualsNode) ||
             (constituent instanceof ExprRelationalOpNode))
         {
-            FilterSpecParam param = handleEqualsAndRelOp(constituent, arrayEventTypes);
+            FilterSpecParam param = handleEqualsAndRelOp(constituent, arrayEventTypes, exprEvaluatorContext);
             if (param != null)
             {
                 return param;
@@ -344,7 +348,7 @@ public final class FilterSpecCompiler
         // Is this expresson node a simple compare, i.e. a=5 or b<4; these can be indexed
         if (constituent instanceof ExprInNode)
         {
-            FilterSpecParam param = handleInSetNode((ExprInNode)constituent, arrayEventTypes);
+            FilterSpecParam param = handleInSetNode((ExprInNode)constituent, arrayEventTypes, exprEvaluatorContext);
             if (param != null)
             {
                 return param;
@@ -353,7 +357,7 @@ public final class FilterSpecCompiler
 
         if (constituent instanceof ExprBetweenNode)
         {
-            FilterSpecParam param = handleRangeNode((ExprBetweenNode)constituent, arrayEventTypes);
+            FilterSpecParam param = handleRangeNode((ExprBetweenNode)constituent, arrayEventTypes, exprEvaluatorContext);
             if (param != null)
             {
                 return param;
@@ -363,7 +367,7 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParam handleRangeNode(ExprBetweenNode betweenNode, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+    private static FilterSpecParam handleRangeNode(ExprBetweenNode betweenNode, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, ExprEvaluatorContext exprEvaluatorContext)
     {
         ExprNode left = betweenNode.getChildNodes().get(0);
         if (left instanceof ExprIdentNode)
@@ -373,8 +377,8 @@ public final class FilterSpecCompiler
             FilterOperator op = FilterOperator.parseRangeOperator(betweenNode.isLowEndpointIncluded(), betweenNode.isHighEndpointIncluded(),
                     betweenNode.isNotBetween());
 
-            FilterSpecParamRangeValue low = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(1), arrayEventTypes);
-            FilterSpecParamRangeValue high = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(2), arrayEventTypes);
+            FilterSpecParamRangeValue low = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(1), arrayEventTypes, exprEvaluatorContext);
+            FilterSpecParamRangeValue high = handleRangeNodeEndpoint(betweenNode.getChildNodes().get(2), arrayEventTypes, exprEvaluatorContext);
 
             if ((low != null) && (high != null))
             {
@@ -384,13 +388,13 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParamRangeValue handleRangeNodeEndpoint(ExprNode endpoint, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+    private static FilterSpecParamRangeValue handleRangeNodeEndpoint(ExprNode endpoint, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, ExprEvaluatorContext exprEvaluatorContext)
     {
         // constant
         if (endpoint instanceof ExprConstantNode)
         {
             ExprConstantNode node = (ExprConstantNode) endpoint;
-            Number result = (Number) node.evaluate(null, true);
+            Number result = (Number) node.evaluate(null, true, exprEvaluatorContext);
             return new RangeValueDouble(result.doubleValue());
         }
 
@@ -418,7 +422,7 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParam handleInSetNode(ExprInNode constituent, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+    private static FilterSpecParam handleInSetNode(ExprInNode constituent, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         ExprNode left = constituent.getChildNodes().get(0);
@@ -441,7 +445,7 @@ public final class FilterSpecCompiler
                 if (subNode instanceof ExprConstantNode)
                 {
                     ExprConstantNode constantNode = (ExprConstantNode) subNode;
-                    Object constant = constantNode.evaluate(null, true);
+                    Object constant = constantNode.evaluate(null, true, exprEvaluatorContext);
                     constant = handleConstantsCoercion(identNodeInSet, constant);
                     listofValues.add(new InSetOfValuesConstant(constant));
                 }
@@ -493,7 +497,7 @@ public final class FilterSpecCompiler
         return null;
     }
 
-    private static FilterSpecParam handleEqualsAndRelOp(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+    private static FilterSpecParam handleEqualsAndRelOp(ExprNode constituent, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         FilterOperator op;
@@ -539,7 +543,7 @@ public final class FilterSpecCompiler
             ExprIdentNode identNode = (ExprIdentNode) left;
             ExprConstantNode constantNode = (ExprConstantNode) right;
             String propertyName = identNode.getResolvedPropertyName();
-            Object constant = constantNode.evaluate(null, true);
+            Object constant = constantNode.evaluate(null, true, exprEvaluatorContext);
             constant = handleConstantsCoercion(identNode, constant);
 
             return new FilterSpecParamConstant(propertyName, op, constant);
@@ -549,7 +553,7 @@ public final class FilterSpecCompiler
             ExprIdentNode identNode = (ExprIdentNode) right;
             ExprConstantNode constantNode = (ExprConstantNode) left;
             String propertyName = identNode.getResolvedPropertyName();
-            Object constant = constantNode.evaluate(null, true);
+            Object constant = constantNode.evaluate(null, true, exprEvaluatorContext);
             constant = handleConstantsCoercion(identNode, constant);
             return new FilterSpecParamConstant(propertyName, op, constant);
         }

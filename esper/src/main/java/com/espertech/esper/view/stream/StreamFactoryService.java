@@ -14,6 +14,7 @@ import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * Service on top of the filter service for reuseing filter callbacks and their associated EventStream instances.
@@ -33,10 +34,13 @@ public interface StreamFactoryService
      * @param isJoin is indicatng whether the stream will participate in a join statement, information
      * necessary for stream reuse and multithreading concerns
      * @param isSubSelect true for subselects
+     * @param statementId the statement id
+     * @param exprEvaluatorContext expression evaluation context
+     * @param isNamedWindowTrigger if a named window or trigger querying from named window
      * @return event stream representing active filter
      */
-    public Pair<EventStream, ManagedLock> createStream(FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
-                                    boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger);
+    public Pair<EventStream, ManagedLock> createStream(final String statementId, FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
+                                    boolean isJoin, boolean isSubSelect, ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger);
 
     /**
      * Drop the event stream associated with the filter passed in.
@@ -46,6 +50,7 @@ public interface StreamFactoryService
      * @param isJoin is indicatng whether the stream will participate in a join statement, information
      * necessary for stream reuse and multithreading concerns
      * @param isSubSelect true for subselects
+     * @param isNamedWindowTrigger if a named window or trigger querying from named window
      */
     public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger);
 

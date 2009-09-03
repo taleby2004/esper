@@ -24,9 +24,10 @@ public class ExprNodeUtility
      * @param filter expression
      * @param streamZeroEvent the event that represents stream zero
      * @param streamOneEvents all events thate are stream one events
+     * @param exprEvaluatorContext context for expression evaluation
      * @return filtered stream one events
      */
-    public static EventBean[] applyFilterExpression(ExprNode filter, EventBean streamZeroEvent, EventBean[] streamOneEvents)
+    public static EventBean[] applyFilterExpression(ExprNode filter, EventBean streamZeroEvent, EventBean[] streamOneEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean[] eventsPerStream = new EventBean[2];
         eventsPerStream[0] = streamZeroEvent;
@@ -38,7 +39,7 @@ public class ExprNodeUtility
         {
             eventsPerStream[1] = eventBean;
 
-            Boolean result = (Boolean) filter.evaluate(eventsPerStream, true);
+            Boolean result = (Boolean) filter.evaluate(eventsPerStream, true, exprEvaluatorContext);
             if ((result != null) && result)
             {
                 filtered[countPass] = eventBean;
@@ -57,11 +58,12 @@ public class ExprNodeUtility
      * Apply a filter expression returning a pass indicator.
      * @param filter to apply
      * @param eventsPerStream events per stream
+     * @param exprEvaluatorContext context for expression evaluation
      * @return pass indicator
      */
-    public static boolean applyFilterExpression(ExprNode filter, EventBean[] eventsPerStream)
+    public static boolean applyFilterExpression(ExprNode filter, EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Boolean result = (Boolean) filter.evaluate(eventsPerStream, true);
+        Boolean result = (Boolean) filter.evaluate(eventsPerStream, true, exprEvaluatorContext);
         return (result != null) && result;
     }
 

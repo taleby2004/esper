@@ -3,6 +3,7 @@ package com.espertech.esper.support.view;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.core.StatementResultServiceImpl;
 import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 import com.espertech.esper.view.ViewResolutionServiceImpl;
@@ -45,7 +46,7 @@ public class SupportStatementContextFactory
                 "stmtName",
                 "exprHere",
                 stub,
-                stub.allocateBucket(),
+                new ScheduleBucket(1),
                 SupportEventAdapterService.getService(),
                 null,
                 new ViewResolutionServiceImpl(ViewEnumHelper.getBuiltinViews()),
@@ -62,6 +63,7 @@ public class SupportStatementContextFactory
                 new StatementResultServiceImpl(null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc
                 null, // resolution URIs
                 new ValueAddEventServiceImpl(), // revison svc
-                config);
+                config,
+                null);
     }
 }

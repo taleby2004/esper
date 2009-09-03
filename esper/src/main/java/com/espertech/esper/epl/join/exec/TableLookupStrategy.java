@@ -10,6 +10,7 @@ package com.espertech.esper.epl.join.exec;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.join.rep.Cursor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Set;
 
@@ -24,7 +25,8 @@ public interface TableLookupStrategy
      * always returns null to indicate no results.
      * @param event to look up
      * @param cursor the path in the query that the lookup took
+     * @param exprEvaluatorContext expression evaluation context
      * @return set of matching events, or null if none matching
      */
-    public Set<EventBean> lookup(EventBean event, Cursor cursor);
+    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext);
 }

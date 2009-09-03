@@ -21,7 +21,7 @@ import java.util.*;
  * Synchronized since statement creation and event evaluation by multiple (event send) threads
  * can lead to callbacks added/removed asynchronously.
  */
-public final class SchedulingServiceImpl implements SchedulingService
+public final class SchedulingServiceImpl implements SchedulingServiceSPI
 {
     // Map of time and handle
     private final SortedMap<Long, SortedMap<ScheduleSlot, ScheduleHandle>> timeHandleMap;
@@ -31,9 +31,6 @@ public final class SchedulingServiceImpl implements SchedulingService
 
     // Current time - used for evaluation as well as for adding new handles
     private volatile long currentTime;
-
-    // Current bucket number - for use in ordering handles by bucket
-    private int curBucketNum;
 
     /**
      * Constructor.
@@ -52,12 +49,6 @@ public final class SchedulingServiceImpl implements SchedulingService
         log.debug("Destroying scheduling service");
         handleSetMap.clear();
         timeHandleMap.clear();
-    }
-
-    public synchronized ScheduleBucket allocateBucket()
-    {
-        curBucketNum++;
-        return new ScheduleBucket(curBucketNum);
     }
 
     public long getTime()
@@ -153,6 +144,38 @@ public final class SchedulingServiceImpl implements SchedulingService
         for (Long key : removeKeys)
         {
             timeHandleMap.remove(key);
+        }
+    }
+
+    public ScheduleSet take(Set<String> statementIds)
+    {
+        List<ScheduleSetEntry> list = new ArrayList<ScheduleSetEntry>();
+        long currentTime = getTime();
+        for (Map.Entry<Long, SortedMap<ScheduleSlot, ScheduleHandle>> schedule : timeHandleMap.entrySet())
+        {
+            for (Map.Entry<ScheduleSlot, ScheduleHandle> entry : schedule.getValue().entrySet())
+            {
+                if (statementIds.contains(entry.getValue().getStatementId()))
+                {
+                    long relative = schedule.getKey() - currentTime;
+                    list.add(new ScheduleSetEntry(relative, entry.getKey(), entry.getValue()));
+                }
+            }
+        }
+
+        for (ScheduleSetEntry entry : list)
+        {
+            remove(entry.getHandle(), entry.getSlot());
+        }
+
+        return new ScheduleSet(list);
+    }
+
+    public void apply(ScheduleSet scheduleSet)
+    {
+        for (ScheduleSetEntry entry : scheduleSet.getList())
+        {
+            add(entry.getTime(), entry.getHandle(), entry.getSlot());
         }
     }
 

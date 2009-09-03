@@ -25,6 +25,7 @@ public class ExprSubselectInNode extends ExprSubselectNode
 {
     private boolean isNotIn;
     private SubselectEvalStrategy subselectEvalStrategy;
+    private static final long serialVersionUID = -7233906204211162498L;
 
     /**
      * Ctor.
@@ -58,13 +59,13 @@ public class ExprSubselectInNode extends ExprSubselectNode
         return isNotIn;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         subselectEvalStrategy = SubselectEvalStrategyFactory.createStrategy(this, isNotIn, false, false, null);
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return subselectEvalStrategy.evaluate(eventsPerStream, isNewData, matchingEvents);
+        return subselectEvalStrategy.evaluate(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 }

@@ -154,4 +154,12 @@ public interface EPStatement extends EPListenable, EPIterable
      * @return annotations or a zero-length array if no annotaions have been specified.
      */
     public Annotation[] getAnnotations();
+
+    /**
+     * Returns the name of the isolated service provided is the statement is currently
+     * isolated in terms of event visibility and scheduling,
+     * or returns null if the statement is live in the engine.
+     * @return isolated service name or null for statements that are not currently isolated
+     */
+    public String getServiceIsolated();
 }

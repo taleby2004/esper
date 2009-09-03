@@ -17,7 +17,7 @@ public final class FilterServiceProvider
      * Creates an implementation of the FilterEvaluationService interface.
      * @return implementation
      */
-    public static FilterService newService()
+    public static FilterServiceSPI newService()
     {
         return new FilterServiceImpl();
     }

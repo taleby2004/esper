@@ -11,6 +11,7 @@ package com.espertech.esper.core;
 import com.espertech.esper.util.MetaDefItem;
 import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.io.Serializable;
 
@@ -68,6 +69,14 @@ public class EPStatementHandle implements MetaDefItem, Serializable
     public void setCanSelfJoin(boolean canSelfJoin)
     {
         this.canSelfJoin = canSelfJoin;
+    }
+
+    /**
+     * Returns the statement id.
+     * @return statement id
+     */
+    public String getStatementId() {
+        return statementId;
     }
 
     /**
@@ -129,12 +138,13 @@ public class EPStatementHandle implements MetaDefItem, Serializable
     /**
      * Invoked by {@link com.espertech.esper.client.EPRuntime} to indicate that a statements's
      * filer and schedule processing is done, and now it's time to process join results.
+     * @param exprEvaluatorContext context for expression evaluation
      */
-    public void internalDispatch()
+    public void internalDispatch(ExprEvaluatorContext exprEvaluatorContext)
     {
         if (optionalDispatchable != null)
         {
-            optionalDispatchable.execute();
+            optionalDispatchable.execute(exprEvaluatorContext);
         }
     }
 

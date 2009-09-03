@@ -14,6 +14,7 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventBeanWriter;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
 import org.antlr.runtime.tree.Tree;

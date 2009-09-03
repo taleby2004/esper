@@ -71,12 +71,12 @@ public class SchemaUtil {
         if (item instanceof SchemaItemAttribute)
         {
             SchemaItemAttribute att = (SchemaItemAttribute) item;
-            return SchemaUtil.toReturnType(att.getXsSimpleType(), att.getTypeName());
+            return SchemaUtil.toReturnType(att.getXsSimpleType(), att.getTypeName(), null);
         }
         else if (item instanceof SchemaElementSimple)
         {
             SchemaElementSimple simple = (SchemaElementSimple) item;
-            Class returnType = SchemaUtil.toReturnType(simple.getXsSimpleType(), simple.getTypeName());
+            Class returnType = SchemaUtil.toReturnType(simple.getXsSimpleType(), simple.getTypeName(), simple.getFractionDigits());
             if (simple.isArray())
             {
                 returnType = Array.newInstance(returnType, 0).getClass();
@@ -88,7 +88,7 @@ public class SchemaUtil {
             SchemaElementComplex complex = (SchemaElementComplex) item;
             if (complex.getOptionalSimpleType() != null)
             {
-                return SchemaUtil.toReturnType(complex.getOptionalSimpleType(), complex.getOptionalSimpleTypeName());
+                return SchemaUtil.toReturnType(complex.getOptionalSimpleType(), complex.getOptionalSimpleTypeName(), null);
             }
             if (complex.isArray())
             {
@@ -106,9 +106,10 @@ public class SchemaUtil {
      * Returns the type for a give short type and type name.
      * @param xsType XSSimplyType type
      * @param typeName type name in XML standard
+     * @param optionalFractionDigits fraction digits if any are defined
      * @return equivalent native type
      */
-    public static Class toReturnType(short xsType, String typeName)
+    public static Class toReturnType(short xsType, String typeName, Integer optionalFractionDigits)
     {
         if (typeName != null)
         {
@@ -126,6 +127,10 @@ public class SchemaUtil {
             case XSSimpleType.PRIMITIVE_STRING :
                     return String.class;
             case XSSimpleType.PRIMITIVE_DECIMAL :
+                    if ((optionalFractionDigits != null) && (optionalFractionDigits > 0))
+                    {
+                        return Double.class;
+                    }
                     return Integer.class;
             case XSSimpleType.PRIMITIVE_FLOAT :
                     return Float.class;

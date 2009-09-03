@@ -87,7 +87,7 @@ public class AxiomXMLEventType implements EventTypeSPI
             {
                 TypedEventPropertyGetter getter = resolvePropertyGetter(property.getName(), property.getXpath(), property.getType(), property.getOptionalCastToType());
                 propertyGetterCache.put(property.getName(), getter);
-                EventPropertyDescriptor desc = new EventPropertyDescriptor(property.getName(), getter.getResultClass(), false, false, false, false, false); 
+                EventPropertyDescriptor desc = new EventPropertyDescriptor(property.getName(), getter.getResultClass(), null, false, false, false, false, false); 
                 propertyDescriptorsMap.put(property.getName(), desc);
                 descriptors.add(desc);
             }
@@ -197,5 +197,35 @@ public class AxiomXMLEventType implements EventTypeSPI
     public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
     {
         return propertyDescriptorsMap.get(propertyName);
+    }
+
+    public EventPropertyWriter getWriter(String propertyName)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor[] getWriteableProperties()
+    {
+        return new EventPropertyDescriptor[0];
+    }
+
+    public EventBeanCopyMethod getCopyMethod(String[] properties)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor getWritableProperty(String propertyName)
+    {
+        return null;
+    }
+
+    public EventBeanWriter getWriter(String[] properties)
+    {
+        return null;
+    }
+
+    public EventBeanReader getReader()
+    {
+        return null;
     }
 }

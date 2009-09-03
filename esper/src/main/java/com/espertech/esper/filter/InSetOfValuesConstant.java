@@ -16,6 +16,7 @@ import com.espertech.esper.pattern.MatchedEventMap;
 public class InSetOfValuesConstant implements FilterSpecParamInValue
 {
     private Object constant;
+    private static final long serialVersionUID = 575037486475447197L;
 
     /**
      * Ctor.
@@ -40,24 +41,29 @@ public class InSetOfValuesConstant implements FilterSpecParamInValue
         return constant;
     }
 
-    public boolean equals(Object obj)
+    public boolean equals(Object o)
     {
-        if (this == obj)
+        if (this == o)
         {
             return true;
         }
-
-        if (!(obj instanceof InSetOfValuesConstant))
+        if (o == null || getClass() != o.getClass())
         {
             return false;
         }
 
-        InSetOfValuesConstant other = (InSetOfValuesConstant) obj;
-        return other.constant.equals(this.constant);
+        InSetOfValuesConstant that = (InSetOfValuesConstant) o;
+
+        if (constant != null ? !constant.equals(that.constant) : that.constant != null)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public int hashCode()
     {
-        return (constant != null ? constant.hashCode() : 0);
+        return constant != null ? constant.hashCode() : 0;
     }
 }

@@ -24,6 +24,7 @@ public class ExprNumberSetCronParam extends ExprNode
     
     private final CronOperatorEnum cronOperator;
     private TimeProvider timeProvider;
+    private static final long serialVersionUID = -1315999998249935318L;
 
     /**
      * Ctor.
@@ -71,7 +72,7 @@ public class ExprNumberSetCronParam extends ExprNode
         return other.cronOperator.equals(this.cronOperator); 
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         this.timeProvider = timeProvider;
         if (this.getChildNodes().isEmpty())
@@ -90,7 +91,7 @@ public class ExprNumberSetCronParam extends ExprNode
         return CronParameter.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (timeProvider == null)
         {
@@ -100,7 +101,7 @@ public class ExprNumberSetCronParam extends ExprNode
         {
             return new CronParameter(cronOperator, null, timeProvider.getTime());
         }
-        Object value = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
+        Object value = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (value == null)
         {
             log.warn("Null value returned for cron parameter");

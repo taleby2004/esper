@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 public class ExprNumberSetRange extends ExprNode
 {
     private static final Log log = LogFactory.getLog(ExprNumberSetRange.class);
+    private static final long serialVersionUID = -3777415170380735662L;
 
     public String toExpressionString()
     {
@@ -37,7 +38,7 @@ public class ExprNumberSetRange extends ExprNode
         return node instanceof ExprNumberSetRange;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         Class typeOne = this.getChildNodes().get(0).getType();
         Class typeTwo = this.getChildNodes().get(1).getType();
@@ -52,10 +53,10 @@ public class ExprNumberSetRange extends ExprNode
         return RangeParameter.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object valueLower = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
-        Object valueUpper = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
+        Object valueLower = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object valueUpper = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (valueLower == null)
         {
             log.warn("Null value returned for lower bounds value in range parameter, using zero as lower bounds");

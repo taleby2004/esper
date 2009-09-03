@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventBean;
 
 import java.util.List;
@@ -24,17 +25,20 @@ public class FilteredEventIterator implements Iterator<EventBean>
     private final Iterator<EventBean> parent;
     private final List<ExprNode> filterList;
     private final EventBean[] eventPerStream = new EventBean[1];
+    private final ExprEvaluatorContext exprEvaluatorContext;
     private EventBean next;
 
     /**
      * Ctor.
      * @param filters is a list of expression nodes for filtering
      * @param parent is the iterator supplying the events to apply the filter on
+     * @param exprEvaluatorContext context for expression evalauation
      */
-    public FilteredEventIterator(List<ExprNode> filters, Iterator<EventBean> parent)
+    public FilteredEventIterator(List<ExprNode> filters, Iterator<EventBean> parent, ExprEvaluatorContext exprEvaluatorContext)
     {
         this.parent = parent;
         this.filterList = filters;
+        this.exprEvaluatorContext = exprEvaluatorContext;
         getNext();
     }
 
@@ -83,7 +87,7 @@ public class FilteredEventIterator implements Iterator<EventBean>
             boolean pass = true;
             for (ExprNode filter : filterList)
             {
-                Boolean result = (Boolean) filter.evaluate(eventPerStream, true);
+                Boolean result = (Boolean) filter.evaluate(eventPerStream, true, exprEvaluatorContext);
                 if ((result != null) && (!result))
                 {
                     pass = false;

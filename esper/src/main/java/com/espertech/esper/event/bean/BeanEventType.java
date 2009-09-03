@@ -9,17 +9,21 @@
 package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.event.*;
+import com.espertech.esper.event.property.GenericPropertyDesc;
 import com.espertech.esper.event.property.Property;
 import com.espertech.esper.event.property.PropertyParser;
 import com.espertech.esper.event.property.SimpleProperty;
-import com.espertech.esper.event.property.GenericPropertyDesc;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.Serializable;
 import java.util.*;
+import java.lang.reflect.Method;
 
 /**
  * Implementation of the EventType interface for handling JavaBean-type classes.
@@ -45,8 +49,11 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
     private final Map<String, EventPropertyGetter> propertyGetterCache;
     private EventPropertyDescriptor[] propertyDescriptors;
+    private EventPropertyDescriptor[] writeablePropertyDescriptors;
+    private Map<String, Pair<EventPropertyDescriptor, BeanEventPropertyWriter>> writerMap;
     private Map<String, EventPropertyDescriptor> propertyDescriptorMap;
     private String factoryMethodName;
+    private String copyMethodName;
 
     /**
      * Constructor takes a java bean class as an argument.
@@ -67,6 +74,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         if (optionalLegacyDef != null)
         {
             this.factoryMethodName = optionalLegacyDef.getFactoryMethod();
+            this.copyMethodName = optionalLegacyDef.getCopyMethod();
             this.propertyResolutionStyle = optionalLegacyDef.getPropertyResolutionStyle();
         }
         else
@@ -342,6 +350,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         {
             String propertyName = desc.getPropertyName();
             Class underlyingType;
+            Class componentType;
             boolean isRequiresIndex;
             boolean isRequiresMapkey;
             boolean isIndexed;
@@ -369,6 +378,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 }
 
                 underlyingType = type;
+                componentType = null;
                 isRequiresIndex = false;
                 isRequiresMapkey = false;
                 isIndexed = false;
@@ -384,12 +394,21 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 {
                     isIndexed = true;
                     isFragment = JavaClassHelper.isFragmentableType(type.getComponentType());
+                    componentType = type.getComponentType();
                 }
                 else if (JavaClassHelper.isImplementsInterface(type, Iterable.class))
                 {
                     isIndexed = true;
                     Class genericType = JavaClassHelper.getGenericReturnType(desc.getReadMethod(), desc.getAccessorField(), true);
                     isFragment = JavaClassHelper.isFragmentableType(genericType);
+                    if (genericType != null)
+                    {
+                        componentType = genericType;
+                    }
+                    else
+                    {
+                        componentType = Object.class;
+                    }                    
                 }
                 else
                 {
@@ -420,6 +439,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 mappedPropertyDescriptors.put(propertyName, desc);
 
                 underlyingType = desc.getReturnType();
+                componentType = null;
                 isRequiresIndex = false;
                 isRequiresMapkey = desc.getReadMethod().getParameterTypes().length > 0;
                 isIndexed = false;
@@ -448,6 +468,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 indexedPropertyDescriptors.put(propertyName, desc);
 
                 underlyingType = desc.getReturnType();
+                componentType = null;
                 isRequiresIndex = desc.getReadMethod().getParameterTypes().length > 0;
                 isRequiresMapkey = false;
                 isIndexed = true;
@@ -477,7 +498,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
             propertyNames[count] = desc.getPropertyName();
             EventPropertyDescriptor descriptor = new EventPropertyDescriptor(desc.getPropertyName(),
-                underlyingType, isRequiresIndex, isRequiresMapkey, isIndexed, isMapped, isFragment);
+                underlyingType, componentType, isRequiresIndex, isRequiresMapkey, isIndexed, isMapped, isFragment);
             propertyDescriptors[count++] = descriptor; 
             propertyDescriptorMap.put(descriptor.getPropertyName(), descriptor);                    
         }
@@ -715,6 +736,115 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
             return null;
         }
         return EventBeanUtility.createNativeFragmentType(genericProp.getType(), genericProp.getGeneric(), eventAdapterService);
+    }
+
+    public EventPropertyWriter getWriter(String propertyName)
+    {
+        if (writeablePropertyDescriptors == null)
+        {
+            initializeWriters();
+        }
+        Pair<EventPropertyDescriptor, BeanEventPropertyWriter> pair = writerMap.get(propertyName);
+        if (pair == null)
+        {
+            return null;
+        }
+        return pair.getSecond();
+    }
+
+    public EventPropertyDescriptor getWritableProperty(String propertyName)
+    {
+        if (writeablePropertyDescriptors == null)
+        {
+            initializeWriters();
+        }
+        Pair<EventPropertyDescriptor, BeanEventPropertyWriter> pair = writerMap.get(propertyName);
+        if (pair == null)
+        {
+            return null;
+        }
+        return pair.getFirst();
+    }
+
+    public EventPropertyDescriptor[] getWriteableProperties()
+    {
+        if (writeablePropertyDescriptors == null)
+        {
+            initializeWriters();
+        }
+
+        return writeablePropertyDescriptors;
+    }
+
+    public EventBeanReader getReader()
+    {
+        return new BeanEventBeanReader(this);
+    }
+
+    public EventBeanCopyMethod getCopyMethod(String[] properties)
+    {
+        if (JavaClassHelper.isImplementsInterface(clazz, Serializable.class))
+        {
+            return new BeanEventBeanSerializableCopyMethod(this, eventAdapterService);
+        }
+        if (copyMethodName == null)
+        {
+            return null;
+        }
+        Method method = null;
+        try
+        {
+            method = clazz.getMethod(copyMethodName);
+        }
+        catch (NoSuchMethodException e)
+        {
+            log.error("Configured copy-method for class '" + clazz.getName() + " not found by name '" + copyMethodName + "': " + e.getMessage());
+        }
+        if (method == null)
+        {
+            log.error("Configured copy-method for class '" + clazz.getName() + " not found by name '" + copyMethodName + "'");
+        }
+        return new BeanEventBeanConfiguredCopyMethod(this, eventAdapterService, fastClass.getMethod(method));
+    }
+
+    public EventBeanWriter getWriter(String[] properties)
+    {
+        if (writeablePropertyDescriptors == null)
+        {
+            initializeWriters();
+        }
+
+        BeanEventPropertyWriter[] writers = new BeanEventPropertyWriter[properties.length];
+        for (int i = 0; i < properties.length; i++)
+        {
+            Pair<EventPropertyDescriptor, BeanEventPropertyWriter> pair = writerMap.get(properties[i]);
+            if (pair == null)
+            {
+                return null;
+            }
+            writers[i] = pair.getSecond();
+        }
+        return new BeanEventBeanWriter(writers);
+    }
+
+    private void initializeWriters()
+    {
+        Set<WriteablePropertyDescriptor> writables = PropertyHelper.getWritableProperties(fastClass.getJavaClass());
+        EventPropertyDescriptor[] desc = new EventPropertyDescriptor[writables.size()];
+        Map<String, Pair<EventPropertyDescriptor, BeanEventPropertyWriter>> writers = new HashMap<String, Pair<EventPropertyDescriptor, BeanEventPropertyWriter>>();
+
+        int count = 0;
+        for (final WriteablePropertyDescriptor writable : writables)
+        {
+            EventPropertyDescriptor propertyDesc = new EventPropertyDescriptor(writable.getPropertyName(), writable.getType(), null, false, false, false, false, false);
+            desc[count++] = propertyDesc;
+
+            final FastMethod fastMethod = fastClass.getMethod(writable.getWriteMethod());
+            writers.put(writable.getPropertyName(), new Pair<EventPropertyDescriptor, BeanEventPropertyWriter>(propertyDesc, new BeanEventPropertyWriter(clazz, fastMethod)));
+        }
+
+        writerMap = writers;
+        writeablePropertyDescriptors = desc;
     }
 
     private static final Log log = LogFactory.getLog(BeanEventType.class);

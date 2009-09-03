@@ -14,10 +14,15 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.InternalEventRouter;
 import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.StatementStopService;
+import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.EventBeanReaderDefaultImpl;
+import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.event.EventBeanReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,8 +41,11 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
     private final ResultSetProcessor resultSetProcessor;
     private final EPStatementHandle statementHandle;
     private final StatementResultService statementResultService;
+    private final StatementContext statementContext;
     private EventBean[] lastResult;
     private Set<MultiKey<EventBean>> oldEvents = new HashSet<MultiKey<EventBean>>();
+    private boolean isDistinct;
+    private EventBeanReader eventBeanReader;
 
     /**
      * Ctor.
@@ -48,6 +56,8 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
      * @param resultSetProcessor for processing aggregation, having and ordering
      * @param statementHandle required for routing events
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
+     * @param statementContext statement services
+     * @param isDistinct is true for distinct output
      */
     public NamedWindowOnSelectView(StatementStopService statementStopService,
                                    LookupStrategy lookupStrategy,
@@ -55,13 +65,29 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
                                    InternalEventRouter internalEventRouter,
                                    ResultSetProcessor resultSetProcessor,
                                    EPStatementHandle statementHandle,
-                                   StatementResultService statementResultService)
+                                   StatementResultService statementResultService,
+                                   StatementContext statementContext,
+                                   boolean isDistinct)
     {
-        super(statementStopService, lookupStrategy, rootView);
+        super(statementStopService, lookupStrategy, rootView, statementContext);
         this.internalEventRouter = internalEventRouter;
         this.resultSetProcessor = resultSetProcessor;
         this.statementHandle = statementHandle;
         this.statementResultService = statementResultService;
+        this.statementContext = statementContext;
+        this.isDistinct = isDistinct;
+
+        if (isDistinct)
+        {
+            if (resultSetProcessor.getResultEventType() instanceof EventTypeSPI)
+            {
+                eventBeanReader = ((EventTypeSPI) resultSetProcessor.getResultEventType()).getReader();
+            }
+            if (eventBeanReader == null)
+            {
+                eventBeanReader = new EventBeanReaderDefaultImpl(resultSetProcessor.getResultEventType());
+            }
+        }
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -92,13 +118,18 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
         UniformPair<EventBean[]> pair = resultSetProcessor.processJoinResult(newEvents, oldEvents, false);
         newData = (pair != null ? pair.getFirst() : null);
 
+        if (isDistinct)
+        {
+            newData = EventBeanUtility.getDistinctByProp(newData, eventBeanReader);
+        }
+
         if (internalEventRouter != null)
         {
             if (newData != null)
             {
                 for (int i = 0; i < newData.length; i++)
                 {
-                    internalEventRouter.route(newData[i], statementHandle);
+                    internalEventRouter.route(newData[i], statementHandle, statementContext.getInternalEventEngineRouteDest(), statementContext);
                 }
             }
         }

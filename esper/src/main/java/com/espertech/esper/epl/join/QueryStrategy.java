@@ -10,6 +10,7 @@ package com.espertech.esper.epl.join;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Set;
 
@@ -22,6 +23,7 @@ public interface QueryStrategy
      * Look up events returning tuples of joined events.
      * @param lookupEvents - events to use to perform the join
      * @param joinSet - result join tuples of events
+     * @param exprEvaluatorContext expression evaluation context
      */
-    public void lookup(EventBean[] lookupEvents, Set<MultiKey<EventBean>> joinSet);
+    public void lookup(EventBean[] lookupEvents, Set<MultiKey<EventBean>> joinSet, ExprEvaluatorContext exprEvaluatorContext);
 }

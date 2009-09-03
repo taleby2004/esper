@@ -106,11 +106,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // called after services are activated, to begin statement loading from store
     }
 
-    public synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, Object userObject)
+    public synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, Object userObject, EPIsolationUnitServices isolationUnitServices)
     {
         // Generate statement id
         String statementId = UuidGenerator.generate();
-        return createAndStart(statementSpec, expression, isPattern, optStatementName, statementId, null, userObject);
+        return createAndStart(statementSpec, expression, isPattern, optStatementName, statementId, null, userObject, isolationUnitServices);
     }
 
     /**
@@ -122,9 +122,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param statementId is the statement id
      * @param optAdditionalContext additional context for use by the statement context
      * @param userObject the application define user object associated to each statement, if supplied
+     * @param isolationUnitServices isolated service services
      * @return started statement
      */
-    protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
+    protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject, EPIsolationUnitServices isolationUnitServices)
     {
         String statementName = statementId;
 
@@ -149,8 +150,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             statementName = getUniqueStatementName(optStatementName, statementId);
         }
 
-        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject);
-        start(statementId, desc, true, false);
+        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject, isolationUnitServices);
+        start(statementId, desc, true, false, false);
         return desc.getEpStatement();
     }
 
@@ -163,15 +164,16 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param statementId is the statement id
      * @param optAdditionalContext additional context for use by the statement context
      * @param userObject the application define user object associated to each statement, if supplied
+     * @param isolationUnitServices isolated service services
      * @return stopped statement
      */
-    protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject)
+    protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject, EPIsolationUnitServices isolationUnitServices)
     {
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
 
         Annotation[] annotations = AnnotationUtil.compileAnnotations(statementSpec.getAnnotations(), services.getEngineImportService(), expression);
-        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc(), false, annotations);
+        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc(), false, annotations, isolationUnitServices);
         StatementSpecCompiled compiledSpec;
         try
         {
@@ -245,10 +247,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             boolean isSpinLocks = services.getEngineSettingsService().getEngineSettings().getThreading().getListenerDispatchLocking() == ConfigurationEngineDefaults.Threading.Locking.SPIN;
             long blockingTimeout = services.getEngineSettingsService().getEngineSettings().getThreading().getListenerDispatchTimeout();
             long timeLastStateChange = services.getSchedulingService().getTime();
-            EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, isPattern,
+            EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, statementSpec.getExpressionNoAnnotations(), isPattern,
                     services.getDispatchService(), this, timeLastStateChange, preserveDispatchOrder, isSpinLocks, blockingTimeout,
-                    statementContext.getEpStatementHandle(), statementContext.getVariableService(), statementContext.getStatementResultService(),
-                    services.getTimeSource(), new StatementMetadata(statementType), userObject, compiledSpec.getAnnotations());
+                    services.getTimeSource(), new StatementMetadata(statementType), userObject, compiledSpec.getAnnotations(), statementContext);
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
             statementContext.getStatementResultService().setContext(statement, epServiceProvider,
@@ -449,7 +450,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             {
                 throw new IllegalStateException("Cannot start statement, statement is in destroyed state");
             }
-            startInternal(statementId, desc, false, false);
+            startInternal(statementId, desc, false, false, false);
         }
         catch (RuntimeException ex)
         {
@@ -467,8 +468,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param desc is the cached statement info
      * @param isNewStatement indicator whether the statement is new or a stop-restart statement
      * @param isRecoveringStatement if the statement is recovering or new
+     * @param isResilient true if recovering a resilient stmt
      */
-    public void start(String statementId, EPStatementDesc desc, boolean isNewStatement, boolean isRecoveringStatement)
+    public void start(String statementId, EPStatementDesc desc, boolean isNewStatement, boolean isRecoveringStatement, boolean isResilient)
     {
         if (log.isDebugEnabled())
         {
@@ -480,7 +482,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         eventProcessingRWLock.acquireWriteLock();
         try
         {
-            startInternal(statementId, desc, isNewStatement, isRecoveringStatement);
+            startInternal(statementId, desc, isNewStatement, isRecoveringStatement, isResilient);
         }
         catch (RuntimeException ex)
         {
@@ -492,7 +494,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
     }
 
-    private void startInternal(String statementId, EPStatementDesc desc, boolean isNewStatement, boolean isRecoveringStatement)
+    private void startInternal(String statementId, EPStatementDesc desc, boolean isNewStatement, boolean isRecoveringStatement, boolean isResilient)
     {
         if (log.isDebugEnabled())
         {
@@ -514,7 +516,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         Pair<Viewable, EPStatementStopMethod> pair;
         try
         {
-            pair = desc.getStartMethod().start(isNewStatement, isRecoveringStatement);
+            pair = desc.getStartMethod().start(isNewStatement, isRecoveringStatement, isResilient);
         }
         catch (EPStatementException ex)
         {
@@ -868,7 +870,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                             throw new ExprValidationException("Create window where-clause may not have " + checkMinimal);
                         }
                         StreamTypeService streamTypeService = new StreamTypeServiceImpl(selectFromType, selectFromTypeName, statementContext.getEngineURI());
-                        ExprNode insertFilter = spec.getCreateWindowDesc().getInsertFilter().getValidatedSubtree(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService());
+                        ExprNode insertFilter = spec.getCreateWindowDesc().getInsertFilter().getValidatedSubtree(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
                         spec.getCreateWindowDesc().setInsertFilter(insertFilter);
                     }
 
@@ -900,7 +902,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // Recursively compile the statement within the statement.
         ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
         List<SelectClauseElementCompiled> selectElements = new ArrayList<SelectClauseElementCompiled>();
-        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements);
+        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements, spec.getSelectClauseSpec().isDistinct());
         for (SelectClauseElementRaw raw : spec.getSelectClauseSpec().getSelectExprList())
         {
             if (raw instanceof SelectClauseExprRawSpec)
@@ -928,6 +930,17 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         {
             spec.getFilterRootNode().accept(visitor);
         }
+        if (spec.getUpdateDesc() != null)
+        {
+            if (spec.getUpdateDesc().getOptionalWhereClause() != null)
+            {
+                spec.getUpdateDesc().getOptionalWhereClause().accept(visitor);
+            }
+            for (OnTriggerSetAssignment assignment : spec.getUpdateDesc().getAssignments())
+            {
+                assignment.getExpression().accept(visitor);
+            }
+        }
         for (ExprSubselectNode subselect : visitor.getSubselects())
         {
             StatementSpecRaw raw = subselect.getStatementSpecRaw();
@@ -953,7 +966,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 spec.isHasVariables(),
                 spec.getRowLimitSpec(),
                 eventTypeReferences,
-                annotations
+                annotations,
+                spec.getUpdateDesc(),
+                spec.getMatchRecognizeSpec()
                 );
     }
 
@@ -969,7 +984,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // Recursively compile the statement within the statement.
         ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
         List<SelectClauseElementCompiled> selectElements = new ArrayList<SelectClauseElementCompiled>();
-        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements);
+        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements, spec.isDistinct());
         for (SelectClauseElementRaw raw : spec.getSelectExprList())
         {
             if (raw instanceof SelectClauseExprRawSpec)
@@ -1016,7 +1031,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         EventType targetType;
 
         // Validate the select expressions which consists of properties only
-        List<NamedWindowSelectedProps> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType, selectFromTypeName, statementContext.getEngineURI());
+        List<NamedWindowSelectedProps> select = compileLimitedSelect(spec.getSelectClauseSpec(), eplStatement, selectFromType, selectFromTypeName, statementContext.getEngineURI(), statementContext);
 
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
@@ -1076,7 +1091,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return new Pair<FilterSpecCompiled, SelectClauseSpecRaw>(filter, newSelectClauseSpecRaw);
     }
 
-    private static List<NamedWindowSelectedProps> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType, String selectFromTypeName, String engineURI)
+    private static List<NamedWindowSelectedProps> compileLimitedSelect(SelectClauseSpecRaw spec, String eplStatement, EventType singleType, String selectFromTypeName, String engineURI, ExprEvaluatorContext exprEvaluatorContext)
     {
         List<NamedWindowSelectedProps> selectProps = new LinkedList<NamedWindowSelectedProps>();
         StreamTypeService streams = new StreamTypeServiceImpl(new EventType[] {singleType}, new String[] {"stream_0"}, engineURI);
@@ -1091,7 +1106,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             ExprNode validatedExpression;
             try
             {
-                validatedExpression = exprSpec.getSelectExpression().getValidatedSubtree(streams, null, null, null, null);
+                validatedExpression = exprSpec.getSelectExpression().getValidatedSubtree(streams, null, null, null, null, exprEvaluatorContext);
             }
             catch (ExprValidationException e)
             {

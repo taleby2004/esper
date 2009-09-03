@@ -15,8 +15,10 @@ import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.spec.OutputLimitSpec;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esper.event.EventBeanUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,6 +53,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
      * @param statementContext is the services the output condition may depend on
      * @param isInsertInto is true if the statement is a insert-into
      * @param outputStrategy is the method to use to produce output
+     * @param isDistinct true for distinct
      * @throws ExprValidationException if validation of the output expressions fails
      */
     public OutputProcessViewPolicy(ResultSetProcessor resultSetProcessor,
@@ -58,10 +61,11 @@ public class OutputProcessViewPolicy extends OutputProcessView
                           boolean isInsertInto,
                           int streamCount,
     					  OutputLimitSpec outputLimitSpec,
-    					  StatementContext statementContext)
+    					  StatementContext statementContext,
+                          boolean isDistinct)
             throws ExprValidationException
     {
-        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext.getStatementResultService());
+        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext, isDistinct, outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents());
         log.debug(".ctor");
 
     	if(streamCount < 1)
@@ -88,6 +92,11 @@ public class OutputProcessViewPolicy extends OutputProcessView
                     "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
         }
 
+        if (!super.checkAfterCondition(newData))
+        {
+            return;
+        }
+
         int newDataLength = 0;
         int oldDataLength = 0;
         if(newData != null)
@@ -110,13 +119,18 @@ public class OutputProcessViewPolicy extends OutputProcessView
      * @param newEvents - new events
      * @param oldEvents - old events
      */
-    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
+    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".process Received update, " +
                     "  newData.length==" + ((newEvents == null) ? 0 : newEvents.size()) +
                     "  oldData.length==" + ((oldEvents == null) ? 0 : oldEvents.size()));
+        }
+
+        if (!super.checkAfterCondition(newEvents))
+        {
+            return;
         }
 
         int newEventsSize = 0;
@@ -158,6 +172,12 @@ public class OutputProcessViewPolicy extends OutputProcessView
 
         // Process the events and get the result
         UniformPair<EventBean[]> newOldEvents = resultSetProcessor.processOutputLimitedView(viewEventsList, isGenerateSynthetic, outputLimitLimitType);
+
+        if (isDistinct)
+        {
+            newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), eventBeanReader));
+            newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), eventBeanReader));
+        }
 
         if ((!isGenerateSynthetic) && (!isGenerateNatural))
         {
@@ -205,6 +225,12 @@ public class OutputProcessViewPolicy extends OutputProcessView
 
         // Process the events and get the result
         UniformPair<EventBean[]> newOldEvents = resultSetProcessor.processOutputLimitedJoin(joinEventsSet, isGenerateSynthetic, outputLimitLimitType);
+
+        if (isDistinct)
+        {
+            newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), eventBeanReader));
+            newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), eventBeanReader));
+        }
 
         if ((!isGenerateSynthetic) && (!isGenerateNatural))
         {

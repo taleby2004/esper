@@ -9,6 +9,7 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.dispatch.DispatchService;
 import com.espertech.esper.dispatch.DispatchServiceProvider;
 import com.espertech.esper.epl.core.EngineImportService;
@@ -17,13 +18,13 @@ import com.espertech.esper.epl.db.DatabaseConfigService;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
-import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
-import com.espertech.esper.filter.FilterService;
-import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.filter.FilterServiceSPI;
+import com.espertech.esper.schedule.SchedulingMgmtService;
+import com.espertech.esper.schedule.SchedulingServiceSPI;
 import com.espertech.esper.timer.TimeSourceService;
 import com.espertech.esper.timer.TimerService;
 import com.espertech.esper.util.ManagedReadWriteLock;
@@ -38,9 +39,9 @@ public final class EPServicesContext
 {
     private String engineURI;
     private String engineInstanceId;
-    private FilterService filterService;
+    private FilterServiceSPI filterService;
     private TimerService timerService;
-    private SchedulingService schedulingService;
+    private SchedulingServiceSPI schedulingService;
     private DispatchService dispatchService;
     private ViewService viewService;
     private StreamFactoryService streamFactoryService;
@@ -64,10 +65,13 @@ public final class EPServicesContext
     private StatementEventTypeRef statementEventTypeRef;
     private ConfigurationInformation configSnapshot;
     private ThreadingService threadingService;
+    private InternalEventRouteDest internalEventEngineRouteDest;
+    private StatementIsolationService statementIsolationService;
+    private SchedulingMgmtService schedulingMgmtService;
 
     // Supplied after construction to avoid circular dependency
     private StatementLifecycleSvc statementLifecycleSvc;
-    private InternalEventRouter internalEventRouter;
+    private InternalEventRouterImpl internalEventRouter;
 
     /**
      * Constructor - sets up new set of services.
@@ -97,10 +101,13 @@ public final class EPServicesContext
      * @param statementEventTypeRef - statement to event type reference holding
      * @param configSnapshot configuration snapshot
      * @param threadingServiceImpl - engine-level threading services
+     * @param internalEventRouter - routing of events
+     * @param statementIsolationService - maintains isolation information per statement
+     * @param schedulingMgmtService - schedule management for statements
      */
     public EPServicesContext(String engineURI,
                              String engineInstanceId,
-                             SchedulingService schedulingService,
+                             SchedulingServiceSPI schedulingService,
                              EventAdapterService eventAdapterService,
                              EngineImportService engineImportService,
                              EngineSettingsService engineSettingsService,
@@ -114,7 +121,7 @@ public final class EPServicesContext
                              PluggableObjectCollection plugInPatternObjects,
                              OutputConditionFactory outputConditionFactory,
                              TimerService timerService,
-                             FilterService filterService,
+                             FilterServiceSPI filterService,
                              StreamFactoryService streamFactoryService,
                              NamedWindowService namedWindowService,
                              VariableService variableService,
@@ -123,7 +130,10 @@ public final class EPServicesContext
                              MetricReportingService metricsReportingService,
                              StatementEventTypeRef statementEventTypeRef,
                              ConfigurationInformation configSnapshot,
-                             ThreadingService threadingServiceImpl)
+                             ThreadingService threadingServiceImpl,
+                             InternalEventRouterImpl internalEventRouter,
+                             StatementIsolationService statementIsolationService,
+                             SchedulingMgmtService schedulingMgmtService)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -153,6 +163,9 @@ public final class EPServicesContext
         this.statementEventTypeRef = statementEventTypeRef;
         this.configSnapshot = configSnapshot;
         this.threadingService = threadingServiceImpl;
+        this.internalEventRouter = internalEventRouter;
+        this.statementIsolationService = statementIsolationService;
+        this.schedulingMgmtService = schedulingMgmtService;
     }
 
     /**
@@ -165,28 +178,37 @@ public final class EPServicesContext
     }
 
     /**
-     * Returns router for internal event processing.
-     * @return router for internal event processing
+     * Returns the event routing destination.
+     * @return event routing destination
      */
-    public InternalEventRouter getInternalEventRouter()
+    public InternalEventRouteDest getInternalEventEngineRouteDest()
     {
-        return internalEventRouter;
+        return internalEventEngineRouteDest;
     }
 
     /**
-     * Set the router for internal event processing.
-     * @param internalEventRouter router to use
+     * Sets the event routing destination.
+     * @param internalEventEngineRouteDest event routing destination
      */
-    public void setInternalEventRouter(InternalEventRouter internalEventRouter)
+    public void setInternalEventEngineRouteDest(InternalEventRouteDest internalEventEngineRouteDest)
     {
-        this.internalEventRouter = internalEventRouter;
+        this.internalEventEngineRouteDest = internalEventEngineRouteDest;
+    }
+
+    /**
+     * Returns router for internal event processing.
+     * @return router for internal event processing
+     */
+    public InternalEventRouterImpl getInternalEventRouter()
+    {
+        return internalEventRouter;
     }
 
     /**
      * Returns filter evaluation service implementation.
      * @return filter evaluation service
      */
-    public final FilterService getFilterService()
+    public final FilterServiceSPI getFilterService()
     {
         return filterService;
     }
@@ -204,7 +226,7 @@ public final class EPServicesContext
      * Returns scheduling service implementation.
      * @return scheduling service
      */
-    public final SchedulingService getSchedulingService()
+    public final SchedulingServiceSPI getSchedulingService()
     {
         return schedulingService;
     }
@@ -360,6 +382,10 @@ public final class EPServicesContext
         {
             schedulingService.destroy();
         }
+        if (schedulingMgmtService != null)
+        {
+            schedulingMgmtService.destroy();
+        }
         if (streamFactoryService != null)
         {
             streamFactoryService.destroy();
@@ -371,6 +397,10 @@ public final class EPServicesContext
         if (extensionServicesContext != null)
         {
             extensionServicesContext.destroy();
+        }
+        if (statementIsolationService != null)
+        {
+            statementIsolationService.destroy();
         }
     }
 
@@ -511,5 +541,32 @@ public final class EPServicesContext
     public ConfigurationInformation getConfigSnapshot()
     {
         return configSnapshot;
+    }
+
+    /**
+     * Returns the schedule management service.
+     * @return schedule management service
+     */
+    public SchedulingMgmtService getSchedulingMgmtService()
+    {
+        return schedulingMgmtService;
+    }
+
+    /**
+     * Returns the service for maintaining statement isolation information.
+     * @return isolation service
+     */
+    public StatementIsolationService getStatementIsolationService()
+    {
+        return statementIsolationService;
+    }
+
+    /**
+     * Sets the service for maintaining statement isolation information.
+     * @param statementIsolationService isolation service
+     */
+    public void setStatementIsolationService(StatementIsolationService statementIsolationService)
+    {
+        this.statementIsolationService = statementIsolationService;
     }
 }

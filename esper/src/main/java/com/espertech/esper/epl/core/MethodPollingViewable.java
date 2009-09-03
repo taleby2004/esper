@@ -18,6 +18,7 @@ import com.espertech.esper.epl.db.PollExecStrategy;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeIdentifierVisitor;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.UnindexedEventTableList;
@@ -41,6 +42,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
     private final DataCache dataCache;
     private final EventType eventType;
     private final ThreadLocal<DataCache> dataCacheThreadLocal = new ThreadLocal<DataCache>();
+    private final ExprEvaluatorContext exprEvaluatorContext;
 
     private SortedSet<Integer> requiredStreams;
     private ExprNode[] validatedExprNodes;
@@ -66,6 +68,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
      * @param pollExecStrategy the execution strategy
      * @param dataCache the cache to use
      * @param eventType the type of event returned
+     * @param exprEvaluatorContext expression evaluation context
      */
     public MethodPollingViewable(
                            MethodStreamSpec methodStreamSpec,
@@ -73,13 +76,15 @@ public class MethodPollingViewable implements HistoricalEventViewable
                            List<ExprNode> inputParameters,
                            PollExecStrategy pollExecStrategy,
                            DataCache dataCache,
-                           EventType eventType)
+                           EventType eventType,
+                           ExprEvaluatorContext exprEvaluatorContext)
     {
         this.methodStreamSpec = methodStreamSpec;
         this.inputParameters = inputParameters;
         this.pollExecStrategy = pollExecStrategy;
         this.dataCache = dataCache;
         this.eventType = eventType;
+        this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
     public void stop()
@@ -95,7 +100,8 @@ public class MethodPollingViewable implements HistoricalEventViewable
     public void validate(StreamTypeService streamTypeService,
                          MethodResolutionService methodResolutionService,
                          TimeProvider timeProvider,
-                         VariableService variableService) throws ExprValidationException
+                         VariableService variableService,
+                         ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         Class[] paramTypes = new Class[inputParameters.size()];
         int count = 0;
@@ -105,7 +111,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
         for (ExprNode exprNode : inputParameters)
         {
-            ExprNode validated = exprNode.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService);
+            ExprNode validated = exprNode.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext);
             validatedExprNodes[count] = validated;
             paramTypes[count] = validated.getType();
             count++;
@@ -134,7 +140,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
 		}
     }
 
-    public EventTable[] poll(EventBean[][] lookupEventsPerStream, PollResultIndexingStrategy indexingStrategy)
+    public EventTable[] poll(EventBean[][] lookupEventsPerStream, PollResultIndexingStrategy indexingStrategy, ExprEvaluatorContext exprEvaluatorContext)
     {
         DataCache localDataCache = dataCacheThreadLocal.get();
         boolean strategyStarted = false;
@@ -149,7 +155,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
             // Build lookup keys
             for (int valueNum = 0; valueNum < inputParameters.size(); valueNum++)
             {
-                Object parameterValue = validatedExprNodes[valueNum].evaluate(lookupEventsPerStream[row], true);
+                Object parameterValue = validatedExprNodes[valueNum].evaluate(lookupEventsPerStream[row], true, exprEvaluatorContext);
                 lookupValues[valueNum] = parameterValue;
             }
 
@@ -254,7 +260,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
     public Iterator<EventBean> iterator()
     {
-        EventTable[] result = poll(NULL_ROWS, iteratorIndexingStrategy);
+        EventTable[] result = poll(NULL_ROWS, iteratorIndexingStrategy, exprEvaluatorContext);
         return new IterablesArrayIterator(result);
     }
 

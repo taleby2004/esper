@@ -9,12 +9,13 @@
 package com.espertech.esper.type;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.util.SimpleNumberBigIntegerCoercer;
 import com.espertech.esper.util.SimpleNumberBigDecimalCoercer;
+import com.espertech.esper.util.SimpleNumberBigIntegerCoercer;
 
-import java.math.BigInteger;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 
 /**
@@ -57,9 +58,10 @@ public enum MinMaxTypeEnum
          * Executes child expression nodes and compares results, returning the min/max.
          * @param eventsPerStream events per stream
          * @param isNewData true if new data
+         * @param exprEvaluatorContext expression evaluation context
          * @return result
          */
-        public Number execute(EventBean[] eventsPerStream, boolean isNewData);
+        public Number execute(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext);
     }
 
     /**
@@ -78,10 +80,10 @@ public enum MinMaxTypeEnum
             this.childNodes = childNodes;
         }
 
-        public Number execute(EventBean[] eventsPerStream, boolean isNewData)
+        public Number execute(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
         {
-            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData);
-            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData);
+            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
             if ((valueChildOne == null) || (valueChildTwo == null))
             {
@@ -99,7 +101,7 @@ public enum MinMaxTypeEnum
             }
             for (int i = 2; i < childNodes.length; i++)
             {
-                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData);
+                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
                 if (valueChild == null)
                 {
                     return null;
@@ -129,10 +131,10 @@ public enum MinMaxTypeEnum
             this.childNodes = childNodes;
         }
 
-        public Number execute(EventBean[] eventsPerStream, boolean isNewData)
+        public Number execute(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
         {
-            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData);
-            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData);
+            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
             if ((valueChildOne == null) || (valueChildTwo == null))
             {
@@ -150,7 +152,7 @@ public enum MinMaxTypeEnum
             }
             for (int i = 2; i < childNodes.length; i++)
             {
-                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData);
+                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
                 if (valueChild == null)
                 {
                     return null;
@@ -186,10 +188,10 @@ public enum MinMaxTypeEnum
             this.isMax = isMax;
         }
 
-        public Number execute(EventBean[] eventsPerStream, boolean isNewData)
+        public Number execute(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
         {
-            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData);
-            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData);
+            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
             if ((valueChildOne == null) || (valueChildTwo == null))
             {
@@ -211,7 +213,7 @@ public enum MinMaxTypeEnum
             }
             for (int i = 2; i < childNodes.length; i++)
             {
-                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData);
+                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
                 if (valueChild == null)
                 {
                     return null;
@@ -249,10 +251,10 @@ public enum MinMaxTypeEnum
             this.isMax = isMax;
         }
 
-        public Number execute(EventBean[] eventsPerStream, boolean isNewData)
+        public Number execute(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
         {
-            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData);
-            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData);
+            Number valueChildOne = (Number) childNodes[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+            Number valueChildTwo = (Number) childNodes[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
             if ((valueChildOne == null) || (valueChildTwo == null))
             {
@@ -274,7 +276,7 @@ public enum MinMaxTypeEnum
             }
             for (int i = 2; i < childNodes.length; i++)
             {
-                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData);
+                Number valueChild = (Number) childNodes[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
                 if (valueChild == null)
                 {
                     return null;

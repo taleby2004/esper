@@ -29,6 +29,7 @@ public class ExprEqualsNode extends ExprNode
     private boolean mustCoerce;
     private SimpleNumberCoercer numberCoercerLHS;
     private SimpleNumberCoercer numberCoercerRHS;
+    private static final long serialVersionUID = 5504809379222369952L;
 
     /**
      * Ctor.
@@ -48,7 +49,7 @@ public class ExprEqualsNode extends ExprNode
         return isNotEquals;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         // Must have 2 child nodes
         if (this.getChildNodes().size() != 2)
@@ -115,10 +116,10 @@ public class ExprEqualsNode extends ExprNode
         return Boolean.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object leftResult = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
-        Object rightResult = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
+        Object leftResult = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object rightResult = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
         if (leftResult == null)
         {

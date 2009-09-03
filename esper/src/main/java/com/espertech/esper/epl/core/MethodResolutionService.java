@@ -89,6 +89,20 @@ public interface MethodResolutionService
     public AggregationMethod makeCountAggregator(boolean isIgnoreNull);
 
     /**
+     * Makes a new first-value aggregator.
+     * @param type of value
+     * @return aggregator
+     */
+    public AggregationMethod makeFirstValueAggregator(Class type);
+
+    /**
+     * Makes a new last-value aggregator.
+     * @param type of value
+     * @return aggregator
+     */
+    public AggregationMethod makeLastValueAggregator(Class type);
+
+    /**
      * Makes a new sum-aggregator.
      * @param type is the type to be summed up, i.e. float, long etc.
      * @return aggregator
@@ -137,10 +151,29 @@ public interface MethodResolutionService
     public AggregationMethod makeStddevAggregator();
 
     /**
+     * Sets the group key types.
+     * @param groupKeyTypes types of group keys
+     */
+    public void setGroupKeyTypes(Class[] groupKeyTypes);
+    
+    /**
      * Returns a new set of aggregators given an existing prototype-set of aggregators for a given group key.
      * @param prototypes is the prototypes
      * @param groupKey is the key to group-by for
      * @return new set of aggregators for this group
      */
     public AggregationMethod[] newAggregators(AggregationMethod[] prototypes, MultiKeyUntyped groupKey);
+
+    /**
+     * Opportunity to remove aggregations for a group.
+     * @param groupKey that is no longer used
+     */
+    public void removeAggregators(MultiKeyUntyped groupKey);
+
+    /**
+     * Returns the current row count of an aggregation, for use with resilience.
+     * @param aggregators aggregators
+     * @return row count
+     */
+    public long getCurrentRowCount(AggregationMethod[] aggregators);
 }

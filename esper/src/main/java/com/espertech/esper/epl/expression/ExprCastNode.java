@@ -27,6 +27,7 @@ public class ExprCastNode extends ExprNode
     private final String classIdentifier;
     private Class targetType;
     private CasterParserComputer casterParserComputer;
+    private static final long serialVersionUID = 7448449031028156455L;
 
     /**
      * Ctor.
@@ -46,7 +47,7 @@ public class ExprCastNode extends ExprNode
         return classIdentifier;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {
@@ -132,9 +133,9 @@ public class ExprCastNode extends ExprNode
         return targetType;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object result = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
+        Object result = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (result == null)
         {
             return null;

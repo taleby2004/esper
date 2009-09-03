@@ -13,6 +13,8 @@ package com.espertech.esper.pattern.observer;
  */
 public class ObserverParameterException extends Exception
 {
+    private static final long serialVersionUID = -7069000986550813236L;
+
     /**
      * Ctor.
      * @param message - validation error message

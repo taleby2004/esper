@@ -14,6 +14,7 @@ import com.espertech.esper.client.EventBean;
 public class ExprOrderedExpr extends ExprNode
 {
     private final boolean isDescending;
+    private static final long serialVersionUID = -3140402807682771591L;
 
     /**
      * Ctor.
@@ -49,7 +50,7 @@ public class ExprOrderedExpr extends ExprNode
         return other.isDescending == this.isDescending;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         // always valid
     }
@@ -59,9 +60,9 @@ public class ExprOrderedExpr extends ExprNode
         return getChildNodes().get(0).getType();
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
+        return getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
     }
 
     /**

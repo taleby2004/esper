@@ -7,6 +7,7 @@ import com.espertech.esper.client.annotation.Tag;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.core.EPStatementSPI;
 import junit.framework.TestCase;
 
 import java.lang.annotation.Annotation;
@@ -33,19 +34,19 @@ public class TestStatementAnnotation extends TestCase
         epService.getEPAdministrator().getConfiguration().addImport("com.espertech.esper.regression.client.*");
 
         tryInvalid("@MyAnnotationNested(nestableSimple=@MyAnnotationNestableSimple, nestableValues=@MyAnnotationNestableValues, nestableNestable=@MyAnnotationNestableNestable) select * from Bean", false,
-                   "Failed to process statement annotations: Annotation 'MyAnnotationNestableValues' requires a value for attribute 'val' [@MyAnnotationNested(nestableSimple=@MyAnnotationNestableSimple, nestableValues=@MyAnnotationNestableValues, nestableNestable=@MyAnnotationNestableNestable) select * from Bean]");
+                   "Failed to process statement annotations: Annotation 'MyAnnotationNestableNestable' requires a value for attribute 'value' [@MyAnnotationNested(nestableSimple=@MyAnnotationNestableSimple, nestableValues=@MyAnnotationNestableValues, nestableNestable=@MyAnnotationNestableNestable) select * from Bean]");
 
-        tryInvalid("@MyAnnotationNested(nestableSimple=1) select * from Bean", false,
-                   "Failed to process statement annotations: Annotation 'MyAnnotationNested' requires a MyAnnotationNestableSimple-typed value for attribute 'nestableSimple' but received a Integer-typed value [@MyAnnotationNested(nestableSimple=1) select * from Bean]");
+        tryInvalid("@MyAnnotationNested(nestableNestable=@MyAnnotationNestableNestable('A'), nestableSimple=1) select * from Bean", false,
+                   "Failed to process statement annotations: Annotation 'MyAnnotationNested' requires a MyAnnotationNestableSimple-typed value for attribute 'nestableSimple' but received a Integer-typed value [@MyAnnotationNested(nestableNestable=@MyAnnotationNestableNestable('A'), nestableSimple=1) select * from Bean]");
 
         tryInvalid("@MyAnnotationValuePair(stringVal='abc') select * from Bean", false,
-                   "Failed to process statement annotations: Annotation 'MyAnnotationValuePair' requires a value for attribute 'intVal' [@MyAnnotationValuePair(stringVal='abc') select * from Bean]");
+                   "Failed to process statement annotations: Annotation 'MyAnnotationValuePair' requires a value for attribute 'booleanVal' [@MyAnnotationValuePair(stringVal='abc') select * from Bean]");
 
         tryInvalid("MyAnnotationValueArray(value=5) select * from Bean", true,
                    "Incorrect syntax near 'MyAnnotationValueArray' [MyAnnotationValueArray(value=5) select * from Bean]");
 
         tryInvalid("@MyAnnotationValueArray(value=null) select * from Bean", false,
-                   "Failed to process statement annotations: Annotation 'MyAnnotationValueArray' requires a value for attribute 'value' [@MyAnnotationValueArray(value=null) select * from Bean]");
+                   "Failed to process statement annotations: Annotation 'MyAnnotationValueArray' requires a value for attribute 'doubleArray' [@MyAnnotationValueArray(value=null) select * from Bean]");
 
         tryInvalid("@MyAnnotationValueArray(intArray={},doubleArray={},stringArray={null},value={}) select * from Bean", false,
                    "Failed to process statement annotations: Annotation 'MyAnnotationValueArray' requires a non-null value for array elements for attribute 'stringArray' [@MyAnnotationValueArray(intArray={},doubleArray={},stringArray={null},value={}) select * from Bean]");
@@ -72,6 +73,11 @@ public class TestStatementAnnotation extends TestCase
                    "Failed to process statement annotations: Annotation 'MyAnnotationValueArray' requires a long[]-typed value for attribute 'value' but received a String-typed value [@MyAnnotationValueArray(value=\"ABC\", intArray={}, doubleArray={}, stringArray={}) select * from Bean]");
         tryInvalid("@MyAnnotationValueEnum(a.b.CC) select * from Bean", false,
                    "Annotation enumeration value 'a.b.CC' not recognized as an enumeration class, please check imports or type used [@MyAnnotationValueEnum(a.b.CC) select * from Bean]");
+
+        tryInvalid("@Hint('XXX') select * from Bean", false,
+                   "Failed to process statement annotations: Hint annotation value 'XXX' is not one of the known values [@Hint('XXX') select * from Bean]");
+        tryInvalid("@Hint('ITERATE_ONLY,XYZ') select * from Bean", false,
+                   "Failed to process statement annotations: Hint annotation value 'XYZ' is not one of the known values [@Hint('ITERATE_ONLY,XYZ') select * from Bean]");
     }
 
     private void tryInvalid(String stmtText, boolean isSyntax, String message)
@@ -108,6 +114,11 @@ public class TestStatementAnnotation extends TestCase
         stmtText = "@" + Name.class.getName() + "('MyTestStmt') @Description('MyTestStmt description') @Tag(name=\"UserId\", value=\"value\") every Bean";
         stmt = epService.getEPAdministrator().createPattern(stmtText);
         runAssertion(stmt);
+
+        epService.getEPAdministrator().createEPL("@Hint('ITERATE_ONLY') select * from Bean");
+        epService.getEPAdministrator().createEPL("@Hint('ITERATE_ONLY,DISABLE_RECLAIM_GROUP') select * from Bean");
+        epService.getEPAdministrator().createEPL("@Hint('ITERATE_ONLY,DISABLE_RECLAIM_GROUP,ITERATE_ONLY') select * from Bean");
+        epService.getEPAdministrator().createEPL("@Hint('  iterate_only ') select * from Bean");
     }
 
     private void runAssertion(EPStatement stmt)
@@ -118,15 +129,17 @@ public class TestStatementAnnotation extends TestCase
 
         assertEquals(Description.class, annotations[0].annotationType());
         assertEquals("MyTestStmt description", ((Description)annotations[0]).value());
-        assertEquals("@Description", annotations[0].toString());
+        assertEquals("@Description(\"MyTestStmt description\")", annotations[0].toString());
 
         assertEquals(Name.class, annotations[1].annotationType());
         assertEquals("MyTestStmt", ((Name)annotations[1]).value());
         assertEquals("MyTestStmt", stmt.getName());
+        assertEquals("@Name(\"MyTestStmt\")", annotations[1].toString());
 
         assertEquals(Tag.class, annotations[2].annotationType());
         assertEquals("UserId", ((Tag)annotations[2]).name());
         assertEquals("value", ((Tag)annotations[2]).value());
+        assertEquals("@Tag(value=\"value\", name=\"UserId\")", annotations[2].toString());
 
         assertFalse(annotations[2].equals(annotations[1]));
         assertTrue(annotations[1].equals(annotations[1]));
@@ -152,6 +165,8 @@ public class TestStatementAnnotation extends TestCase
                 "@MyAnnotationValuePair(stringVal='a', intVal=-1, longVal=2, booleanVal=true, charVal='x', byteVal=10, shortVal=20, doubleVal=2.5) " +
                 "select * from Bean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatementSPI spi = (EPStatementSPI) stmt;
+        assertEquals("select * from Bean", spi.getExpressionNoAnnotations());
 
         Annotation[] annotations = stmt.getAnnotations();
         annotations = sortAlpha(annotations);
@@ -183,8 +198,8 @@ public class TestStatementAnnotation extends TestCase
 
         // test array
         stmtText =
-                "@MyAnnotationValueArray(value={1, 2, 3}, intArray={4, 5}, doubleArray={}, stringArray={\"X\"}) " +
-                "select * from Bean";
+                "@MyAnnotationValueArray(value={1, 2, 3}, intArray={4, 5}, doubleArray={}, \nstringArray={\"X\"})\n" +
+                "/* Test */ select * \nfrom Bean";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
 
         annotations = stmt.getAnnotations();
@@ -197,6 +212,34 @@ public class TestStatementAnnotation extends TestCase
         assertTrue(Arrays.deepEquals(toObjectArray(array.doubleArray()), new Object[] {}));
         assertTrue(Arrays.deepEquals(toObjectArray(array.stringArray()), new Object[] {"X"}));
         assertTrue(Arrays.deepEquals(toObjectArray(array.stringArrayDef()), new Object[] {"XYZ"}));
+    }
+
+    public void testSPI()
+    {
+        epService.getEPAdministrator().getConfiguration().addImport("com.espertech.esper.regression.client.*");
+
+        String[][] testdata = new String[][] {
+                {"@MyAnnotationSimple /* test */ select * from Bean",
+                 "/* test */ select * from Bean"},
+                {"/* test */ select * from Bean",
+                 null},
+                {"@MyAnnotationValueArray(value={1, 2, 3}, intArray={4, 5}, doubleArray={}, stringArray={\"X\"})    select * from Bean",
+                 "select * from Bean"},
+                {"@MyAnnotationSimple\nselect * from Bean",
+                 "select * from Bean"},
+                {"@MyAnnotationSimple\n@MyAnnotationSimple\nselect * from Bean",
+                 "select * from Bean"},
+                {"@MyAnnotationValueArray(value={1, 2, 3}, intArray={4, 5}, doubleArray={}, \nstringArray={\"X\"})\n" +
+                "/* Test */ select * \nfrom Bean",
+                "/* Test */ select * \r\nfrom Bean"},
+        };
+
+        for (int i = 0; i < testdata.length; i++)
+        {
+            EPStatement stmt = epService.getEPAdministrator().createEPL(testdata[i][0]);
+            EPStatementSPI spi = (EPStatementSPI) stmt;
+            assertEquals("Error on " + testdata[i][0], testdata[i][1], spi.getExpressionNoAnnotations());
+        }
     }
 
     @MyAnnotationNested(

@@ -10,6 +10,7 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -33,6 +34,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
     private final List<ExprNode> filterList;
     private final EventType eventType;
     private final NamedWindowTailView tailView;
+    private final ExprEvaluatorContext exprEvaluatorContext;
     private EventBean[] eventPerStream = new EventBean[1];
 
     /**
@@ -41,15 +43,18 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
      * @param statementStopService for registering a callback when the view stopped, to unregister the statement as a consumer
      * @param tailView to indicate when the consumer stopped to remove the consumer
      * @param filterList is a list of filter expressions
+     * @param exprEvaluatorContext context for expression evalauation
      */
     public NamedWindowConsumerView(List<ExprNode> filterList,
                                    EventType eventType,
                                    StatementStopService statementStopService,
-                                   NamedWindowTailView tailView)
+                                   NamedWindowTailView tailView,
+                                   ExprEvaluatorContext exprEvaluatorContext)
     {
         this.filterList = filterList;
         this.eventType = eventType;
         this.tailView = tailView;
+        this.exprEvaluatorContext = exprEvaluatorContext;
         statementStopService.addSubscriber(this);
     }
 
@@ -65,8 +70,8 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         // if we have a filter for the named window,
         if (!filterList.isEmpty())
         {
-            newData = passFilter(newData, true);
-            oldData = passFilter(oldData, false);
+            newData = passFilter(newData, true, exprEvaluatorContext);
+            oldData = passFilter(oldData, false, exprEvaluatorContext);
         }
 
         if ((newData != null) || (oldData != null))
@@ -75,7 +80,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         }
     }
 
-    private EventBean[] passFilter(EventBean[] eventData, boolean isNewData)
+    private EventBean[] passFilter(EventBean[] eventData, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         if ((eventData == null) || (eventData.length == 0))
         {
@@ -89,7 +94,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
             boolean pass = true;
             for (ExprNode filter : filterList)
             {
-                Boolean result = (Boolean) filter.evaluate(eventPerStream, isNewData);
+                Boolean result = (Boolean) filter.evaluate(eventPerStream, isNewData, exprEvaluatorContext);
                 if ((result != null) && (!result))
                 {
                     pass = false;
@@ -121,7 +126,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
 
     public Iterator<EventBean> iterator()
     {
-        return new FilteredEventIterator(filterList, tailView.iterator());
+        return new FilteredEventIterator(filterList, tailView.iterator(), exprEvaluatorContext);
     }
 
     public void statementStopped()

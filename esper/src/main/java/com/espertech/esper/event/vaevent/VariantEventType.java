@@ -8,12 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventPropertyDescriptor;
-import com.espertech.esper.client.FragmentEventType;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.client.*;
+import com.espertech.esper.event.*;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.*;
@@ -69,7 +65,7 @@ public class VariantEventType implements EventTypeSPI
         for (Map.Entry<String, VariantPropertyDesc> desc : propertyDesc.entrySet())
         {
             Class type = desc.getValue().getPropertyType();
-            EventPropertyDescriptor descriptor = new EventPropertyDescriptor(desc.getKey(), type, false, false, false, false, JavaClassHelper.isFragmentableType(desc.getValue().getPropertyType()));
+            EventPropertyDescriptor descriptor = new EventPropertyDescriptor(desc.getKey(), type, null, false, false, false, false, JavaClassHelper.isFragmentableType(desc.getValue().getPropertyType()));
             propertyDescriptors[count++] = descriptor;
             propertyDescriptorMap.put(desc.getKey(), descriptor);
         }
@@ -171,6 +167,36 @@ public class VariantEventType implements EventTypeSPI
     }    
 
     public FragmentEventType getFragmentType(String property)
+    {
+        return null;
+    }
+
+    public EventPropertyWriter getWriter(String propertyName)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor getWritableProperty(String propertyName)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor[] getWriteableProperties()
+    {
+        return new EventPropertyDescriptor[0];
+    }
+
+    public EventBeanCopyMethod getCopyMethod(String[] properties)
+    {
+        return null;
+    }
+
+    public EventBeanWriter getWriter(String[] properties)
+    {
+        return null;
+    }
+
+    public EventBeanReader getReader()
     {
         return null;
     }

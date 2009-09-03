@@ -51,6 +51,8 @@ public class WrapperEventType implements EventTypeSPI
     private final boolean isNoMapProperties;
     private final Map<String, EventPropertyGetter> propertyGetterCache;
     private final EventAdapterService eventAdapterService;
+    private EventPropertyDescriptor[] writableProperties;
+    private Map<String, Pair<EventPropertyDescriptor, EventPropertyWriter>> writers;
 
     /**
      * Ctor.
@@ -111,7 +113,42 @@ public class WrapperEventType implements EventTypeSPI
             return cachedGetter;
         }
 
-		if(underlyingEventType.isProperty(property))
+		if (underlyingMapType.isProperty(property) && (property.indexOf('?') == -1))
+		{
+            final EventPropertyGetter mapGetter = underlyingMapType.getGetter(property);
+            EventPropertyGetter getter = new EventPropertyGetter()
+            {
+                public Object get(EventBean event)
+                {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    Map map = wrapperEvent.getDecoratingProperties();
+                    return mapGetter.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
+                }
+
+                public boolean isExistsProperty(EventBean eventBean)
+                {
+                    return true; // Property exists as the property is not dynamic (unchecked)
+                }
+
+                public Object getFragment(EventBean event)
+                {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    Map map = wrapperEvent.getDecoratingProperties();
+                    return mapGetter.getFragment(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
+                }
+            };
+            propertyGetterCache.put(property, getter);
+            return getter;
+        }
+        else if(underlyingEventType.isProperty(property))
 		{
             EventPropertyGetter getter = new EventPropertyGetter()
             {
@@ -157,41 +194,6 @@ public class WrapperEventType implements EventTypeSPI
             propertyGetterCache.put(property, getter);
             return getter;
         }
-		else if (underlyingMapType.isProperty(property))
-		{
-            final EventPropertyGetter mapGetter = underlyingMapType.getGetter(property);
-            EventPropertyGetter getter = new EventPropertyGetter()
-            {
-                public Object get(EventBean event)
-                {
-                    if(!(event instanceof DecoratingEventBean))
-                    {
-                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
-                    }
-                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
-                    Map map = wrapperEvent.getDecoratingProperties();
-                    return mapGetter.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
-                }
-
-                public boolean isExistsProperty(EventBean eventBean)
-                {
-                    return true; // Property exists as the property is not dynamic (unchecked)
-                }
-
-                public Object getFragment(EventBean event)
-                {
-                    if(!(event instanceof DecoratingEventBean))
-                    {
-                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
-                    }
-                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
-                    Map map = wrapperEvent.getDecoratingProperties();
-                    return mapGetter.getFragment(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
-                }
-            };
-            propertyGetterCache.put(property, getter);
-            return getter;
-        }
 		else
 		{
 			return null;
@@ -218,6 +220,11 @@ public class WrapperEventType implements EventTypeSPI
 			return null;
 		}
 	}
+
+    public EventBeanReader getReader()
+    {
+        return null;
+    }    
 
 	public EventType[] getSuperTypes()
 	{
@@ -319,6 +326,202 @@ public class WrapperEventType implements EventTypeSPI
             return fragment;
         }
         return underlyingMapType.getFragmentType(property);
+    }
+
+    public EventPropertyWriter getWriter(String propertyName)
+    {
+        if (writableProperties == null)
+        {
+            initializeWriters();
+        }
+        Pair<EventPropertyDescriptor, EventPropertyWriter> pair = writers.get(propertyName);
+        if (pair == null)
+        {
+            return null;
+        }
+        return pair.getSecond();
+    }
+
+    public EventPropertyDescriptor getWritableProperty(String propertyName)
+    {
+        if (writableProperties == null)
+        {
+            initializeWriters();
+        }
+        Pair<EventPropertyDescriptor, EventPropertyWriter> pair = writers.get(propertyName);
+        if (pair == null)
+        {
+            return null;
+        }
+        return pair.getFirst();
+    }
+
+    public EventPropertyDescriptor[] getWriteableProperties()
+    {
+        if (writableProperties == null)
+        {
+            initializeWriters();
+        }
+        return writableProperties;
+    }
+
+    private void initializeWriters()
+    {
+        List<EventPropertyDescriptor> writables = new ArrayList<EventPropertyDescriptor>();
+        Map<String, Pair<EventPropertyDescriptor, EventPropertyWriter>> writerMap = new HashMap<String, Pair<EventPropertyDescriptor, EventPropertyWriter>>();
+        writables.addAll(Arrays.asList(underlyingMapType.getWriteableProperties()));
+
+        for (EventPropertyDescriptor writableMapProp : underlyingMapType.getWriteableProperties())
+        {
+            final String propertyName = writableMapProp.getPropertyName();
+            writables.add(writableMapProp);
+            EventPropertyWriter writer = new EventPropertyWriter()
+            {
+                public void write(Object value, EventBean target)
+                {
+                    DecoratingEventBean decorated = (DecoratingEventBean) target;
+                    decorated.getDecoratingProperties().put(propertyName, value);
+                }
+            };
+            writerMap.put(propertyName, new Pair<EventPropertyDescriptor, EventPropertyWriter>(writableMapProp, writer));
+        }
+
+        if (underlyingEventType instanceof EventTypeSPI)
+        {
+            EventTypeSPI spi = (EventTypeSPI) underlyingEventType;
+            for (EventPropertyDescriptor writableUndProp : spi.getWriteableProperties())
+            {
+                final String propertyName = writableUndProp.getPropertyName();
+                final EventPropertyWriter innerWriter = spi.getWriter(propertyName);
+                if (innerWriter == null)
+                {
+                    continue;
+                }
+
+                writables.add(writableUndProp);
+                EventPropertyWriter writer = new EventPropertyWriter()
+                {
+                    public void write(Object value, EventBean target)
+                    {
+                        DecoratingEventBean decorated = (DecoratingEventBean) target;
+                        innerWriter.write(value, decorated.getUnderlyingEvent());
+                    }
+                };
+                writerMap.put(propertyName, new Pair<EventPropertyDescriptor, EventPropertyWriter>(writableUndProp, writer));
+            }
+        }
+
+        writers = writerMap;
+        writableProperties = writables.toArray(new EventPropertyDescriptor[writables.size()]);
+    }
+
+    public EventBeanCopyMethod getCopyMethod(String[] properties)
+    {
+        if (writableProperties == null)
+        {
+            initializeWriters();
+        }
+
+        boolean isOnlyMap = true;
+        for (int i = 0; i < properties.length; i++)
+        {
+            if (underlyingMapType.getWritableProperty(properties[i]) == null)
+            {
+                isOnlyMap = false;
+            }
+        }
+
+        boolean isOnlyUnderlying = true;
+        if (!isOnlyMap)
+        {
+            if (!(underlyingEventType instanceof EventTypeSPI))
+            {
+                return null;
+            }
+            EventTypeSPI spi = (EventTypeSPI) underlyingEventType;
+            for (int i = 0; i < properties.length; i++)
+            {
+                if (spi.getWritableProperty(properties[i]) == null)
+                {
+                    isOnlyUnderlying = false;
+                }
+            }
+        }
+
+        if (isOnlyMap)
+        {
+            return new WrapperEventBeanMapCopyMethod(this, eventAdapterService);
+        }
+
+        EventBeanCopyMethod undCopyMethod = ((EventTypeSPI) underlyingEventType).getCopyMethod(properties);
+        if (undCopyMethod == null)
+        {
+            return null;
+        }
+        if (isOnlyUnderlying)
+        {
+            return new WrapperEventBeanUndCopyMethod(this, eventAdapterService, undCopyMethod);
+        }
+        else
+        {
+            return new WrapperEventBeanCopyMethod(this, eventAdapterService, undCopyMethod);
+        }
+    }
+
+    public EventBeanWriter getWriter(String[] properties)
+    {
+        if (writableProperties == null)
+        {
+            initializeWriters();
+        }
+
+        boolean isOnlyMap = true;
+        for (int i = 0; i < properties.length; i++)
+        {
+            if (!writers.containsKey(properties[i]))
+            {
+                return null;
+            }
+            if (underlyingMapType.getWritableProperty(properties[i]) == null)
+            {
+                isOnlyMap = false;
+            }
+        }
+
+        boolean isOnlyUnderlying = true;
+        if (!isOnlyMap)
+        {
+            EventTypeSPI spi = (EventTypeSPI) underlyingEventType;
+            for (int i = 0; i < properties.length; i++)
+            {
+                if (spi.getWritableProperty(properties[i]) == null)
+                {
+                    isOnlyUnderlying = false; 
+                }
+            }
+        }
+
+        if (isOnlyMap)
+        {
+            return new WrapperEventBeanMapWriter(properties);
+        }
+        if (isOnlyUnderlying)
+        {
+            EventTypeSPI spi = (EventTypeSPI) underlyingEventType;
+            EventBeanWriter undWriter = spi.getWriter(properties);
+            if (undWriter == null)
+            {
+                return undWriter;
+            }
+            return new WrapperEventBeanUndWriter(undWriter);
+        }
+
+        EventPropertyWriter writerArr[] = new EventPropertyWriter[properties.length];
+        for (int i = 0; i < properties.length; i++)
+        {
+            writerArr[i] = writers.get(properties[i]).getSecond();
+        }
+        return new WrapperEventBeanPropertyWriter(writerArr);
     }
 
     private void checkForRepeatedPropertyNames(EventType eventType, Map<String, Object> properties)

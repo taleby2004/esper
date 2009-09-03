@@ -8,13 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.expression.ExprAggregateNode;
-import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.annotation.HintEnum;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.expression.*;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -26,6 +25,100 @@ import java.util.*;
 public class AggregationServiceFactory
 {
     /**
+     * Produces an aggregation service for use with match-recognice.
+     * @param numStreams number of streams
+     * @param measureExprNodesPerStream measure nodes
+     * @param methodResolutionService method resolution
+     * @param exprEvaluatorContext context for expression evaluatiom
+     * @return service
+     */
+    public static AggregationServiceMatchRecognize getServiceMatchRecognize(int numStreams, Map<Integer, List<ExprAggregateNode>> measureExprNodesPerStream,
+                                                       MethodResolutionService methodResolutionService,
+                                                       ExprEvaluatorContext exprEvaluatorContext)
+    {
+        Map<Integer, Map<ExprAggregateNode, List<ExprAggregateNode>>> equivalencyListPerStream = new HashMap<Integer, Map<ExprAggregateNode, List<ExprAggregateNode>>>();
+
+        for (Map.Entry<Integer, List<ExprAggregateNode>> entry : measureExprNodesPerStream.entrySet())
+        {
+            Map<ExprAggregateNode, List<ExprAggregateNode>> equivalencyList = new LinkedHashMap<ExprAggregateNode, List<ExprAggregateNode>>();
+            equivalencyListPerStream.put(entry.getKey(), equivalencyList);
+            for (ExprAggregateNode selectAggNode : entry.getValue())
+            {
+                addEquivalent(selectAggNode, equivalencyList);
+            }
+        }
+
+        LinkedHashMap<Integer, AggregationMethod[]> aggregatorsPerStream = new LinkedHashMap<Integer, AggregationMethod[]>();
+        Map<Integer, ExprEvaluator[]> evaluatorsPerStream = new HashMap<Integer, ExprEvaluator[]>();
+
+        for (Map.Entry<Integer, Map<ExprAggregateNode, List<ExprAggregateNode>>> equivalencyPerStream : equivalencyListPerStream.entrySet())
+        {
+            int index = 0;
+            int stream = equivalencyPerStream.getKey();
+
+            AggregationMethod[] aggregators = new AggregationMethod[equivalencyPerStream.getValue().size()];
+            aggregatorsPerStream.put(stream, aggregators);
+
+            ExprEvaluator[] evaluators = new ExprEvaluator[equivalencyPerStream.getValue().size()];
+            evaluatorsPerStream.put(stream, evaluators);
+
+            for (ExprAggregateNode aggregateNode : equivalencyPerStream.getValue().keySet())
+            {
+                if (aggregateNode.getChildNodes().size() > 1)
+                {
+                    evaluators[index] = getMultiNodeEvaluator(aggregateNode.getChildNodes(), exprEvaluatorContext);
+                }
+                else if (!aggregateNode.getChildNodes().isEmpty())
+                {
+                    // Use the evaluation node under the aggregation node to obtain the aggregation value
+                    evaluators[index] = aggregateNode.getChildNodes().get(0);
+                }
+                // For aggregation that doesn't evaluate any particular sub-expression, return null on evaluation
+                else
+                {
+                    evaluators[index] = new ExprEvaluator() {
+                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                        {
+                            return null;
+                        }
+                    };
+                }
+
+                aggregators[index] = aggregateNode.getPrototypeAggregator();
+                index++;
+            }
+        }
+
+        AggregationServiceMatchRecognizeImpl service = new AggregationServiceMatchRecognizeImpl(numStreams, aggregatorsPerStream, evaluatorsPerStream);
+
+        // Hand a service reference to the aggregation nodes themselves.
+        // Thus on expression evaluation time each aggregate node calls back to find out what the
+        // group's state is (and thus does not evaluate by asking its child node for its result).
+        int column = 0; // absolute index for all agg functions
+        for (Map.Entry<Integer, Map<ExprAggregateNode, List<ExprAggregateNode>>> equivalencyPerStream : equivalencyListPerStream.entrySet())
+        {
+            for (ExprAggregateNode aggregateNode : equivalencyPerStream.getValue().keySet())
+            {
+                aggregateNode.setAggregationResultFuture(service, column);
+
+                // hand to all equivalent-to
+                List<ExprAggregateNode> equivalentAggregators = equivalencyPerStream.getValue().get(aggregateNode);
+                if (equivalentAggregators != null)
+                {
+                    for (ExprAggregateNode equivalentAggNode : equivalentAggregators)
+                    {
+                        equivalentAggNode.setAggregationResultFuture(service, column);
+                    }
+                }
+
+                column++;
+            }
+        }
+
+        return service;
+    }
+
+    /**
      * Returns an instance to handle the aggregation required by the aggregation expression nodes, depending on
      * whether there are any group-by nodes.
      * @param selectAggregateExprNodes - aggregation nodes extracted out of the select expression
@@ -33,13 +126,17 @@ public class AggregationServiceFactory
      * @param orderByAggregateExprNodes - aggregation nodes extracted out of the select expression
      * @param hasGroupByClause - indicator on whethere there is group-by required, or group-all
      * @param methodResolutionService - is required to resolve aggregation methods
+     * @param exprEvaluatorContext context for expression evaluatiom
+     * @param annotations - statement annotations
      * @return instance for aggregation handling
      */
     public static AggregationService getService(List<ExprAggregateNode> selectAggregateExprNodes,
                                                 List<ExprAggregateNode> havingAggregateExprNodes,
                                                 List<ExprAggregateNode> orderByAggregateExprNodes,
                                                 boolean hasGroupByClause,
-                                                MethodResolutionService methodResolutionService)
+                                                MethodResolutionService methodResolutionService,
+                                                ExprEvaluatorContext exprEvaluatorContext,
+                                                Annotation[] annotations)
     {
         // No aggregates used, we do not need this service
         if ((selectAggregateExprNodes.isEmpty()) && (havingAggregateExprNodes.isEmpty()))
@@ -74,7 +171,7 @@ public class AggregationServiceFactory
         {
             if (aggregateNode.getChildNodes().size() > 1)
             {
-                evaluators[index] = getMultiNodeEvaluator(aggregateNode.getChildNodes());
+                evaluators[index] = getMultiNodeEvaluator(aggregateNode.getChildNodes(), exprEvaluatorContext);
             }
             else if (!aggregateNode.getChildNodes().isEmpty())
             {
@@ -85,7 +182,7 @@ public class AggregationServiceFactory
             else
             {
                 evaluators[index] = new ExprEvaluator() {
-                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                     {
                         return null;
                     }
@@ -99,8 +196,15 @@ public class AggregationServiceFactory
         AggregationService service;
         if (hasGroupByClause)
         {
-            // If there is a group-by clause, then we need to keep aggregators as prototypes
-            service = new AggregationServiceGroupByImpl(evaluators, aggregators, methodResolutionService);
+            boolean hasNoReclaim = HintEnum.DISABLE_RECLAIM_GROUP.containedIn(annotations);
+            if (hasNoReclaim)
+            {
+                service = new AggregationServiceGroupByImpl(evaluators, aggregators, methodResolutionService);
+            }
+            else
+            {
+                service = new AggregationServiceGroupByRefcountedImpl(evaluators, aggregators, methodResolutionService);                
+            }
         }
         else
         {
@@ -132,7 +236,7 @@ public class AggregationServiceFactory
         return service;
     }
 
-    private static ExprEvaluator getMultiNodeEvaluator(List<ExprNode> childNodes)
+    private static ExprEvaluator getMultiNodeEvaluator(List<ExprNode> childNodes, ExprEvaluatorContext exprEvaluatorContext)
     {
         final int size = childNodes.size();
         final List<ExprNode> exprNodes = childNodes;
@@ -144,18 +248,18 @@ public class AggregationServiceFactory
         {
             if (node.isConstantResult())
             {
-                prototype[count] = node.evaluate(null, true);
+                prototype[count] = node.evaluate(null, true, exprEvaluatorContext);
             }
             count++;
         }
 
         return new ExprEvaluator() {
-            public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+            public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
             {
                 int count = 0;
                 for (ExprNode node : exprNodes)
                 {
-                    prototype[count] = node.evaluate(eventsPerStream, isNewData);
+                    prototype[count] = node.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
                     count++;
                 }
                 return prototype;

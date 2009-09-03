@@ -14,7 +14,8 @@ public interface SubselectEvalStrategy
      * @param eventsPerStream events per stream
      * @param isNewData true for new data
      * @param matchingEvents prefiltered events
+     * @param exprEvaluatorContext expression evaluation context
      * @return eval result
      */
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents);
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
 }

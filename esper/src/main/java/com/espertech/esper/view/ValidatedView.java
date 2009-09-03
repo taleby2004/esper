@@ -11,6 +11,7 @@ package com.espertech.esper.view;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
 
@@ -25,10 +26,12 @@ public interface ValidatedView
      * @param methodResolutionService for resolving imports and classes and methods
      * @param timeProvider for providing current time
      * @param variableService for access to variables
+     * @param exprEvaluatorContext context for expression evaluation
      * @throws ExprValidationException is thrown to indicate an exception in validating the view
      */
     public void validate(StreamTypeService streamTypeService,
                          MethodResolutionService methodResolutionService,
                          TimeProvider timeProvider,
-                         VariableService variableService) throws ExprValidationException;
+                         VariableService variableService,
+                         ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException;
 }

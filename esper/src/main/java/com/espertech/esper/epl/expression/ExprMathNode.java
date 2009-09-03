@@ -30,6 +30,7 @@ public class ExprMathNode extends ExprNode
 
     private MathArithTypeEnum.Computer arithTypeEnumComputer;
     private Class resultType;
+    private static final long serialVersionUID = 6479683588602862158L;
 
     /**
      * Ctor.
@@ -44,7 +45,7 @@ public class ExprMathNode extends ExprNode
         this.isDivisionByZeroReturnsNull = isDivisionByZeroReturnsNull;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 2)
         {
@@ -96,10 +97,10 @@ public class ExprMathNode extends ExprNode
         return false;
     }
     
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object valueChildOne = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
-        Object valueChildTwo = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
+        Object valueChildOne = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object valueChildTwo = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
         if ((valueChildOne == null) || (valueChildTwo == null))
         {

@@ -27,9 +27,9 @@ public class TestOutputProcessViewPolicy extends TestCase
     {
         OutputStrategy outputStrategy = new OutputStrategySimple();
         resultSetProcessor = new SupportResultSetProcessor();
-        OutputLimitSpec spec = new OutputLimitSpec(1d, null, OutputLimitRateType.EVENTS, OutputLimitLimitType.DEFAULT, null, null, null, null);
-        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 1, spec, SupportStatementContextFactory.makeContext());
-        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 2, spec, SupportStatementContextFactory.makeContext());
+        OutputLimitSpec spec = new OutputLimitSpec(1d, null, OutputLimitRateType.EVENTS, OutputLimitLimitType.DEFAULT, null, null, null, null, null, null);
+        outputProcessViewUpdate = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 1, spec, SupportStatementContextFactory.makeContext(), false);
+        outputProcessViewProcess = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, false, 2, spec, SupportStatementContextFactory.makeContext(), false);
         
         childViewNoJoin = new SupportSchemaNeutralView();
         outputProcessViewUpdate.addView(childViewNoJoin);
@@ -59,7 +59,7 @@ public class TestOutputProcessViewPolicy extends TestCase
         oldData[0] = SupportEventBeanFactory.createObject(new SupportBean());
         newData[0] = SupportEventBeanFactory.createObject(new SupportBean());
 
-        outputProcessViewProcess.process(makeEventSet(newData[0]), makeEventSet(oldData[0]));
+        outputProcessViewProcess.process(makeEventSet(newData[0]), makeEventSet(oldData[0]), null);
     }
 
     private Set<MultiKey<EventBean>> makeEventSet(EventBean event)

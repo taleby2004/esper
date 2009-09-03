@@ -77,7 +77,7 @@ startEPLExpressionRule
 	;
 
 eplExpressionRule
-	:	(selectExpr | createWindowExpr | createVariableExpr | onExpr)		 
+	:	(selectExpr | createWindowExpr | createVariableExpr | onExpr | updateExpr)		 
 	;
 
 onExpr 
@@ -86,16 +86,20 @@ onExpr
 		{ leaveNode($i); } )
 	;
 	
+updateExpr
+	:	^(u=UPDATE_EXPR CLASS_IDENT IDENT? onSetAssignment+ whereClause[false]? { leaveNode($u); })
+	;
+
 onDeleteExpr
-	:	^(ON_DELETE_EXPR onExprFrom (whereClause)? )
+	:	^(ON_DELETE_EXPR onExprFrom (whereClause[true])? )
 	;	
 
 onSelectExpr
-	:	^(ON_SELECT_EXPR insertIntoExpr? selectionList onExprFrom? whereClause? groupByClause? havingClause? orderByClause?)
+	:	^(s=ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause[true]? groupByClause? havingClause? orderByClause? { leaveNode($s); }) 
 	;	
 
 onSelectInsertExpr
-	:	{pushStmtContext();} ^(ON_SELECT_INSERT_EXPR insertIntoExpr selectionList whereClause?)
+	:	{pushStmtContext();} ^(ON_SELECT_INSERT_EXPR insertIntoExpr selectionList whereClause[true]?)
 	;	
 	
 onSelectInsertOutput
@@ -103,13 +107,13 @@ onSelectInsertOutput
 	;
 
 onSetExpr
-	:	^(ON_SET_EXPR onSetAssignment (onSetAssignment)*)
-	;
-	
-onSetAssignment
-	:	IDENT valueExpr
+	:	^(ON_SET_EXPR onSetAssignment (onSetAssignment)* whereClause[false]?)
 	;
 
+onSetAssignment
+	:	^(ON_SET_EXPR_ITEM IDENT valueExpr)
+	;
+	
 onExprFrom
 	:	^(ON_EXPR_FROM IDENT (IDENT)? )
 	;
@@ -157,7 +161,8 @@ selectExpr
 	:	(insertIntoExpr)?
 		selectClause 
 		fromClause
-		(whereClause)?
+		(matchRecogClause)?
+		(whereClause[true])?
 		(groupByClause)?
 		(havingClause)?
 		(outputLimitExpr)?
@@ -174,12 +179,77 @@ insertIntoExprCol
 	;
 
 selectClause
-	:	^(s=SELECTION_EXPR (RSTREAM | ISTREAM | IRSTREAM)? selectionList { leaveNode($s); })
+	:	^(s=SELECTION_EXPR (RSTREAM | ISTREAM | IRSTREAM)? DISTINCT? selectionList { leaveNode($s); })
 	;
 
 fromClause
 	:	streamExpression (streamExpression (outerJoin)* )*
 	;
+	
+matchRecogClause
+	:	^(m=MATCH_RECOGNIZE matchRecogPartitionBy? 
+			matchRecogMeasures 
+			ALL?
+			matchRecogMatchesAfterSkip?
+			matchRecogPattern 
+			matchRecogMatchesInterval?
+			matchRecogDefine { leaveNode($m); })
+	;
+	
+matchRecogPartitionBy
+	:	^(p=MATCHREC_PARTITION valueExpr+ { leaveNode($p); })
+	;
+	
+matchRecogMatchesAfterSkip
+	:	^(MATCHREC_AFTER_SKIP IDENT IDENT IDENT IDENT IDENT)
+	;	
+	
+matchRecogMatchesInterval
+	:	^(MATCHREC_INTERVAL IDENT timePeriod)
+	;	
+
+matchRecogMeasures
+	:	^(m=MATCHREC_MEASURES matchRecogMeasureListElement*)
+	;
+	
+matchRecogMeasureListElement
+	:	^(m=MATCHREC_MEASURE_ITEM valueExpr IDENT? { leaveNode($m); })
+	;
+		
+matchRecogPattern
+	:	^(p=MATCHREC_PATTERN matchRecogPatternAlteration+ { leaveNode($p); })
+	;
+
+matchRecogPatternAlteration
+	:	matchRecogPatternConcat
+	|	^(o=MATCHREC_PATTERN_ALTER matchRecogPatternConcat matchRecogPatternConcat+ { leaveNode($o); })
+	;
+
+matchRecogPatternConcat
+	:	^(p=MATCHREC_PATTERN_CONCAT matchRecogPatternUnary+ { leaveNode($p); })
+	;
+
+matchRecogPatternUnary
+	:	matchRecogPatternNested
+	|	matchRecogPatternAtom
+	;
+	
+matchRecogPatternNested
+	:	^(p=MATCHREC_PATTERN_NESTED matchRecogPatternAlteration (PLUS | STAR | QUESTION)? { leaveNode($p); })
+	;
+	
+matchRecogPatternAtom
+	:	^(p=MATCHREC_PATTERN_ATOM IDENT ( (PLUS | STAR | QUESTION) QUESTION? )?  { leaveNode($p); })
+	;
+
+matchRecogDefine
+	:	^(p=MATCHREC_DEFINE matchRecogDefineItem+ )
+	;
+
+matchRecogDefineItem
+	:	^(d=MATCHREC_DEFINE_ITEM IDENT valueExpr { leaveNode($d); })
+	;
+	
 	
 selectionList
 	:	selectionListElement (selectionListElement)*
@@ -244,8 +314,8 @@ viewExpr
 	:	^(n=VIEW_EXPR IDENT IDENT (valueExprWithTime)* { leaveNode($n); } )
 	;
 	
-whereClause
-	:	^(n=WHERE_EXPR valueExpr { leaveNode($n); } )
+whereClause[boolean isLeaveNode]
+	:	^(n=WHERE_EXPR valueExpr { if ($isLeaveNode) leaveNode($n); } )
 	;
 
 groupByClause
@@ -265,10 +335,15 @@ havingClause
 	;
 
 outputLimitExpr
-	:	^(e=EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) { leaveNode($e); } ) 
-	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? timePeriod { leaveNode($tp); } )
-	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet { leaveNode($cron); } )
-	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? { leaveNode($when); } )
+	:	^(e=EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) outputLimitAfter? { leaveNode($e); } ) 
+	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? timePeriod outputLimitAfter? { leaveNode($tp); } )
+	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet outputLimitAfter? { leaveNode($cron); } )
+	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? outputLimitAfter? { leaveNode($when); } )
+	|	^(after=AFTER_LIMIT_EXPR outputLimitAfter { leaveNode($after); })
+	;
+
+outputLimitAfter
+	:	^(AFTER timePeriod? number?)
 	;
 
 rowLimitClause
@@ -384,7 +459,7 @@ subSelectInQueryExpr
 	;
 	
 subQueryExpr 
-	:	selectionListElement subSelectFilterExpr (whereClause)?
+	:	DISTINCT? selectionListElement subSelectFilterExpr (whereClause[true])?
 	;
 	
 subSelectFilterExpr
@@ -425,8 +500,10 @@ builtinFunc
 	|	^(f=MEDIAN (DISTINCT)? valueExpr) { leaveNode($f); }
 	|	^(f=STDDEV (DISTINCT)? valueExpr) { leaveNode($f); }
 	|	^(f=AVEDEV (DISTINCT)? valueExpr) { leaveNode($f); }
+	|	^(f=LAST_AGGREG (DISTINCT)? valueExpr) { leaveNode($f); }
+	|	^(f=FIRST_AGGREG (DISTINCT)? valueExpr) { leaveNode($f); }
 	| 	^(f=COALESCE valueExpr valueExpr (valueExpr)* ) { leaveNode($f); }
-	| 	^(f=PREVIOUS valueExpr eventPropertyExpr[true]) { leaveNode($f); }
+	| 	^(f=PREVIOUS valueExpr valueExpr?) { leaveNode($f); }
 	| 	^(f=PRIOR c=NUM_INT eventPropertyExpr[true]) {leaveNode($c); leaveNode($f);}
 	| 	^(f=INSTANCEOF valueExpr CLASS_IDENT (CLASS_IDENT)*) { leaveNode($f); }
 	| 	^(f=CAST valueExpr CLASS_IDENT) { leaveNode($f); }

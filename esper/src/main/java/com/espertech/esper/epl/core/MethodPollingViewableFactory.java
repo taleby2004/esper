@@ -16,6 +16,7 @@ import com.espertech.esper.epl.db.DataCache;
 import com.espertech.esper.epl.db.DataCacheFactory;
 import com.espertech.esper.epl.db.PollExecStrategy;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.MethodStreamSpec;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.ScheduleBucket;
@@ -48,6 +49,7 @@ public class MethodPollingViewableFactory
      * @param engineImportService for resolving configurations
      * @param schedulingService for scheduling callbacks in expiry-time based caches
      * @param scheduleBucket for schedules within the statement
+     * @param exprEvaluatorContext expression evaluation context
      * @return pollable view
      * @throws ExprValidationException if the expressions cannot be validated or the method descriptor
      * has incorrect class and method names, or parameter number and types don't match
@@ -59,7 +61,8 @@ public class MethodPollingViewableFactory
                                                                MethodResolutionService methodResolutionService,
                                                                EngineImportService engineImportService,
                                                                SchedulingService schedulingService,
-                                                               ScheduleBucket scheduleBucket)
+                                                               ScheduleBucket scheduleBucket,
+                                                               ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         // Try to resolve the method
@@ -145,6 +148,6 @@ public class MethodPollingViewableFactory
         DataCache dataCache = DataCacheFactory.getDataCache(dataCacheDesc, epStatementHandle, schedulingService, scheduleBucket);
         PollExecStrategy methodPollStrategy = new MethodPollingExecStrategy(eventAdapterService, staticMethod, mapTypeName != null, eventType);
 
-        return new MethodPollingViewable(methodStreamSpec, streamNumber, methodStreamSpec.getExpressions(), methodPollStrategy, dataCache, eventType);
+        return new MethodPollingViewable(methodStreamSpec, streamNumber, methodStreamSpec.getExpressions(), methodPollStrategy, dataCache, eventType, exprEvaluatorContext);
     }
 }

@@ -9,8 +9,10 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
@@ -20,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
  * Implementation of the filter service interface.
  * Does not allow the same filter callback to be added more then once.
  */
-public final class FilterServiceImpl implements FilterService
+public final class FilterServiceImpl implements FilterServiceSPI
 {
     private static final Log log = LogFactory.getLog(FilterServiceImpl.class);
     private final EventTypeIndexBuilder indexBuilder;
@@ -53,12 +55,12 @@ public final class FilterServiceImpl implements FilterService
         indexBuilder.remove(filterCallback);
     }
 
-    public final void evaluate(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void evaluate(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
     {
         numEventsEvaluated.incrementAndGet();
 
         // Finds all matching filters and return their callbacks
-        eventTypeIndex.matchEvent(eventBean, matches);
+        eventTypeIndex.matchEvent(eventBean, matches, exprEvaluatorContext);
     }
 
     public final long getNumEventsEvaluated()
@@ -68,5 +70,15 @@ public final class FilterServiceImpl implements FilterService
 
     public void resetStats() {
         numEventsEvaluated.set(0);
+    }
+
+    public FilterSet take(Set<String> statementIds)
+    {
+        return indexBuilder.take(statementIds);
+    }
+
+    public void apply(FilterSet filterSet)
+    {
+        indexBuilder.apply(filterSet);
     }
 }

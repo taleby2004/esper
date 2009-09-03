@@ -14,6 +14,8 @@ import com.espertech.esper.type.WildcardParameter;
 public class ExprNumberSetWildcard extends ExprNode
 {
     private static final WildcardParameter wildcardParameter = new WildcardParameter();
+    private static final long serialVersionUID = -6098833102154556698L;
+
     public String toExpressionString()
     {
         return "*";
@@ -29,7 +31,7 @@ public class ExprNumberSetWildcard extends ExprNode
         return node instanceof ExprNumberSetWildcard;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
     }
 
@@ -38,7 +40,7 @@ public class ExprNumberSetWildcard extends ExprNode
         return WildcardParameter.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         return wildcardParameter;
     }

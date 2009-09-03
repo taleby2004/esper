@@ -24,6 +24,7 @@ public class ExprStreamUnderlyingNode extends ExprNode
     private final String streamName;
     private int streamNum = -1;
     private Class type;
+    private static final long serialVersionUID = 6611578192872250478L;
 
     /**
      * Ctor.
@@ -47,7 +48,7 @@ public class ExprStreamUnderlyingNode extends ExprNode
         return streamName;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         String[] streams = streamTypeService.getStreamNames();
         for (int i = 0; i < streams.length; i++)
@@ -101,7 +102,7 @@ public class ExprStreamUnderlyingNode extends ExprNode
                 " streamNum=" + streamNum;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean event = eventsPerStream[streamNum];
         if (event == null)

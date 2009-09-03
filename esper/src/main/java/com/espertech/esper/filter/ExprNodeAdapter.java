@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
 
@@ -56,9 +57,10 @@ public class ExprNodeAdapter
     /**
      * Evaluate the boolean expression given the event as a stream zero event.
      * @param event is the stream zero event (current event)
+     * @param exprEvaluatorContext context for expression evaluation
      * @return boolean result of the expression
      */
-    public boolean evaluate(EventBean event)
+    public boolean evaluate(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (variableService != null)
         {
@@ -67,7 +69,7 @@ public class ExprNodeAdapter
         EventBean[] eventsPerStream = arrayPerThread.get();
         eventsPerStream[0] = event;
 
-        Boolean result = (Boolean) exprNode.evaluate(eventsPerStream, true);
+        Boolean result = (Boolean) exprNode.evaluate(eventsPerStream, true, exprEvaluatorContext);
         if (result == null)
         {
             return false;

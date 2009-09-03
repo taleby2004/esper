@@ -21,6 +21,7 @@ public class InSetOfValuesEventProp implements FilterSpecParamInValue
     private final String resultEventProperty;
     private final boolean isMustCoerce;
     private final Class coercionType;
+    private static final long serialVersionUID = -2806996166528183416L;
 
     /**
      * Ctor.
@@ -51,7 +52,10 @@ public class InSetOfValuesEventProp implements FilterSpecParamInValue
         // Coerce if necessary
         if (isMustCoerce)
         {
-            value = JavaClassHelper.coerceBoxed((Number) value, coercionType);
+            if (value != null)
+            {
+                value = JavaClassHelper.coerceBoxed((Number) value, coercionType);
+            }
         }
         return value;
     }

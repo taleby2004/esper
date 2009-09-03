@@ -23,6 +23,7 @@ public class ConfigurationEventTypeLegacy implements Serializable
     private List<LegacyFieldPropDesc> fieldProperties;
     private Configuration.PropertyResolutionStyle propertyResolutionStyle;
     private String factoryMethod;
+    private String copyMethod;
     private static final long serialVersionUID = 3385356145345570222L;
 
     /**
@@ -192,6 +193,24 @@ public class ConfigurationEventTypeLegacy implements Serializable
     public void setFactoryMethod(String factoryMethod)
     {
         this.factoryMethod = factoryMethod;
+    }
+
+    /**
+     * Returns the method name of the method to use to copy the underlying event object.
+     * @return method name
+     */
+    public String getCopyMethod()
+    {
+        return copyMethod;
+    }
+
+    /**
+     * Sets the method name of the method to use to copy the underlying event object.
+     * @param copyMethod method name
+     */
+    public void setCopyMethod(String copyMethod)
+    {
+        this.copyMethod = copyMethod;
     }
 
     /**

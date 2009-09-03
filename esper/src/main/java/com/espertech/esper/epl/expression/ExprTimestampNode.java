@@ -20,7 +20,7 @@ import com.espertech.esper.schedule.TimeProvider;
  */
 public class ExprTimestampNode extends ExprNode
 {
-    private TimeProvider timeProvider;
+    private static final long serialVersionUID = -6332243334897136751L;
 
     /**
      * Ctor.
@@ -32,13 +32,12 @@ public class ExprTimestampNode extends ExprNode
     public void validate(StreamTypeService streamTypeService,
                          MethodResolutionService methodResolutionService,
                          ViewResourceDelegate viewResourceDelegate,
-                         TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+                         TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 0)
         {
             throw new ExprValidationException("current_timestamp function node must have exactly 1 child node");
         }
-        this.timeProvider = timeProvider;
     }
 
     public boolean isConstantResult()
@@ -51,9 +50,9 @@ public class ExprTimestampNode extends ExprNode
         return Long.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return timeProvider.getTime();
+        return exprEvaluatorContext.getTimeProvider().getTime();
     }
 
     public String toExpressionString()

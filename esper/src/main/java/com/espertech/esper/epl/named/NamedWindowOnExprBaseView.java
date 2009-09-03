@@ -14,6 +14,7 @@ import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,6 +30,7 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
      */
     protected final EventType namedWindowEventType;
     private final LookupStrategy lookupStrategy;
+    private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
      * The root view accepting removals (old data).
@@ -40,15 +42,18 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
      * @param statementStopService for indicating a statement was stopped or destroyed for cleanup
      * @param lookupStrategy for handling trigger events to determine deleted events
      * @param rootView to indicate which events to delete
+     * @param exprEvaluatorContext context for expression evalauation
      */
     public NamedWindowOnExprBaseView(StatementStopService statementStopService,
                                  LookupStrategy lookupStrategy,
-                                 NamedWindowRootView rootView)
+                                 NamedWindowRootView rootView,
+                                 ExprEvaluatorContext exprEvaluatorContext)
     {
         this.lookupStrategy = lookupStrategy;
         this.rootView = rootView;
         statementStopService.addSubscriber(this);
         namedWindowEventType = rootView.getEventType();
+        this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
     /**
@@ -79,7 +84,7 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
         }
 
         // Determine via the lookup strategy a subset of events to process
-        EventBean[] eventsFound = lookupStrategy.lookup(newData);
+        EventBean[] eventsFound = lookupStrategy.lookup(newData, exprEvaluatorContext);
 
         // Let the implementation handle the delete or
         handleMatching(newData, eventsFound);

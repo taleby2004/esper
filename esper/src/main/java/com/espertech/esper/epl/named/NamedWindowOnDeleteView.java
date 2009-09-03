@@ -13,6 +13,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.*;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,13 +34,15 @@ public class NamedWindowOnDeleteView extends NamedWindowOnExprBaseView
      * @param lookupStrategy for handling trigger events to determine deleted events
      * @param removeStreamView to indicate which events to delete
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
+     * @param exprEvaluatorContext context for expression evalauation
      */
     public NamedWindowOnDeleteView(StatementStopService statementStopService,
                                  LookupStrategy lookupStrategy,
                                  NamedWindowRootView removeStreamView,
-                                 StatementResultService statementResultService)
+                                 StatementResultService statementResultService,
+                                 ExprEvaluatorContext exprEvaluatorContext)
     {
-        super(statementStopService, lookupStrategy, removeStreamView);
+        super(statementStopService, lookupStrategy, removeStreamView, exprEvaluatorContext);
         this.statementResultService = statementResultService;
     }
 

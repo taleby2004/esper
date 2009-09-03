@@ -9,31 +9,31 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.core.thread.ThreadingOption;
+import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
-import com.espertech.esper.core.thread.ThreadingOption;
-import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.plugin.PluginLoader;
 import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.schedule.SchedulingMgmtService;
 import com.espertech.esper.timer.TimerService;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.Hashtable;
 import java.util.concurrent.CopyOnWriteArraySet;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Service provider encapsulates the engine's services for runtime and administration interfaces.
@@ -72,39 +72,40 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         doInitialize();
     }
 
+    public synchronized EPServiceProviderIsolated getEPServiceIsolated(String name) {
+        if (engine.getServices().getConfigSnapshot().getEngineDefaults().getViewResources().isShareViews())
+        {
+            throw new EPException("Isolated runtime requires view sharing disabled, set engine defaults under view resources and share views to false");
+        }
+        if (name == null)
+        {
+            throw new IllegalArgumentException("Name parameter does not have a value provided");
+        }
+
+        return engine.getServices().getStatementIsolationService().getIsolationUnit(name, null);
+    }
+
     /**
      * Invoked after an initialize operation.
      */
     public void postInitialize()
     {
-        try
+        // plugin-loaders
+        List<ConfigurationPluginLoader> pluginLoaders = engine.getServices().getConfigSnapshot().getPluginLoaders();
+        for (ConfigurationPluginLoader config : pluginLoaders)  // in the order configured
         {
-            Hashtable table = engine.getServices().getEngineEnvContext().getEnvironment();
-
-            for (Object key : table.keySet())
+            try
             {
-                if (key.toString().startsWith("plugin-loader/"))
-                {
-                    Object value = table.get(key);
-                    if (value instanceof PluginLoader)
-                    {
-                        try
-                        {
-                            ((PluginLoader) value).postInitialize();
-                        }
-                        catch (Throwable t)
-                        {
-                            log.error("Error post-initializing plugin class " + value.getClass().getSimpleName(), t);
-                        }
-                    }
-                }
+                PluginLoader plugin = (PluginLoader) engine.getServices().getEngineEnvContext().lookup("plugin-loader/" + config.getLoaderName());
+                plugin.postInitialize();
+            }
+            catch (Throwable t)
+            {
+                String message = "Error post-initializing plugin class " + config.getClassName() + ": " + t.getMessage();
+                log.error(message, t);
+                throw new EPException(message, t);
             }
         }
-        catch (NamingException e)
-        {
-            throw new EPException("Failed to use context to bind adapter loader", e);
-        }
-
     }
 
     /**
@@ -355,8 +356,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         // New runtime
         EPRuntimeImpl runtime = new EPRuntimeImpl(services);
 
+        runtime.setInternalEventRouterImpl(services.getInternalEventRouter());
+        services.setInternalEventEngineRouteDest(runtime);
+
         // Configure services to use the new runtime
-        services.setInternalEventRouter(runtime);
         services.getTimerService().setCallback(runtime);
 
         // Statement lifycycle init
@@ -558,5 +561,15 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             this.getStatementLifecycleSvc().removeObserver(stmtEventDispatcher);
             stmtEventDispatcher = null;
         }
+    }
+
+    public String[] getEPServiceIsolatedNames()
+    {
+        return engine.getServices().getStatementIsolationService().getIsolationUnitNames();
+    }
+
+    public SchedulingMgmtService getSchedulingMgmtService()
+    {
+        return engine.getServices().getSchedulingMgmtService();
     }
 }

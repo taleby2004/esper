@@ -14,6 +14,7 @@ import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.view.ViewProcessingException;
 import com.espertech.esper.util.ManagedLock;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.List;
 import java.util.Map;
@@ -56,10 +57,11 @@ public interface NamedWindowService
      * @param eplExpression is the expression
      * @param statementName the name of the statement
      * @param isPrioritized if the engine is running with prioritized execution
+     * @param exprEvaluatorContext context for expression evalauation
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.
@@ -77,9 +79,10 @@ public interface NamedWindowService
     /**
      * Dispatch events of the insert and remove stream of named windows to consumers, as part of the
      * main event processing or dispatch loop.
+     * @param exprEvaluatorContext context for expression evalauation
      * @return send events to consuming statements
      */
-    public boolean dispatch();
+    public boolean dispatch(ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * For use to add a result of a named window that must be dispatched to consuming views.

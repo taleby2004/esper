@@ -10,6 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.collection.MultiKeyUntyped;
 
 import java.util.Iterator;
@@ -28,20 +29,23 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
     private EventBean nextResult;
     private final EventBean[] eventsPerStream;
     private final Set<MultiKeyUntyped> priorSeenGroups;
+    private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
      * Ctor.
      * @param sourceIterator is the parent view iterator
      * @param resultSetProcessor for providing results
      * @param aggregationService for pointing to the right aggregation row
+     * @param exprEvaluatorContext context for expression evalauation
      */
-    public ResultSetRowPerGroupIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorRowPerGroup resultSetProcessor, AggregationService aggregationService)
+    public ResultSetRowPerGroupIterator(Iterator<EventBean> sourceIterator, ResultSetProcessorRowPerGroup resultSetProcessor, AggregationService aggregationService, ExprEvaluatorContext exprEvaluatorContext)
     {
         this.sourceIterator = sourceIterator;
         this.resultSetProcessor = resultSetProcessor;
         this.aggregationService = aggregationService;
         eventsPerStream = new EventBean[1];
         priorSeenGroups = new HashSet<MultiKeyUntyped>();
+        this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
     public boolean hasNext()
@@ -89,7 +93,7 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
             Boolean pass = true;
             if (resultSetProcessor.getOptionalHavingNode() != null)
             {
-                pass = (Boolean) resultSetProcessor.getOptionalHavingNode().evaluate(eventsPerStream, true);
+                pass = (Boolean) resultSetProcessor.getOptionalHavingNode().evaluate(eventsPerStream, true, exprEvaluatorContext);
             }
             if (!pass)
             {

@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.view;
 
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Iterator;
@@ -21,6 +22,7 @@ public class FilterExprViewIterator implements Iterator<EventBean>
 {
     private final Iterator<EventBean> sourceIterator;
     private final ExprEvaluator filter;
+    private final ExprEvaluatorContext exprEvaluatorContext;
     private final EventBean[] evalEventArr;
 
     private EventBean nextResult;
@@ -29,11 +31,13 @@ public class FilterExprViewIterator implements Iterator<EventBean>
      * Ctor.
      * @param sourceIterator is the iterator supplying events to filter out.
      * @param filter is the filter expression
+     * @param exprEvaluatorContext context for expression evalauation
      */
-    public FilterExprViewIterator(Iterator<EventBean> sourceIterator, ExprEvaluator filter)
+    public FilterExprViewIterator(Iterator<EventBean> sourceIterator, ExprEvaluator filter, ExprEvaluatorContext exprEvaluatorContext)
     {
         this.sourceIterator = sourceIterator;
         this.filter = filter;
+        this.exprEvaluatorContext = exprEvaluatorContext;
         evalEventArr = new EventBean[1];
     }
 
@@ -76,7 +80,7 @@ public class FilterExprViewIterator implements Iterator<EventBean>
             EventBean candidate = sourceIterator.next();
             evalEventArr[0] = candidate;
 
-            Boolean pass = (Boolean) filter.evaluate(evalEventArr, true);
+            Boolean pass = (Boolean) filter.evaluate(evalEventArr, true, exprEvaluatorContext);
             if ((pass != null) && (pass))
             {
                 nextResult = candidate;

@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * A deletion strategy is for use with named window in on-delete statements and encapsulates
@@ -21,6 +22,7 @@ public interface LookupStrategy
      * Determines the events to be deleted from a named window.
      * @param newData is the correlation events
      * @return the events to delete from the named window
+     * @param exprEvaluatorContext expression evaluation context
      */
-    public EventBean[] lookup(EventBean[] newData);
+    public EventBean[] lookup(EventBean[] newData, ExprEvaluatorContext exprEvaluatorContext);
 }

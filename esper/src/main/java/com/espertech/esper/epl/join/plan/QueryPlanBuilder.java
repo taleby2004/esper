@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.client.EventType;
@@ -33,6 +34,7 @@ public class QueryPlanBuilder
      * @param isHistorical - indicator for each stream if it is a historical streams or not
      * @param dependencyGraph - dependencies between historical streams
      * @param historicalStreamIndexLists - index management, populated for the query plan
+     * @param exprEvaluatorContext expression evaluation context
      * @return query plan
      * @throws ExprValidationException if the query plan fails
      */
@@ -43,7 +45,8 @@ public class QueryPlanBuilder
                                     boolean hasHistorical,
                                     boolean[] isHistorical,
                                     HistoricalDependencyGraph dependencyGraph,
-                                    HistoricalStreamIndexList[] historicalStreamIndexLists)
+                                    HistoricalStreamIndexList[] historicalStreamIndexLists,
+                                    ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         String methodName = ".getPlan ";
@@ -89,7 +92,7 @@ public class QueryPlanBuilder
         }
 
         return NStreamOuterQueryPlanBuilder.build(queryGraph, outerJoinDescList, streamNames, typesPerStream,
-                                    hasHistorical, isHistorical, dependencyGraph, historicalStreamIndexLists);
+                                    hasHistorical, isHistorical, dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext);
     }
 
     private static final Log log = LogFactory.getLog(QueryPlanBuilder.class);

@@ -24,6 +24,7 @@ public class ExprRelationalOpNode extends ExprNode
 {
     private final RelationalOpEnum relationalOpEnum;
     private RelationalOpEnum.Computer computer;
+    private static final long serialVersionUID = -6170161542681634598L;
 
     /**
      * Ctor.
@@ -48,7 +49,7 @@ public class ExprRelationalOpNode extends ExprNode
         return relationalOpEnum;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         // Must have 2 child nodes
         if (this.getChildNodes().size() != 2)
@@ -86,15 +87,15 @@ public class ExprRelationalOpNode extends ExprNode
         return Boolean.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object valueLeft = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData);
+        Object valueLeft = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (valueLeft == null)
         {
             return null;
         }
         
-        Object valueRight = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData);
+        Object valueRight = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (valueRight == null)
         {
             return null;

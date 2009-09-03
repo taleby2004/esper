@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.IndentWriter;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * Interface for an execution node that looks up events and builds a result set contributing to an overall
@@ -27,8 +28,9 @@ public abstract class ExecNode
      * @param prefillPath - set of events currently in the example tuple to serve
      * as a prototype for result rows.
      * @param result is the list of tuples to add a result row to
+     * @param exprEvaluatorContext context for expression evaluation
      */
-    public abstract void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result);
+    public abstract void process(EventBean lookupEvent, EventBean[] prefillPath, List<EventBean[]> result, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Output the execution strategy.

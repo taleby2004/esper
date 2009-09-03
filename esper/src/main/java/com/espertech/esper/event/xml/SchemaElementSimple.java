@@ -13,6 +13,7 @@ public class SchemaElementSimple implements SchemaElement, Serializable
     private final short xsSimpleType;     // Types from XSSimpleType
     private final String typeName;
     private final boolean isArray;
+    private final Integer fractionDigits;
 
     /**
      * Ctor.
@@ -21,14 +22,16 @@ public class SchemaElementSimple implements SchemaElement, Serializable
      * @param type is the simple element type
      * @param isArray if unbound
      * @param typeName name of type
+     * @param fractionDigits fraction digits if defined
      */
-    public SchemaElementSimple(String name, String namespace, short type, String typeName, boolean isArray)
+    public SchemaElementSimple(String name, String namespace, short type, String typeName, boolean isArray, Integer fractionDigits)
     {
         this.name = name;
         this.namespace = namespace;
         this.xsSimpleType = type;
         this.isArray = isArray;
         this.typeName = typeName;
+        this.fractionDigits = fractionDigits;
     }
 
     /**
@@ -66,6 +69,15 @@ public class SchemaElementSimple implements SchemaElement, Serializable
     public String getTypeName()
     {
         return typeName;
+    }
+
+    /**
+     * Returns the fraction digits if defined.
+     * @return digits
+     */
+    public Integer getFractionDigits()
+    {
+        return fractionDigits;
     }
 
     public String toString()

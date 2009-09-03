@@ -15,6 +15,7 @@ import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeSummaryVisitor;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -141,10 +142,11 @@ public abstract class ViewFactorySupport implements ViewFactory
      * @param viewName textual name of view
      * @param expression expression to check
      * @param index number offset of expression in view parameters
+     * @param exprEvaluatorContext context for expression evaluation
      * @return expression evaluation value
      * @throws ViewParameterException if assertion fails
      */
-    public static Object evaluateAssertNoProperties(String viewName, ExprNode expression, int index) throws ViewParameterException
+    public static Object evaluateAssertNoProperties(String viewName, ExprNode expression, int index, ExprEvaluatorContext exprEvaluatorContext) throws ViewParameterException
     {
         ExprNodeSummaryVisitor visitor = new ExprNodeSummaryVisitor();
         expression.accept(visitor);
@@ -155,7 +157,7 @@ public abstract class ViewFactorySupport implements ViewFactory
             throw new ViewParameterException(message);
         }
 
-        return expression.evaluate(null, false);
+        return expression.evaluate(null, false, exprEvaluatorContext);
     }
 
     private static Object validateAndEvaluateExpr(StatementContext statementContext, ExprNode expression, StreamTypeService streamTypeService, int expressionNumber)
@@ -165,7 +167,7 @@ public abstract class ViewFactorySupport implements ViewFactory
 
         try
         {
-            return validated.evaluate(null, true);
+            return validated.evaluate(null, true, statementContext);
         }
         catch (RuntimeException ex)
         {
@@ -186,7 +188,7 @@ public abstract class ViewFactorySupport implements ViewFactory
         try
         {
             validated = expression.getValidatedSubtree(streamTypeService, statementContext.getMethodResolutionService(),
-                    null, statementContext.getSchedulingService(), statementContext.getVariableService());
+                    null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
         }
         catch (ExprValidationException ex)
         {

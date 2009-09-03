@@ -8,16 +8,25 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.core.UpdateDispatchView;
-import com.espertech.esper.core.StatementResultService;
-import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.epl.join.JoinExecutionStrategy;
-import com.espertech.esper.epl.join.JoinSetIndicator;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.EventDistinctIterator;
+import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.UpdateDispatchView;
+import com.espertech.esper.epl.core.ResultSetProcessor;
+import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.epl.join.JoinExecutionStrategy;
+import com.espertech.esper.epl.join.JoinSetIndicator;
+import com.espertech.esper.event.EventBeanReader;
+import com.espertech.esper.event.EventBeanReaderDefaultImpl;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.Viewable;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -32,11 +41,23 @@ import java.util.Set;
  */
 public abstract class OutputProcessView implements View, JoinSetIndicator
 {
+    private static final Log log = LogFactory.getLog(OutputProcessView.class);
+
+    private JoinExecutionStrategy joinExecutionStrategy;
+    private Long afterConditionTime;
+    private Integer afterConditionNumberOfEvents;
+    private int afterConditionEventsFound;
+    private StatementContext statementContext;
+
+    /**
+     * If the after-condition is satisfied, if any.
+     */
+    protected boolean isAfterConditionSatisfied;
+
     /**
      * Processes the parent views result set generating events for pushing out to child view.
      */
     protected final ResultSetProcessor resultSetProcessor;
-    private JoinExecutionStrategy joinExecutionStrategy;
 
     /**
      * Strategy to performs the output once it's decided we need to output.
@@ -65,20 +86,133 @@ public abstract class OutputProcessView implements View, JoinSetIndicator
     protected boolean isGenerateSynthetic;
 
     /**
+     * Returns the select-distinct indicator.
+     */
+    protected final boolean isDistinct;
+
+    /**
+     * Returns a reader for reading all properties to an event for processing distinct events. 
+     */
+    protected EventBeanReader eventBeanReader;
+
+    /**
      * Ctor.
      * @param resultSetProcessor processes the results posted by parent view or joins
      * @param outputStrategy the strategy to use for producing output
      * @param isInsertInto true if this is an insert-into
-     * @param statementResultService for awareness of listeners and subscriber
+     * @param statementContext for statement-level services
+     * @param isDistinct true for distinct
+     * @param afterTimePeriod after-keyword time period
+     * @param afterConditionNumberOfEvents after-keyword number of events
      */
-    protected OutputProcessView(ResultSetProcessor resultSetProcessor, OutputStrategy outputStrategy, boolean isInsertInto, StatementResultService statementResultService)
+    protected OutputProcessView(ResultSetProcessor resultSetProcessor, OutputStrategy outputStrategy, boolean isInsertInto, StatementContext statementContext, boolean isDistinct, ExprTimePeriod afterTimePeriod, Integer afterConditionNumberOfEvents)
     {
         this.resultSetProcessor = resultSetProcessor;
         this.outputStrategy = outputStrategy;
-        this.statementResultService = statementResultService;
+        this.statementResultService = statementContext.getStatementResultService();
+        this.statementContext = statementContext;
 
         // by default, generate synthetic events only if we insert-into
         this.isGenerateSynthetic = isInsertInto;
+        this.isDistinct = isDistinct;
+        if (isDistinct)
+        {
+            if (resultSetProcessor.getResultEventType() instanceof EventTypeSPI)
+            {
+                EventTypeSPI eventTypeSPI = (EventTypeSPI) resultSetProcessor.getResultEventType();
+                eventBeanReader = eventTypeSPI.getReader();
+            }
+            if (eventBeanReader == null)
+            {
+                eventBeanReader = new EventBeanReaderDefaultImpl(resultSetProcessor.getResultEventType());
+            }
+        }
+
+        isAfterConditionSatisfied = true;
+        if (afterConditionNumberOfEvents != null)
+        {
+            this.afterConditionNumberOfEvents = afterConditionNumberOfEvents;
+            isAfterConditionSatisfied = false;            
+        }
+        else if (afterTimePeriod != null)
+        {
+            isAfterConditionSatisfied = false;
+            Object result = afterTimePeriod.evaluate(null, true, statementContext);
+            if (result == null)
+            {
+                log.warn("The expression in the 'after' clause time period has returned a null value, ignoring after-clause");
+                isAfterConditionSatisfied = true;
+            }
+            else
+            {
+                double sec = ((Number) result).doubleValue();
+                long msec = (long) (sec * 1000.0);
+                afterConditionTime = statementContext.getTimeProvider().getTime() + msec;
+            }
+        }
+    }
+
+
+
+    /**
+     * Returns true if the after-condition is satisfied.
+     * @param newEvents is the view new events
+     * @return indicator for output condition
+     */
+    public boolean checkAfterCondition(EventBean[] newEvents)
+    {
+        return isAfterConditionSatisfied || checkAfterCondition(newEvents == null ? 0 : newEvents.length);
+    }
+
+    /**
+     * Returns true if the after-condition is satisfied.
+     * @param newEvents is the join new events
+     * @return indicator for output condition
+     */
+    public boolean checkAfterCondition(Set<MultiKey<EventBean>> newEvents)
+    {
+        return isAfterConditionSatisfied || checkAfterCondition(newEvents == null ? 0 : newEvents.size());
+    }
+
+    /**
+     * Returns true if the after-condition is satisfied.
+     * @param newOldEvents is the new and old events pair
+     * @return indicator for output condition
+     */
+    public boolean checkAfterCondition(UniformPair<EventBean[]> newOldEvents)
+    {
+        return isAfterConditionSatisfied || checkAfterCondition(newOldEvents == null ? 0 : (newOldEvents.getFirst() == null ? 0 : newOldEvents.getFirst().length));
+    }
+
+    private boolean checkAfterCondition(int numOutputEvents)
+    {
+        if (afterConditionTime != null)
+        {
+            long time = statementContext.getTimeProvider().getTime();
+            if (time < afterConditionTime)
+            {
+                return false;
+            }
+
+            isAfterConditionSatisfied = true;
+            return true;
+        }
+        else if (afterConditionNumberOfEvents != null)
+        {
+            afterConditionEventsFound += numOutputEvents;
+            if (afterConditionEventsFound <= afterConditionNumberOfEvents)
+            {
+                return false;
+            }
+
+            isAfterConditionSatisfied = true;
+            return true;
+        }
+        else
+        {
+            isAfterConditionSatisfied = true;
+            return true;
+        }
     }
 
     public Viewable getParent() {
@@ -137,7 +271,7 @@ public abstract class OutputProcessView implements View, JoinSetIndicator
 
     /**
      * For joins, supplies the join execution strategy that provides iteration over statement results.
-     * @param joinExecutionStrategy executes joins including static (non-continuous) joins 
+     * @param joinExecutionStrategy executes joins including static (non-continuous) joins
      */
     public void setJoinExecutionStrategy(JoinExecutionStrategy joinExecutionStrategy)
     {
@@ -146,18 +280,29 @@ public abstract class OutputProcessView implements View, JoinSetIndicator
 
     public Iterator<EventBean> iterator()
     {
+        Iterator<EventBean> iterator;
+        EventType eventType;
         if (joinExecutionStrategy != null)
         {
             Set<MultiKey<EventBean>> joinSet = joinExecutionStrategy.staticJoin();
-            return resultSetProcessor.getIterator(joinSet);
+            iterator = resultSetProcessor.getIterator(joinSet);
+            eventType = resultSetProcessor.getResultEventType();
         }
-        if(resultSetProcessor != null)
+        else if(resultSetProcessor != null)
     	{
-            return resultSetProcessor.getIterator(parentView);
+            iterator = resultSetProcessor.getIterator(parentView);
+            eventType = resultSetProcessor.getResultEventType();
     	}
     	else
     	{
-    		return parentView.iterator();
+    		iterator = parentView.iterator();
+            eventType = parentView.getEventType();
     	}
+
+        if (!isDistinct)
+        {
+            return iterator;
+        }
+        return new EventDistinctIterator(iterator, eventType);
     }
 }

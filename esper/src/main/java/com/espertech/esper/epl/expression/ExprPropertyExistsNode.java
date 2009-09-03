@@ -21,6 +21,7 @@ import com.espertech.esper.schedule.TimeProvider;
 public class ExprPropertyExistsNode extends ExprNode
 {
     private ExprIdentNode identNode;
+    private static final long serialVersionUID = -6304444201237275628L;
 
     /**
      * Ctor.
@@ -29,7 +30,7 @@ public class ExprPropertyExistsNode extends ExprNode
     {
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {
@@ -54,7 +55,7 @@ public class ExprPropertyExistsNode extends ExprNode
         return Boolean.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         return identNode.evaluatePropertyExists(eventsPerStream, isNewData);
     }

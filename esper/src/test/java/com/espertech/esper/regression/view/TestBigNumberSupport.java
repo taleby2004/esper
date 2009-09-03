@@ -92,6 +92,15 @@ public class TestBigNumberSupport extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(null, new BigDecimal(9.999)));
         assertTrue(listener.getAndClearIsInvoked());
         stmt.destroy();
+
+        // test float
+        stmt = epService.getEPAdministrator().createEPL("select * from SupportBeanNumeric where floatOne < 10f and floatTwo > 10f");
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(true, 1f, 20f));
+        assertTrue(listener.getAndClearIsInvoked());
+        epService.getEPRuntime().sendEvent(new SupportBeanNumeric(true, 20f, 1f));
+        assertFalse(listener.getAndClearIsInvoked());
     }
 
     public void testBetween()

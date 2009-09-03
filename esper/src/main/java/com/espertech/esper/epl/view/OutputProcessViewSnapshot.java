@@ -8,13 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.epl.spec.OutputLimitSpec;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.spec.OutputLimitSpec;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,6 +41,7 @@ public class OutputProcessViewSnapshot extends OutputProcessView
      * @param statementContext is the services the output condition may depend on
      * @param isInsertInto is true if the statement is a insert-into
      * @param outputStrategy is the method to use to produce output
+     * @param isDistinct true for distinct
      * @throws  ExprValidationException if validation of the output expressions fails
      */
     public OutputProcessViewSnapshot(ResultSetProcessor resultSetProcessor,
@@ -47,10 +49,12 @@ public class OutputProcessViewSnapshot extends OutputProcessView
                           boolean isInsertInto,
                           int streamCount,
     					  OutputLimitSpec outputLimitSpec,
-    					  StatementContext statementContext)
+    					  StatementContext statementContext,
+                          boolean isDistinct)
             throws ExprValidationException
     {
-        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext.getStatementResultService());
+        // isDistinct handling through the iterator method
+        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext, isDistinct, outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents());
         log.debug(".ctor");
 
     	if(streamCount < 1)
@@ -78,6 +82,11 @@ public class OutputProcessViewSnapshot extends OutputProcessView
 
         resultSetProcessor.processViewResult(newData, oldData, false);
 
+        if (!super.checkAfterCondition(newData))
+        {
+            return;
+        }
+
         // add the incoming events to the event batches
         int newDataLength = 0;
         int oldDataLength = 0;
@@ -98,7 +107,7 @@ public class OutputProcessViewSnapshot extends OutputProcessView
      * @param newEvents - new events
      * @param oldEvents - old events
      */
-    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents)
+    public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
@@ -108,6 +117,11 @@ public class OutputProcessViewSnapshot extends OutputProcessView
         }
 
         resultSetProcessor.processJoinResult(newEvents, oldEvents, false);
+
+        if (!super.checkAfterCondition(newEvents))
+        {
+            return;
+        }
 
         int newEventsSize = 0;
         if (newEvents != null)

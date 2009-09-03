@@ -24,6 +24,7 @@ public class ExprSubstitutionNode extends ExprNode
 {
     private static final String ERROR_MSG = "Invalid use of substitution parameters marked by '?' in statement, use the prepare method to prepare statements with substitution parameters";
     private final int index;
+    private static final long serialVersionUID = -4238446583735045135L;
 
     /**
      * Ctor.
@@ -34,7 +35,7 @@ public class ExprSubstitutionNode extends ExprNode
         this.index = index;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         throw new ExprValidationException(ERROR_MSG);
     }
@@ -58,7 +59,7 @@ public class ExprSubstitutionNode extends ExprNode
         throw new IllegalStateException(ERROR_MSG);
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         throw new EPException(ERROR_MSG);
     }

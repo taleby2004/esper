@@ -9,10 +9,7 @@
 package com.espertech.esper.event.xml;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.event.BaseConfigurableEventType;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventTypeMetadata;
-import com.espertech.esper.event.ExplicitPropertyDescriptor;
+import com.espertech.esper.event.*;
 import com.espertech.esper.util.ClassInstantiationException;
 import com.espertech.esper.util.JavaClassHelper;
 import org.w3c.dom.Node;
@@ -20,10 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.xml.xpath.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Base class for XML event types.
@@ -107,7 +101,12 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
     protected void initialize(Collection<ConfigurationEventTypeXMLDOM.XPathPropertyDesc> explicitXPathProperties,
                               List<ExplicitPropertyDescriptor> additionalSchemaProperties)
     {
-        List<ExplicitPropertyDescriptor> namedProperties = new ArrayList<ExplicitPropertyDescriptor>(additionalSchemaProperties);
+        // make sure we override those explicitly provided with those derived from a metadataz
+        Map<String, ExplicitPropertyDescriptor> namedProperties = new LinkedHashMap<String, ExplicitPropertyDescriptor>();
+        for (ExplicitPropertyDescriptor desc : additionalSchemaProperties)
+        {
+            namedProperties.put(desc.getDescriptor().getPropertyName(), desc);
+        }
 
         String xpathExpression = null;
         try {
@@ -143,9 +142,9 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
                 EventPropertyGetter getter = new XPathPropertyGetter(property.getName(), xpathExpression, expression, property.getType(), property.getOptionalCastToType(), fragmentFactory);
                 Class returnType = SchemaUtil.toReturnType(property.getType(), property.getOptionalCastToType());
                 
-                EventPropertyDescriptor desc = new EventPropertyDescriptor(property.getName(), returnType, false,false,isArray,false,isFragment);
+                EventPropertyDescriptor desc = new EventPropertyDescriptor(property.getName(), returnType, null, false,false,isArray,false,isFragment);
                 ExplicitPropertyDescriptor explicit = new ExplicitPropertyDescriptor(desc, getter, isArray, property.getOptionaleventTypeName());
-                namedProperties.add(explicit);
+                namedProperties.put(desc.getPropertyName(), explicit);
             }
         }
         catch (XPathExpressionException ex)
@@ -153,7 +152,7 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
             throw new EPException("XPath expression could not be compiled for expression '" + xpathExpression + '\'', ex);
         }
 
-        super.initialize(namedProperties);
+        super.initialize(new ArrayList<ExplicitPropertyDescriptor>(namedProperties.values()));
     }
 
     /**
@@ -192,8 +191,38 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
         return (configurationEventTypeXMLDOM.equals(other.configurationEventTypeXMLDOM));
     }
 
+    public EventPropertyWriter getWriter(String propertyName)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor[] getWriteableProperties()
+    {
+        return new EventPropertyDescriptor[0];
+    }
+
+    public EventBeanCopyMethod getCopyMethod(String[] properties)
+    {
+        return null;
+    }
+
+    public EventPropertyDescriptor getWritableProperty(String propertyName)
+    {
+        return null;
+    }
+
+    public EventBeanWriter getWriter(String[] properties)
+    {
+        return null;
+    }    
+
     public int hashCode()
     {
         return configurationEventTypeXMLDOM.hashCode();
     }
+
+    public EventBeanReader getReader()
+    {
+        return null;
+    }    
 }

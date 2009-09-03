@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+
 /**
  * Interface for statement-level dispatch.
  * <p>
@@ -17,6 +19,7 @@ public interface EPStatementDispatch
 {
     /**
      * Execute dispatch.
+     * @param exprEvaluatorContext context for expression evaluation
      */
-    public void execute();
+    public void execute(ExprEvaluatorContext exprEvaluatorContext);
 }

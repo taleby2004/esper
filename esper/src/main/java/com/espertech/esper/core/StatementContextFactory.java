@@ -31,6 +31,7 @@ public interface StatementContextFactory
      * @param hasVariables indicator whether the statement uses variables anywhere in the statement
      * @param isFireAndForget if the statement context is for a fire-and-forget statement
      * @param annotations statement annotations
+     * @param isolationUnitServices for isolation units
      * @return statement context
      */
     public StatementContext makeContext(String statementId,
@@ -42,5 +43,6 @@ public interface StatementContextFactory
                                         OnTriggerDesc optOnTriggerDesc,
                                         CreateWindowDesc optCreateWindowDesc,
                                         boolean isFireAndForget,
-                                        Annotation[] annotations);
+                                        Annotation[] annotations,
+                                        EPIsolationUnitServices isolationUnitServices);
 }

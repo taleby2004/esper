@@ -106,6 +106,13 @@ tokens
 	VALUE_NULL='null';
 	ROW_LIMIT_EXPR='limit';
 	OFFSET='offset';
+	UPDATE='update';
+	MATCH_RECOGNIZE='match_recognize';
+	MEASURES='measures';
+	DEFINE='define';
+	PARTITION='partition';
+	MATCHES='matches';
+	AFTER='after';	
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -167,6 +174,7 @@ tokens
    	EVENT_PROP_DYNAMIC_MAPPED;
    	EVENT_LIMIT_EXPR;
 	TIMEPERIOD_LIMIT_EXPR;
+   	AFTER_LIMIT_EXPR;
 	CRONTAB_LIMIT_EXPR;
 	CRONTAB_LIMIT_EXPR_PARAM;
 	WHEN_LIMIT_EXPR;
@@ -225,6 +233,10 @@ tokens
 	ANNOTATION;
 	ANNOTATION_ARRAY;
 	ANNOTATION_VALUE;
+	FIRST_AGGREG;
+	LAST_AGGREG;
+	UPDATE_EXPR;
+	ON_SET_EXPR_ITEM;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -236,6 +248,18 @@ tokens
    	NUM_DOUBLE;
    	
    	EPL_EXPR;
+   	MATCHREC_PATTERN;   	
+   	MATCHREC_PATTERN_ATOM;   	
+   	MATCHREC_PATTERN_CONCAT;
+   	MATCHREC_PATTERN_ALTER;
+   	MATCHREC_PATTERN_NESTED;
+   	MATCHREC_AFTER_SKIP;
+   	MATCHREC_INTERVAL;
+   	MATCHREC_DEFINE;
+   	MATCHREC_DEFINE_ITEM;
+   	MATCHREC_MEASURES;
+   	MATCHREC_MEASURE_ITEM;
+   	MATCHREC_PARTITION;
 }
 
 @header {
@@ -443,6 +467,13 @@ tokens
 	parserTokenParaphases.put(VALUE_NULL, "'null'");
 	parserTokenParaphases.put(ROW_LIMIT_EXPR, "'limit'");
 	parserTokenParaphases.put(OFFSET, "'offset'");
+	parserTokenParaphases.put(UPDATE, "'update'");
+	parserTokenParaphases.put(MATCH_RECOGNIZE, "'match_recognize'");
+	parserTokenParaphases.put(MEASURES, "'measures'");
+	parserTokenParaphases.put(DEFINE, "'define'");
+	parserTokenParaphases.put(PARTITION, "'partition'");
+	parserTokenParaphases.put(MATCHES, "'matches'");
+	parserTokenParaphases.put(AFTER, "'after';");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }
@@ -555,12 +586,14 @@ eplExpression
 	|	createWindowExpr
 	|	createVariableExpr
 	|	onExpr
+	|	updateExpr
 	;
 	
 selectExpr
 	:	(INSERT! insertIntoExpr)?
 		SELECT! selectClause
 		FROM! fromClause
+		matchRecog?
 		(WHERE! whereClause)?
 		(GROUP! BY! groupByListExpr)?
 		(HAVING! havingClause)?
@@ -575,17 +608,24 @@ onExpr
 		-> ^(ON_EXPR eventFilterExpression? patternInclusionExpression? $i? onDeleteExpr? onSelectExpr? onSelectInsertExpr* outputClauseInsert? onSetExpr?)
 	;
 	
+updateExpr
+	:	UPDATE ISTREAM classIdentifier (AS i=IDENT | i=IDENT)?
+		SET onSetAssignment (COMMA onSetAssignment)* 
+		(WHERE whereClause)?		
+		-> ^(UPDATE_EXPR classIdentifier $i? onSetAssignment+ whereClause?)
+	;
+
 onSelectExpr	
 @init  { paraphrases.push("on-select clause"); }
 @after { paraphrases.pop(); }
 	:	(INSERT insertIntoExpr)?
-		SELECT selectionList
+		SELECT DISTINCT? selectionList
 		onExprFrom?
 		(WHERE whereClause)?		
 		(GROUP BY groupByListExpr)?
 		(HAVING havingClause)?
 		(ORDER BY orderByListExpr)?
-		-> ^(ON_SELECT_EXPR insertIntoExpr? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr?)
+		-> ^(ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr?)
 	;
 	
 onSelectInsertExpr
@@ -619,7 +659,8 @@ onSetExpr
 	;
 	
 onSetAssignment
-	:	IDENT EQUALS! expression
+	:	i=IDENT EQUALS expression
+		-> ^(ON_SET_EXPR_ITEM $i expression)
 	;
 		
 onExprFrom
@@ -733,8 +774,8 @@ whereClause
 selectClause
 @init  { paraphrases.push("select clause"); }
 @after { paraphrases.pop(); }
-	:	(s=RSTREAM | s=ISTREAM | s=IRSTREAM)? selectionList
-		-> ^(SELECTION_EXPR $s? selectionList)
+	:	(s=RSTREAM | s=ISTREAM | s=IRSTREAM)? d=DISTINCT? selectionList
+		-> ^(SELECTION_EXPR $s? $d? selectionList)
 	;
 
 selectionList 	
@@ -756,13 +797,106 @@ streamSelector
 		-> ^(SELECTION_STREAM $s $i?)
 	;
 	
+// TODO: review should row pattern recognition be a stream or before the WHERE; if after WHERE then make it the only thing
 streamExpression
-	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression)
+	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression )
 		(DOT viewExpression (DOT viewExpression)*)? (AS i=IDENT | i=IDENT)? (u=UNIDIRECTIONAL)? (ru=RETAINUNION|ri=RETAININTERSECTION)?
 		-> ^(STREAM_EXPR eventFilterExpression? patternInclusionExpression? databaseJoinExpression? methodJoinExpression?
 		viewExpression* $i? $u? $ru? $ri?)
 	;
-			
+	
+// Start match recognize
+//
+// Lowest precedence is listed first, order is (highest to lowest):  
+// Single-character-ERE duplication * + ? {m,n}
+// Concatenation
+// Anchoring ^ $
+// Alternation  |
+//
+matchRecog
+	:	MATCH_RECOGNIZE 
+	          LPAREN 
+			matchRecogPartitionBy? 
+			matchRecogMeasures
+			matchRecogMatchesSelection?
+			matchRecogMatchesAfterSkip?
+			matchRecogPattern 
+			matchRecogMatchesInterval?
+			matchRecogDefine 
+		  RPAREN
+		-> ^(MATCH_RECOGNIZE matchRecogPartitionBy? matchRecogMeasures matchRecogMatchesSelection? matchRecogMatchesAfterSkip? matchRecogPattern matchRecogMatchesInterval? matchRecogDefine)
+	;
+
+matchRecogPartitionBy
+	:	PARTITION BY expression (COMMA expression)*
+		-> ^(MATCHREC_PARTITION expression+)
+	;		
+		
+matchRecogMeasures 
+	:	MEASURES matchRecogMeasureItem (COMMA matchRecogMeasureItem)*
+		-> ^(MATCHREC_MEASURES matchRecogMeasureItem*)
+	;
+	
+matchRecogMeasureItem
+	:	expression (AS (i=IDENT)? )?
+		-> ^(MATCHREC_MEASURE_ITEM expression $i?)
+	;
+	
+matchRecogMatchesSelection
+	:	ALL^ MATCHES! 
+	;
+		
+matchRecogPattern
+	:	PATTERN LPAREN matchRecogPatternAlteration RPAREN
+		-> ^(MATCHREC_PATTERN matchRecogPatternAlteration)
+	;
+	
+matchRecogMatchesAfterSkip
+	:	AFTER i1=keywordAllowedIdent i2=keywordAllowedIdent i3=keywordAllowedIdent i4=keywordAllowedIdent i5=keywordAllowedIdent
+		-> ^(MATCHREC_AFTER_SKIP $i1 $i2 $i3 $i4 $i5)
+	;
+
+matchRecogMatchesInterval
+	:	i=IDENT timePeriod
+		-> ^(MATCHREC_INTERVAL $i timePeriod)
+	;
+		
+matchRecogPatternAlteration
+	:	matchRecogPatternConcat (o=BOR matchRecogPatternConcat)*
+		-> {$o != null}? ^(MATCHREC_PATTERN_ALTER matchRecogPatternConcat+)
+		-> matchRecogPatternConcat
+	;	
+
+matchRecogPatternConcat
+	:	matchRecogPatternUnary+
+		-> ^(MATCHREC_PATTERN_CONCAT matchRecogPatternUnary+)
+	;	
+
+matchRecogPatternUnary
+	: 	matchRecogPatternNested
+	| 	matchRecogPatternAtom
+	;
+
+matchRecogPatternNested
+	: 	LPAREN matchRecogPatternAlteration RPAREN (s=STAR | p=PLUS | q=QUESTION)?
+		-> ^(MATCHREC_PATTERN_NESTED matchRecogPatternAlteration $s? $p? $q?)
+	;
+		
+matchRecogPatternAtom
+	:	i=IDENT ((s=STAR | p=PLUS | q=QUESTION) (reluctant=QUESTION)? )?
+		-> ^(MATCHREC_PATTERN_ATOM $i $s? $p? $q? $reluctant?)
+	;
+	
+matchRecogDefine
+	:	DEFINE matchRecogDefineItem (COMMA matchRecogDefineItem)*
+		-> ^(MATCHREC_DEFINE matchRecogDefineItem+)
+	;	
+
+matchRecogDefineItem
+	:	i=IDENT AS expression
+		-> ^(MATCHREC_DEFINE_ITEM $i expression)
+	;	
+
 patternInclusionExpression
 	:	PATTERN LBRACK patternExpression RBRACK
 		-> ^(PATTERN_INCL_EXPR patternExpression)
@@ -818,23 +952,31 @@ havingClause
 outputLimit
 @init  { paraphrases.push("output rate clause"); }
 @after { paraphrases.pop(); }
-	:   (k=ALL|k=FIRST|k=LAST|k=SNAPSHOT)? 
-	      (
-	        ( ev=EVERY_EXPR 
-		  ( 
-		    (timePeriod) => timePeriod
-		  | (number | i=IDENT) (e=EVENTS)
+	:      outputLimitAfter?
+ 	       (k=ALL|k=FIRST|k=LAST|k=SNAPSHOT)? 
+	        (
+	          ( ev=EVERY_EXPR 
+		    ( 
+		      (timePeriod) => timePeriod
+		    | (number | i=IDENT) (e=EVENTS)
+		    )
 		  )
-		)
-		|
-		( at=AT crontabLimitParameterSet )
-		|
-		( wh=WHEN expression (THEN onSetExpr)? )
-	      )
-	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i?)
-	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod)		
-	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet)		
-	    -> ^(WHEN_LIMIT_EXPR $k? expression onSetExpr?)		
+		  |
+		  ( at=AT crontabLimitParameterSet)
+		  |
+		  ( wh=WHEN expression (THEN onSetExpr)? )
+		  |
+	        )
+	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i? outputLimitAfter?)
+	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod outputLimitAfter?)		
+	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet outputLimitAfter?)		
+	    -> {$wh != null}? ^(WHEN_LIMIT_EXPR $k? expression onSetExpr? outputLimitAfter?)
+	    -> ^(AFTER_LIMIT_EXPR outputLimitAfter)
+	;	
+
+outputLimitAfter
+	:   a=AFTER (timePeriod | number EVENTS)
+	    -> ^(AFTER timePeriod? number?)
 	;	
 
 rowLimit
@@ -1009,7 +1151,7 @@ subQueryExpr
 @init  { paraphrases.push("subquery"); }
 @after { paraphrases.pop(); }
 	:	LPAREN! 
-		SELECT! selectionListElement
+		SELECT! DISTINCT? selectionListElement
 	    FROM! subSelectFilterExpr
 	    (WHERE! whereClause)?
 	    RPAREN!
@@ -1041,8 +1183,10 @@ builtinFunc
 	| MEDIAN^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| STDDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+	| firstAggregation
+	| lastAggregation
 	| COALESCE^ LPAREN! expression COMMA! expression (COMMA! expression)* RPAREN!
-	| PREVIOUS^ LPAREN! expression COMMA! eventProperty RPAREN!
+	| PREVIOUS^ LPAREN! expression (COMMA! expression)? RPAREN!
 	| PRIOR^ LPAREN! NUM_INT COMMA! eventProperty RPAREN!
 	// MIN and MAX can also be "Math.min" static function and "min(price)" aggregation function and "min(a, b, c...)" built-in function
 	// therefore handled in code via libFunction as below
@@ -1052,6 +1196,16 @@ builtinFunc
 	| CURRENT_TIMESTAMP^ (LPAREN! RPAREN!)?
 	;
 	
+firstAggregation
+	: FIRST LPAREN (a=ALL | d=DISTINCT)? expression RPAREN
+	  -> ^(FIRST_AGGREG $d? expression)
+	;
+
+lastAggregation
+	: LAST LPAREN (a=ALL | d=DISTINCT)? expression RPAREN
+	  -> ^(LAST_AGGREG $d? expression)
+	;
+
 maxFunc
 	: (MAX^ | MIN^) LPAREN! expression (COMMA! expression (COMMA! expression)* )? RPAREN!
 	;
@@ -1408,6 +1562,9 @@ keywordAllowedIdent returns [String result]
 		|OUTER { $result = "outer"; }
 		|FULL { $result = "full"; }
 		|JOIN { $result = "join"; }
+		|DEFINE { $result = "define"; }
+		|PARTITION { $result = "partition"; }
+		|MATCHES { $result = "matches"; }
 	;
 		
 escapableIdent returns [String result]

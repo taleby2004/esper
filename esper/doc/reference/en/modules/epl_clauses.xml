@@ -5,7 +5,15 @@
         <title>EPL Introduction</title>
 
         <para>
-			The Event Processing Language (EPL) is a SQL-like language with <literal>SELECT</literal>, <literal>FROM</literal>, <literal>WHERE</literal>, <literal>GROUP BY</literal>, <literal>HAVING</literal> and <literal>ORDER BY</literal> clauses. Streams replace tables as the source of data with events replacing rows as the basic unit of data. Since events are composed of data, the SQL concepts of correlation through joins, filtering and aggregation through grouping can be effectively leveraged. The <literal>INSERT INTO</literal> clause is recast as a means of forwarding events to other streams for further downstream processing. External data accessible through JDBC may be queried and joined with the stream data. Additional clauses such as the <literal>PATTERN</literal> and <literal>OUTPUT</literal> clauses are also available to provide the missing SQL language constructs specific to event processing.
+			The Event Processing Language (EPL) is a SQL-like language with <literal>SELECT</literal>, <literal>FROM</literal>, <literal>WHERE</literal>, <literal>GROUP BY</literal>, <literal>HAVING</literal> and <literal>ORDER BY</literal> clauses. Streams replace tables as the source of data with events replacing rows as the basic unit of data. Since events are composed of data, the SQL concepts of correlation through joins, filtering and aggregation through grouping can be effectively leveraged.
+        </para>
+
+        <para>
+			The <literal>INSERT INTO</literal> clause is recast as a means of forwarding events to other streams for further downstream processing. External data accessible through JDBC may be queried and joined with the stream data. Additional clauses such as the <literal>PATTERN</literal> and <literal>OUTPUT</literal> clauses are also available to provide the missing SQL language constructs specific to event processing.
+        </para>
+
+        <para>
+			The purpose of the <literal>UPDATE</literal> clause is to update event properties. Update takes place before an event applies to any selecting statements or pattern statements.
         </para>
 
         <para>
@@ -493,6 +501,14 @@ is placed here.")]]></programlisting></entry>
 								</entry>
 								<entry><programlisting><![CDATA[@Drop]]></programlisting></entry>
 							</row>
+							<row>
+								<entry>Hint</entry>
+								<entry>
+									<para>For providing one or more hints towards how the engine should execute a statement. Attributes are:</para>
+									<para>value : A comma-separated list of one or more keywords.</para>
+								</entry>
+								<entry><programlisting><![CDATA[@Hint('ITERATE_ONLY')]]></programlisting></entry>
+							</row>
 						</tbody>
 					</tgroup>				
 				</table>
@@ -579,6 +595,23 @@ select * from SecurityFilter(ip="127.0.0.1")]]></programlisting>
 				</para>	
 				<programlisting><![CDATA[@Drop select * from SecurityFilter(ip="127.0.0.1")]]></programlisting>
 			</sect3>
+
+			<sect3 id="epl-syntax-annotation-hint">
+				<title>@Hint</title>
+				<para>
+					A hint can be used to provide tips for the engine to affect statement execution. Hints change performance or memory-use of a statement but generally do not change its output.
+				</para>
+
+				<para>
+					The string value of a <literal>Hint</literal> annotation contains a keyword or a comma-separated list of multiple keywords. Hint keywords are case-insensitive. A list of hints is available in <xref linkend="perf-tips-15"/>.
+				</para>
+
+				<para>
+					Example:
+				</para>	
+				<programlisting><![CDATA[@Hint('disable_reclaim_group') 
+select ipaddress, count(*) from SecurityFilter.win:time(60 sec) group by ipaddress]]></programlisting>
+			</sect3>
 		</sect2>
     </sect1>
 
@@ -599,10 +632,14 @@ select * from SecurityFilter(ip="127.0.0.1")]]></programlisting>
 			The syntax for the <literal>select</literal> clause is summarized below.
 		</para>
 
-		<synopsis>select [istream | irstream | rstream] * | <emphasis>expression_list</emphasis> ... </synopsis>
+		<synopsis>select [istream | irstream | rstream] [distinct] * | <emphasis>expression_list</emphasis> ... </synopsis>
 
 		<para>
 			The <literal>istream</literal> keyword is the default, and indicates that the engine only delivers insert stream events to listeners and observers. The <literal>irstream</literal> keyword indicates that the engine delivers both insert and remove stream. Finally, the <literal>rstream</literal> keyword tells the engine to deliver only the remove stream.
+		</para>
+
+		<para>
+			The <literal>distinct</literal> keyword outputs only unique rows depending on the column list you have specified after it. It must occur after the <literal>select</literal> and after the optional stream keywords, as described in more detail below.
 		</para>
 
         <sect2 id="epl-select-all-props" >
@@ -651,7 +688,7 @@ select * from SecurityFilter(ip="127.0.0.1")]]></programlisting>
 			<para>
 				The following statement declares a further view onto the event stream of stock ticks: the univariate statistics view (<literal>stat:uni</literal>). The statement selects the properties that this view derives from the stream, for the last 100 events of IBM stock ticks in the length window.
 			</para>
-			<programlisting><![CDATA[select datapoints, total, average, variance, stdev, stdevpa 
+			<programlisting><![CDATA[select datapoints, total, average, variance, stddev, stddevpa
 from StockTick(symbol='IBM').win:length(100).stat:uni(volume)]]></programlisting>
 		</sect2>
 
@@ -857,6 +894,41 @@ select default.MyEvent.myProperty from MyEvent</programlisting>
 
 		</sect2>
 
+		<sect2 id="epl-syntax-distinct">
+			<title>Select <literal>Distinct</literal></title>
+			
+			<para>
+				The optional <literal>distinct</literal> keyword removes duplicate output events from output. The keyword must occur after the <literal>select</literal> keyword and after the optional <literal>irstream</literal> keyword.
+			</para>
+
+			<para>
+				The <literal>distinct</literal> keyword in your <literal>select</literal> instructs the engine to consolidate, at time of output, the output event(s) and remove output events with identical property values.
+				Duplicate removal only takes place when two or more events are output together at any one time, therefore <literal>distinct</literal> is typically used with a batch data window, output rate limiting, on-demand queries, on-select or iterator pull API.
+			</para>
+
+			<para>
+				If two or more output event objects have same property values for all properties of the event, the <literal>distinct</literal> removes all but one duplicated event before outputting events to listeners. Indexed, nested and mapped properties
+				are considered in the comparison, if present in the output event.				
+			</para>
+
+			<para>
+				The next example outputs sensor ids of temperature sensor events, but only every 10 seconds and only unique sensor id values during the 10 seconds:
+			</para>
+			<programlisting>select distinct sensorId from TemperatureSensorEvent output every 10 seconds</programlisting>
+
+			<para>
+				Use <literal>distinct</literal> with wildcard (<literal>*</literal>) to remove duplicate output events considering all properties of an event.
+			</para>
+
+			<para>
+				This example statement outputs all distinct events either when 100 events arrive or when 10 seconds passed, whichever occurs first:
+			</para>
+			<programlisting>select distinct * from TemperatureSensorEvent.win:time_length_batch(10, 100)</programlisting>
+			
+			<para>
+				When selecting nested, indexed, mapped or dynamic properties in a <literal>select</literal> clause with <literal>distinct</literal>, it is relevant to know that the comparison uses hash code and the Java <literal>equals</literal> semantics.
+			</para>
+		</sect2>
     </sect1>
 
     <sect1 id="epl-from-clause">
@@ -1144,24 +1216,36 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
         <sect2 id="epl-from-clause-view-spec" >
            <title>Specifying Views</title>
 			<para>
-				Views are used to derive or aggregate data. Views can be staggered onto each other. See the section <xref linkend="epl-views"/> on the views available that also outlines the different types of views: Data Window views and Derived-Value views.
+				Views are used to specify an expiry policy for events (data window views) and also to derive data. Views can be staggered onto each other. See the section <xref linkend="epl-views"/> on the views available that also outlines the different types of views: Data Window views and Derived-Value views.
 			</para>
 						
 			<para>
-				Views can optionally take one or more parameters. These parameters are expressions themselves that may consists of any combination of variables, arithmatics, user-define function or substituion parameters for prepared statements, as example.
+				Views can optionally take one or more parameters. These parameters are expressions themselves that may consist of any combination of variables, arithmetic, user-defined function or substitution parameters for prepared statements, for example.
 			</para>
 
 			<para>
-				The below example serves to show views and staggering of views. It uses a car location event that contains information about the location of a car on a highway. 
+				The example statement below outputs a count per expressway for car location events (contains information about the location of a car on a highway) of the last 60 seconds:
 			</para>
 				
-         <programlisting><![CDATA[select * from CarLocEvent.std:groupby(carId).win:length(4).
-  std:groupby(expressway, direction, segment).std:size()]]></programlisting>
+         <programlisting><![CDATA[select expressway, count(*) from CarLocEvent.win:time(60) 
+group by expressway]]></programlisting>
 
 			<para>
-				The first view <literal>std:groupby(carId)</literal> groups car location events by car id. The second view <literal>win:length(4)</literal> keeps a length window of the 4 last events, with one length window for each car id. The next view <literal>std:groupby(expressway, direction, segment)</literal> groups each event by its expressway, direction and segment property values. Again, the grouping is done for each car id considering the last 4 events only. The last view <literal>std:size()</literal> is used to report the number of events. Thus the below example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. 
+				The next example serves to show staggering of views. It uses the <literal>std:groupby</literal> view to create a separate length window per car id:
+			</para>
+				
+         <programlisting><![CDATA[select cardId, expressway, direction, segment, count(*) 
+from CarLocEvent.std:groupby(carId).win:length(4) 
+group by carId, expressway, direction, segment]]></programlisting>
+
+			<para>
+				The first view <literal>std:groupby(carId)</literal> groups car location events by car id. The second view <literal>win:length(4)</literal> keeps a length window of the 4 last events, with one separate length window for each car id. The example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. 
 			</para>
 			
+			<para>
+				Note that the <literal>group by</literal> syntax is generally preferable over <literal>std:groupby</literal> for grouping information as it is SQL-compliant, easier to read and does not create a separate data window per group. The <literal>std:groupby</literal> in above example creates a separate data window (length window in the example) per group, demonstrating staggering views.
+			</para>
+
 			<para>
 				When views are staggered onto each other as a chain of views, then the insert and remove stream received by each view is the insert and remove stream made available by the view (or stream) earlier in the chain. 
 			</para>
@@ -1367,7 +1451,7 @@ where symbol='IBM'</programlisting>
 				<para>
 					The syntax of the <literal>group by</literal> clause is:
 				</para>
-				<synopsis>group by <emphasis>arregate_free_expression</emphasis> [, <emphasis>arregate_free_expression</emphasis>] [, ...]</synopsis>
+				<synopsis>group by <emphasis>aggregate_free_expression</emphasis> [, <emphasis>aggregate_free_expression</emphasis>] [, ...]</synopsis>
 			
 				<para>
 					Esper places the following restrictions on expressions in the <literal>group by</literal> clause:
@@ -1382,6 +1466,12 @@ where symbol='IBM'</programlisting>
 					<listitem>
 						<para>
 							Event properties that are used within aggregate functions in the <literal>select</literal> clause cannot also be used in a <literal>group by</literal> expression
+						</para>
+					</listitem>
+					<listitem>
+						<para>
+							When grouping an unbound stream, i.e. no data window is specified onto the stream providing groups, or when using output rate limiting with the ALL keyword, you should ensure your group-by expression does not return an unlimited number of values. 
+							If, for example, your group-by expression is a fine-grained timestamp, group state that accumulates for an unlimited number of groups potentially reduces available memory significantly.
 						</para>
 					</listitem>
 				</orderedlist>
@@ -1433,6 +1523,13 @@ group by symbol, tickDataFeed</programlisting>
 					You can use a <literal>where</literal> clause in a statement with <literal>group by</literal>. Events that do not satisfy the conditions in the <literal>where</literal> clause are eliminated before any grouping is done. For example, the statement below posts the number of stock ticks in the last 30 seconds with a volume larger then 100, posting one event per group (symbol).
 				</para>
 				<programlisting>select symbol, count(*) from StockTickEvent.win:time(30 sec) where volume &gt; 100 group by symbol</programlisting>
+
+				<sect4 id="epl-groupby-hints" >
+					 <title>Hints Pertaining to Group-By</title>
+					<para>
+						The Esper engine reclaims aggregation state agressively when it determines that a group has no data points. When your application data creates a large number of groups with a small or zero number of data points then performance may suffer as state is reclaimed and created anew. Esper provides the <literal>@Hint('disable_reclaim_group')</literal> hint that you can specify as part of an EPL statement text to avoid group reclaim.
+					</para>
+				</sect4>
 		</sect2>
 
         <sect2 id="epl-grouping-having" >
@@ -1583,27 +1680,34 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				<title>Output Clause Options</title>
 			
 				<para>
-					The <literal>output</literal> clause is optional in Esper and is used to control or stabilize the rate at which events are output. The EPL language provides for several different ways to control output rate.
+					The <literal>output</literal> clause is optional in Esper and is used to control or stabilize the rate at which events are output and to suppress output events. The EPL language provides for several different ways to control output rate.
 				</para>
 
 				<para>
 					Here is the syntax for the <literal>output</literal> clause that specifies a rate in time interval or number of events:
 				</para>
-				<synopsis>output [all | first | last | snapshot] every <emphasis>output_rate</emphasis> [minutes | seconds | events]</synopsis>
+				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
+  [[all | first | last | snapshot] every <emphasis>output_rate</emphasis> [seconds | events]]</synopsis>
 
 				<para>
 					An alternate syntax specifies the time period between output as outlined in <xref linkend="epl-syntax-time-periods"/> :
 				</para>
-				<synopsis>output [all | first | last | snapshot] every <emphasis>time_period</emphasis></synopsis>
+				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
+  [[all | first | last | snapshot] every <emphasis>time_period</emphasis>]</synopsis>
 
 				<para>
 					A crontab-like schedule can also be specified. The schedule parameters follow the pattern observer parameters and are further described in <xref linkend="pattern-timer-at"/> :
 				</para>
-				<synopsis>output [all | first | last | snapshot] at 
-  (<emphasis>minutes, hours, days of month, months, days of week [, seconds]</emphasis>)</synopsis>
+				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
+  [[all | first | last | snapshot] at 
+   (<emphasis>minutes, hours, days of month, months, days of week [, seconds]</emphasis>)]</synopsis>
 
 				<para>
 					Last, output can be controlled by an expression that may contain variables, user-defined functions and information about the number of collected events. Output that is controlled by an expression is discussed in detail below.
+				</para>
+
+				<para>
+					The <literal>after</literal> keyword and <emphasis>suppression_def</emphasis> can appear alone or together with further output conditions and suppresses output events.
 				</para>
 
 				<para>
@@ -1628,7 +1732,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				</para>
 
 				<para>
-					The <literal>snapshot</literal> keyword indicates that the engine output current computation results considering all events as per views specified and/or current aggregation results. While the other keywords control how a batch of events between output intervals is being considered, the <literal>snapshot</literal> keyword outputs all current state of a statement independent of the last batch. It's output is equivalent to the <literal>iterator</literal> method provided by a statement.
+					The <literal>snapshot</literal> keyword indicates that the engine output current computation results considering all events as per views specified and/or current aggregation results. While the other keywords control how a batch of events between output intervals is being considered, the <literal>snapshot</literal> keyword outputs all current state of a statement independent of the last batch. Its output is equivalent to the <literal>iterator</literal> method provided by a statement.
 				</para>
 
 				<para>
@@ -1672,7 +1776,8 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 					<para>
 						Output can also be controlled by an expression that may check variable values, use user-defined functions and query built-in properties that provide additional information. The synopsis is as follows:
 					</para>
-					<synopsis>output [all | first | last | snapshot] when <emphasis>trigger_expression</emphasis> 
+					<synopsis>output [after <emphasis>suppression_def</emphasis>] 
+  [[all | first | last | snapshot] when <emphasis>trigger_expression</emphasis> 
     [then set <emphasis>variable_name</emphasis> = <emphasis>assign_expression</emphasis> [, <emphasis>variable_name</emphasis> = <emphasis>assign_expression</emphasis> [,...]]]</synopsis>
 
 					<para>
@@ -1705,9 +1810,9 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 					<para>
 						By adding a <literal>then</literal> part to the EPL, we can reset any variables after the trigger expression evaluated to true:
 					</para>
-					<synopsis>select sum(price) from StockTickEvent 
+			    <programlisting>select sum(price) from StockTickEvent 
   output when OutputTriggerVar = true  
-  then set OutputTriggerVar = false</synopsis>
+  then set OutputTriggerVar = false</programlisting>
 
 					<para>
 						Expressions in the <literal>when</literal> and <literal>then</literal> may, for example, use variables, user defined functions or any of the built-in named properties that are described in the below list.
@@ -1771,6 +1876,40 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 					</itemizedlist>
 				</sect3>
 
+				<sect3 id="epl-output-suppress" >
+					<title>Suppressing Output With <literal>After</literal></title>
+
+					<indexterm><primary>output</primary><secondary>suppressing output</secondary></indexterm>
+					<indexterm><primary>after</primary></indexterm>
+					<para>
+						The <literal>after</literal> keyword and its time period or number of events parameters is optional and can occur after the <literal>output</literal> keyword, either alone or with output conditions as listed above.
+					</para>
+
+					<para>
+						The synopsis of <literal>after</literal> is as follows:
+					</para>
+					<synopsis>output after <emphasis>time_period</emphasis> | <emphasis>number</emphasis> events [...]</synopsis>
+
+					<para>
+						When using <literal>after</literal> either alone or together with further output conditions, the engine discards all output events until the time period passed as measured from the start of the statement, or until the
+						number of output events are reached. The discarded events are not output and do not count towards any further output conditions if any are specified.
+					</para>
+
+					<para>
+						For example, the following statement outputs every minute the total price for all orders in the 30-minute time window but only after 30 minutes have passed:		
+					</para>
+					<programlisting>select sum(price) from OrderEvent.win:time(30 min) output after 30 min snapshot every 1 min</programlisting>
+
+					<para>
+						An example in which <literal>after</literal> occur alone is below, in a statement that outputs total price for all orders in the last minute but only after 1 minute passed, each time an event arrives or leaves the data window:
+					</para>
+					<programlisting>select sum(price) from OrderEvent.win:time(1 min) output after 1 min</programlisting>
+
+					<para>
+						To demonstrate <literal>after</literal> when used with an event count, this statement find pairs of orders with the same id but suppresses output for the first 5 pairs:
+					</para>
+					<programlisting>select * from pattern[every o=OrderEvent->p=OrderEvent(id=o.id)] output after 5 events</programlisting>
+				</sect3>
 		</sect2>
 
         <sect2 id="epl-output-groupby" >
@@ -4483,6 +4622,154 @@ from MediaOrder[books.book] as book unidirectional,
 where productId = bookId]]></programlisting>
 
 		</sect2>
+	</sect1>
+	
+	<sect1 id="epl-update">
+	   <title>Updating Event Properties: the Update Clause</title>
+	   
+		<para>
+			The <literal>update istream</literal> statement allows declarative modification of event properties of events entering a stream. Update is a pre-processing step to each new event, modifying an event before the event applies to any statements.
+		</para>
 
+		<para>
+			The synopsis of <literal>update istream</literal> is as follows:
+		</para>
+
+		<synopsis>update istream <emphasis>event_type</emphasis> [as <emphasis>stream_name</emphasis>]
+  set <emphasis>property_name</emphasis> = <emphasis>set_expression</emphasis> [, <emphasis>property_name</emphasis> = <emphasis>set_expression</emphasis>] [,...]
+  [where <emphasis>where_expression</emphasis>]
+</synopsis>
+
+		<para>
+			The <emphasis>event_type</emphasis> is the name of the type of events that the <literal>update</literal> applies to.
+			The optional <literal>as</literal> keyword can be used to assign a name to the event type for use with subqueries, for example.
+			Following the <literal>set</literal> keyword is a comma-separated list of property names and expressions that provide the event properties to change and values to set.
+		</para>
+
+		<para>
+			The optional <literal>where</literal> clause and expression can be used to filter out events to which to apply updates.
+		</para>
+		
+		<para>
+			Listeners to an <literal>update</literal> statement receive the updated event in the insert stream (new data) and the event prior to the update in the remove stream (old data). Note that if there are multiple update statements that all apply to the same event then the engine will ensure that the output events delivered to listeners or subscribers are consistent with the then-current updated properties of the event (if necessary making event copies, as described below, in the case that listeners are attached to update statements). Iterating over an update statement returns no events.
+		</para>
+
+		<para>
+			As an example, the below statement assumes an <literal>AlertEvent</literal> event type that has properties named <literal>severity</literal> and <literal>reason</literal>:
+		</para>
+		
+		<programlisting><![CDATA[update istream AlertEvent 
+  set severity = 'High'
+  where severity = 'Medium' and reason like '%withdrawal limit%']]></programlisting>
+
+		<para>
+			The statement above changes the value of the <literal>severity</literal> property to "High" for <literal>AlertEvent</literal> events that have a medium severity and contain a specific reason text.
+		</para>
+
+		<para>
+			Update statements apply the changes to event properties before other statements receive the event(s) for processing, e.g. "<literal>select * from AlertEvent</literal>" receives the updated <literal>AlertEvent</literal>. This is true regardless of the order in which your application creates statements.
+		</para>
+
+		<para>
+			When multiple update statements apply to the same event, the engine executes updates in the order in which update statements are created. We recommend the <literal>@Priority</literal> EPL annotation to define a deterministic order of processing updates, especially in the case where update statements get created and destroyed dynamically or multiple update statements update the same fields. The update statement with the highest <literal>@Priority</literal> value applies last.
+		</para>
+
+		<para>
+			The <literal>update</literal> clause can be used on streams populated via <literal>insert into</literal>, as this example utilizing a pattern demonstrates:
+		</para>		
+		<programlisting><![CDATA[insert into DoubleWithdrawalStream 
+select a.id, b.id, a.account as account, 0 as minimum 
+from pattern [a=Withdrawal -> b=Withdrawal(id = a.id)]
+
+update istream DoubleWithdrawalStream set minimum = 1000 where account in (10002, 10003)]]></programlisting>
+
+		<para>
+			When using <literal>update</literal> with named windows, any changes to event properties apply before an event enters the named window.
+		</para>
+
+		<para>
+			Consider the next example (shown here with statement names in @Name EPL annotation):
+		</para>		
+		<programlisting><![CDATA[@Name("CreateWindow") create window MyWindow.win:time(30 sec) as AlertEvent
+
+@Name("UpdateStream") update istream MyWindow set severity = 'Low' where reason = '%out of paper%'
+
+@Name("InsertWindow") insert into MyWindow select * from AlertEvent
+
+@Name("SelectWindow") select * from MyWindow]]></programlisting>
+
+		<para>
+			The <literal>UpdateStream</literal> statement specifies an <literal>update</literal> clause that applies to all events entering the named window. Note that <literal>update</literal> does not apply to events already in the named window at the time an application creates the <literal>UpdateStream</literal> statement, it only applies to new events entering the named window (after an application created the <literal>update</literal> statement).
+		</para>
+
+		<para>
+			Therefore, in the above example listeners to the <literal>SelectWindow</literal> statement as well as the <literal>CreateWindow</literal> statement receive the updated event, 
+			while listeners to the <literal>InsertWindow</literal> statement receive the original <literal>AlertEvent</literal> event (and not the updated event).
+		</para>
+
+		<para>
+			Subqueries can also be used in all expressions including the optional <literal>where</literal> clause.
+		</para>		
+
+		<para>
+			This example demonstrates a correlated subquery in an assignment expression and also demonstrates the optional <literal>as</literal> keyword. It assigns the <literal>phone</literal> property of an <literal>AlertEvent</literal> event a new value based on the lookup within all unique <literal>PhoneEvent</literal> events (according to an <literal>empid</literal> property) correlating the <literal>AlertEvent</literal> property <literal>reporter</literal> with the <literal>empid</literal> property of <literal>PhoneEvent</literal>:
+		</para>		
+		<programlisting><![CDATA[update istream AlertEvent as ae
+  set phone = 
+    (select phone from PhoneEvent.std:unique(empid) where empid = ae.reporter)]]></programlisting>
+		
+		<para>
+			When using <literal>update</literal>, please note these limitations:
+		</para>
+		
+		<orderedlist spacing="compact">
+			<listitem>
+				<para>
+					Expressions may not use aggregation functions.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					The <literal>prev</literal> and <literal>prior</literal> functions may not be used.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					For underlying event representations that are Java objects, a event object class must implement the <literal>java.io.Serializable</literal> interface as discussed below.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					When using an XML underlying event type, event properties in the XML document representation are not available for update.
+				</para>
+			</listitem>
+			<listitem>
+				<para>
+					Nested, indexed and mapped properties are not supported for update. Revision event types and variant streams may also not be updated.
+				</para>
+			</listitem>
+		</orderedlist>
+		
+		<sect2 id="epl-update-object" revision="1">
+			<title>Immutability and Updates</title>
+	
+			<para>
+				When updating event objects the engine maintains consistency across statements. The engine ensures that an update to an event does not impact the results of statements that look for or retain the original un-updated event. 
+				As a result the engine may need to copy an event object to maintain consistency.
+			</para>
+
+			<para>
+				In the case your application utilizes Java objects as the underlying event representation and an <literal>update</literal> statement updates properties on an object, then in order to maintain consistency across statements 
+				it is necessary for the engine to copy the object before changing properties (and thus not change the original object). 
+			</para>
+
+			<para>
+				For Java application objects, the copy operation is implemented by serialization. Your event object must therefore implement the <literal>java.io.Serializable</literal> interface to become eligible for update. As an alternative to serialization, you may instead configure a copy method as part of the event type configuration via <literal>ConfigurationEventTypeLegacy</literal>.
+			</para>
+			
+			<para>
+				Esper also provides a feature related in purpose to update: the revision event type. A revision event type is useful when there are two or more event types: full events that carry all the information, and delta events that provide only a partial update to the full events, and the full events and delta events are associated with each other via primary key(s).
+			</para>
+		</sect2>
 	</sect1>
 </chapter>

@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 public class ExprNumberSetList extends ExprNode
 {
     private static final Log log = LogFactory.getLog(ExprNumberSetList.class);
+    private static final long serialVersionUID = 4941618470342360450L;
 
     public String toExpressionString()
     {
@@ -60,7 +61,7 @@ public class ExprNumberSetList extends ExprNode
         return (node instanceof ExprNumberSetList);
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         // all nodes must either be int, frequency or range
         for (ExprNode child : this.getChildNodes())
@@ -83,12 +84,12 @@ public class ExprNumberSetList extends ExprNode
         return ListParameter.class;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         List<NumberSetParameter> parameters = new ArrayList<NumberSetParameter>();
         for (ExprNode child : this.getChildNodes())
         {
-            Object value = child.evaluate(eventsPerStream, isNewData);
+            Object value = child.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
             if (value == null)
             {
                 log.info("Null value returned for lower bounds value in list parameter, skipping parameter");

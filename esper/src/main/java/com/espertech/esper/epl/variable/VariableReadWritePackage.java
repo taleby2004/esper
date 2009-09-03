@@ -10,6 +10,7 @@ package com.espertech.esper.epl.variable;
 
 import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 
@@ -94,10 +95,12 @@ public class VariableReadWritePackage
      * @param variableService variable service
      * @param eventsPerStream events per stream
      * @param valuesWritten null or an empty map to populate with written values
+     * @param exprEvaluatorContext expression evaluation context
      */
     public void writeVariables(VariableService variableService,
                                  EventBean[] eventsPerStream,
-                                 Map<String, Object> valuesWritten)
+                                 Map<String, Object> valuesWritten,
+                                 ExprEvaluatorContext exprEvaluatorContext)
     {
         // We obtain a write lock global to the variable space
         // Since expressions can contain variables themselves, these need to be unchangeable for the duration
@@ -111,7 +114,7 @@ public class VariableReadWritePackage
             for (OnTriggerSetAssignment assignment : assignments)
             {
                 VariableReader reader = readers[count];
-                Object value = assignment.getExpression().evaluate(eventsPerStream, true);
+                Object value = assignment.getExpression().evaluate(eventsPerStream, true, exprEvaluatorContext);
                 if ((value != null) && (mustCoerce[count]))
                 {
                     value = JavaClassHelper.coerceBoxed((Number) value, reader.getType());

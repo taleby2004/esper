@@ -21,6 +21,7 @@ import com.espertech.esper.schedule.TimeProvider;
 public class ExprConcatNode extends ExprNode
 {
     private StringBuffer buffer;
+    private static final long serialVersionUID = 5811427566733004327L;
 
     /**
      * Ctor.
@@ -30,7 +31,7 @@ public class ExprConcatNode extends ExprNode
         buffer = new StringBuffer();
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService) throws ExprValidationException
+    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() < 2)
         {
@@ -59,12 +60,12 @@ public class ExprConcatNode extends ExprNode
         return false;
     }
 
-    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData)
+    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         buffer.delete(0, buffer.length());
         for (ExprNode child : this.getChildNodes())
         {
-            String result = (String) child.evaluate(eventsPerStream, isNewData);
+            String result = (String) child.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
             if (result == null)
             {
                 return null;

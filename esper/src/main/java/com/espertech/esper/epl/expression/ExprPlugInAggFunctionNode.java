@@ -19,6 +19,7 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 public class ExprPlugInAggFunctionNode extends ExprAggregateNode
 {
     private AggregationSupport aggregationSupport;
+    private static final long serialVersionUID = 4512085880102791194L;
 
     /**
      * Ctor.
@@ -33,7 +34,7 @@ public class ExprPlugInAggFunctionNode extends ExprAggregateNode
         aggregationSupport.setFunctionName(functionName);
     }
 
-    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService) throws ExprValidationException
+    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() > 1)
         {
@@ -47,7 +48,7 @@ public class ExprPlugInAggFunctionNode extends ExprAggregateNode
                 if (child.isConstantResult())
                 {
                     isConstant[count] = true;
-                    constant[count] = child.evaluate(null, true);
+                    constant[count] = child.evaluate(null, true, exprEvaluatorContext);
                 }
                 parameterTypes[count] = child.getType();
                 count++;

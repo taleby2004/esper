@@ -11,6 +11,7 @@ package com.espertech.esper.pattern;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,10 +31,11 @@ public class PatternExpressionUtil
      * @param beginState the pattern begin state
      * @param parameters object parameters
      * @param convertor for converting to a event-per-stream view for use to evaluate expressions
+     * @param exprEvaluatorContext expression evaluation context
      * @return expression results
      * @throws EPException if the evaluate failed
      */
-    public static List<Object> evaluate(String objectName, MatchedEventMap beginState, List<ExprNode> parameters, MatchedEventConvertor convertor)
+    public static List<Object> evaluate(String objectName, MatchedEventMap beginState, List<ExprNode> parameters, MatchedEventConvertor convertor, ExprEvaluatorContext exprEvaluatorContext)
             throws EPException
     {
         List<Object> results = new ArrayList<Object>();
@@ -43,7 +45,7 @@ public class PatternExpressionUtil
         {
             try
             {
-                Object result = evaluate(objectName, expr, eventsPerStream);
+                Object result = evaluate(objectName, expr, eventsPerStream, exprEvaluatorContext);
                 results.add(result);
                 count++;
             }
@@ -67,21 +69,22 @@ public class PatternExpressionUtil
      * @param beginState pattern state
      * @param parameter expression node
      * @param convertor to converting from pattern match to event-per-stream
+     * @param exprEvaluatorContext expression evaluation context
      * @return evaluation result
      * @throws EPException if the evaluation failed
      */
-    public static Object evaluate(String objectName, MatchedEventMap beginState, ExprNode parameter, MatchedEventConvertor convertor)
+    public static Object evaluate(String objectName, MatchedEventMap beginState, ExprNode parameter, MatchedEventConvertor convertor, ExprEvaluatorContext exprEvaluatorContext)
             throws EPException
     {
         EventBean[] eventsPerStream = convertor.convert(beginState);
-        return evaluate(objectName, parameter, eventsPerStream);
+        return evaluate(objectName, parameter, eventsPerStream, exprEvaluatorContext);
     }
 
-    private static Object evaluate(String objectName, ExprNode expression, EventBean[] eventsPerStream) throws EPException
+    private static Object evaluate(String objectName, ExprNode expression, EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext) throws EPException
     {
         try
         {
-            return expression.evaluate(eventsPerStream, true);
+            return expression.evaluate(eventsPerStream, true, exprEvaluatorContext);
         }
         catch (RuntimeException ex)
         {

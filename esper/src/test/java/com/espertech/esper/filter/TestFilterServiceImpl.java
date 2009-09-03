@@ -97,7 +97,7 @@ public class TestFilterServiceImpl extends TestCase
         for (int i = 0; i < events.size(); i++)
         {
             List<FilterHandle> matchList = new LinkedList<FilterHandle>();
-            filterService.evaluate(events.get(i), matchList);
+            filterService.evaluate(events.get(i), matchList, null);
             for (FilterHandle match : matchList)
             {
                 SupportFilterHandle handle = (SupportFilterHandle) match;
@@ -175,6 +175,11 @@ public class TestFilterServiceImpl extends TestCase
         // callback that removes another matching filter spec callback
         FilterHandleCallback callbackOne = new FilterHandleCallback()
         {
+            public String getStatementId()
+            {
+                return "";
+            }
+
             public void matchFound(EventBean event)
             {
                 log.debug(".matchFound Removing callbackTwo");
@@ -193,7 +198,7 @@ public class TestFilterServiceImpl extends TestCase
         // send event
         EventBean event = makeTypeOneEvent(1, "HELLO", false, 1);
         List<FilterHandle> matches = new LinkedList<FilterHandle>();
-        filterService.evaluate(event, matches);
+        filterService.evaluate(event, matches, null);
         for (FilterHandle match : matches)
         {
             FilterHandleCallback handle = (FilterHandleCallback) match;

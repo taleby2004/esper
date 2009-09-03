@@ -19,6 +19,7 @@ import com.espertech.esper.type.MinMaxTypeEnum;
 public class ExprMinMaxAggrNode extends ExprAggregateNode
 {
     private final MinMaxTypeEnum minMaxTypeEnum;
+    private static final long serialVersionUID = -7828413362615586145L;
 
     /**
      * Ctor.
@@ -31,7 +32,7 @@ public class ExprMinMaxAggrNode extends ExprAggregateNode
         this.minMaxTypeEnum = minMaxTypeEnum;
     }
 
-    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService) throws ExprValidationException
+    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {
