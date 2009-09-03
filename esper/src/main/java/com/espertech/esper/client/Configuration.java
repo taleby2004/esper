@@ -334,6 +334,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 		{
 			isUsingDefaultImports = false;
 			imports.clear();
+            imports.add(Name.class.getPackage().getName() + ".*");
 		}
     	imports.add(autoImport);
     }

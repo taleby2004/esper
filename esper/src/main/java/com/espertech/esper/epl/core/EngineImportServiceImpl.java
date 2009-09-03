@@ -15,7 +15,6 @@ import com.espertech.esper.client.ConfigurationMethodRef;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Array;
 import java.util.*;
 
 import org.apache.commons.logging.Log;
@@ -146,7 +145,7 @@ public class EngineImportServiceImpl implements EngineImportService
         }
         catch (EngineNoSuchMethodException e)
         {
-            throw convert(clazz, methodName, e);
+            throw convert(clazz, methodName, paramTypes, e);
         }
     }
 
@@ -293,20 +292,29 @@ public class EngineImportServiceImpl implements EngineImportService
         }
         catch (EngineNoSuchMethodException e)
         {
-            throw convert(clazz, methodName, e);
+            throw convert(clazz, methodName, paramTypes, e);
         }
     }
 
-    private EngineImportException convert(Class clazz, String methodName, EngineNoSuchMethodException e)
+    private EngineImportException convert(Class clazz, String methodName, Class[] paramTypes, EngineNoSuchMethodException e)
     {
-        String message = "Could not find static method named '" + methodName + "' in class '" + clazz.getName() + "' with matching parameter number and types";
+        String expected = JavaClassHelper.getParameterAsString(paramTypes);
+        String message;
+        if (paramTypes.length > 0)
+        {
+            message = "Could not find static method named '" + methodName + "' in class '" + clazz.getName() + "' with matching parameter number and expected parameter type(s) '" + expected + "'";
+        }
+        else
+        {
+            message = "Could not find static method named '" + methodName + "' in class '" + clazz.getName() + "' taking no parameters";
+        }
+
         if (e.getNearestMissMethod() != null)
         {
-            message += (" (nearest match found was '" + e.getNearestMissMethod().getName() + "' taking " + JavaClassHelper.getParameterAsString(e.getNearestMissMethod().getParameterTypes()) + ")");
+            message += (" (nearest match found was '" + e.getNearestMissMethod().getName() + "' taking type(s) '" + JavaClassHelper.getParameterAsString(e.getNearestMissMethod().getParameterTypes()) + "')");
         }
         return new EngineImportException(message, e);
     }
-
 
     /**
      * For testing, returns imports.

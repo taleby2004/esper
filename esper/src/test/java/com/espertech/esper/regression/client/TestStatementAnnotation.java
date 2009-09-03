@@ -21,16 +21,13 @@ public class TestStatementAnnotation extends TestCase
 {
     private EPServiceProvider epService;
 
-    public void setUp()
+    public void testInvalid() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addEventType("Bean", SupportBean.class.getName());
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
-    }
 
-    public void testInvalid() throws Exception
-    {
         epService.getEPAdministrator().getConfiguration().addImport("com.espertech.esper.regression.client.*");
 
         tryInvalid("@MyAnnotationNested(nestableSimple=@MyAnnotationNestableSimple, nestableValues=@MyAnnotationNestableValues, nestableNestable=@MyAnnotationNestableNestable) select * from Bean", false,
@@ -101,6 +98,12 @@ public class TestStatementAnnotation extends TestCase
 
     public void testBuiltin()
     {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.addEventType("Bean", SupportBean.class.getName());
+        configuration.addImport(MyAnnotationNestableValues.class.getPackage().getName() + ".*");
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
         String stmtText = "@Name('MyTestStmt') @Description('MyTestStmt description') @Tag(name=\"UserId\", value=\"value\") select * from Bean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         runAssertion(stmt);
@@ -154,6 +157,11 @@ public class TestStatementAnnotation extends TestCase
     @MyAnnotationValueEnum(supportEnum = SupportEnum.ENUM_VALUE_3)
     public void testClientAppAnnotationSimple()
     {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.addEventType("Bean", SupportBean.class.getName());
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
         epService.getEPAdministrator().getConfiguration().addImport("com.espertech.esper.regression.client.*");
         epService.getEPAdministrator().getConfiguration().addImport(SupportEnum.class);
 
@@ -163,6 +171,7 @@ public class TestStatementAnnotation extends TestCase
                 "@MyAnnotationValueDefaulted " +
                 "@MyAnnotationValueEnum(supportEnum = SupportEnum.ENUM_VALUE_3) " +
                 "@MyAnnotationValuePair(stringVal='a', intVal=-1, longVal=2, booleanVal=true, charVal='x', byteVal=10, shortVal=20, doubleVal=2.5) " +
+                "@Name('STMTONE')" +
                 "select * from Bean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         EPStatementSPI spi = (EPStatementSPI) stmt;
@@ -170,11 +179,12 @@ public class TestStatementAnnotation extends TestCase
 
         Annotation[] annotations = stmt.getAnnotations();
         annotations = sortAlpha(annotations);
-        assertEquals(5, annotations.length);
+        assertEquals(6, annotations.length);
 
         assertEquals(MyAnnotationSimple.class, annotations[0].annotationType());
         assertEquals("abc", ((MyAnnotationValue)annotations[1]).value());
         assertEquals("XYZ", ((MyAnnotationValueDefaulted)annotations[2]).value());
+        assertEquals("STMTONE", ((Name)annotations[5]).value());
 
         MyAnnotationValueEnum enumval = (MyAnnotationValueEnum) annotations[3];
         assertEquals(SupportEnum.ENUM_VALUE_2, enumval.supportEnumDef());
@@ -216,6 +226,11 @@ public class TestStatementAnnotation extends TestCase
 
     public void testSPI()
     {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.addEventType("Bean", SupportBean.class.getName());
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
         epService.getEPAdministrator().getConfiguration().addImport("com.espertech.esper.regression.client.*");
 
         String[][] testdata = new String[][] {
@@ -249,6 +264,11 @@ public class TestStatementAnnotation extends TestCase
     )
     public void testClientAppAnnotationNested()
     {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.addEventType("Bean", SupportBean.class.getName());
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
         epService.getEPAdministrator().getConfiguration().addImport("com.espertech.esper.regression.client.*");
 
         String stmtText =

@@ -625,7 +625,8 @@ onSelectExpr
 		(GROUP BY groupByListExpr)?
 		(HAVING havingClause)?
 		(ORDER BY orderByListExpr)?
-		-> ^(ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr?)
+		(ROW_LIMIT_EXPR rowLimit)?
+		-> ^(ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause? groupByListExpr? havingClause? orderByListExpr? rowLimit?)
 	;
 	
 onSelectInsertExpr

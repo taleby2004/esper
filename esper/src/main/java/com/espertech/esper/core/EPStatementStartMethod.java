@@ -1086,7 +1086,15 @@ public class EPStatementStartMethod
         JoinExecStrategyDispatchable joinStatementDispatch = new JoinExecStrategyDispatchable(execution, statementSpec.getStreamSpecs().size());
         statementContext.getEpStatementHandle().setOptionalDispatchable(joinStatementDispatch);
 
-        JoinPreloadMethodImpl preloadMethod = new JoinPreloadMethodImpl(streamNames.length, composer);
+        JoinPreloadMethod preloadMethod;
+        if (joinAnalysisResult.getUnidirectionalStreamNumber() >= 0)
+        {
+            preloadMethod = new JoinPreloadMethodNull();
+        }
+        else
+        {
+            preloadMethod = new JoinPreloadMethodImpl(streamNames.length, composer); 
+        }
 
         // Create buffer for each view. Point buffer to dispatchable for join.
         for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)

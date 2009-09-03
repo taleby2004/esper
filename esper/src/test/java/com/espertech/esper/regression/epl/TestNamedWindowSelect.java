@@ -218,7 +218,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtCreate.destroy();
     }
 
-    public void testSelectJoinColumns()
+    public void testSelectJoinColumnsLimit()
     {
         String[] fields = new String[] {"triggerid", "wina", "b"};
 
@@ -247,7 +247,17 @@ public class TestNamedWindowSelect extends TestCase
         ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fields, new Object[] {"A1", "E2", 2});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"A1", "E1", 1}, {"A1", "E2", 2}});
 
+        // try limit clause
         stmtSelect.destroy();
+        stmtTextSelect = "on " + SupportBean_A.class.getName() + " as trigger select trigger.id as triggerid, win.a as wina, b from MyWindow as win order by wina limit 1";
+        stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
+        stmtSelect.addListener(listenerSelect);
+
+        sendSupportBean_A("A1");
+        assertEquals(1, listenerSelect.getLastNewData().length);
+        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fields, new Object[] {"A1", "E1", 1});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"A1", "E1", 1}});
+
         stmtCreate.destroy();
     }
 

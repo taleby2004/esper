@@ -27,6 +27,7 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.View;
+import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.*;
 
@@ -136,7 +137,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
                 throw new ExprValidationException("Method footprint does not match the number or type of expression parameters, expecting no parameters in method: " + e.getMessage());
             }
             throw new ExprValidationException("Method footprint does not match the number or type of expression parameters, expecting a method where parameters are typed '" +
-                    Arrays.toString(paramTypes) + "': " + e.getMessage());
+                    JavaClassHelper.getParameterAsString(paramTypes) + "': " + e.getMessage());
 		}
     }
 

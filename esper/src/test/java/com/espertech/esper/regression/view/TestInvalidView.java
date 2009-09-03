@@ -130,7 +130,7 @@ public class TestInvalidView extends TestCase
 
         // method not found
         exceptionText = getStatementExceptionView("select Math.unknownMethod() from " + EVENT_NUM + ".win:length(10)");
-        assertEquals("Error starting statement: Could not find static method named 'unknownMethod' in class 'java.lang.Math' with matching parameter number and types [select Math.unknownMethod() from com.espertech.esper.support.bean.SupportBean_N.win:length(10)]", exceptionText);
+        assertEquals("Error starting statement: Could not find static method named 'unknownMethod' in class 'java.lang.Math' taking no parameters [select Math.unknownMethod() from com.espertech.esper.support.bean.SupportBean_N.win:length(10)]", exceptionText);
 
         // invalid property in group-by
         exceptionText = getStatementExceptionView("select intPrimitive from " + EVENT_ALLTYPES + ".win:length(1) group by xxx");

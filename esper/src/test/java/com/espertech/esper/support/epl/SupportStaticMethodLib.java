@@ -412,4 +412,67 @@ public class SupportStaticMethodLib
     {
         return new int[] {100, 200, 300};
     }
+
+    public static int arraySumIntBoxed(Integer[] array)
+    {
+        int sum = 0;
+        for (int i = 0; i < array.length; i++)
+        {
+            if (array[i] == null)
+            {
+                continue;
+            }
+            sum += array[i];
+        }
+        return sum;
+    }
+
+    public static double arraySumDouble(Double[] array)
+    {
+        double sum = 0;
+        for (int i = 0; i < array.length; i++)
+        {
+            if (array[i] == null)
+            {
+                continue;
+            }
+            sum += array[i];
+        }
+        return sum;
+    }
+
+    public static double arraySumString(String[] array)
+    {
+        double sum = 0;
+        for (int i = 0; i < array.length; i++)
+        {
+            if (array[i] == null)
+            {
+                continue;
+            }
+            sum += Double.parseDouble(array[i]);
+        }
+        return sum;
+    }
+
+    public static double arraySumObject(Object[] array)
+    {
+        double sum = 0;
+        for (int i = 0; i < array.length; i++)
+        {
+            if (array[i] == null)
+            {
+                continue;
+            }
+            if (array[i] instanceof Number)
+            {
+                sum += ((Number) array[i]).doubleValue();
+            }
+            else
+            {
+                sum += Double.parseDouble(array[i].toString());
+            }
+        }
+        return sum;
+    }
 }

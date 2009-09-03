@@ -131,6 +131,25 @@ public class TestStaticFunctions extends TestCase
         epService.getEPAdministrator().createEPL(text);
     }
 
+    public void testArrayParameter()
+    {
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class);
+        
+        String text = "select " +
+                "SupportStaticMethodLib.arraySumIntBoxed({1,2,null,3,4}) as v1, " +
+                "SupportStaticMethodLib.arraySumDouble({1,2,3,4.0}) as v2, " +
+                "SupportStaticMethodLib.arraySumString({'1','2','3','4'}) as v3, " +
+                "SupportStaticMethodLib.arraySumObject({'1',2,3.0,'4.0'}) as v4 " +
+                " from " + SupportBean.class.getName();
+        listener = new SupportUpdateListener();
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "v1,v2,v3,v4".split(","), new Object[] {10, 10d, 10d, 10d});
+    }
+
 	public void testNoParameters()
 	{
 		Long startTime = System.currentTimeMillis();

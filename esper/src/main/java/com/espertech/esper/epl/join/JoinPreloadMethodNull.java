@@ -8,31 +8,35 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join;
 
-import com.espertech.esper.epl.core.ResultSetProcessor;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.view.internal.BufferView;
+import com.espertech.esper.epl.core.ResultSetProcessor;
+import com.espertech.esper.collection.MultiKey;
+
+import java.util.Set;
+import java.util.HashSet;
 
 /**
- * Method for preloading events for a given stream onto the stream's indexes, from a buffer already associated with a stream.
+ * Implements a method for pre-loading (initializing) join that does not return any events.
  */
-public interface JoinPreloadMethod
+public class JoinPreloadMethodNull implements JoinPreloadMethod
 {
     /**
-     * Initialize a stream from the stream buffers data.
-     * @param stream to initialize and load indexes
+     * Ctor.
      */
-    public void preloadFromBuffer(int stream);
+    public JoinPreloadMethodNull()
+    {
+    }
 
-    /**
-     * Initialize the result set process for the purpose of grouping and aggregation
-     * from the join result set.
-     * @param resultSetProcessor is the grouping and aggregation result processing
-     */
-    public void preloadAggregation(ResultSetProcessor resultSetProcessor);
+    public void preloadFromBuffer(int stream)
+    {
+    }
 
-    /**
-     * Sets the buffee to use.
-     * @param buffer buffer to use
-     * @param i stream
-     */
-    void setBuffer(BufferView buffer, int i);
+    public void preloadAggregation(ResultSetProcessor resultSetProcessor)
+    {
+    }
+
+    public void setBuffer(BufferView buffer, int i)
+    {        
+    }
 }

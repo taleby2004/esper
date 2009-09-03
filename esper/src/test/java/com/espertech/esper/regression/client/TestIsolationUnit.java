@@ -7,7 +7,10 @@ import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
+
+import java.util.Iterator;
 
 public class TestIsolationUnit extends TestCase
 {
@@ -610,6 +613,31 @@ public class TestIsolationUnit extends TestCase
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {106000L});
 
         epService.getEPAdministrator().destroyAllStatements();
+    }
+
+    public void testSubscriberNamedWindowConsumerIterate()
+    {
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as select * from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+
+        EPServiceProviderIsolated isolatedService = epService.getEPServiceIsolated("isolatedStmts");
+        isolatedService.getEPRuntime().sendEvent(new CurrentTimeEvent(System.currentTimeMillis()));
+
+        SupportSubscriber subscriber = new SupportSubscriber();
+        final EPStatement stmtOne = epService.getEPAdministrator().createEPL("select * from SupportBean");
+        stmtOne.setSubscriber(subscriber);
+
+        final EPStatement stmtTwo = isolatedService.getEPAdministrator().createEPL("select * from MyWindow", null, null);
+        isolatedService.getEPAdministrator().addStatement(stmtOne);
+
+        final Iterator<EventBean> iter = stmtTwo.iterator();
+        while (iter.hasNext()) {
+            final EventBean event = iter.next();
+            isolatedService.getEPRuntime().sendEvent(event.getUnderlying());
+        }
+
+        assertTrue(subscriber.isInvoked());
     }
 
     private void sendTimerUnisolated(long millis){

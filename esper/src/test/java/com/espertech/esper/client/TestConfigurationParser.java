@@ -1,6 +1,7 @@
 package com.espertech.esper.client;
 
 import com.espertech.esper.client.soda.StreamSelector;
+import com.espertech.esper.client.annotation.Name;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.type.StringPatternSet;
 import com.espertech.esper.type.StringPatternSetRegex;
@@ -95,9 +96,10 @@ public class TestConfigurationParser extends TestCase
         assertEquals("com.mycompany.package.MyLegacyTypeEvent", config.getEventTypeNames().get("MyLegacyTypeEvent"));
 
         // assert auto imports
-        assertEquals(2, config.getImports().size());
-        assertEquals("com.mycompany.myapp.*", config.getImports().get(0));
-        assertEquals("com.mycompany.myapp.ClassOne", config.getImports().get(1));
+        assertEquals(3, config.getImports().size());
+        assertEquals(Name.class.getPackage().getName() + ".*", config.getImports().get(0));
+        assertEquals("com.mycompany.myapp.*", config.getImports().get(1));
+        assertEquals("com.mycompany.myapp.ClassOne", config.getImports().get(2));
 
         // assert XML DOM - no schema
         assertEquals(2, config.getEventTypesXMLDOM().size());

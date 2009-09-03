@@ -437,6 +437,25 @@ public class TestNamedWindowJoin extends TestCase
         ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 8, "S0", 7});
     }
 
+    public void testUnidirectional()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() select * from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL("select w.* from MyWindow w unidirectional, SupportBean_A.std:lastevent() s where s.id = w.string");
+        stmtOne.addListener(listenerStmtOne);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
+        assertFalse(listenerStmtOne.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        assertTrue(listenerStmtOne.isInvoked());
+    }
+
     private SupportBean_A sendSupportBean_A(String id)
     {
         SupportBean_A bean = new SupportBean_A(id);

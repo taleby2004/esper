@@ -95,7 +95,7 @@ onDeleteExpr
 	;	
 
 onSelectExpr
-	:	^(s=ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause[true]? groupByClause? havingClause? orderByClause? { leaveNode($s); }) 
+	:	^(s=ON_SELECT_EXPR insertIntoExpr? DISTINCT? selectionList onExprFrom? whereClause[true]? groupByClause? havingClause? orderByClause? rowLimitClause? { leaveNode($s); }) 
 	;	
 
 onSelectInsertExpr
