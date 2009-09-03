@@ -5,9 +5,29 @@ Esper Changelog
 Changes in version 3.2.0
 ------------------------
 
-- Support to the proposed SQL standard "match_recognize", a regular expression-based event pattern matching language
-- Support for isolated service providers, which allow to control event visibility and time-related behavior on a statement level
-- Support for "update istream" which allows declarative modification of event properties of events entering a stream.
+Major API changes
+  - None
+  
+New Features
+  - Support to the proposed SQL standard "match_recognize", a regular expression-based event pattern matching language
+  - Support for isolated service providers, which allow to control event visibility and time-related behavior on a statement level, i.e. suspend, preload or catch-up statements
+  - Support for "update istream" which allows declarative modification of event properties of events entering a stream.
+  - Support for "distinct" in the select clause
+  - New 'output after' syntax to discard of events until time period passed
+
+Minor changes  
+  - Fixed issue ESPER-386 "Output when" with variables fails when multiple statements refer to same variable
+  - Fixed issue ESPER-385 NPE thrown on removeAllListeners for destroyed statement
+  - Fixed issue ESPER-382 ConcurrentModificationException for named window select/insert/delete
+  - Fixed issue ESPER-376 Restriction in element not parsing to right type for XSD-backed event type
+  - Fixed issue ESPER-375 Contained event selection for certain XML creates ClassCastException
+  - Fixed issue ESPER-373 NPE in output rate limiting using SODA
+  - Fixed issue ESPER-371 Using Esper 3.1.1, a POJO type of float isn't supported in the statements
+  - Fixed issue ESPER-370 Exception compiling pattern with repeat operator and filter using repeated property within the repeat operator itself
+  - Fixed issue ESPER-368 XML schema property plus XPath with the same property name produce incorrect result if schema and XPath typing don't match
+  - Fixed issue ESPER-367 OutOfMemory issue when a group-by expression returns an unlimited number of values
+  - Fixed issue ESPER-366 Missing export of package com.espertech.esper.event.property
+  - Documentation and performance improvements
 
 
 Changes in version 3.1.0

@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,7 +112,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
                     log.info(".execute Setting parameter " + count + " to " + parameter + " typed " + ((parameter == null)? "null" : parameter.getClass()));
                 }
 
-                preparedStatement.setObject(count, lookupValuePerStream[i]);
+				setObject(preparedStatement, count, lookupValuePerStream[i]);
             }
             catch (SQLException ex)
             {
@@ -176,4 +177,19 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
 
         return rows;
     }
+
+	private void setObject(PreparedStatement preparedStatement, int column, Object value) throws SQLException
+	{
+		// Allow java.util.Date conversion for JDBC drivers that don't provide this feature
+		if (value instanceof Date)
+		{
+			value = new Timestamp(((Date)value).getTime());
+		}
+        else if (value instanceof Calendar)
+        {
+            value = new Timestamp(((Calendar)value).getTimeInMillis());
+        }
+
+		preparedStatement.setObject(column, value);		
+	}
 }
