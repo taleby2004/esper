@@ -49,7 +49,7 @@ Features
 
 	* Grouping, aggregation, sorting, filtering, merging, splitting or duplicating of event streams
 
-	* Tailored SQL-like query language using <insert into>, <select>, <from>, <where>, <group-by>, <having> and <order-by> clauses
+	* Familiar SQL-standard-based continuous query language using <insert into>, <select>, <from>, <where>, <group-by>, <having>, <order-by>, <limit> and <distinct> clauses
 
 	* Inner-joins and outer joins (left, right, full) of an unlimited number of streams or windows
 
@@ -66,7 +66,7 @@ Features
 		* Support for predefined query execution optimized by indexed access, via on-select
 		
 		[]
-			
+		
 	[]
 		
         
@@ -79,6 +79,8 @@ Features
 	* Lifecycle of pattern can be controlled by timer and via operators, repeat-number and repeat-until, every-distinct
 
         * Pattern-matched events provided to listeners
+        
+        * Support for <match_recognize> which is a proposed SQL standard for row pattern matching based on regular expressions
 
         []
 
@@ -98,6 +100,20 @@ Features
 
         []
         
+* API
+
+    	* Mature API with few significant changes since version 1.0
+    	
+    	* Support for both the << listener (push/subscription) API>> and the <<consumer (pull/receive) API>> for querying results
+    	
+    	* Control event visibility and the concept of timer on a statement level via isolated service provider
+    		
+    		* Suspend statements: take statements offline and online without losing state
+    		
+    		* Load statements from historical data and merge into real-time streams
+    			
+	[]
+
 * Prepared statements and substitution parameters
     
         * Precompile a statement with substitution parameters and efficiently start the parameterized statement multiple times
@@ -158,8 +174,6 @@ Features
        when the event type is expected to vary, or when optional properties are desired.
  
     * Support for <<update events>> that update, provide a new version or that revise an existing event held by an engine.
-
-    * Support for both the << listener (push/subscription) API>> and the <<consumer (pull/receive) API>> for querying results
 	
     * <<Concurrency-safe iterator>> provides complete query capability for all statements    
     
@@ -173,7 +187,7 @@ Features
     	
     	* Applications can retain full control over threading; Inbound, outbound and execution threading configurable
     	
-    	* Efficiently sharing resources between statements and low thread blocking 
+    	* Efficiently sharing resources between statements and low thread blocking
     	
     	[]
     	
@@ -196,9 +210,11 @@ Features
     
     * JSON and XML output event rendering without syntax to learn
             
-    * <<Annotations>> allow adding informaton to EPL statements specific to your application
+    * <<Annotations>> allow adding information to EPL statements specific to your application
     
     * Assign a <<priority>> to your statement; Identify <<preemptive>> statements that cause an event to drop in face of multiple statements matching filters.
+    
+    * Declarative update of event properties via <<update istream>> of events entering a stream.
         
     []		
     

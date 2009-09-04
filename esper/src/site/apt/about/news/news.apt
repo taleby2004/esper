@@ -1,5 +1,22 @@
 News
 
+* Sept. 6, 2009  -  Esper 3.2.0
+
+  * Support to the proposed SQL standard "match_recognize", a regular expression-based event pattern matching language
+  
+  * Support for isolated service providers, which allow to control event visibility and time-related behavior on a statement level, i.e. suspend, preload or catch-up statements
+  
+  * Support for "update istream" which allows declarative modification of event properties of events entering a stream.
+  
+  * Support for "distinct" in the select clause
+  
+  * Support for	"output after" syntax to discard of events until time period passed
+  
+  * Support for "limit" clause for on-select and on-insert
+
+  []
+
+
 * August 3, 2009  -  NEsper 3.0.0 for .NET
 
   * Esper for .NET - feature equivalent to Esper 3.0.0

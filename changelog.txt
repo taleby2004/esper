@@ -13,7 +13,8 @@ New Features
   - Support for isolated service providers, which allow to control event visibility and time-related behavior on a statement level, i.e. suspend, preload or catch-up statements
   - Support for "update istream" which allows declarative modification of event properties of events entering a stream.
   - Support for "distinct" in the select clause
-  - New 'output after' syntax to discard of events until time period passed
+  - Support for	"output after" syntax to discard of events until time period passed
+  - Support for "limit" clause for on-select and on-insert
 
 Minor changes  
   - Fixed issue ESPER-386 "Output when" with variables fails when multiple statements refer to same variable
@@ -27,6 +28,8 @@ Minor changes
   - Fixed issue ESPER-368 XML schema property plus XPath with the same property name produce incorrect result if schema and XPath typing don't match
   - Fixed issue ESPER-367 OutOfMemory issue when a group-by expression returns an unlimited number of values
   - Fixed issue ESPER-366 Missing export of package com.espertech.esper.event.property
+  - Fixed issue ESPER-365 Import EPL built in annotation by default
+  - Fixed issue ESPER-362 Error "Iteration over a unidirectional join is not supported" at statement start in a stream to window join
   - Documentation and performance improvements
 
 

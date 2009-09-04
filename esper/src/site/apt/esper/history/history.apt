@@ -12,6 +12,42 @@ Change History
 	[]
 
 
+
+Version 3.2.0
+
+	Released Sept. 6, 2009
+	
+	Built with Sun JDK 5.0 Update 20; Also tested for JDK 6
+
+* API changes
+
+  * None.
+    
+* Major changes
+    
+  * Support to the proposed SQL standard "match_recognize", a regular expression-based event pattern matching language
+  
+  * Support for isolated service providers, which allow to control event visibility and time-related behavior on a statement level, i.e. suspend, preload or catch-up statements
+  
+  * Support for "update istream" which allows declarative modification of event properties of events entering a stream.
+  
+  * Support for "distinct" in the select clause
+  
+  * Support for	"output after" syntax to discard of events until time period passed
+  
+  * Support for "limit" clause for on-select and on-insert
+    
+  []
+    
+* Minor changes
+
+  * Documentation and performance improvements
+  
+  * Bug fixes: see JIRA list of resolved issues for release 3.2
+
+  []
+
+
 Version 3.1.0
 
 	Released May 16, 2009
