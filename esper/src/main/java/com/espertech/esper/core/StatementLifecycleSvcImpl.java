@@ -854,6 +854,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) createWindowTypeSpec;
                     selectFromType = filterStreamSpec.getFilterSpec().getFilterForEventType();
                     selectFromTypeName = filterStreamSpec.getFilterSpec().getFilterForEventTypeName();
+
+                    if (spec.getCreateWindowDesc().getInsertFilter() != null)
+                    {
+                        throw new EPStatementException("A named window by name '" + selectFromTypeName + "' could not be located, use the insert-keyword with an existing named window", eplStatement);
+                    }
                 }
                 else
                 {

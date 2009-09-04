@@ -220,6 +220,16 @@ public class TestNamedWindowInsertFrom extends TestCase
 
         try
         {
+            epService.getEPAdministrator().createEPL("create window testWindow3.win:keepall() as select * from " + SupportBean.class.getName() + " insert where (intPrimitive = 10)");
+            fail();
+        }
+        catch (EPStatementException ex)
+        {
+            assertEquals("A named window by name 'com.espertech.esper.support.bean.SupportBean' could not be located, use the insert-keyword with an existing named window [create window testWindow3.win:keepall() as select * from com.espertech.esper.support.bean.SupportBean insert where (intPrimitive = 10)]", ex.getMessage());
+        }
+
+        try
+        {
             epService.getEPAdministrator().createEPL("create window MyWindowTwo.win:keepall() as MyWindow insert where (select intPrimitive from SupportBean.std:lastevent())");
             fail();
         }
