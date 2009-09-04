@@ -105,7 +105,7 @@ public class EngineImportServiceImpl implements EngineImportService
             throw new EngineImportException("Could not load aggregation class by name '" + className + "'", ex);
         }
 
-        Object object = null;
+        Object object;
         try
         {
             object = clazz.newInstance();
@@ -152,7 +152,7 @@ public class EngineImportServiceImpl implements EngineImportService
     public Method resolveMethod(String className, String methodName)
 			throws EngineImportException
     {
-        Class clazz = null;
+        Class clazz;
         try
         {
             clazz = resolveClassInternal(className);

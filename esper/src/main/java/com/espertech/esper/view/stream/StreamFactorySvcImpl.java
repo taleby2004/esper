@@ -95,7 +95,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         }
 
         // Check if a stream for this filter already exists
-        Pair<EventStream, EPStatementHandleCallback> pair = null;
+        Pair<EventStream, EPStatementHandleCallback> pair;
         boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger;
         if (forceNewStream)
         {
@@ -197,7 +197,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
      */
     public void dropStream(FilterSpecCompiled filterSpec, FilterService filterService, boolean isJoin, boolean isSubSelect, boolean isNamedWindowTrigger)
     {
-        Pair<EventStream, EPStatementHandleCallback> pair = null;
+        Pair<EventStream, EPStatementHandleCallback> pair;
         boolean forceNewStream = isJoin || (!isReuseViews) || isSubSelect || isNamedWindowTrigger;
 
         if (forceNewStream)

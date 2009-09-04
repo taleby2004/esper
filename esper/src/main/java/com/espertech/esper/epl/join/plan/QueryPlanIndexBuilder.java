@@ -65,7 +65,7 @@ public class QueryPlanIndexBuilder
             }
 
             // Copy the index properties for the stream to a QueryPlanIndex instance
-            String[][] indexProps = null;
+            String[][] indexProps;
             if (!indexesList.isEmpty())
             {
                 indexProps = new String[indexesList.size()][];

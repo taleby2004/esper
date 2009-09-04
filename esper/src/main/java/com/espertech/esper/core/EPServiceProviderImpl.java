@@ -243,7 +243,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             // plugin-loaders
             List<ConfigurationPluginLoader> pluginLoaders = engine.getServices().getConfigSnapshot().getPluginLoaders();
             for (ConfigurationPluginLoader config : pluginLoaders) {
-                PluginLoader plugin = null;
+                PluginLoader plugin;
                 try {
                     plugin = (PluginLoader) engine.getServices().getEngineEnvContext().lookup("plugin-loader/" + config.getLoaderName());
                     plugin.destroy();

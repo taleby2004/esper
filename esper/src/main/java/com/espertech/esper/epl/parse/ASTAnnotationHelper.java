@@ -27,7 +27,7 @@ public class ASTAnnotationHelper
     {
         String name = node.getChild(0).getText();
         List<Pair<String, Object>> values = new ArrayList<Pair<String, Object>>();
-        Object value = null;
+        Object value;
 
         for (int i = 1; i < node.getChildCount(); i++)
         {
@@ -84,7 +84,7 @@ public class ASTAnnotationHelper
     private static Object walkClassIdent(Tree child, EngineImportService engineImportService)
     {
         String enumValueText = child.getText();
-        Object enumValue = null;
+        Object enumValue;
         try
         {
             enumValue = JavaClassHelper.resolveIdentAsEnumConst(enumValueText, null, engineImportService);

@@ -307,7 +307,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         }
 
         ArrayList<EventBean> releaseEvents = null;
-        Long oldestKey = null;
+        Long oldestKey;
         while(true)
         {
             if (sortedEvents.isEmpty())

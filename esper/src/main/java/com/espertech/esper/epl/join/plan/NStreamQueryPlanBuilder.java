@@ -229,7 +229,7 @@ public class NStreamQueryPlanBuilder
                                                QueryPlanIndex indexSpecs, EventType[] typesPerStream)
     {
         String[] indexedStreamIndexProps = queryGraph.getIndexProperties(currentLookupStream, indexedStream);
-        int indexNum = -1;
+        int indexNum;
 
         // We use an index if there are index properties for the 2 streams
         TableLookupPlan tableLookupPlan;

@@ -188,7 +188,7 @@ public class ExprIdentNode extends ExprNode
     protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName)
         throws ExprValidationPropertyException
     {
-        PropertyResolutionDescriptor propertyInfo = null;
+        PropertyResolutionDescriptor propertyInfo;
 
         // no stream/property name supplied
         if (streamOrPropertyName == null)

@@ -27,7 +27,7 @@ public class ResourceLoader
      */
     public static URL resolveClassPathOrURLResource(String resourceName, String urlOrClasspathResource)
     {
-        URL url = null;
+        URL url;
         try
         {
             url = new URL(urlOrClasspathResource);

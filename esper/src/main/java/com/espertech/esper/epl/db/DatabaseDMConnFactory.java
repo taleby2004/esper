@@ -56,7 +56,7 @@ public class DatabaseDMConnFactory implements DatabaseConnectionFactory
     public Connection getConnection() throws DatabaseConfigException
     {
         // use driver manager to get a connection
-        Connection connection = null;
+        Connection connection;
         String url = driverConfig.getUrl();
         Properties properties = driverConfig.getOptionalProperties();
         if (properties == null)

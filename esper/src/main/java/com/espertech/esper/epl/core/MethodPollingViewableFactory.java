@@ -67,7 +67,7 @@ public class MethodPollingViewableFactory
     {
         // Try to resolve the method
         FastMethod staticMethod;
-        Class declaringClass = null;
+        Class declaringClass;
         try
 		{
 			Method method = methodResolutionService.resolveMethod(methodStreamSpec.getClassName(), methodStreamSpec.getMethodName());

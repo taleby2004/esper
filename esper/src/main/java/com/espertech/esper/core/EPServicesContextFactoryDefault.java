@@ -395,7 +395,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                                                           SchedulingService schedulingService,
                                                           SchedulingMgmtService schedulingMgmtService)
     {
-        DatabaseConfigService databaseConfigService = null;
+        DatabaseConfigService databaseConfigService;
 
         // Add auto-imports
         try

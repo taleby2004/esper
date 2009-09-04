@@ -87,7 +87,7 @@ public class PriorEventViewFactory implements ViewFactory
 
     public View makeView(StatementContext statementContext)
     {
-        ViewUpdatedCollection viewUpdatedCollection = null;
+        ViewUpdatedCollection viewUpdatedCollection;
 
         if (callbacksPerIndex.isEmpty())
         {

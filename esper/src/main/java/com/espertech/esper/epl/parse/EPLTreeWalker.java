@@ -2317,7 +2317,6 @@ public class EPLTreeWalker extends EsperEPL2Ast
         {
             throw new ASTWalkException("Unexpected AST tree contains zero child element for case node");
         }
-        Tree childNode = node.getChild(0);
         if (astExprNodeMap.size() == 1)
         {
             throw new ASTWalkException("AST tree doesn not contain at least when node for case node");

@@ -96,7 +96,7 @@ public class ExprBetweenNode extends ExprNode
             throw new ExprValidationException("Null value not allowed in between-clause");
         }
 
-        Class compareType = null;
+        Class compareType;
         if ((typeTwo == null) || (typeThree == null))
         {
             isAlwaysFalse = true;

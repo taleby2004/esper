@@ -219,7 +219,6 @@ public class NamedWindowRootView extends ViewSupport
         }
         Arrays.sort(joinedPropDesc);
         keyPropertiesJoin = JoinedPropDesc.getKeyProperties(joinedPropDesc);
-        indexPropertiesJoin = JoinedPropDesc.getIndexProperties(joinedPropDesc);
 
         // Get the table for this index
         PropertyIndexedEventTable table = indexRepository.addTable(joinedPropDesc, dataWindowContents, namedWindowEventType, mustCoerce);

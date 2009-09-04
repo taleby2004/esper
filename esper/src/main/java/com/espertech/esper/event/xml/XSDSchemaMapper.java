@@ -188,11 +188,6 @@ public class XSDSchemaMapper
                         XSElementDeclaration decl = (XSElementDeclaration) childParticle.getTerm();
                         boolean isArrayFlag = isArray(childParticle);
 
-                        XSTypeDefinition type = decl.getTypeDefinition();
-                        //String name = type.getTypeName();
-                        Object o = type.getBaseType();
-                        
-
                         if (isSimpleTypeCategory(decl.getTypeDefinition().getTypeCategory())) {
 
                             XSSimpleTypeDecl simpleType = (XSSimpleTypeDecl) decl.getTypeDefinition();

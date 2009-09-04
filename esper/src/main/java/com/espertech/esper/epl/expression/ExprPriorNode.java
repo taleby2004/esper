@@ -88,7 +88,7 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean originalEvent = eventsPerStream[streamNumber];
-        EventBean substituteEvent = null;
+        EventBean substituteEvent;
 
         if (randomAccess != null)
         {

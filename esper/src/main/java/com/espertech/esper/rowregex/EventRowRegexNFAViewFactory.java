@@ -32,7 +32,6 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
     private final LinkedHashMap<String, Pair<Integer, Boolean>> variableStreams;
     private final Map<Integer, String> streamVariables;
     private final Set<String> variablesSingle;
-    private final Set<String> variablesMultiple;
     private final EventType compositeEventType;
     private final EventType rowEventType;
     private final AggregationServiceMatchRecognize aggregationService;
@@ -59,7 +58,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
 
         // Determine single-row and multiple-row variables
         variablesSingle = new LinkedHashSet<String>();
-        variablesMultiple = new LinkedHashSet<String>();
+        Set<String> variablesMultiple = new LinkedHashSet<String>();
         EventRowRegexHelper.recursiveInspectVariables(matchRecognizeSpec.getPattern(), false, variablesSingle, variablesMultiple);
 
         // each variable gets associated with a stream number (multiple-row variables as well to hold the current event for the expression).

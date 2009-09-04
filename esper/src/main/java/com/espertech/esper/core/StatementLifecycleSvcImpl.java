@@ -1130,7 +1130,6 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             if ((validatedExpression instanceof ExprIdentNode) && (!(singleType instanceof NativeEventType)))
             {
                 ExprIdentNode identNode = (ExprIdentNode) validatedExpression;
-                String propertyName = identNode.getResolvedPropertyName();
                 FragmentEventType fragmentEventType = singleType.getFragmentType(identNode.getFullUnresolvedName());
                 if ((fragmentEventType != null) && (!fragmentEventType.isNative()))
                 {

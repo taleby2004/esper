@@ -163,7 +163,7 @@ public class QueryGraph
      */
     public static void fillEquivalentNav(QueryGraph queryGraph)
     {
-        boolean addedEquivalency = false;
+        boolean addedEquivalency;
 
         // Repeat until no more entries were added
         do

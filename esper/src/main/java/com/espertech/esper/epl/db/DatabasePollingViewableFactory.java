@@ -55,7 +55,7 @@ public class DatabasePollingViewableFactory
             throws ExprValidationException
     {
         // Parse the SQL for placeholders and text fragments
-        List<PlaceholderParser.Fragment> sqlFragments = null;
+        List<PlaceholderParser.Fragment> sqlFragments;
         try
         {
             sqlFragments = PlaceholderParser.parsePlaceholder(databaseStreamSpec.getSqlWithSubsParams());
@@ -77,8 +77,8 @@ public class DatabasePollingViewableFactory
 
         // Get a database connection
         String databaseName = databaseStreamSpec.getDatabaseName();
-        DatabaseConnectionFactory databaseConnectionFactory = null;
-        ColumnSettings metadataSetting = null;
+        DatabaseConnectionFactory databaseConnectionFactory;
+        ColumnSettings metadataSetting;
         try
         {
             databaseConnectionFactory = databaseConfigService.getConnectionFactory(databaseName);
@@ -91,7 +91,7 @@ public class DatabasePollingViewableFactory
             throw new ExprValidationException(text + ", reason: " + ex.getMessage());
         }
 
-        Connection connection = null;
+        Connection connection;
         try
         {
             connection = databaseConnectionFactory.getConnection();
@@ -402,7 +402,7 @@ public class DatabasePollingViewableFactory
         }
 
         // No where clause, find group-by
-        int insertIndex = -1;
+        int insertIndex;
         if (groupbyIndex != -1)
         {
             insertIndex = groupbyIndex;

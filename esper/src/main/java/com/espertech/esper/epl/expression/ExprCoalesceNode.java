@@ -83,7 +83,7 @@ public class ExprCoalesceNode extends ExprNode
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object value = null;
+        Object value;
 
         // Look for the first non-null return value
         int count = 0;

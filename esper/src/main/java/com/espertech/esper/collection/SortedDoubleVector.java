@@ -121,7 +121,7 @@ public class SortedDoubleVector
         {
             int startIndex = values.size() >> 1;
             double startValue = values.get(startIndex);
-            int insertAt = -1;
+            int insertAt;
 
             if (value < startValue)
             {

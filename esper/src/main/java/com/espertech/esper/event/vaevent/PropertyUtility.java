@@ -126,7 +126,7 @@ public class PropertyUtility
             }
 
             PropertyGroupDesc propertyGroup = result.get(props);
-            Map<EventType, String> typesForGroup = null;
+            Map<EventType, String> typesForGroup;
             if (propertyGroup == null)
             {
                 typesForGroup = new HashMap<EventType, String>();

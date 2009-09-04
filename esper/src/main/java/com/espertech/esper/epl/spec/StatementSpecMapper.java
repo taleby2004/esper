@@ -1431,7 +1431,7 @@ public class StatementSpecMapper
         else if (expr instanceof ExprNumberSetCronParam)
         {
             ExprNumberSetCronParam cronParam = (ExprNumberSetCronParam) expr;
-            CrontabParameterExpression.ScheduleItemType type = null;
+            CrontabParameterExpression.ScheduleItemType type;
             if (cronParam.getCronOperator() == CronOperatorEnum.LASTDAY)
             {
                 type = CrontabParameterExpression.ScheduleItemType.LASTDAY;

@@ -78,7 +78,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
 
     public List<EventBean> poll(Object[] lookupValues)
     {
-        List<EventBean> result = null;
+        List<EventBean> result;
         try
         {
             result = execute(resources.getSecond(), lookupValues);
@@ -123,7 +123,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
         }
 
         // execute
-        ResultSet resultSet = null;
+        ResultSet resultSet;
         try
         {
              resultSet = preparedStatement.executeQuery();

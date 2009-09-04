@@ -415,7 +415,7 @@ public class JoinSetComposerFactoryImpl implements JoinSetComposerFactory
      */
     protected static EventTable buildIndex(int indexedStreamNum, String[] indexProps, Class[] optCoercionTypes, EventType eventType)
     {
-        EventTable table = null;
+        EventTable table;
         if (indexProps.length == 0)
         {
             table = new UnindexedEventTable(indexedStreamNum);

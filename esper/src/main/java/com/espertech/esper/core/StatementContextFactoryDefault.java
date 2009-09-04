@@ -73,7 +73,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         ScheduleBucket scheduleBucket = engineServices.getSchedulingMgmtService().allocateBucket();
 
         // Create a lock for the statement
-        ManagedLock statementResourceLock = null;
+        ManagedLock statementResourceLock;
 
         // For on-delete statements, use the create-named-window statement lock
         if ((optOnTriggerDesc != null) && (optOnTriggerDesc instanceof OnTriggerWindowDesc))

@@ -123,8 +123,6 @@ public class VariantPropResolutionStrategyDefault implements VariantPropResoluti
                 {
                     if (superClassType.isInterface() && (supersForCommonType.contains(superClassType)))
                     {
-                        commonType = superClassType;
-                        found = true;
                         break;
                     }
                 }

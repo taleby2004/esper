@@ -323,7 +323,7 @@ public class PropertyHelper
      */
     protected static PropertyDescriptor[] introspect(Class clazz)
     {
-        BeanInfo beanInfo = null;
+        BeanInfo beanInfo;
 
         try
         {

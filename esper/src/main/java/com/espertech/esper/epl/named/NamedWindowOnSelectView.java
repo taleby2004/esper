@@ -92,7 +92,7 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
     {
-        EventBean[] newData = null;
+        EventBean[] newData;
 
         // clear state from prior results
         resultSetProcessor.clear();

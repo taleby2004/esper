@@ -112,7 +112,7 @@ public class PropertyListBuilderExplicit implements PropertyListBuilder
 
     private static InternalEventPropDescriptor makeDesc(Class clazz, ConfigurationEventTypeLegacy.LegacyFieldPropDesc fieldDesc)
     {
-        Field field = null;
+        Field field;
         try
         {
             field = clazz.getField(fieldDesc.getAccessorFieldName());
@@ -145,7 +145,7 @@ public class PropertyListBuilderExplicit implements PropertyListBuilder
      */
     protected static InternalEventPropDescriptor makeMethodDesc(Method method, String name)
     {
-        EventPropertyType propertyType = null;
+        EventPropertyType propertyType;
 
         if (method.getParameterTypes().length == 1)
         {

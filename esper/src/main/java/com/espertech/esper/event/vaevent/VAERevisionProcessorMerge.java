@@ -208,7 +208,7 @@ public class VAERevisionProcessorMerge extends VAERevisionProcessorBase implemen
 
         // obtain key values
         MultiKeyUntyped key = null;
-        RevisionTypeDesc typesDesc = null;
+        RevisionTypeDesc typesDesc;
         boolean isBaseEventType = false;
         if (underyingEventType == revisionSpec.getBaseEventType())
         {

@@ -145,7 +145,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             throw new IllegalArgumentException("Null stream and property name");
         }
 
-        PropertyResolutionDescriptor desc = null;
+        PropertyResolutionDescriptor desc;
         try
         {
             // first try to resolve as a property name

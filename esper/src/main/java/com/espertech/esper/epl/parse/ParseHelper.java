@@ -106,7 +106,6 @@ public class ParseHelper
         EsperEPL2GrammarLexer lex = new EsperEPL2GrammarLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lex);
         EsperEPL2GrammarParser parser = new EsperEPL2GrammarParser(tokens);
-        EsperEPL2GrammarParser.startEventPropertyRule_return r;
 
         Tree tree;
         try

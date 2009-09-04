@@ -100,7 +100,7 @@ public abstract class ConnectionCache
     protected Pair<Connection, PreparedStatement> makeNew()
     {
         log.info(".makeNew Obtaining new connection and statement");
-        Connection connection = null;
+        Connection connection;
         try
         {
             connection = databaseConnectionFactory.getConnection();
@@ -110,7 +110,7 @@ public abstract class ConnectionCache
             throw new EPException("Error obtaining connection", ex);
         }
 
-        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement;
         try
         {
             preparedStatement = connection.prepareStatement(sql);
