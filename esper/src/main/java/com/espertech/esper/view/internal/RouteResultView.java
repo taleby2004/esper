@@ -40,7 +40,7 @@ public class RouteResultView extends ViewSupport
             throw new IllegalArgumentException("Number of where-clauses and processors does not match");
         }
 
-        this.exprEvaluatorContext = exprEvaluatorContext;
+        this.exprEvaluatorContext = statementContext;
         this.eventType = eventType;
         if (isFirst)
         {

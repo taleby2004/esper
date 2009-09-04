@@ -43,7 +43,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         }
 
         this.activeChildNodes = new LinkedList<EvalStateNode>();
-        this.eventsPerChild = new Hashtable<EvalStateNode, List<MatchedEventMap>>();
+        this.eventsPerChild = new HashMap<EvalStateNode, List<MatchedEventMap>>();
 
         // In an "and" expression we need to create a state for all child listeners
         for (EvalNode node : evalAndNode.getChildNodes())

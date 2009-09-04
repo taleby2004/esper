@@ -39,7 +39,7 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
     public SchedulingServiceImpl(TimeSourceService timeSourceService)
     {
         this.timeHandleMap = new TreeMap<Long, SortedMap<ScheduleSlot, ScheduleHandle>>();
-        this.handleSetMap = new Hashtable<ScheduleHandle, SortedMap<ScheduleSlot, ScheduleHandle>>();
+        this.handleSetMap = new HashMap<ScheduleHandle, SortedMap<ScheduleSlot, ScheduleHandle>>();
         // initialize time to just before now as there is a check for duplicate external time events
         this.currentTime = timeSourceService.getTimeMillis() - 1;
     }

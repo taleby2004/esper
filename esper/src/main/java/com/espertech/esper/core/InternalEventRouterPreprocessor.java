@@ -117,14 +117,15 @@ public class InternalEventRouterPreprocessor
             // copy event for the first update that applies
             if (!haveCloned)
             {
-                event = copyMethod.copy(event);
-                if (event == null)
+                EventBean copiedEvent = copyMethod.copy(event);
+                if (copiedEvent == null)
                 {
                     log.warn("Event of type " + event.getEventType().getName() + " could not be copied");
                     return null;
                 }
                 haveCloned = true;
-                eventsPerStream[0] = event;
+                eventsPerStream[0] = copiedEvent;
+                event = copiedEvent;
             }
             
             apply(event, eventsPerStream, entry, exprEvaluatorContext);

@@ -17,6 +17,7 @@ import com.espertech.esper.collection.Pair;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * Implements a convertor for pattern partial results to events per stream.  
@@ -43,7 +44,14 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
 
         this.eventsPerStream = new EventBean[size];
         this.filterTypes = new LinkedHashMap<String, Pair<EventType, String>>(filterTypes);
-        this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>(arrayEventTypes);
+        if (arrayEventTypes != null)
+        {
+            this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>(arrayEventTypes);
+        }
+        else
+        {
+            this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
+        }
     }
 
     public EventBean[] convert(MatchedEventMap events)

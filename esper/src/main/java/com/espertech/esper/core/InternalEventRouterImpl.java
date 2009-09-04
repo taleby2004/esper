@@ -250,7 +250,7 @@ public class InternalEventRouterImpl implements InternalEventRouter
         return new NullableObject<InternalEventRouterPreprocessor>(new InternalEventRouterPreprocessor(copyMethod, desc));
     }
 
-    private class IRDescEntry
+    private static class IRDescEntry
     {
         private EventType eventType;
         private Annotation[] annotations;

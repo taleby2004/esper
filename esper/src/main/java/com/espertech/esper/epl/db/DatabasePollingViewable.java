@@ -263,8 +263,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
 
     public Iterator<EventBean> iterator()
     {
-        EventTable[] result = poll(NULL_ROWS, iteratorIndexingStrategy, exprEvaluatorContext);
-        return new IterablesArrayIterator(result);
+        return new IterablesArrayIterator(poll(NULL_ROWS, iteratorIndexingStrategy, exprEvaluatorContext));
     }
 
     public SortedSet<Integer> getRequiredStreams()

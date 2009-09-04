@@ -8,6 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.metric;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MetricsExecutorThreaded implements MetricsExecutor
 {
+    private static final Log log = LogFactory.getLog(MetricsExecutorThreaded.class);
     private final ExecutorService threadPool;
 
     /**
@@ -67,6 +71,7 @@ public class MetricsExecutorThreaded implements MetricsExecutor
         }
         catch (InterruptedException e)
         {
+            log.error("Interrupted", e);
             e.printStackTrace();
         }
     }

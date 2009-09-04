@@ -74,10 +74,7 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
         // schedule the first callback
         if (this.isStartEager)
         {
-            if (currentReferencePoint == null)
-            {
-                currentReferencePoint = statementContext.getSchedulingService().getTime();
-            }
+            currentReferencePoint = statementContext.getSchedulingService().getTime();
             scheduleCallback();
             isCallbackScheduled = true;
         }
