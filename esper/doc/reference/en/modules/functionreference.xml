@@ -715,6 +715,25 @@ from StockTick.win:time(30 sec)]]></programlisting>
 			</para>
 		</sect3>
 
+		<sect3 id="epl-function-user-defined-matching">
+			<title>Parameter Matching</title>
+			 <para>
+				 EPL follows Java standards in terms of widening, performing widening automatically in cases where widening type conversion is allowed without loss of precision, for both boxed and primitive types.				 
+			 </para> 
+			 
+			 <para>
+				 When user-defined functions are overloaded, the function with the best match is selected based on how well the arguments to a function can match up with the parameters, giving preference to the function that requires the least number of widening conversions.
+			 </para>
+
+			 <para>
+				 Boxing and unboxing of arrays is not supported in UDF as it is not supported in Java. For example, an array of <literal>Integer</literal> and an array of <literal>int</literal> are not compatible types.
+			 </para>
+
+			 <para>
+				 When using <literal>{}</literal> array syntax in EPL, the resulting type is always a boxed type: <literal>"{1, 2}"</literal> is an array of <literal>Integer</literal> (and not <literal>int</literal> since it may contain null values), <literal>"{1.0, 2d}"</literal> is an array of <literal>Double</literal> and <literal>"{'A', "B"}"</literal> is an array of <literal>String</literal>, while <literal>"{1, "B", 2.0}"</literal> is an array of <literal>Object</literal> (<literal>Object[]</literal>).
+			 </para>
+		</sect3>
+
 	</sect1>
 
 </chapter>
