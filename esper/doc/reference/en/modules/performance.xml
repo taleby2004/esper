@@ -418,6 +418,62 @@ insert into StreamAvgB select symbol, avg(value) as avgB from MyEvent.win:length
 select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:lastevent() b]]></programlisting>
 		</sect2>
 
+		<sect2 id="perf-tips-13b">
+			<title>Patterns and Pattern Sub-Expression Instances</title>
+
+			<para>
+				The <literal>every</literal> and repeat operators in patterns control the number of sub-expressions that are active. Each sub-expression can consume memory as it may retain, depending on the use of tags in the pattern,
+				the matching events. A large number of active sub-expressions can reduce performance or lead to out-of-memory errors. 
+			</para>
+
+			<para>
+				During the design of the pattern statement consider the use of <literal>timer:within</literal> to reduce the amount of time a sub-expression lives, or consider the <literal>not</literal> operator to end a sub-expression.
+			</para>
+
+			<para>
+				The examples herein assume an <literal>AEvent</literal> and a <literal>BEvent</literal> event type that have an <literal>id</literal> property that may correlate between arriving events of the two event types.
+			</para>
+
+			<para>
+				In the following sample pattern the engine starts, for each arriving AEvent, a new pattern sub-expression looking for a matching BEvent. Since the AEvent is tagged with <literal>a</literal> the engine retains
+				each AEvent until a match is found for delivery to listeners or subscribers:
+			</para>
+
+<programlisting><![CDATA[every a=AEvent -> b=BEvent(b.id = a.id)]]></programlisting>
+
+			<para>
+				One way to end a sub-expression is to attach a time how long it may be active.
+			</para>
+
+			<para>
+				The next statement ends sub-expressions looking for a matching BEvent 10 seconds after arrival of the AEvent event that started the sub-expression:
+			</para>
+<programlisting><![CDATA[every a=AEvent -> (b=BEvent(b.id = a.id) where timer:within(10 sec))]]></programlisting>
+
+			<para>
+				A second way to end a sub-expression is to use the <literal>not</literal> operator. You can use the <literal>not</literal> operator together with the <literal>and</literal> operator to end a sub-expression when a certain event arrives.
+			</para>
+				
+			<para>
+				The next statement ends sub-expressions looking for a matching BEvent when, in the order of arrival, the next BEvent that arrives after the AEvent event that started the sub-expression does not match the id of the AEvent:
+			</para>
+<programlisting><![CDATA[every a=AEvent -> (b=BEvent(b.id = a.id) and not BEvent(b.id != a.id))]]></programlisting>
+
+			<para>
+				The <literal>every-distinct</literal> operator can be used to keep one sub-expression alive per one or more keys. The next pattern demonstrates an alternative to <literal>every-distinct</literal>. It ends sub-expressions looking for a matching BEvent when an AEvent arrives that matches the id of the AEvent that started the sub-expression:
+			</para>
+<programlisting><![CDATA[every a=AEvent -> (b=BEvent(b.id = a.id) and not AEvent(b.id = a.id))]]></programlisting>
+
+		</sect2>
+
+		<sect2 id="perf-tips-13c">
+			<title>The Keep-All Data Window</title>
+
+			<para>
+				The <literal>std:keepall</literal> data window is a data window that retains all arriving events. The data window can be useful during the development phase and to implement a custom expiry policy using <literal>on-delete</literal> and named windows. Care should be taken to timely remove from the keep-all data window however. Use <literal>on-select</literal> or on-demand queries to count the number of rows currently held by a named window with keep-all expiry policy.
+			</para>
+		</sect2>
+
 		<sect2 id="perf-tips-14">
 
 			<title>Performance, JVM, OS and hardware</title>
