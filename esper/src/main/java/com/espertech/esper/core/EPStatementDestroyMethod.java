@@ -6,29 +6,15 @@
  * The software in this package is published under the terms of the GPL license       *
  * a copy of which has been included with this distribution in the license.txt file.  *
  **************************************************************************************/
-package com.espertech.esper.filter;
-
-import java.util.Set;
+package com.espertech.esper.core;
 
 /**
- * Service provider interface for filter service.
+ * Method to call to destroy an EPStatement.
  */
-public interface FilterServiceSPI extends FilterService
+public interface EPStatementDestroyMethod
 {
     /**
-     * Take a set of statements of out the active filters, returning a save-set of filters.
-     * @param statementId statement ids to remove
-     * @return filters
+     * Destroys a statement.
      */
-    public FilterSet take(Set<String> statementId);
-
-    /**
-     * Apply a set of previously taken filters.
-     * @param filterSet to apply
-     */
-    public void apply(FilterSet filterSet);
-
-    public void addFilterServiceListener(FilterServiceListener filterServiceListener);
-
-    public void removeFilterServiceListener(FilterServiceListener filterServiceListener);
+    public void destroy();
 }

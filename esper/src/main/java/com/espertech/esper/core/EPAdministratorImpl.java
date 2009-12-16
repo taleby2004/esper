@@ -11,6 +11,7 @@ package com.espertech.esper.core;
 import com.espertech.esper.antlr.ASTUtil;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.parse.*;
 import com.espertech.esper.epl.spec.*;
@@ -380,8 +381,14 @@ public class EPAdministratorImpl implements EPAdministrator
         statementSpec.getSelectClauseSpec().getSelectExprList().add(new SelectClauseElementWildcard());
         statementSpec.setAnnotations(walker.getStatementSpec().getAnnotations());
         statementSpec.setExpressionNoAnnotations(parseResult.getExpressionWithoutAnnotations());
-        
+
         return statementSpec;
+    }
+
+    public PatternStreamSpecRaw compilePatternToNode(String pattern) throws EPException
+    {
+        StatementSpecRaw raw = compilePattern(pattern);
+        return (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
     }
 
     private static String getNullableErrortext(String msg, String cause)
@@ -393,7 +400,7 @@ public class EPAdministratorImpl implements EPAdministrator
         else
         {
             return msg + ": " + cause;
-        }        
+        }
     }
 
     private static Log log = LogFactory.getLog(EPAdministratorImpl.class);

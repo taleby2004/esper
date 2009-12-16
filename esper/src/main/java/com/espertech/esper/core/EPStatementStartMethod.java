@@ -52,6 +52,7 @@ import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import com.espertech.esper.view.internal.BufferView;
 import com.espertech.esper.view.internal.RouteResultView;
+import com.espertech.esper.view.internal.SingleStreamDispatchView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -94,7 +95,7 @@ public class EPStatementStartMethod
      * @throws ExprValidationException when the expression validation fails
      * @throws ViewProcessingException when views cannot be started
      */
-    public Pair<Viewable, EPStatementStopMethod> start(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient)
+    public EPStatementStartResult start(boolean isNewStatement, boolean isRecoveringStatement, boolean isRecoveringResilient)
         throws ExprValidationException, ViewProcessingException
     {
         statementContext.getVariableService().setLocalVersion();    // get current version of variables
@@ -121,7 +122,7 @@ public class EPStatementStartMethod
         }
     }
 
-    private Pair<Viewable, EPStatementStopMethod> startOnTrigger()
+    private EPStatementStartResult startOnTrigger()
         throws ExprValidationException, ViewProcessingException
     {
         final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
@@ -335,10 +336,10 @@ public class EPStatementStartMethod
 
         log.debug(".start Statement start completed");
 
-        return new Pair<Viewable, EPStatementStopMethod>(onExprView, stopMethod);
+        return new EPStatementStartResult(onExprView, stopMethod);
     }
 
-    private Pair<Viewable, EPStatementStopMethod> startUpdate()
+    private EPStatementStartResult startUpdate()
         throws ExprValidationException, ViewProcessingException
     {
         final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
@@ -416,10 +417,10 @@ public class EPStatementStartMethod
                 }
             }
         };
-        return new Pair<Viewable, EPStatementStopMethod>(onExprView, stopMethod);
+        return new EPStatementStartResult(onExprView, stopMethod);
     }
 
-    private Pair<Viewable, EPStatementStopMethod> startCreateWindow(boolean isNewStatement, boolean isRecoveringStatement)
+    private EPStatementStartResult startCreateWindow(boolean isNewStatement, boolean isRecoveringStatement)
         throws ExprValidationException, ViewProcessingException
     {
         final FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) statementSpec.getStreamSpecs().get(0);
@@ -534,13 +535,13 @@ public class EPStatementStartMethod
 
         log.debug(".start Statement start completed");
 
-        return new Pair<Viewable, EPStatementStopMethod>(finalView, stopMethod);
+        return new EPStatementStartResult(finalView, stopMethod);
     }
 
-    private Pair<Viewable, EPStatementStopMethod> startCreateVariable(boolean isNewStatement)
+    private EPStatementStartResult startCreateVariable(boolean isNewStatement)
         throws ExprValidationException, ViewProcessingException
     {
-        CreateVariableDesc createDesc = statementSpec.getCreateVariableDesc();
+        final CreateVariableDesc createDesc = statementSpec.getCreateVariableDesc();
 
         // Determime the variable type
         Class type;
@@ -610,14 +611,28 @@ public class EPStatementStartMethod
         OutputProcessView outputView = OutputProcessViewFactory.makeView(resultSetProcessor, statementSpec, statementContext, services.getInternalEventRouter());
         createView.addView(outputView);
 
-        return new Pair<Viewable, EPStatementStopMethod>(outputView, new EPStatementStopMethod(){
+        services.getStatementVariableRefService().addReferences(statementContext.getStatementName(), Collections.singleton(createDesc.getVariableName()));
+        EPStatementDestroyMethod destroyMethod = new EPStatementDestroyMethod() {
+            public void destroy() {
+                try {
+                    services.getStatementVariableRefService().removeReferencesStatement(statementContext.getStatementName());
+                }
+                catch (RuntimeException ex) {
+                    log.error("Error removing variable '" + createDesc.getVariableName() + "': " + ex.getMessage());
+                }
+            }
+        };
+
+        EPStatementStopMethod stopMethod = new EPStatementStopMethod(){
             public void stop()
             {
             }
-        });
+        };
+
+        return new EPStatementStartResult(outputView, stopMethod, destroyMethod);
     }
 
-    private Pair<Viewable, EPStatementStopMethod> startSelect(boolean isRecoveringResilient)
+    private EPStatementStartResult startSelect(boolean isRecoveringResilient)
         throws ExprValidationException, ViewProcessingException
     {
         // Determine stream names for each stream - some streams may not have a name given
@@ -650,7 +665,7 @@ public class EPStatementStartMethod
 
                 // Since only for non-joins we get the existing stream's lock and try to reuse it's views
                 Pair<EventStream, ManagedLock> streamLockPair = services.getStreamService().createStream(statementContext.getStatementId(), filterStreamSpec.getFilterSpec(),
-                        statementContext.getFilterService(), statementContext.getEpStatementHandle(), isJoin, false, statementContext, false);
+                        statementContext.getFilterService(), statementContext.getEpStatementHandle(), isJoin, false, statementContext, false | !statementSpec.getOrderByList().isEmpty());
                 eventStreamParentViewable[i] = streamLockPair.getFirst();
 
                 // Use the re-used stream's lock for all this statement's locking needs
@@ -789,7 +804,7 @@ public class EPStatementStartMethod
                     if (streamSpec instanceof FilterStreamSpecCompiled)
                     {
                         FilterStreamSpecCompiled filterStreamSpec = (FilterStreamSpecCompiled) streamSpec;
-                        services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), statementContext.getFilterService(), isJoin, false, false);
+                        services.getStreamService().dropStream(filterStreamSpec.getFilterSpec(), statementContext.getFilterService(), isJoin, false, false | !statementSpec.getOrderByList().isEmpty());
                     }
                 }
                 for (StopCallback stopCallback : stopCallbacks)
@@ -893,6 +908,12 @@ public class EPStatementStartMethod
                 {
                     joinPreloadMethod.preloadFromBuffer(i);
                 }
+                else
+                {
+                    if (statementContext.getEpStatementHandle().getOptionalDispatchable() != null) {
+                        statementContext.getEpStatementHandle().getOptionalDispatchable().execute(statementContext);                        
+                    }
+                }
             }
         }
         // last, for aggregation we need to send the current join results to the result set processor
@@ -903,7 +924,7 @@ public class EPStatementStartMethod
 
         log.debug(".start Statement start completed");
 
-        return new Pair<Viewable, EPStatementStopMethod>(finalView, stopMethod);
+        return new EPStatementStartResult(finalView, stopMethod);
     }
 
     /**
@@ -1334,8 +1355,17 @@ public class EPStatementStartMethod
             finalView = filterView;
         }
 
+        // for ordered deliver without output limit/buffer
+        if (!statementSpec.getOrderByList().isEmpty() && (statementSpec.getOutputLimitSpec() == null)) {
+            SingleStreamDispatchView bf = new SingleStreamDispatchView();
+            statementContext.getEpStatementHandle().setOptionalDispatchable(bf);
+            finalView.addView(bf);
+            finalView = bf;
+        }
+
         OutputProcessView selectView = OutputProcessViewFactory.makeView(resultSetProcessor, statementSpec,
                 statementContext, services.getInternalEventRouter());
+
         finalView.addView(selectView);
         finalView = selectView;
 
@@ -1703,5 +1733,12 @@ public class EPStatementStartMethod
         ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(visitAggregateNodes);
         exprNode.accept(visitor);
         return visitor.getExprProperties();
+    }
+
+    private String getNull(Object value) {
+        if (value == null) {
+            return "-";
+        }
+        return value.toString();
     }
 }

@@ -16,6 +16,7 @@ import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.db.DatabaseConfigService;
 import com.espertech.esper.epl.metric.MetricReportingService;
+import com.espertech.esper.epl.metric.MetricReportingServiceSPI;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import com.espertech.esper.epl.variable.VariableService;
@@ -61,8 +62,9 @@ public final class EPServicesContext
     private VariableService variableService;
     private TimeSourceService timeSourceService;
     private ValueAddEventService valueAddEventService;
-    private MetricReportingService metricsReportingService;
+    private MetricReportingServiceSPI metricsReportingService;
     private StatementEventTypeRef statementEventTypeRef;
+    private StatementVariableRef statementVariableRef;
     private ConfigurationInformation configSnapshot;
     private ThreadingService threadingService;
     private InternalEventRouteDest internalEventEngineRouteDest;
@@ -127,8 +129,9 @@ public final class EPServicesContext
                              VariableService variableService,
                              TimeSourceService timeSourceService,
                              ValueAddEventService valueAddEventService,
-                             MetricReportingService metricsReportingService,
+                             MetricReportingServiceSPI metricsReportingService,
                              StatementEventTypeRef statementEventTypeRef,
+                             StatementVariableRef statementVariableRef,
                              ConfigurationInformation configSnapshot,
                              ThreadingService threadingServiceImpl,
                              InternalEventRouterImpl internalEventRouter,
@@ -166,6 +169,7 @@ public final class EPServicesContext
         this.internalEventRouter = internalEventRouter;
         this.statementIsolationService = statementIsolationService;
         this.schedulingMgmtService = schedulingMgmtService;
+        this.statementVariableRef = statementVariableRef;
     }
 
     /**
@@ -520,7 +524,7 @@ public final class EPServicesContext
      * Returns metrics reporting.
      * @return metrics reporting
      */
-    public MetricReportingService getMetricsReportingService()
+    public MetricReportingServiceSPI getMetricsReportingService()
     {
         return metricsReportingService;
     }
@@ -541,6 +545,14 @@ public final class EPServicesContext
     public ConfigurationInformation getConfigSnapshot()
     {
         return configSnapshot;
+    }
+
+    /**
+     * Service for keeping track of variable-statement use.
+     * @return svc
+     */
+    public StatementVariableRef getStatementVariableRefService() {
+        return statementVariableRef;
     }
 
     /**
