@@ -81,7 +81,7 @@ public class TestMetricsReporting extends TestCase
         sendTimer(20000);
         sendTimer(21000);
         event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, engineFields, new Object[] {"MyURI", 21000L, 4L, 0L});
+        ArrayAssertionUtil.assertProps(event, engineFields, new Object[] {"MyURI", 21000L, 5L, 0L});
     }
 
     public void testStatementGroups()

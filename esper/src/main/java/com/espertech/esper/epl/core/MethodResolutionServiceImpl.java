@@ -12,6 +12,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.agg.*;
 import com.espertech.esper.type.MinMaxTypeEnum;
+import com.espertech.esper.schedule.TimeProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,6 +28,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
 {
     private static final Log log = LogFactory.getLog(MethodResolutionServiceImpl.class);
 	private final EngineImportService engineImportService;
+    private final TimeProvider timeProvider;
     private final boolean isUdfCache;
 
     /**
@@ -35,9 +37,11 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
      * @param isUdfCache returns true to cache UDF results for constant parameter sets
      */
     public MethodResolutionServiceImpl(EngineImportService engineImportService,
+                                       TimeProvider timeProvider,
                                        boolean isUdfCache)
 	{
         this.engineImportService = engineImportService;
+        this.timeProvider = timeProvider;
         this.isUdfCache = isUdfCache;
     }
 
@@ -152,8 +156,11 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return new MedianAggregator();
     }
 
-    public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxTypeEnum, Class targetType)
+    public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxTypeEnum, Class targetType, boolean isHasDataWindows)
     {
+        if (!isHasDataWindows) {
+            return new MinMaxEverAggregator(minMaxTypeEnum, targetType);
+        }
         return new MinMaxAggregator(minMaxTypeEnum, targetType);
     }
 
@@ -168,6 +175,22 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
 
     public AggregationMethod makeLastValueAggregator(Class type) {
         return new LastValueAggregator(type);
+    }
+
+    public AggregationMethod makeRateAggregator() {
+        return new RateAggregator();
+    }
+
+    public AggregationMethod makeRateEverAggregator(long interval) {
+        return new RateEverAggregator(interval, timeProvider);
+    }
+
+    public AggregationMethod makeNthAggregator(Class returnType, int size) {
+        return new NthAggregator(returnType, size);
+    }
+
+    public AggregationMethod makeLeavingAggregator() {
+        return new LeavingAggregator();
     }
 
     public void setGroupKeyTypes(Class[] groupKeyTypes)

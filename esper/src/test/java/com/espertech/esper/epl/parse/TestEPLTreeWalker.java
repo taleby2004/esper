@@ -136,6 +136,28 @@ public class TestEPLTreeWalker extends TestCase
         assertTrue(raw.isHasVariables());
     }
 
+    public void testWalkOnUpdate() throws Exception
+    {
+        String expression = "on com.MyClass as myevent update MyWindow as mw set prop1 = 'a', prop2=a.b*c where a=b";
+        EPLTreeWalker walker = parseAndWalkEPL(expression);
+        StatementSpecRaw raw = walker.getStatementSpec();
+
+        FilterStreamSpecRaw streamSpec = (FilterStreamSpecRaw) raw.getStreamSpecs().get(0);
+        assertEquals("com.MyClass", streamSpec.getRawFilterSpec().getEventTypeName());
+        assertEquals(0, streamSpec.getRawFilterSpec().getFilterExpressions().size());
+        assertEquals("myevent", streamSpec.getOptionalStreamName());
+
+        OnTriggerWindowUpdateDesc setDesc = (OnTriggerWindowUpdateDesc) raw.getOnTriggerDesc();
+        assertTrue(setDesc.getOnTriggerType() == OnTriggerType.ON_UPDATE);
+        assertEquals(2, setDesc.getAssignments().size());
+
+        OnTriggerSetAssignment assign = setDesc.getAssignments().get(0);
+        assertEquals("prop1", assign.getVariableName());
+        assertTrue(assign.getExpression() instanceof ExprConstantNode);
+        
+        assertEquals("a = b", raw.getFilterExprRootNode().toExpressionString());
+    }
+
     public void testWalkOnSelectNoInsert() throws Exception
     {
         String expression = "on com.MyClass(myval != 0) as myevent select *, mywin.* as abc, myevent.* from MyNamedWindow as mywin where a=b";
@@ -1006,7 +1028,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkPluginAggregationFunction() throws Exception
     {
-        EngineImportService engineImportService = new EngineImportServiceImpl();
+        EngineImportService engineImportService = new EngineImportServiceImpl(true);
         engineImportService.addAggregation("concat", SupportPluginAggregationMethodOne.class.getName());
 
         String text = "select * from " + SupportBean.class.getName() + " group by concat(1)";
@@ -1210,7 +1232,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public static EPLTreeWalker parseAndWalkEPL(String expression) throws Exception
     {
-        return parseAndWalkEPL(expression, new EngineImportServiceImpl(), new VariableServiceImpl(0, null, null));
+        return parseAndWalkEPL(expression, new EngineImportServiceImpl(true), new VariableServiceImpl(0, null, null));
     }
 
     private static EPLTreeWalker parseAndWalkEPL(String expression, EngineImportService engineImportService, VariableService variableService) throws Exception

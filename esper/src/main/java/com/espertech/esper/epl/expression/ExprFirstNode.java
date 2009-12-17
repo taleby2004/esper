@@ -32,7 +32,7 @@ public class ExprFirstNode extends ExprAggregateNode
     {
         if (this.getChildNodes().size() != 1)
         {
-            throw new ExprValidationException("Count node must have 1 child nodes");
+            throw new ExprValidationException("First aggregation node must have 1 child nodes");
         }
         return methodResolutionService.makeFirstValueAggregator(this.getChildNodes().get(0).getType());
     }
@@ -44,11 +44,7 @@ public class ExprFirstNode extends ExprAggregateNode
 
     public final boolean equalsNodeAggregate(ExprAggregateNode node)
     {
-        if (!(node instanceof ExprFirstNode))
-        {
-            return false;
-        }
+        return node instanceof ExprFirstNode;
 
-        return true;
     }
 }

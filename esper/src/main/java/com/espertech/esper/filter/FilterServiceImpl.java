@@ -31,8 +31,8 @@ public final class FilterServiceImpl implements FilterServiceSPI
     private final EventTypeIndexBuilder indexBuilder;
     private final EventTypeIndex eventTypeIndex;
     private final AtomicLong numEventsEvaluated = new AtomicLong();
-    private final CopyOnWriteArraySet<FilterServiceListener> filterServiceListeners;
     private volatile long filtersVersion = 1;
+    private final CopyOnWriteArraySet<FilterServiceListener> filterServiceListeners;
 
     /**
      * Constructor.
@@ -89,7 +89,7 @@ public final class FilterServiceImpl implements FilterServiceSPI
         long version = filtersVersion;
         numEventsEvaluated.incrementAndGet();
 
-        ArrayDequeJDK6Backport<FilterHandle> allMatches = new ArrayDequeJDK6Backport<FilterHandle>(); 
+        ArrayDequeJDK6Backport<FilterHandle> allMatches = new ArrayDequeJDK6Backport<FilterHandle>();
 
         // Finds all matching filters
         eventTypeIndex.matchEvent(eventBean, allMatches, exprEvaluatorContext);

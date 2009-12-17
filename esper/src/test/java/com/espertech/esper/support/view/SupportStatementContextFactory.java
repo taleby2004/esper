@@ -26,7 +26,7 @@ public class SupportStatementContextFactory
     public static StatementContext makeContext()
     {
         SupportSchedulingServiceImpl sched = new SupportSchedulingServiceImpl();
-        return makeContext(sched);                
+        return makeContext(sched);
     }
 
     public static ViewFactoryContext makeViewContext()
@@ -54,7 +54,7 @@ public class SupportStatementContextFactory
                 new PatternObjectResolutionServiceImpl(null),
                 null,
                 null,
-                new MethodResolutionServiceImpl(new EngineImportServiceImpl(), true),
+                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true), null, true),
                 null,
                 null,
                 null,
@@ -65,6 +65,7 @@ public class SupportStatementContextFactory
                 null, // resolution URIs
                 new ValueAddEventServiceImpl(), // revison svc
                 config,
+                null,
                 null,
                 null,
                 new StatementFilterVersion());

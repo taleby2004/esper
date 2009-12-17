@@ -59,6 +59,7 @@ public class StatementSpecMapper
     private static StatementSpecRaw map(EPStatementObjectModel sodaStatement, StatementSpecMapContext mapContext)
     {
         StatementSpecRaw raw = new StatementSpecRaw(SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        mapAnnotations(sodaStatement.getAnnotations(), raw);
         mapUpdateClause(sodaStatement.getUpdateClause(), raw, mapContext);
         mapCreateWindow(sodaStatement.getCreateWindow(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
@@ -86,6 +87,7 @@ public class StatementSpecMapper
         StatementSpecUnMapContext unmapContext = new StatementSpecUnMapContext();
 
         EPStatementObjectModel model = new EPStatementObjectModel();
+        unmapAnnotations(statementSpec.getAnnotations(), model);
         unmapCreateWindow(statementSpec.getCreateWindowDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
         unmapUpdateClause(statementSpec.getStreamSpecs(), statementSpec.getUpdateDesc(), model, unmapContext);
@@ -116,12 +118,23 @@ public class StatementSpecMapper
             OnTriggerWindowDesc window = (OnTriggerWindowDesc) onTriggerDesc;
             model.setOnExpr(new OnDeleteClause(window.getWindowName(), window.getOptionalAsName()));
         }
-        if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SELECT)
+        else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_UPDATE)
+        {
+            OnTriggerWindowUpdateDesc window = (OnTriggerWindowUpdateDesc) onTriggerDesc;
+            OnUpdateClause clause = new OnUpdateClause(window.getWindowName(), window.getOptionalAsName());
+            for (OnTriggerSetAssignment assignment : window.getAssignments())
+            {
+                Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
+                clause.addAssignment(assignment.getVariableName(), expr);
+            }
+            model.setOnExpr(clause);
+        }
+        else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SELECT)
         {
             OnTriggerWindowDesc window = (OnTriggerWindowDesc) onTriggerDesc;
             model.setOnExpr(new OnSelectClause(window.getWindowName(), window.getOptionalAsName()));
         }
-        if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SET)
+        else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SET)
         {
             OnTriggerSetDesc trigger = (OnTriggerSetDesc) onTriggerDesc;
             OnSetClause clause = new OnSetClause();
@@ -132,7 +145,7 @@ public class StatementSpecMapper
             }
             model.setOnExpr(clause);
         }
-        if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SPLITSTREAM)
+        else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_SPLITSTREAM)
         {
             OnTriggerSplitStreamDesc trigger = (OnTriggerSplitStreamDesc) onTriggerDesc;
             OnInsertSplitStreamClause clause = OnInsertSplitStreamClause.create();
@@ -411,12 +424,12 @@ public class StatementSpecMapper
         if (onExpr instanceof OnDeleteClause)
         {
             OnDeleteClause onDeleteClause = (OnDeleteClause) onExpr;
-            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onDeleteClause.getWindowName(), onDeleteClause.getOptionalAsName(), true));
+            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onDeleteClause.getWindowName(), onDeleteClause.getOptionalAsName(), OnTriggerType.ON_DELETE));
         }
         else if (onExpr instanceof OnSelectClause)
         {
             OnSelectClause onSelectClause = (OnSelectClause) onExpr;
-            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onSelectClause.getWindowName(), onSelectClause.getOptionalAsName(), true));
+            raw.setOnTriggerDesc(new OnTriggerWindowDesc(onSelectClause.getWindowName(), onSelectClause.getOptionalAsName(), OnTriggerType.ON_SELECT));
         }
         else if (onExpr instanceof OnSetClause)
         {
@@ -429,6 +442,18 @@ public class StatementSpecMapper
                 assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
             }
             OnTriggerSetDesc desc = new OnTriggerSetDesc(assignments);
+            raw.setOnTriggerDesc(desc);
+        }
+        else if (onExpr instanceof OnUpdateClause)
+        {
+            OnUpdateClause updateClause = (OnUpdateClause) onExpr;
+            List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
+            for (Pair<String, Expression> pair : updateClause.getAssignments())
+            {
+                ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
+                assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+            }
+            OnTriggerWindowUpdateDesc desc = new OnTriggerWindowUpdateDesc(updateClause.getWindowName(), updateClause.getOptionalAsName(), assignments);
             raw.setOnTriggerDesc(desc);
         }
         else if (onExpr instanceof OnInsertSplitStreamClause)
@@ -1035,6 +1060,16 @@ public class StatementSpecMapper
             StddevProjectionExpression node = (StddevProjectionExpression) expr;
             return new ExprStddevNode(node.isDistinct());
         }
+        else if (expr instanceof LastProjectionExpression)
+        {
+            LastProjectionExpression node = (LastProjectionExpression) expr;
+            return new ExprLastNode(node.isDistinct());
+        }
+        else if (expr instanceof FirstProjectionExpression)
+        {
+            FirstProjectionExpression node = (FirstProjectionExpression) expr;
+            return new ExprFirstNode(node.isDistinct());
+        }
         else if (expr instanceof InstanceOfExpression)
         {
             InstanceOfExpression node = (InstanceOfExpression) expr;
@@ -1082,17 +1117,21 @@ public class StatementSpecMapper
         else if (expr instanceof PlugInProjectionExpression)
         {
             PlugInProjectionExpression node = (PlugInProjectionExpression) expr;
+
+            // first try the configured aggregation
             try
             {
                 AggregationSupport aggregation = mapContext.getEngineImportService().resolveAggregation(node.getFunctionName());
                 return new ExprPlugInAggFunctionNode(node.isDistinct(), aggregation, node.getFunctionName());
             }
-            catch (EngineImportUndefinedException e)
+            catch (Exception e)
             {
-                throw new EPException("Error resolving aggregation: " + e.getMessage(), e);
-            }
-            catch (EngineImportException e)
-            {
+                // then try the builtin aggregation
+                ExprNode exprNode = mapContext.getEngineImportService().resolveAggExtendedBuiltin(node.getFunctionName(), node.isDistinct());
+                if (exprNode != null) {
+                    return exprNode;
+                }
+
                 throw new EPException("Error resolving aggregation: " + e.getMessage(), e);
             }
         }
@@ -1274,6 +1313,18 @@ public class StatementSpecMapper
         {
             return new PriorExpression();
         }
+        else if (expr instanceof ExprRateAggNode)
+        {
+            return new PlugInProjectionExpression("rate", false);
+        }
+        else if (expr instanceof ExprNthAggNode)
+        {
+            return new PlugInProjectionExpression("nth", false);
+        }
+        else if (expr instanceof ExprLeavingAggNode)
+        {
+            return new PlugInProjectionExpression("leaving", false);
+        }
         else if (expr instanceof ExprPreviousNode)
         {
             return new PreviousExpression();
@@ -1352,6 +1403,16 @@ public class StatementSpecMapper
         {
             ExprMedianNode median = (ExprMedianNode) expr;
             return new MedianProjectionExpression(median.isDistinct());
+        }
+        else if (expr instanceof ExprLastNode)
+        {
+            ExprLastNode last = (ExprLastNode) expr;
+            return new LastProjectionExpression(last.isDistinct());
+        }
+        else if (expr instanceof ExprFirstNode)
+        {
+            ExprFirstNode first = (ExprFirstNode) expr;
+            return new FirstProjectionExpression(first.isDistinct());
         }
         else if (expr instanceof ExprAvedevNode)
         {
@@ -1626,6 +1687,12 @@ public class StatementSpecMapper
             PatternMatchUntilExpr until = (PatternMatchUntilExpr) eval;
             return new EvalMatchUntilNode(new EvalMatchUntilSpec(until.getLow(), until.getHigh()));
         }
+        else if (eval instanceof PatternEveryDistinctExpr)
+        {
+            PatternEveryDistinctExpr everyDist = (PatternEveryDistinctExpr) eval;
+            List<ExprNode> expressions = mapExpressionDeep(everyDist.getExpressions(), mapContext);
+            return new EvalEveryDistinctNode(expressions, null);
+        }
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }
 
@@ -1675,6 +1742,12 @@ public class StatementSpecMapper
         {
             EvalMatchUntilNode matchUntilNode = (EvalMatchUntilNode) eval;
             return new PatternMatchUntilExpr(matchUntilNode.getSpec().getLowerBounds(), matchUntilNode.getSpec().getUpperBounds());
+        }
+        else if (eval instanceof EvalEveryDistinctNode)
+        {
+            EvalEveryDistinctNode everyDistinctNode = (EvalEveryDistinctNode) eval;
+            List<Expression> expressions = unmapExpressionDeep(everyDistinctNode.getExpressions(), unmapContext);
+            return new PatternEveryDistinctExpr(expressions);
         }
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }
@@ -1789,4 +1862,61 @@ public class StatementSpecMapper
         }
         return filterDef;
     }
+
+    private static void unmapAnnotations(List<AnnotationDesc> annotations, EPStatementObjectModel model) {
+        List<AnnotationPart> result = new ArrayList<AnnotationPart>();
+        for (AnnotationDesc desc : annotations) {
+            result.add(unmapAnnotation(desc));
+        }
+        model.setAnnotations(result);
+    }
+
+    private static AnnotationPart unmapAnnotation(AnnotationDesc desc) {
+        if ((desc.getAttributes() == null) || (desc.getAttributes().isEmpty())) {
+            return new AnnotationPart(desc.getName());
+        }
+
+        List<Pair<String, Object>> attributes = new ArrayList<Pair<String, Object>>();
+        for (Pair<String, Object> pair : desc.getAttributes()) {
+            if (pair.getSecond() instanceof AnnotationDesc) {
+                attributes.add(new Pair<String, Object>(pair.getFirst(), unmapAnnotation((AnnotationDesc) pair.getSecond())));
+            }
+            else {
+                attributes.add(new Pair<String, Object>(pair.getFirst(), pair.getSecond()));
+            }
+        }
+        return new AnnotationPart(desc.getName(), attributes);
+    }
+
+    private static void mapAnnotations(List<AnnotationPart> annotations, StatementSpecRaw raw) {
+        List<AnnotationDesc> result;
+        if (annotations != null) {
+            result = new ArrayList<AnnotationDesc>();
+            for (AnnotationPart part : annotations) {
+                result.add(mapAnnotation(part));
+            }
+        }
+        else {
+            result = Collections.emptyList();
+        }
+        raw.setAnnotations(result);
+    }
+
+    private static AnnotationDesc mapAnnotation(AnnotationPart part) {
+        if ((part.getAttributes() == null) || (part.getAttributes().isEmpty())) {
+            return new AnnotationDesc(part.getName(), Collections.EMPTY_LIST);
+        }
+
+        List<Pair<String, Object>> attributes = new ArrayList<Pair<String, Object>>();
+        for (Pair<String, Object> pair : part.getAttributes()) {
+            if (pair.getSecond() instanceof AnnotationPart) {
+                attributes.add(new Pair<String, Object>(pair.getFirst(), mapAnnotation((AnnotationPart) pair.getSecond())));
+            }
+            else {
+                attributes.add(new Pair<String, Object>(pair.getFirst(), pair.getSecond()));
+            }
+        }
+        return new AnnotationDesc(part.getName(), attributes);
+    }
+
 }

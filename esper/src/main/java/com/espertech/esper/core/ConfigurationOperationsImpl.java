@@ -25,6 +25,7 @@ import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.VariantEventType;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.UuidGenerator;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -252,6 +253,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         try
         {
             variableService.createNewVariable(variableName, type, initializationValue, null);
+            statementVariableRef.addConfiguredVariable(variableName);
         }
         catch (VariableExistsException e)
         {
@@ -411,6 +413,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
 
         variableService.removeVariable(name);
         statementVariableRef.removeReferencesVariable(name);
+        statementVariableRef.removeConfiguredVariable(name);
         return true;
     }
 

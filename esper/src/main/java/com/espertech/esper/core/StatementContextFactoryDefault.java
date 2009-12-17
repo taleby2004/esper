@@ -106,12 +106,12 @@ public class StatementContextFactoryDefault implements StatementContextFactory
             stmtMetric = engineServices.getMetricsReportingService().getStatementHandle(statementId, statementName);
         }
 
-        StatementFilterVersion statementFilterVersion = new StatementFilterVersion(); 
+        StatementFilterVersion statementFilterVersion = new StatementFilterVersion();
 
         AnnotationAnalysisResult annotationData = AnnotationAnalysisResult.analyzeAnnotations(annotations);
         EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementResourceLock, expression, hasVariables, stmtMetric, annotationData.getPriority(), annotationData.isPremptive(), statementFilterVersion);
 
-        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getConfigSnapshot().getEngineDefaults().getExpression().isUdfCache());
+        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getSchedulingService(), engineServices.getConfigSnapshot().getEngineDefaults().getExpression().isUdfCache());
 
         PatternContextFactory patternContextFactory = new PatternContextFactoryDefault();
 
@@ -123,7 +123,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         if (isolationUnitServices != null)
         {
             filterService = isolationUnitServices.getFilterService();
-            schedulingService = isolationUnitServices.getSchedulingService(); 
+            schedulingService = isolationUnitServices.getSchedulingService();
         }
 
         // Create statement context
@@ -153,6 +153,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getConfigSnapshot(),
                 engineServices.getInternalEventEngineRouteDest(),
                 engineServices.getMetricsReportingService(),
+                engineServices.getViewService(),
                 statementFilterVersion);
     }
 

@@ -1219,6 +1219,12 @@ class ConfigurationParser {
             boolean isSelfSubselectPreeval = Boolean.parseBoolean(selfSubselectPreeval);
             configuration.getEngineDefaults().getExpression().setSelfSubselectPreeval(isSelfSubselectPreeval);
         }
+        String extendedAggregationStr = getOptionalAttribute(parentElement, "extended-agg");
+        if (extendedAggregationStr != null)
+        {
+            boolean extendedAggregation = Boolean.parseBoolean(extendedAggregationStr);
+            configuration.getEngineDefaults().getExpression().setExtendedAggregation(extendedAggregation);
+        }
     }
 
     private static void handleExecution(Configuration configuration, Element parentElement)

@@ -39,4 +39,7 @@ public interface StatementVariableRef
      * @param variableName variable name
      */
     public void removeReferencesVariable(String variableName);
+
+    public void addConfiguredVariable(String variableName);
+    public void removeConfiguredVariable(String variableName);
 }

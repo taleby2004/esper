@@ -27,8 +27,9 @@ import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Implements tracking of statement listeners and subscribers for a given statement
@@ -80,7 +81,7 @@ public class StatementResultServiceImpl implements StatementResultService
      * @param metricReportingService for metrics reporting
      * @param threadingService for outbound threading
      */
-    public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc, 
+    public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc,
                                       MetricReportingServiceSPI metricReportingService,
                                       ThreadingService threadingService)
     {
@@ -91,7 +92,7 @@ public class StatementResultServiceImpl implements StatementResultService
             this.statementOutputHooks = metricReportingService.getStatementOutputHooks();
         }
         else {
-            this.statementOutputHooks = new HashSet<StatementResultListener>();
+            this.statementOutputHooks = Collections.EMPTY_SET;
         }
         this.threadingService = threadingService;
     }
@@ -167,7 +168,7 @@ public class StatementResultServiceImpl implements StatementResultService
     {
         if (results != null)
         {
-            if ((MetricReportingPath.isMetricsEnabled) && (statementMetricHandle.isEnabled()))            
+            if ((MetricReportingPath.isMetricsEnabled) && (statementMetricHandle.isEnabled()))
             {
                 int numIStream = (results.getFirst() != null) ? results.getFirst().length : 0;
                 int numRStream = (results.getSecond() != null) ? results.getSecond().length : 0;
@@ -209,13 +210,13 @@ public class StatementResultServiceImpl implements StatementResultService
         {
             processDispatch(events);
         }
-        
+
         dispatches.clear();
     }
 
     /**
      * Indicate an outbound result.
-     * @param events to indicate 
+     * @param events to indicate
      */
     public void processDispatch(UniformPair<EventBean[]> events)
     {

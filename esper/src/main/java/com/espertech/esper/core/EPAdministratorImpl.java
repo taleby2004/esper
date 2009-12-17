@@ -15,6 +15,8 @@ import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.parse.*;
 import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.pattern.EvalNode;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.antlr.runtime.tree.Tree;
@@ -24,7 +26,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Implementation for the admin interface.
  */
-public class EPAdministratorImpl implements EPAdministrator
+public class EPAdministratorImpl implements EPAdministratorSPI
 {
     private static ParseRuleSelector patternParseRule;
     private static ParseRuleSelector eplParseRule;
@@ -389,6 +391,12 @@ public class EPAdministratorImpl implements EPAdministrator
     {
         StatementSpecRaw raw = compilePattern(pattern);
         return (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
+    }
+
+    public ExprNode compileExpression(String expression) throws EPException
+    {
+        StatementSpecRaw raw = compileEPL("select * from java.lang.Object where " + expression, null, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        return raw.getFilterRootNode();
     }
 
     private static String getNullableErrortext(String msg, String cause)

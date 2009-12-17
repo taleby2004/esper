@@ -37,6 +37,14 @@ public class StatementVariableRefImpl implements StatementVariableRef
         }
     }
 
+    public void addConfiguredVariable(String variableName) {
+        configuredVariables.add(variableName);
+    }
+
+    public void removeConfiguredVariable(String variableName) {
+        configuredVariables.remove(variableName);
+    }
+
     public void addReferences(String statementName, Set<String> variablesReferenced)
     {
         if ((variablesReferenced == null) || (variablesReferenced.isEmpty()))

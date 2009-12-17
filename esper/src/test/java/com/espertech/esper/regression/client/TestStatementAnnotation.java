@@ -1,6 +1,7 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.annotation.Description;
 import com.espertech.esper.client.annotation.Name;
 import com.espertech.esper.client.annotation.Tag;
@@ -75,6 +76,14 @@ public class TestStatementAnnotation extends TestCase
                    "Failed to process statement annotations: Hint annotation value 'XXX' is not one of the known values [@Hint('XXX') select * from Bean]");
         tryInvalid("@Hint('ITERATE_ONLY,XYZ') select * from Bean", false,
                    "Failed to process statement annotations: Hint annotation value 'XYZ' is not one of the known values [@Hint('ITERATE_ONLY,XYZ') select * from Bean]");
+        tryInvalid("@Hint('testit=5') select * from Bean", false,
+                   "Failed to process statement annotations: Hint annotation value 'testit' is not one of the known values [@Hint('testit=5') select * from Bean]");
+        tryInvalid("@Hint('RECLAIM_GROUP_AGED') select * from Bean", false,
+                   "Failed to process statement annotations: Hint 'RECLAIM_GROUP_AGED' requires a parameter value [@Hint('RECLAIM_GROUP_AGED') select * from Bean]");
+        tryInvalid("@Hint('ITERATE_ONLY,RECLAIM_GROUP_AGED') select * from Bean", false,
+                   "Failed to process statement annotations: Hint 'RECLAIM_GROUP_AGED' requires a parameter value [@Hint('ITERATE_ONLY,RECLAIM_GROUP_AGED') select * from Bean]");
+        tryInvalid("@Hint('ITERATE_ONLY=5,RECLAIM_GROUP_AGED=5') select * from Bean", false,
+                   "Failed to process statement annotations: Hint 'ITERATE_ONLY' does not accept a parameter value [@Hint('ITERATE_ONLY=5,RECLAIM_GROUP_AGED=5') select * from Bean]");
     }
 
     private void tryInvalid(String stmtText, boolean isSyntax, String message)
@@ -122,6 +131,11 @@ public class TestStatementAnnotation extends TestCase
         epService.getEPAdministrator().createEPL("@Hint('ITERATE_ONLY,DISABLE_RECLAIM_GROUP') select * from Bean");
         epService.getEPAdministrator().createEPL("@Hint('ITERATE_ONLY,DISABLE_RECLAIM_GROUP,ITERATE_ONLY') select * from Bean");
         epService.getEPAdministrator().createEPL("@Hint('  iterate_only ') select * from Bean");
+        
+        // test statement name override
+        stmtText = "@Name('MyAnnotatedName') select * from Bean";
+        stmt = epService.getEPAdministrator().createEPL(stmtText, "MyABCStmt");
+        assertEquals("MyABCStmt", stmt.getName());
     }
 
     private void runAssertion(EPStatement stmt)
@@ -169,9 +183,9 @@ public class TestStatementAnnotation extends TestCase
                 "@MyAnnotationSimple " +
                 "@MyAnnotationValue('abc') " +
                 "@MyAnnotationValueDefaulted " +
-                "@MyAnnotationValueEnum(supportEnum = SupportEnum.ENUM_VALUE_3) " +
-                "@MyAnnotationValuePair(stringVal='a', intVal=-1, longVal=2, booleanVal=true, charVal='x', byteVal=10, shortVal=20, doubleVal=2.5) " +
-                "@Name('STMTONE')" +
+                "@MyAnnotationValueEnum(supportEnum=com.espertech.esper.support.bean.SupportEnum.ENUM_VALUE_3) " +
+                "@MyAnnotationValuePair(stringVal='a',intVal=-1,longVal=2,booleanVal=true,charVal='x',byteVal=10,shortVal=20,doubleVal=2.5) " +
+                "@Name('STMTONE') " +
                 "select * from Bean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         EPStatementSPI spi = (EPStatementSPI) stmt;
@@ -206,6 +220,13 @@ public class TestStatementAnnotation extends TestCase
         assertEquals('D', pair.charValDef());
         assertEquals(1.1, pair.doubleValDef());
 
+        // statement model
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
+        assertEquals(stmtText, model.toEPL());
+        EPStatement stmtTwo = epService.getEPAdministrator().create(model);
+        assertEquals(stmtTwo.getText(), model.toEPL());
+        assertEquals(6, stmtTwo.getAnnotations().length);
+
         // test array
         stmtText =
                 "@MyAnnotationValueArray(value={1, 2, 3}, intArray={4, 5}, doubleArray={}, \nstringArray={\"X\"})\n" +
@@ -222,6 +243,13 @@ public class TestStatementAnnotation extends TestCase
         assertTrue(Arrays.deepEquals(toObjectArray(array.doubleArray()), new Object[] {}));
         assertTrue(Arrays.deepEquals(toObjectArray(array.stringArray()), new Object[] {"X"}));
         assertTrue(Arrays.deepEquals(toObjectArray(array.stringArrayDef()), new Object[] {"XYZ"}));
+
+        // statement model
+        model = epService.getEPAdministrator().compileEPL(stmtText);
+        assertEquals("@MyAnnotationValueArray(value={1,2,3},intArray={4,5},doubleArray={},stringArray={'X'}) select * from Bean", model.toEPL());
+        stmtTwo = epService.getEPAdministrator().create(model);
+        assertEquals(stmtTwo.getText(), model.toEPL());
+        assertEquals(1, stmtTwo.getAnnotations().length);
     }
 
     public void testSPI()

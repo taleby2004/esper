@@ -39,7 +39,10 @@ public class ExprMinMaxAggrNode extends ExprAggregateNode
             throw new ExprValidationException(minMaxTypeEnum.toString() + " node must have exactly 1 child node");
         }
         ExprNode child = this.getChildNodes().get(0);
-        return methodResolutionService.makeMinMaxAggregator(minMaxTypeEnum, child.getType());
+
+        boolean hasDataWindows = ExprNodeUtility.hasRemoveStream(child, streamTypeService);
+
+        return methodResolutionService.makeMinMaxAggregator(minMaxTypeEnum, child.getType(), hasDataWindows);
     }
 
     public final boolean equalsNodeAggregate(ExprAggregateNode node)

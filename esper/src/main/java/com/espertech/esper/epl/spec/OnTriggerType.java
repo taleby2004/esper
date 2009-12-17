@@ -31,5 +31,10 @@ public enum OnTriggerType
     /**
      * For on-set triggers that set variable values when a triggering event arrives.
      */
-    ON_SET
+    ON_SET,
+
+    /**
+     * For on-update triggers that update an event in a named window when a triggering event arrives.
+     */
+    ON_UPDATE    
 }

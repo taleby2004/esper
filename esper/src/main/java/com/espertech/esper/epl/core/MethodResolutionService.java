@@ -142,13 +142,33 @@ public interface MethodResolutionService
      * @param targetType is the type to max or min
      * @return aggregator
      */
-    public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxType, Class targetType);
+    public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxType, Class targetType, boolean isHasDataWindows);
 
     /**
      * Makes a new stddev-aggregator.
      * @return aggregator
      */
     public AggregationMethod makeStddevAggregator();
+
+    /**
+     * Makes a new rate-aggregator.
+     * @return aggregator
+     */
+    public AggregationMethod makeRateAggregator();
+
+    /**
+     * Makes a new rate-aggregator.
+     * @return aggregator
+     */
+    public AggregationMethod makeRateEverAggregator(long interval);
+
+    /**
+     * Makes a Nth element aggregator.
+     * @return aggregator
+     */
+    public AggregationMethod makeNthAggregator(Class returnType, int size);
+
+    public AggregationMethod makeLeavingAggregator();
 
     /**
      * Sets the group key types.
