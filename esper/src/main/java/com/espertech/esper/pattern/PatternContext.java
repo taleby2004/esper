@@ -166,6 +166,10 @@ public final class PatternContext implements ExprEvaluatorContext
         return statementContext.getTimeProvider();
     }
 
+    /**
+     * Returns filter version.
+     * @return version
+     */
     public StatementFilterVersion getStatementFilterVersion() {
         return statementContext.getStatementFilterVersion();
     }

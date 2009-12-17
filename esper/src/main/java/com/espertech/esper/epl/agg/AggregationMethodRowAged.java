@@ -31,6 +31,10 @@ public class AggregationMethodRowAged
         return refcount;
     }
 
+    /**
+     * Returns last upd time.
+     * @return time
+     */
     public long getLastUpdateTime()
     {
         return lastUpdateTime;
@@ -45,6 +49,10 @@ public class AggregationMethodRowAged
         return methods;
     }
 
+    /**
+     * Set last update time.
+     * @param lastUpdateTime time
+     */
     public void setLastUpdateTime(long lastUpdateTime)
     {
         this.lastUpdateTime = lastUpdateTime;

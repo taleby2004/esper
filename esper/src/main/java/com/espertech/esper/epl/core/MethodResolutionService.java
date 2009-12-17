@@ -140,7 +140,8 @@ public interface MethodResolutionService
      * Makes a new min-max-aggregator.
      * @param minMaxType dedicates whether to do min or max
      * @param targetType is the type to max or min
-     * @return aggregator
+     * @param isHasDataWindows true for has data windows
+     * @return aggregator to use
      */
     public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxType, Class targetType, boolean isHasDataWindows);
 
@@ -158,16 +159,23 @@ public interface MethodResolutionService
 
     /**
      * Makes a new rate-aggregator.
-     * @return aggregator
+     * @param interval seconds
+     * @return aggregator to use
      */
     public AggregationMethod makeRateEverAggregator(long interval);
 
     /**
      * Makes a Nth element aggregator.
+     * @param returnType of aggregation
+     * @param size of elements
      * @return aggregator
      */
     public AggregationMethod makeNthAggregator(Class returnType, int size);
 
+    /**
+     * Make leaving agg.
+     * @return agg
+     */
     public AggregationMethod makeLeavingAggregator();
 
     /**

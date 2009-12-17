@@ -30,6 +30,7 @@ public interface FilterService
      * @param event is the event to be matched against filters
      * @param matches is a collection that is populated via add method with any handles for matching filters
      * @param exprEvaluatorContext context for expression evalauation
+     * @return filter current version
      */
     public long evaluate(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext);
 
@@ -38,6 +39,8 @@ public interface FilterService
      * @param event is the event to be matched against filters
      * @param matches is a collection that is populated via add method with any handles for matching filters
      * @param exprEvaluatorContext context for expression evalauation
+     * @param statementId statement for which to return results for
+     * @return filter current version
      */
     public long evaluate(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext, String statementId);
 
@@ -72,5 +75,9 @@ public interface FilterService
      */
     public void destroy();
 
+    /**
+     * Returns filter version.
+     * @return filter version
+     */
     public long getFiltersVersion();
 }

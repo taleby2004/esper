@@ -127,7 +127,7 @@ public class Expressions implements Serializable
     /**
      * Plug-in aggregation function.
      * @param functionName is the function name
-     * @param parameter provides the values to aggregate
+     * @param moreExpressions provides the values to aggregate
      * @return expression
      */
     public static PlugInProjectionExpression plugInAggregation(String functionName, Expression... moreExpressions)

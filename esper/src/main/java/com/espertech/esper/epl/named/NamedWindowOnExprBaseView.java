@@ -90,6 +90,10 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
         handleMatching(newData, eventsFound);
     }
 
+    /**
+     * returns expr context.
+     * @return context
+     */
     public ExprEvaluatorContext getExprEvaluatorContext() {
         return exprEvaluatorContext;
     }

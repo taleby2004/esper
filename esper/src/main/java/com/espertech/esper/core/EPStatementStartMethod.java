@@ -1757,6 +1757,12 @@ public class EPStatementStartMethod
         return deleteJoinExpr.getValidatedSubtree(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
     }
 
+    /**
+     * Walk expression returning properties used.
+     * @param exprNode to walk
+     * @param visitAggregateNodes true to visit aggregation nodes
+     * @return list of props
+     */
     public static List<Pair<Integer, String>> getExpressionProperties(ExprNode exprNode, boolean visitAggregateNodes)
     {
         ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(visitAggregateNodes);

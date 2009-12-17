@@ -1,5 +1,27 @@
 News
 
+
+* Dec. 17, 2009  -  Esper 3.3.0
+
+  * Support for on-update
+  
+  * New aggregation functions: rate, last, first, nth, leaving
+  
+  * Support for subqueries to occur in filter expressions (stream or pattern)
+  
+  * Support for subqueries in split-stream and on-set and on-select
+  
+  * The "prev" and "prior" functions now accept a stream name 
+  
+  * Optimization of min and max aggregation function for use with or without data window
+  
+  * Support for annotations in statement object model
+  
+  * Variables that are created via "create variable" and that are no longer referenced are removed  
+    
+  []
+
+
 * Sept. 6, 2009  -  Esper 3.2.0
 
   * Support to the proposed SQL standard "match_recognize", a regular expression-based event pattern matching language

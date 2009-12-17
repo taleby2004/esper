@@ -27,6 +27,7 @@ public class RouteUnitMultiple implements RouteUnitRunnable
      * @param callbackList callback list
      * @param event event to pass
      * @param handle statement handle
+     * @param filterVersion version of filter
      */
     public RouteUnitMultiple(EPRuntimeImpl epRuntime, ArrayDequeJDK6Backport<FilterHandleCallback> callbackList, EventBean event, EPStatementHandle handle, long filterVersion)
     {

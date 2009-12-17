@@ -10,6 +10,9 @@ package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
 
+/**
+ * Aggregation computing an event arrival rate for data windowed-events.
+ */
 public class RateAggregator implements AggregationMethod {
 
     private double accumulator;

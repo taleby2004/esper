@@ -129,6 +129,15 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      */
     public EngineEnvContext getEngineEnvContext();
 
+    /**
+     * Returns services.
+     * @return services
+     */
     public EPServicesContext getServicesContext();
+
+    /**
+     * Returns context factory.
+     * @return factory
+     */
     public StatementContextFactory getStatementContextFactory();
 }

@@ -179,8 +179,10 @@ public final class FilterSpecCompiler
      * Validates expression nodes and returns a list of validated nodes.
      * @param exprNodes is the nodes to validate
      * @param streamTypeService is provding type information for each stream
-     * @param taggedEventTypes
-     *@param arrayEventTypes @return list of validated expression nodes
+     * @param taggedEventTypes pattern tagged types
+     * @param arrayEventTypes @return list of validated expression nodes
+     * @return expr nodes
+     * @param statementContext context
      * @throws ExprValidationException for validation errors
      */
     public static List<ExprNode> validateAllowSubquery(List<ExprNode> exprNodes, StreamTypeService streamTypeService,

@@ -921,6 +921,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
      * @param handle statement handle
      * @param callbackList object containing callbacks
      * @param event to process
+     * @param version filter version
      */
     public void processStatementFilterMultiple(EPStatementHandle handle, ArrayDequeJDK6Backport<FilterHandleCallback> callbackList, EventBean event, long version)
     {
@@ -1000,6 +1001,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
      * @param handle statement
      * @param handleCallback callback
      * @param event event to indicate
+     * @param version filter version
      */
     public void processStatementFilterSingle(EPStatementHandle handle, EPStatementHandleCallback handleCallback, EventBean event, long version)
     {

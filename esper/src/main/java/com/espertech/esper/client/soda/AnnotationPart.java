@@ -7,6 +7,9 @@ import java.lang.reflect.Array;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Represents a single annotation.
+ */
 public class AnnotationPart {
 
     private String name;
@@ -15,6 +18,10 @@ public class AnnotationPart {
     //      <"value"|attribute name, constant|array of value (Object[])| AnnotationPart
     private List<Pair<String, Object>> attributes = new ArrayList<Pair<String, Object>>();
 
+    /**
+     * Ctor.
+     * @param name of annotation
+     */
     public AnnotationPart(String name) {
         this.name = name;
     }
@@ -39,10 +46,19 @@ public class AnnotationPart {
         return name;
     }
 
+    /**
+     * Add value.
+     * @param value to add
+     */
     public void addValue(Object value) {
         attributes.add(new Pair<String, Object>("value", value));
     }
 
+    /**
+     * Add named value.
+     * @param name name
+     * @param value value
+     */
     public void addValue(String name, Object value) {
         attributes.add(new Pair<String, Object>(name, value));
     }
@@ -56,6 +72,11 @@ public class AnnotationPart {
         return attributes;
     }
 
+    /**
+     * Print.
+     * @param writer to print to
+     * @param annotations annotations
+     */
     public static void toEPL(StringWriter writer, List<AnnotationPart> annotations) {
         if ((annotations == null) || (annotations.isEmpty())) {
             return;
@@ -70,6 +91,10 @@ public class AnnotationPart {
         writer.append(" ");
     }
 
+    /**
+     * Print part.
+     * @param writer to write to
+     */
     public void toEPL(StringWriter writer) {
         writer.append("@");
         writer.append(name);

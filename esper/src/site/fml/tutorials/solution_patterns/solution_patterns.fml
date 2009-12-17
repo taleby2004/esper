@@ -171,13 +171,23 @@ where sensor.sensorId = loc.sensorId</pre></div>
   	<title>General</title>
   	
     <faq id="throughput-1">
-      <question>How do I measure the rate of arrival of events in a given time period?</question>
+      <question>How do I measure the rate of arrival of events in a given time period? Per category?</question>
       <answer>
         <p>
-          The time batch window of 1 second as shown below produces an event each second with the count of the number of events
-          in the batch.
+          The "rate" built-in aggregation function computes arrival rate. It can also be used when timestamp values are part of your event.
         </p>
-	<div class="source"><pre>select count(*) as cnt from MarketDataEvent.win:time_batch(1 second)</pre></div>      
+        <p>
+          This computes the per-second rate using engine timestamps by averaging 5 seconds of events:
+        </p>
+	<div class="source"><pre>select rate(5) from MarketDataEvent</pre></div>      
+        <p>
+          This computes the per-second rate using event timestamps (timestamp being a property of your event), also considering the last 5 seconds of events:
+        </p>
+	<div class="source"><pre>select rate(timestamp) from MarketDataEvent.win:time(5 sec)</pre></div>      
+        <p>
+          Use the rate aggregation function with group-by as follows:
+        </p>
+	<div class="source"><pre>select feed, rate(timestamp) from MarketDataEvent.win:time(5 sec) group by feed</pre></div>      
       </answer>
     </faq>    
 
@@ -488,9 +498,10 @@ from StockTick.std:groupby(symbol).win:length(10)</pre></div>
           aggregation. Here we compute for the last 30 seconds the maximum and minimum rate per feed.
         </p>
 
-<div class="source"><pre>insert into TicksPerSecond select feed, count(*) as cnt 
-from MarketDataEvent.win:time_batch(1 second) 
+<div class="source"><pre>insert into TicksPerSecond select feed, rate(1) as cnt 
+from MarketDataEvent
 group by feed
+output snapshot every 1 sec
 	
 select feed, max(cnt) as maxCount, min(cnt) as minCount 
 from TicksPerSecond.win:time(30 sec) 

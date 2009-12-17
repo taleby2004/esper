@@ -64,6 +64,7 @@ public class StatementSpecCompiled
      * @param annotations statement annotations
      * @param updateSpec update specification if used
      * @param matchRecognizeSpec if provided
+     * @param variableReferences variables referenced
      */
     public StatementSpecCompiled(OnTriggerDesc onTriggerDesc,
                                  CreateWindowDesc createWindowDesc,
@@ -348,6 +349,10 @@ public class StatementSpecCompiled
         return matchRecognizeSpec;
     }
 
+    /**
+     * Return variables referenced.
+     * @return variables
+     */
     public Set<String> getVariableReferences() {
         return variableReferences;
     }

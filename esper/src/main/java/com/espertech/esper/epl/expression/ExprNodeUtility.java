@@ -20,6 +20,12 @@ import java.util.List;
  */
 public class ExprNodeUtility
 {
+    /**
+     * Returns true if all properties within the expression are witin data window'd streams.
+     * @param child expression to interrogate
+     * @param streamTypeService streams
+     * @return indicator
+     */
     public static boolean hasRemoveStream(ExprNode child, StreamTypeService streamTypeService) {
 
         // Determine whether all streams are istream-only or irstream

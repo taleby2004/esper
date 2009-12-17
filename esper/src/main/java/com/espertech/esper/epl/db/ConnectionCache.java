@@ -117,6 +117,14 @@ public abstract class ConnectionCache
         }
         catch (SQLException ex)
         {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    log.warn("Error closing connection: " + e.getMessage(), e);
+                }
+            }
+
             throw new EPException("Error preparing statement '" + sql + '\'', ex);
         }
 

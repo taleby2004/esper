@@ -55,6 +55,8 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
      * @param removeStreamView to indicate which events to delete
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      * @param exprEvaluatorContext context for expression evalauation
+     * @param onTriggerDesc describes on-update
+     * @throws com.espertech.esper.epl.expression.ExprValidationException when expression validation fails
      */
     public NamedWindowOnUpdateView(StatementStopService statementStopService,
                                  LookupStrategy lookupStrategy,

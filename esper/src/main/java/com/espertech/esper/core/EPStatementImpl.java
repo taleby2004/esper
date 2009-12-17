@@ -65,6 +65,7 @@ public class EPStatementImpl implements EPStatementSPI
      * @param annotations annotations associated to statement
      * @param statementContext the statement service context
      * @param expressionNoAnnotations expression text witout annotations
+     * @param isFailed indicator to start in failed state
      */
     public EPStatementImpl(String statementId,
                               String statementName,

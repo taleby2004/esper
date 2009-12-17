@@ -59,11 +59,19 @@ public enum HintEnum
         return value;
     }
 
+    /**
+     * True if the hint accepts params.
+     * @return indicator
+     */
     public boolean isAcceptsParameters()
     {
         return acceptsParameters;
     }
 
+    /**
+     * True if the hint requires params.
+     * @return indicator
+     */
     public boolean isRequiresParameters()
     {
         return requiresParameters;
@@ -133,6 +141,11 @@ public enum HintEnum
         return null;
     }
 
+    /**
+     * Returns null or value assigned.
+     * @param hintAnnotation annotation
+     * @return value
+     */
     public String getHintAssignedValue(Hint hintAnnotation)
     {
         if (!acceptsParameters)

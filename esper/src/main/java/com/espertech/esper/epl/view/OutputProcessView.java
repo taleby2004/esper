@@ -311,6 +311,10 @@ public abstract class OutputProcessView implements View, JoinSetIndicator
         return new EventDistinctIterator(iterator, eventType);
     }
 
+    /**
+     * Indicate statement result.
+     * @param newOldEvents result
+     */
     public void indicateEarlyReturn(UniformPair<EventBean[]> newOldEvents) {
         if (newOldEvents == null) {
             return;

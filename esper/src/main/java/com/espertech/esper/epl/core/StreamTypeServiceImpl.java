@@ -44,6 +44,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
      * @param eventType a single event type for a single stream
      * @param streamName the stream name of the single stream
      * @param engineURI engine URI
+     * @param isIStreamOnly true for no datawindow for stream
      */
     public StreamTypeServiceImpl (EventType eventType, String streamName, boolean isIStreamOnly, String engineURI)
     {
@@ -55,6 +56,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
      * @param eventTypes - array of event types, one for each stream
      * @param streamNames - array of stream names, one for each stream
      * @param engineURI - engine URI
+     * @param isIStreamOnly true for no datawindow for stream
      */
     public StreamTypeServiceImpl (EventType[] eventTypes, String[] streamNames, boolean[] isIStreamOnly, String engineURI)
     {

@@ -168,6 +168,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param optAdditionalContext additional context for use by the statement context
      * @param userObject the application define user object associated to each statement, if supplied
      * @param isolationUnitServices isolated service services
+     * @param isFailed to start the statement in failed state
      * @return stopped statement
      */
     protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject, EPIsolationUnitServices isolationUnitServices, boolean isFailed)
@@ -1253,6 +1254,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
          * @param optInsertIntoStream is the insert-into stream name, or null if not using insert-into
          * @param statementHandle is the locking handle for the statement
          * @param statementContext statement context
+         * @param destroyMethod method to call when destroyed
          */
         public EPStatementDesc(EPStatementSPI epStatement, EPStatementStartMethod startMethod, EPStatementStopMethod stopMethod, EPStatementDestroyMethod destroyMethod, String optInsertIntoStream, EPStatementHandle statementHandle, StatementContext statementContext)
         {
@@ -1328,10 +1330,18 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             return statementContext;
         }
 
+        /**
+         * Set method to call when destroyed.
+         * @param destroyMethod method
+         */
         public void setDestroyMethod(EPStatementDestroyMethod destroyMethod) {
             this.destroyMethod = destroyMethod;
         }
 
+        /**
+         * Return destroy method.
+         * @return method.
+         */
         public EPStatementDestroyMethod getDestroyMethod() {
             return destroyMethod;
         }

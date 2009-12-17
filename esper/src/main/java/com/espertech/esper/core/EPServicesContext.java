@@ -101,6 +101,7 @@ public final class EPServicesContext
      * @param timeSourceService time source provider class
      * @param metricsReportingService - for metric reporting
      * @param statementEventTypeRef - statement to event type reference holding
+     * @param statementVariableRef - statement to variabke reference holding
      * @param configSnapshot configuration snapshot
      * @param threadingServiceImpl - engine-level threading services
      * @param internalEventRouter - routing of events

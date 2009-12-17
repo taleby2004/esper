@@ -393,10 +393,18 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
         this.matchRecognizeSpec = matchRecognizeSpec;
     }
 
+    /**
+     * Set variables referenced
+     * @param referencedVariables vars
+     */
     public void setReferencedVariables(Set<String> referencedVariables) {
         this.referencedVariables = referencedVariables;
     }
 
+    /**
+     * Returns variables referenced
+     * @return vars
+     */
     public Set<String> getReferencedVariables() {
         return referencedVariables;
     }

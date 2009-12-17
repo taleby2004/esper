@@ -198,11 +198,19 @@ public abstract class ExprSubselectNode extends ExprNode
         return rawEventType;
     }
 
+    /**
+     * Return stream types.
+     * @return types
+     */
     public StreamTypeService getFilterSubqueryStreamTypes()
     {
         return filterSubqueryStreamTypes;
     }
 
+    /**
+     * Set stream types.
+     * @param filterSubqueryStreamTypes types
+     */
     public void setFilterSubqueryStreamTypes(StreamTypeService filterSubqueryStreamTypes)
     {
         this.filterSubqueryStreamTypes = filterSubqueryStreamTypes;

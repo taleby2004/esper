@@ -54,6 +54,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
      * @param valueAddEventService - update event handling
      * @param metricReportingService - for metric reporting
      * @param statementEventTypeRef - statement to event type reference holding 
+     * @param statementVariableRef - statement to variable reference holding 
      */
     public ConfigurationOperationsImpl(EventAdapterService eventAdapterService,
                                        EngineImportService engineImportService,

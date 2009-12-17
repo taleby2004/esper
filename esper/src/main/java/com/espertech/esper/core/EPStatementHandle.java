@@ -48,6 +48,7 @@ public class EPStatementHandle implements MetaDefItem, Serializable
      * @param metricsHandle handle for metrics reporting
      * @param priority priority, zero is default
      * @param preemptive true for drop after done
+     * @param statementFilterVersion filter version
      */
     public EPStatementHandle(String statementId, ManagedLock statementLock, String expressionText, boolean hasVariables, StatementMetricHandle metricsHandle, int priority, boolean preemptive, StatementFilterVersion statementFilterVersion)
     {
@@ -61,6 +62,11 @@ public class EPStatementHandle implements MetaDefItem, Serializable
         hashCode = expressionText.hashCode() ^ statementLock.hashCode();
     }
 
+    /**
+     * Tests filter version.
+     * @param filterVersion to test
+     * @return indicator whether version is up-to-date
+     */
     public boolean isCurrentFilter(long filterVersion) {
         return statementFilterVersion.isCurrentFilter(filterVersion);
     }
@@ -210,6 +216,10 @@ public class EPStatementHandle implements MetaDefItem, Serializable
         return metricsHandle;
     }
 
+    /**
+     * Returns dispatch.
+     * @return dispatch
+     */
     public EPStatementDispatch getOptionalDispatchable()
     {
         return optionalDispatchable;

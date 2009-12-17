@@ -13,7 +13,17 @@ import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
 
+/**
+ * Listener to filter activity.
+ */
 public interface FilterServiceListener
 {
+    /**
+     * Indicates an event being filtered.
+     * @param event event
+     * @param matches matches found
+     * @param exprEvaluatorContext expression
+     * @param statementId optional statement id if for a statement
+     */
     public void filtering(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext, String statementId);
 }

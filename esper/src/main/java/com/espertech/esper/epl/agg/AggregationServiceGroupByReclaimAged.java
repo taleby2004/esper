@@ -65,6 +65,11 @@ public class AggregationServiceGroupByReclaimAged extends AggregationServiceBase
      * @param prototypes - collect the aggregation state that evaluators evaluate to, act as prototypes for new aggregations
      * aggregation states for each group
      * @param methodResolutionService - factory for creating additional aggregation method instances per group key
+     * @param reclaimGroupAged hint to reclaim
+     * @param reclaimGroupFrequency hint to reclaim
+     * @param variableService variables
+     * @param statementStopService stop svc
+     * @throws com.espertech.esper.epl.expression.ExprValidationException when validation fails
      */
     public AggregationServiceGroupByReclaimAged(ExprEvaluator evaluators[],
                                                 AggregationMethod prototypes[],

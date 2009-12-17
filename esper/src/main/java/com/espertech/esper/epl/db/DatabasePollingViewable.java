@@ -94,6 +94,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
         getters = new EventPropertyGetter[inputParameters.size()];
         getterStreamNumbers = new int[inputParameters.size()];
         subordinateStreams = new TreeSet<Integer>();
+        this.exprEvaluatorContext = exprEvaluatorContext;
 
         int count = 0;
         for (String inputParam : inputParameters)

@@ -73,5 +73,9 @@ public interface StreamTypeService
      */
     public EventType[] getEventTypes();
 
+    /**
+     * Returns true for each stream without a data window.
+     * @return true for non-windowed streams.
+     */
     public boolean[] getIStreamOnly();
 }

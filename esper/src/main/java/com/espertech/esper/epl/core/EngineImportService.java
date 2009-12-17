@@ -90,5 +90,11 @@ public interface EngineImportService
      */
     public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;
 
+    /**
+     * Resolve an extended (non-SQL std) builtin aggregation.
+     * @param name of func
+     * @param isDistinct indicator
+     * @return aggregation func node
+     */
     public ExprNode resolveAggExtendedBuiltin(String name, boolean isDistinct);
 }

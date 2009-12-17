@@ -138,6 +138,7 @@ public class NamedWindowRootView extends ViewSupport
      * @param statementContext statement services
      * @param isDistinct is true for distinct output
      * @return base view for on-trigger expression
+     * @throws com.espertech.esper.epl.expression.ExprValidationException when expression validation fails
      */
     public NamedWindowOnExprBaseView addOnExpr(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType, StatementStopService statementStopService, InternalEventRouter internalEventRouter, ResultSetProcessor resultSetProcessor, EPStatementHandle statementHandle, StatementResultService statementResultService, StatementContext statementContext, boolean isDistinct)
             throws ExprValidationException

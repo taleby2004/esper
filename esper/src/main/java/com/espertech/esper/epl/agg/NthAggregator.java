@@ -25,6 +25,11 @@ public class NthAggregator implements AggregationMethod {
     private int currentBufferElementPointer;
     private long numDataPoints;
 
+    /**
+     * Ctor.
+     * @param returnType return type
+     * @param sizeBuf size
+     */
     public NthAggregator(Class returnType, int sizeBuf) {
         this.returnType = returnType;
         this.sizeBuf = sizeBuf;

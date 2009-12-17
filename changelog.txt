@@ -4,10 +4,41 @@ Esper Changelog
 Changes in version 3.3.0
 ------------------------
 
-- Support for subqueries to occur in filter expressions (stream or pattern)
-- Support for subqueries in split-stream and on-set and on-select
-- Support for on-update
-- Optimization for min/max cases
+Major API changes
+  - None
+  
+New Features
+  - Support for subqueries to occur in filter expressions (stream or pattern)
+  - Support for subqueries in split-stream and on-set and on-select
+  - Support for on-update
+  - New aggregation functions: rate, last, first, nth, leaving
+  - The "prev" and "prior" functions now accept a stream name 
+  - Optimization of min and max aggregation function for use with or without data window
+  - Support for annotations in statement object model
+  - Variables that are created via "create variable" and that are no longer referenced are removed
+
+Minor changes  
+  - Fixed issue ESPER-389 startAllStatements() starts rules in unpredictable order
+  - Fixed issue ESPER-393 Stream name alias not available for use in where-clause
+  - Fixed issue ESPER-396 Unbound stream and aggregating/grouping by unlimited key (i.e. timestamp) configurable state drop
+  - Fixed issue ESPER-398 Escape syntax for quote and double quote not working
+  - Fixed issue ESPER-402 Pattern with two NOT-operators connected by AND-operator throws ConcurrentModificationException (1 thread)
+  - Fixed issue ESPER-404 Statement resources not cleaned up after statement destroy keeping last event
+  - Fixed issue ESPER-405 Equals operator on object types in expressions should support inheritance
+  - Fixed issue ESPER-406 OutOfMemory : StatementMetrics not cleaned up after statement destroyed
+  - Fixed issue ESPER-409 Order-by clause not applied when pattern delivers multiple result rows for single incoming event
+  - Fixed issue ESPER-411 Operands of expression passed the wrong way round in patterns
+  - Fixed issue ESPER-414 In some scenario, createEPL fails with IllegalStateException vs EPException
+  - Fixed issue ESPER-415 statement object model fails on every-distinct
+  - Fixed issue ESPER-416 statement name provided by API does not overrides annotation provided name
+  - Fixed issue ESPER-432 Dangling meta character in regexp hangs the engine
+  - Fixed issue ESPER-418 Statement fails to compile if the statement only has a where-clause and uses an alias
+  - Fixed issue ESPER-419 Group-by with "output last" output rate limiting and wildcard select outputs last event and not last event per group
+  - Fixed issue ESPER-420 Group-by with wildcard-select may present wrong value for non-aggregated and non-grouped properties
+  - Fixed issue ESPER-421 Case-when throws NullPointerException when condition returns null
+  - Fixed issue ESPER-424 Self-join and order-by incorrect order
+  - Fixed issue ESPER-431 20-stream join hangs query optimizer
+
 
 Changes in version 3.2.0
 ------------------------

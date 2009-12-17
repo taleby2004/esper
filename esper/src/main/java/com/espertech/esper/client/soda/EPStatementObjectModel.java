@@ -461,10 +461,18 @@ public class EPStatementObjectModel implements Serializable
         this.updateClause = updateClause;
     }
 
+    /**
+     * Returns annotations.
+     * @return annotations
+     */
     public List<AnnotationPart> getAnnotations() {
         return annotations;
     }
 
+    /**
+     * Sets annotations.
+     * @param annotations to set
+     */
     public void setAnnotations(List<AnnotationPart> annotations) {
         this.annotations = annotations;
     }

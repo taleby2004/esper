@@ -34,6 +34,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
     /**
      * Ctor.
      * @param engineImportService is the engine imports
+     * @param timeProvider returns time
      * @param isUdfCache returns true to cache UDF results for constant parameter sets
      */
     public MethodResolutionServiceImpl(EngineImportService engineImportService,

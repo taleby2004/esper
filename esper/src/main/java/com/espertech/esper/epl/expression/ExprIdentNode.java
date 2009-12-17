@@ -89,6 +89,10 @@ public class ExprIdentNode extends ExprNode
         return streamOrPropertyName;
     }
 
+    /**
+     * Set name.
+     * @param streamOrPropertyName to use
+     */
     public void setStreamOrPropertyName(String streamOrPropertyName) {
         this.streamOrPropertyName = streamOrPropertyName;
     }

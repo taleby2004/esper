@@ -10,6 +10,9 @@ package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
 
+/**
+ * For testing if a remove stream entry has been present.
+ */
 public class LeavingAggregator implements AggregationMethod {
 
     private boolean leaving = false;

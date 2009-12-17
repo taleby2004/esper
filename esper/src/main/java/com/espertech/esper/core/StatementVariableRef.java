@@ -40,6 +40,15 @@ public interface StatementVariableRef
      */
     public void removeReferencesVariable(String variableName);
 
+    /**
+     * Add a preconfigured variable.
+     * @param variableName name
+     */
     public void addConfiguredVariable(String variableName);
+
+    /**
+     * Remove a preconfigured variable.
+     * @param variableName var
+     */
     public void removeConfiguredVariable(String variableName);
 }

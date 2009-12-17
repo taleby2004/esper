@@ -29,15 +29,24 @@ public class PatternEveryDistinctExpr extends PatternExprBase
 
     /**
      * Ctor - for use to create a pattern expression tree, without unique-criterial expression.
+     * @param expressions distinct expressions
      */
     public PatternEveryDistinctExpr(List<Expression> expressions) {
         this.expressions = expressions;
     }
 
+    /**
+     * Returns distinct expressions
+     * @return expr
+     */
     public List<Expression> getExpressions() {
         return expressions;
     }
 
+    /**
+     * Sets distinct expressions.
+     * @param expressions expr
+     */
     public void setExpressions(List<Expression> expressions) {
         this.expressions = expressions;
     }

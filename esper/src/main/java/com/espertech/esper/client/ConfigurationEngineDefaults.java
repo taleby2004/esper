@@ -1060,11 +1060,19 @@ public class ConfigurationEngineDefaults implements Serializable
             this.selfSubselectPreeval = selfSubselectPreeval;
         }
 
+        /**
+         * Enables or disables non-SQL standard builtin aggregation functions.
+         * @return indicator
+         */
         public boolean isExtendedAggregation()
         {
             return extendedAggregation;
         }
 
+        /**
+         * Enables or disables non-SQL standard builtin aggregation functions.
+         * @param extendedAggregation indicator
+         */
         public void setExtendedAggregation(boolean extendedAggregation)
         {
             this.extendedAggregation = extendedAggregation;

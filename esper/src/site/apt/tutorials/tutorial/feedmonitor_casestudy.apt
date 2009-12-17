@@ -21,14 +21,14 @@ double askPrice;
 
 	For the throughput statistics and to detect rapid fall-off we calculate a ticks per second rate for each market data feed. 
 
-	We can use an EPL statement that specifies a view onto the market data event stream that batches together 1 second of events. 
+	We can use an aggregation function by name "rate" that outputs an average rate given a number of seconds of events to consider.
 	We specify the feed and a count of events per feed as output values. To make this data available for further processing, we
 	insert output events into the TicksPerSecond event stream:
 
 ----------------------------------------
 insert into TicksPerSecond
-select feed, count(*) as cnt 
-  from MarketDataEvent.win:time_batch(1 sec) 
+select feed, rate(10) as cnt 
+  from MarketDataEvent 
  group by feed
 ----------------------------------------
 

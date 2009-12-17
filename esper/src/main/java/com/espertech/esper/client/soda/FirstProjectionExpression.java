@@ -28,6 +28,7 @@ public class FirstProjectionExpression extends ExpressionBase
 
     /**
      * Ctor.
+     * @param expression to aggregate
      * @param isDistinct true for distinct
      */
     public FirstProjectionExpression(Expression expression, boolean isDistinct)

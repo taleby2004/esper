@@ -38,7 +38,8 @@ public class EngineImportServiceImpl implements EngineImportService
     private final boolean allowExtendedAggregationFunc;
 
     /**
-	 * Ctor.
+	 * Ctor
+     * @param allowExtendedAggregationFunc true to allow non-SQL standard builtin agg functions.
 	 */
 	public EngineImportServiceImpl(boolean allowExtendedAggregationFunc)
     {

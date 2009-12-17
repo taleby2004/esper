@@ -28,7 +28,15 @@ public interface FilterServiceSPI extends FilterService
      */
     public void apply(FilterSet filterSet);
 
+    /**
+     * Add activity listener.
+     * @param filterServiceListener to add
+     */
     public void addFilterServiceListener(FilterServiceListener filterServiceListener);
 
+    /**
+     * Remove activity listener.
+     * @param filterServiceListener to remove
+     */
     public void removeFilterServiceListener(FilterServiceListener filterServiceListener);
 }

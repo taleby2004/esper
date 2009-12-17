@@ -95,6 +95,9 @@ public final class StatementContext implements ExprEvaluatorContext
      * @param valueAddEventService - service that handles update events
      * @param configSnapshot configuration snapshot
      * @param internalEventEngineRouteDest routing destination
+     * @param metricReportingService metrics
+     * @param viewService views
+     * @param statementFilterVersion statement filter keeper
      */
     public StatementContext(String engineURI,
                             String engineInstanceId,
@@ -436,6 +439,10 @@ public final class StatementContext implements ExprEvaluatorContext
         return scheduleAdjustmentService;
     }
 
+    /**
+     * Returns metrics svc.
+     * @return metrics
+     */
     public MetricReportingServiceSPI getMetricReportingService() {
         return metricReportingService;
     }
@@ -449,10 +456,18 @@ public final class StatementContext implements ExprEvaluatorContext
         return schedulingService;
     }
 
+    /**
+     * Returns view svc.
+     * @return svc
+     */
     public ViewService getViewService() {
         return viewService;
     }
 
+    /**
+     * Returns stmt filters version.
+     * @return filter version
+     */
     public StatementFilterVersion getStatementFilterVersion() {
         return statementFilterVersion;
     }

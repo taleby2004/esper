@@ -87,6 +87,10 @@ public class StatementSpecMapContext
         return configuration;
     }
 
+    /**
+     * Returns variables.
+     * @return variables
+     */
     public Set<String> getVariableNames() {
         return variableNames;
     }

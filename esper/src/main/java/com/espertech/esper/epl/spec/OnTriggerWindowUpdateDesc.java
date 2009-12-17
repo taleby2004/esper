@@ -28,6 +28,10 @@ public class OnTriggerWindowUpdateDesc extends OnTriggerWindowDesc
         this.assignments = assignments;
     }
 
+    /**
+     * Returns assignments.
+     * @return assignments
+     */
     public List<OnTriggerSetAssignment> getAssignments() {
         return assignments;
     }

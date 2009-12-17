@@ -12,6 +12,9 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.schedule.TimeProvider;
 
+/**
+ * Aggregation computing an event arrival rate for with and without data window.
+ */
 public class RateEverAggregator implements AggregationMethod {
 
     private final long interval;
@@ -19,6 +22,11 @@ public class RateEverAggregator implements AggregationMethod {
     private boolean hasLeave = false;
     private final TimeProvider timeProvider;
 
+    /**
+     * Ctor.
+     * @param interval rate interval
+     * @param timeProvider time
+     */
     public RateEverAggregator(long interval, TimeProvider timeProvider) {
         this.interval = interval;
         this.timeProvider = timeProvider;

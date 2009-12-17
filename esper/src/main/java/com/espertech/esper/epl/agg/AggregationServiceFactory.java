@@ -131,7 +131,10 @@ public class AggregationServiceFactory
      * @param methodResolutionService - is required to resolve aggregation methods
      * @param exprEvaluatorContext context for expression evaluatiom
      * @param annotations - statement annotations
+     * @param variableService - variable
+     * @param statementStopService - stop callbacks
      * @return instance for aggregation handling
+     * @throws com.espertech.esper.epl.expression.ExprValidationException if validation fails
      */
     public static AggregationService getService(List<ExprAggregateNode> selectAggregateExprNodes,
                                                 List<ExprAggregateNode> havingAggregateExprNodes,

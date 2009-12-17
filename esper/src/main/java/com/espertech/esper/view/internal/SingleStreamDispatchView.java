@@ -17,6 +17,9 @@ import com.espertech.esper.collection.FlushedEventBuffer;
 import com.espertech.esper.core.EPStatementDispatch;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
+/**
+ * View to dispatch for a single stream (no join).
+ */
 public final class SingleStreamDispatchView extends ViewSupport implements EPStatementDispatch
 {
     private boolean hasData = false;
