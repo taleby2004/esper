@@ -28,6 +28,12 @@ public abstract class Stream implements Serializable
      * @param writer to output to
      */
     public abstract void toEPLStream(StringWriter writer);
+    
+    /**
+     * Renders the stream type under a non-complete textual representation for tool use
+     * @param writer to output to
+     */
+    public abstract void toEPLStreamType(StringWriter writer);
 
     /**
      * Ctor.

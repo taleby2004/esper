@@ -134,4 +134,11 @@ public class SQLStream extends Stream
         writer.write(sqlWithSubsParams);
         writer.write("\"]");
     }
+    
+    public void toEPLStreamType(StringWriter writer)
+    {
+        writer.write("sql:");
+        writer.write(databaseName);
+        writer.write("[..]");
+    }
 }

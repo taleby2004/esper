@@ -29,6 +29,12 @@ public abstract class ProjectedStream extends Stream
     public abstract void toEPLProjectedStream(StringWriter writer);
 
     /**
+     * Represent type as textual non complete.
+     * @param writer to output to
+     */
+    public abstract void toEPLProjectedStreamType(StringWriter writer);
+
+    /**
      * Ctor.
      * @param views is a list of views upon the stream
      * @param optStreamName is the stream as-name, or null if unnamed 
@@ -125,6 +131,23 @@ public abstract class ProjectedStream extends Stream
         else if (isRetainIntersection)
         {
             writer.write(" retain-intersection");
+        }
+    }
+    
+    public void toEPLStreamType(StringWriter writer)
+    {
+    	toEPLProjectedStreamType(writer);
+    	
+        if ((views != null) && (views.size() != 0))
+        {
+            writer.write('.');
+            String delimiter = "";
+            for (View view : views)
+            {
+                writer.write(delimiter);
+                writer.append(view.getNamespace()).append(".").append(view.getName()).append("()");
+                delimiter = ".";
+            }
         }
     }
 

@@ -87,4 +87,11 @@ public class PatternStream extends ProjectedStream
         expression.toEPL(writer);
         writer.write(']');
     }
+
+	public void toEPLProjectedStreamType(StringWriter writer)
+	{
+		writer.write("pattern");
+	}
+    
+    
 }

@@ -140,4 +140,11 @@ public class FilterStream extends ProjectedStream
     {
         filter.toEPL(writer);
     }
+
+	public void toEPLProjectedStreamType(StringWriter writer)
+	{
+		writer.write(filter.getEventTypeName());
+	}
+    
+    
 }

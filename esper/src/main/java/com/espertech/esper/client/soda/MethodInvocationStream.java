@@ -137,4 +137,14 @@ public class MethodInvocationStream extends Stream
         }
         writer.write(")");
     }
+    
+    public void toEPLStreamType(StringWriter writer)
+    {
+        writer.write("method:");
+        writer.write(className);
+        writer.write(".");
+        writer.write(methodName);
+        writer.write("(..)");
+    }
+
 }

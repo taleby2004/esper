@@ -172,7 +172,7 @@ public class ParseHelper
                 return expression.substring(fromChar).trim();
             }
 
-            String[] lines = expression.split("\r|\n|\r\n");
+            String[] lines = expression.split("\r\n|\r|\n");
             StringBuilder buf = new StringBuilder();
             buf.append(lines[line-1].substring(fromChar));
             for (int i = line; i < lines.length; i++)

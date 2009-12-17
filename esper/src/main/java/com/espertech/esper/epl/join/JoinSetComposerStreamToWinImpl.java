@@ -83,9 +83,11 @@ public class JoinSetComposerStreamToWinImpl implements JoinSetComposer
     {
         for (EventTable[] repository : repositories)
         {
-            for (EventTable table : repository)
-            {
-                table.clear();
+            if (repository != null) {
+            	for (EventTable table : repository)
+            	{
+            		table.clear();
+            	}
             }
         }
     }

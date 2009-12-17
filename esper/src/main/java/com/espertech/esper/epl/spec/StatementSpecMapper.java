@@ -659,6 +659,9 @@ public class StatementSpecMapper
 
     private static SelectClause unmapSelect(SelectClauseSpecRaw selectClauseSpec, SelectClauseStreamSelectorEnum selectStreamSelectorEnum, StatementSpecUnMapContext unmapContext)
     {
+    	// special case for "on X set f = y"
+    	if (selectClauseSpec.getSelectExprList().isEmpty()) return null;
+    	
         SelectClause clause = SelectClause.create();
         clause.setStreamSelector(SelectClauseStreamSelectorEnum.mapFromSODA(selectStreamSelectorEnum));
         for (SelectClauseElementRaw raw : selectClauseSpec.getSelectExprList())
