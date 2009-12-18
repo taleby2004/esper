@@ -142,7 +142,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
   <part id="troubleshooting">
   	<title>Troubleshooting</title>
   	
-    <faq id="troubleshooting-1">
+    <faq id="troubleshooting-0">
       <question>My query presents incorrect or incomplete results? What can I do?</question>
       <answer>
         <p>
@@ -165,6 +165,17 @@ where sensor.sensorId = loc.sensorId</pre></div>
         </p>
       </answer>
     </faq>    
+    <faq id="troubleshooting-1">
+      <question>My query does not compile?</question>
+      <answer>
+        <p>
+          For syntax errors, the query compiler provides line and column numbers as part of the error message.
+        </p>
+        <p>
+          You could try a simpler query first and then add to the query.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
   <part id="general">
@@ -174,31 +185,20 @@ where sensor.sensorId = loc.sensorId</pre></div>
       <question>How do I measure the rate of arrival of events in a given time period? Per category?</question>
       <answer>
         <p>
-          The "rate" built-in aggregation function computes arrival rate. It can also be used when timestamp values are part of your event.
+          The "rate" built-in aggregation function computes arrival rate. It can also be used when timestamp values are provided by your event.
         </p>
         <p>
-          This computes the per-second rate using engine timestamps by averaging 5 seconds of events:
+          This computes the per-second rate using engine timestamps by averaging 5 seconds of events, and outputs the rate every second:
         </p>
-	<div class="source"><pre>select rate(5) from MarketDataEvent</pre></div>      
+	<div class="source"><pre>select rate(5) from MarketDataEvent output snapshot every 1 sec</pre></div>      
         <p>
           This computes the per-second rate using event timestamps (timestamp being a property of your event), also considering the last 5 seconds of events:
         </p>
-	<div class="source"><pre>select rate(timestamp) from MarketDataEvent.win:time(5 sec)</pre></div>      
+	<div class="source"><pre>select rate(timestamp) from MarketDataEvent.win:time(5 sec) output snapshot every 1 sec</pre></div>      
         <p>
           Use the rate aggregation function with group-by as follows:
         </p>
-	<div class="source"><pre>select feed, rate(timestamp) from MarketDataEvent.win:time(5 sec) group by feed</pre></div>      
-      </answer>
-    </faq>    
-
-    <faq id="throughput-2">
-      <question>How do I measure the rate of arrival of events in a given time period per another category?</question>
-      <answer>
-        <p>
-          We can solve this problem by grouping the events in the window per the category. The below example uses 'feed' as the category.
-        </p>
-<div class="source"><pre>select feed, count(*) as cnt from MarketDataEvent.win:time_batch(1 second) 
-group by feed</pre></div>      
+	<div class="source"><pre>select feed, rate(timestamp) from MarketDataEvent.win:time(5 sec) group by feed output snapshot every 1 sec</pre></div>      
       </answer>
     </faq>    
     

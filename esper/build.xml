@@ -43,7 +43,8 @@
 			windowtitle="${Name} API Documentation"
 			Overview="${doc.api.dir}/package.html"
 			stylesheetfile="${doc.api.dir}/jdstyle.css"
-			doctitle="${Name} ${version} API Documentation">
+			doctitle="${Name} ${version} API Documentation"
+			maxmemory="1024M">
 			<link href="${javadoc_link}"/>
 			<footer>
 				<![CDATA[
