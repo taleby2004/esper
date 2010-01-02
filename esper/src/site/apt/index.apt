@@ -173,8 +173,6 @@ Features
     * <<Variant event streams>> allows treating disparate types of events as the same type, such as when the event type can only be known at runtime, 
        when the event type is expected to vary, or when optional properties are desired.
  
-    * Support for <<update events>> that update, provide a new version or that revise an existing event held by an engine.
-	
     * <<Concurrency-safe iterator>> provides complete query capability for all statements    
     
     * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within an engine
@@ -214,8 +212,10 @@ Features
     
     * Assign a <<priority>> to your statement; Identify <<preemptive>> statements that cause an event to drop in face of multiple statements matching filters.
     
-    * Declarative update of event properties via <<update istream>> of events entering a stream.
+    * Declarative update of event properties via <<on update>> for named windows and <<update istream>> of events entering a stream.
         
+    * Support for <<versioned events>> that update, provide a new version or that revise an existing event held by an engine.
+	
     []		
     
 * Excellent documentation 
