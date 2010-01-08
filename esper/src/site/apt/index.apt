@@ -36,7 +36,24 @@ Commonly Asked Questions
 	{{{http://www.espertech.com/support}Can I get support?}}
 	
 	
-Features
+Esper Enterprise Edition Feature Summary 
+
+	* Rich Web-based Multi-window GUI based on Flex
+
+	* Real-time continously-updating displays
+	
+		* Charts, Timeline, Gauge, Grids
+	
+		* Interactive, composable, configurable
+
+	* Data distribution service
+	
+	* {{{http://www.espertech.com/products/esperee.php}Info and Download}}
+
+	[]
+
+
+Core CEP Features
 
 	
 * Event Stream Processing
