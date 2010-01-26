@@ -1392,13 +1392,7 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
 					This pattern fires for all A events that arrive within 5 seconds. After 5 seconds, this pattern stops matching even if more A events arrive.
 				</para>
 				<programlisting><![CDATA[(every A) where timer:within (5 seconds)]]></programlisting>
-				
-				<para>
-					This pattern is similar to the first pattern but here every time A arrives within 5 seconds, the pattern begins looking for A for another 5 seconds. As long
-					as A events arrive within 5 seconds after the last A, the pattern does not stop matching.
-				</para>
-				<programlisting><![CDATA[every (A where timer:within (5 sec))]]></programlisting>
-	
+					
 				<para>
 					This pattern matches for any one A or B event in the next 5 seconds.
 				</para>

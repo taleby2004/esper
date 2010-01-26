@@ -161,6 +161,9 @@ where sensor.sensorId = loc.sensorId</pre></div>
           Consider adding a user-defined function to your EPL statement to output application information or to set a breakpoint.
         </p>
         <p>
+          If you want to see remove stream events posted to listeners, the "irstream" and "rstream" keywords in the select clause select the remove stream.
+        </p>
+        <p>
           The Reporting Issues page on this site provides further information for resolving issues.
         </p>
       </answer>

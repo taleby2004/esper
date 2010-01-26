@@ -455,7 +455,7 @@ variable factor in the statements?</i>".
 	</p>	
       </answer>  
     </faq>
-    <faq id="">
+    <faq id="event_no_interest">
       <question>What happens if I send events to which no query is created yet? Can a time-to-live be specified to retry matching an event?</question>
       <answer>
         <p>
@@ -464,6 +464,19 @@ variable factor in the statements?</i>".
         <p>
     	  Your application can use the UnmatchedEventListener interface to catch an event that is dropped because no EPL statement needs to see it. 
     	  Your application would need to retain and retry such unmatched events to achieve a time-to-live for unmatched events.
+	</p>
+      </answer>  
+    </faq>
+    <faq id="arrival_time_concept">
+      <question>How can the timestamp for an event be explicitly controlled?</question>
+      <answer>
+        <p>
+	  In Esper the concept of time is under the control of an application via CurrentTimeEvent at the level of the runtime and at the level of statements via 
+	  isolated service provider. The event arrival time is the time the runtime or isolated service is currently at, when the event is made known to the runtime or isolated service. 
+	  This allows any number of time dimensions to be controlled separately, such as event originating time or transmitted time for example. 
+	</p>
+        <p>
+	  Use the time-order view (ext:time_order) to reorder events arriving out-of-order. The time order view can operate on a timestamp event property that is part of your event.	  
 	</p>
       </answer>  
     </faq>
