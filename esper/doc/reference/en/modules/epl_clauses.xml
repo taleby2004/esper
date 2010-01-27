@@ -692,11 +692,17 @@ select ipaddress, count(*) from SecurityFilter.win:time(60 sec) group by ipaddre
 			<programlisting><![CDATA[select * from StockTick(symbol='IBM').win:time(30 sec)]]></programlisting>
 
 			<para>
+			  You may well be asking: Why does the statement specify a time window here? First, the statement is meant to demonstrate the use of <literal>*</literal> wildcard. 
+			  When the engine pushes statement results to your listener and as the statement does not select remove stream events via <literal>rstream</literal> keyword, the listener receives only new events and the time window could be left off.
+			  By adding the time window the pull API (iterator API or JDBC driver) returns the last 30 seconds of events.
+			</para>
+
+			<para>
 				The <literal>*</literal> wildcard and expressions can also be combined in a <literal>select</literal> clause. The combination selects all event properties and in addition the computed values
 				as specified by any additional expressions that are part of the <literal>select</literal> clause. Here is an example that selects all properties of stock tick events plus a computed product of price and volume that the 
 				statement names 'pricevolume':
 			</para>
-			<programlisting><![CDATA[select *, price * volume as pricevolume from StockTick(symbol='IBM')]]></programlisting>
+			<programlisting><![CDATA[select *, price * volume as pricevolume from StockTick]]></programlisting>
 
 			<para>
 				When using wildcard (*), Esper does not actually copy your event properties out of your event or events. It simply wraps your native type in an <literal>EventBean</literal> interface. Your application has access to
@@ -751,7 +757,7 @@ from StockTick(symbol='IBM').win:length(100).stat:uni(volume)]]></programlisting
 			<para>
 				The following statement selects volume multiplied by price and specifies the name <emphasis>volPrice</emphasis> for the resulting column.
 			</para>
-			<programlisting><![CDATA[select volume * price as volPrice from StockTick.win:length(100)]]></programlisting>
+			<programlisting><![CDATA[select volume * price as volPrice from StockTick]]></programlisting>
 
 			<para>
 				Identifiers cannot contain the "." (dot) character, i.e. "vol.price" is not a valid identifier for the rename syntax.
@@ -772,7 +778,8 @@ from StockTick(symbol='IBM').win:length(100).stat:uni(volume)]]></programlisting
 			<para>
 				This example is a join between the two streams StockTick and News, respectively named as 'tick' and 'news'. The example selects from the StockTick event the symbol value using the 'tick' stream name as a prefix:
 			</para>
-			<programlisting><![CDATA[select tick.symbol from StockTick.win:time(10) as tick, News.win:time(10) as news]]></programlisting>
+			<programlisting><![CDATA[select tick.symbol from StockTick.win:time(10) as tick, News.win:time(10) as news
+where news.symbol = tick.symbol]]></programlisting>
 
 			<para>
 				Use the wildcard (*) selector in a join to generate a property for each stream, with the property value being the event itself. The output events of the statement below have two properties: the 'tick' property holds the StockTick event and the 'news' property holds the News event:
