@@ -57,7 +57,7 @@ Documentation
  		{{{../../esper-2.3.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-2.3.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-2.3.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 	<<EsperIO Reference documentation>> : {{{../../esperio-2.3.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-2.3.0/doc/reference/en/html/index.html}Online HTML}} \
@@ -69,7 +69,7 @@ Documentation
  		{{{../../esper-2.2.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-2.2.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-2.2.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 	<<EsperIO Reference documentation>> : {{{../../esperio-2.2.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-2.2.0/doc/reference/en/html/index.html}Online HTML}} \
@@ -81,7 +81,7 @@ Documentation
  		{{{../../esper-2.2.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-2.2.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-2.2.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 	<<EsperIO Reference documentation>> : {{{../../esperio-2.2.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-2.2.0/doc/reference/en/html/index.html}Online HTML}} \
@@ -93,7 +93,7 @@ Documentation
  		{{{../../esper-2.1.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-2.1.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-2.1.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 	<<EsperIO Reference documentation>> : {{{../../esperio-2.1.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-2.1.0/doc/reference/en/html/index.html}Online HTML}} \
@@ -105,7 +105,7 @@ Documentation
  		{{{../../esper-2.0.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-2.0.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-2.0.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 	<<EsperIO Reference documentation>> : {{{../../esperio-2.0.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-2.0.0/doc/reference/en/html/index.html}Online HTML}} \
@@ -117,22 +117,16 @@ Documentation
  		{{{../../esper-1.12.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.12.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-1.12.0/doc/api/index.html}API JavaDoc}}
-
 	<<Esper Grammar HTML>> : {{{../../esper-1.12.0/doc/grammar/EQLStatementParser.html}Parser Grammar}} \
 		{{{../../esper-1.12.0/doc/grammar/EQLStatementLexer.html}Lexer Grammar}}
 
-	<<EsperIO Reference documentation>> : {{{../../esperio-1.12.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
- 		{{{../../esperio-1.12.0/doc/reference/en/html/index.html}Online HTML}} \
- 		{{{../../esperio-1.12.0/doc/reference/en/html_single/index.html}Single page HTML}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.11.0
 	
 	<<Esper Reference documentation>> : {{{../../esper-1.11.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
  		{{{../../esper-1.11.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.11.0/doc/reference/en/html_single/index.html}Single page HTML}}
-
-	<<Esper API JavaDoc>> : {{{../../esper-1.11.0/doc/api/index.html}API JavaDoc}}
 
 	<<Esper Grammar HTML>> : {{{../../esper-1.11.0/doc/grammar/EQLStatementParser.html}Parser Grammar}} \
 		{{{../../esper-1.11.0/doc/grammar/EQLStatementLexer.html}Lexer Grammar}}
@@ -141,15 +135,13 @@ Documentation
  		{{{../../esperio-1.11.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.11.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.11.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.10.0
 	
 	<<Esper Reference documentation>> : {{{../../esper-1.10.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
  		{{{../../esper-1.10.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.10.0/doc/reference/en/html_single/index.html}Single page HTML}}
-
-	<<Esper API JavaDoc>> : {{{../../esper-1.10.0/doc/api/index.html}API JavaDoc}}
 
 	<<Esper Grammar HTML>> : {{{../../esper-1.10.0/doc/grammar/EQLStatementParser.html}Parser Grammar}} \
 		{{{../../esper-1.10.0/doc/grammar/EQLStatementLexer.html}Lexer Grammar}}
@@ -158,15 +150,13 @@ Documentation
  		{{{../../esperio-1.10.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.10.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.10.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.9.0
 	
 	<<Esper Reference documentation>> : {{{../../esper-1.9.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
  		{{{../../esper-1.9.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.9.0/doc/reference/en/html_single/index.html}Single page HTML}}
-
-	<<Esper API JavaDoc>> : {{{../../esper-1.9.0/doc/api/index.html}API JavaDoc}}
 
 	<<Esper Grammar HTML>> : {{{../../esper-1.9.0/doc/grammar/EQLStatementParser.html}Parser Grammar}} \
 		{{{../../esper-1.9.0/doc/grammar/EQLStatementLexer.html}Lexer Grammar}}
@@ -175,7 +165,7 @@ Documentation
  		{{{../../esperio-1.9.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.9.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.9.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.8.0
 	
@@ -183,13 +173,11 @@ Documentation
  		{{{../../esper-1.8.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.8.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-1.8.0/doc/api/index.html}API JavaDoc}}
-
 	<<EsperIO Reference documentation>> : {{{../../esperio-1.8.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-1.8.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.8.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.8.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.7.0
 	
@@ -197,13 +185,11 @@ Documentation
  		{{{../../esper-1.7.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.7.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-1.7.0/doc/api/index.html}API JavaDoc}}
-
 	<<EsperIO Reference documentation>> : {{{../../esperio-1.7.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-1.7.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.7.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.7.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.6.0
 	
@@ -211,14 +197,11 @@ Documentation
  		{{{../../esper-1.6.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.6.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-1.6.0/doc/api/index.html}API JavaDoc}}
-
-
 	<<EsperIO Reference documentation>> : {{{../../esperio-1.6.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-1.6.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.6.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.6.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.5.0
 	
@@ -226,14 +209,11 @@ Documentation
  		{{{../../esper-1.5.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.5.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-1.5.0/doc/api/index.html}API JavaDoc}}
-
-
 	<<EsperIO Reference documentation>> : {{{../../esperio-1.5.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-1.5.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.5.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.5.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper and EsperIO 1.4.0
 	
@@ -241,14 +221,11 @@ Documentation
  		{{{../../esper-1.4.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esper-1.4.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<Esper API JavaDoc>> : {{{../../esper-1.4.0/doc/api/index.html}API JavaDoc}}
-
-
 	<<EsperIO Reference documentation>> : {{{../../esperio-1.4.0/doc/reference/en/pdf/esper_adapter_reference.pdf}PDF print version}} \
  		{{{../../esperio-1.4.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-1.4.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<EsperIO API JavaDoc>> : {{{../../esperio-1.4.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 1.3.0
 	
@@ -258,9 +235,7 @@ Documentation
  	{{{../../esper-1.3.0/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-1.3.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-1.3.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 1.2.0
 	
@@ -270,9 +245,7 @@ Documentation
  	{{{../../esper-1.2.0/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-1.2.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-1.2.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 1.1.0
 	
@@ -282,10 +255,7 @@ Documentation
  	{{{../../esper-1.1.0/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-1.1.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-1.1.0/doc/api/index.html}API JavaDoc}}
-
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 1.0.5
 	
@@ -295,10 +265,7 @@ Documentation
  	{{{../../esper-1.0.5/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-1.0.5/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-1.0.5/doc/api/index.html}API JavaDoc}}
-
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 1.0.0
 	
@@ -308,10 +275,7 @@ Documentation
  	{{{../../esper-1.0.0/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-1.0.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-1.0.0/doc/api/index.html}API JavaDoc}}
-
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.9.5
 	
@@ -321,10 +285,7 @@ Documentation
  	{{{../../esper-0.9.5/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-0.9.5/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-0.9.5/doc/api/index.html}API JavaDoc}}
-
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.9.1
 	
@@ -334,9 +295,7 @@ Documentation
  	{{{../../esper-0.9.1/doc/reference/en/html/index.html}Online HTML}} \
  	{{{../../esper-0.9.1/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-0.9.1/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.9.0
 	
@@ -346,9 +305,7 @@ Documentation
  	{{{http://esper.sourceforge.net/esper-0.9.0/doc/reference/en/html/index.html}Online HTML}} \
  	{{{http://esper.sourceforge.net/esper-0.9.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{http://esper.sourceforge.net/esper-0.9.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.8.5
 	
@@ -358,9 +315,7 @@ Documentation
  	{{{http://esper.sourceforge.net/esper-0.8.5/doc/reference/en/html/index.html}Online HTML}} \
  	{{{http://esper.sourceforge.net/esper-0.8.5/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{../../esper-0.8.5/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.8.0
 	
@@ -370,10 +325,7 @@ Documentation
  	{{{http://esper.sourceforge.net/esper-0.8.0/doc/reference/en/html/index.html}Online HTML}} \
  	{{{http://esper.sourceforge.net/esper-0.8.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{http://esper.sourceforge.net/esper-0.8.0/doc/api/index.html}API JavaDoc}}
-
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.7.5
 	
@@ -383,9 +335,7 @@ Documentation
  	{{{http://esper.sourceforge.net/esper-0.7.5/doc/reference/en/html/index.html}Online HTML}} \
  	{{{http://esper.sourceforge.net/esper-0.7.5/doc/reference/en/html_single/index.html}Single page HTML}}
 
-	<<API JavaDoc>>
-	
-	{{{http://esper.sourceforge.net/esper-0.7.5/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
 
 * Esper 0.7.0
 		
@@ -393,6 +343,4 @@ Documentation
 	
 	{{{http://esper.sourceforge.net/esper-0.7.0/doc/reference/pdf/esper_reference.pdf}PDF print version}}.
 	
-	<<API JavaDoc>>
-	
-	{{{http://esper.sourceforge.net/esper-0.7.0/doc/api/index.html}API JavaDoc}}
+	Please download the distribution for the JavaDoc API docs.
