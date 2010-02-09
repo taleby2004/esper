@@ -772,7 +772,7 @@ match_recognize (
 		</sect2>
 
 		<sect2 id="match-recognize-patternops-quantifiers-zeroormore">
-			<title>Quantifier - Zero Or More (+ and +?)</title>
+			<title>Quantifier - Zero Or More (* and *?)</title>
 
 			<para>
 				The zero-or-more quantifier (*) must be matched zero or more times by events. The operator is greedy and the reluctant version is <literal>*?</literal>.
