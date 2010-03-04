@@ -719,7 +719,7 @@ insert into TickWindow select price, prior(1, price) as priorprice from StockTic
       <answer>
         <p>
 	We would like to detect the absence of certain events in the event stream. All possible tuples are known beforehand.
-	Lets say a tuple simple consists of the IP-Address. The possible tuples might look like the following:
+	Let's say a tuple simple consists of the IP-Address. The possible tuples might look like the following:
 	</p>
 	<pre>(ip=192.168.1.1), (ip=192.168.1.2), ... many more..., (ip=192.168.1.3)</pre>
         <p>
@@ -1564,6 +1564,119 @@ group by category, subEventType</pre></div>
       </answer>
     </faq>    
 
+    <faq id="buckets">
+      <question>How to compute for 5-minute buckets? How to aggregate (e.g.vwap) n buckets of k minutes each?</question>
+      <answer>
+        <p>
+          In other words, my buckets look as follows: t---(bucket1)---t-n---(bucket2)---t-2n---(bucket3)---t-3n---(bucket4)---t-4n          
+        </p>
+    	<p>
+	  One solution is to make a staggered set of named windows, where the remove stream of the first named windows feeds to the second,
+	   each named window a k-minute time window, and the second to the third and so on.    	
+        </p>
+    	<p>
+	  Here is a sample of statements:
+        </p>
+	<div class="source"><pre>create window BucketWindow1.win:time(5 min) as select * from MyEvent
+create window BucketWindow2.win:time(5 min) as select * from MyEvent
+create window BucketWindow3.win:time(5 min) as select * from MyEvent
+
+insert into BucketWindow1 select * from MyEvent
+insert rstream into BucketWindow2 select rstream * from W1
+insert rstream into BucketWindow3 select rstream * from W2
+
+select sum(price*volume) from BucketWindow1
+select sum(price*volume) from BucketWindow2
+select sum(price*volume) from BucketWindow3</pre></div>
+      </answer>
+    </faq>    
+
+    <faq id="change_statements_runtime">
+      <question>How to change statements at runtime?</question>
+      <answer>
+        <p>
+          The runtime configuration API, available from epAdministrator.getConfiguration(), allows to add, set and remove variables and add, remove and change event types and has other useful runtime functions. 
+        </p>
+    	<p>
+	  Variables are the preferred way to introduce dynamic thresholds, change filters on the fly or generally parameterize a statement. Variables can be scalar, object(any) type and can 
+	  be classes with properties as well as event-typed to hold events.
+        </p>
+    	<p>
+	  Consider using subqueries and named windows as a second and alternative approach. Named windows are similar to a relational database table, automatically indexed based on
+	  the standing queries against them or explicitly indexed for use in on-demand fire-and-forget queries.
+        </p>
+    	<p>
+	  Alternatively you may use any of the extension points such as user-defined function, custom aggregation functions (these are often useful in subqueries returning multiple rows) 
+	  or custom views.
+        </p>
+      </answer>
+    </faq>    
+
+    <faq id="execute_every_x_seconds">
+      <question>How can I execute a query only every X seconds?</question>
+      <answer>
+        <p>
+          Let's assume I only want to output every 20 seconds the last value, and forget the rest of the data. This would do it:
+        </p>
+	<div class="source">Select sum(price) from Marketdata.std:unique(ticker) group by ticker output snapshot every 20 seconds<pre></pre></div>
+
+        <p>
+          If using a named window, the on-select is a good way to fire at any schedule as the pattern defines. Here the example fires the query every
+          20 seconds if the hour is between 9am and 9:59am:
+        </p>
+	<div class="source">on pattern[every timer:crontab(*, 9, *, *, *, */20)] select * from MyNamedWindow<pre></pre></div>
+
+        <p>
+          You could also join a pattern to historical data, thereby repeatedly poll, optionally parameterize with variables (not shown below) to do incremental polling, a sample is here:
+        </p>
+	<div class="source"><pre>select * from pattern[every timer:interval(20)], sql:db1["select * from MySQLTable"]</pre></div>
+	
+        <p>
+          Or join the pattern to a stream. If joining to a stream then mark the join direction as unidirectional, 
+          thereby having the join execute only when the pattern fires:
+        </p>
+	<div class="source"><pre>select userId, sum(qty) from pattern[every timer:interval(10)] unidirectional, MyOrderEvent.win:time(10 min)</pre></div>
+
+        <p>
+          Last, the next example defines a variable and sets the variable to "on" or "off" to control output of statements. Variables can also be set programmatically
+          via runtime API.
+        </p>
+	<div class="source"><pre>create variable boolean var_on_off
+on pattern[timer:crontab(*, 9, *, *, *)] set var_on_off = true
+on pattern[timer:crontab(*, 10, *, *, *)] set var_on_off = false
+insert into nextStream select * from xyz(var_on_off)
+..or..
+select * from xyz output when var_on_off</pre></div>
+
+      </answer>
+    </faq>
+    
+    
+    <faq id="recursive_self_define">
+      <question>How do I create a recursive query? That is a query that feeds to itself and defines it's own input stream as output?</question>
+      <answer>
+        <p>
+          When creating your recursive query, you would want to ensure the event type is defined in advance, since the runtime will not be able to check 
+          the type at time of statement creation, since the statement itself creates the type.
+        </p>
+        <p>
+          Therefore, a good way is to define the type:
+        </p>
+	<div class="source"><pre>Map&lt;String, Object&gt; mapType = new HashMap&lt;String, Object&gt;();
+mapType.put("x", long.class);
+mapType.put("id", String.class);
+mapType.put("vol", double.class);
+epService.getEPAdministrator().getConfiguration().addEventType("Volatility", mapType);
+</pre></div>
+        <p>
+          Then create the query:
+        </p>
+	<div class="source"><pre>insert into Volatility
+select id, x+ prev(1,vol) as vol ,
+from Volatility.std:groupby(id).win:length(2)</pre></div>
+
+      </answer>
+    </faq>
   </part>
 
 </faqs>

@@ -155,19 +155,19 @@
 						<row>
 							<entry>&amp;</entry>
 							<entry>
-								<para>Bitwise AND if both operands are numbers; conditional AND if both operands are boolean</para>
+								<para>Bitwise AND if both operands are numbers; conditional AND if both operands are boolean.</para>
 							</entry>
 						</row>
 						<row>
 							<entry>|</entry>
 							<entry>
-								<para>Bitwise OR if both operands are numbers; conditional OR if both operands are boolean</para>
+								<para>Bitwise OR if both operands are numbers; conditional OR if both operands are boolean.</para>
 							</entry>
 						</row>
 						<row>
 							<entry>^</entry>
 							<entry>
-								<para>Bitwise exclusive OR (XOR)</para>
+								<para>Bitwise exclusive OR (XOR).</para>
 							</entry>
 						</row>
 					</tbody>
