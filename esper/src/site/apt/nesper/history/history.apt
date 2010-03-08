@@ -12,6 +12,39 @@ NEsper Change History
 	[]
 
 
+NEsper 3.3.0
+
+  Released March 8, 2010
+
+* API changes
+
+    * Enhancements release; Esper for .NET - feature equivalent to Esper 3.3.0
+          
+    []
+    
+* Major changes
+
+    * All changes for Esper 3.3
+    
+    * MonitorLock, MonitorSpinLock
+    
+    	* Default timeout now uses BaseLock.MLockTimeout
+    
+    	* IDisposable instance is singleton reducing heap fragmentation.
+    	
+    	[]
+    
+    * HighResolutionPerformanceProvider changed to use double instead of decimal for calculation.  Faster performance with no notable degradation.
+    
+    * Benchmark performance improved from 1.3 million EPS to 3.6 million EPS.
+        
+    []
+
+* Minor changes	
+    
+    * none
+
+
 NEsper 3.2.1
 
   Released Jan. 26, 2010
