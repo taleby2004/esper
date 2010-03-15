@@ -23,12 +23,21 @@ public abstract class Stream implements Serializable
 
     private String streamName;
 
+    public Stream() {
+    }
+
     /**
      * Renders the stream in textual representation.
      * @param writer to output to
      */
     public abstract void toEPLStream(StringWriter writer);
     
+    /**
+     * Renders the stream in textual representation any stream options, if present.
+     * @param writer to output to
+     */
+    public abstract void toEPLStreamOptions(StringWriter writer);
+
     /**
      * Renders the stream type under a non-complete textual representation for tool use
      * @param writer to output to
@@ -75,6 +84,8 @@ public abstract class Stream implements Serializable
             writer.write(" as ");
             writer.write(streamName);
         }
+
+        toEPLStreamOptions(writer);
     }
 
 }

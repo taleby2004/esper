@@ -8,12 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.epl.spec.SubstitutionParameterExpression;
-
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Object model of an EPL statement.
@@ -49,6 +46,7 @@ public class EPStatementObjectModel implements Serializable
     private UpdateClause updateClause;
     private CreateVariableClause createVariable;
     private CreateWindowClause createWindow;
+    private CreateIndexClause createIndex;
     private OnClause onExpr;
     private InsertIntoClause insertInto;
     private SelectClause selectClause;
@@ -59,6 +57,7 @@ public class EPStatementObjectModel implements Serializable
     private OutputLimitClause outputLimitClause;
     private OrderByClause orderByClause;
     private RowLimitClause rowLimitClause;
+    private MatchRecognizeClause matchRecognizeClause;
 
     /**
      * Ctor.
@@ -70,9 +69,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify an insert-into-clause.
      * @param insertInto specifies the insert-into-clause, or null to indicate that the clause is absent
+     */
+    public void setInsertInto(InsertIntoClause insertInto)
+    {
+        this.insertInto = insertInto;
+    }
+
+    /**
+     * Specify an insert-into-clause.
+     * @param insertInto specifies the insert-into-clause, or null to indicate that the clause is absent
      * @return model
      */
-    public EPStatementObjectModel setInsertInto(InsertIntoClause insertInto)
+    public EPStatementObjectModel insertInto(InsertIntoClause insertInto)
     {
         this.insertInto = insertInto;
         return this;
@@ -90,9 +98,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify a select-clause.
      * @param selectClause specifies the select-clause, the select-clause cannot be null and must be set
+     */
+    public void setSelectClause(SelectClause selectClause)
+    {
+        this.selectClause = selectClause;
+    }
+
+    /**
+     * Specify a select-clause.
+     * @param selectClause specifies the select-clause, the select-clause cannot be null and must be set
      * @return model
      */
-    public EPStatementObjectModel setSelectClause(SelectClause selectClause)
+    public EPStatementObjectModel selectClause(SelectClause selectClause)
     {
         this.selectClause = selectClause;
         return this;
@@ -110,9 +127,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify a from-clause.
      * @param fromClause specifies the from-clause, the from-clause cannot be null and must be set
+     */
+    public void setFromClause(FromClause fromClause)
+    {
+        this.fromClause = fromClause;
+    }
+
+    /**
+     * Specify a from-clause.
+     * @param fromClause specifies the from-clause, the from-clause cannot be null and must be set
      * @return model
      */
-    public EPStatementObjectModel setFromClause(FromClause fromClause)
+    public EPStatementObjectModel fromClause(FromClause fromClause)
     {
         this.fromClause = fromClause;
         return this;
@@ -130,9 +156,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify a where-clause.
      * @param whereClause specifies the where-clause, which is optional and can be null
+     */
+    public void setWhereClause(Expression whereClause)
+    {
+        this.whereClause = whereClause;
+    }
+
+    /**
+     * Specify a where-clause.
+     * @param whereClause specifies the where-clause, which is optional and can be null
      * @return model
      */
-    public EPStatementObjectModel setWhereClause(Expression whereClause)
+    public EPStatementObjectModel whereClause(Expression whereClause)
     {
         this.whereClause = whereClause;
         return this;
@@ -159,9 +194,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify a group-by-clause.
      * @param groupByClause specifies the group-by-clause, which is optional and can be null
+     */
+    public void setGroupByClause(GroupByClause groupByClause)
+    {
+        this.groupByClause = groupByClause;
+    }
+
+    /**
+     * Specify a group-by-clause.
+     * @param groupByClause specifies the group-by-clause, which is optional and can be null
      * @return model
      */
-    public EPStatementObjectModel setGroupByClause(GroupByClause groupByClause)
+    public EPStatementObjectModel groupByClause(GroupByClause groupByClause)
     {
         this.groupByClause = groupByClause;
         return this;
@@ -179,9 +223,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify a having-clause.
      * @param havingClause specifies the having-clause, which is optional and can be null
+     */
+    public void setHavingClause(Expression havingClause)
+    {
+        this.havingClause = havingClause;
+    }
+
+    /**
+     * Specify a having-clause.
+     * @param havingClause specifies the having-clause, which is optional and can be null
      * @return model
      */
-    public EPStatementObjectModel setHavingClause(Expression havingClause)
+    public EPStatementObjectModel havingClause(Expression havingClause)
     {
         this.havingClause = havingClause;
         return this;
@@ -199,9 +252,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify an order-by-clause.
      * @param orderByClause specifies the order-by-clause, which is optional and can be null
+     */
+    public void setOrderByClause(OrderByClause orderByClause)
+    {
+        this.orderByClause = orderByClause;
+    }
+
+    /**
+     * Specify an order-by-clause.
+     * @param orderByClause specifies the order-by-clause, which is optional and can be null
      * @return model
      */
-    public EPStatementObjectModel setOrderByClause(OrderByClause orderByClause)
+    public EPStatementObjectModel orderByClause(OrderByClause orderByClause)
     {
         this.orderByClause = orderByClause;
         return this;
@@ -219,9 +281,18 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Specify an output-rate-limiting-clause.
      * @param outputLimitClause specifies the output-rate-limiting-clause, which is optional and can be null
+     */
+    public void setOutputLimitClause(OutputLimitClause outputLimitClause)
+    {
+        this.outputLimitClause = outputLimitClause;
+    }
+
+    /**
+     * Specify an output-rate-limiting-clause.
+     * @param outputLimitClause specifies the output-rate-limiting-clause, which is optional and can be null
      * @return model
      */
-    public EPStatementObjectModel setOutputLimitClause(OutputLimitClause outputLimitClause)
+    public EPStatementObjectModel outputLimitClause(OutputLimitClause outputLimitClause)
     {
         this.outputLimitClause = outputLimitClause;
         return this;
@@ -238,21 +309,40 @@ public class EPStatementObjectModel implements Serializable
 
         AnnotationPart.toEPL(writer, annotations);
 
+        if (createIndex != null)
+        {
+            createIndex.toEPL(writer);
+            return writer.toString();
+        }
         if (createWindow != null)
         {
             createWindow.toEPL(writer);
+
+            FilterStream fs = (FilterStream) fromClause.getStreams().get(0);
+            if (fs.isRetainUnion()) {
+                writer.write(" retain-union");    
+            }
+
             writer.write(" as ");
             if (selectClause == null)
             {
                 throw new IllegalStateException("Select clause has not been defined");
             }
-            selectClause.toEPL(writer);
-            if (fromClause == null)
-            {
-                throw new IllegalStateException("From clause has not been defined");
+
+
+            if (fs.getFilter().getEventTypeName().equals(Object.class.getName())) {
+                createWindow.toEPLCreateTablePart(writer, selectClause);
             }
-            fromClause.toEPL(writer);
-            createWindow.toEPLInsertPart(writer);
+            else {
+                selectClause.toEPL(writer);
+
+                if (fromClause == null)
+                {
+                    throw new IllegalStateException("From clause has not been defined");
+                }
+                fromClause.toEPL(writer);
+                createWindow.toEPLInsertPart(writer);
+            }
             return writer.toString();
         }
 
@@ -307,7 +397,7 @@ public class EPStatementObjectModel implements Serializable
                 if (whereClause != null)
                 {
                     writer.write(" where ");
-                    whereClause.toEPL(writer);
+                    whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                 }
                 writer.write(" ");
                 split.toEPL(writer);
@@ -333,10 +423,14 @@ public class EPStatementObjectModel implements Serializable
             fromClause.toEPL(writer);
         }
 
+        if (matchRecognizeClause != null)
+        {
+            matchRecognizeClause.toEPL(writer);
+        }
         if ((whereClause != null) && (displayWhereClause))
         {
             writer.write(" where ");
-            whereClause.toEPL(writer);
+            whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         if (groupByClause != null)
         {
@@ -346,7 +440,7 @@ public class EPStatementObjectModel implements Serializable
         if (havingClause != null)
         {
             writer.write(" having ");
-            havingClause.toEPL(writer);
+            havingClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         if (outputLimitClause != null)
         {
@@ -475,5 +569,21 @@ public class EPStatementObjectModel implements Serializable
      */
     public void setAnnotations(List<AnnotationPart> annotations) {
         this.annotations = annotations;
+    }
+
+    public MatchRecognizeClause getMatchRecognizeClause() {
+        return matchRecognizeClause;
+    }
+
+    public void setMatchRecognizeClause(MatchRecognizeClause matchRecognizeClause) {
+        this.matchRecognizeClause = matchRecognizeClause;
+    }
+
+    public CreateIndexClause getCreateIndex() {
+        return createIndex;
+    }
+
+    public void setCreateIndex(CreateIndexClause createIndex) {
+        this.createIndex = createIndex;
     }
 }

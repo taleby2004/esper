@@ -11,6 +11,7 @@ package com.espertech.esper.client.soda;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.io.StringWriter;
 
 /**
  * Pattern observer expression observes occurances such as timer-at (crontab) and timer-interval. 
@@ -18,6 +19,26 @@ import java.util.Arrays;
 public class PatternObserverExpr extends EPBaseNamedObject implements PatternExpr
 {
     private static final long serialVersionUID = 0L;
+
+    private String treeObjectName;
+
+    public void setChildren(List<PatternExpr> children)
+    {
+        // this expression has no child expressions
+    }
+
+    public PatternObserverExpr() {
+    }
+
+    public String getTreeObjectName()
+    {
+        return treeObjectName;
+    }
+
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
+    }
 
     /**
      * Ctor - for use to create a pattern expression tree, without pattern child expression.
@@ -45,4 +66,29 @@ public class PatternObserverExpr extends EPBaseNamedObject implements PatternExp
     {
         return new ArrayList<PatternExpr>();
     }
+
+    public PatternExprPrecedenceEnum getPrecedence() {
+        return PatternExprPrecedenceEnum.ATOM;
+    }
+
+    public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence) {
+        if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
+            writer.write("(");
+            toPrecedenceFreeEPL(writer);
+            writer.write(")");
+        }
+        else {
+            toPrecedenceFreeEPL(writer);
+        }
+    }
+
+    /**
+     * Renders the expressions and all it's child expression, in full tree depth, as a string in
+     * language syntax.
+     * @param writer is the output to use
+     */
+    public void toPrecedenceFreeEPL(StringWriter writer) {
+        super.toEPL(writer);
+    }
+
 }

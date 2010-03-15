@@ -1,10 +1,12 @@
 package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,7 +15,7 @@ public class TestRowPatternRecognitionInterval extends TestCase {
 
     private static final Log log = LogFactory.getLog(TestRowPatternRecognitionInterval.class);
 
-    public void testInterval()
+    public void testInterval() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("MyEvent", SupportRecogBean.class);
@@ -21,21 +23,36 @@ public class TestRowPatternRecognitionInterval extends TestCase {
         epService.initialize();
 
         sendTimer(0, epService);
-        String[] fields = "a,b0,b1,lastb".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a, B[0].string as b0, B[1].string as b1, last(B.string) as lastb" +
-                "  pattern (A B*) " +
-                "  interval 10 seconds " +
-                "  define " +
-                "    A as A.string like 'A%'," +
-                "    B as B.string like 'B%'" +
+                " measures A.string as a, B[0].string as b0, B[1].string as b1, last(B.string) as lastb" +
+                " pattern (A B*)" +
+                " interval 10 seconds" +
+                " define" +
+                " A as A.string like \"A%\"," +
+                " B as B.string like \"B%\"" +
                 ") order by a, b0, b1, lastb";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
+        runAssertion(epService, listener, stmt);
+
+        stmt.destroy();
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
+        SerializableObjectCopier.copy(model);
+        assertEquals(text, model.toEPL());
+        stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+        assertEquals(text, stmt.getText());
+
+        runAssertion(epService, listener, stmt);
+    }
+
+    private void runAssertion(EPServiceProvider epService, SupportUpdateListener listener, EPStatement stmt) {
+
+        String[] fields = "a,b0,b1,lastb".split(",");
         sendTimer(1000, epService);
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A1", 1));
         assertFalse(listener.isInvoked());

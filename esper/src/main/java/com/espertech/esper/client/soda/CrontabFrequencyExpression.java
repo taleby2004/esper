@@ -25,9 +25,14 @@ public class CrontabFrequencyExpression extends ExpressionBase
         this.getChildren().add(numericParameter);
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.append("*/");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
     }
 }

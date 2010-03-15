@@ -110,7 +110,7 @@ public class GroupByClause implements Serializable
         for (Expression child : groupByExpressions)
         {
             writer.write(delimiter);
-            child.toEPL(writer);
+            child.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
     }

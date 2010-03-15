@@ -56,8 +56,8 @@ public class TestCaseExpr extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String caseExpr = "select case" +
-              " when (symbol = \"GE\") then volume" +
-              " when (symbol = \"DELL\") then sum(price) " +
+              " when symbol = \"GE\" then volume" +
+              " when symbol = \"DELL\" then sum(price) " +
               "end as p1 from " +   SupportMarketDataBean.class.getName() + ".win:length(10)";
 
         assertEquals(caseExpr, model.toEPL());
@@ -71,8 +71,8 @@ public class TestCaseExpr extends TestCase
     public void testCaseSyntax1Sum_Compile()
     {
         String caseExpr = "select case" +
-              " when (symbol = \"GE\") then volume" +
-              " when (symbol = \"DELL\") then sum(price) " +
+              " when symbol = \"GE\" then volume" +
+              " when symbol = \"DELL\" then sum(price) " +
               "end as p1 from " +   SupportMarketDataBean.class.getName() + ".win:length(10)";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);
 
@@ -129,7 +129,7 @@ public class TestCaseExpr extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String caseExpr = "select case " +
-              "when (symbol = \"DELL\") then (volume * 3) " +
+              "when symbol = \"DELL\" then volume * 3 " +
               "else volume " +
               "end as p1 from " + SupportMarketDataBean.class.getName() + ".win:length(10)";
         assertEquals(caseExpr, model.toEPL());
@@ -144,7 +144,7 @@ public class TestCaseExpr extends TestCase
     public void testCaseSyntax1WithElse_Compile()
     {
         String caseExpr = "select case " +
-              "when (symbol = \"DELL\") then (volume * 3) " +
+              "when symbol = \"DELL\" then volume * 3 " +
               "else volume " +
               "end as p1 from " + SupportMarketDataBean.class.getName() + ".win:length(10)";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(caseExpr);

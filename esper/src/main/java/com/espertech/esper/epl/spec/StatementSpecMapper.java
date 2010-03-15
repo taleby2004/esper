@@ -13,13 +13,12 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
-import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.pattern.*;
+import com.espertech.esper.rowregex.*;
 import com.espertech.esper.type.CronOperatorEnum;
 import com.espertech.esper.type.MathArithTypeEnum;
 import com.espertech.esper.type.MinMaxTypeEnum;
@@ -35,6 +34,23 @@ import java.util.List;
  */
 public class StatementSpecMapper
 {
+    public static Expression unmap(ExprNode expression) {
+        return unmapExpressionDeep(expression, new StatementSpecUnMapContext());
+    }
+
+    public static PatternExpr unmap(EvalNode node) {
+        return unmapPatternEvalDeep(node, new StatementSpecUnMapContext());
+    }
+
+    public static AnnotationPart unmap(AnnotationDesc node) {
+        List<AnnotationPart> list = unmapAnnotations(Collections.singletonList(node));
+        return list.get(0);
+    }
+
+    public static MatchRecognizeRegEx unmap(RowRegexExprNode pattern) {
+        return unmapExpressionDeepRowRegex(pattern, new StatementSpecUnMapContext());
+    }
+
     /**
      * Maps the SODA object model to a statement specification.
      * @param sodaStatement is the object model to map
@@ -62,6 +78,7 @@ public class StatementSpecMapper
         mapAnnotations(sodaStatement.getAnnotations(), raw);
         mapUpdateClause(sodaStatement.getUpdateClause(), raw, mapContext);
         mapCreateWindow(sodaStatement.getCreateWindow(), raw, mapContext);
+        mapCreateIndex(sodaStatement.getCreateIndex(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
         mapOnTrigger(sodaStatement.getOnExpr(), raw, mapContext);
         InsertIntoDesc desc = mapInsertInto(sodaStatement.getInsertInto());
@@ -74,6 +91,7 @@ public class StatementSpecMapper
         mapOutputLimit(sodaStatement.getOutputLimitClause(), raw, mapContext);
         mapOrderBy(sodaStatement.getOrderByClause(), raw, mapContext);
         mapRowLimit(sodaStatement.getRowLimitClause(), raw, mapContext);
+        mapMatchRecognize(sodaStatement.getMatchRecognizeClause(), raw, mapContext);
         return raw;
     }
 
@@ -87,8 +105,10 @@ public class StatementSpecMapper
         StatementSpecUnMapContext unmapContext = new StatementSpecUnMapContext();
 
         EPStatementObjectModel model = new EPStatementObjectModel();
-        unmapAnnotations(statementSpec.getAnnotations(), model);
+        List<AnnotationPart> annotations = unmapAnnotations(statementSpec.getAnnotations());
+        model.setAnnotations(annotations);
         unmapCreateWindow(statementSpec.getCreateWindowDesc(), model, unmapContext);
+        unmapCreateIndex(statementSpec.getCreateIndexDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
         unmapUpdateClause(statementSpec.getStreamSpecs(), statementSpec.getUpdateDesc(), model, unmapContext);
         unmapOnClause(statementSpec.getOnTriggerDesc(), model, unmapContext);
@@ -103,6 +123,7 @@ public class StatementSpecMapper
         unmapOutputLimit(statementSpec.getOutputLimitSpec(), model, unmapContext);
         unmapOrderBy(statementSpec.getOrderByList(), model, unmapContext);
         unmapRowLimit(statementSpec.getRowLimitSpec(), model, unmapContext);
+        unmapMatchRecognize(statementSpec.getMatchRecognizeSpec(), model, unmapContext);
 
         return new StatementSpecUnMapResult(model, unmapContext.getIndexedParams());
     }
@@ -204,6 +225,15 @@ public class StatementSpecMapper
         model.setCreateWindow(clause);
     }
 
+    private static void unmapCreateIndex(CreateIndexDesc createIndexDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (createIndexDesc == null)
+        {
+            return;
+        }
+        model.setCreateIndex(new CreateIndexClause(createIndexDesc.getIndexName(), createIndexDesc.getWindowName(), createIndexDesc.getColumns().toArray(new String[createIndexDesc.getColumns().size()])));
+    }
+
     private static void unmapCreateVariable(CreateVariableDesc createVariableDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
     {
         if (createVariableDesc == null)
@@ -284,7 +314,7 @@ public class StatementSpecMapper
         {
             unit = OutputLimitUnit.WHEN_EXPRESSION;
             Expression whenExpression = unmapExpressionDeep(outputLimitSpec.getWhenExpressionNode(), unmapContext);
-            List<Pair<String, Expression>> thenAssignments = new ArrayList<Pair<String, Expression>>();
+            List<AssignmentPair> thenAssignments = new ArrayList<AssignmentPair>();
             clause = new OutputLimitClause(selector, whenExpression, thenAssignments);
             if (outputLimitSpec.getThenExpressions() != null)
             {
@@ -307,6 +337,10 @@ public class StatementSpecMapper
             clause = new OutputLimitClause(selector, outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), unit);
         }
 
+        clause.setAfterNumberOfEvents(outputLimitSpec.getAfterNumberOfEvents());
+        if (outputLimitSpec.getAfterTimePeriodExpr() != null) {
+            clause.setAfterTimePeriodExpression((TimePeriodExpression) unmapExpressionDeep(outputLimitSpec.getAfterTimePeriodExpr(), unmapContext));
+        }
         model.setOutputLimitClause(clause);
     }
 
@@ -319,6 +353,36 @@ public class StatementSpecMapper
         RowLimitClause spec = new RowLimitClause(rowLimitSpec.getNumRows(), rowLimitSpec.getOptionalOffset(),
                 rowLimitSpec.getNumRowsVariable(), rowLimitSpec.getOptionalOffsetVariable());
         model.setRowLimitClause(spec);
+    }
+
+    private static void unmapMatchRecognize(MatchRecognizeSpec spec, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (spec == null) {
+            return;
+        }
+        MatchRecognizeClause clause = new MatchRecognizeClause();
+        clause.setPartitionExpressions(unmapExpressionDeep(spec.getPartitionByExpressions(), unmapContext));
+
+        List<SelectClauseExpression> measures = new ArrayList<SelectClauseExpression>();
+        for (MatchRecognizeMeasureItem item : spec.getMeasures()) {
+            measures.add(new SelectClauseExpression(unmapExpressionDeep(item.getExpr(), unmapContext), item.getName()));
+        }
+        clause.setMeasures(measures);
+        clause.setAll(spec.isAllMatches());
+        clause.setSkip(MatchRecognizeSkipClause.values()[spec.getSkip().getSkip().ordinal()]);
+
+        List<MatchRecognizeDefine> defines = new ArrayList<MatchRecognizeDefine>();
+        for (MatchRecognizeDefineItem define : spec.getDefines()) {
+
+            defines.add(new MatchRecognizeDefine(define.getIdentifier(), unmapExpressionDeep(define.getExpression(), unmapContext)));
+        }
+        clause.setDefines(defines);
+
+        if (spec.getInterval() != null) {
+            clause.setIntervalClause(new MatchRecognizeIntervalClause((TimePeriodExpression) unmapExpressionDeep(spec.getInterval().getTimePeriodExpr(), unmapContext)));
+        }
+        clause.setPattern(unmapExpressionDeepRowRegex(spec.getPattern(), unmapContext));
+        model.setMatchRecognizeClause(clause);
     }
 
     private static void mapOrderBy(OrderByClause orderByClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -385,10 +449,10 @@ public class StatementSpecMapper
             whenExpression = mapExpressionDeep(outputLimitClause.getWhenExpression(), mapContext);
 
             assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (Pair<String, Expression> pair : outputLimitClause.getThenAssignments())
+            for (AssignmentPair pair : outputLimitClause.getThenAssignments())
             {
-                ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+                ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
+                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
             }
         }
 
@@ -436,10 +500,10 @@ public class StatementSpecMapper
             OnSetClause setClause = (OnSetClause) onExpr;
             mapContext.setHasVariables(true);
             List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (Pair<String, Expression> pair : setClause.getAssignments())
+            for (AssignmentPair pair : setClause.getAssignments())
             {
-                ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+                ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
+                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
             }
             OnTriggerSetDesc desc = new OnTriggerSetDesc(assignments);
             raw.setOnTriggerDesc(desc);
@@ -448,10 +512,10 @@ public class StatementSpecMapper
         {
             OnUpdateClause updateClause = (OnUpdateClause) onExpr;
             List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-            for (Pair<String, Expression> pair : updateClause.getAssignments())
+            for (AssignmentPair pair : updateClause.getAssignments())
             {
-                ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
-                assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+                ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
+                assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
             }
             OnTriggerWindowUpdateDesc desc = new OnTriggerWindowUpdateDesc(updateClause.getWindowName(), updateClause.getOptionalAsName(), assignments);
             raw.setOnTriggerDesc(desc);
@@ -497,6 +561,35 @@ public class StatementSpecMapper
         }
         raw.setRowLimitSpec(new RowLimitSpec(rowLimitClause.getNumRows(), rowLimitClause.getOptionalOffsetRows(),
                 rowLimitClause.getNumRowsVariable(), rowLimitClause.getOptionalOffsetRowsVariable()));
+    }
+
+    private static void mapMatchRecognize(MatchRecognizeClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
+        if (clause == null) {
+            return;
+        }
+        MatchRecognizeSpec spec = new MatchRecognizeSpec();
+        spec.setPartitionByExpressions(mapExpressionDeep(clause.getPartitionExpressions(), mapContext));
+
+        List<MatchRecognizeMeasureItem> measures = new ArrayList<MatchRecognizeMeasureItem>();
+        for (SelectClauseExpression item : clause.getMeasures()) {
+            measures.add(new MatchRecognizeMeasureItem(mapExpressionDeep(item.getExpression(), mapContext), item.getAsName()));
+        }
+        spec.setMeasures(measures);
+        spec.setAllMatches(clause.isAll());
+        spec.setSkip(new MatchRecognizeSkip(MatchRecognizeSkipEnum.values()[clause.getSkip().ordinal()]));
+
+        List<MatchRecognizeDefineItem> defines = new ArrayList<MatchRecognizeDefineItem>();
+        for (MatchRecognizeDefine define : clause.getDefines()) {
+
+            defines.add(new MatchRecognizeDefineItem(define.getName(), mapExpressionDeep(define.getExpression(), mapContext)));
+        }
+        spec.setDefines(defines);
+
+        if (clause.getIntervalClause() != null) {
+            spec.setInterval(new MatchRecognizeInterval((ExprTimePeriod) mapExpressionDeep(clause.getIntervalClause().getExpression(), mapContext)));
+        }
+        spec.setPattern(mapExpressionDeepRowRegex(clause.getPattern(), mapContext));
+        raw.setMatchRecognizeSpec(spec);
     }
 
     private static void mapHaving(Expression havingClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -629,7 +722,7 @@ public class StatementSpecMapper
             PropertyValueExpression left = (PropertyValueExpression) unmapExpressionFlat(desc.getLeftNode(), unmapContext);
             PropertyValueExpression right = (PropertyValueExpression) unmapExpressionFlat(desc.getRightNode(), unmapContext);
 
-            ArrayList<Pair<PropertyValueExpression, PropertyValueExpression>> additionalProperties = new ArrayList<Pair<PropertyValueExpression, PropertyValueExpression>>();
+            ArrayList<PropertyValueExpressionPair> additionalProperties = new ArrayList<PropertyValueExpressionPair>();
             if (desc.getAdditionalLeftNodes() != null)
             {
                 for (int i = 0; i < desc.getAdditionalLeftNodes().length; i++)
@@ -638,7 +731,7 @@ public class StatementSpecMapper
                     ExprIdentNode rightNode = desc.getAdditionalRightNodes()[i];
                     PropertyValueExpression propLeft = (PropertyValueExpression) unmapExpressionFlat(leftNode, unmapContext);
                     PropertyValueExpression propRight = (PropertyValueExpression) unmapExpressionFlat(rightNode, unmapContext);
-                    additionalProperties.add(new Pair<PropertyValueExpression, PropertyValueExpression>(propLeft, propRight));
+                    additionalProperties.add(new PropertyValueExpressionPair(propLeft, propRight));
                 }
             }
             from.add(new OuterJoinQualifier(desc.getOuterJoinType(), left, right, additionalProperties));
@@ -717,6 +810,17 @@ public class StatementSpecMapper
         raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews(), mapContext), new StreamSpecOptions(), createWindow.isInsert(), insertFromWhereExpr));
     }
 
+    private static void mapCreateIndex(CreateIndexClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    {
+        if (clause == null)
+        {
+            return;
+        }
+
+        CreateIndexDesc desc = new CreateIndexDesc(clause.getIndexName(),clause.getWindowName(), clause.getColumns());
+        raw.setCreateIndexDesc(desc);
+    }
+
     private static void mapUpdateClause(UpdateClause updateClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
     {
         if (updateClause == null)
@@ -724,10 +828,10 @@ public class StatementSpecMapper
             return;
         }
         List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
-        for (Pair<String, Expression> pair : updateClause.getAssignments())
+        for (AssignmentPair pair : updateClause.getAssignments())
         {
-            ExprNode expr = mapExpressionDeep(pair.getSecond(), mapContext);
-            assignments.add(new OnTriggerSetAssignment(pair.getFirst(), expr));
+            ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
+            assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
         }
         ExprNode whereClause = null;
         if (updateClause.getOptionalWhereClause() != null)
@@ -830,19 +934,24 @@ public class StatementSpecMapper
         return result;
     }
 
-    private static ExprNode mapExpressionDeepOptional(Expression expr, StatementSpecMapContext mapContext)
+    private static MatchRecognizeRegEx unmapExpressionDeepRowRegex(RowRegexExprNode exprNode, StatementSpecUnMapContext unmapContext)
     {
-        if (expr == null)
-        {
-            return null;
-        }
-        return mapExpressionDeep(expr, mapContext);
+        MatchRecognizeRegEx parent = unmapExpressionFlatRowregex(exprNode, unmapContext);
+        unmapExpressionRecursiveRowregex(parent, exprNode, unmapContext);
+        return parent;
     }
 
     private static ExprNode mapExpressionDeep(Expression expr, StatementSpecMapContext mapContext)
     {
         ExprNode parent = mapExpressionFlat(expr, mapContext);
         mapExpressionRecursive(parent, expr, mapContext);
+        return parent;
+    }
+
+    private static RowRegexExprNode mapExpressionDeepRowRegex(MatchRecognizeRegEx expr, StatementSpecMapContext mapContext)
+    {
+        RowRegexExprNode parent = mapExpressionFlatRowregex(expr, mapContext);
+        mapExpressionRecursiveRowregex(parent, expr, mapContext);
         return parent;
     }
 
@@ -873,7 +982,7 @@ public class StatementSpecMapper
             if (mapContext.getVariableService().getReader(prop.getPropertyName()) != null)
             {
                 mapContext.setHasVariables(true);
-                return new ExprVariableNode(prop.getPropertyName());
+                return new ExprVariableNode(prop.getPropertyName()); // TODO
             }
             return new ExprIdentNode(prop.getPropertyName());
         }
@@ -904,7 +1013,18 @@ public class StatementSpecMapper
         else if (expr instanceof ConstantExpression)
         {
             ConstantExpression op = (ConstantExpression) expr;
-            return new ExprConstantNode(op.getConstant());
+            Class constantType = null;
+            if (op.getConstantType() != null) {
+                try
+                {
+                    constantType = Class.forName(op.getConstantType());
+                }
+                catch (ClassNotFoundException e)
+                {
+                    throw new EPException("Error looking up class name '" + op.getConstantType() + "' to resolve as constant type");
+                }
+            }
+            return new ExprConstantNode(op.getConstant(), constantType);
         }
         else if (expr instanceof ConcatExpression)
         {
@@ -1155,20 +1275,20 @@ public class StatementSpecMapper
         else if (expr instanceof CrontabParameterExpression)
         {
             CrontabParameterExpression cronParam = (CrontabParameterExpression) expr;
-            if (cronParam.getType() == CrontabParameterExpression.ScheduleItemType.WILDCARD)
+            if (cronParam.getType() == ScheduleItemType.WILDCARD)
             {
                 return new ExprNumberSetWildcard();
             }
             CronOperatorEnum operator;
-            if (cronParam.getType() == CrontabParameterExpression.ScheduleItemType.LASTDAY)
+            if (cronParam.getType() == ScheduleItemType.LASTDAY)
             {
                 operator = CronOperatorEnum.LASTDAY;
             }
-            else if (cronParam.getType() == CrontabParameterExpression.ScheduleItemType.WEEKDAY)
+            else if (cronParam.getType() == ScheduleItemType.WEEKDAY)
             {
                 operator = CronOperatorEnum.WEEKDAY;
             }
-            else if (cronParam.getType() == CrontabParameterExpression.ScheduleItemType.LASTWEEKDAY)
+            else if (cronParam.getType() == ScheduleItemType.LASTWEEKDAY)
             {
                 operator = CronOperatorEnum.LASTWEEKDAY;
             }
@@ -1188,6 +1308,42 @@ public class StatementSpecMapper
             result.add(unmapExpressionDeep(expr, unmapContext));
         }
         return result;
+    }
+
+    private static MatchRecognizeRegEx unmapExpressionFlatRowregex(RowRegexExprNode expr, StatementSpecUnMapContext unmapContext)
+    {
+        if (expr instanceof RowRegexExprNodeAlteration) {
+            return new MatchRecognizeRegExAlteration();
+        }
+        else if (expr instanceof RowRegexExprNodeAtom) {
+            RowRegexExprNodeAtom atom = (RowRegexExprNodeAtom) expr;
+            return new MatchRecognizeRegExAtom(atom.getTag(), MatchRecogizePatternElementType.values()[atom.getType().ordinal()]);
+        }
+        else if (expr instanceof RowRegexExprNodeConcatenation) {
+            return new MatchRecognizeRegExConcatenation();
+        }
+        else {
+            RowRegexExprNodeNested nested = (RowRegexExprNodeNested) expr;
+            return new MatchRecognizeRegExNested(MatchRecogizePatternElementType.values()[nested.getType().ordinal()]);
+        }
+    }
+
+    private static RowRegexExprNode mapExpressionFlatRowregex(MatchRecognizeRegEx expr, StatementSpecMapContext mapContext)
+    {
+        if (expr instanceof MatchRecognizeRegExAlteration) {
+            return new RowRegexExprNodeAlteration();
+        }
+        else if (expr instanceof MatchRecognizeRegExAtom) {
+            MatchRecognizeRegExAtom atom = (MatchRecognizeRegExAtom) expr;
+            return new RowRegexExprNodeAtom(atom.getName(), RegexNFATypeEnum.values()[atom.getType().ordinal()]);
+        }
+        else if (expr instanceof MatchRecognizeRegExConcatenation) {
+            return new RowRegexExprNodeConcatenation();
+        }
+        else {
+            MatchRecognizeRegExNested nested = (MatchRecognizeRegExNested) expr;
+            return new RowRegexExprNodeNested(RegexNFATypeEnum.values()[nested.getType().ordinal()]);
+        }
     }
 
     private static Expression unmapExpressionFlat(ExprNode expr, StatementSpecUnMapContext unmapContext)
@@ -1239,7 +1395,11 @@ public class StatementSpecMapper
         else if (expr instanceof ExprConstantNode)
         {
             ExprConstantNode constNode = (ExprConstantNode) expr;
-            return new ConstantExpression(constNode.getValue());
+            String constantType = null;
+            if (constNode.getType() != null) {
+                constantType = constNode.getType().getName();
+            }
+            return new ConstantExpression(constNode.getValue(), constantType);
         }
         else if (expr instanceof ExprConcatNode)
         {
@@ -1461,7 +1621,7 @@ public class StatementSpecMapper
         }
         else if (expr instanceof ExprNumberSetWildcard)
         {
-            return new CrontabParameterExpression(CrontabParameterExpression.ScheduleItemType.WILDCARD);
+            return new CrontabParameterExpression(ScheduleItemType.WILDCARD);
         }
         else if (expr instanceof ExprNumberSetFrequency)
         {
@@ -1494,18 +1654,18 @@ public class StatementSpecMapper
         else if (expr instanceof ExprNumberSetCronParam)
         {
             ExprNumberSetCronParam cronParam = (ExprNumberSetCronParam) expr;
-            CrontabParameterExpression.ScheduleItemType type;
+            ScheduleItemType type;
             if (cronParam.getCronOperator() == CronOperatorEnum.LASTDAY)
             {
-                type = CrontabParameterExpression.ScheduleItemType.LASTDAY;
+                type = ScheduleItemType.LASTDAY;
             }
             else if (cronParam.getCronOperator() == CronOperatorEnum.LASTWEEKDAY)
             {
-                type = CrontabParameterExpression.ScheduleItemType.LASTWEEKDAY;
+                type = ScheduleItemType.LASTWEEKDAY;
             }
             else if (cronParam.getCronOperator() == CronOperatorEnum.WEEKDAY)
             {
-                type = CrontabParameterExpression.ScheduleItemType.WEEKDAY;
+                type = ScheduleItemType.WEEKDAY;
             }
             else {
                 throw new IllegalArgumentException("Cron parameter not recognized: " + cronParam.getCronOperator());
@@ -1525,6 +1685,16 @@ public class StatementSpecMapper
         }
     }
 
+    private static void unmapExpressionRecursiveRowregex(MatchRecognizeRegEx parent, RowRegexExprNode expr, StatementSpecUnMapContext unmapContext)
+    {
+        for (RowRegexExprNode child : expr.getChildNodes())
+        {
+            MatchRecognizeRegEx result = unmapExpressionFlatRowregex(child, unmapContext);
+            parent.getChildren().add(result);
+            unmapExpressionRecursiveRowregex(result, child, unmapContext);
+        }
+    }
+
     private static void mapExpressionRecursive(ExprNode parent, Expression expr, StatementSpecMapContext mapContext)
     {
         for (Expression child : expr.getChildren())
@@ -1532,6 +1702,16 @@ public class StatementSpecMapper
             ExprNode result = mapExpressionFlat(child, mapContext);
             parent.addChildNode(result);
             mapExpressionRecursive(result, child, mapContext);
+        }
+    }
+
+    private static void mapExpressionRecursiveRowregex(RowRegexExprNode parent, MatchRecognizeRegEx expr, StatementSpecMapContext mapContext)
+    {
+        for (MatchRecognizeRegEx child : expr.getChildren())
+        {
+            RowRegexExprNode result = mapExpressionFlatRowregex(child, mapContext);
+            parent.addChildNode(result);
+            mapExpressionRecursiveRowregex(result, child, mapContext);
         }
     }
 
@@ -1605,10 +1785,10 @@ public class StatementSpecMapper
                 additionalLeft = new ExprIdentNode[qualifier.getAdditionalProperties().size()];
                 additionalRight = new ExprIdentNode[qualifier.getAdditionalProperties().size()];
                 int count = 0;
-                for (Pair<PropertyValueExpression, PropertyValueExpression> pair : qualifier.getAdditionalProperties())
+                for (PropertyValueExpressionPair pair : qualifier.getAdditionalProperties())
                 {
-                    additionalLeft[count] = (ExprIdentNode) mapExpressionFlat(pair.getFirst(), mapContext);
-                    additionalRight[count] = (ExprIdentNode) mapExpressionFlat(pair.getSecond(), mapContext);
+                    additionalLeft[count] = (ExprIdentNode) mapExpressionFlat(pair.getLeft(), mapContext);
+                    additionalRight[count] = (ExprIdentNode) mapExpressionFlat(pair.getRight(), mapContext);
                     count++;
                 }
             }
@@ -1849,6 +2029,9 @@ public class StatementSpecMapper
                 {
                     selectClause = unmapSelect(atom.getOptionalSelectClause(), SelectClauseStreamSelectorEnum.ISTREAM_ONLY, unmapContext);
                 }
+                if (selectClause.getSelectList().isEmpty()) {
+                    selectClause.getSelectList().add(new SelectClauseWildcard());
+                }
 
                 Expression filterExpression = null;
                 if (atom.getOptionalWhereClause() != null)
@@ -1863,12 +2046,12 @@ public class StatementSpecMapper
         return filterDef;
     }
 
-    private static void unmapAnnotations(List<AnnotationDesc> annotations, EPStatementObjectModel model) {
+    private static List<AnnotationPart> unmapAnnotations(List<AnnotationDesc> annotations) {
         List<AnnotationPart> result = new ArrayList<AnnotationPart>();
         for (AnnotationDesc desc : annotations) {
             result.add(unmapAnnotation(desc));
         }
-        model.setAnnotations(result);
+        return result;
     }
 
     private static AnnotationPart unmapAnnotation(AnnotationDesc desc) {
@@ -1876,13 +2059,13 @@ public class StatementSpecMapper
             return new AnnotationPart(desc.getName());
         }
 
-        List<Pair<String, Object>> attributes = new ArrayList<Pair<String, Object>>();
+        List<AnnotationAttribute> attributes = new ArrayList<AnnotationAttribute>();
         for (Pair<String, Object> pair : desc.getAttributes()) {
             if (pair.getSecond() instanceof AnnotationDesc) {
-                attributes.add(new Pair<String, Object>(pair.getFirst(), unmapAnnotation((AnnotationDesc) pair.getSecond())));
+                attributes.add(new AnnotationAttribute(pair.getFirst(), unmapAnnotation((AnnotationDesc) pair.getSecond())));
             }
             else {
-                attributes.add(new Pair<String, Object>(pair.getFirst(), pair.getSecond()));
+                attributes.add(new AnnotationAttribute(pair.getFirst(), pair.getSecond()));
             }
         }
         return new AnnotationPart(desc.getName(), attributes);
@@ -1908,15 +2091,14 @@ public class StatementSpecMapper
         }
 
         List<Pair<String, Object>> attributes = new ArrayList<Pair<String, Object>>();
-        for (Pair<String, Object> pair : part.getAttributes()) {
-            if (pair.getSecond() instanceof AnnotationPart) {
-                attributes.add(new Pair<String, Object>(pair.getFirst(), mapAnnotation((AnnotationPart) pair.getSecond())));
+        for (AnnotationAttribute pair : part.getAttributes()) {
+            if (pair.getValue() instanceof AnnotationPart) {
+                attributes.add(new Pair<String, Object>(pair.getName(), mapAnnotation((AnnotationPart) pair.getValue())));
             }
             else {
-                attributes.add(new Pair<String, Object>(pair.getFirst(), pair.getSecond()));
+                attributes.add(new Pair<String, Object>(pair.getName(), pair.getValue()));
             }
         }
         return new AnnotationDesc(part.getName(), attributes);
     }
-
 }

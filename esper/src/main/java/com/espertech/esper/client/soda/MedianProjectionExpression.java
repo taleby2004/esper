@@ -15,16 +15,20 @@ import java.io.StringWriter;
  */
 public class MedianProjectionExpression extends ExpressionBase
 {
-    private boolean isDistinct;
+    private boolean distinct;
     private static final long serialVersionUID = 4859634868887801690L;
 
+    public MedianProjectionExpression() {
+    }
+
     /**
+
      * Ctor - for use to create an expression tree, without inner expression
      * @param isDistinct true if distinct
      */
     public MedianProjectionExpression(boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
     }
 
     /**
@@ -34,18 +38,23 @@ public class MedianProjectionExpression extends ExpressionBase
      */
     public MedianProjectionExpression(Expression expression, boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
         this.getChildren().add(expression);
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("median(");
-        if (isDistinct)
+        if (distinct)
         {
             writer.write("distinct ");
         }
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(")");
     }
 
@@ -55,7 +64,16 @@ public class MedianProjectionExpression extends ExpressionBase
      */
     public boolean isDistinct()
     {
-        return isDistinct;
+        return distinct;
+    }
+
+    /**
+     * Returns true if the projection considers distinct values only.
+     * @return true if distinct
+     */
+    public boolean getDistinct()
+    {
+        return distinct;
     }
 
     /**
@@ -64,6 +82,6 @@ public class MedianProjectionExpression extends ExpressionBase
      */
     public void setDistinct(boolean distinct)
     {
-        isDistinct = distinct;
+        this.distinct = distinct;
     }
 }

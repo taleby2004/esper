@@ -15,7 +15,7 @@ public class TestNamedWindowQueryMain extends TestCase
     public void testNamedWindowQuery()
     {
         NamedWindowQueryMain main = new NamedWindowQueryMain();
-        main.runExample(true);
+        main.runExample(true, "NamedWindowMain");
     }
 }
 

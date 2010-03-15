@@ -22,6 +22,9 @@ public class BetweenExpression extends ExpressionBase
     private boolean isNotBetween;
     private static final long serialVersionUID = 4626033892510751123L;
 
+    public BetweenExpression() {
+    }
+
     /**
      * Ctor, creates a between range check.
      * @param datapoint provides the datapoint
@@ -68,22 +71,27 @@ public class BetweenExpression extends ExpressionBase
         isNotBetween = notBetween;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+    }
+
+    /**
+     * Renders the clause in textual representation.
+     * @param writer to output to
+     */
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         if ((isLowEndpointIncluded) && (isHighEndpointIncluded))
         {
-            writer.write('(');
-            this.getChildren().get(0).toEPL(writer);
+            this.getChildren().get(0).toEPL(writer, getPrecedence());
             writer.write(" between ");
-            this.getChildren().get(1).toEPL(writer);
+            this.getChildren().get(1).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.write(" and ");
-            this.getChildren().get(2).toEPL(writer);
-            writer.write(')');
+            this.getChildren().get(2).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         else
         {
-            writer.write('(');
-            this.getChildren().get(0).toEPL(writer);
+            this.getChildren().get(0).toEPL(writer, getPrecedence());
             writer.write(" in ");
             if (isLowEndpointIncluded)
             {
@@ -93,9 +101,9 @@ public class BetweenExpression extends ExpressionBase
             {
                 writer.write('(');
             }
-            this.getChildren().get(1).toEPL(writer);
+            this.getChildren().get(1).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.write(':');
-            this.getChildren().get(2).toEPL(writer);
+            this.getChildren().get(2).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             if (isHighEndpointIncluded)
             {
                 writer.write(']');
@@ -104,7 +112,6 @@ public class BetweenExpression extends ExpressionBase
             {
                 writer.write(')');
             }
-            writer.write(')');
         }
     }
 

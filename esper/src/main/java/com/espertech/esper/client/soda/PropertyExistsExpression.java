@@ -33,14 +33,15 @@ public class PropertyExistsExpression extends ExpressionBase
         this.getChildren().add(Expressions.getPropExpr(propertyName));
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("exists(");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(")");
     }
 }

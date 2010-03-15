@@ -33,9 +33,13 @@ public class PatternNotExpr extends PatternExprBase
         this.getChildren().add(inner);    
     }
 
-    public void toEPL(StringWriter writer)
+    public PatternExprPrecedenceEnum getPrecedence() {
+        return PatternExprPrecedenceEnum.EVERY_NOT;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("not ");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
     }
 }

@@ -9,16 +9,20 @@
 package com.espertech.esper.event;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.EventBeanManufacturerBean;
 import com.espertech.esper.event.bean.PropertyHelper;
 import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.w3c.dom.Node;
 
 /**
  * Helper for writeable events.
@@ -57,8 +61,40 @@ public class EventAdapterServiceHelper
                 {
                     writables.add(new WriteablePropertyDescriptor(types.getKey(), (Class) types.getValue(), null));
                 }
+                if (types.getValue() instanceof String)
+                {
+                    String typeName = types.getValue().toString();
+                    Class clazz = JavaClassHelper.getPrimitiveClassForName(typeName);
+                    if (clazz != null)
+                    {
+                        writables.add(new WriteablePropertyDescriptor(types.getKey(), clazz, null));
+                    }                    
+                }
             }
             return writables;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public static EventBean adapterForType(Object event, EventType eventType, EventAdapterService eventAdapterService)
+    {
+        if (event == null) {
+            return null;
+        }
+        if (eventType instanceof BeanEventType)
+        {
+            return eventAdapterService.adapterForTypedBean(event, (BeanEventType) eventType);
+        }
+        else if (eventType instanceof MapEventType)
+        {
+            return eventAdapterService.adaptorForTypedMap((Map) event, eventType);
+        }
+        else if (eventType instanceof BaseConfigurableEventType)
+        {
+            return eventAdapterService.adapterForTypedDOM((Node) event, eventType);
         }
         else
         {

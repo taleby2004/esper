@@ -41,7 +41,7 @@ public class TestOutputLimitAfter extends TestCase
          EPStatementObjectModel model = new EPStatementObjectModel();
          model.setSelectClause(SelectClause.create("string"));
          model.setFromClause(FromClause.create(FilterStream.create("SupportBean").addView("win", "keepall")));
-         model.setOutputLimitClause(OutputLimitClause.create(Expressions.timePeriod(0, 0, 0, 5, 0)).setAfterTimePeriodExpression(Expressions.timePeriod(0, 0, 0, 20, 0)));
+         model.setOutputLimitClause(OutputLimitClause.create(Expressions.timePeriod(0, 0, 0, 5, 0)).afterTimePeriodExpression(Expressions.timePeriod(0, 0, 0, 20, 0)));
          assertEquals(stmtText, model.toEPL());
      }
 
@@ -151,10 +151,21 @@ public class TestOutputLimitAfter extends TestCase
          epService.getEPAdministrator().createEPL("create variable int myvar = 1");
 
          sendTimer(0);
-         String stmtText = "select string from SupportBean.win:keepall() output after 20 seconds snapshot when myvar=1";
+         String stmtText = "select string from SupportBean.win:keepall() output after 20 seconds snapshot when myvar = 1";
          EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
          stmt.addListener(listener);
 
+         runAssertionSnapshotVar();
+         
+         stmt.destroy();
+         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
+         assertEquals(stmtText, model.toEPL());
+         stmt = epService.getEPAdministrator().create(model);
+         assertEquals(stmtText, stmt.getText());
+     }
+
+     private void runAssertionSnapshotVar()
+     {
          sendTimer(6000);
          sendEvent("E1");
          sendEvent("E2");

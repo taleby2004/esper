@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - AutoID</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_autoid</artifactId>
+	<artifactId>esper-example-autoid</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example AutoID</description>
 	<dependencies>

@@ -23,6 +23,9 @@ public class SelectClauseStreamWildcard implements SelectClauseElement
     private String optionalColumnName;
     private static final long serialVersionUID = -1827870385836445548L;
 
+    public SelectClauseStreamWildcard() {
+    }
+
     /**
      * Ctor.
      * @param streamName is the name assigned to a stream
@@ -51,6 +54,14 @@ public class SelectClauseStreamWildcard implements SelectClauseElement
     public String getOptionalColumnName()
     {
         return optionalColumnName;
+    }
+
+    public void setStreamName(String streamName) {
+        this.streamName = streamName;
+    }
+
+    public void setOptionalColumnName(String optionalColumnName) {
+        this.optionalColumnName = optionalColumnName;
     }
 
     /**

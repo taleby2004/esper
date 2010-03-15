@@ -10,12 +10,11 @@ package com.espertech.esper.core;
 
 import com.espertech.esper.antlr.ASTUtil;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.client.soda.*;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.parse.*;
 import com.espertech.esper.epl.spec.*;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.pattern.EvalNode;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.CommonTreeNodeStream;
@@ -129,7 +128,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
     private EPStatement createPatternStmt(String expression, String statementName, Object userObject) throws EPException
     {
-        StatementSpecRaw rawPattern = compilePattern(expression);
+        StatementSpecRaw rawPattern = compilePattern(expression, expression, true);
         return services.getStatementLifecycleSvc().createAndStart(rawPattern, expression, true, statementName, userObject, null);
 
         /**
@@ -142,7 +141,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
     private EPStatement createEPLStmt(String eplStatement, String statementName, Object userObject) throws EPException
     {
-        StatementSpecRaw statementSpec = compileEPL(eplStatement, statementName, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEPL(eplStatement, eplStatement, true, statementName, services, defaultStreamSelector);
         EPStatement statement = services.getStatementLifecycleSvc().createAndStart(statementSpec, eplStatement, false, statementName, userObject, null);
 
         log.debug(".createEPLStmt Statement created and started");
@@ -187,7 +186,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
     public EPPreparedStatement prepareEPL(String eplExpression) throws EPException
     {
         // compile to specification
-        StatementSpecRaw statementSpec = compileEPL(eplExpression, null, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEPL(eplExpression, eplExpression, true, null, services, defaultStreamSelector);
 
         // map to object model thus finding all substitution parameters and their indexes
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
@@ -199,7 +198,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
     public EPPreparedStatement preparePattern(String patternExpression) throws EPException
     {
-        StatementSpecRaw rawPattern = compilePattern(patternExpression);
+        StatementSpecRaw rawPattern = compilePattern(patternExpression, patternExpression, true);
 
         // map to object model thus finding all substitution parameters and their indexes
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(rawPattern);
@@ -236,7 +235,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
     public EPStatementObjectModel compileEPL(String eplStatement) throws EPException
     {
-        StatementSpecRaw statementSpec = compileEPL(eplStatement, null, services, defaultStreamSelector);
+        StatementSpecRaw statementSpec = compileEPL(eplStatement, eplStatement, true, null, services, defaultStreamSelector);
         StatementSpecUnMapResult unmapped = StatementSpecMapper.unmap(statementSpec);
         if (unmapped.getIndexedParams().size() != 0)
         {
@@ -292,14 +291,14 @@ public class EPAdministratorImpl implements EPAdministratorSPI
      * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
      * @return statement specification
      */
-    protected static StatementSpecRaw compileEPL(String eplStatement, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
+    protected static StatementSpecRaw compileEPL(String eplStatement, String eplStatementForErrorMsg, boolean addPleaseCheck, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
         if (log.isDebugEnabled())
         {
             log.debug(".createEPLStmt statementName=" + statementName + " eplStatement=" + eplStatement);
         }
 
-        ParseResult parseResult = ParseHelper.parse(eplStatement, eplParseRule);
+        ParseResult parseResult = ParseHelper.parse(eplStatement, eplStatementForErrorMsg, addPleaseCheck, eplParseRule);
         Tree ast = parseResult.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
 
@@ -307,12 +306,12 @@ public class EPAdministratorImpl implements EPAdministratorSPI
 
         try
         {
-            ParseHelper.walk(ast, walker, eplWalkRule, eplStatement);
+            ParseHelper.walk(ast, walker, eplWalkRule, eplStatement, eplStatementForErrorMsg);
         }
         catch (ASTWalkException ex)
         {
             log.error(".createEPL Error validating expression", ex);
-            throw new EPStatementException(ex.getMessage(), eplStatement);
+            throw new EPStatementException(ex.getMessage(), eplStatementForErrorMsg);
         }
         catch (EPStatementSyntaxException ex)
         {
@@ -322,7 +321,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         {
             String message = "Error in expression";
             log.debug(message, ex);
-            throw new EPStatementException(getNullableErrortext(message, ex.getMessage()), eplStatement);
+            throw new EPStatementException(getNullableErrortext(message, ex.getMessage()), eplStatementForErrorMsg);
         }
 
         if (log.isDebugEnabled())
@@ -335,17 +334,17 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         return raw;
     }
 
-    private StatementSpecRaw compilePattern(String expression)
+    private StatementSpecRaw compilePattern(String expression, String expressionForErrorMessage, boolean addPleaseCheck)
     {
         // Parse and walk
-        ParseResult parseResult = ParseHelper.parse(expression, patternParseRule);
+        ParseResult parseResult = ParseHelper.parse(expression, expressionForErrorMessage, addPleaseCheck, patternParseRule);
         Tree ast = parseResult.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
         EPLTreeWalker walker = new EPLTreeWalker(nodes, services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot());
 
         try
         {
-            ParseHelper.walk(ast, walker, patternWalkRule, expression);
+            ParseHelper.walk(ast, walker, patternWalkRule, expression, expressionForErrorMessage);
         }
         catch (ASTWalkException ex)
         {
@@ -387,16 +386,17 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         return statementSpec;
     }
 
-    public PatternStreamSpecRaw compilePatternToNode(String pattern) throws EPException
+    public EvalNode compilePatternToNode(String pattern) throws EPException
     {
-        StatementSpecRaw raw = compilePattern(pattern);
-        return (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
+        StatementSpecRaw raw = this.compilePattern(pattern, pattern, false);
+        return ((PatternStreamSpecRaw) raw.getStreamSpecs().get(0)).getEvalNode();    
     }
 
     public ExprNode compileExpression(String expression) throws EPException
     {
-        StatementSpecRaw raw = compileEPL("select * from java.lang.Object where " + expression, null, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
-        return raw.getFilterRootNode();
+        String toCompile = "select * from java.lang.Object.win:time(" + expression + ")";
+        StatementSpecRaw raw = compileEPL(toCompile, expression, false, null, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        return raw.getStreamSpecs().get(0).getViewSpecs().get(0).getObjectParameters().get(0);
     }
 
     private static String getNullableErrortext(String msg, String cause)
@@ -409,6 +409,32 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         {
             return msg + ": " + cause;
         }
+    }
+
+    public Expression compileExpressionToSODA(String expression) throws EPException
+    {
+        ExprNode node = compileExpression(expression);
+        return StatementSpecMapper.unmap(node);
+    }
+
+    public PatternExpr compilePatternToSODA(String expression) throws EPException
+    {
+        EvalNode node = compilePatternToNode(expression);
+        return StatementSpecMapper.unmap(node);
+    }
+
+    public AnnotationPart compileAnnotationToSODA(String annotationExpression)
+    {
+        String toCompile = annotationExpression + " select * from java.lang.Object";
+        StatementSpecRaw raw = compileEPL(toCompile, annotationExpression, false, null, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        return StatementSpecMapper.unmap(raw.getAnnotations().get(0));
+    }
+
+    public MatchRecognizeRegEx compileMatchRecognizePatternToSODA(String matchRecogPatternExpression)
+    {
+        String toCompile = "select * from java.lang.Object match_recognize(measures a.b as c pattern (" + matchRecogPatternExpression + ") define A as true)";
+        StatementSpecRaw raw = compileEPL(toCompile, matchRecogPatternExpression, false, null, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        return StatementSpecMapper.unmap(raw.getMatchRecognizeSpec().getPattern());
     }
 
     private static Log log = LogFactory.getLog(EPAdministratorImpl.class);

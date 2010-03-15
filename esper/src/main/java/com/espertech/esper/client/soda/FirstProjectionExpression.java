@@ -15,15 +15,19 @@ import java.io.StringWriter;
  */
 public class FirstProjectionExpression extends ExpressionBase
 {
-    private boolean isDistinct;
+    private boolean distinct;
+
+    public FirstProjectionExpression() {
+    }
 
     /**
+
      * Ctor.
      * @param isDistinct true for distinct
      */
     public FirstProjectionExpression(boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
     }
 
     /**
@@ -33,25 +37,26 @@ public class FirstProjectionExpression extends ExpressionBase
      */
     public FirstProjectionExpression(Expression expression, boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
         this.getChildren().add(expression);
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("first");
         writer.write('(');
-        if (isDistinct)
+        if (distinct)
         {
             writer.write("distinct ");
         }
         if (this.getChildren().size() > 0)
         {
-            this.getChildren().get(0).toEPL(writer);
+            this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         writer.write(")");
     }
@@ -62,7 +67,16 @@ public class FirstProjectionExpression extends ExpressionBase
      */
     public boolean isDistinct()
     {
-        return isDistinct;
+        return distinct;
+    }
+
+    /**
+     * Returns true for distinct.
+     * @return boolean indicating distinct or not
+     */
+    public boolean getDistinct()
+    {
+        return distinct;
     }
 
     /**
@@ -71,6 +85,6 @@ public class FirstProjectionExpression extends ExpressionBase
      */
     public void setDistinct(boolean distinct)
     {
-        isDistinct = distinct;
+        this.distinct = distinct;
     }
 }

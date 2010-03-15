@@ -19,7 +19,11 @@ public class PatternFilterExpr extends PatternExprBase
     private Filter filter;
     private static final long serialVersionUID = -916214860560949884L;
 
+    public PatternFilterExpr() {
+    }
+
     /**
+
      * Ctor.
      * @param filter specifies to events to filter out
      */
@@ -75,7 +79,11 @@ public class PatternFilterExpr extends PatternExprBase
         this.filter = filter;
     }
 
-    public void toEPL(StringWriter writer)
+    public PatternExprPrecedenceEnum getPrecedence() {
+        return PatternExprPrecedenceEnum.ATOM;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         if (tagName != null)
         {

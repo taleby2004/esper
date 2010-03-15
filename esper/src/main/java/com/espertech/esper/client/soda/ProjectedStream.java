@@ -18,9 +18,12 @@ import java.util.List;
 public abstract class ProjectedStream extends Stream
 {
     private List<View> views;
-    private boolean isUnidirectional;
-    private boolean isRetainUnion;
-    private boolean isRetainIntersection;
+    private boolean unidirectional;
+    private boolean retainUnion;
+    private boolean retainIntersection;
+
+    public ProjectedStream() {
+    }
 
     /**
      * Represent as textual.
@@ -120,18 +123,6 @@ public abstract class ProjectedStream extends Stream
     {
         toEPLProjectedStream(writer);
         toEPLViews(writer, views);
-        if (isUnidirectional)
-        {
-            writer.write(" unidirectional");
-        }
-        else if (isRetainUnion)
-        {
-            writer.write(" retain-union");
-        }
-        else if (isRetainIntersection)
-        {
-            writer.write(" retain-intersection");
-        }
     }
     
     public void toEPLStreamType(StringWriter writer)
@@ -157,17 +148,21 @@ public abstract class ProjectedStream extends Stream
      */
     public boolean isUnidirectional()
     {
-        return isUnidirectional;
+        return unidirectional;
     }
 
     /**
      * Set to true to indicate that a stream is unidirectional, for use in unidirectional joins.
      * @param isUnidirectional true for unidirectional stream, applicable only for joins
-     * @return projected stream
      */
-    public ProjectedStream setUnidirectional(boolean isUnidirectional)
+    public void setUnidirectional(boolean isUnidirectional)
     {
-        this.isUnidirectional = isUnidirectional;
+        this.unidirectional = isUnidirectional;
+    }
+
+    public ProjectedStream unidirectional(boolean isUnidirectional)
+    {
+        this.unidirectional = isUnidirectional;
         return this;
     }
 
@@ -177,7 +172,7 @@ public abstract class ProjectedStream extends Stream
      */
     public boolean isRetainUnion()
     {
-        return isRetainUnion;
+        return retainUnion;
     }
 
     /**
@@ -186,7 +181,7 @@ public abstract class ProjectedStream extends Stream
      */
     public void setRetainUnion(boolean retainUnion)
     {
-        isRetainUnion = retainUnion;
+        this.retainUnion = retainUnion;
     }
 
     /**
@@ -195,7 +190,7 @@ public abstract class ProjectedStream extends Stream
      */
     public boolean isRetainIntersection()
     {
-        return isRetainIntersection;
+        return retainIntersection;
     }
 
     /**
@@ -204,7 +199,7 @@ public abstract class ProjectedStream extends Stream
      */
     public void setRetainIntersection(boolean retainIntersection)
     {
-        isRetainIntersection = retainIntersection;
+        this.retainIntersection = retainIntersection;
     }
 
     /**
@@ -225,5 +220,21 @@ public abstract class ProjectedStream extends Stream
                 delimiter = ".";
             }
         }
+    }
+
+    public void toEPLStreamOptions(StringWriter writer)
+    {
+        if (unidirectional)
+        {
+            writer.write(" unidirectional");
+        }
+        else if (retainUnion)
+        {
+            writer.write(" retain-union");
+        }
+        else if (retainIntersection)
+        {
+            writer.write(" retain-intersection");
+        }        
     }
 }

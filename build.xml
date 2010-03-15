@@ -25,7 +25,7 @@
 	    esper/lib/**, esper/etc/*.*, esper/doc/grammar/**,
 	    esperio/lib/**, esperio/etc/*.*,
 	    examples/**"/>
-	<property name="dist_includes_exceptions" value="examples/terminalsvc/**/target/*.jar"/>
+	<property name="dist_includes_exceptions" value="examples/**/target/*.jar"/>
     <!-- examples has specific excludes -->
     <!-- doc is handled separately for folder remapping (remove of build/en) -->
     <property name="dist_excludes" value="

@@ -27,11 +27,17 @@ public interface PatternExpr extends Serializable
      * @return pattern child expressions or empty list if there are no child expressions
      */
     public List<PatternExpr> getChildren();
+    public void setChildren(List<PatternExpr> children);
+
+    public PatternExprPrecedenceEnum getPrecedence();
 
     /**
      * Renders the pattern expression and all it's child expressions, in full tree depth, as a string in
      * language syntax.
      * @param writer is the output to use
      */    
-    public void toEPL(StringWriter writer);
+    public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence);
+
+    public String getTreeObjectName();
+    public void setTreeObjectName(String objectName);    
 }

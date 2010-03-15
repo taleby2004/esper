@@ -10,6 +10,7 @@ package com.espertech.esper.client.soda;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.StringWriter;
 
 /**
  * Base expression.
@@ -18,12 +19,23 @@ public abstract class ExpressionBase implements Expression
 {
     private static final long serialVersionUID = 0L;
 
+    private String treeObjectName;
     private List<Expression> children;
+
+    public String getTreeObjectName()
+    {
+        return treeObjectName;
+    }
+
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
+    }
 
     /**
      * Ctor.
      */
-    protected ExpressionBase()
+    public ExpressionBase()
     {
         children = new ArrayList<Expression>();
     }
@@ -41,8 +53,30 @@ public abstract class ExpressionBase implements Expression
      * Adds a new child expression to the current expression.
      * @param expression to add
      */
-    protected void addChild(Expression expression)
+    public void addChild(Expression expression)
     {
         children.add(expression);
     }
+
+    public void setChildren(List<Expression> children) {
+        this.children = children;
+    }
+
+    public final void toEPL(StringWriter writer, ExpressionPrecedenceEnum parentPrecedence) {
+        if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
+            writer.write("(");
+            toPrecedenceFreeEPL(writer);
+            writer.write(")");
+        }
+        else {
+            toPrecedenceFreeEPL(writer);
+        }
+    }
+
+    /**
+     * Renders the expressions and all it's child expression, in full tree depth, as a string in
+     * language syntax.
+     * @param writer is the output to use
+     */
+    public abstract void toPrecedenceFreeEPL(StringWriter writer);
 }

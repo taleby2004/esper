@@ -15,9 +15,12 @@ import java.io.StringWriter;
  */
 public class SubqueryInExpression extends ExpressionBase
 {
-    private boolean isNotIn;
+    private boolean notIn;
     private EPStatementObjectModel model;
     private static final long serialVersionUID = 8013096666658967181L;
+
+    public SubqueryInExpression() {
+    }
 
     /**
      * Ctor - for use to create an expression tree, without child expression.
@@ -27,7 +30,7 @@ public class SubqueryInExpression extends ExpressionBase
     public SubqueryInExpression(EPStatementObjectModel model, boolean isNotIn)
     {
         this.model = model;
-        this.isNotIn = isNotIn;
+        this.notIn = isNotIn;
     }
 
     /**
@@ -40,7 +43,7 @@ public class SubqueryInExpression extends ExpressionBase
     {
         this.getChildren().add(expression);
         this.model = model;
-        this.isNotIn = isNotIn;
+        this.notIn = isNotIn;
     }
 
     /**
@@ -49,7 +52,7 @@ public class SubqueryInExpression extends ExpressionBase
      */
     public boolean isNotIn()
     {
-        return isNotIn;
+        return notIn;
     }
 
     /**
@@ -58,13 +61,16 @@ public class SubqueryInExpression extends ExpressionBase
      */
     public void setNotIn(boolean notIn)
     {
-        isNotIn = notIn;
+        this.notIn = notIn;
     }
 
-    public void toEPL(StringWriter writer)
-    {
-        this.getChildren().get(0).toEPL(writer);
-        if (isNotIn)
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
+        if (notIn)
         {
             writer.write(" not in (");
         }

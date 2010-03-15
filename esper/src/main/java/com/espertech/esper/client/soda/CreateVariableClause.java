@@ -22,6 +22,9 @@ public class CreateVariableClause implements Serializable
     private String variableName;
     private Expression optionalAssignment;
 
+    public CreateVariableClause() {
+    }
+
     /**
      * Creates a create-variable syntax for declaring a variable.
      * @param variableType is the variable type name
@@ -126,7 +129,7 @@ public class CreateVariableClause implements Serializable
         if (optionalAssignment != null)
         {
             writer.append(" = ");
-            optionalAssignment.toEPL(writer);
+            optionalAssignment.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
     }
 }

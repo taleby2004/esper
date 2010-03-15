@@ -20,6 +20,9 @@ public class BitwiseOpExpression extends ExpressionBase
     private BitWiseOpEnum binaryOp;
     private static final long serialVersionUID = 5564205980185587363L;
 
+    public BitwiseOpExpression() {
+    }
+
     /**
      * Ctor - for use to create an expression tree, without child expression.
      * <p>
@@ -64,7 +67,12 @@ public class BitwiseOpExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.BITWISE;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         boolean isFirst = true;
         for (Expression child : this.getChildren())
@@ -75,7 +83,7 @@ public class BitwiseOpExpression extends ExpressionBase
                 writer.write(binaryOp.getExpressionText());
                 writer.write(' ');
             }
-            child.toEPL(writer);
+            child.toEPL(writer, getPrecedence());
             isFirst = false;
         }
     }

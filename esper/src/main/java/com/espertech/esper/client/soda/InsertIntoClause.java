@@ -21,9 +21,12 @@ public class InsertIntoClause implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
-    private final boolean isIStream;
-    private final String streamName;
+    private boolean insertStream;
+    private String streamName;
     private List<String> columnNames;
+
+    public InsertIntoClause() {
+    }
 
     /**
      * Creates the insert-into clause.
@@ -68,7 +71,7 @@ public class InsertIntoClause implements Serializable
      */
     public InsertIntoClause(String streamName)
     {
-        this.isIStream = true;
+        this.insertStream = true;
         this.streamName = streamName;
         this.columnNames = new ArrayList<String>();
     }
@@ -80,7 +83,7 @@ public class InsertIntoClause implements Serializable
      */
     public InsertIntoClause(String streamName, String[] columnNames)
     {
-        this.isIStream = true;
+        this.insertStream = true;
         this.streamName = streamName;
         this.columnNames = Arrays.asList(columnNames);
     }
@@ -93,9 +96,19 @@ public class InsertIntoClause implements Serializable
      */
     public InsertIntoClause(String streamName, List<String> columnNames, boolean isIStream)
     {
-        this.isIStream = isIStream;
+        this.insertStream = isIStream;
         this.streamName = streamName;
         this.columnNames = columnNames;
+    }
+
+    public boolean isInsertStream()
+    {
+        return insertStream;
+    }
+
+    public void setInsertStream(boolean insertStream)
+    {
+        this.insertStream = insertStream;
     }
 
     /**
@@ -104,7 +117,16 @@ public class InsertIntoClause implements Serializable
      */
     public boolean isIStream()
     {
-        return isIStream;
+        return insertStream;
+    }
+
+    /**
+     * Returns true if insert (new data) events are fed, or false for remove (old data) events are fed.
+     * @return true for insert stream, false for remove stream
+     */
+    public boolean getIStream()
+    {
+        return insertStream;
     }
 
     /**
@@ -125,6 +147,16 @@ public class InsertIntoClause implements Serializable
         return columnNames;
     }
 
+    public void setIStream(boolean IStream)
+    {
+        insertStream = IStream;
+    }
+
+    public void setStreamName(String streamName)
+    {
+        this.streamName = streamName;
+    }
+
     /**
      * Add a column name to the insert-into clause.
      * @param columnName to add
@@ -134,6 +166,10 @@ public class InsertIntoClause implements Serializable
         columnNames.add(columnName);
     }
 
+    public void setColumnNames(List<String> columnNames) {
+        this.columnNames = columnNames;
+    }
+
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
@@ -141,10 +177,11 @@ public class InsertIntoClause implements Serializable
     public void toEPL(StringWriter writer)
     {
         writer.write("insert ");
-        if (!isIStream)
+        if (!insertStream)
         {
             writer.write("rstream ");
         }
+
 
         writer.write("into ");
         writer.write(streamName);

@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.soda.ExpressionBase;
+import com.espertech.esper.client.soda.ExpressionPrecedenceEnum;
 import com.espertech.esper.core.EPStatementObjectModelHelper;
 
 import java.io.StringWriter;
@@ -33,7 +34,12 @@ public class SubstitutionParameterExpression extends ExpressionBase
         this.index = index;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         if (!isSatisfied)
         {

@@ -1,6 +1,7 @@
 package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -31,16 +32,16 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         String text = "select * " +
                 "from SupportBean " +
                 "match_recognize (" +
-                "  measures A.string as beginA, last(Z.string) as lastZ" +
-                "  ALL MATCHES" +
-                "  after match skip to current row" +
-                "  pattern(A W+ X+ Y+ Z+)" +
-                "  define" +
-                "    W as W.intPrimitive < prev(W.intPrimitive), " +
-                "    X as X.intPrimitive > prev(X.intPrimitive), " +
-                "    Y as Y.intPrimitive < prev(Y.intPrimitive), " +
-                "    Z as Z.intPrimitive > prev(Z.intPrimitive)" +
-                "  )";
+                " measures A.string as beginA, last(Z.string) as lastZ" +
+                " all matches" +
+                " after match skip to current row" +
+                " pattern (A W+ X+ Y+ Z+)" +
+                " define" +
+                " W as W.intPrimitive < prev(W.intPrimitive)," +
+                " X as X.intPrimitive > prev(X.intPrimitive)," +
+                " Y as Y.intPrimitive < prev(Y.intPrimitive)," +
+                " Z as Z.intPrimitive > prev(Z.intPrimitive)" +
+                ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -122,6 +123,22 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         };
 
         int rowCount = 0;
+        for (Object[] row : data)
+        {
+            SupportBean event = new SupportBean((String) row[0], (Integer) row[1]);
+            epService.getEPRuntime().sendEvent(event);
+
+            compare(row, rowCount, event, listener);
+            rowCount++;
+        }
+
+        stmt.destroy();
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
+        assertEquals(text, model.toEPL());
+        stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+        assertEquals(text, stmt.getText());
+        
         for (Object[] row : data)
         {
             SupportBean event = new SupportBean((String) row[0], (Integer) row[1]);

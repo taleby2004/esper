@@ -115,6 +115,7 @@ public class TestStatementAnnotation extends TestCase
 
         String stmtText = "@Name('MyTestStmt') @Description('MyTestStmt description') @Tag(name=\"UserId\", value=\"value\") select * from Bean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        assertTrue((((EPStatementSPI)stmt).isNameProvided()));
         runAssertion(stmt);
         stmt.destroy();
 
@@ -190,6 +191,7 @@ public class TestStatementAnnotation extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         EPStatementSPI spi = (EPStatementSPI) stmt;
         assertEquals("select * from Bean", spi.getExpressionNoAnnotations());
+        assertTrue(spi.isNameProvided());
 
         Annotation[] annotations = stmt.getAnnotations();
         annotations = sortAlpha(annotations);
@@ -282,7 +284,11 @@ public class TestStatementAnnotation extends TestCase
             EPStatement stmt = epService.getEPAdministrator().createEPL(testdata[i][0]);
             EPStatementSPI spi = (EPStatementSPI) stmt;
             assertEquals("Error on " + testdata[i][0], testdata[i][1], spi.getExpressionNoAnnotations());
+            assertFalse((((EPStatementSPI)stmt).isNameProvided()));
         }
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL(testdata[0][0], "nameProvided");
+        assertTrue((((EPStatementSPI)stmt).isNameProvided()));
     }
 
     @MyAnnotationNested(

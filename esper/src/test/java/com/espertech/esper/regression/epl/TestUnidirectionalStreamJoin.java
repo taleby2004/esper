@@ -345,7 +345,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create("symbol", "volume", "string", "intPrimitive"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).setUnidirectional(true)));
+        model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).unidirectional(true)));
         model.getFromClause().add(FilterStream.create(SupportBean.class.getName()).addView("win", "keepall"));
         model.getFromClause().add(OuterJoinQualifier.create("string", OuterJoinType.FULL, "symbol"));
 

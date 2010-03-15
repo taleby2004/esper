@@ -1,6 +1,7 @@
 package com.espertech.esper.rowregex;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.annotation.HintEnum;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.StatementContext;
@@ -38,6 +39,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
     private final TreeMap<Integer, List<ExprPreviousMatchRecognizeNode>> callbacksPerIndex = new TreeMap<Integer, List<ExprPreviousMatchRecognizeNode>>();
     private final boolean isUnbound;
     private final boolean isIterateOnly;
+    private final boolean isSelectAsksMultimatches;
 
     /**
      * Ctor.
@@ -158,6 +160,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
         StreamTypeService typeServiceMeasure = new StreamTypeServiceImpl(compositeEventType, "MATCH_RECOGNIZE", true, statementContext.getEngineURI());
 
         // find MEASURE clause aggregations
+        boolean measureReferencesMultivar = false;
         List<ExprAggregateNode> measureAggregateExprNodes = new ArrayList<ExprAggregateNode>();
         for (MatchRecognizeMeasureItem measureItem : matchRecognizeSpec.getMeasures())
         {
@@ -196,6 +199,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
                     String variable = streamVariables.get(streamNumAggregated);
                     if (variablesMultiple.contains(variable))
                     {
+                        measureReferencesMultivar = true;
                         if (multipleVarStream == null)
                         {
                             multipleVarStream = streamNumAggregated;
@@ -228,6 +232,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
 
         // validate each MEASURE clause expression
         Map<String, Object> rowTypeDef = new LinkedHashMap<String, Object>();
+        ExprNodeIdentifierCollectVisitor streamRefVisitorNonAgg = new ExprNodeIdentifierCollectVisitor();
         for (MatchRecognizeMeasureItem measureItem : matchRecognizeSpec.getMeasures())
         {
             if (measureItem.getName() == null)
@@ -237,7 +242,18 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
             ExprNode validated = validateMeasureClause(measureItem.getExpr(), typeServiceMeasure, variablesMultiple, variablesSingle, statementContext);
             measureItem.setExpr(validated);
             rowTypeDef.put(measureItem.getName(), validated.getType());
+            validated.accept(streamRefVisitorNonAgg);
         }
+
+        // Determine if any of the multi-var streams are referenced in the measures (non-aggregated only)
+        for (ExprIdentNode ref : streamRefVisitorNonAgg.getExprProperties()) {
+            String rootPropName = ref.getResolvedPropertyNameRoot();
+            if (variablesMultiple.contains(rootPropName) || (rootPropName == null)) {
+                measureReferencesMultivar = true;
+                break;
+            }
+        }
+        isSelectAsksMultimatches = measureReferencesMultivar;
 
         // create rowevent type
         rowEventType = statementContext.getEventAdapterService().createAnonymousMapType(rowTypeDef);
@@ -370,7 +386,8 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
                 callbacksPerIndex,
                 aggregationService,
                 isUnbound,
-                isIterateOnly
+                isIterateOnly,
+                isSelectAsksMultimatches
              );
     }
 

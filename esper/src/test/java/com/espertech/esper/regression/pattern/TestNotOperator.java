@@ -25,7 +25,7 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
         testCase.add("B1", "b", events.getEvent("B1"));
         testCaseList.addTest(testCase);
 
-        String text = "select * from pattern [(every (b=" + EVENT_B_CLASS + ")) and (not g=" + EVENT_G_CLASS + ")]";
+        String text = "select * from pattern [every b=" + EVENT_B_CLASS + " and not g=" + EVENT_G_CLASS + "]";
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.createWildcard());
         PatternExpr pattern = Patterns.and()

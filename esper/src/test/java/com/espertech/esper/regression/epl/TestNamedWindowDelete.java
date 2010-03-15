@@ -38,7 +38,31 @@ public class TestNamedWindowDelete extends TestCase
         listenerDelete = new SupportUpdateListener();
     }
 
-    public void testStaggeredNamedWindow()
+    public void testFirstUnique() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
+
+        String[] fields = new String[] {"string","intPrimitive"};
+        String stmtTextCreateOne = "create window MyWindowOne.std:firstunique(string) as select * from SupportBean";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreateOne);
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne select * from SupportBean");
+        EPStatement stmtDelete = epService.getEPAdministrator().createEPL("on SupportBean_A a delete from MyWindowOne where string=a.id");
+        stmtDelete.addListener(listenerDelete);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 2));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A"));
+        ArrayAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[] {"A", 1});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 3));
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"A", 3}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A"));
+        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
+    }
+
+    public void testStaggeredNamedWindow() throws Exception
     {
         String[] fieldsOne = new String[] {"a1", "b1"};
         String[] fieldsTwo = new String[] {"a2", "b2"};
@@ -98,7 +122,7 @@ public class TestNamedWindowDelete extends TestCase
         stmtCreateTwo.destroy();
     }
 
-    public void testDeletePattern()
+    public void testDeletePattern() throws Exception
     {
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
@@ -148,7 +172,7 @@ public class TestNamedWindowDelete extends TestCase
         stmtCreate.destroy();
     }
 
-    public void testDeleteAll()
+    public void testDeleteAll() throws Exception
     {
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
@@ -215,7 +239,7 @@ public class TestNamedWindowDelete extends TestCase
         assertEquals(0, getCount("MyWindow"));
     }
 
-    public void testDeleteCondition()
+    public void testDeleteCondition() throws Exception
     {
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
@@ -408,7 +432,7 @@ public class TestNamedWindowDelete extends TestCase
         return bean;
     }
 
-    private long getCount(String windowName)
+    private long getCount(String windowName) throws Exception
     {
         NamedWindowProcessor processor = ((EPServiceProviderSPI)epService).getNamedWindowService().getProcessor(windowName);
         return processor.getCountDataWindow();

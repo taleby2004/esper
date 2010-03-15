@@ -35,14 +35,14 @@ public class TestHavingNoGroupBy extends TestCase
     public void testSumOneViewOM() throws Exception
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create("symbol", "price").setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH).add(Expressions.avg("price"), "avgPrice"));
+        model.setSelectClause(SelectClause.create("symbol", "price").streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH).add(Expressions.avg("price"), "avgPrice"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).addView("win", "length", Expressions.constant(5))));
         model.setHavingClause(Expressions.lt(Expressions.property("price"), Expressions.avg("price")));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         String viewExpr = "select irstream symbol, price, avg(price) as avgPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
-                          "having (price < avg(price))";
+                          "having price < avg(price)";
         assertEquals(viewExpr, model.toEPL());
 
         selectTestView = epService.getEPAdministrator().create(model);

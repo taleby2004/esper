@@ -15,10 +15,14 @@ import java.io.StringWriter;
  */
 public class InExpression extends ExpressionBase
 {
-    boolean isNotIn;
+    private boolean notIn;
     private static final long serialVersionUID = -5105764419995579144L;
 
+    public InExpression() {
+    }
+
     /**
+
      * Ctor - for use to create an expression tree, without child expression.
      * <p>
      * Use add methods to add child expressions to acts upon.
@@ -26,7 +30,7 @@ public class InExpression extends ExpressionBase
      */
     public InExpression(boolean isNotIn)
     {
-        this.isNotIn = isNotIn;
+        this.notIn = isNotIn;
     }
 
     /**
@@ -39,7 +43,7 @@ public class InExpression extends ExpressionBase
      */
     public InExpression(Expression value, boolean isNotIn, Object... parameters)
     {
-        this.isNotIn = isNotIn;
+        this.notIn = isNotIn;
         this.getChildren().add(value);
         for (int i = 0; i < parameters.length; i++)
         {
@@ -60,7 +64,16 @@ public class InExpression extends ExpressionBase
      */
     public boolean isNotIn()
     {
-        return isNotIn;
+        return notIn;
+    }
+
+    /**
+     * Returns true for the not-in expression, or false for an in-expression.
+     * @return true for not-in
+     */
+    public boolean getNotIn()
+    {
+        return notIn;
     }
 
     /**
@@ -69,7 +82,7 @@ public class InExpression extends ExpressionBase
      */
     public void setNotIn(boolean notIn)
     {
-        isNotIn = notIn;
+        this.notIn = notIn;
     }
 
     /**
@@ -105,10 +118,15 @@ public class InExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
     {
-        this.getChildren().get(0).toEPL(writer);
-        if (isNotIn)
+        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
+    {
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
+        if (notIn)
         {
             writer.write(" not in (");
         }
@@ -121,7 +139,7 @@ public class InExpression extends ExpressionBase
         for (int i = 1; i < this.getChildren().size(); i++)
         {
             writer.write(delimiter);
-            this.getChildren().get(i).toEPL(writer);
+            this.getChildren().get(i).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
         writer.write(')');

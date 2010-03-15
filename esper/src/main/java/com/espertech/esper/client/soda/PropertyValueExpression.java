@@ -18,7 +18,11 @@ public class PropertyValueExpression extends ExpressionBase
     private String propertyName;
     private static final long serialVersionUID = -1736666647795932881L;
 
+    public PropertyValueExpression() {
+    }
+
     /**
+
      * Ctor.
      * @param propertyName is the name of the property
      */
@@ -45,7 +49,12 @@ public class PropertyValueExpression extends ExpressionBase
         this.propertyName = propertyName;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write(propertyName);
     }

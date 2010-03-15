@@ -38,11 +38,13 @@ public class TestExprVariableNode extends TestCase
         ExprInNode otherInNode = SupportExprNodeFactory.makeInSetNode(false);
         ExprVariableNode otherVarOne = new ExprVariableNode("dummy");
         ExprVariableNode otherVarTwo = new ExprVariableNode("var1");
+        ExprVariableNode otherVarThree = new ExprVariableNode("var1.abc");
 
         assertTrue(varNode.equalsNode(varNode));
         assertTrue(varNode.equalsNode(otherVarTwo));
         assertFalse(varNode.equalsNode(otherVarOne));
         assertFalse(varNode.equalsNode(otherInNode));
+        assertFalse(otherVarTwo.equalsNode(otherVarThree));
     }
 
     public void testToExpressionString() throws Exception

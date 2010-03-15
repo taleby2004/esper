@@ -43,15 +43,18 @@ public class Disjunction extends Junction
         }        
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.OR;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            writer.write('(');
-            child.toEPL(writer);
-            writer.write(')');
+            child.toEPL(writer, getPrecedence());
             delimiter = " or ";
         }
     }

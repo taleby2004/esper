@@ -29,11 +29,12 @@ public interface Expression extends Serializable
      * @return child expressions or empty list if there are no child expressions
      */
     public List<Expression> getChildren();
+    public void setChildren(List<Expression> children);
 
-    /**
-     * Renders the expressions and all it's child expression, in full tree depth, as a string in
-     * language syntax.
-     * @param writer is the output to use
-     */
-    public void toEPL(StringWriter writer);
+    public String getTreeObjectName();
+    public void setTreeObjectName(String objectName);
+
+    public ExpressionPrecedenceEnum getPrecedence();
+
+    public void toEPL(StringWriter writer, ExpressionPrecedenceEnum parentPrecedence);
 }

@@ -35,9 +35,14 @@ public class NotExpression extends ExpressionBase
     {        
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.NEGATED;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("not ");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
     }
 }

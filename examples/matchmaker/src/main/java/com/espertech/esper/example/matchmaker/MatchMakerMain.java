@@ -20,13 +20,18 @@ public class MatchMakerMain
 
     public static void main(String[] args)
     {
+        new MatchMakerMain().run("MatchMaker");
+    }
+
+    public void run(String engineURI)
+    {
         log.info("Setting up EPL");
         // This code runs as part of the automated regression test suite; Therefore disable internal timer theading to safe resources
         Configuration config = new Configuration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
 
         MatchAlertListener listener = new MatchAlertListener();
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI, config);
         epService.initialize();
 
         new MatchMakingMonitor(listener);

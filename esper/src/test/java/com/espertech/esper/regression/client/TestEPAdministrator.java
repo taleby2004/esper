@@ -1,12 +1,19 @@
 package com.espertech.esper.regression.client;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.soda.*;
+import com.espertech.esper.core.EPAdministratorSPI;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.pattern.EvalFollowedByNode;
+import com.espertech.esper.pattern.EvalNode;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
+
+import java.io.StringWriter;
 
 public class TestEPAdministrator extends TestCase
 {
@@ -237,6 +244,92 @@ public class TestEPAdministrator extends TestCase
 
         epService.getEPAdministrator().destroyAllStatements();
         assertDestroyed(stmts);
+    }
+
+    public void testSPI() {
+        EPAdministratorSPI spi = (EPAdministratorSPI) epService.getEPAdministrator();
+
+        ExprNode node = spi.compileExpression("value=5 and /* comment */ true");
+        assertEquals("(value = 5 AND true)", node.toExpressionString());
+
+        Expression expr = spi.compileExpressionToSODA("value=5 and true");
+        StringWriter buf = new StringWriter();
+        expr.toEPL(buf, ExpressionPrecedenceEnum.MINIMUM);
+        assertEquals("value = 5 and true", buf.toString());
+
+        expr = spi.compileExpressionToSODA("5 sec");
+        buf = new StringWriter();
+        expr.toEPL(buf, ExpressionPrecedenceEnum.MINIMUM);
+        assertEquals("5 seconds", buf.toString());
+
+        EvalNode pattern = spi.compilePatternToNode("every A -> B");
+        assertEquals(EvalFollowedByNode.class, pattern.getClass());
+
+        PatternExpr patternExpr = spi.compilePatternToSODA("every A -> B");
+        assertEquals(PatternFollowedByExpr.class, patternExpr.getClass());
+
+        AnnotationPart part = spi.compileAnnotationToSODA("@somevalue(a='test', b=5)");
+        assertEquals("somevalue", part.getName());
+        assertEquals(2, part.getAttributes().size());
+        assertEquals("a", part.getAttributes().get(0).getName());
+        assertEquals("test", part.getAttributes().get(0).getValue());
+        assertEquals("b", part.getAttributes().get(1).getName());
+        assertEquals(5, part.getAttributes().get(1).getValue());
+
+        MatchRecognizeRegEx regex = spi.compileMatchRecognizePatternToSODA("a b* c+ d? e?");
+        assertEquals(5, regex.getChildren().size());
+
+        // test fail cases
+        String expected = "Incorrect syntax near 'in' (a reserved keyword) at line 1 column 46 [goofy in in]";
+        String compiled = "goofy in in";
+        try {
+            spi.compileExpression(compiled);
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals(expected, ex.getMessage());
+        }
+
+        try {
+            spi.compileExpressionToSODA(compiled);
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals(expected, ex.getMessage());
+        }
+
+        expected = "Incorrect syntax near 'goofy' near reserved keyword 'in' [goofy in in]"; 
+        try {
+            spi.compilePatternToNode(compiled);
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals(expected, ex.getMessage());
+        }
+
+        try {
+            spi.compilePatternToSODA(compiled);
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals(expected, ex.getMessage());
+        }
+
+        try {
+            spi.compileAnnotationToSODA("not an annotation");
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("Incorrect syntax near 'not' (a reserved keyword) [not an annotation]", ex.getMessage());
+        }
+
+        try {
+            spi.compileMatchRecognizePatternToSODA("a b???");
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("Incorrect syntax near '?' expecting a closing parenthesis ')' but found a questionmark '?' at line 1 column 79 [a b???]", ex.getMessage());
+        }
     }
 
     private void assertStopped(EPStatement[] stmts)

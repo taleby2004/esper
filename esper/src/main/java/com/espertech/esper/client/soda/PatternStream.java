@@ -22,7 +22,11 @@ public class PatternStream extends ProjectedStream
     private PatternExpr expression;
     private static final long serialVersionUID = -8321367637970657123L;
 
+    public PatternStream() {
+    }
+
     /**
+
      * Creates a pattern stream from a pattern expression.
      * @param expression pattern expression
      * @return stream
@@ -84,7 +88,9 @@ public class PatternStream extends ProjectedStream
     public void toEPLProjectedStream(StringWriter writer)
     {
         writer.write("pattern [");
-        expression.toEPL(writer);
+        if (expression != null) {
+            expression.toEPL(writer, PatternExprPrecedenceEnum.MINIMUM);
+        }
         writer.write(']');
     }
 
@@ -92,6 +98,8 @@ public class PatternStream extends ProjectedStream
 	{
 		writer.write("pattern");
 	}
-    
-    
+
+    public void toEPLStreamOptions(StringWriter writer)
+    {        
+    }
 }

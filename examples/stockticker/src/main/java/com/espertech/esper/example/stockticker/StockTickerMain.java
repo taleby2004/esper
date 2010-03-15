@@ -19,12 +19,17 @@ public class StockTickerMain
 
     public static void main(String[] args)
     {
+        new StockTickerMain().run("StockTicker");
+    }
+
+    public void run(String engineURI) {
+
         Configuration configuration = new Configuration();
         configuration.addEventType("PriceLimit", PriceLimit.class.getName());
         configuration.addEventType("StockTick", StockTick.class.getName());
 
         log.info("Setting up EPL");
-        EPServiceProvider epService = EPServiceProviderManager.getProvider("StockTicker", configuration);
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI, configuration);
         epService.initialize();
         new StockTickerMonitor(epService, new StockTickerResultListener());
 

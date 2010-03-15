@@ -23,13 +23,17 @@ public abstract class EPBaseNamedObject implements Serializable
     private String name;
     private List<Expression> parameters;
 
+    public EPBaseNamedObject() {
+    }
+
     /**
+
      * Ctor.
      * @param namespace is the namespace of the object, i.e. view namespace or pattern object namespace
      * @param name is the name of the object, such as the view name
      * @param parameters is the optional parameters to the view or pattern object, or empty list for no parameters
      */
-    protected EPBaseNamedObject(String namespace, String name, List<Expression> parameters)
+    public EPBaseNamedObject(String namespace, String name, List<Expression> parameters)
     {
         this.namespace = namespace;
         this.name = name;
@@ -105,7 +109,7 @@ public abstract class EPBaseNamedObject implements Serializable
         for (Expression param : parameters)
         {
             writer.write(delimiter);
-            param.toEPL(writer);
+            param.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
         writer.write(')');

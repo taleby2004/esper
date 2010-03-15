@@ -19,6 +19,9 @@ public class PlugInProjectionExpression extends ExpressionBase
     private boolean isDistinct;
     private static final long serialVersionUID = -4474825377733541468L;
 
+    public PlugInProjectionExpression() {
+    }
+
     /**
      * Ctor.
      * @param functionName the name of the function
@@ -46,11 +49,12 @@ public class PlugInProjectionExpression extends ExpressionBase
         }
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write(functionName);
         writer.write('(');
@@ -63,7 +67,7 @@ public class PlugInProjectionExpression extends ExpressionBase
         for (Expression expr : this.getChildren())
         {
             writer.write(delimiter);
-            expr.toEPL(writer);
+            expr.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
 

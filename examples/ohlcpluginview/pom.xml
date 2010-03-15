@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - OHLCPlugInView</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_ohlcpluginview</artifactId>
+	<artifactId>esper-example-ohlcpluginview</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example OHLCPlugInView</description>
 	<dependencies>

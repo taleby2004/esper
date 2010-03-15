@@ -18,7 +18,21 @@ import java.io.StringWriter;
 public class ConstantExpression extends ExpressionBase
 {
     private Object constant;
+    private String constantType;
     private static final long serialVersionUID = 1787950621647511049L;
+
+    public ConstantExpression() {
+    }
+
+    public String getConstantType()
+    {
+        return constantType;
+    }
+
+    public void setConstantType(String constantType)
+    {
+        this.constantType = constantType;
+    }
 
     /**
      * Ctor.
@@ -29,7 +43,18 @@ public class ConstantExpression extends ExpressionBase
         this.constant = constant;
     }
 
-    public void toEPL(StringWriter writer)
+    public ConstantExpression(Object constant, String constantType)
+    {
+        this.constant = constant;
+        this.constantType = constantType;
+    }
+
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         EPStatementObjectModelHelper.renderEPL(writer, constant);
     }

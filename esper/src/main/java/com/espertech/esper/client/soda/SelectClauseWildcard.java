@@ -17,6 +17,9 @@ public class SelectClauseWildcard implements SelectClauseElement
 {
     private static final long serialVersionUID = 7047821688887542393L;
 
+    public SelectClauseWildcard() {
+    }
+
     /**
      * Renders the element in textual representation.
      * @param writer to output to

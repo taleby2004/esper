@@ -18,7 +18,11 @@ public class RelationalOpExpression extends ExpressionBase
     private String operator;
     private static final long serialVersionUID = -4590496481449181068L;
 
+    public RelationalOpExpression() {
+    }
+
     /**
+
      * Ctor.
      * @param operator is the relational operator.
      */
@@ -66,14 +70,20 @@ public class RelationalOpExpression extends ExpressionBase
         this.operator = operator;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
     {
-        writer.write('(');
-        this.getChildren().get(0).toEPL(writer);
+        if (operator.equals("=")) {
+            return ExpressionPrecedenceEnum.EQUALS;
+        }
+        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
+    {
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
         writer.write(' ');
         writer.write(operator);
         writer.write(' ');
-        this.getChildren().get(1).toEPL(writer);
-        writer.write(')');
+        this.getChildren().get(1).toEPL(writer, getPrecedence());
     }
 }

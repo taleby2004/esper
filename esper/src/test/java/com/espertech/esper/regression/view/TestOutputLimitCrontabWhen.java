@@ -142,7 +142,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         epService.getEPAdministrator().getConfiguration().addVariable("count_insert_var", int.class, 0);
         epService.getEPAdministrator().createEPL("on SupportBean set myvar = intPrimitive");
 
-        String expression = "select symbol from MarketData.win:length(2) output when (myvar = 1) then set myvar = 0, count_insert_var = count_insert";
+        String expression = "select symbol from MarketData.win:length(2) output when myvar = 1 then set myvar = 0, count_insert_var = count_insert";
         EPStatement stmt =  epService.getEPAdministrator().createEPL(expression);
         runAssertion(1, stmt);
 
@@ -163,7 +163,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         stmt = epService.getEPAdministrator().create(model);
         runAssertion(3, stmt);
 
-        String outputLast = "select symbol from MarketData.win:length(2) output last when (myvar = 1) ";
+        String outputLast = "select symbol from MarketData.win:length(2) output last when myvar = 1 ";
         model = epService.getEPAdministrator().compileEPL(outputLast);
         assertEquals(outputLast.trim(), model.toEPL().trim());
 

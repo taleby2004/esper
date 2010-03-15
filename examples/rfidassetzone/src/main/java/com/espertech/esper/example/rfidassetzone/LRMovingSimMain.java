@@ -69,6 +69,7 @@ public class LRMovingSimMain
     private final int numberOfAssetGroups;
     private final int numberOfSeconds;
     private boolean isAssert;
+    private String engineURI;
 
     private EPServiceProvider epService;
     private Random random = new Random();
@@ -112,16 +113,17 @@ public class LRMovingSimMain
 
         // Run the sample
         System.out.println("Using " + numberOfThreads + " threads and " + numberOfAssetGroups + " asset groups, for " + numberOfSeconds + " seconds");
-        LRMovingSimMain simMain = new LRMovingSimMain(numberOfThreads, numberOfAssetGroups, numberOfSeconds, false);
+        LRMovingSimMain simMain = new LRMovingSimMain(numberOfThreads, numberOfAssetGroups, numberOfSeconds, false, "LRMovingExampleURI");
         simMain.run();
     }
 
-    public LRMovingSimMain(int numberOfThreads, int numberOfAssetGroups, int numberOfSeconds, boolean isAssert)
+    public LRMovingSimMain(int numberOfThreads, int numberOfAssetGroups, int numberOfSeconds, boolean isAssert, String engineURI)
     {
         this.numberOfThreads = numberOfThreads;
         this.numberOfAssetGroups = numberOfAssetGroups;
         this.numberOfSeconds = numberOfSeconds;
         this.isAssert = isAssert;
+        this.engineURI = engineURI;
     }
 
     public void run() throws Exception
@@ -129,7 +131,7 @@ public class LRMovingSimMain
         Configuration config = new Configuration();
         config.addEventType("LocationReport", LocationReport.class);
 
-        epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService = EPServiceProviderManager.getProvider(engineURI, config);
         epService.initialize();
 
         // Number of seconds the total test runs

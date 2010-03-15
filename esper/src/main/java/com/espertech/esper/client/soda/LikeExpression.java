@@ -15,7 +15,7 @@ import java.io.StringWriter;
  */
 public class LikeExpression extends ExpressionBase
 {
-    private boolean isNot;
+    private boolean not;
     private static final long serialVersionUID = 6873736361487805660L;
 
     /**
@@ -25,7 +25,7 @@ public class LikeExpression extends ExpressionBase
      */
     public LikeExpression()
     {
-        isNot = false;
+        not = false;
     }
 
     /**
@@ -36,7 +36,7 @@ public class LikeExpression extends ExpressionBase
      */
     public LikeExpression(boolean isNot)
     {
-        this.isNot = isNot;
+        this.not = isNot;
     }
 
     /**
@@ -63,7 +63,7 @@ public class LikeExpression extends ExpressionBase
         {
             this.getChildren().add(escape);
         }
-        this.isNot = false;
+        this.not = false;
     }
 
     /**
@@ -92,26 +92,29 @@ public class LikeExpression extends ExpressionBase
         {
             this.getChildren().add(escape);
         }
-        this.isNot = isNot;
+        this.not = isNot;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
     {
-        writer.write("(");
-        this.getChildren().get(0).toEPL(writer);
-        if (isNot)
+        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
+    {
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
+        if (not)
         {
             writer.write(" not");
         }
         writer.write(" like ");
-        this.getChildren().get(1).toEPL(writer);
+        this.getChildren().get(1).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
 
         if (this.getChildren().size() > 2)
         {
             writer.write(" escape ");
-            this.getChildren().get(2).toEPL(writer);
+            this.getChildren().get(2).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
-        writer.write(")");
     }
 
     /**
@@ -120,6 +123,19 @@ public class LikeExpression extends ExpressionBase
      */
     public boolean isNot()
     {
-        return isNot;
+        return not;
+    }
+
+    public void setNot(boolean not) {
+        this.not = not;
+    }
+
+    /**
+     * Returns true if this is a "not like", or false if just a like
+     * @return indicator whether negated or not
+     */
+    public boolean getNot()
+    {
+        return not;
     }
 }

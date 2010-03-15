@@ -18,6 +18,9 @@ public class SubqueryExpression extends ExpressionBase
     private EPStatementObjectModel model;
     private static final long serialVersionUID = 5210335236320516663L;
 
+    public SubqueryExpression() {
+    }
+
     /**
      * Ctor - for use to create an expression tree, without child expression.
      * @param model is the lookup statement object model
@@ -27,7 +30,12 @@ public class SubqueryExpression extends ExpressionBase
         this.model = model;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write('(');
         writer.write(model.toEPL());

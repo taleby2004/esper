@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - ServerShell</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_servershell</artifactId>
+	<artifactId>esper-example-servershell</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example ServerShell</description>
 	<dependencies>

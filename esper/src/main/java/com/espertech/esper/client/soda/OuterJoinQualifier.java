@@ -9,11 +9,10 @@
 package com.espertech.esper.client.soda;
 
 import com.espertech.esper.type.OuterJoinType;
-import com.espertech.esper.collection.Pair;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Qualifies a join by providing the outer join type (full/left/right) and joined-on properties.
@@ -23,9 +22,12 @@ public class OuterJoinQualifier implements Serializable
     private static final long serialVersionUID = 0L;
 
     private OuterJoinType type;
-    private PropertyValueExpression left;
-    private PropertyValueExpression right;
-    private List<Pair<PropertyValueExpression, PropertyValueExpression>> additionalProperties;
+    private Expression left;
+    private Expression right;
+    private List<PropertyValueExpressionPair> additionalProperties;
+
+    public OuterJoinQualifier() {
+    }
 
     /**
      * Creates qualifier.
@@ -47,7 +49,7 @@ public class OuterJoinQualifier implements Serializable
      */
     public OuterJoinQualifier(OuterJoinType type, PropertyValueExpression left, PropertyValueExpression right)
     {
-        this(type, left, right, new ArrayList<Pair<PropertyValueExpression, PropertyValueExpression>>());
+        this(type, left, right, new ArrayList<PropertyValueExpressionPair>());
     }
 
     /**
@@ -57,7 +59,7 @@ public class OuterJoinQualifier implements Serializable
      * @param right is a property providing joined-on values
      * @param additionalProperties for any pairs of additional on-clause properties
      */
-    public OuterJoinQualifier(OuterJoinType type, PropertyValueExpression left, PropertyValueExpression right, ArrayList<Pair<PropertyValueExpression, PropertyValueExpression>> additionalProperties)
+    public OuterJoinQualifier(OuterJoinType type, PropertyValueExpression left, PropertyValueExpression right, ArrayList<PropertyValueExpressionPair> additionalProperties)
     {
         this.type = type;
         this.left = left;
@@ -83,11 +85,15 @@ public class OuterJoinQualifier implements Serializable
         this.type = type;
     }
 
+    public void setAdditionalProperties(List<PropertyValueExpressionPair> additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
     /**
      * Returns property value expression to join on.
      * @return expression providing joined-on values
      */
-    public PropertyValueExpression getLeft()
+    public Expression getLeft()
     {
         return left;
     }
@@ -96,7 +102,7 @@ public class OuterJoinQualifier implements Serializable
      * Sets the property value expression to join on.
      * @param left expression providing joined-on values
      */
-    public void setLeft(PropertyValueExpression left)
+    public void setLeft(Expression left)
     {
         this.left = left;
     }
@@ -105,7 +111,7 @@ public class OuterJoinQualifier implements Serializable
      * Returns property value expression to join on.
      * @return expression providing joined-on values
      */
-    public PropertyValueExpression getRight()
+    public Expression getRight()
     {
         return right;
     }
@@ -114,7 +120,7 @@ public class OuterJoinQualifier implements Serializable
      * Sets the property value expression to join on.
      * @param right expression providing joined-on values
      */
-    public void setRight(PropertyValueExpression right)
+    public void setRight(Expression right)
     {
         this.right = right;
     }
@@ -127,7 +133,7 @@ public class OuterJoinQualifier implements Serializable
      */
     public OuterJoinQualifier add(String propertyLeft, String propertyRight)
     {
-        additionalProperties.add(new Pair<PropertyValueExpression, PropertyValueExpression>(new PropertyValueExpression(propertyLeft), new PropertyValueExpression(propertyRight)));
+        additionalProperties.add(new PropertyValueExpressionPair(new PropertyValueExpression(propertyLeft), new PropertyValueExpression(propertyRight)));
         return this;
     }
 
@@ -135,7 +141,7 @@ public class OuterJoinQualifier implements Serializable
      * Returns optional additional properties in the on-clause of the outer join.
      * @return pairs of properties connected via logical-and in an on-clause
      */
-    public List<Pair<PropertyValueExpression, PropertyValueExpression>> getAdditionalProperties()
+    public List<PropertyValueExpressionPair> getAdditionalProperties()
     {
         return additionalProperties;
     }

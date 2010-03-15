@@ -30,6 +30,19 @@ public class TestEPLTreeWalker extends TestCase
                     CLASSNAME + "(string='a').win:length(10).std:lastevent() as win1," +
                     CLASSNAME + "(string='b').win:length(10).std:lastevent() as win2 ";
 
+    public void testWalkCreateIndex() throws Exception
+    {
+        String expression = "create index A_INDEX on B_NAMEDWIN (c, d)";
+
+        EPLTreeWalker walker = parseAndWalkEPL(expression);
+        CreateIndexDesc createIndex = walker.getStatementSpec().getCreateIndexDesc();
+        assertEquals("A_INDEX", createIndex.getIndexName());
+        assertEquals("B_NAMEDWIN", createIndex.getWindowName());
+        assertEquals(2, createIndex.getColumns().size());
+        assertEquals("c", createIndex.getColumns().get(0));
+        assertEquals("d", createIndex.getColumns().get(1));
+    }
+
     public void testWalkViewExpressions() throws Exception
     {
         String className = SupportBean.class.getName();
@@ -98,8 +111,8 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkOnSet() throws Exception
     {
-        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), null);
-        variableService.createNewVariable("var1", Long.class, 100L, null);
+        VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), SupportEventAdapterService.getService(), null);
+        variableService.createNewVariable("var1", Long.class.getName(), 100L, null);
 
         String expression = "on com.MyClass as myevent set var1 = 'a', var2 = 2*3, var3 = var1";
         EPLTreeWalker walker = parseAndWalkEPL(expression, null, variableService);
@@ -1232,7 +1245,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public static EPLTreeWalker parseAndWalkEPL(String expression) throws Exception
     {
-        return parseAndWalkEPL(expression, new EngineImportServiceImpl(true), new VariableServiceImpl(0, null, null));
+        return parseAndWalkEPL(expression, new EngineImportServiceImpl(true), new VariableServiceImpl(0, null, SupportEventAdapterService.getService(), null));
     }
 
     private static EPLTreeWalker parseAndWalkEPL(String expression, EngineImportService engineImportService, VariableService variableService) throws Exception

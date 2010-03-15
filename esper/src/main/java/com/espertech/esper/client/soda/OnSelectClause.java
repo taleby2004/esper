@@ -20,6 +20,9 @@ public class OnSelectClause extends OnClause
     private String windowName;
     private String optionalAsName;
 
+    public OnSelectClause() {
+    }
+
     /**
      * Creates an on-select clause.
      * @param windowName is the named window name

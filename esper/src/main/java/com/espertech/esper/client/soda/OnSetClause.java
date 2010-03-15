@@ -8,11 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
-
-import java.util.List;
-import java.util.ArrayList;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A clause to assign new values to variables based on a triggering event arriving.
@@ -21,7 +19,7 @@ public class OnSetClause extends OnClause
 {
     private static final long serialVersionUID = 0L;
 
-    private List<Pair<String, Expression>> assignments;
+    private List<AssignmentPair> assignments;
 
     /**
      * Creates a new on-set clause for setting variables, and adds a variable to set.
@@ -41,7 +39,7 @@ public class OnSetClause extends OnClause
      */
     public OnSetClause()
     {
-        assignments = new ArrayList<Pair<String, Expression>>();
+        assignments = new ArrayList<AssignmentPair>();
     }
 
     /**
@@ -52,7 +50,7 @@ public class OnSetClause extends OnClause
      */
     public OnSetClause addAssignment(String variable, Expression expression)
     {
-        assignments.add(new Pair<String, Expression>(variable, expression));
+        assignments.add(new AssignmentPair(variable, expression));
         return this;
     }
 
@@ -60,7 +58,7 @@ public class OnSetClause extends OnClause
      * Returns the list of variable assignments.
      * @return pair of variable name and expression
      */
-    public List<Pair<String, Expression>> getAssignments()
+    public List<AssignmentPair> getAssignments()
     {
         return assignments;
     }
@@ -69,7 +67,7 @@ public class OnSetClause extends OnClause
      * Sets a list of variable assignments.
      * @param assignments list of pairs of variable name and expression
      */
-    public void setAssignments(List<Pair<String, Expression>> assignments)
+    public void setAssignments(List<AssignmentPair> assignments)
     {
         this.assignments = assignments;
     }
@@ -82,12 +80,12 @@ public class OnSetClause extends OnClause
     {
         writer.write(" set ");
         String delimiter = "";
-        for (Pair<String, Expression> pair : assignments)
+        for (AssignmentPair pair : assignments)
         {
             writer.write(delimiter);
-            writer.write(pair.getFirst());
+            writer.write(pair.getName());
             writer.write(" = ");
-            pair.getSecond().toEPL(writer);
+            pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
     }

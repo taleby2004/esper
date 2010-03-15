@@ -37,7 +37,7 @@ public class TestAnyAllSomeExpr extends TestCase
                           "intPrimitive != all (1, intBoxed) as neq, " +
                           "intPrimitive <> all (1, intBoxed) as sqlneq, " +
                           "not intPrimitive = all (1, intBoxed) as nneq " +
-                          "from SupportBean((string like \"E%\"))";
+                          "from SupportBean(string like \"E%\")";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 

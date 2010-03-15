@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - MatchMaker</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_matchmaker</artifactId>
+	<artifactId>esper-example-matchmaker</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example MatchMaker</description>
 	<dependencies>

@@ -346,6 +346,17 @@ public class Expressions implements Serializable
     }
 
     /**
+     * Constant, use when the value is null.
+     * @param value is the constant value
+     * @param constantType is the type of the constant
+     * @return expression
+     */
+    public static ConstantExpression constant(Object value, Class constantType)
+    {
+        return new ConstantExpression(value, constantType.getName());
+    }
+
+    /**
      * Case-when-then expression.
      * @return expression
      */
@@ -1485,7 +1496,7 @@ public class Expressions implements Serializable
      */
     public static CrontabParameterExpression crontabScheduleWildcard()
     {
-        return new CrontabParameterExpression(CrontabParameterExpression.ScheduleItemType.WILDCARD);
+        return new CrontabParameterExpression(ScheduleItemType.WILDCARD);
     }
 
     /**
@@ -1494,7 +1505,7 @@ public class Expressions implements Serializable
      * @param type the type of crontab parameter
      * @return crontab parameter
      */
-    public static CrontabParameterExpression crontabScheduleItem(Integer parameter, CrontabParameterExpression.ScheduleItemType type)
+    public static CrontabParameterExpression crontabScheduleItem(Integer parameter, ScheduleItemType type)
     {
         CrontabParameterExpression param = new CrontabParameterExpression(type);
         if (parameter != null)

@@ -18,7 +18,11 @@ public class InstanceOfExpression extends ExpressionBase
     private String[] typeNames;
     private static final long serialVersionUID = 237629474193131995L;
 
+    public InstanceOfExpression() {
+    }
+
     /**
+
      * Ctor - for use to create an expression tree, without child expression.
      * @param typeNames is the fully-qualified class names or Java primitive type names or "string"
      */
@@ -48,14 +52,15 @@ public class InstanceOfExpression extends ExpressionBase
         }
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("instanceof(");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(", ");
 
         String delimiter = "";

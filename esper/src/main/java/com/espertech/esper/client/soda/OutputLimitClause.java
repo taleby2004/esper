@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
-
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -28,11 +26,14 @@ public class OutputLimitClause implements Serializable
     private String frequencyVariable;
     private OutputLimitUnit unit;
     private Expression whenExpression;
-    private List<Pair<String, Expression>> thenAssignments;
+    private List<AssignmentPair> thenAssignments;
     private Expression[] crontabAtParameters;
-    private TimePeriodExpression timePeriodExpression;
-    private TimePeriodExpression afterTimePeriodExpression;
+    private Expression timePeriodExpression;
+    private Expression afterTimePeriodExpression;
     private Integer afterNumberOfEvents;
+
+    public OutputLimitClause() {
+    }
 
     /**
      * Creates an output limit clause.
@@ -124,7 +125,7 @@ public class OutputLimitClause implements Serializable
      */
     public static OutputLimitClause create(Expression whenExpression)
     {
-        return new OutputLimitClause(OutputLimitSelector.DEFAULT, whenExpression, new ArrayList<Pair<String, Expression>>());
+        return new OutputLimitClause(OutputLimitSelector.DEFAULT, whenExpression, new ArrayList<AssignmentPair>());
     }
 
     /**
@@ -231,7 +232,7 @@ public class OutputLimitClause implements Serializable
      * @param whenExpression the boolean expression to evaluate to control output
      * @param thenAssignments the variable assignments, optional or an empty list
      */
-    public OutputLimitClause(OutputLimitSelector selector, Expression whenExpression, List<Pair<String, Expression>> thenAssignments)
+    public OutputLimitClause(OutputLimitSelector selector, Expression whenExpression, List<AssignmentPair> thenAssignments)
     {
         this.selector = selector;
         this.whenExpression = whenExpression;
@@ -324,7 +325,7 @@ public class OutputLimitClause implements Serializable
      * Returns the time period, or null if none provided.
      * @return time period
      */
-    public TimePeriodExpression getTimePeriodExpression()
+    public Expression getTimePeriodExpression()
     {
         return timePeriodExpression;
     }
@@ -333,7 +334,7 @@ public class OutputLimitClause implements Serializable
      * Returns the list of optional then-keyword variable assignments, if any
      * @return list of variable assignments or null if none
      */
-    public List<Pair<String, Expression>> getThenAssignments()
+    public List<AssignmentPair> getThenAssignments()
     {
         return thenAssignments;
     }
@@ -346,7 +347,7 @@ public class OutputLimitClause implements Serializable
      */
     public OutputLimitClause addThenAssignment(String variableName, Expression assignmentExpression)
     {
-        thenAssignments.add(new Pair<String, Expression>(variableName, assignmentExpression));
+        thenAssignments.add(new AssignmentPair(variableName, assignmentExpression));
         return this;
     }
 
@@ -368,10 +369,10 @@ public class OutputLimitClause implements Serializable
         if (afterTimePeriodExpression != null)
         {
             writer.write("after ");
-            afterTimePeriodExpression.toEPL(writer);
+            afterTimePeriodExpression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.write(" ");
         }
-        else if (afterNumberOfEvents != null)
+        else if ((afterNumberOfEvents != null) && (afterNumberOfEvents != 0))
         {
             writer.write("after ");
             writer.write(Integer.toString(afterNumberOfEvents));
@@ -386,19 +387,19 @@ public class OutputLimitClause implements Serializable
         if (unit == OutputLimitUnit.WHEN_EXPRESSION)
         {
             writer.write("when ");
-            whenExpression.toEPL(writer);
+            whenExpression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
 
             if ((thenAssignments != null) && (thenAssignments.size() > 0))
             {
                 writer.write(" then set ");
 
                 String delimiter = "";
-                for (Pair<String, Expression> pair : thenAssignments)
+                for (AssignmentPair pair : thenAssignments)
                 {
                     writer.write(delimiter);
-                    writer.write(pair.getFirst());
+                    writer.write(pair.getName());
                     writer.write(" = ");
-                    pair.getSecond().toEPL(writer);
+                    pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                     delimiter = ", ";
                 }
             }
@@ -410,7 +411,7 @@ public class OutputLimitClause implements Serializable
             for (int i = 0; i < crontabAtParameters.length; i++)
             {
                 writer.write(delimiter);
-                crontabAtParameters[i].toEPL(writer);
+                crontabAtParameters[i].toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                 delimiter = ", ";
             }
             writer.write(")");
@@ -418,7 +419,7 @@ public class OutputLimitClause implements Serializable
         else if (unit == OutputLimitUnit.TIME_PERIOD && timePeriodExpression != null)
         {
             writer.write("every ");
-            timePeriodExpression.toEPL(writer);
+            timePeriodExpression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         else if (unit == OutputLimitUnit.AFTER)
         {
@@ -443,7 +444,7 @@ public class OutputLimitClause implements Serializable
      * Returns the after-keyword time period.
      * @return after-keyword time period
      */
-    public TimePeriodExpression getAfterTimePeriodExpression()
+    public Expression getAfterTimePeriodExpression()
     {
         return afterTimePeriodExpression;
     }
@@ -451,9 +452,18 @@ public class OutputLimitClause implements Serializable
     /**
      * Sets the after-keyword time period.
      * @param afterTimePeriodExpression after-keyword time period
+     */
+    public void setAfterTimePeriodExpression(Expression afterTimePeriodExpression)
+    {
+        this.afterTimePeriodExpression = afterTimePeriodExpression;
+    }
+
+    /**
+     * Sets the after-keyword time period.
+     * @param afterTimePeriodExpression after-keyword time period
      * @return clause
      */
-    public OutputLimitClause setAfterTimePeriodExpression(TimePeriodExpression afterTimePeriodExpression)
+    public OutputLimitClause afterTimePeriodExpression(TimePeriodExpression afterTimePeriodExpression)
     {
         this.afterTimePeriodExpression = afterTimePeriodExpression;
         return this;
@@ -468,12 +478,41 @@ public class OutputLimitClause implements Serializable
         return afterNumberOfEvents;
     }
 
+    public void setFrequency(Double frequency) {
+        this.frequency = frequency;
+    }
+
+    public void setWhenExpression(Expression whenExpression) {
+        this.whenExpression = whenExpression;
+    }
+
+    public void setThenAssignments(List<AssignmentPair> thenAssignments) {
+        this.thenAssignments = thenAssignments;
+    }
+
+    public void setCrontabAtParameters(Expression[] crontabAtParameters) {
+        this.crontabAtParameters = crontabAtParameters;
+    }
+
+    public void setTimePeriodExpression(Expression timePeriodExpression) {
+        this.timePeriodExpression = timePeriodExpression;
+    }
+
+    /**
+     * Sets the after-keyword number of events, or null if undefined.
+     * @param afterNumberOfEvents set num events for after-keyword
+     */
+    public void setAfterNumberOfEvents(Integer afterNumberOfEvents)
+    {
+        this.afterNumberOfEvents = afterNumberOfEvents;
+    }
+
     /**
      * Sets the after-keyword number of events, or null if undefined.
      * @param afterNumberOfEvents set num events for after-keyword
      * @return clause
      */
-    public OutputLimitClause setAfterNumberOfEvents(Integer afterNumberOfEvents)
+    public OutputLimitClause afterNumberOfEvents(Integer afterNumberOfEvents)
     {
         this.afterNumberOfEvents = afterNumberOfEvents;
         return this;

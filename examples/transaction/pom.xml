@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - Transaction</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_transaction</artifactId>
+	<artifactId>esper-example-transaction</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example Transaction</description>
 	<dependencies>

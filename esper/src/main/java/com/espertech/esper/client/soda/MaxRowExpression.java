@@ -91,7 +91,12 @@ public class MaxRowExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("max(");
 
@@ -99,7 +104,7 @@ public class MaxRowExpression extends ExpressionBase
         for (Expression expr : this.getChildren())
         {
             writer.write(delimiter);
-            expr.toEPL(writer);
+            expr.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
         writer.write(')');

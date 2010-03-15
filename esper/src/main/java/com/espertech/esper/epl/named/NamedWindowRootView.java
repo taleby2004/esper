@@ -30,18 +30,21 @@ import com.espertech.esper.epl.spec.OnTriggerDesc;
 import com.espertech.esper.epl.spec.OnTriggerType;
 import com.espertech.esper.epl.spec.OnTriggerWindowUpdateDesc;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
+import com.espertech.esper.filter.FilterOperator;
+import com.espertech.esper.filter.FilterSpecCompiled;
+import com.espertech.esper.filter.FilterSpecParam;
+import com.espertech.esper.filter.FilterSpecParamConstant;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewSupport;
 import com.espertech.esper.view.Viewable;
+import com.espertech.esper.view.BatchingDataWindowView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The root window in a named window plays multiple roles: It holds the indexes for deleting rows, if any on-delete statement
@@ -57,6 +60,8 @@ public class NamedWindowRootView extends ViewSupport
     private Iterable<EventBean> dataWindowContents;
     private final Map<LookupStrategy, PropertyIndexedEventTable> tablePerStrategy;
     private final ValueAddEventProcessor revisionProcessor;
+    private final ConcurrentHashMap<String, PropertyIndexedEventTable> explicitIndexes;
+    private boolean isChildBatching;
 
     /**
      * Ctor.
@@ -66,6 +71,7 @@ public class NamedWindowRootView extends ViewSupport
     {
         this.indexRepository = new NamedWindowIndexRepository();
         this.tablePerStrategy = new HashMap<LookupStrategy, PropertyIndexedEventTable>();
+        this.explicitIndexes = new ConcurrentHashMap<String, PropertyIndexedEventTable>();
         this.revisionProcessor = revisionProcessor;
     }
 
@@ -97,6 +103,44 @@ public class NamedWindowRootView extends ViewSupport
         }
     }
 
+    /**
+     * Called by tail view to indicate that the data window view has new events that must be added to index tables.
+     */
+    public void addNewData(EventBean[] newData)
+    {
+        if (revisionProcessor == null) {
+            // Update indexes for fast deletion, if there are any
+            for (EventTable table : indexRepository.getTables())
+            {
+                table.add(newData);
+            }
+        }
+    }
+
+    public synchronized void addExplicitIndex(String namedWindowName, String indexName, List<String> columns) throws ExprValidationException {
+
+        if (explicitIndexes.containsKey(indexName)) {
+            throw new ExprValidationException("Index by name '" + indexName + "' already exists");
+        }
+
+        Set<String> indexed = new HashSet<String>();
+        IndexedPropDesc[] desc = new IndexedPropDesc[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
+            String columnName = columns.get(i);
+            Class type = namedWindowEventType.getPropertyType(columnName);
+            if (type == null) {
+                throw new ExprValidationException("Property named '" + columnName + "' not found on named window '"+ namedWindowName + "'");
+            }
+            if (!indexed.add(columnName)) {
+                throw new ExprValidationException("Property named '" + columnName + "' has been declared more then once");
+            }
+            desc[i] = new IndexedPropDesc(columnName, type);
+        }
+
+        PropertyIndexedEventTable table = indexRepository.addTable(desc, dataWindowContents, namedWindowEventType, false);
+        explicitIndexes.put(indexName, table);
+    }
+
     // Called by deletion strategy and also the insert-into for new events only
     public void update(EventBean[] newData, EventBean[] oldData)
     {
@@ -116,7 +160,9 @@ public class NamedWindowRootView extends ViewSupport
             // Update indexes for fast deletion, if there are any
             for (EventTable table : indexRepository.getTables())
             {
-                table.add(newData);
+                if (isChildBatching) {
+                    table.add(newData);
+                }
                 table.remove(oldData);
             }
 
@@ -226,15 +272,18 @@ public class NamedWindowRootView extends ViewSupport
 
         // Add all joined fields to an array for sorting
         JoinedPropDesc[] joinedPropDesc = new JoinedPropDesc[keyPropertiesJoin.length];
+        IndexedPropDesc[] indexedPropDesc = new IndexedPropDesc[keyPropertiesJoin.length];
         for (int i = 0; i < joinedPropDesc.length; i++)
         {
             joinedPropDesc[i] = new JoinedPropDesc(indexPropertiesJoin[i], coercionTypes[i], keyPropertiesJoin[i], 1);
+            indexedPropDesc[i] = new IndexedPropDesc(indexPropertiesJoin[i], coercionTypes[i]);
         }
         Arrays.sort(joinedPropDesc);
+        Arrays.sort(indexedPropDesc);
         keyPropertiesJoin = JoinedPropDesc.getKeyProperties(joinedPropDesc);
 
         // Get the table for this index
-        PropertyIndexedEventTable table = indexRepository.addTable(joinedPropDesc, dataWindowContents, namedWindowEventType, mustCoerce);
+        PropertyIndexedEventTable table = indexRepository.addTable(indexedPropDesc, dataWindowContents, namedWindowEventType, mustCoerce);
 
         // assign types and stream numbers
         EventType[] eventTypePerStream = new EventType[] {null, filterEventType};
@@ -281,5 +330,119 @@ public class NamedWindowRootView extends ViewSupport
     {
         indexRepository.destroy();
         tablePerStrategy.clear();
+    }
+
+    public Collection<EventBean> snapshot(FilterSpecCompiled filter) {
+        if (filter.getParameters().isEmpty()) {
+            return null;
+        }
+
+        // Widening/Coercion is part of filter spec compile 
+        Map<String, Class> keysAndTypes = new HashMap<String, Class>();
+        for (FilterSpecParam param : filter.getParameters()) {
+            if (!(param instanceof FilterSpecParamConstant)) {
+                continue;
+            }
+            if (param.getFilterOperator() == FilterOperator.EQUAL) {
+                Object filterValue = param.getFilterValue(null);
+                if (filterValue == null) {
+                    keysAndTypes.put(param.getPropertyName(), null);
+                }
+                else {
+                    keysAndTypes.put(param.getPropertyName(), filterValue.getClass());
+                }
+            }
+        }
+        if (keysAndTypes.isEmpty()) {
+            return null;
+        }
+
+        List<PropertyIndexedEventTable> candidateTables = null;
+        for (PropertyIndexedEventTable table : indexRepository.getTables()) {
+
+            boolean missed = false;
+            for (String indexedProp : table.getPropertyNames()) {
+                if (!keysAndTypes.containsKey(indexedProp)) {
+                    missed = true;
+                    break;
+                }
+            }
+            if (!missed) {
+                if (candidateTables == null) {
+                    candidateTables = new ArrayList<PropertyIndexedEventTable>();
+                    candidateTables.add(table);
+                }
+                else {
+                    candidateTables.add(table);
+                }
+            }
+        }
+
+        if (candidateTables == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("No index found.");
+            }
+            return null;
+        }
+
+        // take the best available table
+        PropertyIndexedEventTable tableFound;
+        if (candidateTables.size() > 1) {
+            Comparator<PropertyIndexedEventTable> comparator = new Comparator<PropertyIndexedEventTable>() {
+                public int compare(PropertyIndexedEventTable o1, PropertyIndexedEventTable o2)
+                {
+                    if (o1.getPropertyNames().length > o2.getPropertyNames().length) {
+                        return -1;  // sort desc by count columns
+                    }
+                    if (o1.getPropertyNames().length == o2.getPropertyNames().length) {
+                        return 0;
+                    }
+                    return 1;
+                }
+            };
+            Collections.sort(candidateTables,comparator);
+            tableFound = candidateTables.get(0);
+        }
+        else {
+            tableFound = candidateTables.get(0);
+        }
+
+        if (log.isDebugEnabled()) {
+            String indexName = null;
+            for (Map.Entry<String, PropertyIndexedEventTable> entry : explicitIndexes.entrySet()) {
+                if (entry.getValue() == tableFound) {
+                    indexName = entry.getKey();
+                }
+            }
+            log.debug("Using index " + indexName + " for on-demand query");
+        }
+
+        Object[] keyValues = new Object[tableFound.getPropertyNames().length];
+        for (int keyIndex = 0; keyIndex < tableFound.getPropertyNames().length; keyIndex++) {
+            for (FilterSpecParam param : filter.getParameters()) {
+                if (param.getPropertyName().equals(tableFound.getPropertyNames()[keyIndex])) {
+                    keyValues[keyIndex] = param.getFilterValue(null);
+                    break;
+                }
+            }
+        }
+
+        Set<EventBean> result = tableFound.lookup(keyValues);
+        if (result != null) {
+            return result;
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    public void removeExplicitIndex(String indexName)
+    {
+        EventTable table = explicitIndexes.remove(indexName);
+        if (table != null) {
+            indexRepository.removeTableReference(table);
+        }
+    }
+
+    public void setBatchView(boolean batchView) {
+        isChildBatching = batchView;
     }
 }

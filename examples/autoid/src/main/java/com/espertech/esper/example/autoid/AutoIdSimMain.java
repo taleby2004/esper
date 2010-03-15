@@ -21,8 +21,12 @@ import java.io.IOException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class AutoIdSimMain {
+
+    private static Log log = LogFactory.getLog( AutoIdSimMain.class );
 
     private final static Random RANDOM = new Random(System.currentTimeMillis());
     private final static String[] SENSOR_IDS = {"urn:epc:1:4.16.30", "urn:epc:1:4.16.32", "urn:epc:1:4.16.36", "urn:epc:1:4.16.38" };
@@ -36,6 +40,7 @@ public class AutoIdSimMain {
             "  xsi:schemaLocation=\"urn:autoid:specification:interchange:PMLCore:xml:schema:1 AutoIdPmlCore.xsd\">\n";
 
     private final int numEvents;
+    private final String engineURI;
     private final DocumentBuilder documentBuilder;
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException
@@ -63,13 +68,14 @@ public class AutoIdSimMain {
         }
 
         // Run the sample
-        AutoIdSimMain autoIdSimMain = new AutoIdSimMain(events);
+        AutoIdSimMain autoIdSimMain = new AutoIdSimMain(events, "AutoIDSim");
         autoIdSimMain.run();
     }
 
-    public AutoIdSimMain(int numEvents) throws ParserConfigurationException
+    public AutoIdSimMain(int numEvents, String engineURI) throws ParserConfigurationException
     {
         this.numEvents = numEvents;
+        this.engineURI = engineURI;
 
         // set up DOM parser
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -80,12 +86,17 @@ public class AutoIdSimMain {
     public void run() throws SAXException, IOException
     {
         // load config - this defines the XML event types to be processed
-        URL url = AutoIdSimMain.class.getClassLoader().getResource("esper.examples.cfg.xml");
+        String configFile = "esper.examples.cfg.xml";
+        URL url = AutoIdSimMain.class.getClassLoader().getResource(configFile);
+        if (url == null) {
+            log.error("Error loading configuration file '" + configFile + "' from classpath");
+            return;
+        }
         Configuration config = new Configuration();
         config.configure(url);
 
         // get engine instance
-        EPServiceProvider epService = EPServiceProviderManager.getProvider("AutoIdSim", config);
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI, config);
 
         // set up statement
         RFIDTagsPerSensorStmt rfidStmt = new RFIDTagsPerSensorStmt(epService.getEPAdministrator());
@@ -128,5 +139,9 @@ public class AutoIdSimMain {
         buffer.append("</pmlcore:Sensor>");
 
         return buffer.toString();
+    }
+
+    public void destroy() {
+        EPServiceProviderManager.getProvider(engineURI).getEPAdministrator().destroyAllStatements();        
     }
 }

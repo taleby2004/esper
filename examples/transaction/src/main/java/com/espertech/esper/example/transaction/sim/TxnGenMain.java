@@ -72,17 +72,19 @@ public class TxnGenMain {
 
         // Run the sample
         System.out.println("Using bucket size of " + bucketSize + " with " + numTransactions + " transactions");
-        TxnGenMain txnGenMain = new TxnGenMain(bucketSize, numTransactions);
+        TxnGenMain txnGenMain = new TxnGenMain(bucketSize, numTransactions, "TransactionExample");
         txnGenMain.run();
     }
 
     private int bucketSize;
     private int numTransactions;
+    private String engineURI;
 
-    public TxnGenMain(int bucketSize, int numTransactions)
+    public TxnGenMain(int bucketSize, int numTransactions, String engineURI)
     {
         this.bucketSize = bucketSize;
         this.numTransactions = numTransactions;
+        this.engineURI = engineURI;
     }
 
     public void run() throws IOException
@@ -95,7 +97,7 @@ public class TxnGenMain {
         configuration.addEventType("TxnEventC", TxnEventC.class.getName());
 
         // Get engine instance
-        EPServiceProvider epService = EPServiceProviderManager.getProvider("TransactionExample", configuration);
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI, configuration);
 
         // We will be supplying timer events externally.
         // We will assume that each bucket arrives within a defined period of time.

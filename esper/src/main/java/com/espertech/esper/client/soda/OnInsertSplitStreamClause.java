@@ -19,8 +19,11 @@ public class OnInsertSplitStreamClause extends OnClause
 {
     private static final long serialVersionUID = 0L;
 
-    private boolean isFirst;
-    private List<OnInsertSplitStreamItem> items;
+    private boolean first;
+    private List<OnInsertSplitStreamItem> items = new ArrayList<OnInsertSplitStreamItem>();
+
+    public OnInsertSplitStreamClause() {
+    }
 
     /**
      * Creates a split-stream on-insert clause from an indicator whether to consider the first of all where-clauses,
@@ -50,7 +53,7 @@ public class OnInsertSplitStreamClause extends OnClause
      */
     public OnInsertSplitStreamClause(boolean isFirst, List<OnInsertSplitStreamItem> items)
     {
-        this.isFirst = isFirst;
+        this.first = isFirst;
         this.items = items;
     }
 
@@ -69,12 +72,12 @@ public class OnInsertSplitStreamClause extends OnClause
             if (item.getWhereClause() != null)
             {
                 writer.append(" where ");
-                item.getWhereClause().toEPL(writer);
+                item.getWhereClause().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             }
             delimiter = " ";
         }
 
-        if (!isFirst)
+        if (!first)
         {
             writer.append(" output all");
         }
@@ -87,7 +90,17 @@ public class OnInsertSplitStreamClause extends OnClause
      */
     public boolean isFirst()
     {
-        return isFirst;
+        return first;
+    }
+
+    /**
+     * Returns true for firing the insert-into for only the first where-clause that matches,
+     * or false for firing the insert-into for all where-clauses that match.
+     * @return indicator first or all
+     */
+    public boolean getFirst()
+    {
+        return first;
     }
 
     /**
@@ -97,7 +110,7 @@ public class OnInsertSplitStreamClause extends OnClause
      */
     public void setFirst(boolean first)
     {
-        isFirst = first;
+        this.first = first;
     }
 
     /**

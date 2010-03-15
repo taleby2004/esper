@@ -15,7 +15,10 @@ import java.io.StringWriter;
  */
 public class LastProjectionExpression extends ExpressionBase
 {
-    private boolean isDistinct;
+    private boolean distinct;
+
+    public LastProjectionExpression() {
+    }
 
     /**
      * Ctor.
@@ -23,7 +26,7 @@ public class LastProjectionExpression extends ExpressionBase
      */
     public LastProjectionExpression(boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
     }
 
     /**
@@ -33,25 +36,24 @@ public class LastProjectionExpression extends ExpressionBase
      */
     public LastProjectionExpression(Expression expression, boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
         this.getChildren().add(expression);
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
-    {
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
         writer.write("last");
         writer.write('(');
-        if (isDistinct)
+        if (distinct)
         {
             writer.write("distinct ");
         }
         if (this.getChildren().size() > 0)
         {
-            this.getChildren().get(0).toEPL(writer);
+            this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         writer.write(")");
     }
@@ -62,7 +64,16 @@ public class LastProjectionExpression extends ExpressionBase
      */
     public boolean isDistinct()
     {
-        return isDistinct;
+        return distinct;
+    }
+
+    /**
+     * Returns true for distinct.
+     * @return boolean indicating distinct or not
+     */
+    public boolean getDistinct()
+    {
+        return distinct;
     }
 
     /**
@@ -71,6 +82,6 @@ public class LastProjectionExpression extends ExpressionBase
      */
     public void setDistinct(boolean distinct)
     {
-        isDistinct = distinct;
+        this.distinct = distinct;
     }
 }

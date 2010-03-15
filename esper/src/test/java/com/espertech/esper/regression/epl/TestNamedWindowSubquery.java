@@ -5,6 +5,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -149,6 +150,22 @@ public class TestNamedWindowSubquery extends TestCase
         sendSupportBean("E2", 5);
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 5});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 4}, {"E2", 5}});
+    }
+
+    public void testCorrelatedSubquerySelect() {
+
+        // ESPER-452
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ABean", SupportBean_S0.class);
+        epService.getEPAdministrator().createEPL("create window MyWindow.std:unique(string) as select * from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select status.*, (select * from MyWindow where string = ABean.p00) as details" +
+                    " from ABean(p01='good') as status");
+        stmt.addListener(listenerStmtOne);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1", "good"));
+        assertTrue(listenerStmtOne.isInvoked());
     }
 
     public void testSubqueryDeleteInsertReplace()

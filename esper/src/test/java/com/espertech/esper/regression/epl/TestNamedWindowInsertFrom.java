@@ -65,7 +65,7 @@ public class TestNamedWindowInsertFrom extends TestCase
         ArrayAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[] {"E1"});
     }
 
-    public void testInsertWhereTypeAndFilter()
+    public void testInsertWhereTypeAndFilter() throws Exception
     {
         String[] fields = new String[] {"string"};
 
@@ -173,10 +173,10 @@ public class TestNamedWindowInsertFrom extends TestCase
         // create window with keep-all using OM
         EPStatementObjectModel model = new EPStatementObjectModel();
         Expression where = Expressions.eq("b", 10);
-        model.setCreateWindow(CreateWindowClause.create("MyWindowTwo", View.create("win", "keepall")).setInsert(true).setInsertWhereClause(where));
+        model.setCreateWindow(CreateWindowClause.create("MyWindowTwo", View.create("win", "keepall")).insert(true).insertWhereClause(where));
         model.setSelectClause(SelectClause.createWildcard());
         model.setFromClause(FromClause.create(FilterStream.create("MyWindow")));
-        String text = "create window MyWindowTwo.win:keepall() as select * from MyWindow insert where (b = 10)";
+        String text = "create window MyWindowTwo.win:keepall() as select * from MyWindow insert where b = 10";
         assertEquals(text, model.toEPL());
 
         EPStatementObjectModel modelTwo = epService.getEPAdministrator().compileEPL(text);
@@ -273,19 +273,19 @@ public class TestNamedWindowInsertFrom extends TestCase
         return result;
     }
 
-    private long getCount(String windowName)
+    private long getCount(String windowName) throws Exception
     {
         NamedWindowProcessor processor = ((EPServiceProviderSPI)epService).getNamedWindowService().getProcessor(windowName);
         return processor.getCountDataWindow();
     }    
 
-    private String getStatementName(String windowName)
+    private String getStatementName(String windowName) throws Exception
     {
         NamedWindowProcessor processor = ((EPServiceProviderSPI)epService).getNamedWindowService().getProcessor(windowName);
         return processor.getStatementName();
     }
 
-    private String getEPL(String windowName)
+    private String getEPL(String windowName) throws Exception
     {
         NamedWindowProcessor processor = ((EPServiceProviderSPI)epService).getNamedWindowService().getProcessor(windowName);
         return processor.getEplExpression();

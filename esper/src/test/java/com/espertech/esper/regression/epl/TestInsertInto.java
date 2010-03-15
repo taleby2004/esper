@@ -79,7 +79,7 @@ public class TestInsertInto extends TestCase
         EPStatement stmt = runAsserts(null, model);
 
         String epl = "insert into Event_1(delta, product) " +
-                      "select (intPrimitive - intBoxed) as deltaTag, (intPrimitive * intBoxed) as productTag " +
+                      "select intPrimitive - intBoxed as deltaTag, intPrimitive * intBoxed as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100)";
         assertEquals(epl, model.toEPL());
         assertEquals(epl, stmt.getText());
@@ -88,7 +88,7 @@ public class TestInsertInto extends TestCase
     public void testVariantOneEPLToOMStmt() throws Exception
     {
         String epl = "insert into Event_1(delta, product) " +
-                      "select (intPrimitive - intBoxed) as deltaTag, (intPrimitive * intBoxed) as productTag " +
+                      "select intPrimitive - intBoxed as deltaTag, intPrimitive * intBoxed as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100)";
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);

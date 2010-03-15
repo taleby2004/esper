@@ -19,6 +19,9 @@ public class ArithmaticExpression extends ExpressionBase
     
     private String operator;
 
+    public ArithmaticExpression() {
+    }
+
     /**
      * Ctor.
      * @param operator can be any of '-', '+', '*', '/' or '%' (modulo).
@@ -48,6 +51,10 @@ public class ArithmaticExpression extends ExpressionBase
     public String getOperator()
     {
         return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
     }
 
     /**
@@ -83,16 +90,22 @@ public class ArithmaticExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
-    {
-        writer.write("(");
+    public ExpressionPrecedenceEnum getPrecedence() {
+        if (operator.equals("*") || operator.equals("/") || operator.equals("%")) {
+            return ExpressionPrecedenceEnum.MULTIPLY;
+        }
+        else {
+            return ExpressionPrecedenceEnum.ADDITIVE;
+        }
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEPL(writer);
+            child.toEPL(writer, getPrecedence());
             delimiter = " " + operator + " ";
         }
-        writer.write(")");
     }
 }

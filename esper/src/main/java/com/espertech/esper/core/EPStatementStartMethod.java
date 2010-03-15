@@ -11,6 +11,11 @@ package com.espertech.esper.core;
 import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.VariableValueException;
+import com.espertech.esper.client.annotation.HookType;
+import com.espertech.esper.client.hook.SQLColumnTypeConversion;
+import com.espertech.esper.client.hook.SQLOutputRowConversion;
+import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.agg.AggregationService;
@@ -112,6 +117,10 @@ public class EPStatementStartMethod
         {
             return startCreateWindow(isNewStatement, isRecoveringStatement);
         }
+        else if (statementSpec.getCreateIndexDesc() != null)
+        {
+            return startCreateIndex();
+        }
         else if (statementSpec.getCreateVariableDesc() != null)
         {
             return startCreateVariable(isNewStatement);
@@ -120,6 +129,59 @@ public class EPStatementStartMethod
         {
             return startSelect(isRecoveringResilient);
         }
+    }
+
+    private EPStatementStartResult startCreateIndex()
+        throws ExprValidationException, ViewProcessingException
+    {
+        final CreateIndexDesc spec = statementSpec.getCreateIndexDesc();
+        final NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(spec.getWindowName());
+        processor.getRootView().addExplicitIndex(spec.getWindowName(), spec.getIndexName(), spec.getColumns());
+
+        Viewable viewable = new Viewable() {
+
+            public View addView(View view)
+            {
+                return null;
+            }
+
+            public List<View> getViews()
+            {
+                return null;
+            }
+
+            public boolean removeView(View view)
+            {
+                return false;
+            }
+
+            public void removeAllViews()
+            {
+            }
+
+            public boolean hasViews()
+            {
+                return false;
+            }
+
+            public EventType getEventType()
+            {
+                return processor.getNamedWindowType();
+            }
+
+            public Iterator<EventBean> iterator()
+            {
+                return new ArrayEventIterator(null);
+            }
+        };
+        EPStatementStopMethod stopMethod = new EPStatementStopMethod() {
+            public void stop()
+            {
+                processor.getRootView().removeExplicitIndex(spec.getIndexName());
+            }
+        };
+        EPStatementStartResult result = new EPStatementStartResult(viewable, stopMethod, null);
+        return result;
     }
 
     private EPStatementStartResult startOnTrigger()
@@ -264,7 +326,12 @@ public class EPStatementStartMethod
                 assignment.setExpression(validated);
             }
 
-            onExprView = new OnSetVariableView(desc, statementContext.getEventAdapterService(), statementContext.getVariableService(), statementContext.getStatementResultService(), statementContext);
+            try {
+                onExprView = new OnSetVariableView(desc, statementContext.getEventAdapterService(), statementContext.getVariableService(), statementContext.getStatementResultService(), statementContext);
+            }
+            catch (VariableValueException ex) {
+                throw new ExprValidationException("Error in variable assignment: " + ex.getMessage(), ex);
+            }
             eventStreamParentViewable.addView(onExprView);
         }
         // split-stream use case
@@ -498,7 +565,10 @@ public class EPStatementStartMethod
         Viewable finalView = services.getViewService().createViews(rootView, unmaterializedViewChain.getViewFactoryChain(), statementContext);
 
         // Attach tail view
+        boolean isBatchView = finalView instanceof BatchingDataWindowView;
         NamedWindowTailView tailView = processor.getTailView();
+        tailView.setBatchView(isBatchView);
+        processor.getRootView().setBatchView(isBatchView);
         finalView.addView(tailView);
         finalView = tailView;
 
@@ -563,18 +633,6 @@ public class EPStatementStartMethod
     {
         final CreateVariableDesc createDesc = statementSpec.getCreateVariableDesc();
 
-        // Determime the variable type
-        Class type;
-        try
-        {
-            type = JavaClassHelper.getClassForSimpleName(createDesc.getVariableType());
-        }
-        catch (Throwable t)
-        {
-            throw new ExprValidationException("Cannot create variable '" + createDesc.getVariableName() + "', type '" +
-                createDesc.getVariableType() + "' is not a recognized type");
-        }
-
         // Get assignment value
         Object value = null;
         if (createDesc.getAssignment() != null)
@@ -588,18 +646,12 @@ public class EPStatementStartMethod
         // Create variable
         try
         {
-            services.getVariableService().createNewVariable(createDesc.getVariableName(), type, value, statementContext.getExtensionServicesContext());
+            services.getVariableService().createNewVariable(createDesc.getVariableName(), createDesc.getVariableType(), value, statementContext.getExtensionServicesContext());
         }
         catch (VariableExistsException ex)
         {
             // for new statement we don't allow creating the same variable
             if (isNewStatement)
-            {
-                throw new ExprValidationException("Cannot create variable: " + ex.getMessage());
-            }
-
-            // compare the type
-            if (services.getVariableService().getReader(createDesc.getVariableName()).getType() != type)
             {
                 throw new ExprValidationException("Cannot create variable: " + ex.getMessage());
             }
@@ -669,6 +721,7 @@ public class EPStatementStartMethod
         Viewable[] eventStreamParentViewable = new Viewable[numStreams];
         ViewFactoryChain[] unmaterializedViewChain = new ViewFactoryChain[numStreams];
         String[] eventTypeNamees = new String[numStreams];
+        boolean[] isNamedWindow = new boolean[numStreams];
 
         // verify for joins that required views are present
         StreamJoinAnalysisResult joinAnalysisResult = verifyJoinViews(statementSpec.getStreamSpecs());
@@ -732,7 +785,9 @@ public class EPStatementStartMethod
                 }
 
                 DBStatementStreamSpec sqlStreamSpec = (DBStatementStreamSpec) streamSpec;
-                HistoricalEventViewable historicalEventViewable = DatabasePollingViewableFactory.createDBStatementView(i, sqlStreamSpec, services.getDatabaseRefService(), services.getEventAdapterService(), statementContext.getEpStatementHandle());
+                SQLColumnTypeConversion typeConversionHook = (SQLColumnTypeConversion) JavaClassHelper.getAnnotationHook(statementSpec.getAnnotations(), HookType.SQLCOL, SQLColumnTypeConversion.class, statementContext.getMethodResolutionService());
+                SQLOutputRowConversion outputRowConversionHook = (SQLOutputRowConversion) JavaClassHelper.getAnnotationHook(statementSpec.getAnnotations(), HookType.SQLROW, SQLOutputRowConversion.class, statementContext.getMethodResolutionService());
+                HistoricalEventViewable historicalEventViewable = DatabasePollingViewableFactory.createDBStatementView(i, sqlStreamSpec, services.getDatabaseRefService(), services.getEventAdapterService(), statementContext.getEpStatementHandle(), typeConversionHook, outputRowConversionHook);
                 unmaterializedViewChain[i] = new ViewFactoryChain(historicalEventViewable.getEventType(), new LinkedList<ViewFactory>());
                 eventStreamParentViewable[i] = historicalEventViewable;
                 stopCallbacks.add(historicalEventViewable);
@@ -760,6 +815,7 @@ public class EPStatementStartMethod
                 unmaterializedViewChain[i] = services.getViewService().createFactories(i, consumerView.getEventType(), namedSpec.getViewSpecs(), namedSpec.getOptions(), statementContext);
                 joinAnalysisResult.setNamedWindow(i);
                 eventTypeNamees[i] = namedSpec.getWindowName();
+                isNamedWindow[i] = true;
 
                 // Consumers to named windows cannot declare a data window view onto the named window to avoid duplicate remove streams
                 ViewResourceDelegate viewResourceDelegate = new ViewResourceDelegateImpl(unmaterializedViewChain, statementContext);
@@ -797,7 +853,7 @@ public class EPStatementStartMethod
         statementStreamSpecs.addAll(statementSpec.getStreamSpecs());
 
         // Construct type information per stream
-        StreamTypeService typeService = new StreamTypeServiceImpl(streamEventTypes, streamNames, getHasIStreamOnly(unmaterializedViewChain), services.getEngineURI());
+        StreamTypeService typeService = new StreamTypeServiceImpl(streamEventTypes, streamNames, getHasIStreamOnly(isNamedWindow, unmaterializedViewChain), services.getEngineURI());
         ViewResourceDelegate viewResourceDelegate = new ViewResourceDelegateImpl(unmaterializedViewChain, statementContext);
 
         // boolean multiple expiry policy
@@ -947,10 +1003,13 @@ public class EPStatementStartMethod
         return new EPStatementStartResult(finalView, stopMethod);
     }
 
-    private boolean[] getHasIStreamOnly(ViewFactoryChain[] unmaterializedViewChain)
+    private boolean[] getHasIStreamOnly(boolean[] isNamedWindow, ViewFactoryChain[] unmaterializedViewChain)
     {
         boolean[] result = new boolean[unmaterializedViewChain.length];
         for (int i = 0; i < unmaterializedViewChain.length; i++) {
+            if (isNamedWindow[i]) {
+                continue;
+            }
             result[i] = unmaterializedViewChain[i].getDataWindowViewFactoryCount() == 0;
         }
         return result;
@@ -1428,6 +1487,7 @@ public class EPStatementStartMethod
                 NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
                 NamedWindowConsumerView consumerView = processor.addConsumer(namedSpec.getFilterExpressions(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
                 ViewFactoryChain viewFactoryChain = services.getViewService().createFactories(0, consumerView.getEventType(), namedSpec.getViewSpecs(), namedSpec.getOptions(), statementContext);
+                subselect.setRawEventType(viewFactoryChain.getEventType());
                 subSelectStreamDesc.add(subselect, subselectStreamNumber, consumerView, viewFactoryChain);
             }
         }
@@ -1712,17 +1772,17 @@ public class EPStatementStartMethod
             String indexedProps[] = joinProps.keySet().toArray(new String[joinProps.keySet().size()]);
             int[] keyStreamNums = JoinedPropDesc.getKeyStreamNums(joinProps.values());
             String[] keyProps = JoinedPropDesc.getKeyProperties(joinProps.values());
+            Class coercionTypes[] = JoinedPropDesc.getCoercionTypes(joinProps.values());
 
             if (!mustCoerce)
             {
-                PropertyIndexedEventTable table = new PropertyIndexedEventTable(0, viewableEventType, indexedProps);
+                PropertyIndexedEventTable table = new PropertyIndexedEventTable(0, viewableEventType, indexedProps, coercionTypes);
                 TableLookupStrategy strategy = new IndexedTableLookupStrategy( outerEventTypes,
                         keyStreamNums, keyProps, table);
                 return new Pair<EventTable, TableLookupStrategy>(table, strategy);
             }
             else
-            {
-                Class coercionTypes[] = JoinedPropDesc.getCoercionTypes(joinProps.values());
+            {                
                 PropertyIndTableCoerceAdd table = new PropertyIndTableCoerceAdd(0, viewableEventType, indexedProps, coercionTypes);
                 TableLookupStrategy strategy = new IndexedTableLookupStrategyCoercing( outerEventTypes, keyStreamNums, keyProps, table, coercionTypes);
                 return new Pair<EventTable, TableLookupStrategy>(table, strategy);

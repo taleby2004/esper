@@ -51,15 +51,17 @@ public class PatternAndExpr extends PatternExprBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
+    public PatternExprPrecedenceEnum getPrecedence() {
+        return PatternExprPrecedenceEnum.AND;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         String delimiter = "";
         for (PatternExpr child : this.getChildren())
         {
             writer.write(delimiter);
-            writer.write('(');
-            child.toEPL(writer);
-            writer.write(')');
+            child.toEPL(writer, getPrecedence());
             delimiter = " and ";
         }
     }

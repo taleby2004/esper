@@ -19,7 +19,11 @@ public abstract class OnClause implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
+    public OnClause() {
+    }
+
     /**
+
      * Creates an on-delete clause for deleting from a named window.
      * @param windowName is the named window name
      * @param asName is the as-provided name of the named window

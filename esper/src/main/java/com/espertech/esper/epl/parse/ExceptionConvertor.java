@@ -1,10 +1,10 @@
 package com.espertech.esper.epl.parse;
 
-import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.EPStatementSyntaxException;
+import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.generated.EsperEPL2Ast;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
-import com.espertech.esper.collection.UniformPair;
 import org.antlr.runtime.*;
 
 import java.util.Set;
@@ -22,9 +22,9 @@ public class ExceptionConvertor
      * @param parser the parser that parsed the expression
      * @return syntax exception
      */
-    public static EPStatementSyntaxException convertStatement(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
+    public static EPStatementSyntaxException convertStatement(RecognitionException e, String expression, boolean addPleaseCheck, EsperEPL2GrammarParser parser)
     {
-        UniformPair<String> pair = convert(e, expression, parser);
+        UniformPair<String> pair = convert(e, expression, addPleaseCheck, parser);
         return new EPStatementSyntaxException(pair.getFirst(), pair.getSecond());
     }
 
@@ -35,9 +35,9 @@ public class ExceptionConvertor
      * @param parser the parser that parsed the expression
      * @return syntax exception
      */
-    public static PropertyAccessException convertProperty(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
+    public static PropertyAccessException convertProperty(RecognitionException e, String expression, boolean addPleaseCheck, EsperEPL2GrammarParser parser)
     {
-        UniformPair<String> pair = convert(e, expression, parser);
+        UniformPair<String> pair = convert(e, expression, addPleaseCheck, parser);
         return new PropertyAccessException(pair.getFirst(), pair.getSecond());
     }
 
@@ -48,7 +48,7 @@ public class ExceptionConvertor
      * @param parser the parser that parsed the expression
      * @return syntax exception
      */
-    public static UniformPair<String> convert(RecognitionException e, String expression, EsperEPL2GrammarParser parser)
+    public static UniformPair<String> convert(RecognitionException e, String expression, boolean addPleaseCheck, EsperEPL2GrammarParser parser)
     {
         if (expression.trim().length() == 0)
         {
@@ -80,7 +80,7 @@ public class ExceptionConvertor
 
         Stack stack = parser.getParaphrases();
         String check = "";
-        if (stack.size() > 0)
+        if ((stack.size() > 0) && addPleaseCheck)
         {
             String delimiter = "";
             StringBuilder checkList = new StringBuilder();

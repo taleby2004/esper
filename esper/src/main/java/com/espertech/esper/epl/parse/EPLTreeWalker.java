@@ -380,6 +380,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case CREATE_WINDOW_EXPR:
                 leaveCreateWindow(node);
                 break;
+            case CREATE_INDEX_EXPR:
+                leaveCreateIndex(node);
+                break;
             case CREATE_WINDOW_SELECT_EXPR:
                 leaveCreateWindowSelect(node);
                 break;
@@ -549,16 +552,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
         StreamSpecOptions streamSpecOptions = new StreamSpecOptions(false,isRetainUnion,isRetainIntersection);
 
         // handle table-create clause, i.e. (col1 type, col2 type)
-        if ((node.getChildCount() > 2) && node.getChild(2).getType() == CREATE_WINDOW_COL_TYPE_LIST)
-        {
-            Tree parent = node.getChild(2);
-            for (int i = 0; i < parent.getChildCount(); i++)
+        for (int nodeNum = 0; nodeNum < node.getChildCount(); nodeNum++) {
+            if (node.getChild(nodeNum).getType() == CREATE_WINDOW_COL_TYPE_LIST)
             {
-                String name = parent.getChild(i).getChild(0).getText();
-                String type = parent.getChild(i).getChild(1).getText();
-                Class clazz = JavaClassHelper.getClassForSimpleName(type);
-                SelectClauseExprRawSpec selectElement = new SelectClauseExprRawSpec(new ExprConstantNode(clazz), name);
-                statementSpec.getSelectClauseSpec().add(selectElement);
+                Tree parent = node.getChild(nodeNum);
+                for (int i = 0; i < parent.getChildCount(); i++)
+                {
+                    String name = parent.getChild(i).getChild(0).getText();
+                    String type = parent.getChild(i).getChild(1).getText();
+                    Class clazz = JavaClassHelper.getClassForSimpleName(type);
+                    SelectClauseExprRawSpec selectElement = new SelectClauseExprRawSpec(new ExprConstantNode(clazz), name);
+                    statementSpec.getSelectClauseSpec().add(selectElement);
+                }
             }
         }
 
@@ -580,6 +585,27 @@ public class EPLTreeWalker extends EsperEPL2Ast
         FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, new LinkedList<ExprNode>(), null);
         FilterStreamSpecRaw streamSpec = new FilterStreamSpecRaw(rawFilterSpec, new LinkedList<ViewSpec>(), null, streamSpecOptions);
         statementSpec.getStreamSpecs().add(streamSpec);
+    }
+
+    private void leaveCreateIndex(Tree node)
+    {
+        log.debug(".leaveCreateIndex");
+
+        String indexName = node.getChild(0).getText();
+        String windowName = node.getChild(1).getText();
+
+        Tree nodeExpr = node.getChild(2);
+        List<String> columns = new ArrayList<String>();
+
+        for (int i = 0; i < nodeExpr.getChildCount(); i++)
+        {
+            if (nodeExpr.getChild(i).getType() == IDENT)
+            {
+                columns.add(nodeExpr.getChild(i).getText());
+            }
+        }
+
+        statementSpec.setCreateIndexDesc(new CreateIndexDesc(indexName, windowName, columns));
     }
 
     private void leaveCreateVariable(Tree node)
@@ -755,15 +781,10 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 continue;
             }
 
-            Tree child = node.getChild(i);
-            if (child.getChild(0).getType() != IDENT)
-            {
-                throw new IllegalStateException("Expected identifier but received type '" + child.getType() + "'");
-            }
-
-            String variableName = child.getChild(0).getText();
-            ExprNode childEvalNode = astExprNodeMap.get(child.getChild(1));
-            astExprNodeMap.remove(child.getChild(1));
+            Tree childNode = node.getChild(i);
+            String variableName = ASTFilterSpecHelper.getPropertyName(childNode.getChild(0), 0);
+            ExprNode childEvalNode = astExprNodeMap.get(childNode.getChild(1));
+            astExprNodeMap.remove(childNode.getChild(1));
             assignments.add(new OnTriggerSetAssignment(variableName, childEvalNode));
         }
         return assignments;
@@ -1578,7 +1599,16 @@ public class EPLTreeWalker extends EsperEPL2Ast
             String leadingIdentifier = node.getChild(0).getChild(0).getText();
             String streamOrNestedPropertyName = ASTFilterSpecHelper.escapeDot(leadingIdentifier);
             propertyName = ASTFilterSpecHelper.getPropertyName(node, 1);
-            exprNode = new ExprIdentNode(propertyName, streamOrNestedPropertyName);
+
+            if (variableService.getReader(leadingIdentifier) != null)
+            {
+                exprNode = new ExprVariableNode(leadingIdentifier + "." + propertyName);
+                statementSpec.setHasVariables(true);
+                addVariable(statementSpec, propertyName);
+            }
+            else {
+                exprNode = new ExprIdentNode(propertyName, streamOrNestedPropertyName);
+            }
         }
 
         if (variableService.getReader(propertyName) != null)
@@ -2105,7 +2135,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         // optional columns
         child = node.getChild(++count);
-        if ((child != null) && (child.getType() == INSERTINTO_EXPRCOL))
+        if ((child != null) && (child.getType() == EXPRCOL))
         {
             // Each child to the insert-into AST node represents a column name
             for (int i = 0; i < child.getChildCount(); i++)

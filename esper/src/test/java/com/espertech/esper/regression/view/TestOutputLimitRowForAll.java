@@ -404,7 +404,7 @@ public class TestOutputLimitRowForAll extends TestCase
 
         String viewExpr = "select irstream max(price) as maxVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".ext:sort(1, volume desc) as s0, " +
-                          SupportBean.class.getName() + ".win:keepall() as s1 where (s1.string = s0.symbol) " +
+                          SupportBean.class.getName() + ".win:keepall() as s1 where s1.string = s0.symbol " +
                           "output every 1.0 seconds";
         EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);

@@ -17,6 +17,9 @@ public class ConcatExpression extends ExpressionBase
 {
     private static final long serialVersionUID = 0L;
 
+    public ConcatExpression() {
+    }
+
     /**
      * Add a constant to include in the computation.
      * @param object constant to add
@@ -50,13 +53,18 @@ public class ConcatExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.CONCAT;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEPL(writer);
+            child.toEPL(writer, getPrecedence());
             delimiter = " || ";
         }
     }

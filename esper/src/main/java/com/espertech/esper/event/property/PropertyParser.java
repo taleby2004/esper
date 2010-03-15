@@ -14,7 +14,6 @@ import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import com.espertech.esper.epl.parse.ExceptionConvertor;
-import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.type.IntValue;
 import com.espertech.esper.type.StringValue;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -110,7 +109,7 @@ public class PropertyParser
             }
             if (e.getCause() instanceof RecognitionException)
             {
-                throw ExceptionConvertor.convertProperty((RecognitionException)e.getCause(), propertyName, g);
+                throw ExceptionConvertor.convertProperty((RecognitionException)e.getCause(), propertyName, true, g);
             }
             else
             {
@@ -119,7 +118,7 @@ public class PropertyParser
         }
         catch (RecognitionException e)
         {
-            throw ExceptionConvertor.convertProperty(e, propertyName, g);
+            throw ExceptionConvertor.convertProperty(e, propertyName, true, g);
         }
 
         return (Tree) r.getTree();

@@ -42,6 +42,23 @@ public class ExprConstantNode extends ExprNode
     }
 
     /**
+     * Ctor.
+     * @param value is the constant's value.
+     */
+    public ExprConstantNode(Object value, Class valueType)
+    {
+        this.value = value;
+        if (value == null)
+        {
+            clazz = valueType;
+        }
+        else
+        {
+            clazz = value.getClass();
+        }
+    }
+
+    /**
      * Ctor - for use when the constant should return a given type and the actual value is always null.
      * @param clazz the type of the constant null.
      */

@@ -4,9 +4,11 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,27 +17,43 @@ public class TestRowPatternRecognitionAfter extends TestCase {
 
     private static final Log log = LogFactory.getLog(TestRowPatternRecognitionAfter.class);
 
-    public void testAfterCurrentRow()
+    public void testAfterCurrentRow() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("MyEvent", SupportRecogBean.class);
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String[] fields = "a,b0,b1".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a, B[0].string as b0, B[1].string as b1" +
-                "  AFTER MATCH SKIP TO CURRENT ROW " +
-                "  pattern (A B*) " +
-                "  define " +
-                "    A as A.string like 'A%'," +
-                "    B as B.string like 'B%'" +
+                " measures A.string as a, B[0].string as b0, B[1].string as b1" +
+                " after match skip to current row" +
+                " pattern (A B*)" +
+                " define" +
+                " A as A.string like \"A%\"," +
+                " B as B.string like \"B%\"" +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
+
+        runAssertion(epService, listener, stmt);
+        
+        stmt.destroy();
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
+        SerializableObjectCopier.copy(model);
+        assertEquals(text, model.toEPL());
+        stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+        assertEquals(text, stmt.getText());
+
+        runAssertion(epService, listener, stmt);
+    }
+
+    private void runAssertion(EPServiceProvider epService, SupportUpdateListener listener, EPStatement stmt)
+    {
+        String[] fields = "a,b0,b1".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A1", 1));
         ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
@@ -276,5 +294,63 @@ public class TestRowPatternRecognitionAfter extends TestCase {
                 new Object[][] {{"S1", 4, 6}, {"S1", 4, 7}, {"S2", 4, 5}, {"S4", -1, 10}, {"S4", 10, 11}, {"S4", -1, 12}});
 
         stmt.destroy();
+    }
+
+    public void testAfterSkipPastLast()
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventType("MyEvent", SupportRecogBean.class);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        String[] fields = "a_string,b_string".split(",");
+        String text = "select * from MyEvent.win:keepall() " +
+                "match_recognize (" +
+                "  measures A.string as a_string, B.string as b_string " +
+                "  all matches " +
+                "  after match skip past last row" +
+                "  pattern (A B) " +
+                "  define B as B.value > A.value" +
+                ") " +
+                "order by a_string, b_string";
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL(text);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E1", 5));
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E2", 3));
+        assertFalse(listener.isInvoked());
+        assertFalse(stmt.iterator().hasNext());
+
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E3", 6));
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][] {{"E2", "E3"}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] {{"E2", "E3"}});
+
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E4", 4));
+        assertFalse(listener.isInvoked());
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] {{"E2", "E3"}});
+
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E5", 6));
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][] {{"E4", "E5"}});
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] {{"E2", "E3"}, {"E4", "E5"}});
+
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", 10));
+        assertFalse(listener.isInvoked());      // E5-E6 not a match since "skip past last row"
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] {{"E2", "E3"}, {"E4", "E5"}});
+
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E7", 9));
+        epService.getEPRuntime().sendEvent(new SupportRecogBean("E8", 4));
+        assertFalse(listener.isInvoked());
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
+                new Object[][] {{"E2", "E3"}, {"E4", "E5"}});
+
+        stmt.stop();
     }
 }

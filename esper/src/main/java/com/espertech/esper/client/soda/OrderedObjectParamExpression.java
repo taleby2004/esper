@@ -8,8 +8,11 @@ import java.io.StringWriter;
  */
 public class OrderedObjectParamExpression extends ExpressionBase
 {
-    private boolean isDescending;
+    private boolean descending;
     private static final long serialVersionUID = -8607653757516174092L;
+
+    public OrderedObjectParamExpression() {
+    }
 
     /**
      * Ctor.
@@ -17,7 +20,7 @@ public class OrderedObjectParamExpression extends ExpressionBase
      */
     public OrderedObjectParamExpression(boolean descending)
     {
-        isDescending = descending;
+        this.descending = descending;
     }
 
     /**
@@ -26,13 +29,31 @@ public class OrderedObjectParamExpression extends ExpressionBase
      */
     public boolean isDescending()
     {
-        return isDescending;
+        return descending;
     }
 
-    public void toEPL(StringWriter writer)
+    /**
+     * Returns true for descending, false for ascending.
+     * @return indicator for descending sort
+     */
+    public boolean getDescending()
     {
-        this.getChildren().get(0).toEPL(writer);
-        if (isDescending)
+        return descending;
+    }
+
+    public void setDescending(boolean descending) {
+        this.descending = descending;
+    }
+
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
+    {
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        if (descending)
         {
             writer.write(" desc");
         }

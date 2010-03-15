@@ -20,7 +20,7 @@ public class OHLCMain
         OHLCMain sample = new OHLCMain();
         try
         {
-            sample.run();
+            sample.run("OHLCEngineURI");
         }
         catch (RuntimeException ex)
         {
@@ -28,7 +28,7 @@ public class OHLCMain
         }        
     }
 
-    public void run()
+    public void run(String engineURI)
     {
         log.info("Setting up EPL");
 
@@ -37,7 +37,7 @@ public class OHLCMain
         config.addEventType("OHLCTick", OHLCTick.class);
         config.addPlugInView("examples", "ohlcbarminute", OHLCBarPlugInViewFactory.class.getName());
 
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI, config);
         epService.initialize();     // Since running in a unit test may use the same engine many times
 
         // set time as an arbitrary start time

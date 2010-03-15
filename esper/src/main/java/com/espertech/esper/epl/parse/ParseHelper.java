@@ -42,7 +42,7 @@ public class ParseHelper
      * @param walkRuleSelector - walk rule
      * @param expression - the expression we are walking in string form
      */
-    public static void walk(Tree ast, EPLTreeWalker walker, WalkRuleSelector walkRuleSelector, String expression)
+    public static void walk(Tree ast, EPLTreeWalker walker, WalkRuleSelector walkRuleSelector, String expression, String eplStatementForErrorMsg)
     {
         // Walk tree
         try
@@ -65,7 +65,7 @@ public class ParseHelper
             log.info("Error walking statement [" + expression + "]", e);
             if (e.getCause() instanceof RecognitionException)
             {
-                throw ExceptionConvertor.convert((RecognitionException)e.getCause(), expression, walker);
+                throw ExceptionConvertor.convert((RecognitionException)e.getCause(), eplStatementForErrorMsg, walker);
             }
             else
             {
@@ -75,7 +75,7 @@ public class ParseHelper
         catch (RecognitionException e)
         {
             log.info("Error walking statement [" + expression + "]", e);
-            throw ExceptionConvertor.convert(e, expression, walker);
+            throw ExceptionConvertor.convert(e, eplStatementForErrorMsg, walker);
         }
     }
 
@@ -86,7 +86,7 @@ public class ParseHelper
      * @return AST - syntax tree
      * @throws EPException when the AST could not be parsed
      */
-    public static ParseResult parse(String expression, ParseRuleSelector parseRuleSelector) throws EPException
+    public static ParseResult parse(String expression, String eplStatementErrorMsg, boolean addPleaseCheck, ParseRuleSelector parseRuleSelector) throws EPException
     {
         if (log.isDebugEnabled())
         {
@@ -116,11 +116,11 @@ public class ParseHelper
         {
             if (log.isDebugEnabled())
             {
-                log.debug("Error parsing statement [" + expression + "]", e);
+                log.debug("Error parsing statement [" + eplStatementErrorMsg + "]", e);
             }
             if (e.getCause() instanceof RecognitionException)
             {
-                throw ExceptionConvertor.convertStatement((RecognitionException)e.getCause(), expression, parser);
+                throw ExceptionConvertor.convertStatement((RecognitionException)e.getCause(), eplStatementErrorMsg, addPleaseCheck, parser);
             }
             else
             {
@@ -130,7 +130,7 @@ public class ParseHelper
         catch (RecognitionException ex)
         {
             log.debug("Error parsing statement [" + expression + "]", ex);
-            throw ExceptionConvertor.convertStatement(ex, expression, parser);
+            throw ExceptionConvertor.convertStatement(ex, eplStatementErrorMsg, addPleaseCheck, parser);
         }
 
         if (log.isDebugEnabled())

@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
+import com.espertech.esper.util.JavaClassHelper;
+
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -23,8 +25,11 @@ public class CreateWindowClause implements Serializable
 
     private String windowName;
     private List<View> views;
-    private boolean isInsert;
+    private boolean insert;
     private Expression insertWhereClause;
+
+    public CreateWindowClause() {
+    }
 
     /**
      * Creates a clause to create a named window.
@@ -129,13 +134,13 @@ public class CreateWindowClause implements Serializable
      */
     public void toEPLInsertPart(StringWriter writer)
     {
-        if (isInsert)
+        if (insert)
         {
             writer.write(" insert");
             if (insertWhereClause != null)
             {
                 writer.write(" where ");
-                insertWhereClause.toEPL(writer);
+                insertWhereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             }
         }
     }
@@ -173,7 +178,16 @@ public class CreateWindowClause implements Serializable
      */
     public boolean isInsert()
     {
-        return isInsert;
+        return insert;
+    }
+
+    /**
+     * Returns true if inserting from another named window, false if not.
+     * @return insert from named window
+     */
+    public boolean getInsert()
+    {
+        return insert;
     }
 
     /**
@@ -190,9 +204,29 @@ public class CreateWindowClause implements Serializable
      * @param insert true for insert from another named window
      * @return clause
      */
-    public CreateWindowClause setInsert(boolean insert)
+    public CreateWindowClause insert(boolean insert)
     {
-        isInsert = insert;
+        this.insert = insert;
+        return this;
+    }
+
+    /**
+     * Sets flag indicating that an insert from another named window should take place at the time of window creation.
+     * @param insert true for insert from another named window
+     */
+    public void setInsert(boolean insert)
+    {
+        this.insert = insert;
+    }
+
+    /**
+     * Sets the filter expression for inserting from another named window
+     * @param insertWhereClause filter expression
+     * @return create window clause
+     */
+    public CreateWindowClause insertWhereClause(Expression insertWhereClause)
+    {
+        this.insertWhereClause = insertWhereClause;
         return this;
     }
 
@@ -201,10 +235,9 @@ public class CreateWindowClause implements Serializable
      * @param insertWhereClause filter expression
      * @return create window clause
      */
-    public CreateWindowClause setInsertWhereClause(Expression insertWhereClause)
+    public void setInsertWhereClause(Expression insertWhereClause)
     {
         this.insertWhereClause = insertWhereClause;
-        return this;
     }
 
     /**
@@ -214,5 +247,37 @@ public class CreateWindowClause implements Serializable
     public void setViews(List<View> views)
     {
         this.views = views;
+    }
+
+    public void toEPLCreateTablePart(StringWriter writer, SelectClause selectClause)
+    {
+        writer.write('(');
+        String delimiter = "";
+        for (SelectClauseElement element : selectClause.getSelectList()) {
+            if (!(element instanceof SelectClauseExpression)) {
+                continue;
+            }
+            SelectClauseExpression expr = (SelectClauseExpression) element;
+            if (!(expr.getExpression() instanceof ConstantExpression)) {
+                continue;
+            }
+            ConstantExpression constant = (ConstantExpression) expr.getExpression();
+            Class clazz;
+            try
+            {
+                clazz = JavaClassHelper.getClassForName(constant.getConstantType());
+            }
+            catch (ClassNotFoundException e)
+            {
+                continue;
+            }
+
+            writer.write(delimiter);
+            writer.append(expr.getAsName());
+            writer.write(' ');
+            writer.append(clazz.getSimpleName().toLowerCase());
+            delimiter = ", ";
+        }
+        writer.write(')');
     }
 }

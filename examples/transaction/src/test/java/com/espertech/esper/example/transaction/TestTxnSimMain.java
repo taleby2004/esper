@@ -15,13 +15,13 @@ public class TestTxnSimMain extends TestCase
 {
     public void testTiny() throws Exception
     {
-        TxnGenMain main = new TxnGenMain(20, 200);
+        TxnGenMain main = new TxnGenMain(20, 200, "TransactionExample");
         main.run();
     }
 
     public void testSmall() throws Exception
     {
-        TxnGenMain main = new TxnGenMain(1000, 3000);
+        TxnGenMain main = new TxnGenMain(1000, 3000, "TransactionExample");
         main.run();
     }
 }

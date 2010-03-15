@@ -1117,7 +1117,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         {
             throw new VariableNotFoundException("Variable by name '" + variableName + "' has not been declared");
         }
-        return reader.getValue();
+        Object value = reader.getValue();
+        if (value == null || reader.getEventType() == null) {
+            return value;
+        }
+        return ((EventBean) value).getUnderlying();
     }
 
     public Map<String, Object> getVariableValue(Set<String> variableNames) throws EPException
@@ -1133,6 +1137,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
 
             Object value = reader.getValue();
+            if (value != null && reader.getEventType() != null) {
+                value = ((EventBean) value).getUnderlying();
+            }
             values.put(variableName, value);
         }
         return values;
@@ -1188,7 +1195,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         catch (Throwable t)
         {
             String message = "Error executing statement: " + t.getMessage();
-            log.debug(message, t);
+            log.info(message, t);
             throw new EPStatementException(message, epl);
         }
     }
@@ -1220,7 +1227,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         try
         {
-            StatementSpecRaw spec = EPAdministratorImpl.compileEPL(epl, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+            StatementSpecRaw spec = EPAdministratorImpl.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
             StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null);
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations);

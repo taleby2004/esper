@@ -77,7 +77,7 @@ startEPLExpressionRule
 	;
 
 eplExpressionRule
-	:	(selectExpr | createWindowExpr | createVariableExpr | onExpr | updateExpr)		 
+	:	(selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | onExpr | updateExpr)		 
 	;
 
 onExpr 
@@ -119,7 +119,7 @@ onUpdateExpr
 	;
 
 onSetAssignment
-	:	^(ON_SET_EXPR_ITEM IDENT valueExpr)
+	:	^(ON_SET_EXPR_ITEM eventPropertyExpr[false] valueExpr)
 	;
 	
 onExprFrom
@@ -135,6 +135,10 @@ createWindowExpr
 			)
 			createWindowExprInsert?
 		{ leaveNode($i); })
+	;
+
+createIndexExpr
+	:	^(i=CREATE_INDEX_EXPR IDENT IDENT exprCol { leaveNode($i); })
 	;
 
 createWindowExprInsert
@@ -162,7 +166,7 @@ createSelectionListElement
 	;
 
 createVariableExpr
-	:	^(i=CREATE_VARIABLE_EXPR IDENT IDENT (valueExpr)? { leaveNode($i); } )
+	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT (valueExpr)? { leaveNode($i); } )
 	;
 
 selectExpr
@@ -179,11 +183,11 @@ selectExpr
 	;
 	
 insertIntoExpr
-	:	^(i=INSERTINTO_EXPR (ISTREAM | RSTREAM)? IDENT (insertIntoExprCol)? { leaveNode($i); } )
+	:	^(i=INSERTINTO_EXPR (ISTREAM | RSTREAM)? IDENT (exprCol)? { leaveNode($i); } )
 	;
 	
-insertIntoExprCol
-	:	^(INSERTINTO_EXPRCOL IDENT (IDENT)* )
+exprCol
+	:	^(EXPRCOL IDENT (IDENT)* )
 	;
 
 selectClause
@@ -209,7 +213,7 @@ matchRecogPartitionBy
 	;
 	
 matchRecogMatchesAfterSkip
-	:	^(MATCHREC_AFTER_SKIP IDENT IDENT IDENT IDENT IDENT)
+	:	^(MATCHREC_AFTER_SKIP IDENT IDENT IDENT (IDENT|LAST) IDENT)
 	;	
 	
 matchRecogMatchesInterval

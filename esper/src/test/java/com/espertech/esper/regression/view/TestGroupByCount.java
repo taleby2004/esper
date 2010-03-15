@@ -35,7 +35,7 @@ public class TestGroupByCount extends TestCase
     public void testCountOneViewOM() throws Exception
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create().setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
+        model.setSelectClause(SelectClause.create().streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
                 .add("symbol")
                 .add(Expressions.countStar(), "countAll")
                 .add(Expressions.countDistinct("volume"), "countDistVol")
@@ -53,7 +53,7 @@ public class TestGroupByCount extends TestCase
                                   "count(distinct volume) as countDistVol, " +
                                   "count(volume) as countVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
-                          "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
+                          "where symbol = \"DELL\" or symbol = \"IBM\" or symbol = \"GE\" " +
                           "group by symbol";
         assertEquals(viewExpr, model.toEPL());
 
@@ -97,7 +97,7 @@ public class TestGroupByCount extends TestCase
                                   "count(distinct volume) as countDistVol, " +
                                   "count(volume) as countVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
-                          "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
+                          "where symbol = \"DELL\" or symbol = \"IBM\" or symbol = \"GE\" " +
                           "group by symbol";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);

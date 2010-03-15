@@ -2,6 +2,7 @@ package com.espertech.esper.regression.epl;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -229,6 +230,24 @@ public class TestNamedWindowTypes extends TestCase
         String[] fields = "stringValOne,stringValTwo,intVal,longVal".split(",");
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1", 1, 10L});
         ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1","E1", 1, 10L});
+
+        // create window with two views
+        stmtTextCreate = "create window MyWindowTwo.std:unique(stringValOne).win:keepall() (stringValOne varchar, stringValTwo string, intVal int, longVal long)";
+        stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+
+        //create window with statement object model
+        String text = "create window MyWindowThree.win:keepall() as (a string, b integer, c integer)";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
+        stmtCreate = epService.getEPAdministrator().create(model);
+        assertEquals(String.class, stmtCreate.getEventType().getPropertyType("a"));
+        assertEquals(Integer.class, stmtCreate.getEventType().getPropertyType("b"));
+        assertEquals(Integer.class, stmtCreate.getEventType().getPropertyType("c"));
+        assertEquals(text, model.toEPL());
+
+        text = "create window MyWindowFour.std:unique(a).std:unique(b) retain-union as (a string, b integer, c integer)";
+        model = epService.getEPAdministrator().compileEPL(text);
+        stmtCreate = epService.getEPAdministrator().create(model);
+        assertEquals(text, model.toEPL());
     }
 
     public void testWildcardNoFieldsNoAs()

@@ -20,6 +20,7 @@ public class PatternGuardExpr extends EPBaseNamedObject implements PatternExpr
 {
     private static final long serialVersionUID = 0L;
 
+    private String treeObjectName;
     private List<PatternExpr> guarded;
 
     /**
@@ -65,11 +66,51 @@ public class PatternGuardExpr extends EPBaseNamedObject implements PatternExpr
         return guarded;
     }
 
-    public void toEPL(StringWriter writer)
+    public void setGuarded(List<PatternExpr> guarded) {
+        this.guarded = guarded;
+    }
+
+    public List<PatternExpr> getGuarded() {
+        return guarded;
+    }
+
+    public String getTreeObjectName()
     {
-        writer.write('(');
-        guarded.get(0).toEPL(writer);
-        writer.write(") where ");
+        return treeObjectName;
+    }
+
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
+    }
+
+    public PatternExprPrecedenceEnum getPrecedence() {
+        return PatternExprPrecedenceEnum.GUARD;
+    }
+
+    public final void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence) {
+        if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
+            writer.write("(");
+            toPrecedenceFreeEPL(writer);
+            writer.write(")");
+        }
+        else {
+            toPrecedenceFreeEPL(writer);
+        }
+    }
+
+    /**
+     * Renders the expressions and all it's child expression, in full tree depth, as a string in
+     * language syntax.
+     * @param writer is the output to use
+     */
+    public void toPrecedenceFreeEPL(StringWriter writer) {
+        guarded.get(0).toEPL(writer, getPrecedence());
+        writer.write(" where ");
         super.toEPL(writer);
+    }
+
+    public void setChildren(List<PatternExpr> children) {
+        guarded = children;
     }
 }

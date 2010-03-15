@@ -52,7 +52,7 @@ public class TestNamedWindowOM extends TestCase
         EPStatementObjectModel modelSelect = epService.getEPAdministrator().compileEPL(stmtTextSelectOne);
         EPStatement stmtSelectOne = epService.getEPAdministrator().create(modelSelect);
         stmtSelectOne.addListener(listenerStmtOne);
-        assertEquals("select irstream key, (value * 2) as value from MyWindow((key != null))", modelSelect.toEPL());
+        assertEquals("select irstream key, value * 2 as value from MyWindow(key != null)", modelSelect.toEPL());
 
         // send events
         sendSupportBean("E1", 10L);
@@ -67,7 +67,7 @@ public class TestNamedWindowOM extends TestCase
         String stmtTextDelete = "on " + SupportMarketDataBean.class.getName() + " as s0 delete from MyWindow as s1 where s0.symbol = s1.key";
         EPStatementObjectModel modelDelete = epService.getEPAdministrator().compileEPL(stmtTextDelete);
         epService.getEPAdministrator().create(modelDelete);
-        assertEquals("on com.espertech.esper.support.bean.SupportMarketDataBean as s0 delete from MyWindow as s1 where (s0.symbol = s1.key)", modelDelete.toEPL());
+        assertEquals("on com.espertech.esper.support.bean.SupportMarketDataBean as s0 delete from MyWindow as s1 where s0.symbol = s1.key", modelDelete.toEPL());
 
         // send delete event
         sendMarketBean("E1");
@@ -127,14 +127,14 @@ public class TestNamedWindowOM extends TestCase
         // Consumer statement object model
         model = new EPStatementObjectModel();
         Expression multi = Expressions.multiply(Expressions.property("value"), Expressions.constant(2));
-        model.setSelectClause(SelectClause.create().setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
+        model.setSelectClause(SelectClause.create().streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
                 .add("key")
                 .add(multi, "value"));
         model.setFromClause(FromClause.create(FilterStream.create("MyWindow", Expressions.isNotNull("value"))));
 
         EPStatement stmtSelectOne = epService.getEPAdministrator().create(model);
         stmtSelectOne.addListener(listenerStmtOne);
-        String stmtTextSelectOne = "select irstream key, (value * 2) as value from MyWindow((value != null))";
+        String stmtTextSelectOne = "select irstream key, value * 2 as value from MyWindow(value != null)";
         assertEquals(stmtTextSelectOne, model.toEPL());
 
         // send events
@@ -152,7 +152,7 @@ public class TestNamedWindowOM extends TestCase
         model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName(), "s0")));
         model.setWhereClause(Expressions.eqProperty("s0.symbol", "s1.key"));
         epService.getEPAdministrator().create(model);
-        String stmtTextDelete = "on " + SupportMarketDataBean.class.getName() + " as s0 delete from MyWindow as s1 where (s0.symbol = s1.key)";
+        String stmtTextDelete = "on " + SupportMarketDataBean.class.getName() + " as s0 delete from MyWindow as s1 where s0.symbol = s1.key";
         assertEquals(stmtTextDelete, model.toEPL());
 
         // send delete event
@@ -178,7 +178,7 @@ public class TestNamedWindowOM extends TestCase
         model.setSelectClause(SelectClause.createStreamWildcard("s1"));
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(listenerOnSelect);
-        String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " as s0 select s1.*  from MyWindow as s1 where (s0.id = s1.key)";
+        String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " as s0 select s1.*  from MyWindow as s1 where s0.id = s1.key";
         assertEquals(stmtTextOnSelect, model.toEPL());
 
         // send some more events

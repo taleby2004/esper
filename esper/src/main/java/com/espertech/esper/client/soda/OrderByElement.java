@@ -19,7 +19,10 @@ public class OrderByElement implements Serializable
     private static final long serialVersionUID = 0L;
 
     private Expression expression;
-    private boolean isDescending;
+    private boolean descending;
+
+    public OrderByElement() {
+    }
 
     /**
      * Ctor.
@@ -29,7 +32,7 @@ public class OrderByElement implements Serializable
     public OrderByElement(Expression expression, boolean descending)
     {
         this.expression = expression;
-        isDescending = descending;
+        this.descending = descending;
     }
 
     /**
@@ -56,7 +59,7 @@ public class OrderByElement implements Serializable
      */
     public boolean isDescending()
     {
-        return isDescending;
+        return descending;
     }
 
     /**
@@ -65,7 +68,7 @@ public class OrderByElement implements Serializable
      */
     public void setDescending(boolean descending)
     {
-        isDescending = descending;
+        this.descending = descending;
     }
 
     /**
@@ -74,8 +77,8 @@ public class OrderByElement implements Serializable
      */
     public void toEPL(StringWriter writer)
     {
-        expression.toEPL(writer);
-        if (isDescending)
+        expression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        if (descending)
         {
             writer.write(" desc");
         }

@@ -20,6 +20,9 @@ public class FilterStream extends ProjectedStream
     private Filter filter;
     private static final long serialVersionUID = -7234330289222721729L;
 
+    public FilterStream() {
+    }
+
     /**
      * Creates a stream using a filter that provides the event type name and filter expression to filter for.
      * @param filter defines what to look for

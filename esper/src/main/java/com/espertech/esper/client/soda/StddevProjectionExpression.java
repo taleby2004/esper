@@ -15,8 +15,11 @@ import java.io.StringWriter;
  */
 public class StddevProjectionExpression extends ExpressionBase
 {
-    private boolean isDistinct;
+    private boolean distinct;
     private static final long serialVersionUID = -3145467730712717532L;
+
+    public StddevProjectionExpression() {
+    }
 
     /**
      * Ctor - for use to create an expression tree, without inner expression
@@ -24,7 +27,7 @@ public class StddevProjectionExpression extends ExpressionBase
      */
     public StddevProjectionExpression(boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
     }
 
     /**
@@ -34,18 +37,23 @@ public class StddevProjectionExpression extends ExpressionBase
      */
     public StddevProjectionExpression(Expression expression, boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
         this.getChildren().add(expression);
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("stddev(");
-        if (isDistinct)
+        if (distinct)
         {
             writer.write("distinct ");
         }
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(")");
     }
 
@@ -55,7 +63,7 @@ public class StddevProjectionExpression extends ExpressionBase
      */
     public boolean isDistinct()
     {
-        return isDistinct;
+        return distinct;
     }
 
     /**
@@ -64,6 +72,6 @@ public class StddevProjectionExpression extends ExpressionBase
      */
     public void setDistinct(boolean distinct)
     {
-        isDistinct = distinct;
+        this.distinct = distinct;
     }
 }

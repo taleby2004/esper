@@ -447,10 +447,22 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
      */
     public void addPluginLoader(String loaderName, String className, Properties configuration)
     {
+        addPluginLoader(loaderName, className, configuration, null);
+    }
+
+    /**
+     * Add a plugin loader (f.e. an input/output adapter loader).
+     * @param loaderName is the name of the loader
+     * @param className is the fully-qualified classname of the loader class
+     * @param configuration is loader cofiguration entries
+     */
+    public void addPluginLoader(String loaderName, String className, Properties configuration, String configurationXML)
+    {
         ConfigurationPluginLoader pluginLoader = new ConfigurationPluginLoader();
         pluginLoader.setLoaderName(loaderName);
         pluginLoader.setClassName(className);
         pluginLoader.setConfigProperties(configuration);
+        pluginLoader.setConfigurationXML(configurationXML);
         pluginLoaders.add(pluginLoader);
     }
 
@@ -507,6 +519,14 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     public void addVariable(String variableName, Class type, Object initializationValue)
+    {
+        ConfigurationVariable configVar = new ConfigurationVariable();
+        configVar.setType(type.getName());
+        configVar.setInitializationValue(initializationValue);
+        variables.put(variableName, configVar);
+    }
+
+    public void addVariable(String variableName, String type, Object initializationValue) throws ConfigurationException
     {
         ConfigurationVariable configVar = new ConfigurationVariable();
         configVar.setType(type);

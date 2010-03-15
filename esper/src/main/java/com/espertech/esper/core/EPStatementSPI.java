@@ -74,4 +74,6 @@ public interface EPStatementSPI extends EPStatement
      * @return statement context
      */
     public StatementContext getStatementContext();
+
+    public boolean isNameProvided();
 }

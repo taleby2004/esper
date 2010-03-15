@@ -89,6 +89,7 @@ tokens
 	VARIABLE='variable';
 	UNTIL='until';
 	AT='at';
+	INDEX='index';
 	TIMEPERIOD_DAY='day';
 	TIMEPERIOD_DAYS='days';
 	TIMEPERIOD_HOUR='hour';
@@ -179,7 +180,7 @@ tokens
 	CRONTAB_LIMIT_EXPR_PARAM;
 	WHEN_LIMIT_EXPR;
 	INSERTINTO_EXPR;
-	INSERTINTO_EXPRCOL;
+	EXPRCOL;
 	CONCAT;	
 	LIB_FUNCTION;
 	UNARY_MINUS;
@@ -211,6 +212,7 @@ tokens
 	WEEKDAY_OPERATOR;
 	SUBSTITUTION;
 	CAST_EXPR;
+	CREATE_INDEX_EXPR;
 	CREATE_WINDOW_EXPR;
 	CREATE_WINDOW_SELECT_EXPR;
 	ON_EXPR;
@@ -447,9 +449,11 @@ tokens
 	parserTokenParaphases.put(CAST, "'cast'");
 	parserTokenParaphases.put(CURRENT_TIMESTAMP, "'current_timestamp'");
 	parserTokenParaphases.put(DELETE, "'delete'");
+	parserTokenParaphases.put(DISTINCT, "'distinct'");
 	parserTokenParaphases.put(SNAPSHOT, "'snapshot'");
 	parserTokenParaphases.put(SET, "'set'");
 	parserTokenParaphases.put(VARIABLE, "'variable'");
+	parserTokenParaphases.put(INDEX, "'index'");
 	parserTokenParaphases.put(UNTIL, "'until'");
 	parserTokenParaphases.put(AT, "'at'");
 	parserTokenParaphases.put(TIMEPERIOD_DAY, "'day'");
@@ -586,6 +590,7 @@ elementValueArrayEnum
 eplExpression 
 	:	selectExpr
 	|	createWindowExpr
+	|	createIndexExpr
 	|	createVariableExpr
 	|	onExpr
 	|	updateExpr
@@ -677,8 +682,8 @@ onSetExpr
 	;
 	
 onSetAssignment
-	:	i=IDENT EQUALS expression
-		-> ^(ON_SET_EXPR_ITEM $i expression)
+	:	eventProperty EQUALS expression
+		-> ^(ON_SET_EXPR_ITEM eventProperty expression)
 	;
 		
 onExprFrom
@@ -702,9 +707,14 @@ createWindowExprModelAfter
 	:	(SELECT! createSelectionList FROM!)? classIdentifier
 	;
 		
+createIndexExpr
+	:	CREATE INDEX n=IDENT ON w=IDENT (columnList)
+		-> ^(CREATE_INDEX_EXPR $n $w columnList)
+	;
+
 createVariableExpr
-	:	CREATE VARIABLE t=IDENT n=IDENT (EQUALS expression)?
-		-> ^(CREATE_VARIABLE_EXPR $t $n expression?)
+	:	CREATE VARIABLE classIdentifier n=IDENT (EQUALS expression)?
+		-> ^(CREATE_VARIABLE_EXPR classIdentifier $n expression?)
 	;
 
 createWindowColumnList 	
@@ -738,13 +748,13 @@ createSelectionListElement
 insertIntoExpr
 @init  { paraphrases.push("insert-into clause"); }
 @after { paraphrases.pop(); }
-	:	(s=ISTREAM | s=RSTREAM)? INTO i=IDENT (insertIntoColumnList)?
-		-> ^(INSERTINTO_EXPR $s? $i insertIntoColumnList?)
+	:	(s=ISTREAM | s=RSTREAM)? INTO i=IDENT (columnList)?
+		-> ^(INSERTINTO_EXPR $s? $i columnList?)
 	;
 		
-insertIntoColumnList
+columnList
 	: 	LPAREN IDENT (COMMA IDENT)* RPAREN
-		-> ^(INSERTINTO_EXPRCOL IDENT*)
+		-> ^(EXPRCOL IDENT*)
 	;
 	
 fromClause 
@@ -1574,6 +1584,7 @@ keywordAllowedIdent returns [String result]
 		|CAST { $result = "cast"; }
 		|SNAPSHOT { $result = "snapshot"; }
 		|VARIABLE { $result = "variable"; }		
+		|INDEX { $result = "index"; }		
 		|WINDOW { $result = "window"; }
 		|LEFT { $result = "left"; }
 		|RIGHT { $result = "right"; }

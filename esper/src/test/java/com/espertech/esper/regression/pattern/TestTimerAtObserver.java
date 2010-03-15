@@ -310,7 +310,7 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
 
     public void testCrontabParameters()
     {
-        String expression = "select * from pattern [every (timer:at(*/VFREQ, VMIN:VMAX, 1 last, *, [8, 2:VMAX, */VREQ]))]";
+        String expression = "select * from pattern [every timer:at(*/VFREQ, VMIN:VMAX, 1 last, *, [8, 2:VMAX, */VREQ])]";
         Configuration config = SupportConfigFactory.getConfiguration();
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();

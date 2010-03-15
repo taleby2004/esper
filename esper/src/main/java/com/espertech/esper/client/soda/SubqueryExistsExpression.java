@@ -18,6 +18,9 @@ public class SubqueryExistsExpression extends ExpressionBase
     private EPStatementObjectModel model;
     private static final long serialVersionUID = 2615782942153556969L;
 
+    public SubqueryExistsExpression() {
+    }
+
     /**
      * Ctor - for use to create an expression tree, without child expression.
      * @param model is the lookup statement object model
@@ -27,7 +30,12 @@ public class SubqueryExistsExpression extends ExpressionBase
         this.model = model;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("exists (");
         writer.write(model.toEPL());

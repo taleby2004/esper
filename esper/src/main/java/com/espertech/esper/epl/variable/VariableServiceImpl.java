@@ -8,23 +8,25 @@
  **************************************************************************************/
 package com.espertech.esper.epl.variable;
 
-import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.VariableValueException;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.StatementExtensionSvcContext;
-import com.espertech.esper.client.VariableValueException;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.JavaClassHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.concurrent.CopyOnWriteArraySet;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Variables service for reading and writing variables, and for setting a version number for the current thread to
@@ -120,6 +122,7 @@ public class VariableServiceImpl implements VariableService
     // Number of milliseconds that old versions of a variable are allowed to live
     private final long millisecondLifetimeOldVersions;
     private final TimeProvider timeProvider;
+    private final EventAdapterService eventAdapterService;
     private final VariableStateHandler optionalStateHandler;
 
     private volatile int currentVersionNumber;
@@ -131,9 +134,9 @@ public class VariableServiceImpl implements VariableService
      * @param timeProvider provides the current time
      * @param optionalStateHandler a optional plug-in that may store variable state and retrieve state upon creation
      */
-    public VariableServiceImpl(long millisecondLifetimeOldVersions, TimeProvider timeProvider, VariableStateHandler optionalStateHandler)
+    public VariableServiceImpl(long millisecondLifetimeOldVersions, TimeProvider timeProvider, EventAdapterService eventAdapterService, VariableStateHandler optionalStateHandler)
     {
-        this(0, millisecondLifetimeOldVersions, timeProvider, optionalStateHandler);
+        this(0, millisecondLifetimeOldVersions, timeProvider, eventAdapterService, optionalStateHandler);
     }
 
     /**
@@ -143,10 +146,11 @@ public class VariableServiceImpl implements VariableService
      * @param timeProvider provides the current time
      * @param optionalStateHandler a optional plug-in that may store variable state and retrieve state upon creation
      */
-    protected VariableServiceImpl(int startVersion, long millisecondLifetimeOldVersions, TimeProvider timeProvider, VariableStateHandler optionalStateHandler)
+    protected VariableServiceImpl(int startVersion, long millisecondLifetimeOldVersions, TimeProvider timeProvider, EventAdapterService eventAdapterService, VariableStateHandler optionalStateHandler)
     {
         this.millisecondLifetimeOldVersions = millisecondLifetimeOldVersions;
         this.timeProvider = timeProvider;
+        this.eventAdapterService = eventAdapterService;
         this.optionalStateHandler = optionalStateHandler;
         this.variables = new HashMap<String, VariableReader>();
         this.variableVersions = new ArrayList<VersionedValueList<Object>>();
@@ -197,57 +201,98 @@ public class VariableServiceImpl implements VariableService
         }
     }
 
-    public synchronized void createNewVariable(String variableName, Class type, Object value, StatementExtensionSvcContext extensionServicesContext)
-            throws VariableExistsException, VariableTypeException
+    public void createNewVariable(String variableName, String variableType, Object value, StatementExtensionSvcContext extensionServicesContext) throws VariableExistsException, VariableTypeException
     {
-        // check type
-        Class variableType = JavaClassHelper.getBoxedType(type);
-
-        if (!JavaClassHelper.isJavaBuiltinDataType(variableType))
+        // Determime the variable type
+        Class type = null;
+        EventType eventType = null;
+        try
         {
-            throw new VariableTypeException("Invalid variable type for variable '" + variableName
-                + "' as type '" + variableType.getName() + "', only Java primitive, boxed or String types are allowed");
+            type = JavaClassHelper.getClassForSimpleName(variableType);
+        }
+        catch (Throwable t)
+        {
+            if (variableType.toLowerCase().equals("object")) {
+                type = Object.class;
+            }
+            if (type == null) {
+                eventType = eventAdapterService.getExistsTypeByName(variableType);
+                if (eventType != null) {
+                    type = eventType.getUnderlyingType();
+                }
+            }
+            if (type == null) {
+                throw new VariableTypeException("Cannot create variable '" + variableName + "', type '" +
+                    variableType + "' is not a recognized type");
+            }
         }
 
+        if ((eventType == null) && (!JavaClassHelper.isJavaBuiltinDataType(type)) && (type != Object.class)) {
+            eventType = eventAdapterService.addBeanType(type.getName(), type, false);
+        }
+
+        createNewVariable(variableName, type, eventType, value, extensionServicesContext);
+    }
+
+    private synchronized void createNewVariable(String variableName, Class type, EventType eventType, Object value, StatementExtensionSvcContext extensionServicesContext)
+            throws VariableExistsException, VariableTypeException
+    {
         // check coercion
         Object coercedValue = value;
 
-        // allow string assignments to non-string variables
-        if ((coercedValue != null) && (coercedValue instanceof String))
-        {
-            try
-            {
-                coercedValue = JavaClassHelper.parse(type, (String) coercedValue);
-            }
-            catch (Exception ex)
-            {
+        // check type
+        Class variableType = JavaClassHelper.getBoxedType(type);
+
+        if (eventType != null) {
+            if ((value != null) && (!JavaClassHelper.isSubclassOrImplementsInterface(value.getClass(), eventType.getUnderlyingType()))) {
                 throw new VariableTypeException("Variable '" + variableName
-                    + "' of declared type '" + variableType.getName() +
-                        "' cannot be initialized by value '" + coercedValue + "': " + ex.toString());
+                    + "' of declared event type '" + eventType.getName() + "' underlying type '" + eventType.getUnderlyingType().getName() +
+                        "' cannot be assigned a value of type '" + value.getClass().getName() + "'");
             }
+            coercedValue = eventAdapterService.adapterForType(value, eventType);
         }
+        else if (type == java.lang.Object.class) {
+            // no validation
+        }
+        else {
 
-        if ((coercedValue != null) &&
-            (variableType != coercedValue.getClass()))
-        {
-            // if the declared type is not numeric or the init value is not numeric, fail
-            if ((!JavaClassHelper.isNumeric(variableType)) ||
-                (!(coercedValue instanceof Number)))
+            // allow string assignments to non-string variables
+            if ((coercedValue != null) && (coercedValue instanceof String))
             {
-                throw new VariableTypeException("Variable '" + variableName
-                    + "' of declared type '" + variableType.getName() +
-                        "' cannot be initialized by a value of type '" + coercedValue.getClass().getName() + "'");
+                try
+                {
+                    coercedValue = JavaClassHelper.parse(type, (String) coercedValue);
+                }
+                catch (Exception ex)
+                {
+                    throw new VariableTypeException("Variable '" + variableName
+                        + "' of declared type '" + variableType.getName() +
+                            "' cannot be initialized by value '" + coercedValue + "': " + ex.toString());
+                }
             }
 
-            if (!(JavaClassHelper.canCoerce(coercedValue.getClass(), variableType)))
+            if ((coercedValue != null) &&
+                (variableType != coercedValue.getClass()))
             {
-                throw new VariableTypeException("Variable '" + variableName
-                    + "' of declared type '" + variableType.getName() +
-                        "' cannot be initialized by a value of type '" + coercedValue.getClass().getName() + "'");
-            }
+                // if the declared type is not numeric or the init value is not numeric, fail
+                if ((!JavaClassHelper.isNumeric(variableType)) ||
+                    (!(coercedValue instanceof Number)))
+                {
+                    throw new VariableTypeException("Variable '" + variableName
+                        + "' of declared type '" + variableType.getName() +
+                            "' cannot be initialized by a value of type '" + coercedValue.getClass().getName() + "'");
+                }
 
-            // coerce
-            coercedValue = JavaClassHelper.coerceBoxed((Number)coercedValue, variableType);
+                if (!(JavaClassHelper.canCoerce(coercedValue.getClass(), variableType)))
+                {
+                    throw new VariableTypeException("Variable '" + variableName
+                        + "' of declared type '" + variableType.getName() +
+                            "' cannot be initialized by a value of type '" + coercedValue.getClass().getName() + "'");
+                }
+
+                // coerce
+                coercedValue = JavaClassHelper.coerceBoxed((Number)coercedValue, variableType);
+            }
         }
 
         // check if it exists
@@ -298,7 +343,7 @@ public class VariableServiceImpl implements VariableService
         }
 
         // create reader
-        reader = new VariableReader(versionThreadLocal, variableType, variableName, variableNumber, valuePerVersion);
+        reader = new VariableReader(versionThreadLocal, variableType, eventType, variableName, variableNumber, valuePerVersion);
         variables.put(variableName, reader);
     }
 
@@ -415,14 +460,26 @@ public class VariableServiceImpl implements VariableService
 
         Class valueType = newValue.getClass();
         String variableName = variableVersions.get(variableNumber).getName();
-        Class variableType = variables.get(variableName).getType();
+        VariableReader variableReader = variables.get(variableName);
 
-        if (valueType.equals(variableType))
+        if (variableReader.getEventType() != null) {
+            if ((newValue != null) && (!JavaClassHelper.isSubclassOrImplementsInterface(newValue.getClass(), variableReader.getEventType().getUnderlyingType()))) {
+                throw new VariableValueException("Variable '" + variableName
+                    + "' of declared event type '" + variableReader.getEventType().getName() + "' underlying type '" + variableReader.getEventType().getUnderlyingType().getName() +
+                        "' cannot be assigned a value of type '" + valueType.getName() + "'");
+            }
+            EventBean eventBean = eventAdapterService.adapterForType(newValue, variableReader.getEventType());
+            write(variableNumber, eventBean);
+            return;
+        }
+
+        Class variableType = variableReader.getType();
+        if ((valueType.equals(variableType)) || (variableType == Object.class))
         {
             write(variableNumber, newValue);
             return;
         }
-
+        
         if ((!JavaClassHelper.isNumeric(variableType)) ||
             (!JavaClassHelper.isNumeric(valueType)))
         {

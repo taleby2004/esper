@@ -17,8 +17,11 @@ import java.io.StringWriter;
  */
 public class AvgProjectionExpression extends ExpressionBase
 {
-    private boolean isDistinct;
+    private boolean distinct;
     private static final long serialVersionUID = 8608818096433764685L;
+
+    public AvgProjectionExpression() {
+    }
 
     /**
      * Ctor - for use to create an expression tree, without inner expression
@@ -26,7 +29,7 @@ public class AvgProjectionExpression extends ExpressionBase
      */
     public AvgProjectionExpression(boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
     }
 
     /**
@@ -36,18 +39,23 @@ public class AvgProjectionExpression extends ExpressionBase
      */
     public AvgProjectionExpression(Expression expression, boolean isDistinct)
     {
-        this.isDistinct = isDistinct;
+        this.distinct = isDistinct;
         this.getChildren().add(expression);
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("avg(");
-        if (isDistinct)
+        if (distinct)
         {
             writer.write("distinct ");
         }
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(")");
     }
 
@@ -57,7 +65,16 @@ public class AvgProjectionExpression extends ExpressionBase
      */
     public boolean isDistinct()
     {
-        return isDistinct;
+        return distinct;
+    }
+
+    /**
+     * Returns true if the projection considers distinct values only.
+     * @return true if distinct
+     */
+    public boolean getDistinct()
+    {
+        return distinct;
     }
 
     /**
@@ -66,6 +83,6 @@ public class AvgProjectionExpression extends ExpressionBase
      */
     public void setDistinct(boolean distinct)
     {
-        isDistinct = distinct;
+        this.distinct = distinct;
     }
 }

@@ -10,6 +10,7 @@ package com.espertech.esper.client.soda;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.StringWriter;
 
 /**
  * Abstract base class for all pattern expressions.
@@ -18,7 +19,18 @@ public abstract class PatternExprBase implements PatternExpr
 {
     private static final long serialVersionUID = 0L;
 
+    private String treeObjectName;
     private List<PatternExpr> children;
+
+    public String getTreeObjectName()
+    {
+        return treeObjectName;
+    }
+
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
+    }
 
     /**
      * Ctor.
@@ -33,6 +45,10 @@ public abstract class PatternExprBase implements PatternExpr
         return children;
     }
 
+    public void setChildren(List<PatternExpr> children) {
+        this.children = children;
+    }
+
     /**
      * Adds a sub-expression to the pattern expression.
      * @param expression to add
@@ -41,4 +57,22 @@ public abstract class PatternExprBase implements PatternExpr
     {
         children.add(expression);
     }
+
+    public final void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence) {
+        if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
+            writer.write("(");
+            toPrecedenceFreeEPL(writer);
+            writer.write(")");
+        }
+        else {
+            toPrecedenceFreeEPL(writer);
+        }
+    }
+
+    /**
+     * Renders the expressions and all it's child expression, in full tree depth, as a string in
+     * language syntax.
+     * @param writer is the output to use
+     */
+    public abstract void toPrecedenceFreeEPL(StringWriter writer);
 }

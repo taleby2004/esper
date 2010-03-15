@@ -16,7 +16,10 @@ import java.io.StringWriter;
 public class ArrayExpression extends ExpressionBase
 {
     private static final long serialVersionUID = 5332982041846659978L;
-    
+
+    public ArrayExpression() {
+    }
+
     /**
      * Add a property to the expression.
      * @param property to add
@@ -50,7 +53,12 @@ public class ArrayExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("{");
         boolean isFirst = true;
@@ -60,7 +68,7 @@ public class ArrayExpression extends ExpressionBase
             {
                 writer.write(", ");
             }
-            child.toEPL(writer);
+            child.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             isFirst = false;
         }
         writer.write("}");

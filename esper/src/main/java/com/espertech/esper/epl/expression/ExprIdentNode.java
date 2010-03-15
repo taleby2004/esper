@@ -182,6 +182,23 @@ public class ExprIdentNode extends ExprNode
         return resolvedPropertyName;
     }
 
+    public String getResolvedPropertyNameRoot() {
+        if (resolvedPropertyName == null)
+        {
+            throw new IllegalStateException("Identifier node has not been validated");
+        }
+        if (resolvedPropertyName.indexOf('[') != -1) {
+            return resolvedPropertyName.substring(0, resolvedPropertyName.indexOf('['));
+        }
+        if (resolvedPropertyName.indexOf('(') != -1) {
+            return resolvedPropertyName.substring(0, resolvedPropertyName.indexOf('('));
+        }
+        if (resolvedPropertyName.indexOf('.') != -1) {
+            return resolvedPropertyName.substring(0, resolvedPropertyName.indexOf('.'));
+        }
+        return resolvedPropertyName;
+    }
+
     /**
      * Determine stream id and property type given an unresolved property name and
      * a stream name that may also be part of the property name.

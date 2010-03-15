@@ -134,7 +134,7 @@ public class TestComplexPropertyAccess extends TestCase
         model.setFromClause(FromClause.create(PatternStream.create(pattern)));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        String patternText = "select * from pattern [(every (a=" + type + ")) -> (b=" + type + "((indexed[0] = a.indexed[0])))]";
+        String patternText = "select * from pattern [every a=" + type + " -> b=" + type + "(indexed[0] = a.indexed[0])]";
         assertEquals(patternText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
@@ -147,7 +147,7 @@ public class TestComplexPropertyAccess extends TestCase
         epService.initialize();
         String type = SupportBeanComplexProps.class.getName();
 
-        String patternText = "select * from pattern [(every (a=" + type + ")) -> (b=" + type + "((indexed[0] = a.indexed[0])))]";
+        String patternText = "select * from pattern [every a=" + type + " -> b=" + type + "(indexed[0] = a.indexed[0])]";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(patternText);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(patternText, model.toEPL());

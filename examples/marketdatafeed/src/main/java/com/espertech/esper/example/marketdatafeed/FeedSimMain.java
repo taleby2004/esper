@@ -63,7 +63,7 @@ public class FeedSimMain {
 
         // Run the sample
         System.out.println("Using " + numberOfThreads + " threads with a drop probability of " + dropProbability + "%, for " + numberOfSeconds + " seconds");
-        FeedSimMain feedSimMain = new FeedSimMain(numberOfThreads, dropProbability, numberOfSeconds, true);
+        FeedSimMain feedSimMain = new FeedSimMain(numberOfThreads, dropProbability, numberOfSeconds, true, "FeedSimMain");
         feedSimMain.run();
     }
 
@@ -71,13 +71,15 @@ public class FeedSimMain {
     private double dropProbability;
     private int numSeconds;
     private boolean isWaitKeypress;
+    private String engineURI;
 
-    public FeedSimMain(int numberOfThreads, double dropProbability, int numSeconds, boolean isWaitKeypress)
+    public FeedSimMain(int numberOfThreads, double dropProbability, int numSeconds, boolean isWaitKeypress, String engineURI)
     {
         this.numberOfThreads = numberOfThreads;
         this.dropProbability = dropProbability;
         this.numSeconds = numSeconds;
         this.isWaitKeypress = isWaitKeypress;
+        this.engineURI = engineURI;
     }
 
     public void run() throws IOException, InterruptedException
@@ -94,7 +96,7 @@ public class FeedSimMain {
         configuration.addEventType("MarketDataEvent", MarketDataEvent.class.getName());
 
         // Get engine instance
-        EPServiceProvider epService = EPServiceProviderManager.getProvider("FeedSimMain", configuration);
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI, configuration);
 
         // Set up statements
         TicksPerSecondStatement tickPerSecStmt = new TicksPerSecondStatement(epService.getEPAdministrator());

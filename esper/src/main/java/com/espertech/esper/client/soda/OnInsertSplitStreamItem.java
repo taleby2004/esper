@@ -21,6 +21,9 @@ public class OnInsertSplitStreamItem implements Serializable
     private SelectClause selectClause;
     private Expression whereClause;
 
+    public OnInsertSplitStreamItem() {
+    }
+
     /**
      * Factory method for split-stream items.
      * @param insertInto the insert-into clause

@@ -8,11 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
-
 import java.io.StringWriter;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A clause to update a named window based on a triggering event arriving and correlated to the named window events to be updated.
@@ -23,7 +21,11 @@ public class OnUpdateClause extends OnClause
 
     private String windowName;
     private String optionalAsName;
-    private List<Pair<String, Expression>> assignments;
+    private List<AssignmentPair> assignments;
+
+    public OnUpdateClause() {
+        assignments = new ArrayList<AssignmentPair>();
+    }
 
     /**
      * Creates an on-update clause.
@@ -45,7 +47,7 @@ public class OnUpdateClause extends OnClause
     {
         this.windowName = windowName;
         this.optionalAsName = optionalAsName;
-        assignments = new ArrayList<Pair<String, Expression>>();
+        assignments = new ArrayList<AssignmentPair>();
     }
 
     /**
@@ -63,12 +65,12 @@ public class OnUpdateClause extends OnClause
 
         writer.write(" set ");
         String delimiter = "";
-        for (Pair<String, Expression> pair : assignments)
+        for (AssignmentPair pair : assignments)
         {
             writer.write(delimiter);
-            writer.write(pair.getFirst());
+            writer.write(pair.getName());
             writer.write(" = ");
-            pair.getSecond().toEPL(writer);
+            pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }        
     }
@@ -117,7 +119,7 @@ public class OnUpdateClause extends OnClause
      */
     public OnUpdateClause addAssignment(String variable, Expression expression)
     {
-        assignments.add(new Pair<String, Expression>(variable, expression));
+        assignments.add(new AssignmentPair(variable, expression));
         return this;
     }
 
@@ -125,7 +127,7 @@ public class OnUpdateClause extends OnClause
      * Returns the list of variable assignments.
      * @return pair of variable name and expression
      */
-    public List<Pair<String, Expression>> getAssignments()
+    public List<AssignmentPair> getAssignments()
     {
         return assignments;
     }
@@ -134,7 +136,7 @@ public class OnUpdateClause extends OnClause
      * Sets a list of variable assignments.
      * @param assignments list of pairs of variable name and expression
      */
-    public void setAssignments(List<Pair<String, Expression>> assignments)
+    public void setAssignments(List<AssignmentPair> assignments)
     {
         this.assignments = assignments;
     }

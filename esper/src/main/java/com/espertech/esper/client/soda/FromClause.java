@@ -8,13 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
-
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The from-clause names the streams to select upon.
@@ -34,7 +32,13 @@ public class FromClause implements Serializable
     private List<Stream> streams;
     private List<OuterJoinQualifier> outerJoinQualifiers;
 
+    public FromClause() {
+        streams = new ArrayList<Stream>();
+        outerJoinQualifiers = new ArrayList<OuterJoinQualifier>();
+    }
+
     /**
+
      * Creates an empty from-clause to which one adds streams via the add methods.
      * @return empty from clause
      */
@@ -148,7 +152,7 @@ public class FromClause implements Serializable
             writer.write("from ");
         }
 
-        if (outerJoinQualifiers.size() == 0)
+        if ((outerJoinQualifiers == null) || (outerJoinQualifiers.size() == 0))
         {
             for (Stream stream : streams)
             {
@@ -161,7 +165,7 @@ public class FromClause implements Serializable
         {
             if (outerJoinQualifiers.size() != (streams.size() - 1))
             {
-                throw new IllegalArgumentException("Number of outer join outerJoinQualifiers must be one less then the number of streams");
+                throw new IllegalArgumentException("Number of outer join qualifiers must be one less then the number of streams.");
             }
             for (int i = 0; i < streams.size(); i++)
             {
@@ -172,18 +176,18 @@ public class FromClause implements Serializable
                 {
                     OuterJoinQualifier qualCond = outerJoinQualifiers.get(i - 1);
                     writer.write(" on ");
-                    qualCond.getLeft().toEPL(writer);
+                    qualCond.getLeft().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                     writer.write(" = ");
-                    qualCond.getRight().toEPL(writer);
+                    qualCond.getRight().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
 
                     if (qualCond.getAdditionalProperties().size() > 0)
                     {
-                        for (Pair<PropertyValueExpression, PropertyValueExpression> pair : qualCond.getAdditionalProperties())
+                        for (PropertyValueExpressionPair pair : qualCond.getAdditionalProperties())
                         {
                             writer.write(" and ");
-                            pair.getFirst().toEPL(writer);
+                            pair.getLeft().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                             writer.write(" = ");
-                            pair.getSecond().toEPL(writer);
+                            pair.getRight().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                         }
                     }
                 }
@@ -206,5 +210,13 @@ public class FromClause implements Serializable
     public List<OuterJoinQualifier> getOuterJoinQualifiers()
     {
         return outerJoinQualifiers;
+    }
+
+    public void setStreams(List<Stream> streams) {
+        this.streams = streams;
+    }
+
+    public void setOuterJoinQualifiers(List<OuterJoinQualifier> outerJoinQualifiers) {
+        this.outerJoinQualifiers = outerJoinQualifiers;
     }
 }

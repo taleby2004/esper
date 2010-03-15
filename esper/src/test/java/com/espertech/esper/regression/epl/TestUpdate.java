@@ -69,7 +69,7 @@ public class TestUpdate extends TestCase
         tryInvalid("update istream SupportBeanStream set intPrimitive=null",
                    "Error starting statement: Invalid assignment of column 'null' of null type to event property 'intPrimitive' typed as 'int', nullable type mismatch [update istream SupportBeanStream set intPrimitive=null]");
         tryInvalid("update istream SupportBeanStreamTwo set a.intPrimitive=10",
-                   "Incorrect syntax near '.' expecting an equals '=' but found a dot '.' at line 1 column 41 [update istream SupportBeanStreamTwo set a.intPrimitive=10]");
+                   "Error starting statement: Property 'a.intPrimitive' is not available for write access [update istream SupportBeanStreamTwo set a.intPrimitive=10]");
         tryInvalid("update istream SupportBeanStreamRO set side='a'",
                    "Error starting statement: Property 'side' is not available for write access [update istream SupportBeanStreamRO set side='a']");
         tryInvalid("update istream SupportBean set longPrimitive=sum(intPrimitive)",
@@ -459,7 +459,7 @@ public class TestUpdate extends TestCase
         model.setUpdateClause(UpdateClause.create("MyMapType", "p1", Expressions.constant("newvalue")));
         model.getUpdateClause().setOptionalAsClauseStreamName("mytype");
         model.getUpdateClause().setOptionalWhereClause(Expressions.eq("p0", "E1"));
-        assertEquals("update istream MyMapType as mytype set p1 = \"newvalue\" where (p0 = \"E1\")", model.toEPL());
+        assertEquals("update istream MyMapType as mytype set p1 = \"newvalue\" where p0 = \"E1\"", model.toEPL());
         
         // test map
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select * from MyMapType");
@@ -471,7 +471,7 @@ public class TestUpdate extends TestCase
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", "newvalue"});
 
         // test unmap
-        String text = "update istream MyMapType as mytype set p1 = \"newvalue\" where (p0 = \"E1\")";
+        String text = "update istream MyMapType as mytype set p1 = \"newvalue\" where p0 = \"E1\"";
         model = epService.getEPAdministrator().compileEPL(text);
         assertEquals(text, model.toEPL());
     }

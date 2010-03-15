@@ -95,6 +95,11 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
         {
             log.debug(".evaluateFalse fromNode=" + fromNode.hashCode());
         }
+
+        childNodes.remove(fromNode);
+        if (childNodes.isEmpty()) {
+            this.getParentEvaluator().evaluateFalse(this);
+        }
     }
 
     public final void quit()

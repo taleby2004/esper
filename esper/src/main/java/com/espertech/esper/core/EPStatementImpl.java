@@ -33,6 +33,7 @@ public class EPStatementImpl implements EPStatementSPI
     private final String statementName;
     private final String expressionText;
     private final String expressionNoAnnotations;
+    private final boolean nameProvided;
     private boolean isPattern;
     private UpdateDispatchViewBase dispatchChildView;
     private StatementLifecycleSvc statementLifecycleSvc;
@@ -66,6 +67,7 @@ public class EPStatementImpl implements EPStatementSPI
      * @param statementContext the statement service context
      * @param expressionNoAnnotations expression text witout annotations
      * @param isFailed indicator to start in failed state
+     * @param nameProvided true to indicate a statement name has been provided and is not a system-generated name
      */
     public EPStatementImpl(String statementId,
                               String statementName,
@@ -83,7 +85,8 @@ public class EPStatementImpl implements EPStatementSPI
                               Object userObject,
                               Annotation[] annotations,
                               StatementContext statementContext,
-                              boolean isFailed)
+                              boolean isFailed,
+                              boolean nameProvided)
     {
         this.isPattern = isPattern;
         this.statementId = statementId;
@@ -92,6 +95,7 @@ public class EPStatementImpl implements EPStatementSPI
         this.expressionNoAnnotations = expressionNoAnnotations;
         this.statementLifecycleSvc = statementLifecycleSvc;
         this.statementContext = statementContext;
+        this.nameProvided = nameProvided; 
         statementListenerSet = new EPStatementListenerSet();
         if (isBlockingDispatch)
         {
@@ -513,5 +517,10 @@ public class EPStatementImpl implements EPStatementSPI
     public void setServiceIsolated(String serviceIsolated)
     {
         this.serviceIsolated = serviceIsolated;
+    }
+
+    public boolean isNameProvided()
+    {
+        return nameProvided;
     }
 }

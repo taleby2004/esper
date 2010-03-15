@@ -17,8 +17,11 @@ public class SubqueryQualifiedExpression extends ExpressionBase
 {
     private EPStatementObjectModel model;
     private String operator;
-    private boolean isAll;
+    private boolean all;
     private static final long serialVersionUID = 7461569844284137858L;
+
+    public SubqueryQualifiedExpression() {
+    }
 
     /**
      * Ctor - for use to create an expression tree, without child expression.
@@ -30,15 +33,20 @@ public class SubqueryQualifiedExpression extends ExpressionBase
     {
         this.model = model;
         this.operator = operator;
-        isAll = all;
+        this.all = all;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
     {
-        getChildren().get(0).toEPL(writer);
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
+    {
+        getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(' ');
         writer.write(operator);
-        if (isAll)
+        if (all)
         {
             writer.write(" all (");
         }
@@ -92,7 +100,7 @@ public class SubqueryQualifiedExpression extends ExpressionBase
      */
     public boolean isAll()
     {
-        return isAll;
+        return all;
     }
 
     /**
@@ -101,6 +109,6 @@ public class SubqueryQualifiedExpression extends ExpressionBase
      */
     public void setAll(boolean all)
     {
-        isAll = all;
+        this.all = all;
     }
 }

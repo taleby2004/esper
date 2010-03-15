@@ -30,7 +30,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         testCase = new EventExpressionCase("b=" + EVENT_B_CLASS + "(id=\"B1\") where timer:within(1999 msec)");
         testCaseList.addTest(testCase);
 
-        String text = "select * from pattern [(b=" + EVENT_B_CLASS + "((id = \"B3\"))) where timer:within(10.001)]";
+        String text = "select * from pattern [b=" + EVENT_B_CLASS + "(id = \"B3\") where timer:within(10.001)]";
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.createWildcard());
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
@@ -247,8 +247,8 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         sendTimer(0, epService);
 
         // Set up a timer:within
-        String stmtText = "select * from pattern [(every (" + SupportBean.class.getName() +
-                ")) where timer:within(D days H hours M minutes S seconds MS milliseconds)]";
+        String stmtText = "select * from pattern [(every " + SupportBean.class.getName() +
+                ") where timer:within(D days H hours M minutes S seconds MS milliseconds)]";
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
 
         SupportUpdateListener testListener = new SupportUpdateListener();

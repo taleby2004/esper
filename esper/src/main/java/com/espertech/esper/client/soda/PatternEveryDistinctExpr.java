@@ -51,17 +51,21 @@ public class PatternEveryDistinctExpr extends PatternExprBase
         this.expressions = expressions;
     }
 
-    public void toEPL(StringWriter writer)
+    public PatternExprPrecedenceEnum getPrecedence() {
+        return PatternExprPrecedenceEnum.EVERY_NOT;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("every-distinct(");
         String delimiter = "";
         for (Expression expr : expressions) {
             writer.write(delimiter);
-            expr.toEPL(writer);
+            expr.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ",";
         }
         writer.write(") ");
 
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
     }
 }

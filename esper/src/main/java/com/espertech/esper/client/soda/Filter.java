@@ -24,7 +24,11 @@ public class Filter implements Serializable
     private Expression filter;
     private List<ContainedEventSelect> optionalPropertySelects;
 
+    public Filter() {
+    }
+
     /**
+
      * Creates a filter to the given named event type.
      * @param eventTypeName is the event type name to filter for
      * @return filter
@@ -129,7 +133,7 @@ public class Filter implements Serializable
         if (filter != null)
         {
             writer.write('(');
-            filter.toEPL(writer);
+            filter.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.write(')');
         }
         if (optionalPropertySelects != null)

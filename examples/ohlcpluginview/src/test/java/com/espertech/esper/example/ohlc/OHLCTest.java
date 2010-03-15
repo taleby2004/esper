@@ -10,6 +10,6 @@ public class OHLCTest extends TestCase
     public void testSample()
     {
         OHLCMain main = new OHLCMain();
-        main.run();
+        main.run("OHLCEngineURI");
     }
 }

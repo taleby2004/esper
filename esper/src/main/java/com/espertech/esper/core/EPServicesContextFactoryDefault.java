@@ -98,7 +98,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         }
         TimerService timerService = new TimerServiceImpl(epServiceProvider.getURI(), msecTimerResolution);
 
-        VariableService variableService = new VariableServiceImpl(configSnapshot.getEngineDefaults().getVariables().getMsecVersionRelease(), schedulingService, null);
+        VariableService variableService = new VariableServiceImpl(configSnapshot.getEngineDefaults().getVariables().getMsecVersionRelease(), schedulingService, eventAdapterService, null);
         initVariables(variableService, configSnapshot.getVariables());
 
         StatementLockFactory statementLockFactory = new StatementLockFactoryImpl();

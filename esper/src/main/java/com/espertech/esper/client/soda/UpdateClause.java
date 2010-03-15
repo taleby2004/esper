@@ -1,6 +1,5 @@
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.io.Serializable;
@@ -17,8 +16,11 @@ public class UpdateClause implements MetaDefItem, Serializable
 
     private String eventType;
     private String optionalAsClauseStreamName;
-    private List<Pair<String, Expression>> assignments;
+    private List<AssignmentPair> assignments;
     private Expression optionalWhereClause;
+
+    public UpdateClause() {
+    }
 
     /**
      * Ctor.
@@ -43,7 +45,7 @@ public class UpdateClause implements MetaDefItem, Serializable
     {
         this.eventType = eventType;
         this.optionalAsClauseStreamName = optionalAsClauseStreamName;
-        assignments = new ArrayList<Pair<String, Expression>>();
+        assignments = new ArrayList<AssignmentPair>();
     }
 
     /**
@@ -54,7 +56,7 @@ public class UpdateClause implements MetaDefItem, Serializable
      */
     public UpdateClause addAssignment(String property, Expression expression)
     {
-        assignments.add(new Pair<String, Expression>(property, expression));
+        assignments.add(new AssignmentPair(property, expression));
         return this;
     }
 
@@ -62,7 +64,7 @@ public class UpdateClause implements MetaDefItem, Serializable
      * Returns the list of property assignments.
      * @return pair of property name and expression
      */
-    public List<Pair<String, Expression>> getAssignments()
+    public List<AssignmentPair> getAssignments()
     {
         return assignments;
     }
@@ -71,7 +73,7 @@ public class UpdateClause implements MetaDefItem, Serializable
      * Sets a list of property assignments.
      * @param assignments list of pairs of property name and expression
      */
-    public void setAssignments(List<Pair<String, Expression>> assignments)
+    public void setAssignments(List<AssignmentPair> assignments)
     {
         this.assignments = assignments;
     }
@@ -142,19 +144,19 @@ public class UpdateClause implements MetaDefItem, Serializable
         }
         writer.write(" set ");
         String delimiter = "";
-        for (Pair<String, Expression> pair : assignments)
+        for (AssignmentPair pair : assignments)
         {
             writer.write(delimiter);
-            writer.write(pair.getFirst());
+            writer.write(pair.getName());
             writer.write(" = ");
-            pair.getSecond().toEPL(writer);
+            pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
 
         if (optionalWhereClause != null)
         {
             writer.write(" where ");
-            optionalWhereClause.toEPL(writer);
+            optionalWhereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
     }
 }

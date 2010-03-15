@@ -19,6 +19,9 @@ public class StaticMethodExpression extends ExpressionBase
     private String method;
     private static final long serialVersionUID = -8876482797010708113L;
 
+    public StaticMethodExpression() {
+    }
+
     /**
      * Ctor.
      * @param className class name providing the static method
@@ -54,7 +57,12 @@ public class StaticMethodExpression extends ExpressionBase
         this.method = method;
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write(className);
         writer.write('.');
@@ -65,7 +73,7 @@ public class StaticMethodExpression extends ExpressionBase
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEPL(writer);
+            child.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
 

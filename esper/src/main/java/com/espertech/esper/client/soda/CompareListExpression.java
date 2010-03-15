@@ -8,8 +8,11 @@ import java.io.StringWriter;
 public class CompareListExpression extends ExpressionBase
 {
     private String operator;
-    private boolean isAll;
+    private boolean all;
     private static final long serialVersionUID = 2915262248687901526L;
+
+    public CompareListExpression() {
+    }
 
     /**
      * Ctor.
@@ -18,7 +21,7 @@ public class CompareListExpression extends ExpressionBase
      */
     public CompareListExpression(boolean all, String operator)
     {
-        isAll = all;
+        this.all = all;
         this.operator = operator;
     }
 
@@ -28,7 +31,16 @@ public class CompareListExpression extends ExpressionBase
      */
     public boolean isAll()
     {
-        return isAll;
+        return all;
+    }
+
+    /**
+     * Returns all flag, true for ALL and false for ANY.
+     * @return indicator if all or any
+     */
+    public boolean getAll()
+    {
+        return all;
     }
 
     /**
@@ -37,7 +49,7 @@ public class CompareListExpression extends ExpressionBase
      */
     public void setAll(boolean all)
     {
-        isAll = all;
+        this.all = all;
     }
 
     /**
@@ -58,12 +70,16 @@ public class CompareListExpression extends ExpressionBase
         this.operator = operator;
     }
 
-    public void toEPL(StringWriter writer)
-    {
-        this.getChildren().get(0).toEPL(writer);
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
+
+        this.getChildren().get(0).toEPL(writer, this.getPrecedence());
         writer.write(" ");
         writer.write(operator);
-        if (isAll)
+        if (all)
         {
             writer.write(" all (");
         }
@@ -76,7 +92,7 @@ public class CompareListExpression extends ExpressionBase
         for (int i = 1; i < this.getChildren().size(); i++)
         {
             writer.write(delimiter);
-            this.getChildren().get(i).toEPL(writer);
+            this.getChildren().get(i).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
         writer.write(')');

@@ -15,7 +15,7 @@ import java.io.StringWriter;
  */
 public class RegExpExpression extends ExpressionBase
 {
-    private boolean isNot;
+    private boolean not;
     private static final long serialVersionUID = -3147750744100550487L;
 
     /**
@@ -24,7 +24,7 @@ public class RegExpExpression extends ExpressionBase
      */
     public RegExpExpression(boolean isNot)
     {
-        this.isNot = isNot;
+        this.not = isNot;
     }
 
     /**
@@ -53,7 +53,7 @@ public class RegExpExpression extends ExpressionBase
         {
             this.getChildren().add(escape);
         }
-        this.isNot = isNot;
+        this.not = isNot;
     }
 
     /**
@@ -61,7 +61,7 @@ public class RegExpExpression extends ExpressionBase
      */    
     public RegExpExpression()
     {
-        isNot = false;
+        not = false;
     }
 
     /**
@@ -88,30 +88,27 @@ public class RegExpExpression extends ExpressionBase
         {
             this.getChildren().add(escape);
         }
-        isNot = false;
+        not = false;
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
-    {
-        writer.write("(");
-        this.getChildren().get(0).toEPL(writer);
-        if (isNot)
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
+        this.getChildren().get(0).toEPL(writer, getPrecedence());
+        if (not)
         {
             writer.write(" not");            
         }
         writer.write(" regexp ");
-        this.getChildren().get(1).toEPL(writer);
+        this.getChildren().get(1).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
 
         if (this.getChildren().size() > 2)
         {
             writer.write(" escape ");
-            this.getChildren().get(2).toEPL(writer);
+            this.getChildren().get(2).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
-        writer.write(")");
     }
 
     /**
@@ -120,6 +117,6 @@ public class RegExpExpression extends ExpressionBase
      */
     public boolean isNot()
     {
-        return isNot;
+        return not;
     }
 }

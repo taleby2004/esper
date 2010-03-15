@@ -545,6 +545,14 @@ is placed here.")]]></programlisting></entry>
 								</entry>
 								<entry><programlisting><![CDATA[@Hint('ITERATE_ONLY')]]></programlisting></entry>
 							</row>
+							<row>
+								<entry>Hook</entry>
+								<entry>
+									<para>Use this annotation to register one or more statement-specific hooks providing a hook type for each individual hook, such as for SQL parameter, column or row conversion.</para>
+									<para>Attributes are the hook <literal>type</literal> and the <literal>hook</literal> itself (usually a import or class name):</para>
+								</entry>
+								<entry><programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook=MyDBTypeConvertor)]]></programlisting></entry>
+							</row>
 						</tbody>
 					</tgroup>				
 				</table>
@@ -647,6 +655,17 @@ select * from SecurityFilter(ip="127.0.0.1")]]></programlisting>
 				</para>	
 				<programlisting><![CDATA[@Hint('disable_reclaim_group') 
 select ipaddress, count(*) from SecurityFilter.win:time(60 sec) group by ipaddress]]></programlisting>
+			</sect3>
+
+			<sect3 id="epl-syntax-annotation-hook">
+				<title>@Hook</title>
+				<para>
+					A hook is for attaching a callback to a statement.
+				</para>
+
+				<para>
+					The type value of a <literal>Hook</literal> annotation defines the type of hook and the <literal>hook</literal> value is an imported or fully-qualified class name providing the callback implementation.
+				</para>
 			</sect3>
 		</sect2>
     </sect1>
@@ -3208,6 +3227,56 @@ select orderId, orderAmount from
 			</para>
 		</sect2>
 
+		<sect2 id="histdata_convert_cols" revision="1">
+			<title>SQL Input Parameter and Column Output Conversion</title>
+
+			<para>
+			   As part of database access configuration you may optionally specify SQL type mappings. These mappings apply to all queries against the same database identified by name.
+			</para>
+			
+			<para>
+			  If your application must perform SQL-query-specific or EPL-statement-specific mapping or conversion between types, the facility to register a conversion callback exists as follows.
+			</para>
+
+			<para>
+			  Use the <literal>@Hook</literal> instruction and <literal>HookType.SQLCOL</literal> as part of your EPL statement text to register a statement SQL parameter or column conversion hook. 
+			  Implement the interface <literal>com.espertech.esper.client.hook.SQLColumnTypeConversion</literal> to perform the input parameter or column value conversion.
+			</para>
+			
+			<para>
+			  A sample statement with annotation is shown:
+			</para>
+			<programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook=MyDBTypeConvertor)
+select * from sql:MyDB ['select * from MyEventTable]]]></programlisting>
+
+			<para>
+			  The engine expects <literal>MyDBTypeConvertor</literal> to resolve to a class (considering engine imports) and instantiates one instance of MyDBTypeConvertor for each statement.
+			</para>
+		</sect2>
+
+		<sect2 id="histdata_convert_row" revision="1">
+			<title>SQL Row POJO Conversion</title>
+
+			<para>
+			   Your application may also directly convert a SQL result row into a Java class which is an opportunity for your application to interrogate and transform the SQL row result data freely before packing the data into a 
+			   Java class. Your application can additionally indicate to skip SQL result rows.
+			</para>
+			
+			<para>
+			  Use the <literal>@Hook</literal> instruction and <literal>HookType.SQLROW</literal> as part of your EPL statement text to register a statement SQL output row conversion hook. 
+			  Implement the interface <literal>com.espertech.esper.client.hook.SQLOutputRowConversion</literal> to perform the output row conversion.
+			</para>
+			
+			<para>
+			  A sample statement with annotation is shown:
+			</para>
+			<programlisting><![CDATA[@Hook(type=HookType.SQLROW, hook=MyDBRowConvertor)
+select * from sql:MyDB ['select * from MyEventTable]]]></programlisting>
+
+			<para>
+			  The engine expects <literal>MyDBRowConvertor</literal> to resolve to a class (considering engine imports) and instantiates one MyDBRowConvertor instance for each statement.
+			</para>
+		</sect2>
 	</sect1>
 	
 	<sect1 id="joining_method" revision="1">
@@ -3901,12 +3970,12 @@ select win.* from OrdersNamedWindow as win]]></programlisting>
 			<para>
 				For example, and assuming the named window <literal>OrdersNamedWindow</literal> already exists, this statement creates a new named window <literal>ScratchOrders</literal> and populates all orders in <literal>OrdersNamedWindow</literal> into the new named window:
 			</para>
-			<programlisting>create window ScratchOrders as OrdersNamedWindow insert</programlisting>
+			<programlisting>create window ScratchOrders.win:keepall() as OrdersNamedWindow insert</programlisting>
 
 			<para>
 				The <literal>where</literal> keyword is also available to perform filtering, for example:
 			</para>
-			<programlisting>create window ScratchBuyOrders as OrdersNamedWindow insert where side = 'buy'</programlisting>
+			<programlisting>create window ScratchBuyOrders.win:time(10) as OrdersNamedWindow insert where side = 'buy'</programlisting>
 
 		</sect2> 
 
@@ -4215,6 +4284,63 @@ insert into UserProfileWindow select * from UserProfileUpdate]]></programlisting
 				</listitem>
 			</itemizedlist>
 		</sect2>
+
+		<sect2 id="named_explicit_index" revision="1">
+			<title>Explicitly Indexing Named Windows</title>
+			
+			<indexterm><primary>named window</primary><secondary>index</secondary></indexterm>
+			<indexterm><primary>named window</primary><secondary>create index</secondary></indexterm>
+			<indexterm><primary>create index</primary></indexterm>
+
+			<para>
+				You may explicitly create an index on a named window. When executing on-demand (fire-and-forget) queries as described in <xref linkend="api-runtime-ondemand"/> using prepared or unprepared queries, 
+				an explicit index can help speed query performance.
+			</para>
+
+			<para>
+				You do not need to explicitly create an index unless using on-demand (fire-and-forget) queries. Therefore you do not need to explicitly create an index for <literal>on-select</literal>, <literal>on-update</literal>, <literal>on-delete</literal> as well as subqueries or consuming statements against named windows.
+			</para>
+
+			<para>
+				Please use the following syntax to create an explicit index on a named window:
+			</para>
+			<synopsis>create index <emphasis>index_name</emphasis> on <emphasis>named_window_name</emphasis> (<emphasis>property</emphasis>[, property] [,...] )</synopsis>
+			
+			<para>
+				The <emphasis>index_name</emphasis> is the name assigned to the index. The name uniquely identifies the index and is used in engine logging.
+			</para>
+
+			<para>
+				The <emphasis>named_window_name</emphasis> is the name of an existing named window. If the named window has data already, the engine builds an index for the data in the named window.
+			</para>
+
+			<para>
+				The list of <emphasis>property</emphasis> names are the properties of events within the named window to include in the index.
+			</para>
+
+			<para>
+				We list a few example EPL statements next that create a named window and create a single index:
+			</para>
+			<programlisting><![CDATA[// create a named window
+create window UserProfileWindow.win:time(1 hour) select * from UserProfile
+
+// create an index for the user id property only
+create index UserProfileIndex on UserProfileWindow(userId)]]></programlisting>
+
+			<para>
+				Next, execute a on-demand fire-and-forget query as shown below, herein we use the prepared version to demonstrate:
+			</para>
+			<programlisting><![CDATA[String query = "select * from UserProfileWindow where userId='Joe'";
+EPOnDemandPreparedQuery prepared = epRuntime.prepareQuery(query);
+// query performance excellent in the face of large number of rows
+EPOnDemandQueryResult result = prepared.execute();
+// ...later ...
+prepared.execute();	// execute a second time]]></programlisting>
+
+			<para>
+				The engine builds a hash code -based index useful for direct comparison via equals (=), filter expressions that look for ranges or use <literal>in, between </literal> do not benefit from the hash-based index. Named windows that hold a revision event type or a variant stream event type may not be indexed.
+			</para>			
+		</sect2>
 	</sect1>
 	
 	<sect1 id="split_overview" revision="1">
@@ -4314,13 +4440,17 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 		<indexterm><primary>EPL</primary><secondary>variable</secondary></indexterm>
 
 		<para>
-			A <emphasis>variable</emphasis> is a scalar value that is available for use in all statements including patterns. Variables can be used in an expression anywhere in a statement as well as in the <literal>output</literal> clause for output rate limiting.
+			A <emphasis>variable</emphasis> is a scalar, object or event value that is available for use in all statements including patterns. Variables can be used in an expression anywhere in a statement as well as in the <literal>output</literal> clause for output rate limiting.
 		</para>
 			
 		<para>
-			Variables must first be declared or configured before use, by defining each variable's type and name. Variables can be created via the <literal>create variable</literal> syntax or declared by configuration. Variables can be assigned new values by using the <literal>on set</literal> syntax or via the <literal>setVariableValue</literal> methods on <literal>EPRuntime</literal>. The <literal>EPRuntime</literal> also provides method to read variable values.
+			Variables must first be declared or configured before use, by defining each variable's type and name. Variables can be created via the <literal>create variable</literal> syntax or declared by runtime or static configuration. Variables can be assigned new values by using the <literal>on set</literal> syntax or via the <literal>setVariableValue</literal> methods on <literal>EPRuntime</literal>. The <literal>EPRuntime</literal> also provides method to read variable values.
 		</para>
 			
+		<para>
+			When declaring a class-type or an event type variable you may read or set individual properties within the same variable.
+		</para>
+
 		<para>
 			 The engine guarantees consistency and atomicity of variable reads and writes on a statement-level (this is a soft guarantee, see below). Variables are optimized for fast read access and are also multithread-safe.
 		</para>		
@@ -4356,8 +4486,15 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 	|  integer 
 	|  long 
 	|  double
-	|  float</synopsis>
+	|  float
+	|  object
+	|  <emphasis>class_name</emphasis>
+	|  <emphasis>event_type_name</emphasis></synopsis>
 				
+			<para>
+				All variable types accept null values. The <literal>object</literal> type is for an untyped variable that can be assigned any value. You can provide a fully-qualified class name to declare a variable of that Java class type. You can also supply the name of an event type to declare a variable that holds an event of that type.
+			</para>
+
 			<para>
 				The <emphasis>variable_name</emphasis> is an identifier that names the variable. The variable name should not already be in use by another variable.
 			</para>
@@ -4482,6 +4619,52 @@ having sum(price) > var_threshold]]></programlisting>
 				The length of the time interval that variable values are held stable for the duration of execution of a given statement is by default 15 seconds, but can be configured via engine default settings.
 			</para>
 		</sect2>
+
+		<sect2 id="variable_object" revision="1">
+			<title>Object-Type Variables</title>
+
+			<para>
+				A variable of type <literal>object</literal> (or <literal>java.lang.Object</literal> via the API) can be assigned any value including null. When using an object-type variable in an expression, your statement may need to cast the
+				value to the desired type.
+			</para>
+			
+			<para>
+			  The following sample EPL creates a variable by name <literal>varobj</literal> of type object:
+			</para>		
+			<programlisting><![CDATA[create variable object varobj]]></programlisting>
+		</sect2>
+
+		<sect2 id="variable_eventtype" revision="1">
+			<title>Class and Event-Type Variables</title>
+
+			<para>
+				The <literal>create variable</literal> syntax and the API accept a fully-qualified class name or alternatively the name of an event type. This is useful when you want a single variable to have multiple property values to read or set.
+			</para>
+
+			<para>
+			  The next statement assumes that the event type <literal>PageHitEvent</literal> is declared:
+			</para>		
+			<programlisting><![CDATA[create variable PageHitEvent varPageHitZero]]></programlisting>
+
+			<para>
+			  These example statements show two ways of assigning to the variable:
+			</para>		
+			<programlisting><![CDATA[// You may assign the complete event
+on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero = pagehit
+
+// Or assign individual properties of the event
+on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId]]></programlisting>
+
+			<para>
+			  Similarly statements may use properties of class or event-type variables as this example shows:
+			</para>		
+			<programlisting><![CDATA[select * from FirewallEvent(userId=varPageHitZero.userId)]]></programlisting>
+
+			<para>
+				When using class or event-type variables, in order for the engine to assign property values,  the underlying event type must allow writing property values. If using JavaBean event classes the class must have setter methods and a default constructor.
+			</para>			
+		</sect2>
+
 	</sect1>		
 
 	<sect1 id="epl-containedeventselect">

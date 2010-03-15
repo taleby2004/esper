@@ -1,16 +1,15 @@
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.core.StatementType;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -401,6 +400,34 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
         assertFalse(listener.isInvoked());
+    }
+
+    public void testFollowedOrPermFalse() {
+
+        // ESPER-451
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventType("SupportBean", SupportBean.class);
+        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
+        epService.initialize();
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+
+        String pattern = "every s=SupportBean(string='E') -> " +
+                  "(timer:interval(10) and not SupportBean(string='C1'))" +
+                  "or" +
+                  "(SupportBean(string='C2') and not timer:interval(10))";
+        EPStatement statement = epService.getEPAdministrator().createPattern(pattern);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+        epService.getEPRuntime().sendEvent(new SupportBean("E", 0));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10999));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(11000));
+        assertTrue(listener.isInvoked());
     }
 
     private long dateToLong(String dateText) throws ParseException

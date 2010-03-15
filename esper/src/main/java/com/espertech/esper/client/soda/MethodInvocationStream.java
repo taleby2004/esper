@@ -22,6 +22,9 @@ public class MethodInvocationStream extends Stream
     private List<Expression> parameterExpressions;
     private static final long serialVersionUID = -4629123886680505829L;
 
+    public MethodInvocationStream() {
+    }
+
     /**
      * Creates a new method-invocation-based stream without parameters.
      * @param className is the name of the class providing the method
@@ -131,9 +134,13 @@ public class MethodInvocationStream extends Stream
         writer.write(".");
         writer.write(methodName);
         writer.write("(");
+
+        String delimiter = "";
         for (Expression expr : parameterExpressions)
         {
-            expr.toEPL(writer);
+            writer.append(delimiter);
+            expr.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+            delimiter = ", ";
         }
         writer.write(")");
     }
@@ -147,4 +154,7 @@ public class MethodInvocationStream extends Stream
         writer.write("(..)");
     }
 
+    public void toEPLStreamOptions(StringWriter writer)
+    {
+    }
 }

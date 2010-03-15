@@ -12,7 +12,6 @@ import com.espertech.esper.epl.agg.AggregationServiceMatchRecognize;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprPreviousMatchRecognizeNode;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.MatchRecognizeDefineItem;
 import com.espertech.esper.epl.spec.MatchRecognizeMeasureItem;
 import com.espertech.esper.epl.spec.MatchRecognizeSkipEnum;
@@ -40,6 +39,7 @@ public class EventRowRegexNFAView extends ViewSupport
     private final MatchRecognizeSpec matchRecognizeSpec;
     private final boolean isUnbound;
     private final boolean isIterateOnly;
+    private final boolean isSelectAsksMultimatches;
 
     private final EventType compositeEventType;
     private final EventType rowEventType;
@@ -91,7 +91,8 @@ public class EventRowRegexNFAView extends ViewSupport
                                 TreeMap<Integer, List<ExprPreviousMatchRecognizeNode>> callbacksPerIndex,
                                 AggregationServiceMatchRecognize aggregationService,
                                 boolean isUnbound,
-                                boolean isIterateOnly)
+                                boolean isIterateOnly,
+                                boolean isSelectAsksMultimatches)
     {
         this.matchRecognizeSpec = matchRecognizeSpec;
         this.compositeEventType = compositeEventType;
@@ -104,6 +105,7 @@ public class EventRowRegexNFAView extends ViewSupport
         this.isUnbound = isUnbound;
         this.isIterateOnly = isIterateOnly;
         this.statementContext = statementContext;
+        this.isSelectAsksMultimatches = isSelectAsksMultimatches;
 
         if (matchRecognizeSpec.getInterval() != null)
         {
@@ -799,13 +801,14 @@ public class EventRowRegexNFAView extends ViewSupport
 
                 // save state for each next state
                 boolean copy = nextStatesFromHere.size() > 1;
+                boolean first = false;
                 for (RegexNFAState next : nextStatesFromHere)
                 {
                     EventBean[] eventsForState = eventsPerStream;
                     MultimatchState[] multimatches = currentState.getOptionalMultiMatches();
                     int[] greedyCounts = currentState.getGreedycountPerState();
 
-                    if (copy)
+                    if (copy && !first)
                     {
                         eventsForState = new EventBean[eventsForState.length];
                         System.arraycopy(eventsPerStream, 0, eventsForState, 0, eventsForState.length);
@@ -814,9 +817,13 @@ public class EventRowRegexNFAView extends ViewSupport
                         System.arraycopy(greedyCounts, 0, greedyCountsCopy, 0, greedyCounts.length);
                         greedyCounts = greedyCountsCopy;
 
-                        multimatches = deepCopy(multimatches);
+                        if (isSelectAsksMultimatches) {
+                            multimatches = deepCopy(multimatches);
+                        }
                     }
-                    if (currentState.getState().isMultiple())
+                    first = false;
+                    
+                    if ((isSelectAsksMultimatches) && (currentState.getState().isMultiple()))
                     {
                         multimatches = addTag(currentState.getState().getStreamNum(), event, multimatches);
                     }

@@ -18,6 +18,9 @@ public class CastExpression extends ExpressionBase
     private String typeName;
     private static final long serialVersionUID = -8931072217889088459L;
 
+    public CastExpression() {
+    }
+
     /**
      * Ctor - for use to create an expression tree, without child expression.
      * @param typeName is the type to cast to: a fully-qualified class name or Java primitive type name or "string"
@@ -38,14 +41,15 @@ public class CastExpression extends ExpressionBase
         this.typeName = typeName;
     }
 
-    /**
-     * Renders the clause in textual representation.
-     * @param writer to output to
-     */
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("cast(");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(", ");
         writer.write(typeName);
         writer.write(")");

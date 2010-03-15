@@ -128,6 +128,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      */
     protected synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject, EPIsolationUnitServices isolationUnitServices)
     {
+        boolean nameProvided = false;
         String statementName = statementId;
 
         // find name annotation
@@ -151,9 +152,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         if (optStatementName != null)
         {
             statementName = getUniqueStatementName(optStatementName, statementId);
+            nameProvided = true;
         }
 
-        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, statementId, optAdditionalContext, userObject, isolationUnitServices, false);
+        EPStatementDesc desc = createStopped(statementSpec, expression, isPattern, statementName, nameProvided, statementId, optAdditionalContext, userObject, isolationUnitServices, false);
         start(statementId, desc, true, false, false);
         return desc.getEpStatement();
     }
@@ -171,7 +173,16 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param isFailed to start the statement in failed state
      * @return stopped statement
      */
-    protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec, String expression, boolean isPattern, String statementName, String statementId, Map<String, Object> optAdditionalContext, Object userObject, EPIsolationUnitServices isolationUnitServices, boolean isFailed)
+    protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec,
+                                                         String expression,
+                                                         boolean isPattern,
+                                                         String statementName,
+                                                         boolean nameProvided,
+                                                         String statementId,
+                                                         Map<String, Object> optAdditionalContext,
+                                                         Object userObject,
+                                                         EPIsolationUnitServices isolationUnitServices,
+                                                         boolean isFailed)
     {
         EPStatementDesc statementDesc;
         EPStatementStartMethod startMethod;
@@ -270,11 +281,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             long timeLastStateChange = services.getSchedulingService().getTime();
             EPStatementSPI statement = new EPStatementImpl(statementId, statementName, expression, statementSpec.getExpressionNoAnnotations(), isPattern,
                     services.getDispatchService(), this, timeLastStateChange, preserveDispatchOrder, isSpinLocks, blockingTimeout,
-                    services.getTimeSource(), new StatementMetadata(statementType), userObject, compiledSpec.getAnnotations(), statementContext, isFailed);
+                    services.getTimeSource(), new StatementMetadata(statementType), userObject, compiledSpec.getAnnotations(), statementContext, isFailed, nameProvided);
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
+            boolean isDistinct = statementSpec.getSelectClauseSpec().isDistinct();
             statementContext.getStatementResultService().setContext(statement, epServiceProvider,
-                    isInsertInto, isPattern, statementContext.getEpStatementHandle().getMetricsHandle());
+                    isInsertInto, isPattern, isDistinct, statementContext.getEpStatementHandle().getMetricsHandle());
 
             // create start method
             startMethod = new EPStatementStartMethod(compiledSpec, services, statementContext);
@@ -1041,6 +1053,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return new StatementSpecCompiled(
                 spec.getOnTriggerDesc(),
                 spec.getCreateWindowDesc(),
+                spec.getCreateIndexDesc(),
                 spec.getCreateVariableDesc(),
                 spec.getInsertIntoDesc(),
                 spec.getSelectStreamSelectorEnum(),

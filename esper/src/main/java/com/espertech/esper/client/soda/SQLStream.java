@@ -20,6 +20,9 @@ public class SQLStream extends Stream
     private String optionalMetadataSQL;
     private static final long serialVersionUID = 2606529559298987982L;
 
+    public SQLStream() {
+    }
+
     /**
      * Creates a new SQL-based stream.
      * @param databaseName is the database name to poll
@@ -140,5 +143,9 @@ public class SQLStream extends Stream
         writer.write("sql:");
         writer.write(databaseName);
         writer.write("[..]");
+    }
+
+    public void toEPLStreamOptions(StringWriter writer)
+    {        
     }
 }

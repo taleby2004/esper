@@ -2,6 +2,7 @@ package com.espertech.esper.regression.view;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.bookexample.*;
@@ -21,17 +22,31 @@ public class TestFilterPropertySimple extends TestCase
 
     public void testUnidirectionalJoin()
     {
-        String[] fields = "orderEvent.orderdetail.orderId,book.bookId,book.title,item.amount".split(",");
         epService.getEPAdministrator().getConfiguration().addEventType("OrderEvent", OrderBean.class);
         String stmtText = "select * from " +
-                      "OrderEvent orderEvent unidirectional, " +
-                      "OrderEvent[books] book, " +
-                      "OrderEvent[orderdetail.items] item " +
-                      "where book.bookId = item.productId order by book.bookId asc, item.amount asc";
+                      "OrderEvent as orderEvent unidirectional, " +
+                      "OrderEvent[select * from books] as book, " +
+                      "OrderEvent[select * from orderdetail.items] as item " +
+                      "where book.bookId = item.productId " +
+                      "order by book.bookId, item.amount";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
+        runAssertion();
+        
+        stmt.destroy();
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
+        assertEquals(stmtText, model.toEPL());
+        stmt = epService.getEPAdministrator().create(model);
+        stmt.addListener(listener);
+
+        runAssertion();
+    }
+
+    private void runAssertion()
+    {
+        String[] fields = "orderEvent.orderdetail.orderId,book.bookId,book.title,item.amount".split(",");
         epService.getEPRuntime().sendEvent(makeEventOne());
         assertEquals(3, listener.getLastNewData().length);
         ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"PO200901", "10020", "Enders Game", 10}, {"PO200901", "10020", "Enders Game", 30}, {"PO200901", "10021", "Foundation 1", 25}});

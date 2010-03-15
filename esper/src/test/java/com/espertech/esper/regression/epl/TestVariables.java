@@ -703,9 +703,6 @@ public class TestVariables extends TestCase
         tryInvalid(Integer.class, new Double(11.1),
                 "Error creating variable: Variable 'var1' of declared type 'java.lang.Integer' cannot be initialized by a value of type 'java.lang.Double'");
 
-        tryInvalid(Math.class, "abcdef",
-                "Error creating variable: Invalid variable type for variable 'var1' as type 'java.lang.Math', only Java primitive, boxed or String types are allowed");
-
         tryInvalid(int.class, new Double(11.1), null);
         tryInvalid(String.class, true, null);
     }

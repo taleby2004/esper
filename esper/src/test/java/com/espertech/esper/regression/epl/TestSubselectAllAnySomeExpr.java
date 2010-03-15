@@ -28,11 +28,11 @@ public class TestSubselectAllAnySomeExpr extends TestCase
     {
         String[] fields = "g,ge,l,le".split(",");
         String stmtText = "select " +
-            "intPrimitive > all (select intPrimitive from SupportBean((string like \"S%\")).win:keepall()) as g, " +
-            "intPrimitive >= all (select intPrimitive from SupportBean((string like \"S%\")).win:keepall()) as ge, " +
-            "intPrimitive < all (select intPrimitive from SupportBean((string like \"S%\")).win:keepall()) as l, " +
-            "intPrimitive <= all (select intPrimitive from SupportBean((string like \"S%\")).win:keepall()) as le " +
-            "from SupportBean((string like \"E%\"))";
+            "intPrimitive > all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as g, " +
+            "intPrimitive >= all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as ge, " +
+            "intPrimitive < all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as l, " +
+            "intPrimitive <= all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as le " +
+            "from SupportBean(string like \"E%\")";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 

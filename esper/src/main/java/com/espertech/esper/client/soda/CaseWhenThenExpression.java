@@ -66,28 +66,31 @@ public class CaseWhenThenExpression extends ExpressionBase
         return this;
     }
 
-    public void toEPL(StringWriter writer)
-    {
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.CASE;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
         writer.write("case");
         int index = 0;
         while(index < this.getChildren().size() - 1)
         {
             writer.write(" when ");
-            getChildren().get(index).toEPL(writer);
+            getChildren().get(index).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             index++;
             if (index == this.getChildren().size())
             {
                 throw new IllegalStateException("Invalid case-when expression, count of when-to-then nodes not matching");
             }
             writer.write(" then ");
-            getChildren().get(index).toEPL(writer);
+            getChildren().get(index).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             index++;
         }
 
         if (index < this.getChildren().size())
         {
             writer.write(" else ");
-            getChildren().get(index).toEPL(writer);
+            getChildren().get(index).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         writer.write(" end");
     }

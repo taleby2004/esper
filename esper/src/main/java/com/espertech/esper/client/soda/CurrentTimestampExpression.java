@@ -24,7 +24,12 @@ public class CurrentTimestampExpression extends ExpressionBase
     {
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("current_timestamp()");
     }

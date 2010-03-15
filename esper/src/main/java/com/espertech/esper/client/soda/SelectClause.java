@@ -21,9 +21,12 @@ public class SelectClause implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
-    private boolean isDistinct;
+    private boolean distinct;
     private StreamSelector streamSelector;
     private List<SelectClauseElement> selectList;
+
+    public SelectClause() {
+    }
 
     /**
      * Creates a wildcard select-clause, additional expressions can still be added.
@@ -171,15 +174,6 @@ public class SelectClause implements Serializable
     }
 
     /**
-     * Returns the stream selector.
-     * @return stream selector
-     */
-    public StreamSelector getStreamSelector()
-    {
-        return streamSelector;
-    }
-
-    /**
      * Returns the list of expressions in the select clause.
      * @return list of expressions with column names
      */
@@ -224,12 +218,30 @@ public class SelectClause implements Serializable
     /**
      * Sets the stream selector.
      * @param streamSelector stream selector to set
+     */
+    public void setStreamSelector(StreamSelector streamSelector)
+    {
+        this.streamSelector = streamSelector;
+    }
+
+    /**
+     * Sets the stream selector.
+     * @param streamSelector stream selector to set
      * @return select clause
      */
-    public SelectClause setStreamSelector(StreamSelector streamSelector)
+    public SelectClause streamSelector(StreamSelector streamSelector)
     {
         this.streamSelector = streamSelector;
         return this;
+    }
+
+    /**
+     * Returns the stream selector.
+     * @return stream selector
+     */
+    public StreamSelector getStreamSelector()
+    {
+        return streamSelector;
     }
 
     /**
@@ -249,7 +261,7 @@ public class SelectClause implements Serializable
     {
         writer.write("select ");
 
-        if (isDistinct)
+        if (distinct)
         {
             writer.write("distinct ");
         }
@@ -266,14 +278,16 @@ public class SelectClause implements Serializable
             writer.write("irstream ");
         }
 
-        String delimiter = "";
-        for (SelectClauseElement element : selectList)
-        {
-            writer.write(delimiter);
-            element.toEPLElement(writer);
-            delimiter = ", ";
+        if (selectList != null) {
+            String delimiter = "";
+            for (SelectClauseElement element : selectList)
+            {
+                writer.write(delimiter);
+                element.toEPLElement(writer);
+                delimiter = ", ";
+            }
+            writer.write(' ');
         }
-        writer.write(' ');
     }
 
     /**
@@ -282,17 +296,45 @@ public class SelectClause implements Serializable
      */
     public boolean isDistinct()
     {
-        return isDistinct;
+        return distinct;
+    }
+
+    /**
+     * Returns indicator whether distinct or not.
+     * @return distinct indicator
+     */
+    public boolean getDistinct()
+    {
+        return distinct;
     }
 
     /**
      * Returns indicator whether distinct or not.
      * @param distinct distinct indicator
+     */
+    public void setDistinct(boolean distinct)
+    {
+        this.distinct = distinct;
+    }
+
+    /**
+     * Sets distinct
+     * @param distinct distinct indicator
      * @return the select clause
      */
-    public SelectClause setDistinct(boolean distinct)
+    public SelectClause distinct(boolean distinct)
     {
-        isDistinct = distinct;
+        this.distinct = distinct;
+        return this;
+    }
+
+    /**
+     * Sets distinct to true.
+     * @return the select clause
+     */
+    public SelectClause distinct()
+    {
+        this.distinct = true;
         return this;
     }
 }

@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - MarketDataFeed</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_marketdatafeed</artifactId>
+	<artifactId>esper-example-marketdatafeed</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example MarketDataFeed</description>
 	<dependencies>

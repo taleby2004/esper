@@ -16,7 +16,7 @@ public class NamedWindowQueryMain
 
         try
         {
-            main.runExample(false);
+            main.runExample(false, "NamedWindowQuery");
         }
         catch (Exception ex)
         {
@@ -24,7 +24,7 @@ public class NamedWindowQueryMain
         }
     }
 
-    public void runExample(boolean isRunFromUnitTest)
+    public void runExample(boolean isRunFromUnitTest, String engineURI)
     {
         int numEventsToLoad = 100000;
         int numFireAndForgetExecutions = 100;
@@ -36,7 +36,7 @@ public class NamedWindowQueryMain
             numOnEventQueryExecutions = 5;
         }
 
-        EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+        EPServiceProvider epService = EPServiceProviderManager.getProvider(engineURI);
 
         // This example initializes the engine instance as it is running within an overall test suite.
         // This step would not be required unless re-using the same engine instance with different configurations. 

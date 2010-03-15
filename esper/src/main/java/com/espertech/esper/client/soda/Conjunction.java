@@ -42,16 +42,19 @@ public class Conjunction extends Junction
         }
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.AND;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         String delimiter = "";
         for (Expression child : this.getChildren())
         {
             writer.write(delimiter);
-            writer.write('(');
-            child.toEPL(writer);
-            writer.write(')');
+            child.toEPL(writer, getPrecedence());
             delimiter = " and ";
         }
-    }    
+    }
 }

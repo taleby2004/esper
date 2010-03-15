@@ -14,6 +14,9 @@ public class TimePeriodExpression extends ExpressionBase
     private boolean hasMilliseconds;
     private static final long serialVersionUID = 1386645838943804276L;
 
+    public TimePeriodExpression() {
+    }
+
     /**
      * Ctor.
      * @param hasDays flag to indicate that a day-part expression exists
@@ -158,13 +161,16 @@ public class TimePeriodExpression extends ExpressionBase
         this.hasMilliseconds = hasMilliseconds;
     }
 
-    public void toEPL(StringWriter writer)
-    {
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
         String delimiter = "";
         int countExpr = 0;
         if (hasDays)
         {
-            this.getChildren().get(countExpr).toEPL(writer);
+            this.getChildren().get(countExpr).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.append(" days");
             delimiter = " ";
             countExpr++;
@@ -172,7 +178,7 @@ public class TimePeriodExpression extends ExpressionBase
         if (hasHours)
         {
             writer.write(delimiter);
-            this.getChildren().get(countExpr).toEPL(writer);
+            this.getChildren().get(countExpr).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.append(" hours");
             delimiter = " ";
             countExpr++;
@@ -180,7 +186,7 @@ public class TimePeriodExpression extends ExpressionBase
         if (hasMinutes)
         {
             writer.write(delimiter);
-            this.getChildren().get(countExpr).toEPL(writer);
+            this.getChildren().get(countExpr).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.append(" minutes");
             delimiter = " ";
             countExpr++;
@@ -188,7 +194,7 @@ public class TimePeriodExpression extends ExpressionBase
         if (hasSeconds)
         {
             writer.write(delimiter);
-            this.getChildren().get(countExpr).toEPL(writer);
+            this.getChildren().get(countExpr).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.append(" seconds");
             delimiter = " ";
             countExpr++;
@@ -196,7 +202,7 @@ public class TimePeriodExpression extends ExpressionBase
         if (hasMilliseconds)
         {
             writer.write(delimiter);
-            this.getChildren().get(countExpr).toEPL(writer);
+            this.getChildren().get(countExpr).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.append(" milliseconds");
         }
     }

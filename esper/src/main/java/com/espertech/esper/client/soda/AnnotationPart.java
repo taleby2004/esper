@@ -1,22 +1,40 @@
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
-
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a single annotation.
  */
-public class AnnotationPart {
+public class AnnotationPart implements Serializable {
 
+    private String treeObjectName;
     private String name;
 
     // Map of identifier name and value can be any of the following:
     //      <"value"|attribute name, constant|array of value (Object[])| AnnotationPart
-    private List<Pair<String, Object>> attributes = new ArrayList<Pair<String, Object>>();
+    private List<AnnotationAttribute> attributes = new ArrayList<AnnotationAttribute>();
+
+    public AnnotationPart() {
+    }
+
+    public void copy(AnnotationPart other) {
+        name = other.name;
+        attributes = other.attributes;
+    }
+    
+    public String getTreeObjectName()
+    {
+        return treeObjectName;
+    }
+
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
+    }
 
     /**
      * Ctor.
@@ -31,7 +49,7 @@ public class AnnotationPart {
      * @param name name of annotation
      * @param attributes are the attribute values
      */
-    public AnnotationPart(String name, List<Pair<String, Object>> attributes)
+    public AnnotationPart(String name, List<AnnotationAttribute> attributes)
     {
         this.name = name;
         this.attributes = attributes;
@@ -46,12 +64,16 @@ public class AnnotationPart {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     /**
      * Add value.
      * @param value to add
      */
     public void addValue(Object value) {
-        attributes.add(new Pair<String, Object>("value", value));
+        attributes.add(new AnnotationAttribute("value", value));
     }
 
     /**
@@ -60,14 +82,14 @@ public class AnnotationPart {
      * @param value value
      */
     public void addValue(String name, Object value) {
-        attributes.add(new Pair<String, Object>(name, value));
+        attributes.add(new AnnotationAttribute(name, value));
     }
 
     /**
      * Returns annotation attributes.
      * @return the attribute values
      */
-    public List<Pair<String, Object>> getAttributes()
+    public List<AnnotationAttribute> getAttributes()
     {
         return attributes;
     }
@@ -83,12 +105,17 @@ public class AnnotationPart {
         }
 
         String delimiter = "";
+        String writerDelimiter = "";
         for (AnnotationPart part : annotations) {
+            if (part.getName() == null) {
+                continue;
+            }
+            writerDelimiter = " ";
             writer.append(delimiter);
             part.toEPL(writer);
             delimiter = " ";
         }
-        writer.append(" ");
+        writer.append(writerDelimiter);
     }
 
     /**
@@ -104,9 +131,9 @@ public class AnnotationPart {
         }
 
         if (attributes.size() == 1) {
-            if (attributes.get(0).getFirst() == null || attributes.get(0).getFirst().equals("value")) {
+            if (attributes.get(0).getName() == null || attributes.get(0).getName().equals("value")) {
                 writer.append("(");
-                toEPL(writer, attributes.get(0).getSecond());
+                toEPL(writer, attributes.get(0).getValue());
                 writer.append(")");
                 return;
             }
@@ -114,14 +141,14 @@ public class AnnotationPart {
 
         String delimiter = "";
         writer.append("(");
-        for (Pair<String, Object> pair : attributes) {
-            if (pair.getSecond() == null) {
+        for (AnnotationAttribute attribute : attributes) {
+            if (attribute.getValue() == null) {
                 return;
             }
             writer.append(delimiter);
-            writer.append(pair.getFirst());
+            writer.append(attribute.getName());
             writer.append("=");
-            toEPL(writer, pair.getSecond());
+            toEPL(writer, attribute.getValue());
             delimiter = ",";
         }
         writer.append(")");

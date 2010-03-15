@@ -51,7 +51,7 @@ public class TestGroupByMaxMin extends TestCase
     public void testMinMaxView_OM() throws Exception
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create().setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
+        model.setSelectClause(SelectClause.create().streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
             .add("symbol")
             .add(Expressions.min("volume"), "minVol")
             .add(Expressions.max("volume"), "maxVol")
@@ -72,7 +72,7 @@ public class TestGroupByMaxMin extends TestCase
                                   "min(distinct volume) as minDistVol, " +
                                   "max(distinct volume) as maxDistVol " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
-                          "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
+                          "where symbol = \"DELL\" or symbol = \"IBM\" or symbol = \"GE\" " +
                           "group by symbol";
         assertEquals(viewExpr, model.toEPL());
 
@@ -90,7 +90,7 @@ public class TestGroupByMaxMin extends TestCase
                                   "min(distinct volume) as minDistVol, " +
                                   "max(distinct volume) as maxDistVol " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) " +
-                          "where ((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\")) " +
+                          "where symbol = \"DELL\" or symbol = \"IBM\" or symbol = \"GE\" " +
                           "group by symbol";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
         assertEquals(viewExpr, model.toEPL());

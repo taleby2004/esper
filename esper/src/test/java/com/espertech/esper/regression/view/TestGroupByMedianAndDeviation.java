@@ -46,6 +46,21 @@ public class TestGroupByMedianAndDeviation extends TestCase
         selectTestView.addListener(testListener);
 
         runAssertion();
+
+        // Test NaN sensitivity
+        selectTestView.destroy();
+        selectTestView = epService.getEPAdministrator().createEPL("select stddev(price) as val from " + SupportMarketDataBean.class.getName() + ".win:length(3)");
+        selectTestView.addListener(testListener);
+
+        sendEvent("A", Double.NaN);
+        sendEvent("B", Double.NaN);
+        sendEvent("C", Double.NaN);
+        sendEvent("D", 1d);
+        sendEvent("E", 2d);
+        testListener.reset();
+        sendEvent("F", 3d);
+        Double result = (Double) testListener.assertOneGetNewAndReset().get("val");
+        assertTrue(result.isNaN());
     }
 
     public void testSumJoin_OM() throws Exception
@@ -56,7 +71,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                 .add(Expressions.medianDistinct("price"), "myDistMedian")
                 .add(Expressions.stddev("price"), "myStdev")
                 .add(Expressions.avedev("price"), "myAvedev")
-                .setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
+                .streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
         );
         FromClause fromClause = FromClause.create(
                 FilterStream.create(SupportBeanString.class.getName(), "one").addView(View.create("win", "length", Expressions.constant(100))),
@@ -79,8 +94,8 @@ public class TestGroupByMedianAndDeviation extends TestCase
                                  "avedev(price) as myAvedev " +
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
-                          "where (((symbol = \"DELL\")) or ((symbol = \"IBM\")) or ((symbol = \"GE\"))) " +
-                          "and ((one.string = two.symbol)) " +
+                          "where (symbol = \"DELL\" or symbol = \"IBM\" or symbol = \"GE\") " +
+                          "and one.string = two.symbol " +
                           "group by symbol";
         assertEquals(viewExpr, model.toEPL());
 

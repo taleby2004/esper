@@ -16,14 +16,19 @@ public class CrontabParameterSetExpression extends ExpressionBase
     {
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         String delimiter = "";
         writer.write("[");
         for (Expression expr : this.getChildren())
         {
             writer.append(delimiter);
-            expr.toEPL(writer);
+            expr.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             delimiter = ", ";
         }
         writer.write("]");

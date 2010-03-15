@@ -309,7 +309,7 @@ public class Patterns
      */
     public static PatternObserverExpr timerAt(Integer minutes, Integer hours, Integer daysOfMonth, Integer month, Integer daysOfWeek, Integer seconds)
     {
-        Expression wildcard = new CrontabParameterExpression(CrontabParameterExpression.ScheduleItemType.WILDCARD);
+        Expression wildcard = new CrontabParameterExpression(ScheduleItemType.WILDCARD);
 
         List<Expression> params = new ArrayList<Expression>();
         params.add(minutes == null ? wildcard : Expressions.constant(minutes));

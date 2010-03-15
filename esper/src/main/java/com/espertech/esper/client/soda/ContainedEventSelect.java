@@ -15,6 +15,9 @@ public class ContainedEventSelect implements Serializable
     private String propertyAsName;
     private Expression whereClause;
 
+    public ContainedEventSelect() {
+    }
+
     /**
      * Ctor.
      * @param propertyName property expression
@@ -121,7 +124,7 @@ public class ContainedEventSelect implements Serializable
         }
         if (whereClause != null)
         {
-            whereClause.toEPL(writer);
+            whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
     }
 }

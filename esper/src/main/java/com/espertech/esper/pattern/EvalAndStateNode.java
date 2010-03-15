@@ -137,7 +137,9 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
             log.debug(".evaluateFalse Removing fromNode=" + fromNode.hashCode());
         }
 
-        eventsPerChild.remove(fromNode);
+        if (eventsPerChild != null) {
+            eventsPerChild.remove(fromNode);
+        }
 
         // The and node cannot turn true anymore, might as well quit all child nodes
         this.getParentEvaluator().evaluateFalse(this);

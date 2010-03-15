@@ -372,7 +372,7 @@ public class TestFromClauseMethod extends TestCase
         tryArrayWithArg(stmt);
 
         model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create("id", "string").setStreamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH));
+        model.setSelectClause(SelectClause.create("id", "string").streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH));
         model.setFromClause(FromClause.create()
             .add(MethodInvocationStream.create(SupportStaticMethodLib.class.getName(), "fetchArrayGen", "s0")
                 .addParameter(Expressions.property("intPrimitive")))

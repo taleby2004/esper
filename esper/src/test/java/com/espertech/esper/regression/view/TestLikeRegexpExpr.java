@@ -70,9 +70,9 @@ public class TestLikeRegexpExpr extends TestCase
 
     public void testLikeRegexStringAndNull_OM() throws Exception
     {
-        String stmtText = "select (p00 like p01) as r1, " +
-                                "(p00 like p01 escape \"!\") as r2, " +
-                                "(p02 regexp p03) as r3 " +
+        String stmtText = "select p00 like p01 as r1, " +
+                                "p00 like p01 escape \"!\" as r2, " +
+                                "p02 regexp p03 as r3 " +
                           "from " + SupportBean_S0.class.getName();
 
         EPStatementObjectModel model = new EPStatementObjectModel();
@@ -90,12 +90,12 @@ public class TestLikeRegexpExpr extends TestCase
 
         runLikeRegexStringAndNull();
 
-        String epl = "select * from " + SupportBean.class.getName() + "((string not like \"foo%\"))";
+        String epl = "select * from " + SupportBean.class.getName() + "(string not like \"foo%\")";
         EPPreparedStatement eps = epService.getEPAdministrator().prepareEPL(epl);
         EPStatement statement = epService.getEPAdministrator().create(eps);
         assertEquals(epl, statement.getText());
 
-        epl = "select * from " + SupportBean.class.getName() + "((string not regexp \"foo\"))";
+        epl = "select * from " + SupportBean.class.getName() + "(string not regexp \"foo\")";
         eps = epService.getEPAdministrator().prepareEPL(epl);
         statement = epService.getEPAdministrator().create(eps);
         assertEquals(epl, statement.getText());
@@ -103,9 +103,9 @@ public class TestLikeRegexpExpr extends TestCase
 
     public void testLikeRegexStringAndNull_Compile() throws Exception
     {
-        String stmtText = "select (p00 like p01) as r1, " +
-                                "(p00 like p01 escape \"!\") as r2, " +
-                                "(p02 regexp p03) as r3 " +
+        String stmtText = "select p00 like p01 as r1, " +
+                                "p00 like p01 escape \"!\" as r2, " +
+                                "p02 regexp p03 as r3 " +
                           "from " + SupportBean_S0.class.getName();
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);

@@ -20,6 +20,9 @@ public class SelectClauseExpression implements SelectClauseElement
     private Expression expression;
     private String asName;
 
+    public SelectClauseExpression() {
+    }
+
     /**
      * Ctor.
      * @param expression is the selection expression
@@ -82,7 +85,7 @@ public class SelectClauseExpression implements SelectClauseElement
      */
     public void toEPLElement(StringWriter writer)
     {
-        expression.toEPL(writer);
+        expression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         if (asName != null)
         {
             writer.write(" as ");

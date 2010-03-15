@@ -27,10 +27,15 @@ public class CrontabRangeExpression extends ExpressionBase
         this.getChildren().add(upperBounds);
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
     {
-        this.getChildren().get(0).toEPL(writer);
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
+    {
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.append(":");
-        this.getChildren().get(1).toEPL(writer);
+        this.getChildren().get(1).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
     }
 }

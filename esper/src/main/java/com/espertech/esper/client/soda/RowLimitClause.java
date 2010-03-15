@@ -23,7 +23,11 @@ public class RowLimitClause implements Serializable
     private String numRowsVariable;
     private String optionalOffsetRowsVariable;
 
+    public RowLimitClause() {
+    }
+
     /**
+
      * Creates a row limit clause.
      * @param numRowsVariable name of the variable providing the maximum number of rows
      * @return clause
@@ -158,24 +162,29 @@ public class RowLimitClause implements Serializable
      */
     public void toEPL(StringWriter writer)
     {
-        if (numRows != null)
-        {
-            writer.write(Integer.toString(numRows));
-        }
-        else
-        {
+        if (numRowsVariable != null) {
             writer.write(numRowsVariable);
         }
-
-        if (optionalOffsetRows != null)
-        {
-            writer.write(" offset ");
-            writer.write(Integer.toString(optionalOffsetRows));
+        else {
+            if (numRows != null)
+            {
+                writer.write(Integer.toString(numRows));
+            }
+            else
+            {
+                writer.write(Integer.toString(Integer.MAX_VALUE));
+            }
         }
-        else if (optionalOffsetRowsVariable != null)
+
+        if (optionalOffsetRowsVariable != null)
         {
             writer.write(" offset ");
             writer.write(optionalOffsetRowsVariable);
+        }
+        else if ((optionalOffsetRows != null) && (optionalOffsetRows != 0))
+        {
+            writer.write(" offset ");
+            writer.write(Integer.toString(optionalOffsetRows));
         }
     }
 }

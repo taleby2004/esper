@@ -17,6 +17,11 @@ public class QualityOfServiceMain
 
     public static void main(String[] args)
     {
+        new QualityOfServiceMain().run("QualityOfService");
+    }
+
+    public void run(String engineURI)
+    {
         log.info("Setting up EPL");
         DynaLatencySpikeMonitor.start();
         AverageLatencyMonitor.start();
@@ -25,7 +30,7 @@ public class QualityOfServiceMain
         ServiceHealthMonitor.start();
         SpikeAndErrorMonitor.start();
 
-        EPRuntime runtime = EPServiceProviderManager.getDefaultProvider().getEPRuntime();
+        EPRuntime runtime = EPServiceProviderManager.getProvider(engineURI).getEPRuntime();
 
         log.info("Sending new limits");
         String services[] = {"s0", "s1", "s2"};

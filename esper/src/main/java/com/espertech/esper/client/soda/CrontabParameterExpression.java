@@ -10,6 +10,9 @@ public class CrontabParameterExpression extends ExpressionBase
     private ScheduleItemType type;
     private static final long serialVersionUID = -7679321191577855626L;
 
+    public CrontabParameterExpression() {
+    }
+
     /**
      * Ctor.
      * @param type of crontab parameter
@@ -19,11 +22,14 @@ public class CrontabParameterExpression extends ExpressionBase
         this.type = type;
     }
 
-    public void toEPL(StringWriter writer)
-    {
+    public ExpressionPrecedenceEnum getPrecedence() {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer) {
         if (!this.getChildren().isEmpty())
         {
-            this.getChildren().get(0).toEPL(writer);
+            this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
             writer.append(' ');
         }
         writer.write(type.getSyntax());
@@ -45,47 +51,5 @@ public class CrontabParameterExpression extends ExpressionBase
     public void setType(ScheduleItemType type)
     {
         this.type = type;
-    }
-
-    /**
-     * Type of schedule item.
-     */
-    public enum ScheduleItemType
-    {
-        /**
-         * Wildcard means any value.
-         */
-        WILDCARD("*"),
-
-        /**
-         * Last day of week or month.
-         */
-        LASTDAY("last"),
-
-        /**
-         * Weekday (nearest to a date)
-         */
-        WEEKDAY("weekday"),
-
-        /**
-         * Last weekday in a month
-         */
-        LASTWEEKDAY("lastweekday");
-
-        private String syntax;
-
-        private ScheduleItemType(String s)
-        {
-            this.syntax = s;
-        }
-
-        /**
-         * Returns the syntax string.
-         * @return syntax
-         */
-        public String getSyntax()
-        {
-            return syntax;
-        }
     }
 }

@@ -656,6 +656,11 @@ from Trade.std:groupby(symbol).ext:sort(price, false, 1)</programlisting>
 		</table>
 
 		<para>
+			If your application provides double-type values to an aggregation function, avoid using Not-a-Number (NaN) and infinity. Aggregation functions are optimized to retain the minimal
+			information necessary to compute a result. Also when using double-type values, round-off errors (or rounding errors) may occur due to double-type precision. Consider rounding your result value to the desired precision.
+		</para>
+
+		<para>
 			Your application may also add its own aggregation function as <xref linkend="custom-aggregation-function"/> describes.
 		</para>
 		

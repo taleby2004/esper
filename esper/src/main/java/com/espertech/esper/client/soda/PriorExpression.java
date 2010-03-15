@@ -35,12 +35,17 @@ public class PriorExpression extends ExpressionBase
         this.addChild(new PropertyValueExpression(propertyName));
     }
 
-    public void toEPL(StringWriter writer)
+    public ExpressionPrecedenceEnum getPrecedence()
+    {
+        return ExpressionPrecedenceEnum.UNARY;
+    }
+
+    public void toPrecedenceFreeEPL(StringWriter writer)
     {
         writer.write("prior(");
-        this.getChildren().get(0).toEPL(writer);
+        this.getChildren().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(", ");
-        this.getChildren().get(1).toEPL(writer);
+        this.getChildren().get(1).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         writer.write(')');
     }
 }

@@ -7,7 +7,7 @@
 	</parent>
 	<name>Esper Examples - StockTicker</name>
 	<groupId>com.espertech</groupId>
-	<artifactId>esper_examples_stockticker</artifactId>
+	<artifactId>esper-example-stockticker</artifactId>
 	<packaging>jar</packaging>
 	<description>Esper Example StockTicker</description>
 	<dependencies>
