@@ -64,6 +64,9 @@ public class DOMComplexElementGetter implements EventPropertyGetter, DOMProperty
         for (int i = 0; i < list.getLength(); i++)
         {
             Node childNode = list.item(i);
+            if (childNode == null) {
+                continue;
+            }
             if (childNode.getNodeType() != Node.ELEMENT_NODE)
             {
                 continue;
@@ -93,6 +96,9 @@ public class DOMComplexElementGetter implements EventPropertyGetter, DOMProperty
         for (int i = 0; i < list.getLength(); i++)
         {
             Node childNode = list.item(i);
+            if (childNode == null) {
+                continue;
+            }
             if (childNode.getNodeType() == Node.ELEMENT_NODE)
             {
                 count++;
