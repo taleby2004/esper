@@ -19,6 +19,9 @@ public class PlugInProjectionExpression extends ExpressionBase
     private boolean isDistinct;
     private static final long serialVersionUID = -4474825377733541468L;
 
+    /**
+     * Ctor.
+     */
     public PlugInProjectionExpression() {
     }
 

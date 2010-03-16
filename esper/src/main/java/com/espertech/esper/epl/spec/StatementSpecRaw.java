@@ -410,10 +410,18 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
         return referencedVariables;
     }
 
+    /**
+     * Returns create-index if any.
+     * @return index create
+     */
     public CreateIndexDesc getCreateIndexDesc() {
         return createIndexDesc;
     }
 
+    /**
+     * Set create-index if any.
+     * @param createIndexDesc index create
+     */
     public void setCreateIndexDesc(CreateIndexDesc createIndexDesc) {
         this.createIndexDesc = createIndexDesc;
     }

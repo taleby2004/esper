@@ -41,6 +41,7 @@ public class ParseHelper
      * @param walker - walker instance
      * @param walkRuleSelector - walk rule
      * @param expression - the expression we are walking in string form
+     * @param eplStatementForErrorMsg - statement text for error messages
      */
     public static void walk(Tree ast, EPLTreeWalker walker, WalkRuleSelector walkRuleSelector, String expression, String eplStatementForErrorMsg)
     {
@@ -83,6 +84,8 @@ public class ParseHelper
      * Parse expression using the rule the ParseRuleSelector instance supplies.
      * @param expression - text to parse
      * @param parseRuleSelector - parse rule to select
+     * @param addPleaseCheck - true to include depth paraphrase
+     * @param eplStatementErrorMsg - text for error
      * @return AST - syntax tree
      * @throws EPException when the AST could not be parsed
      */

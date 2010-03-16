@@ -182,6 +182,10 @@ public class ExprIdentNode extends ExprNode
         return resolvedPropertyName;
     }
 
+    /**
+     * Returns the root of the resolved property name, if any.
+     * @return root
+     */
     public String getResolvedPropertyNameRoot() {
         if (resolvedPropertyName == null)
         {

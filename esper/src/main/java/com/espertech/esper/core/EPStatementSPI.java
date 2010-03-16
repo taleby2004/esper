@@ -75,5 +75,9 @@ public interface EPStatementSPI extends EPStatement
      */
     public StatementContext getStatementContext();
 
+    /**
+     * True if an explicit statement name has been provided, false if the statement name is system-generated.
+     * @return indicator if statement name exists
+     */
     public boolean isNameProvided();
 }

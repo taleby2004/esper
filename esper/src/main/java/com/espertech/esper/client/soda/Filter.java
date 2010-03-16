@@ -24,6 +24,9 @@ public class Filter implements Serializable
     private Expression filter;
     private List<ContainedEventSelect> optionalPropertySelects;
 
+    /**
+     * Ctor.
+     */
     public Filter() {
     }
 

@@ -18,6 +18,9 @@ public class MedianProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = 4859634868887801690L;
 
+    /**
+     * Ctor.
+     */
     public MedianProjectionExpression() {
     }
 

@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.io.Serializable;
 import java.io.StringWriter;
 
@@ -22,17 +20,32 @@ public class MatchRecognizeRegExNested extends MatchRecognizeRegEx implements Se
 {
     private MatchRecogizePatternElementType type;
 
+    /**
+     * Ctor.
+     */
     public MatchRecognizeRegExNested() {
     }
 
+    /**
+     * Ctor.
+     * @param type multiplicity
+     */
     public MatchRecognizeRegExNested(MatchRecogizePatternElementType type) {
         this.type = type;
     }
 
+    /**
+     * Returns multiplicity.
+     * @return multiplicity
+     */
     public MatchRecogizePatternElementType getType() {
         return type;
     }
 
+    /**
+     * Sets multiplicity.
+     * @param type multiplicity to set
+     */
     public void setType(MatchRecogizePatternElementType type) {
         this.type = type;
     }

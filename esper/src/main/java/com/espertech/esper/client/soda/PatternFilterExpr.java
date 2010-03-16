@@ -19,6 +19,9 @@ public class PatternFilterExpr extends PatternExprBase
     private Filter filter;
     private static final long serialVersionUID = -916214860560949884L;
 
+    /**
+     * Ctor.
+     */
     public PatternFilterExpr() {
     }
 

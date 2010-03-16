@@ -32,6 +32,9 @@ public class FromClause implements Serializable
     private List<Stream> streams;
     private List<OuterJoinQualifier> outerJoinQualifiers;
 
+    /**
+     * Ctor.
+     */
     public FromClause() {
         streams = new ArrayList<Stream>();
         outerJoinQualifiers = new ArrayList<OuterJoinQualifier>();
@@ -212,10 +215,18 @@ public class FromClause implements Serializable
         return outerJoinQualifiers;
     }
 
+    /**
+     * Set the streams.
+     * @param streams to set
+     */
     public void setStreams(List<Stream> streams) {
         this.streams = streams;
     }
 
+    /**
+     * Set outer joins.
+     * @param outerJoinQualifiers to set
+     */
     public void setOuterJoinQualifiers(List<OuterJoinQualifier> outerJoinQualifiers) {
         this.outerJoinQualifiers = outerJoinQualifiers;
     }

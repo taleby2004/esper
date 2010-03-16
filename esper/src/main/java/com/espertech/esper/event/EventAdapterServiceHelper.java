@@ -79,6 +79,13 @@ public class EventAdapterServiceHelper
         }
     }
 
+    /**
+     * Return an adapter for the given type of event using the pre-validated object.
+     * @param event value object
+     * @param eventType type of event
+     * @param eventAdapterService service for instances
+     * @return event adapter
+     */
     public static EventBean adapterForType(Object event, EventType eventType, EventAdapterService eventAdapterService)
     {
         if (event == null) {

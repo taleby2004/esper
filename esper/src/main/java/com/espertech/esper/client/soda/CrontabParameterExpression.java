@@ -10,6 +10,9 @@ public class CrontabParameterExpression extends ExpressionBase
     private ScheduleItemType type;
     private static final long serialVersionUID = -7679321191577855626L;
 
+    /**
+     * Ctor.
+     */
     public CrontabParameterExpression() {
     }
 

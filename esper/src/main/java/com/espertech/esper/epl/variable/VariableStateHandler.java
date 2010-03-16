@@ -10,6 +10,7 @@ package com.espertech.esper.epl.variable;
 
 import com.espertech.esper.core.StatementExtensionSvcContext;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.client.EventType;
 
 /**
  * Interface for a plug-in to {@link VariableService} to handle variable persistent state.
@@ -22,10 +23,11 @@ public interface VariableStateHandler
      * @param variableName variable name
      * @param variableNumber number of the variable
      * @param type type of the variable
+     * @param eventType event type or null if not a variable that represents an event
      * @param statementExtContext for caches etc.
      * @return indicator whether the variable is known and it's state, or whether it doesn't have state (false)
      */
-    public Pair<Boolean, Object> getHasState(String variableName, int variableNumber, Class type, StatementExtensionSvcContext statementExtContext);
+    public Pair<Boolean, Object> getHasState(String variableName, int variableNumber, Class type, EventType eventType, StatementExtensionSvcContext statementExtContext);
 
     /**
      * Sets the new variable value

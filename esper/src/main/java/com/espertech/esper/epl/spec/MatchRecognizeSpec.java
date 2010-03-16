@@ -147,10 +147,18 @@ public class MatchRecognizeSpec implements MetaDefItem, Serializable
         this.skip = skip;
     }
 
+    /**
+     * Set measures.
+     * @param measures to set
+     */
     public void setMeasures(List<MatchRecognizeMeasureItem> measures) {
         this.measures = measures;
     }
 
+    /**
+     * Set defines.
+     * @param defines to set
+     */
     public void setDefines(List<MatchRecognizeDefineItem> defines) {
         this.defines = defines;
     }

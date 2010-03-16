@@ -17,6 +17,9 @@ public class FirstProjectionExpression extends ExpressionBase
 {
     private boolean distinct;
 
+    /**
+     * Ctor.
+     */
     public FirstProjectionExpression() {
     }
 

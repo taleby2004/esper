@@ -18,6 +18,9 @@ public class StddevProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = -3145467730712717532L;
 
+    /**
+     * Ctor.
+     */
     public StddevProjectionExpression() {
     }
 

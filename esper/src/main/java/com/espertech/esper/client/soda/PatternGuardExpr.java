@@ -66,10 +66,18 @@ public class PatternGuardExpr extends EPBaseNamedObject implements PatternExpr
         return guarded;
     }
 
+    /**
+     * Set sub pattern.
+     * @param guarded sub expression
+     */
     public void setGuarded(List<PatternExpr> guarded) {
         this.guarded = guarded;
     }
 
+    /**
+     * Get sub expression
+     * @return sub pattern
+     */
     public List<PatternExpr> getGuarded() {
         return guarded;
     }

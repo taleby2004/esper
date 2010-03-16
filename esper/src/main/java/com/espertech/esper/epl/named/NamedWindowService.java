@@ -68,6 +68,7 @@ public interface NamedWindowService
      * Returns the processing instance for a given named window.
      * @param name window name
      * @return processor for the named window
+     * @throws ExprValidationException invalid processor
      */
     public NamedWindowProcessor getProcessor(String name) throws ExprValidationException;
 

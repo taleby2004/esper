@@ -1350,6 +1350,15 @@ public class JavaClassHelper
         return (Class) typeParam;
     }
 
+    /**
+     * Returns an instance of a hook as specified by an annotation.
+     * @param annotations to search
+     * @param hookType type to look for
+     * @param interfaceExpected interface required
+     * @param resolution for resolving references
+     * @return hook instance
+     * @throws ExprValidationException if instantiation failed
+     */
     public static Object getAnnotationHook(Annotation[] annotations, HookType hookType, Class interfaceExpected, MethodResolutionService resolution)
             throws ExprValidationException
     {

@@ -1,5 +1,8 @@
 package com.espertech.esper.client.hook;
 
+/**
+ * For use with {@link SQLColumnTypeConversion}, context of column conversion.
+ */
 public class SQLColumnTypeContext
 {
     private final String db;
@@ -9,6 +12,15 @@ public class SQLColumnTypeContext
     private final int columnSqlType;
     private final int columnNumber;
 
+    /**
+     * Ctor.
+     * @param db database
+     * @param sql sql
+     * @param columnName column name
+     * @param columnClassType column type
+     * @param columnSqlType sql type
+     * @param columnNumber column number starting at 1
+     */
     public SQLColumnTypeContext(String db, String sql, String columnName, Class columnClassType, int columnSqlType, int columnNumber)
     {
         this.db = db;
@@ -19,31 +31,55 @@ public class SQLColumnTypeContext
         this.columnNumber = columnNumber;
     }
 
+    /**
+     * Get database name.
+     * @return db name
+     */
     public String getDb()
     {
         return db;
     }
 
+    /**
+     * Returns sql.
+     * @return sql
+     */
     public String getSql()
     {
         return sql;
     }
 
+    /**
+     * Returns column name.
+     * @return name
+     */
     public String getColumnName()
     {
         return columnName;
     }
 
+    /**
+     * Returns column type.
+     * @return column type
+     */
     public Class getColumnClassType()
     {
         return columnClassType;
     }
 
+    /**
+     * Returns column sql type.
+     * @return sql type
+     */
     public int getColumnSqlType()
     {
         return columnSqlType;
     }
 
+    /**
+     * Returns column number starting at 1.
+     * @return column number
+     */
     public int getColumnNumber()
     {
         return columnNumber;

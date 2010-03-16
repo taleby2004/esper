@@ -46,6 +46,10 @@ public enum MatchRecogizePatternElementType
         this.text = text;
     }
 
+    /**
+     * Returns the multiplicity text.
+     * @return text
+     */
     public String getText() {
         return text;
     }

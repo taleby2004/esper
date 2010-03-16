@@ -23,6 +23,9 @@ public abstract class Stream implements Serializable
 
     private String streamName;
 
+    /**
+     * Ctor.
+     */
     public Stream() {
     }
 

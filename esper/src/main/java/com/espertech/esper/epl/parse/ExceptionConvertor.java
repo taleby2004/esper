@@ -20,6 +20,7 @@ public class ExceptionConvertor
      * @param e is the syntax error
      * @param expression is the expression text
      * @param parser the parser that parsed the expression
+     * @param addPleaseCheck indicates to add "please check" paraphrases
      * @return syntax exception
      */
     public static EPStatementSyntaxException convertStatement(RecognitionException e, String expression, boolean addPleaseCheck, EsperEPL2GrammarParser parser)
@@ -33,6 +34,7 @@ public class ExceptionConvertor
      * @param e is the syntax error
      * @param expression is the expression text
      * @param parser the parser that parsed the expression
+     * @param addPleaseCheck indicates to add "please check" paraphrases
      * @return syntax exception
      */
     public static PropertyAccessException convertProperty(RecognitionException e, String expression, boolean addPleaseCheck, EsperEPL2GrammarParser parser)
@@ -46,6 +48,7 @@ public class ExceptionConvertor
      * @param e is the syntax error
      * @param expression is the expression text
      * @param parser the parser that parsed the expression
+     * @param addPleaseCheck indicates to add "please check" paraphrases
      * @return syntax exception
      */
     public static UniformPair<String> convert(RecognitionException e, String expression, boolean addPleaseCheck, EsperEPL2GrammarParser parser)

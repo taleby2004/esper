@@ -22,6 +22,9 @@ public abstract class ProjectedStream extends Stream
     private boolean retainUnion;
     private boolean retainIntersection;
 
+    /**
+     * Ctor.
+     */
     public ProjectedStream() {
     }
 
@@ -160,6 +163,11 @@ public abstract class ProjectedStream extends Stream
         this.unidirectional = isUnidirectional;
     }
 
+    /**
+     * Set to unidirectional.
+     * @param isUnidirectional try if unidirectional
+     * @return stream
+     */
     public ProjectedStream unidirectional(boolean isUnidirectional)
     {
         this.unidirectional = isUnidirectional;

@@ -23,6 +23,9 @@ public class OnUpdateClause extends OnClause
     private String optionalAsName;
     private List<AssignmentPair> assignments;
 
+    /**
+     * Ctor.
+     */
     public OnUpdateClause() {
         assignments = new ArrayList<AssignmentPair>();
     }

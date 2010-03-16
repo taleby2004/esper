@@ -32,6 +32,9 @@ public class OutputLimitClause implements Serializable
     private Expression afterTimePeriodExpression;
     private Integer afterNumberOfEvents;
 
+    /**
+     * Ctor.
+     */
     public OutputLimitClause() {
     }
 
@@ -478,22 +481,42 @@ public class OutputLimitClause implements Serializable
         return afterNumberOfEvents;
     }
 
+    /**
+     * Set frequency.
+     * @param frequency to set
+     */
     public void setFrequency(Double frequency) {
         this.frequency = frequency;
     }
 
+    /**
+     * Set when.
+     * @param whenExpression to set
+     */
     public void setWhenExpression(Expression whenExpression) {
         this.whenExpression = whenExpression;
     }
 
+    /**
+     * Set then.
+     * @param thenAssignments to set
+     */
     public void setThenAssignments(List<AssignmentPair> thenAssignments) {
         this.thenAssignments = thenAssignments;
     }
 
+    /**
+     * Crontab.
+     * @param crontabAtParameters to set
+     */
     public void setCrontabAtParameters(Expression[] crontabAtParameters) {
         this.crontabAtParameters = crontabAtParameters;
     }
 
+    /**
+     * Crontab
+     * @param timePeriodExpression to set
+     */
     public void setTimePeriodExpression(Expression timePeriodExpression) {
         this.timePeriodExpression = timePeriodExpression;
     }

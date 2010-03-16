@@ -28,6 +28,9 @@ public class CreateWindowClause implements Serializable
     private boolean insert;
     private Expression insertWhereClause;
 
+    /**
+     * Ctor.
+     */
     public CreateWindowClause() {
     }
 
@@ -233,7 +236,6 @@ public class CreateWindowClause implements Serializable
     /**
      * Sets the filter expression for inserting from another named window
      * @param insertWhereClause filter expression
-     * @return create window clause
      */
     public void setInsertWhereClause(Expression insertWhereClause)
     {
@@ -249,6 +251,11 @@ public class CreateWindowClause implements Serializable
         this.views = views;
     }
 
+    /**
+     * To-EPL for create-table syntax.
+     * @param writer to use
+     * @param selectClause select clause
+     */
     public void toEPLCreateTablePart(StringWriter writer, SelectClause selectClause)
     {
         writer.write('(');

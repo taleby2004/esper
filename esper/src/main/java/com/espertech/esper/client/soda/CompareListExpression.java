@@ -11,6 +11,9 @@ public class CompareListExpression extends ExpressionBase
     private boolean all;
     private static final long serialVersionUID = 2915262248687901526L;
 
+    /**
+     * Ctor.
+     */
     public CompareListExpression() {
     }
 

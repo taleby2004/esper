@@ -21,6 +21,9 @@ public class OrderByElement implements Serializable
     private Expression expression;
     private boolean descending;
 
+    /**
+     * Ctor.
+     */
     public OrderByElement() {
     }
 

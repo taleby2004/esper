@@ -32,6 +32,7 @@ public class VariableReader
      * Ctor.
      * @param versionThreadLocal service for returning the threads current version of variable
      * @param type is the type of the variable returned
+     * @param eventType if variable is an event then the type otherwise null
      * @param variableName variable name
      * @param variableNumber number of the variable
      * @param versions a list of versioned-values to ask for the version
@@ -93,6 +94,10 @@ public class VariableReader
         this.versionsLow = versionsLow;
     }
 
+    /**
+     * Returns the event type if the variable hold event(s).
+     * @return type
+     */
     public EventType getEventType() {
         return eventType;
     }

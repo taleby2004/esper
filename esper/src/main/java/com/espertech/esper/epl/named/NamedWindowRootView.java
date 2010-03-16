@@ -105,6 +105,7 @@ public class NamedWindowRootView extends ViewSupport
 
     /**
      * Called by tail view to indicate that the data window view has new events that must be added to index tables.
+     * @param newData new event
      */
     public void addNewData(EventBean[] newData)
     {
@@ -117,6 +118,13 @@ public class NamedWindowRootView extends ViewSupport
         }
     }
 
+    /**
+     * Add an explicit index.
+     * @param namedWindowName window name
+     * @param indexName indexname
+     * @param columns properties indexed
+     * @throws ExprValidationException if the index fails to be valid
+     */
     public synchronized void addExplicitIndex(String namedWindowName, String indexName, List<String> columns) throws ExprValidationException {
 
         if (explicitIndexes.containsKey(indexName)) {
@@ -332,6 +340,11 @@ public class NamedWindowRootView extends ViewSupport
         tablePerStrategy.clear();
     }
 
+    /**
+     * Return a snapshot using index lookup filters.
+     * @param filter to index lookup
+     * @return events
+     */
     public Collection<EventBean> snapshot(FilterSpecCompiled filter) {
         if (filter.getParameters().isEmpty()) {
             return null;
@@ -434,6 +447,10 @@ public class NamedWindowRootView extends ViewSupport
         return Collections.EMPTY_LIST;
     }
 
+    /**
+     * Drop an explicit index.
+     * @param indexName to drop
+     */
     public void removeExplicitIndex(String indexName)
     {
         EventTable table = explicitIndexes.remove(indexName);
@@ -442,6 +459,10 @@ public class NamedWindowRootView extends ViewSupport
         }
     }
 
+    /**
+     * Set batch view indicator
+     * @param batchView true for batch view
+     */
     public void setBatchView(boolean batchView) {
         isChildBatching = batchView;
     }

@@ -7,6 +7,15 @@ package com.espertech.esper.client.annotation;
  */
 public @interface Hook
 {
+    /**
+     * Returns the simple class name (using imports) or fully-qualified class name of the hook.
+     * @return class name
+     */
     String hook();
+
+    /**
+     * Returns hook type.
+     * @return hook type
+     */
     HookType type();    
 }

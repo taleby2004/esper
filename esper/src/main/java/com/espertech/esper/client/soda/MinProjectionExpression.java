@@ -18,6 +18,9 @@ public class MinProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = -5521787388585609418L;
 
+    /**
+     * Ctor.
+     */
     public MinProjectionExpression() {
     }
 

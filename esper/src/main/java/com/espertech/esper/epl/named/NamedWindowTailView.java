@@ -225,6 +225,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
 
     /**
      * Returns a snapshot of window contents, thread-safely
+     * @param filter filters if any
      * @return window contents
      */
     public Collection<EventBean> snapshot(FilterSpecCompiled filter)
@@ -278,6 +279,10 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         return numberOfEvents;
     }
 
+    /**
+     * Sets true for batch views.
+     * @param batchView indicator
+     */
     public void setBatchView(boolean batchView) {
         isParentBatchWindow = batchView;
     }

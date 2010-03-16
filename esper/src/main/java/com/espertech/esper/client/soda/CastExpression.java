@@ -18,6 +18,9 @@ public class CastExpression extends ExpressionBase
     private String typeName;
     private static final long serialVersionUID = -8931072217889088459L;
 
+    /**
+     * Ctor.
+     */
     public CastExpression() {
     }
 

@@ -25,6 +25,9 @@ public class SelectClause implements Serializable
     private StreamSelector streamSelector;
     private List<SelectClauseElement> selectList;
 
+    /**
+     * Ctor.
+     */
     public SelectClause() {
     }
 

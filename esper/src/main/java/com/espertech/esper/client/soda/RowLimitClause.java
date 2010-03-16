@@ -23,6 +23,9 @@ public class RowLimitClause implements Serializable
     private String numRowsVariable;
     private String optionalOffsetRowsVariable;
 
+    /**
+     * Ctor.
+     */
     public RowLimitClause() {
     }
 

@@ -19,11 +19,19 @@ public class ConfigurationVariable implements Serializable
     private Object initializationValue;
     private static final long serialVersionUID = 4273849084807284503L;
 
+    /**
+     * Returns the variable type as a fully-qualified class name, primitive type or event type name.
+     * @return type name
+     */
     public String getType()
     {
         return type;
     }
 
+    /**
+     * Sets the variable type as a fully-qualified class name, primitive type or event type name.
+     * @param type type name
+     */
     public void setType(String type)
     {
         this.type = type;

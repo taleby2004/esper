@@ -48,6 +48,7 @@ public class PropertyIndexedEventTable implements EventTable
      * @param streamNum - the stream number that is indexed
      * @param eventType - types of events indexed
      * @param propertyNames - property names to use for indexing
+     * @param propertyCoercedTypes - property types
      */
     public PropertyIndexedEventTable(int streamNum, EventType eventType, String[] propertyNames, Class[] propertyCoercedTypes)
     {
@@ -187,10 +188,18 @@ public class PropertyIndexedEventTable implements EventTable
         propertyIndex.clear();
     }
 
+    /**
+     * Returns index property names.
+     * @return property names
+     */
     public String[] getPropertyNames() {
         return propertyNames;
     }
 
+    /**
+     * Returns property types.
+     * @return types
+     */
     public Class[] getPropertyCoercedTypes()
     {
         return propertyCoercedTypes;

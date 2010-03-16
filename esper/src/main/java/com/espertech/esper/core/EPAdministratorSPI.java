@@ -47,6 +47,17 @@ public interface EPAdministratorSPI extends EPAdministrator
      */
     public PatternExpr compilePatternToSODA(String expression) throws EPException;
 
+    /**
+     * Compile annotation expressions.
+     * @param annotationExpression to compile
+     * @return model representation
+     */
     public AnnotationPart compileAnnotationToSODA(String annotationExpression);
+
+    /**
+     * Compile match recognize pattern expression.
+     * @param matchRecogPatternExpression to compile
+     * @return model representation
+     */
     public MatchRecognizeRegEx compileMatchRecognizePatternToSODA(String matchRecogPatternExpression);
 }

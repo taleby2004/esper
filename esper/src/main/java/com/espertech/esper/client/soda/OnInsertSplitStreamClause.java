@@ -22,6 +22,9 @@ public class OnInsertSplitStreamClause extends OnClause
     private boolean first;
     private List<OnInsertSplitStreamItem> items = new ArrayList<OnInsertSplitStreamItem>();
 
+    /**
+     * Ctor.
+     */
     public OnInsertSplitStreamClause() {
     }
 

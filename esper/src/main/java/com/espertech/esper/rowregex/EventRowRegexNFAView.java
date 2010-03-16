@@ -80,6 +80,7 @@ public class EventRowRegexNFAView extends ViewSupport
      * @param aggregationService handles aggregations
      * @param isUnbound true if unbound stream
      * @param isIterateOnly true for iterate-only
+     * @param isSelectAsksMultimatches if asking for multimatches
      */
     public EventRowRegexNFAView(EventType compositeEventType,
                                 EventType rowEventType,

@@ -27,17 +27,36 @@ public interface PatternExpr extends Serializable
      * @return pattern child expressions or empty list if there are no child expressions
      */
     public List<PatternExpr> getChildren();
+
+    /**
+     * Sets the list of pattern sub-expressions (child expressions) to the current pattern expression node.
+     * @param children pattern child expressions or empty list if there are no child expressions
+     */
     public void setChildren(List<PatternExpr> children);
 
+    /**
+     * Returns the precedence.
+     * @return precedence
+     */
     public PatternExprPrecedenceEnum getPrecedence();
 
     /**
      * Renders the pattern expression and all it's child expressions, in full tree depth, as a string in
      * language syntax.
      * @param writer is the output to use
+     * @param parentPrecedence precedence
      */    
     public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence);
 
+    /**
+     * Returns the id for the pattern expression, for use by tools.
+     * @return id
+     */
     public String getTreeObjectName();
-    public void setTreeObjectName(String objectName);    
+
+    /**
+     * Sets and id for the pattern expression, for use by tools.
+     * @param objectName id
+     */
+    public void setTreeObjectName(String objectName);
 }

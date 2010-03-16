@@ -17,6 +17,9 @@ public class ConcatExpression extends ExpressionBase
 {
     private static final long serialVersionUID = 0L;
 
+    /**
+     * Ctor.
+     */
     public ConcatExpression() {
     }
 

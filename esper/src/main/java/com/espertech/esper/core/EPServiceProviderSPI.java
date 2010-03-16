@@ -143,6 +143,15 @@ public interface EPServiceProviderSPI extends EPServiceProvider
      */
     public StatementContextFactory getStatementContextFactory();
 
+    /**
+     * Returns engine imports.
+     * @return engine imports
+     */
     public EngineImportService getEngineImportService();
+
+    /**
+     * Returns time provider.
+     * @return time provider
+     */
     public TimeProvider getTimeProvider();
 }

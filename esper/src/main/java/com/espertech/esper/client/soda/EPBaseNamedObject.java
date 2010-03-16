@@ -23,6 +23,9 @@ public abstract class EPBaseNamedObject implements Serializable
     private String name;
     private List<Expression> parameters;
 
+    /**
+     * Ctor.
+     */
     public EPBaseNamedObject() {
     }
 

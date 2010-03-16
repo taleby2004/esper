@@ -11,6 +11,9 @@ public class OrderedObjectParamExpression extends ExpressionBase
     private boolean descending;
     private static final long serialVersionUID = -8607653757516174092L;
 
+    /**
+     * Ctor.
+     */
     public OrderedObjectParamExpression() {
     }
 
@@ -41,10 +44,18 @@ public class OrderedObjectParamExpression extends ExpressionBase
         return descending;
     }
 
+    /**
+     * Return true for descending.
+     * @param descending indicator
+     */
     public void setDescending(boolean descending) {
         this.descending = descending;
     }
 
+    /**
+     * Return precedence.
+     * @return precedence
+     */
     public ExpressionPrecedenceEnum getPrecedence()
     {
         return ExpressionPrecedenceEnum.UNARY;

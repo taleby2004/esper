@@ -170,6 +170,11 @@ public class SQLTypeMapUtil
         throw new IllegalArgumentException("Cannot map java.sql.Types type " + sqlType);
     }
 
+    /**
+     * Returns the SQL type by type name.
+     * @param type sql type name
+     * @return type sql type
+     */
     public static int getSQLTypeByName(String type)
     {
         Integer val = sqlTypeMap.get(type.toUpperCase());

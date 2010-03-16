@@ -18,6 +18,9 @@ public class MaxProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = -2052925266576308551L;
 
+    /**
+     * Ctor.
+     */
     public MaxProjectionExpression() {
     }
 

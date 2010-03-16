@@ -22,6 +22,9 @@ public class PatternStream extends ProjectedStream
     private PatternExpr expression;
     private static final long serialVersionUID = -8321367637970657123L;
 
+    /**
+     * Ctor.
+     */
     public PatternStream() {
     }
 

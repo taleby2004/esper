@@ -22,6 +22,9 @@ public class BetweenExpression extends ExpressionBase
     private boolean isNotBetween;
     private static final long serialVersionUID = 4626033892510751123L;
 
+    /**
+     * Ctor.
+     */
     public BetweenExpression() {
     }
 

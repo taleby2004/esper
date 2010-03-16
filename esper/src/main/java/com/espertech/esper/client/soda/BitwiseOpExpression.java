@@ -20,6 +20,9 @@ public class BitwiseOpExpression extends ExpressionBase
     private BitWiseOpEnum binaryOp;
     private static final long serialVersionUID = 5564205980185587363L;
 
+    /**
+     * Ctor.
+     */
     public BitwiseOpExpression() {
     }
 

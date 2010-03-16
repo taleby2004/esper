@@ -20,6 +20,9 @@ public class SelectClauseExpression implements SelectClauseElement
     private Expression expression;
     private String asName;
 
+    /**
+     * Ctor.
+     */
     public SelectClauseExpression() {
     }
 

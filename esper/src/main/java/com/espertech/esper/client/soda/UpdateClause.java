@@ -19,6 +19,9 @@ public class UpdateClause implements MetaDefItem, Serializable
     private List<AssignmentPair> assignments;
     private Expression optionalWhereClause;
 
+    /**
+     * Ctor.
+     */
     public UpdateClause() {
     }
 

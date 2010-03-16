@@ -175,13 +175,25 @@ public interface ConfigurationOperations
      * <p>
      * Use the runtime API to set variable values or EPL statements to change variable values. 
      * @param variableName name of the variable to add
-     * @param type the type of the variable must be a primitive or boxed Java-builtin scalar type.
+     * @param type the type name of the variable, must be a primitive or boxed Java-builtin scalar type or "object" for any
+     * value or a POJO class name.
      * @param initializationValue is the first assigned value
      * @throws ConfigurationException if the type and initialization value don't match or the variable name
      * is already in use
      */
     public void addVariable(String variableName, Class type, Object initializationValue) throws ConfigurationException;
 
+    /**
+     * Add a variable.
+     * <p>
+     * Use the runtime API to set variable values or EPL statements to change variable values.
+     * @param variableName name of the variable to add
+     * @param type the type name of the variable, must be a primitive or boxed Java-builtin scalar type or "object" for any
+     * value or an event type name.
+     * @param initializationValue is the first assigned value
+     * @throws ConfigurationException if the type and initialization value don't match or the variable name
+     * is already in use
+     */
     public void addVariable(String variableName, String type, Object initializationValue) throws ConfigurationException;
 
     /**

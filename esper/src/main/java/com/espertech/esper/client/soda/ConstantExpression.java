@@ -21,14 +21,25 @@ public class ConstantExpression extends ExpressionBase
     private String constantType;
     private static final long serialVersionUID = 1787950621647511049L;
 
+    /**
+     * Ctor.
+     */
     public ConstantExpression() {
     }
 
+    /**
+     * Returns the type of the constant.
+     * @return type
+     */
     public String getConstantType()
     {
         return constantType;
     }
 
+    /**
+     * Sets the type of the constant.
+     * @param constantType type
+     */
     public void setConstantType(String constantType)
     {
         this.constantType = constantType;
@@ -43,6 +54,11 @@ public class ConstantExpression extends ExpressionBase
         this.constant = constant;
     }
 
+    /**
+     * Ctor.
+     * @param constant value
+     * @param constantType type
+     */
     public ConstantExpression(Object constant, String constantType)
     {
         this.constant = constant;

@@ -19,6 +19,9 @@ public class View extends EPBaseNamedObject
 {
     private static final long serialVersionUID = 704960216123401420L;
 
+    /**
+     * Ctor.
+     */
     public View() {
     }
 

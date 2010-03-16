@@ -48,6 +48,8 @@ public class DatabasePollingViewableFactory
      * @param databaseConfigService for getting database connection and settings
      * @param eventAdapterService for generating event beans from database information
      * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
+     * @param columnTypeConversionHook hook for statement-specific column conversion
+     * @param outputRowConversionHook hook for statement-specific row conversion
      * @return viewable providing poll functionality
      * @throws ExprValidationException if the validation failed
      */

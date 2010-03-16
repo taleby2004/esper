@@ -18,6 +18,9 @@ public class CountProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = -2814984847197845844L;
 
+    /**
+     * Ctor.
+     */
     public CountProjectionExpression() {
     }
 

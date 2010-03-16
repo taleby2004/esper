@@ -17,6 +17,9 @@ public class ArrayExpression extends ExpressionBase
 {
     private static final long serialVersionUID = 5332982041846659978L;
 
+    /**
+     * Ctor.
+     */
     public ArrayExpression() {
     }
 

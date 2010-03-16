@@ -19,6 +19,9 @@ public class StaticMethodExpression extends ExpressionBase
     private String method;
     private static final long serialVersionUID = -8876482797010708113L;
 
+    /**
+     * Ctor.
+     */
     public StaticMethodExpression() {
     }
 

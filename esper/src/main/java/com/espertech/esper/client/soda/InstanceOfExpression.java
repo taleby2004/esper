@@ -18,6 +18,9 @@ public class InstanceOfExpression extends ExpressionBase
     private String[] typeNames;
     private static final long serialVersionUID = 237629474193131995L;
 
+    /**
+     * Ctor.
+     */
     public InstanceOfExpression() {
     }
 

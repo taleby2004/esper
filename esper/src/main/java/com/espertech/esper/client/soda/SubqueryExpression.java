@@ -18,6 +18,9 @@ public class SubqueryExpression extends ExpressionBase
     private EPStatementObjectModel model;
     private static final long serialVersionUID = 5210335236320516663L;
 
+    /**
+     * Ctor.
+     */
     public SubqueryExpression() {
     }
 

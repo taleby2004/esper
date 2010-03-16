@@ -15,6 +15,9 @@ public class ContainedEventSelect implements Serializable
     private String propertyAsName;
     private Expression whereClause;
 
+    /**
+     * Ctor.
+     */
     public ContainedEventSelect() {
     }
 

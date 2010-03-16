@@ -25,6 +25,9 @@ public class InsertIntoClause implements Serializable
     private String streamName;
     private List<String> columnNames;
 
+    /**
+     * Ctor.
+     */
     public InsertIntoClause() {
     }
 
@@ -101,11 +104,19 @@ public class InsertIntoClause implements Serializable
         this.columnNames = columnNames;
     }
 
+    /**
+     * Returns true for insert stream.
+     * @return indicator insert stream
+     */
     public boolean isInsertStream()
     {
         return insertStream;
     }
 
+    /**
+     * Set to true for insert stream.
+     * @param insertStream indicator insert stream
+     */
     public void setInsertStream(boolean insertStream)
     {
         this.insertStream = insertStream;
@@ -147,11 +158,19 @@ public class InsertIntoClause implements Serializable
         return columnNames;
     }
 
+    /**
+     * Set to true for insert stream.
+     * @param IStream indicator insert stream
+     */
     public void setIStream(boolean IStream)
     {
         insertStream = IStream;
     }
 
+    /**
+     * Set stream name.
+     * @param streamName name
+     */
     public void setStreamName(String streamName)
     {
         this.streamName = streamName;
@@ -166,6 +185,10 @@ public class InsertIntoClause implements Serializable
         columnNames.add(columnName);
     }
 
+    /**
+     * Set column names.
+     * @param columnNames names
+     */
     public void setColumnNames(List<String> columnNames) {
         this.columnNames = columnNames;
     }

@@ -133,6 +133,7 @@ public class VariableServiceImpl implements VariableService
      * @param millisecondLifetimeOldVersions number of milliseconds a version may hang around before expiry
      * @param timeProvider provides the current time
      * @param optionalStateHandler a optional plug-in that may store variable state and retrieve state upon creation
+     * @param eventAdapterService event adapters
      */
     public VariableServiceImpl(long millisecondLifetimeOldVersions, TimeProvider timeProvider, EventAdapterService eventAdapterService, VariableStateHandler optionalStateHandler)
     {
@@ -145,6 +146,7 @@ public class VariableServiceImpl implements VariableService
      * @param millisecondLifetimeOldVersions number of milliseconds a version may hang around before expiry
      * @param timeProvider provides the current time
      * @param optionalStateHandler a optional plug-in that may store variable state and retrieve state upon creation
+     * @param eventAdapterService for finding event types
      */
     protected VariableServiceImpl(int startVersion, long millisecondLifetimeOldVersions, TimeProvider timeProvider, EventAdapterService eventAdapterService, VariableStateHandler optionalStateHandler)
     {
@@ -307,7 +309,7 @@ public class VariableServiceImpl implements VariableService
         // Check current state - see if the variable exists in the state handler
         if (optionalStateHandler != null)
         {
-            Pair<Boolean, Object> priorValue = optionalStateHandler.getHasState(variableName, currentVariableNumber, variableType, extensionServicesContext);
+            Pair<Boolean, Object> priorValue = optionalStateHandler.getHasState(variableName, currentVariableNumber, variableType, eventType, extensionServicesContext);
             if (priorValue.getFirst())
             {
                 coercedValue = priorValue.getSecond();

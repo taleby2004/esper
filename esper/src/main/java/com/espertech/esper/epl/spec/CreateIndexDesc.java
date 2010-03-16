@@ -22,6 +22,12 @@ public class CreateIndexDesc implements MetaDefItem, Serializable
     private final String windowName;
     private final List<String> columns;
 
+    /**
+     * Ctor.
+     * @param indexName index name
+     * @param windowName window name
+     * @param columns properties to index
+     */
     public CreateIndexDesc(String indexName, String windowName, List<String> columns)
     {
         this.indexName = indexName;
@@ -29,16 +35,28 @@ public class CreateIndexDesc implements MetaDefItem, Serializable
         this.columns = columns;
     }
 
+    /**
+     * Returns index name.
+     * @return index name
+     */
     public String getIndexName()
     {
         return indexName;
     }
 
+    /**
+     * Returns window name.
+     * @return window name
+     */
     public String getWindowName()
     {
         return windowName;
     }
 
+    /**
+     * Returns columns.
+     * @return columns
+     */
     public List<String> getColumns()
     {
         return columns;

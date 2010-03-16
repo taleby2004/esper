@@ -47,7 +47,8 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
      * @param connectionCache caches Connection and PreparedStatement
      * @param preparedStatementText is the SQL to use for polling
      * @param outputTypes describe columns selected by the SQL
-     * @param outputRowConversionHook
+     * @param outputRowConversionHook hook to convert rows, if any hook is registered
+     * @param columnTypeConversionHook hook to convert columns, if any hook is registered
      */
     public PollExecStrategyDBQuery(EventAdapterService eventAdapterService,
                                    EventType eventType,

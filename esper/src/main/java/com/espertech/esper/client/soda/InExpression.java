@@ -18,6 +18,9 @@ public class InExpression extends ExpressionBase
     private boolean notIn;
     private static final long serialVersionUID = -5105764419995579144L;
 
+    /**
+     * Ctor.
+     */
     public InExpression() {
     }
 

@@ -20,6 +20,9 @@ public class AvgProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = 8608818096433764685L;
 
+    /**
+     * Ctor.
+     */
     public AvgProjectionExpression() {
     }
 

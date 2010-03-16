@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.io.Serializable;
 import java.io.StringWriter;
 
@@ -23,26 +21,50 @@ public class MatchRecognizeRegExAtom extends MatchRecognizeRegEx implements Seri
     private String name;
     private MatchRecogizePatternElementType type;
 
+    /**
+     * Ctor.
+     */
     public MatchRecognizeRegExAtom() {
     }
 
+    /**
+     * Ctor.
+     * @param name of variable
+     * @param type multiplicity
+     */
     public MatchRecognizeRegExAtom(String name, MatchRecogizePatternElementType type) {
         this.name = name;
         this.type = type;
     }
 
+    /**
+     * Returns variable name.
+     * @return name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets variable name.
+     * @param name variable name to set
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Returns multiplicity.
+     * @return multiplicity
+     */
     public MatchRecogizePatternElementType getType() {
         return type;
     }
 
+    /**
+     * Sets multiplicity.
+     * @param type multiplicity
+     */
     public void setType(MatchRecogizePatternElementType type) {
         this.type = type;
     }

@@ -20,6 +20,9 @@ public class SubqueryQualifiedExpression extends ExpressionBase
     private boolean all;
     private static final long serialVersionUID = 7461569844284137858L;
 
+    /**
+     * Ctor.
+     */
     public SubqueryQualifiedExpression() {
     }
 

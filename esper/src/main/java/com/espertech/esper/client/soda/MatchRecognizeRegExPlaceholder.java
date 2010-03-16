@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.io.Serializable;
 import java.io.StringWriter;
 
+/**
+ * For use in match recognize pattern expression as a placeholder to represent its child nodes.
+ */
 public class MatchRecognizeRegExPlaceholder extends MatchRecognizeRegEx implements Serializable
 {
     public void writeEPL(StringWriter writer) {

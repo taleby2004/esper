@@ -44,6 +44,7 @@ public class ExprConstantNode extends ExprNode
     /**
      * Ctor.
      * @param value is the constant's value.
+     * @param valueType is the constant's value type.
      */
     public ExprConstantNode(Object value, Class valueType)
     {

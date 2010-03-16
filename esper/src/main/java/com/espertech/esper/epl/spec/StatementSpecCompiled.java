@@ -66,6 +66,7 @@ public class StatementSpecCompiled
      * @param updateSpec update specification if used
      * @param matchRecognizeSpec if provided
      * @param variableReferences variables referenced
+     * @param createIndexDesc when an index get
      */
     public StatementSpecCompiled(OnTriggerDesc onTriggerDesc,
                                  CreateWindowDesc createWindowDesc,
@@ -361,6 +362,10 @@ public class StatementSpecCompiled
         return variableReferences;
     }
 
+    /**
+     * Returns create index
+     * @return create index
+     */
     public CreateIndexDesc getCreateIndexDesc()
     {
         return createIndexDesc;

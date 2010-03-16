@@ -20,6 +20,9 @@ public class OnDeleteClause extends OnClause
     private String windowName;
     private String optionalAsName;
 
+    /**
+     * Ctor.
+     */
     public OnDeleteClause() {
     }
 

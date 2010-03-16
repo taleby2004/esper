@@ -22,6 +22,9 @@ public class CreateVariableClause implements Serializable
     private String variableName;
     private Expression optionalAssignment;
 
+    /**
+     * Ctor.
+     */
     public CreateVariableClause() {
     }
 

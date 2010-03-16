@@ -89,6 +89,10 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
         registerAdapter(((AdapterSPI) adapter).getEPServiceProvider());
     }
 
+    /**
+     * Register an adapter.
+     * @param epService engine
+     */
     public void registerAdapter(EPServiceProvider epService)
     {
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;

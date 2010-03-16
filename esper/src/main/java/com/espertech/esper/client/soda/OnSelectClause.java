@@ -20,6 +20,9 @@ public class OnSelectClause extends OnClause
     private String windowName;
     private String optionalAsName;
 
+    /**
+     * Ctor.
+     */
     public OnSelectClause() {
     }
 

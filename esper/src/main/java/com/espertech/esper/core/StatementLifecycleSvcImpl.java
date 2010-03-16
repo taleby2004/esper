@@ -171,6 +171,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
      * @param userObject the application define user object associated to each statement, if supplied
      * @param isolationUnitServices isolated service services
      * @param isFailed to start the statement in failed state
+     * @param nameProvided true when an explicit statement name is provided
      * @return stopped statement
      */
     protected synchronized EPStatementDesc createStopped(StatementSpecRaw statementSpec,

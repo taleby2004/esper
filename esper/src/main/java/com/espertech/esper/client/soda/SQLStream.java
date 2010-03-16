@@ -20,6 +20,9 @@ public class SQLStream extends Stream
     private String optionalMetadataSQL;
     private static final long serialVersionUID = 2606529559298987982L;
 
+    /**
+     * Ctor.
+     */
     public SQLStream() {
     }
 

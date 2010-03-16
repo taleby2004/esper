@@ -209,6 +209,12 @@ public interface EventAdapterService
      */
     public EventBean adapterForTypedDOM(Node node, EventType eventType);
 
+    /**
+     * Returns an adapter for an event underlying object when the event type is known.
+     * @param event underlying
+     * @param eventType type
+     * @return event wrapper for object
+     */
     public EventBean adapterForType(Object event, EventType eventType);
 
     /**

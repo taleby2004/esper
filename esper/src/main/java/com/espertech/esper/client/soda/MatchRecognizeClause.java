@@ -5,6 +5,9 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Match-recognize clause.
+ */
 public class MatchRecognizeClause implements Serializable {
 
     private List<Expression> partitionExpressions = new ArrayList<Expression>();
@@ -15,6 +18,9 @@ public class MatchRecognizeClause implements Serializable {
     private MatchRecognizeIntervalClause intervalClause;
     private List<MatchRecognizeDefine> defines = new ArrayList<MatchRecognizeDefine>();
 
+    /**
+     * Ctor.
+     */
     public MatchRecognizeClause() {
     }
 
@@ -73,66 +79,114 @@ public class MatchRecognizeClause implements Serializable {
         writer.write(")");
     }
 
+    /**
+     * Get partition expressions.
+     * @return partition expressions
+     */
     public List<Expression> getPartitionExpressions() {
         return partitionExpressions;
     }
 
+    /**
+     * Set partition expressions.
+     * @param partitionExpressions partition expressions
+     */
     public void setPartitionExpressions(List<Expression> partitionExpressions) {
         this.partitionExpressions = partitionExpressions;
     }
 
+    /**
+     * Returns measures.
+     * @return measures
+     */
     public List<SelectClauseExpression> getMeasures() {
         return measures;
     }
 
+    /**
+     * Sets measures.
+     * @param measures to set
+     */
     public void setMeasures(List<SelectClauseExpression> measures) {
         this.measures = measures;
     }
 
+    /**
+     * Indicator whether all matches.
+     * @return all matches
+     */
     public boolean isAll() {
         return all;
     }
 
+    /**
+     * Sets indicator whether all matches.
+     * @param all all matches
+     */
     public void setAll(boolean all) {
         this.all = all;
     }
 
-    public MatchRecognizeSkipClause getSkip() {
-        return skipClause;
-    }
-
-    public void setSkip(MatchRecognizeSkipClause skipClause) {
-        this.skipClause = skipClause;
-    }
-
+    /**
+     * Returns skip-clause.
+     * @return skip-clause
+     */
     public MatchRecognizeSkipClause getSkipClause() {
         return skipClause;
     }
 
+    /**
+     * Sets the skip-clause.
+     * @param skipClause to set
+     */
     public void setSkipClause(MatchRecognizeSkipClause skipClause) {
         this.skipClause = skipClause;
     }
 
+    /**
+     * Returns the defines-clause
+     * @return defines-clause
+     */
     public List<MatchRecognizeDefine> getDefines() {
         return defines;
     }
 
+    /**
+     * Sets the defines-clause
+     * @param defines to set
+     */
     public void setDefines(List<MatchRecognizeDefine> defines) {
         this.defines = defines;
     }
 
+    /**
+     * Returns the interval clause.
+     * @return interval clause
+     */
     public MatchRecognizeIntervalClause getIntervalClause() {
         return intervalClause;
     }
 
+    /**
+     * Sets the interval clause.
+     * @param intervalClause interval clause
+     */
     public void setIntervalClause(MatchRecognizeIntervalClause intervalClause) {
         this.intervalClause = intervalClause;
     }
 
+    /**
+     * Returns regex-pattern.
+     * @return pattern
+     */
     public MatchRecognizeRegEx getPattern() {
         return pattern;
     }
 
+    /**
+     * Sets regex-pattern.
+     * @param pattern to set
+     */
     public void setPattern(MatchRecognizeRegEx pattern) {
         this.pattern = pattern;
     }

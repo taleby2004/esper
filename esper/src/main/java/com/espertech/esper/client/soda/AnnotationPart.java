@@ -18,19 +18,34 @@ public class AnnotationPart implements Serializable {
     //      <"value"|attribute name, constant|array of value (Object[])| AnnotationPart
     private List<AnnotationAttribute> attributes = new ArrayList<AnnotationAttribute>();
 
+    /**
+     * Ctor.
+     */
     public AnnotationPart() {
     }
 
+    /**
+     * Copy annotation values.
+     * @param other to copy
+     */
     public void copy(AnnotationPart other) {
         name = other.name;
         attributes = other.attributes;
     }
-    
+
+    /**
+     * Returns the internal expression id assigned for tools to identify the expression.
+     * @return object name
+     */
     public String getTreeObjectName()
     {
         return treeObjectName;
     }
 
+    /**
+     * Sets an internal expression id assigned for tools to identify the expression.
+     * @param treeObjectName object name
+     */
     public void setTreeObjectName(String treeObjectName)
     {
         this.treeObjectName = treeObjectName;
@@ -64,6 +79,10 @@ public class AnnotationPart implements Serializable {
         return name;
     }
 
+    /**
+     * Sets annotation interface class name.
+     * @param name name of class, can be fully qualified
+     */
     public void setName(String name) {
         this.name = name;
     }

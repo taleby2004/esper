@@ -19,6 +19,9 @@ public class ArithmaticExpression extends ExpressionBase
     
     private String operator;
 
+    /**
+     * Ctor.
+     */
     public ArithmaticExpression() {
     }
 
@@ -53,6 +56,10 @@ public class ArithmaticExpression extends ExpressionBase
         return operator;
     }
 
+    /**
+     * Set operator
+     * @param operator new value
+     */
     public void setOperator(String operator) {
         this.operator = operator;
     }

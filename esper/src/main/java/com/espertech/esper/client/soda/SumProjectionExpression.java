@@ -18,6 +18,9 @@ public class SumProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = -5248048600379786929L;
 
+    /**
+     * Ctor.
+     */
     public SumProjectionExpression() {
     }
 

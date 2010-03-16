@@ -83,11 +83,19 @@ public class ConfigurationPluginLoader implements Serializable
         this.loaderName = loaderName;
     }
 
+    /**
+     * Returns configuration XML for the plugin.
+     * @return xml
+     */
     public String getConfigurationXML()
     {
         return configurationXML;
     }
 
+    /**
+     * Sets configuration XML for the plugin.
+     * @param configurationXML xml to set
+     */
     public void setConfigurationXML(String configurationXML)
     {
         this.configurationXML = configurationXML;

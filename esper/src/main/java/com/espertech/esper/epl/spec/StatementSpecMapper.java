@@ -34,19 +34,39 @@ import java.util.List;
  */
 public class StatementSpecMapper
 {
+    /**
+     * Unmap expresission.
+     * @param expression to unmap
+     * @return expression
+     */
     public static Expression unmap(ExprNode expression) {
         return unmapExpressionDeep(expression, new StatementSpecUnMapContext());
     }
 
+    /**
+     * Unmap pattern.
+     * @param node to unmap
+     * @return pattern
+     */
     public static PatternExpr unmap(EvalNode node) {
         return unmapPatternEvalDeep(node, new StatementSpecUnMapContext());
     }
 
+    /**
+     * Unmap annotation.
+     * @param node to unmap
+     * @return annotation
+     */
     public static AnnotationPart unmap(AnnotationDesc node) {
         List<AnnotationPart> list = unmapAnnotations(Collections.singletonList(node));
         return list.get(0);
     }
 
+    /**
+     * Unmap match recognize pattern.
+     * @param pattern recognize pattern to unmap
+     * @return match recognize pattern
+     */
     public static MatchRecognizeRegEx unmap(RowRegexExprNode pattern) {
         return unmapExpressionDeepRowRegex(pattern, new StatementSpecUnMapContext());
     }
@@ -369,7 +389,7 @@ public class StatementSpecMapper
         }
         clause.setMeasures(measures);
         clause.setAll(spec.isAllMatches());
-        clause.setSkip(MatchRecognizeSkipClause.values()[spec.getSkip().getSkip().ordinal()]);
+        clause.setSkipClause(MatchRecognizeSkipClause.values()[spec.getSkip().getSkip().ordinal()]);
 
         List<MatchRecognizeDefine> defines = new ArrayList<MatchRecognizeDefine>();
         for (MatchRecognizeDefineItem define : spec.getDefines()) {
@@ -576,7 +596,7 @@ public class StatementSpecMapper
         }
         spec.setMeasures(measures);
         spec.setAllMatches(clause.isAll());
-        spec.setSkip(new MatchRecognizeSkip(MatchRecognizeSkipEnum.values()[clause.getSkip().ordinal()]));
+        spec.setSkip(new MatchRecognizeSkip(MatchRecognizeSkipEnum.values()[clause.getSkipClause().ordinal()]));
 
         List<MatchRecognizeDefineItem> defines = new ArrayList<MatchRecognizeDefineItem>();
         for (MatchRecognizeDefine define : clause.getDefines()) {

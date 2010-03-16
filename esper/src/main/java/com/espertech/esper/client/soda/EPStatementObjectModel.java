@@ -571,18 +571,34 @@ public class EPStatementObjectModel implements Serializable
         this.annotations = annotations;
     }
 
+    /**
+     * Match-recognize clause.
+     * @return clause
+     */
     public MatchRecognizeClause getMatchRecognizeClause() {
         return matchRecognizeClause;
     }
 
-    public void setMatchRecognizeClause(MatchRecognizeClause matchRecognizeClause) {
-        this.matchRecognizeClause = matchRecognizeClause;
+    /**
+     * Sets match-recognize clause.
+     * @param clause to set
+     */
+    public void setMatchRecognizeClause(MatchRecognizeClause clause) {
+        this.matchRecognizeClause = clause;
     }
 
+    /**
+     * Returns create-index clause.
+     * @return clause
+     */
     public CreateIndexClause getCreateIndex() {
         return createIndex;
     }
 
+    /**
+     * Sets create-index clause.
+     * @param createIndex to set
+     */
     public void setCreateIndex(CreateIndexClause createIndex) {
         this.createIndex = createIndex;
     }

@@ -23,27 +23,50 @@ public abstract class MatchRecognizeRegEx implements Serializable
     private String treeObjectName;
     private List<MatchRecognizeRegEx> children;
 
+    /**
+     * Returns id of expression assigned by tools.
+     * @return id
+     */
     public String getTreeObjectName()
     {
         return treeObjectName;
     }
 
+    /**
+     * Sets id of expression assigned by tools.
+     * @param treeObjectName to set
+     */
     public void setTreeObjectName(String treeObjectName)
     {
         this.treeObjectName = treeObjectName;
     }
 
+    /**
+     * Ctor.
+     */
     protected MatchRecognizeRegEx() {
         this.children = new ArrayList<MatchRecognizeRegEx>();
     }
 
+    /**
+     * Returns child nodes.
+     * @return child nodes
+     */
     public List<MatchRecognizeRegEx> getChildren() {
         return children;
     }
 
+    /**
+     * Set child nodes.
+     * @param children child nodes to set
+     */
     public void setChildren(List<MatchRecognizeRegEx> children) {
         this.children = children;
     }
 
+    /**
+     * Write EPL.
+     * @param writer to use
+     */
     public abstract void writeEPL(StringWriter writer);
 }

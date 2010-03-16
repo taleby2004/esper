@@ -1,5 +1,8 @@
 package com.espertech.esper.client.soda;
 
+/**
+ * Skip clause enum for match recognize.
+ */
 public enum MatchRecognizeSkipClause {
     /**
      * Skip to current row.
@@ -18,10 +21,14 @@ public enum MatchRecognizeSkipClause {
 
     private String text;
 
-    MatchRecognizeSkipClause(String text) {
+    private MatchRecognizeSkipClause(String text) {
         this.text = text;
     }
 
+    /**
+     * Returns clause text.
+     * @return textual
+     */
     public String getText() {
         return text;
     }

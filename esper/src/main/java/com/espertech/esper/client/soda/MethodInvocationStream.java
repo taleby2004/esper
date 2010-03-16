@@ -22,6 +22,9 @@ public class MethodInvocationStream extends Stream
     private List<Expression> parameterExpressions;
     private static final long serialVersionUID = -4629123886680505829L;
 
+    /**
+     * Ctor.
+     */
     public MethodInvocationStream() {
     }
 

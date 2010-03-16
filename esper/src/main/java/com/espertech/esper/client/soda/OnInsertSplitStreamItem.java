@@ -21,6 +21,9 @@ public class OnInsertSplitStreamItem implements Serializable
     private SelectClause selectClause;
     private Expression whereClause;
 
+    /**
+     * Ctor.
+     */
     public OnInsertSplitStreamItem() {
     }
 

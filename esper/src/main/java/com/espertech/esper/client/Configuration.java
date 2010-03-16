@@ -455,6 +455,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
      * @param loaderName is the name of the loader
      * @param className is the fully-qualified classname of the loader class
      * @param configuration is loader cofiguration entries
+     * @param configurationXML config xml if any
      */
     public void addPluginLoader(String loaderName, String className, Properties configuration, String configurationXML)
     {

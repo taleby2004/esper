@@ -26,6 +26,9 @@ public class OuterJoinQualifier implements Serializable
     private Expression right;
     private List<PropertyValueExpressionPair> additionalProperties;
 
+    /**
+     * Ctor.
+     */
     public OuterJoinQualifier() {
     }
 
@@ -85,6 +88,10 @@ public class OuterJoinQualifier implements Serializable
         this.type = type;
     }
 
+    /**
+     * Set join properties.
+     * @param additionalProperties for outer join
+     */
     public void setAdditionalProperties(List<PropertyValueExpressionPair> additionalProperties) {
         this.additionalProperties = additionalProperties;
     }

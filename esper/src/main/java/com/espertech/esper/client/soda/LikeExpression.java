@@ -126,6 +126,10 @@ public class LikeExpression extends ExpressionBase
         return not;
     }
 
+    /**
+     * Set to true if this is a "not like", or false if just a like
+     * @param not indicator whether negated or not
+     */
     public void setNot(boolean not) {
         this.not = not;
     }

@@ -20,6 +20,9 @@ public class FilterStream extends ProjectedStream
     private Filter filter;
     private static final long serialVersionUID = -7234330289222721729L;
 
+    /**
+     * Ctor.
+     */
     public FilterStream() {
     }
 

@@ -27,6 +27,9 @@ public class PatternObserverExpr extends EPBaseNamedObject implements PatternExp
         // this expression has no child expressions
     }
 
+    /**
+     * Ctor.
+     */
     public PatternObserverExpr() {
     }
 

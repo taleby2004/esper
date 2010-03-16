@@ -18,6 +18,9 @@ public class AvedevProjectionExpression extends ExpressionBase
     private boolean distinct;
     private static final long serialVersionUID = -2918312975800701965L;
 
+    /**
+     * Ctor.
+     */
     public AvedevProjectionExpression() {
     }
 

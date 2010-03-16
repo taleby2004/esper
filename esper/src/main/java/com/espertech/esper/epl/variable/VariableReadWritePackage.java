@@ -45,6 +45,7 @@ public class VariableReadWritePackage
      * Ctor.
      * @param assignments the list of variable assignments
      * @param variableService variable service
+     * @param eventAdapterService event adapters
      * @throws ExprValidationException when variables cannot be found
      */
     public VariableReadWritePackage(List<OnTriggerSetAssignment> assignments, VariableService variableService, EventAdapterService eventAdapterService)
@@ -273,6 +274,10 @@ public class VariableReadWritePackage
         return variableTypes;
     }
 
+    /**
+     * Iterate returning all values.
+     * @return map of values
+     */
     public Map<String, Object> iterate()
     {
         Map<String, Object> values = new HashMap<String, Object>();
@@ -301,7 +306,7 @@ public class VariableReadWritePackage
         return values;
     }
 
-    public static class CopyMethodDesc {
+    private static class CopyMethodDesc {
         private final String variableName;
         private final List<String> propertiesCopied;
 
@@ -322,7 +327,7 @@ public class VariableReadWritePackage
         }
     }
 
-    public static class WriteDesc {
+    private static class WriteDesc {
 
         private final EventTypeSPI type;
         private final String variableName;

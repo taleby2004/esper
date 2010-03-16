@@ -19,6 +19,9 @@ public abstract class OnClause implements Serializable
 {
     private static final long serialVersionUID = 0L;
 
+    /**
+     * Ctor.
+     */
     public OnClause() {
     }
 

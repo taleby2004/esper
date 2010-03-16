@@ -10,6 +10,9 @@ package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
 
+/**
+ * For use in pattern expression as a placeholder to represent its child nodes.
+ */
 public class PatternExprPlaceholder extends PatternExprBase
 {
     /**
