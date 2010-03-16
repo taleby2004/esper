@@ -1,7 +1,7 @@
 Esper Changelog
 ===================
 
-Changes in version 3.3.0
+Changes in version 3.4.0
 ------------------------
 - support for variables of type Object, class or EventType
 - allow to create an explicit index on a named window for FAF query performance
@@ -9,7 +9,7 @@ Changes in version 3.3.0
 - PluginLoader init method changed slightly
 
 
-Changes in version 3.3.0
+Changes in version 3.4.0
 ------------------------
 
 Major API changes
