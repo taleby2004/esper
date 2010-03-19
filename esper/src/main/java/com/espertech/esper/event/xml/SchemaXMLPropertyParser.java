@@ -89,7 +89,7 @@ public class SchemaXMLPropertyParser
             prefix = "";
         }
         else {
-            prefix = prefix + ':';
+            prefix += ':';
         }
 
         StringBuilder xPathBuf = new StringBuilder();
@@ -218,7 +218,7 @@ public class SchemaXMLPropertyParser
         if (prefix == null)
             prefix = "";
         else
-            prefix = prefix + ':';
+            prefix += ':';
         switch (child.getType())
         {
             case EsperEPL2GrammarParser.EVENT_PROP_DYNAMIC_SIMPLE:
@@ -273,7 +273,7 @@ public class SchemaXMLPropertyParser
             prefix = "";
         }
         else {
-            prefix = prefix + ':';
+            prefix += ':';
         }
 
         switch (child.getType())

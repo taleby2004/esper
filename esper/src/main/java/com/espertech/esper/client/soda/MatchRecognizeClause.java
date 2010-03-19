@@ -10,6 +10,8 @@ import java.util.ArrayList;
  */
 public class MatchRecognizeClause implements Serializable {
 
+    private static final long serialVersionUID = -344174798312697242L;
+    
     private List<Expression> partitionExpressions = new ArrayList<Expression>();
     private List<SelectClauseExpression> measures = new ArrayList<SelectClauseExpression>();
     private boolean all;

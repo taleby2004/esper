@@ -22,7 +22,7 @@ import java.io.Serializable;
 public final class MultiKeyUntypedEventPair implements MetaDefItem, Serializable
 {
     private final Object[] keys;
-    private final EventBean eventBean;
+    private transient final EventBean eventBean;
     private final int hashCode;
     private static final long serialVersionUID = -3890626073105861216L;
 

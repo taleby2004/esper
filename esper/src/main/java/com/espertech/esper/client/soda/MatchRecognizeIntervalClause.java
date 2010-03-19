@@ -6,6 +6,7 @@ import java.io.Serializable;
  * Interval used within match recognize.
  */
 public class MatchRecognizeIntervalClause implements Serializable {
+    private static final long serialVersionUID = 3883389636579120071L;
     private Expression expression;
 
     /**

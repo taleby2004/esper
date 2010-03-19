@@ -72,7 +72,6 @@ public class MetricsExecutorThreaded implements MetricsExecutor
         catch (InterruptedException e)
         {
             log.error("Interrupted", e);
-            e.printStackTrace();
         }
     }
 }

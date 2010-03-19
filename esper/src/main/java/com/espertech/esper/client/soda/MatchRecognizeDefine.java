@@ -6,6 +6,8 @@ import java.io.Serializable;
  * Define-clause in match-recognize expression.
  */
 public class MatchRecognizeDefine implements Serializable {
+    private static final long serialVersionUID = -2665038146328267165L;
+    
     private String name;
     private Expression expression;
 

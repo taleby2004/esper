@@ -15,6 +15,8 @@ import java.io.StringWriter;
  */
 public class LastProjectionExpression extends ExpressionBase
 {
+    private static final long serialVersionUID = -7860591885055704438L;
+    
     private boolean distinct;
 
     /**

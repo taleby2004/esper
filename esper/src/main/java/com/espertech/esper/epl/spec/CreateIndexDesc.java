@@ -18,6 +18,8 @@ import java.util.List;
  */
 public class CreateIndexDesc implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -6758785746637089810L;
+    
     private final String indexName;
     private final String windowName;
     private final List<String> columns;

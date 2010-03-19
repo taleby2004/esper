@@ -18,6 +18,8 @@ import java.io.StringWriter;
  */
 public class MatchRecognizeRegExAtom extends MatchRecognizeRegEx implements Serializable
 {
+    private static final long serialVersionUID = -7673341936779816149L;
+    
     private String name;
     private MatchRecogizePatternElementType type;
 

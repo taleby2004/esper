@@ -10,6 +10,7 @@ import java.util.List;
  * Represents a single annotation.
  */
 public class AnnotationPart implements Serializable {
+    private static final long serialVersionUID = 2404842336644400196L;
 
     private String treeObjectName;
     private String name;

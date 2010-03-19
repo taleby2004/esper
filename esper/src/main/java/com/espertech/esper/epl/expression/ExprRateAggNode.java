@@ -18,6 +18,8 @@ import com.espertech.esper.util.JavaClassHelper;
  */
 public class ExprRateAggNode extends ExprAggregateNode
 {
+    private static final long serialVersionUID = -1616393720555472129L;
+    
     /**
      * Ctor.
      * @param distinct - flag indicating unique or non-unique value aggregation

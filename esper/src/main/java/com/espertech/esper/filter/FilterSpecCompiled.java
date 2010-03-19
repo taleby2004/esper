@@ -197,6 +197,7 @@ public final class FilterSpecCompiled
         int hashCode = filterForEventType.hashCode();
         for (FilterSpecParam param : parameters)
         {
+            hashCode = 31*hashCode;
             hashCode = hashCode ^ param.getPropertyName().hashCode();
             hashCode = hashCode ^ (31 * param.getFilterHash());
         }

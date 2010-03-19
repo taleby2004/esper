@@ -20,6 +20,8 @@ import java.io.StringWriter;
  */
 public class MatchRecognizeRegExConcatenation extends MatchRecognizeRegEx implements Serializable
 {
+    private static final long serialVersionUID = -4238896158904878087L;
+    
     public void writeEPL(StringWriter writer) {
         String delimiter = "";
         for (MatchRecognizeRegEx node : this.getChildren())

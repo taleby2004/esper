@@ -29,7 +29,7 @@ public class SQLColumnValueContext
 
     /**
      * Returns column name
-     * @param columnName
+     * @param columnName the name of the column
      */
     public void setColumnName(String columnName)
     {

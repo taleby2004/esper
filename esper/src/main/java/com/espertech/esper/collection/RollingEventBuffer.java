@@ -91,7 +91,7 @@ public class RollingEventBuffer
         int relative = newest - index;
         if (relative < 0)
         {
-            relative = relative + size;
+            relative += size;
         }
         return buffer[relative];
     }

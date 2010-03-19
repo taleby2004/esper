@@ -103,6 +103,7 @@ public class MapEventType implements EventTypeSPI
         hashCode = typeName.hashCode();
         for (Map.Entry<String, Class> entry : simplePropertyTypes.entrySet())
         {
+            hashCode *= 31;
             hashCode = hashCode ^ entry.getKey().hashCode();
         }
 

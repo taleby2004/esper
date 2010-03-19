@@ -15,6 +15,8 @@ import java.io.StringWriter;
  */
 public class ExpressionPlaceholder extends ExpressionBase
 {
+    private static final long serialVersionUID = 8066735155786013524L;
+    
     /**
      * Ctor.
      */

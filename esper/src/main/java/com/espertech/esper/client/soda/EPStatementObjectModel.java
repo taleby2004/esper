@@ -318,6 +318,10 @@ public class EPStatementObjectModel implements Serializable
         {
             createWindow.toEPL(writer);
 
+            if (fromClause == null)
+            {
+                throw new IllegalStateException("From clause has not been defined");
+            }
             FilterStream fs = (FilterStream) fromClause.getStreams().get(0);
             if (fs.isRetainUnion()) {
                 writer.write(" retain-union");    
@@ -336,10 +340,6 @@ public class EPStatementObjectModel implements Serializable
             else {
                 selectClause.toEPL(writer);
 
-                if (fromClause == null)
-                {
-                    throw new IllegalStateException("From clause has not been defined");
-                }
                 fromClause.toEPL(writer);
                 createWindow.toEPLInsertPart(writer);
             }

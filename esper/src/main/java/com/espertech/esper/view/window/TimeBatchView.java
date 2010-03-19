@@ -337,7 +337,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
     	long n = (current - reference) / interval;
     	if (reference > current)        // References in the future need to deduct one window
         {
-            n = n - 1;
+            n--;
         }
         long solution = reference + (n + 1) * interval - current;
 

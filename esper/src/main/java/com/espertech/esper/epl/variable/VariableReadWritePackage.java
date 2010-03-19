@@ -289,7 +289,7 @@ public class VariableReadWritePackage
             Object value = reader.getValue();
 
             if (value == null) {
-                values.put(assignment.getVariableName(), value);
+                values.put(assignment.getVariableName(), null);
             }
             else if (writers[count] != null) {
                 EventBean current = (EventBean) reader.getValue();

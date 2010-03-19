@@ -7,8 +7,10 @@ import java.io.Serializable;
  */
 public class AnnotationAttribute implements Serializable {
 
+    private static final long serialVersionUID = -2448173068516111756L;
+    
     private String name;
-    private Object value;
+    private Serializable value;
 
     /**
      * Ctor.
@@ -23,7 +25,7 @@ public class AnnotationAttribute implements Serializable {
      */
     public AnnotationAttribute(String name, Object value) {
         this.name = name;
-        this.value = value;
+        this.value = (Serializable) value;
     }
 
     /**
@@ -55,6 +57,6 @@ public class AnnotationAttribute implements Serializable {
      * @param value to set
      */
     public void setValue(Object value) {
-        this.value = value;
+        this.value = (Serializable) value;
     }
 }

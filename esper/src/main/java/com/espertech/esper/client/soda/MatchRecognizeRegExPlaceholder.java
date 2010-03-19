@@ -20,6 +20,8 @@ import java.io.StringWriter;
  */
 public class MatchRecognizeRegExPlaceholder extends MatchRecognizeRegEx implements Serializable
 {
+    private static final long serialVersionUID = -3755313376510761985L;
+
     public void writeEPL(StringWriter writer) {
         if ((this.getChildren() == null) || (this.getChildren().size() == 0)) {
             return;

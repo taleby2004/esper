@@ -15,6 +15,8 @@ import java.util.List;
  */
 public class OnTriggerWindowUpdateDesc extends OnTriggerWindowDesc
 {
+    private static final long serialVersionUID = 3796573624109335943L;
+    
     private List<OnTriggerSetAssignment> assignments;
 
     /**

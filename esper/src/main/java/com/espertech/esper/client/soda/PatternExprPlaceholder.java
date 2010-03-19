@@ -15,6 +15,8 @@ import java.io.StringWriter;
  */
 public class PatternExprPlaceholder extends PatternExprBase
 {
+    private static final long serialVersionUID = -2249254387564559395L;
+    
     /**
      * Ctor.
      */

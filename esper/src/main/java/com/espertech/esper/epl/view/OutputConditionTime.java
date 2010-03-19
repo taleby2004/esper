@@ -190,7 +190,7 @@ public final class OutputConditionTime implements OutputCondition
         long n = (long) ( (current - reference) / (interval * 1f));
         if (reference > current)        // References in the future need to deduct one window
         {
-            n = n - 1;
+            n--;
         }
         long solution = reference + (n + 1) * interval - current;
 

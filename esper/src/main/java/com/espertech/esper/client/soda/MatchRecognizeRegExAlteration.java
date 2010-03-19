@@ -22,6 +22,8 @@ import java.io.StringWriter;
  */
 public class MatchRecognizeRegExAlteration extends MatchRecognizeRegEx implements Serializable
 {
+    private static final long serialVersionUID = 6886222779236797750L;
+    
     public void writeEPL(StringWriter writer) {
         String delimiter = "";
         for (MatchRecognizeRegEx node : this.getChildren())

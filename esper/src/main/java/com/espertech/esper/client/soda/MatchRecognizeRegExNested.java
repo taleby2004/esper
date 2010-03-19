@@ -18,6 +18,7 @@ import java.io.StringWriter;
  */
 public class MatchRecognizeRegExNested extends MatchRecognizeRegEx implements Serializable
 {
+    private static final long serialVersionUID = 7046630048071556077L;
     private MatchRecogizePatternElementType type;
 
     /**

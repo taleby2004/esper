@@ -1,10 +1,14 @@
 package com.espertech.esper.core;
 
+import java.io.Serializable;
+
 /**
  * Records minimal statement filter version required for processing.
  */
-public class StatementFilterVersion {
+public class StatementFilterVersion implements Serializable {
 
+    private static final long serialVersionUID = 5443667960162916787L;
+    
     private volatile long stmtFilterVersion;
 
     /**

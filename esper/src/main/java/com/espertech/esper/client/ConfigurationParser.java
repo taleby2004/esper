@@ -1334,7 +1334,7 @@ class ConfigurationParser {
             stream = classLoader.getResourceAsStream( stripped );
         }
         if ( stream == null ) {
-            ConfigurationParser.class.getResourceAsStream( resource );
+            stream = ConfigurationParser.class.getResourceAsStream( resource );
         }
         if ( stream == null ) {
             stream = ConfigurationParser.class.getClassLoader().getResourceAsStream( stripped );

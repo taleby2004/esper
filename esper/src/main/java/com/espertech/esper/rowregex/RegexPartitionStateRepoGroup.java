@@ -144,7 +144,7 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
 
             if (removeList.size() < (currentCollectionSize / 5))
             {
-                currentCollectionSize = currentCollectionSize * 2;
+                currentCollectionSize *= 2;
             }
         }
 

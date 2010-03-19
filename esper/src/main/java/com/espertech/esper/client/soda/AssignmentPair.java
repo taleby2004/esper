@@ -6,6 +6,8 @@ import java.io.Serializable;
  * An assignment to a variable or property name of an expression value.
  */
 public class AssignmentPair implements Serializable {
+    private static final long serialVersionUID = -2713092091207302856L;
+    
     private String name;
     private Expression value;
 
