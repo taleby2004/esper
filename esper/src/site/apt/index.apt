@@ -80,7 +80,7 @@ Core CEP Features
 		
 		* Multiple and custom entry and exit criteria for events
 		
-		* Support for predefined query execution optimized by indexed access, via on-select
+		* Support for predefined query execution optimized by indexed access, via on-select and on-demand (fire-and-forget) query and explicit indexes
 		
 		[]
 		
@@ -149,7 +149,7 @@ Core CEP Features
         
         []
         
-* Input Adapters
+* Input+Output Adapters
     	
     	* CSV input adapter reads comma-separated value formats
     	
@@ -160,8 +160,14 @@ Core CEP Features
     		* preloading of reference data
     	
     	* JMS input and output adapter based on Spring JMS templates
+    	
+    	* DB output adapter for running DML and for keyed update-insert (aka. upsert)
+    	
+    	* HTTP input+output adapter
+    	
+    	* Socket input adapter
 			
-		[]
+	[]
 
 * Other
 

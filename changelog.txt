@@ -23,7 +23,6 @@ Minor changes
   - Fixed issue ESPER-457 ClassCastException when using subscriber to join statement with wildcard-select and distinct
   - Fixed issue ESPER-446 Benchmark throws exception for weighted average sample
   - Fixed issue ESPER-449 Create window fails for syntax providing column names and types explicitly and multiple data windows
-  - Fixed issue ESPER-435 MultiKey hashcode should be improved
   - Fixed issue ESPER-450 Row-based and/or column-based conversion function for SQL query results
   - Fixed issue ESPER-403 First-unique data window used with named window causes on-delete to misbehave
   - Fixed issue ESPER-429 Replace "childNodeType" with "parameterType" in section 12.2.3

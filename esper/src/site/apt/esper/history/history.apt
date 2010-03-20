@@ -13,6 +13,39 @@ Change History
 
 
 
+Version 3.4.0
+
+	Released March 20, 2010
+	
+	Built with Sun JDK 5.0 Update 21; Also tested for JDK 6
+
+* API changes
+
+  * None.
+    
+* Major changes
+      
+  * Support for variables of type Object (any type), POJO or EventType
+  
+  * Support for creating an explicit index on a named window for best on-demand query performance (aka. fire-and-forget queries)
+  
+  * New socket input adapter
+  
+  * New HTTP input and output adapter
+  
+  * New database output adapter for insert, update, delete (DML) and upsert (keyed-insert/update)
+
+  []
+    
+* Minor changes
+
+  * Documentation and performance improvements
+  
+  * Bug fixes: see JIRA list of resolved issues for release 3.4 or changelog.txt
+
+  []
+
+
 Version 3.3.0
 
 	Released Dec. 17, 2009

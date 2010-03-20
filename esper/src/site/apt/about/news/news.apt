@@ -1,6 +1,21 @@
 News
 
 
+* March 20, 2010  -  Esper 3.4.0
+	      
+  * Support for variables of type Object (any type), POJO or EventType
+  
+  * Support for creating an explicit index on a named window for best on-demand query performance (aka. fire-and-forget queries)
+  
+  * New socket input adapter
+  
+  * New HTTP input and output adapter
+  
+  * New database output adapter for insert, update, delete (DML) and upsert (keyed-insert/update)
+
+  []
+
+
 * March 8, 2010  -  NEsper 3.3.0 for .NET
 
   * Esper CEP for .NET - feature equivalent to Esper 3.3.0

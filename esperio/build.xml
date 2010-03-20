@@ -17,12 +17,15 @@
 	<property name="javadoc_link" value="http://java.sun.com/j2se/1.5.0/docs/api"/>
 
 	<path id="lib.class.path">
-		<fileset dir="${lib.dir}">
-			<include name="**/*.jar"/>
-		</fileset>
+		<fileset dir="../esperio-csv/${lib.dir}"><include name="**/*.jar"/></fileset>
+		<fileset dir="../esperio-http/${lib.dir}"><include name="**/*.jar"/></fileset>
+		<fileset dir="../esperio-socket/${lib.dir}"><include name="**/*.jar"/></fileset>
+		<fileset dir="../esperio-springjms/${lib.dir}"><include name="**/*.jar"/></fileset>
+		<fileset dir="../esperio-stax/${lib.dir}"><include name="**/*.jar"/></fileset>
+		<fileset dir="../esperio-db/${lib.dir}"><include name="**/*.jar"/></fileset>
 		<fileset dir="../esper">
 			<include name="**/esper*.jar"/>
-			<include name="lib/antlr-runtime-*.jar"/>
+			<include name="lib/*.jar"/>
 		</fileset>
 	</path>
 	
@@ -33,7 +36,7 @@
     </target>
 
 	<target name="javadoc" description="Generate JavaDoc - Maven Plug-in not working yet" depends="clean">
-			<javadoc
+		<javadoc
 			classpathref="lib.class.path"
 			destdir="${dist.api.dir}"
 			use="true"
@@ -43,6 +46,7 @@
 			Overview="${doc.api.dir}/package.html"
 			stylesheetfile="${doc.api.dir}/jdstyle.css"
 			doctitle="${Name} ${version} API Documentation">
+
 			<link href="${javadoc_link}"/>
 			<link offline="true" href="http://esper.codehaus.org/esper-${version}/doc/api" packagelistLoc="../esper/doc/javadoc/api"/>
 			<footer>
@@ -58,13 +62,24 @@
 				</script>
 				]]>
 			</footer>
-			<packageset dir="${src.dir}" defaultexcludes="yes">
+			<packageset dir="../esperio-csv/${src.dir}" defaultexcludes="yes">
 				<include name="com/espertech/esperio/**"/>
-			</packageset>
-
-			<group title="Esper Adapter API"
-				packages="com.espertech.esperio,com.espertech.esperio.csv,com.espertech.esperio.jms,com.espertech.esperio.subscription"/>
-						
+			</packageset>						
+			<packageset dir="../esperio-db/${src.dir}" defaultexcludes="yes">
+				<include name="com/espertech/esperio/**"/>
+			</packageset>						
+			<packageset dir="../esperio-http/${src.dir}" defaultexcludes="yes">
+				<include name="com/espertech/esperio/**"/>
+			</packageset>						
+			<packageset dir="../esperio-socket/${src.dir}" defaultexcludes="yes">
+				<include name="com/espertech/esperio/**"/>
+			</packageset>						
+			<packageset dir="../esperio-springjms/${src.dir}" defaultexcludes="yes">
+				<include name="com/espertech/esperio/**"/>
+			</packageset>						
+			<packageset dir="../esperio-stax/${src.dir}" defaultexcludes="yes">
+				<include name="com/espertech/esperio/**"/>
+			</packageset>						
 		</javadoc>
 		<copy file="${doc.api.dir}/package.html" todir="${dist.api.dir}"/>
 	</target>
