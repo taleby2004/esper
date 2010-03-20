@@ -1,6 +1,6 @@
 <project>
 	<modelVersion>4.0.0</modelVersion>
-	<name>Esper IO</name>
+	<name>Esper IO SpringJMS</name>
 	<groupId>com.espertech</groupId>
 	<artifactId>esperio-springjms</artifactId>
 	<version>3.4.0</version>

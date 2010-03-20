@@ -32,7 +32,11 @@ public class TestDoubleRange extends TestCase
     public void testHash()
     {
         DoubleRange range = new DoubleRange(10d, 20d);
-        int hashCode = 7 + Double.valueOf(10).hashCode() ^ Double.valueOf(20).hashCode();
+        int hashCode = 7;
+        hashCode *= 31;
+        hashCode ^= Double.valueOf(10).hashCode();
+        hashCode *= 31;
+        hashCode ^= Double.valueOf(20).hashCode();
 
         assertEquals(hashCode, range.hashCode());        
     }

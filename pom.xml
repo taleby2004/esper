@@ -8,7 +8,11 @@
   <modules>
     <module>esper</module>
     <module>esperio-csv</module>
+    <module>esperio-db</module>
+    <module>esperio-http</module>
+    <module>esperio-socket</module>
     <module>esperio-springjms</module>
     <module>esperio-stax</module>
+    <module>examples</module>
   </modules>
 </project>

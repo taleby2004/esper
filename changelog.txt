@@ -3,13 +3,35 @@ Esper Changelog
 
 Changes in version 3.4.0
 ------------------------
-- support for variables of type Object, class or EventType
-- allow to create an explicit index on a named window for FAF query performance
-- SODA change: EPStatementObjectModel methods setSelectClause now returns void
-- PluginLoader init method changed slightly
+Major API changes
+  - None
+  
+New Features
+  - Support for variables of type Object (any type), class or EventType
+  - Support for creating an explicit index on a named window for best on-demand query performance (aka. fire-and-forget queries)
+  - New socket input adapter
+  - New HTTP input and output adapter
+  - New database output adapter for queueable insert, update, delete (DML) and upsert keyed-insert/update 
+
+Minor changes  
+  - Minor change to the SODA object model API to strictly follow the JavaBean standard
+  - For the PluginLoader API the "init" method now takes a context object that contains initialization parameters
+  - Fixed issue ESPER-445 Improve performance of match-recognize when large number of intermediate events
+  - Fixed issue ESPER-451 Memory leak in pattern with or-operator and permanently false subexpressions
+  - Fixed issue ESPER-430 PlugInProjectionExpression should allow more than one expression
+  - Fixed issue ESPER-453 Repeated Max and Min on Named Window Aggregations
+  - Fixed issue ESPER-457 ClassCastException when using subscriber to join statement with wildcard-select and distinct
+  - Fixed issue ESPER-446 Benchmark throws exception for weighted average sample
+  - Fixed issue ESPER-449 Create window fails for syntax providing column names and types explicitly and multiple data windows
+  - Fixed issue ESPER-435 MultiKey hashcode should be improved
+  - Fixed issue ESPER-450 Row-based and/or column-based conversion function for SQL query results
+  - Fixed issue ESPER-403 First-unique data window used with named window causes on-delete to misbehave
+  - Fixed issue ESPER-429 Replace "childNodeType" with "parameterType" in section 12.2.3
+  - Reorganized EsperIO to individual jar files; Deprecated opentick adapter
+  - Many other documentation and performance improvements
 
 
-Changes in version 3.4.0
+Changes in version 3.3.0
 ------------------------
 
 Major API changes

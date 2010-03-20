@@ -106,6 +106,9 @@ public class WorkerThread extends Thread {
     }
 
     private void handleString(String input) {
+        if (input == null) {
+            return;
+        }
         try {
             Map<String, String> parameters = new HashMap<String, String>();
             WStringTokenizer tokenizer = new WStringTokenizer(input, ",");
