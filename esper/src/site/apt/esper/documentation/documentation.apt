@@ -15,6 +15,8 @@ Documentation
  		{{{../../esperio-3.4.0/doc/reference/en/html/index.html}Online HTML}} \
  		{{{../../esperio-3.4.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
+	<<EsperIO API JavaDoc>> : {{{../../esperio-3.4.0/doc/api/index.html}API JavaDoc}}
+
 * Esper and EsperIO 3.3.0
 	
 	<<Esper Reference documentation>> : {{{../../esper-3.3.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \

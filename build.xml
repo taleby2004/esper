@@ -76,8 +76,12 @@
             		<zipfileset dir="esper" includes="pom.xml"/>
         	</zip>
 		<zip zipfile="${dist.dir}/${fullnameio}-src.zip">
-            		<zipfileset dir="esperio/src/main/java" includes="**"/>
-            		<zipfileset dir="esperio" includes="pom.xml"/>
+            		<zipfileset dir="esperio-csv/src/main/java" includes="**"/>
+            		<zipfileset dir="esperio-http/src/main/java" includes="**"/>
+            		<zipfileset dir="esperio-db/src/main/java" includes="**"/>
+            		<zipfileset dir="esperio-socket/src/main/java" includes="**"/>
+            		<zipfileset dir="esperio-springjms/src/main/java" includes="**"/>
+            		<zipfileset dir="esperio-stax/src/main/java" includes="**"/>
         	</zip>
         </target>
 
@@ -92,11 +96,24 @@
 		<zip zipfile="${zip-file}">
 			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
 			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
-            <zipfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
-            <zipfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
-            <zipfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
-            <zipfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>
-        </zip>
+			<zipfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
+			<zipfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
+			<zipfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
+			<zipfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>
+			<zipfileset prefix="${name}-${version}" dir="esper/target" includes="esper-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}" dir="esperio-csv/target" includes="esperio-csv*-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}" dir="esperio-http/target" includes="esperio-http*-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}" dir="esperio-db/target" includes="esperio-db*-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}" dir="esperio-socket/target" includes="esperio-socket*-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}" dir="esperio-springjms/target" includes="esperio-springjms*-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}" dir="esperio-stax/target" includes="esperio-stax*-${version}.jar"/>
+			<zipfileset prefix="${name}-${version}/esperio-csv" dir="esperio-csv" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<zipfileset prefix="${name}-${version}/esperio-http" dir="esperio-http" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<zipfileset prefix="${name}-${version}/esperio-db" dir="esperio-db" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<zipfileset prefix="${name}-${version}/esperio-socket" dir="esperio-socket" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<zipfileset prefix="${name}-${version}/esperio-springjms" dir="esperio-springjms" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<zipfileset prefix="${name}-${version}/esperio-stax" dir="esperio-stax" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+		</zip>
 		<checksum file="${zip-file}" algorithm="MD5" fileext=".md5"/>
 		<checksum file="${zip-file}" algorithm="SHA" fileext=".asc"/>		
 	</target>
@@ -112,11 +129,24 @@
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
 			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="examples/**/*.sh" excludes="examples/**/target/**/*.sh"/>
-            <tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
-            <tarfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
-            <tarfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
-            <tarfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>            
-        </tar>
+		    	<tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
+		    	<tarfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
+		    	<tarfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
+		    	<tarfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>            
+			<tarfileset prefix="${name}-${version}" dir="esper/target" includes="esper-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}" dir="esperio-csv/target" includes="esperio-csv*-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}" dir="esperio-http/target" includes="esperio-http*-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}" dir="esperio-db/target" includes="esperio-db*-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}" dir="esperio-socket/target" includes="esperio-socket*-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}" dir="esperio-springjms/target" includes="esperio-springjms*-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}" dir="esperio-stax/target" includes="esperio-stax*-${version}.jar"/>
+			<tarfileset prefix="${name}-${version}/esperio-csv" dir="esperio-csv" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}/esperio-http" dir="esperio-http" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}/esperio-db" dir="esperio-db" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}/esperio-socket" dir="esperio-socket" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}/esperio-springjms" dir="esperio-springjms" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+			<tarfileset prefix="${name}-${version}/esperio-stax" dir="esperio-stax" includes="etc/*.*, lib/*.*" excludes="${dist_excludes}"/>
+		</tar>
 		<gzip zipfile="${tar-file}.gz" src="${tar-file}" />
 		<checksum file="${tar-file}.gz" algorithm="MD5" fileext=".md5"/>
 		<checksum file="${tar-file}.gz" algorithm="SHA" fileext=".asc"/>		
