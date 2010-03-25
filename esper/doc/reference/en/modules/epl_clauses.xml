@@ -551,7 +551,7 @@ is placed here.")]]></programlisting></entry>
 									<para>Use this annotation to register one or more statement-specific hooks providing a hook type for each individual hook, such as for SQL parameter, column or row conversion.</para>
 									<para>Attributes are the hook <literal>type</literal> and the <literal>hook</literal> itself (usually a import or class name):</para>
 								</entry>
-								<entry><programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook=MyDBTypeConvertor)]]></programlisting></entry>
+								<entry><programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook='MyDBTypeConvertor')]]></programlisting></entry>
 							</row>
 						</tbody>
 					</tgroup>				
@@ -3246,7 +3246,7 @@ select orderId, orderAmount from
 			<para>
 			  A sample statement with annotation is shown:
 			</para>
-			<programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook=MyDBTypeConvertor)
+			<programlisting><![CDATA[@Hook(type=HookType.SQLCOL, hook='MyDBTypeConvertor')
 select * from sql:MyDB ['select * from MyEventTable]]]></programlisting>
 
 			<para>
@@ -3270,7 +3270,7 @@ select * from sql:MyDB ['select * from MyEventTable]]]></programlisting>
 			<para>
 			  A sample statement with annotation is shown:
 			</para>
-			<programlisting><![CDATA[@Hook(type=HookType.SQLROW, hook=MyDBRowConvertor)
+			<programlisting><![CDATA[@Hook(type=HookType.SQLROW, hook='MyDBRowConvertor')
 select * from sql:MyDB ['select * from MyEventTable]]]></programlisting>
 
 			<para>

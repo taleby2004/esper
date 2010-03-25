@@ -2135,6 +2135,10 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 				<para>
 					If your Java VM version does not report current thread CPU time (most JVM do), then CPU time is reported as zero (use <literal> ManagementFactory.getThreadMXBean().isCurrentThreadCpuTimeSupported()</literal> to determine if your JVM supports this feature).
 				</para>
+				<para>
+					Note: In some JVM the accuracy of CPU time returned is very low (in the order of 10 milliseconds off) which can impact the usefulness of CPU metrics returned. 
+					Consider measuring CPU time in your application thread after sending a number of events in the same thread, external to the engine as an alternative.
+				</para>
 			</listitem>
 			<listitem>
 				<para>
