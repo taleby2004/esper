@@ -836,9 +836,8 @@ where stock.symbol = news.symbol]]></programlisting>
 			</para>
 			<programlisting><![CDATA[insert into TickNewStream select tick, news, MyLib.compute(news, tick) as result
 from StockTick.win:time(10) as tick, News.win:time(10) as news
-where tick.symbol = news.symbol
-
-// second statement that uses the TickNewStream stream
+where tick.symbol = news.symbol]]></programlisting>
+			<programlisting><![CDATA[// second statement that uses the TickNewStream stream
 select tick.price, news.text, result from TickNewStream]]></programlisting>
 
 			<para>
@@ -874,9 +873,8 @@ from pattern[every tick=StockTick where timer:within(10 sec)]]]></programlisting
 			</para>
 			<programlisting><![CDATA[// make a new stream of ticks and news available
 insert into StockTickAndNews 
-select tick, news from pattern [every tick=StockTick -> news=News(symbol=tick.symbol)]
-      
-// second statement to select from the stream of ticks and news
+select tick, news from pattern [every tick=StockTick -> news=News(symbol=tick.symbol)]]]></programlisting>
+			<programlisting><![CDATA[// second statement to select from the stream of ticks and news
 select tick.symbol, tick.price, news.text from StockTickAndNews]]></programlisting>
 		</sect2>
 
@@ -1383,9 +1381,8 @@ group by carId, expressway, direction, segment]]></programlisting>
 				Second, the stream name can be used with a wildcard (*) character to select events in a join, or assign new names to the streams in a join:
 			</para>
             <programlisting><![CDATA[// Select ProductEvent only
-select prod.* from ProductEvent as prod, OrderEvent
-
-// Assign column names 'product' and 'order' to each event
+select prod.* from ProductEvent as prod, OrderEvent]]></programlisting>
+            <programlisting><![CDATA[// Assign column names 'product' and 'order' to each event
 select prod.* as product, ord.* as order from ProductEvent as prod, OrderEvent as ord]]></programlisting>
 
 			<para>
@@ -2393,8 +2390,8 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 				Assume that an application predefined a variant stream named <literal>OrderStream</literal> to carry only <literal>ServiceOrder</literal> and <literal>ProductOrder</literal> events. An <literal>insert into</literal> clause inserts events into
 				the variant stream:
 			</para>
-			<programlisting>insert into OrderStream select * from ServiceOrder
-insert into OrderStream select * from ProductOrder</programlisting>			
+			<programlisting>insert into OrderStream select * from ServiceOrder</programlisting>			
+			<programlisting>insert into OrderStream select * from ProductOrder</programlisting>			
 
 			<para>
 				Here is a sample statement that consumes the variant stream and outputs a total price per customer id for the last 30 seconds of <literal>ServiceOrder</literal> and <literal>ProductOrder</literal> events:
@@ -2744,13 +2741,11 @@ where price > (select max(price) from MarketData(symbol='GOOG').std:lastevent())
 		</para>
 		<programlisting><![CDATA[// Sample correlated subquery as part of stream filter criteria
 select * from A(a_val in 
-  (select b_val from B.std:unique(b_val) as b where a.a_id = b.b_id)) as a
-		
-// Sample correlated subquery against a named window
+  (select b_val from B.std:unique(b_val) as b where a.a_id = b.b_id)) as a]]></programlisting>
+		<programlisting><![CDATA[// Sample correlated subquery against a named window
 select * from A(a_val in 
-  (select b_val from DNamedWindow as d where a.a_id = d.d_id)) as a
-
-// Sample correlated subquery in the filter criteria as part of a pattern, querying a named window
+  (select b_val from DNamedWindow as d where a.a_id = d.d_id)) as a]]></programlisting>
+		<programlisting><![CDATA[// Sample correlated subquery in the filter criteria as part of a pattern, querying a named window
 select * from pattern [
   a=A -> b=B(bvalue = 
     (select d_val from DNamedWindow as d where d.d_id = b.b_id and d.d_id = a.a_id))
@@ -3672,36 +3667,38 @@ where asset.assetid = desc.assetid]]></programlisting>
 			<para>
 				The insert into the named window selects individual columns to be inserted:
 			</para>
-			<programlisting><![CDATA[insert into OrdersWindow(symbol, volume, price) select name, count, price from FXOrderEvent
-// .. alternative form...
-insert into OrdersWindow select name as symbol, vol as volume, price from FXOrderEvent]]></programlisting>
+			<programlisting><![CDATA[insert into OrdersWindow(symbol, volume, price) select name, count, price from FXOrderEvent]]></programlisting>
+			<para>
+			  An alternative form is shown next:
+			</para>
+			<programlisting><![CDATA[insert into OrdersWindow select name as symbol, vol as volume, price from FXOrderEvent]]></programlisting>
 
 			<para>
 				Following above statement, the engine enters every FXOrderEvent arriving into the engine into the named window 'OrdersWindow'.
 			</para>
 
 			<para>
-				The following EPL creates a named window for an event type backed by a Java class, and inserts into the window any 'OrderEvent' where the symbol value is IBM:
+				The following EPL statements create a named window for an event type backed by a Java class and insert into the window any 'OrderEvent' where the symbol value is IBM:
 			</para>
-			<programlisting><![CDATA[create window OrdersWindow as com.mycompany.OrderEvent
-insert into OrdersWindow select * from com.mycompany.OrderEvent(symbol='IBM')]]></programlisting>
+			<programlisting><![CDATA[create window OrdersWindow as com.mycompany.OrderEvent]]></programlisting>
+			<programlisting><![CDATA[insert into OrdersWindow select * from com.mycompany.OrderEvent(symbol='IBM')]]></programlisting>
 
 			<para>
 				The last example adds one column named 'derivedPrice' to the 'OrderEvent' type by specifying a wildcard, and uses a user-defined function to populate the column:
 			</para>
-			<programlisting><![CDATA[create window OrdersWindow as select *, price as derivedPrice from OrderEvent
-insert into OrdersWindow select *, MyFunc.func(price, percent) as derivedPrice from OrderEvent]]></programlisting>
+			<programlisting><![CDATA[create window OrdersWindow as select *, price as derivedPrice from OrderEvent]]></programlisting>
+			<programlisting><![CDATA[insert into OrdersWindow select *, MyFunc.func(price, percent) as derivedPrice from OrderEvent]]></programlisting>
 
 			<para>
 				Event representations based on Java base classes or interfaces, and subclasses or implementing classes, are compatible as these statements show:
 			</para>
 			<programlisting><![CDATA[// create a named window for the base class
-create window OrdersWindow as select * from ProductBaseEvent
+create window OrdersWindow as select * from ProductBaseEvent]]></programlisting>
 
-// The ServiceProductEvent class subclasses the ProductBaseEvent class
-insert into OrdersWindow select * from ServiceProductEvent
+			<programlisting><![CDATA[// The ServiceProductEvent class subclasses the ProductBaseEvent class
+insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
 
-// The MerchandiseProductEvent class subclasses the ProductBaseEvent class
+			<programlisting><![CDATA[// The MerchandiseProductEvent class subclasses the ProductBaseEvent class
 insert into OrdersWindow select * from MerchandiseProductEvent]]></programlisting>
 
 			<para>
@@ -3712,11 +3709,10 @@ select * from ServiceProductEvent as spe
 where not exists (select * from OrdersWindow as win where win.id = spe.id)]]></programlisting>
 
 			<para>
-				A statement that removes events from a named window via the <literal>on delete</literal> clause and a statement that inserts events into a named window via the <literal>insert into</literal> can be combined to replace events in the named window, by creating the two statements in the order as indicated by the sample:
+				A statement that removes events from a named window via the <literal>on delete</literal> clause and a statement that inserts events into a named window via the <literal>insert into</literal> can be combined to replace events in the named window, by creating the two statements in the order as indicated by the sample (create in this order):
 			</para>
-			<programlisting><![CDATA[// create in this order
-on ServiceProductEvent as spe delete from OrdersWindow as win where win.id = spe.id
-insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
+			<programlisting><![CDATA[on ServiceProductEvent as spe delete from OrdersWindow as win where win.id = spe.id]]></programlisting>
+			<programlisting><![CDATA[insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
 
 			<sect3 id="named-insertinto-decorated" revision="1">
 				<title>Named Windows Holding Decorated Events</title>
@@ -3727,9 +3723,8 @@ insert into OrdersWindow select * from ServiceProductEvent]]></programlisting>
 				<para>
 					Here we create a named window that decorates OrderEvent events by adding an additional property named <literal>priceTotal</literal> to each OrderEvent. A matching <literal>insert into</literal> statement is also part of the sample:
 				</para>
-				<programlisting><![CDATA[create window OrdersWindow as select *, price as priceTotal from OrderEvent
-
-insert into OrdersWindow select *, price * unit as priceTotal from ServiceOrderEvent]]></programlisting>
+				<programlisting><![CDATA[create window OrdersWindow as select *, price as priceTotal from OrderEvent]]></programlisting>
+				<programlisting><![CDATA[insert into OrdersWindow select *, price * unit as priceTotal from ServiceOrderEvent]]></programlisting>
 
 				<para>
 					The property type of the additional <literal>priceTotal</literal> column is the property type of the existing <literal>price</literal> property of OrderEvent.
@@ -3745,9 +3740,8 @@ insert into OrdersWindow select *, price * unit as priceTotal from ServiceOrderE
 				<para>
 					The next sample creates a named window that specifies two columns: A column that holds an OrderEvent, and a column by name <literal>priceTotal</literal>. A matching <literal>insert into</literal> statement is also part of the sample:
 				</para>
-				<programlisting><![CDATA[create window OrdersWindow as select this, price as priceTotal from OrderEvent
-
-insert into OrdersWindow select order, price * unit as priceTotal  
+				<programlisting><![CDATA[create window OrdersWindow as select this, price as priceTotal from OrderEvent]]></programlisting>
+				<programlisting><![CDATA[insert into OrdersWindow select order, price * unit as priceTotal  
 from ServiceOrderEvent as order]]></programlisting>
 
 				<para>
@@ -4231,9 +4225,9 @@ where ord.id = win.id or flush.id = win.id]]></programlisting>
 			<para>				
 				Assume that an event type <literal>UserProfileRevisions</literal> has been configured to hold profile events, i.e. creation and update events related by user id. This statement creates a named window to hold the last 1 hour of current profiles per user id:
 			</para>
-			<programlisting><![CDATA[create window UserProfileWindow.win:time(1 hour) select * from UserProfileRevisions
-insert into UserProfileWindow select * from UserProfileCreation
-insert into UserProfileWindow select * from UserProfileUpdate]]></programlisting>
+			<programlisting><![CDATA[create window UserProfileWindow.win:time(1 hour) select * from UserProfileRevisions]]></programlisting>
+			<programlisting><![CDATA[insert into UserProfileWindow select * from UserProfileCreation]]></programlisting>
+			<programlisting><![CDATA[insert into UserProfileWindow select * from UserProfileUpdate]]></programlisting>
 
 			<para>				
 			    In revision event types, the term <emphasis>base</emphasis> event is used to describe events that are subject to update. Events that update, amend or add additional properties to base events are termed <emphasis>delta</emphasis> events. 
@@ -4322,9 +4316,8 @@ insert into UserProfileWindow select * from UserProfileUpdate]]></programlisting
 				We list a few example EPL statements next that create a named window and create a single index:
 			</para>
 			<programlisting><![CDATA[// create a named window
-create window UserProfileWindow.win:time(1 hour) select * from UserProfile
-
-// create an index for the user id property only
+create window UserProfileWindow.win:time(1 hour) select * from UserProfile]]></programlisting>
+			<programlisting><![CDATA[// create an index for the user id property only
 create index UserProfileIndex on UserProfileWindow(userId)]]></programlisting>
 
 			<para>
@@ -4650,9 +4643,8 @@ having sum(price) > var_threshold]]></programlisting>
 			  These example statements show two ways of assigning to the variable:
 			</para>		
 			<programlisting><![CDATA[// You may assign the complete event
-on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero = pagehit
-
-// Or assign individual properties of the event
+on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero = pagehit]]></programlisting>
+			<programlisting><![CDATA[// Or assign individual properties of the event
 on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId]]></programlisting>
 
 			<para>
@@ -4893,8 +4885,8 @@ select * from MediaOrder[books.book as book][select book.*, reviewId, comment fr
 				This EPL produces output events with 3 columns: a column named <literal>mediaOrder</literal> that is the order itself, a column named <literal>book</literal> for each book and a column named <literal>review</literal> that holds each review:
 			</para>
 			<programlisting><![CDATA[insert into ReviewStream select * from MediaOrder[books.book as book]
-  [select mo.* as mediaOrder, book.* as book, review.* as review from review as review] as mo
-// .. and a sample consumer of ReviewStream...
+  [select mo.* as mediaOrder, book.* as book, review.* as review from review as review] as mo]]></programlisting>
+			<programlisting><![CDATA[// .. and a sample consumer of ReviewStream...
 select mediaOrder.orderId, book.bookId, review.reviewId from ReviewStream]]></programlisting>
 
 			<para>
@@ -5112,16 +5104,15 @@ where productId = bookId]]></programlisting>
 		</para>		
 		<programlisting><![CDATA[insert into DoubleWithdrawalStream 
 select a.id, b.id, a.account as account, 0 as minimum 
-from pattern [a=Withdrawal -> b=Withdrawal(id = a.id)]
-
-update istream DoubleWithdrawalStream set minimum = 1000 where account in (10002, 10003)]]></programlisting>
+from pattern [a=Withdrawal -> b=Withdrawal(id = a.id)]]]></programlisting>
+		<programlisting><![CDATA[update istream DoubleWithdrawalStream set minimum = 1000 where account in (10002, 10003)]]></programlisting>
 
 		<para>
 			When using <literal>update</literal> with named windows, any changes to event properties apply before an event enters the named window.
 		</para>
 
 		<para>
-			Consider the next example (shown here with statement names in @Name EPL annotation):
+			Consider the next example (shown here with statement names in @Name EPL annotation, multiple EPL statements):
 		</para>		
 		<programlisting><![CDATA[@Name("CreateWindow") create window MyWindow.win:time(30 sec) as AlertEvent
 

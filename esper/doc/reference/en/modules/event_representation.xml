@@ -277,9 +277,11 @@
 		<para>
 			When dynamic properties are nested, then all properties under the dynamic property are also considered dynamic properties. In the below example the query asks for the "direction" property of the object returned by the "detail" dynamic property:
 		</para>
-		<programlisting><![CDATA[select detail?.direction from OrderEvent
-// equivalent to 
-select detail?.direction? from OrderEvent]]></programlisting>		
+		<programlisting><![CDATA[select detail?.direction from OrderEvent]]></programlisting>		
+		<para>
+			Above is equivalent to:
+		</para>
+		<programlisting><![CDATA[select detail?.direction? from OrderEvent]]></programlisting>		
 
 		<para>
 			The functions that are often useful in conjunction with dynamic properties are:
@@ -411,7 +413,7 @@ select detail?.direction? from OrderEvent]]></programlisting>
 				</para>
 	
 				<para>
-					All event pattern and EPL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions:
+					All event pattern and EPL statements allow the use of indexed, mapped and nested properties (or a combination of these) anywhere where one or more event property names are expected. The below example shows different combinations of indexed, mapped and nested properties in filters of event pattern expressions (each line is a separate EPL statement):
 				</para>
 
 				<programlisting><![CDATA[every NewEmployeeEvent(firstName='myName')
@@ -1319,13 +1321,20 @@ epAdministrator.getConfiguration()
 					The <literal>tagOne</literal> and <literal>tagArray</literal> properties are now ready for selection and transposing to further streams:
 				</para>
 
-				<programlisting><![CDATA[insert into TagOneStream select tagOne.* from SensorEvent
-// ... select from the new stream ...
-select ID from TagOneStream]]></programlisting>
+				<programlisting><![CDATA[insert into TagOneStream select tagOne.* from SensorEvent]]></programlisting>
+				<para>
+					Select from the new stream:
+				</para>
+				<programlisting><![CDATA[select ID from TagOneStream]]></programlisting>
 
-				<programlisting><![CDATA[insert into TagArrayStream select tagArray as mytags from SensorEvent
-// ... select from the new stream ...
-select mytags[0].ID from TagArrayStream]]></programlisting>
+				<para>
+					An example with indexed properties is shown next:
+				</para>
+				<programlisting><![CDATA[insert into TagArrayStream select tagArray as mytags from SensorEvent]]></programlisting>
+				<para>
+					Select from the new stream:
+				</para>
+				<programlisting><![CDATA[select mytags[0].ID from TagArrayStream]]></programlisting>
 
 			</sect3>
 		</sect2>

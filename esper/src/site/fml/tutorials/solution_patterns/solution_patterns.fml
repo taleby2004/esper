@@ -432,11 +432,10 @@ having avg(waitTime) > 60</pre></div>
         </p>
 		<div class="source"><pre>on MyDeleteEvent as d delete from MyWindow as w where w.id = d.id</pre></div>
         <p>
-          This example EPL removes non-unique rows by category, so that only the last event for each category stays in the named window. It therefore selects the remove stream (rstream) of the unique window:
+          This example EPL removes non-unique rows by category, so that only the last event for each category stays in the named window. It therefore selects the remove stream (rstream) of the unique window (2 statements):
         </p>
-		<div class="source"><pre>insert rstream into MyNonUnique select rstream id from MyEvent.std:unique(category)
-		
-on MyNonUnique as d delete from MyWindow as w where w.id = d.id</pre></div>
+		<div class="source"><pre>insert rstream into MyNonUnique select rstream id from MyEvent.std:unique(category)</pre></div>
+		<div class="source"><pre>on MyNonUnique as d delete from MyWindow as w where w.id = d.id</pre></div>
         <p>
           Variables can also be a useful way to parameterize an expiry policy. The next sample EPL assumes that a variable by name CURRENT_THRESHOLD was declared and employs a pattern to execute every 20 seconds:
         </p>
@@ -498,15 +497,14 @@ from StockTick.std:groupby(symbol).win:length(10)</pre></div>
         </p>
         <p>
           We can first compute the number of events arriving within 1 second, then use that number to perform additional 
-          aggregation. Here we compute for the last 30 seconds the maximum and minimum rate per feed.
+          aggregation. Here we compute for the last 30 seconds the maximum and minimum rate per feed (2 statements).
         </p>
 
 <div class="source"><pre>insert into TicksPerSecond select feed, rate(1) as cnt 
 from MarketDataEvent
 group by feed
-output snapshot every 1 sec
-	
-select feed, max(cnt) as maxCount, min(cnt) as minCount 
+output snapshot every 1 sec</pre></div>
+<div class="source"><pre>select feed, max(cnt) as maxCount, min(cnt) as minCount 
 from TicksPerSecond.win:time(30 sec) 
 group by feed</pre></div>
       </answer>
@@ -690,11 +688,10 @@ where login.accountNumber = null</pre></div>
 	The named window would need to hold the price and also the prior price to ensure that its not missing the the drop from $71 to $69. 
 	The Esper EPL queries would be something like below:        
         <p>
-	This set of statements would be created at 9am:
+	This set of statements would be created at 9am (2 statements):
         </p>
-	<div class="source"><pre>create window TickWindow.win:time(5 min) (price double, priorprice double)
-insert into TickWindow select price, prior(1, price) as priorprice from StockTickEvent
-	</pre></div>      
+	<div class="source"><pre>create window TickWindow.win:time(5 min) (price double, priorprice double)</pre></div>      
+	<div class="source"><pre>insert into TickWindow select price, prior(1, price) as priorprice from StockTickEvent</pre></div>      
         <p>
 	This question posed at 11:00am via snapshot EPL query against the named window:
         </p>
@@ -915,9 +912,9 @@ where a.type = b.type
 			From the resulting stream we remove those pairs in which either event was seen before, leaving unique pairs:
 		</p>
 <div class="source"><pre>// Fast way of declaring the stream type, could also be done via config API or XML
-insert into PairDuplicatesRemoved select * from Pair(1=2)
-       
-// Remove duplicate pairs where either sensor event is from the prior pair
+insert into PairDuplicatesRemoved select * from Pair(1=2)</pre></div>
+
+<div class="source"><pre>// Remove duplicate pairs where either sensor event is from the prior pair
 insert into PairDuplicatesRemoved
 select * from Pair
 where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
@@ -1041,12 +1038,8 @@ every a=F -> (
 			The solution considers the maximum market price since statement start time, compared against the current market price:
 		</p>
 		<div class="source"><pre>// since release 2.0
-select * from Quote(symbol=GOOGL)
+select * from Quote(symbol='GOOGL')
 where price &lt;= max(select max(lastPx) as lastPx from Quote(symbol='GOOG')) - 100, 600)
-// or since for release 1.x		
-insert into MaxPrice(lastPx) select max(lastPx) as lastPx from Quote(symbol='GOOG')
-select * from Quote(symbol=GOOGL)
-where price &lt;= max(select lastPx from MaxPrice.std:lastevent()) - 100, 600)
 		</pre></div>
       </answer>
     </faq>    
@@ -1366,8 +1359,8 @@ appContext.destroy();</pre></div>
           can import a class via configuration to avoid package names in EPL. For example, assuming that the "com.mycompany.MyLibrary" class provides a static
           method by name "computeDistance":
         </p>
-	<div class="source"><pre>select com.mycompany.MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent
-// ... or after MyLibrary is imported via configuration
+	<div class="source"><pre>select com.mycompany.MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent</pre></div>
+	<div class="source"><pre>// ... or after MyLibrary is imported via configuration
 select MyLibrary.computeDistance(x1, y1, x2, y2) from MyCoordinateEvent</pre></div>
         
         <p>
@@ -1575,7 +1568,7 @@ group by category, subEventType</pre></div>
 	   each named window a k-minute time window, and the second to the third and so on.    	
         </p>
     	<p>
-	  Here is a sample of statements:
+	  Here is a sample of multiple statements:
         </p>
 	<div class="source"><pre>create window BucketWindow1.win:time(5 min) as select * from MyEvent
 create window BucketWindow2.win:time(5 min) as select * from MyEvent
@@ -1639,7 +1632,7 @@ select sum(price*volume) from BucketWindow3</pre></div>
 
         <p>
           Last, the next example defines a variable and sets the variable to "on" or "off" to control output of statements. Variables can also be set programmatically
-          via runtime API.
+          via runtime API (we show multiple individual statements below).
         </p>
 	<div class="source"><pre>create variable boolean var_on_off
 on pattern[timer:crontab(*, 9, *, *, *)] set var_on_off = true
