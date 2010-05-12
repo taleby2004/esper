@@ -676,6 +676,12 @@ Thread.currentThread().setContextClassLoader(this.class.getClassLoader());
 // create my Esper statement, and finally restore the class loader to its original value:
  Thread.currentThread().setContextClassLoader(contextClassloader);</pre></div>      
 
+	<p>
+		When sending events into an Esper engine in a bundle, in the default configuration the thread that calls the send event method
+		performs all the work, which may also require additional class loading. Consider configuring Esper with an inbound and outbound threadpool
+		to have engine threads perform this work. Please see the documentation on advanced threading options.
+	</p>
+
 	</answer>
     </faq>    
 
