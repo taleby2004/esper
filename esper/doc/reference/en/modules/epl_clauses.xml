@@ -2018,7 +2018,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				<title>Aggregation, Group By, Having and Output clause interaction</title>
 			
 				<para>
-					Remove stream events can also useful in conjunction with aggregation and the <literal>output</literal> clause: When the engine posts remove stream events for fully-aggregated queries, it presents the aggregation state before the expiring event leaves the data window. Your application can thus easily obtain a delta between the new aggregation value and the prior aggregation value.
+					Remove stream events can also be useful in conjunction with aggregation and the <literal>output</literal> clause: When the engine posts remove stream events for fully-aggregated queries, it presents the aggregation state before the expiring event leaves the data window. Your application can thus easily obtain a delta between the new aggregation value and the prior aggregation value.
 				</para>
 				
 				<para>
