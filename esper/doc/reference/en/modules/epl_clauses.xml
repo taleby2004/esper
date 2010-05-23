@@ -2035,7 +2035,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				<itemizedlist spacing="compact">
 					<listitem>
 						<para>
-							When no keyword is specified, the engine produces an output row for each row in the batch.
+							When no keyword is specified, the engine produces an output row for each row in the batch or when using group-by then an output per group only for those groups present in the batch.
 						</para>
 					</listitem>
 					<listitem>
