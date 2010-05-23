@@ -2709,7 +2709,7 @@ where tick.symbol = news.symbol]]></programlisting>
 
 		<para>
 			When your subquery returns multiple rows, you must use an aggregation function in the <literal>select</literal> clause of the subselect, as a subquery can only return a single row and single value object. To return multiple values from a subquery,
-			consider having the subquery return an array of values via the <literal>{...}</literal> syntax or have the subquery return an application object.
+			consider writing a custom aggregation function that returns an array or collection of values.
 		</para>
 
 		<para>
