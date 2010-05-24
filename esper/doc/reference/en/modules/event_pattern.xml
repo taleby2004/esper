@@ -1322,6 +1322,15 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
             </para>
 			<programlisting><![CDATA[StatusEvent(status='ERROR') -> StatusEvent(status='ERROR')]]></programlisting>
 
+            <para>
+				A pattern that takes all A events that are not followed by a B event within 5 minutes:
+            </para>
+			<programlisting><![CDATA[every A -> (timer:interval(5 min) and not B)]]></programlisting>
+
+            <para>
+				A pattern that takes all A events that are not preceded by B within 5 minutes:
+            </para>
+			<programlisting><![CDATA[every (timer:interval(5 min) and not B -> A)]]></programlisting>			
         </sect2>
                     
 		<sect2 id="pattern-guards">
