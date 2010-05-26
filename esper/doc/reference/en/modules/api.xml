@@ -148,6 +148,10 @@ countStmt.start();]]></programlisting>
 				Applications may put arbitrary objects in this field. Use the <literal>getUserObject</literal> method on <literal>EPStatement</literal> to obtain the user object of a statement
 				and <literal>StatementAwareUpdateListener</literal> for listeners.
 			</para>
+			
+			<para>
+				Your application may create new statements or stop and destroy existing statements using any thread and also within listener or subscriber code. If using POJO events, your application may not create or manage statements in the event object itself while the same event is currently being processed by a statement.
+			</para>
 	  </sect2>
 
 	  <sect2 id="api-receive-results">		
