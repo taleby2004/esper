@@ -480,6 +480,23 @@ variable factor in the statements?</i>".
 	</p>
       </answer>  
     </faq>
+    <faq id="copy_events">
+      <question>Does the engine make a copy of events?</question>
+      <answer>
+        <p>
+	    The engine will not ever copy events unless modifying events using on-update or update-istream.
+	</p>
+	<p>
+            Assume the following example statement:
+	</p>
+    	<code>select * from pattern[A -> every B].win:time(1 min) as pair</code>
+        <p>
+	    For the above pattern, the engine internally generates one intermediate event for each combination of A and B (one could name this event 'pair'). 
+	    Each intermediate event is a Map that holds a reference to the original A event and a reference to the current B event. 
+	    The time window holds intermediate events. Depending on your select clause the intermediate events get transformed into output events or output directly.
+	</p>
+      </answer>  
+    </faq>
   </part>
 
   <part id="integration">

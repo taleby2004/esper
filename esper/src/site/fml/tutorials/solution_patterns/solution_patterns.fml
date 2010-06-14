@@ -1080,6 +1080,27 @@ where price &lt;= max(select max(lastPx) as lastPx from Quote(symbol='GOOG')) - 
       </answer>
     </faq>   
     
+    <faq id="one_callback_with_list">
+      <question>How to get a single callback with the list of matching subscriptions?</question>
+      <answer>
+	<p>
+	  Question Detail: I need to have thousands of active filters in a single Esper engine instance all listening to the same stream. 
+	  When an event gets posted into this stream and is matched with N of these filters, 
+	  I want to get a single callback rather than N of such callbacks. I know there is a statement-aware listener
+	  which makes it possible to have one handler for all the N statements, but that is still N update calls. I need something like
+	  "EPStatement[] statements" in my UpdateListener? Is it possible?
+	</p>
+	<p>
+	  Answer: The engine does not have an option to bundle deliveries of multiple statements to a single listener into a single invocation to that listener.
+	</p>
+	<p>
+	  However this seems easiest solved by using a single UpdateListener or StatementAwareUpdateListener that accumulates the received events. 
+	  From a threading perspective in the default configuration you may simply ask that listener to return the accumulated events in the same thread that sends the events. 
+	  This works well since by default the thread that sends an event will process it end-to-end thereby you have a guarantee when the thread returns that all is delivered to the listener.
+	</p>
+      </answer>
+    </faq>   
+
     <faq id="object_model_uses">
       <question>I want to know what streams an EPL statement references but don't want to parse the EPL string? I want to programmatically inspect and change the select clause columns when a user enters an EPL query, how to do this?</question>
       <answer>
