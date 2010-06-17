@@ -8,23 +8,23 @@
  **************************************************************************************/
 package com.espertech.esper.epl.db;
 
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.HistoricalEventViewable;
-import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
-import com.espertech.esper.epl.core.StreamTypesException;
+import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.IterablesArrayIterator;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.UnindexedEventTableList;
-import com.espertech.esper.epl.join.PollResultIndexingStrategy;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.client.*;
+import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.collection.IterablesArrayIterator;
+import com.espertech.esper.view.HistoricalEventViewable;
+import com.espertech.esper.view.View;
 
 import java.util.*;
 
@@ -41,8 +41,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
     private final EventType eventType;
     private final ThreadLocal<DataCache> dataCacheThreadLocal = new ThreadLocal<DataCache>();
 
-    private EventPropertyGetter[] getters;
-    private int[] getterStreamNumbers;
+    private ExprNode[] evaluators;
     private SortedSet<Integer> subordinateStreams;
     private ExprEvaluatorContext exprEvaluatorContext;
 
@@ -85,64 +84,39 @@ public class DatabasePollingViewable implements HistoricalEventViewable
         pollExecStrategy.destroy();
     }
 
-    public void validate(StreamTypeService streamTypeService,
+    public void validate(EngineImportService engineImportService,
+                         StreamTypeService streamTypeService,
                          MethodResolutionService methodResolutionService,
                          TimeProvider timeProvider,
                          VariableService variableService,
-                         ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+                         ExprEvaluatorContext exprEvaluatorContext,
+                         ConfigurationInformation configSnapshot,
+                         SchedulingService schedulingService,
+                         String engineURI,
+                         Map<Integer, List<ExprNode>> sqlParameters) throws ExprValidationException
     {
-        getters = new EventPropertyGetter[inputParameters.size()];
-        getterStreamNumbers = new int[inputParameters.size()];
+        evaluators = new ExprNode[inputParameters.size()];
         subordinateStreams = new TreeSet<Integer>();
         this.exprEvaluatorContext = exprEvaluatorContext;
 
         int count = 0;
         for (String inputParam : inputParameters)
         {
-            PropertyResolutionDescriptor desc = null;
-
-            // try to resolve the property name alone
-            try
-            {
-                desc = streamTypeService.resolveByStreamAndPropName(inputParam);
+            ExprNode raw = findSQLExpressionNode(myStreamNumber, count, sqlParameters);
+            if (raw == null) {
+                throw new ExprValidationException("Internal error find expression for historical stream parameter " + count + " stream " + myStreamNumber);
             }
-            catch (StreamTypesException ex)
-            {
-                if (variableService.getReader(inputParam) == null)
-                {
-                    throw new ExprValidationException("Property '" + inputParam + "' failed to resolve, reason: " + ex.getMessage());
+            ExprNode evaluator = raw.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext);
+            evaluators[count++] = evaluator;
+
+            ExprNodeIdentifierCollectVisitor visitor = new ExprNodeIdentifierCollectVisitor();
+            visitor.visit(evaluator);
+            for (ExprIdentNode identNode : visitor.getExprProperties()) {
+                if (identNode.getStreamId() == myStreamNumber) {
+                    throw new ExprValidationException("Invalid expression '" + inputParam + "' resolves to the historical data itself");
                 }
+                subordinateStreams.add(identNode.getStreamId());
             }
-
-            // Parameter is a property
-            if (desc != null)
-            {
-                // hold on to getter and stream number for each stream
-                int streamId = desc.getStreamNum();
-                if (streamId == myStreamNumber)
-                {
-                    throw new ExprValidationException("Invalid property '" + inputParam + "' resolves to the historical data itself");
-                }
-                String propName = desc.getPropertyName();
-                getters[count] = streamTypeService.getEventTypes()[streamId].getGetter(propName);
-                getterStreamNumbers[count] = streamId;
-                subordinateStreams.add(streamId);
-            }
-            else
-            // Parameter is a variable
-            {
-                final VariableReader reader = variableService.getReader(inputParam);
-                getters[count] = new EventPropertyGetter() {
-                    public Object get(EventBean eventBean) throws PropertyAccessException
-                    {
-                        return reader.getValue();
-                    }
-                    public boolean isExistsProperty(EventBean eventBean) {return true;}
-                    public Object getFragment(EventBean eventBean) {return null;}
-                };
-            }
-
-            count++;
         }
     }
 
@@ -154,6 +128,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
         EventTable[] resultPerInputRow = new EventTable[lookupEventsPerStream.length];
 
         // Get input parameters for each row
+        EventBean[] eventsPerStream;
         for (int row = 0; row < lookupEventsPerStream.length; row++)
         {
             Object[] lookupValues = new Object[inputParameters.size()];
@@ -161,9 +136,8 @@ public class DatabasePollingViewable implements HistoricalEventViewable
             // Build lookup keys
             for (int valueNum = 0; valueNum < inputParameters.size(); valueNum++)
             {
-                int streamNum = getterStreamNumbers[valueNum];
-                EventBean streamEvent = lookupEventsPerStream[row][streamNum];
-                Object lookupValue = getters[valueNum].get(streamEvent);
+                eventsPerStream = lookupEventsPerStream[row];
+                Object lookupValue = evaluators[valueNum].evaluate(eventsPerStream, true, exprEvaluatorContext);
                 lookupValues[valueNum] = lookupValue;
             }
 
@@ -285,5 +259,17 @@ public class DatabasePollingViewable implements HistoricalEventViewable
     public void removeAllViews()
     {
         throw new UnsupportedOperationException("Subviews not supported");
+    }
+
+    private static ExprNode findSQLExpressionNode(int myStreamNumber, int count, Map<Integer, List<ExprNode>> sqlParameters)
+    {
+        if ((sqlParameters == null) || (sqlParameters.isEmpty())) {
+            return null;
+        }
+        List<ExprNode> params = sqlParameters.get(myStreamNumber);
+        if ((params == null) || (params.isEmpty()) || (params.size() < (count + 1))) {
+            return null;
+        }
+        return params.get(count);
     }
 }

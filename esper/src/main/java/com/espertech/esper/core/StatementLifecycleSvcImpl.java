@@ -9,8 +9,8 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.annotation.Name;
 import com.espertech.esper.client.annotation.Hint;
+import com.espertech.esper.client.annotation.Name;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.epl.core.StreamTypeService;
@@ -217,11 +217,14 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         if (statementSpec.getInsertIntoDesc() != null)
         {
             String insertIntoStreamName = statementSpec.getInsertIntoDesc().getEventTypeName();
-            String latchFactoryName = "insert_stream_" + insertIntoStreamName + "_" + statementId;
+            String latchFactoryNameBack = "insert_stream_B_" + insertIntoStreamName + "_" + statementId;
+            String latchFactoryNameFront = "insert_stream_F_" + insertIntoStreamName + "_" + statementId;
             long msecTimeout = services.getEngineSettingsService().getEngineSettings().getThreading().getInsertIntoDispatchTimeout();
             ConfigurationEngineDefaults.Threading.Locking locking = services.getEngineSettingsService().getEngineSettings().getThreading().getInsertIntoDispatchLocking();
-            InsertIntoLatchFactory latchFactory = new InsertIntoLatchFactory(latchFactoryName, msecTimeout, locking, services.getTimeSource());
-            statementContext.getEpStatementHandle().setInsertIntoLatchFactory(latchFactory);
+            InsertIntoLatchFactory latchFactoryFront = new InsertIntoLatchFactory(latchFactoryNameFront, msecTimeout, locking, services.getTimeSource());
+            InsertIntoLatchFactory latchFactoryBack = new InsertIntoLatchFactory(latchFactoryNameBack, msecTimeout, locking, services.getTimeSource());
+            statementContext.getEpStatementHandle().setInsertIntoFrontLatchFactory(latchFactoryFront);
+            statementContext.getEpStatementHandle().setInsertIntoBackLatchFactory(latchFactoryBack);
         }
 
         // In a join statements if the same event type or it's deep super types are used in the join more then once,
@@ -268,6 +271,15 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         else if (isPattern) {
             statementType = StatementType.PATTERN;
         }
+        else if (statementSpec.getUpdateDesc() != null) {
+            statementType = StatementType.UPDATE;
+        }
+        else if (statementSpec.getCreateIndexDesc() != null) {
+            statementType = StatementType.CREATE_INDEX;
+        }
+        else if (statementSpec.getCreateSchemaDesc() != null) {
+            statementType = StatementType.CREATE_SCHEMA;
+        }
         if (statementType == null) {
             statementType = StatementType.SELECT;
         }
@@ -286,8 +298,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
             boolean isInsertInto = statementSpec.getInsertIntoDesc() != null;
             boolean isDistinct = statementSpec.getSelectClauseSpec().isDistinct();
+            boolean isForClause = statementSpec.getForClauseSpec() != null;
             statementContext.getStatementResultService().setContext(statement, epServiceProvider,
-                    isInsertInto, isPattern, isDistinct, statementContext.getEpStatementHandle().getMetricsHandle());
+                    isInsertInto, isPattern, isDistinct, isForClause, statementContext.getEpStatementHandle().getMetricsHandle());
 
             // create start method
             startMethod = new EPStatementStartMethod(compiledSpec, services, statementContext);
@@ -1056,6 +1069,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 spec.getCreateWindowDesc(),
                 spec.getCreateIndexDesc(),
                 spec.getCreateVariableDesc(),
+                spec.getCreateSchemaDesc(),
                 spec.getInsertIntoDesc(),
                 spec.getSelectStreamSelectorEnum(),
                 selectClauseCompiled,
@@ -1072,7 +1086,9 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 eventTypeReferences,
                 annotations,
                 spec.getUpdateDesc(),
-                spec.getMatchRecognizeSpec()
+                spec.getMatchRecognizeSpec(),
+                spec.getForClauseSpec(),
+                spec.getSqlParameters()
                 );
     }
 
@@ -1155,19 +1171,20 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
         // Create Map or Wrapper event type from the select clause of the window.
         // If no columns selected, simply create a wrapper type
+        boolean isOnlyWildcard = spec.getSelectClauseSpec().isOnlyWildcard();
         boolean isWildcard = spec.getSelectClauseSpec().isUsingWildcard();
         if (statementContext.getValueAddEventService().isRevisionTypeName(selectFromTypeName))
         {
             targetType = statementContext.getValueAddEventService().createRevisionType(typeName, selectFromTypeName, statementContext.getStatementStopService(), statementContext.getEventAdapterService());
         }
-        else if (isWildcard)
+        else if (isWildcard && !isOnlyWildcard)
         {
             targetType = statementContext.getEventAdapterService().addWrapperType(typeName, selectFromType, properties, true, false);
         }
         else
         {
             // Some columns selected, use the types of the columns
-            if (spec.getSelectClauseSpec().getSelectExprList().size() > 0)
+            if (spec.getSelectClauseSpec().getSelectExprList().size() > 0 && !isOnlyWildcard)
             {
                 targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, properties, null, false, true, false);
             }

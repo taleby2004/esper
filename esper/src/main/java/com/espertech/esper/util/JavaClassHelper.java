@@ -871,7 +871,7 @@ public class JavaClassHelper
         }
         catch (ClassNotFoundException ex)
         {
-            throw new EventAdapterException("Unable to load class '" + boxedClassName + "', class not found", ex);
+            return null;
         }
     }
 
@@ -1192,6 +1192,18 @@ public class JavaClassHelper
             return false;
         }
         if (propertyType == Date.class)
+        {
+            return false;
+        }
+        if (propertyType == java.sql.Date.class)
+        {
+            return false;
+        }
+        if (propertyType == java.sql.Time.class)
+        {
+            return false;
+        }
+        if (propertyType == java.sql.Timestamp.class)
         {
             return false;
         }

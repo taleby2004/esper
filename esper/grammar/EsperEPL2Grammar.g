@@ -69,6 +69,7 @@ tokens
 	RSTREAM='rstream';
 	ISTREAM='istream';
 	IRSTREAM='irstream';
+	SCHEMA='schema';
 	UNIDIRECTIONAL='unidirectional';
 	RETAINUNION='retain-union';
 	RETAININTERSECTION='retain-intersection';
@@ -114,6 +115,8 @@ tokens
 	PARTITION='partition';
 	MATCHES='matches';
 	AFTER='after';	
+	FOR='for';	
+	WHILE='while';	
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -231,8 +234,8 @@ tokens
 	MATCH_UNTIL_RANGE_HALFCLOSED;
 	MATCH_UNTIL_RANGE_CLOSED;
 	MATCH_UNTIL_RANGE_BOUNDED;
-	CREATE_WINDOW_COL_TYPE_LIST;
-	CREATE_WINDOW_COL_TYPE;
+	CREATE_COL_TYPE_LIST;
+	CREATE_COL_TYPE;
 	NUMBERSETSTAR;
 	ANNOTATION;
 	ANNOTATION_ARRAY;
@@ -241,6 +244,10 @@ tokens
 	LAST_AGGREG;
 	UPDATE_EXPR;
 	ON_SET_EXPR_ITEM;
+	CREATE_SCHEMA_EXPR;
+	CREATE_SCHEMA_EXPR_QUAL;
+	CREATE_SCHEMA_EXPR_INH;
+	VARIANT_LIST;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -434,6 +441,7 @@ tokens
 	parserTokenParaphases.put(RSTREAM, "'rstream'");
 	parserTokenParaphases.put(ISTREAM, "'istream'");
 	parserTokenParaphases.put(IRSTREAM, "'irstream'");
+	parserTokenParaphases.put(SCHEMA, "'schema'");
 	parserTokenParaphases.put(UNIDIRECTIONAL, "'unidirectional'");
 	parserTokenParaphases.put(RETAINUNION, "'retain-union'");
 	parserTokenParaphases.put(RETAININTERSECTION, "'retain-intersection'");
@@ -479,7 +487,9 @@ tokens
 	parserTokenParaphases.put(DEFINE, "'define'");
 	parserTokenParaphases.put(PARTITION, "'partition'");
 	parserTokenParaphases.put(MATCHES, "'matches'");
-	parserTokenParaphases.put(AFTER, "'after';");
+	parserTokenParaphases.put(AFTER, "'after'");
+	parserTokenParaphases.put(FOR, "'for'");
+	parserTokenParaphases.put(WHILE, "'while'");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }
@@ -588,12 +598,13 @@ elementValueArrayEnum
 // EPL expression
 //----------------------------------------------------------------------------
 eplExpression 
-	:	selectExpr
+	:	(selectExpr
 	|	createWindowExpr
 	|	createIndexExpr
 	|	createVariableExpr
+	|	createSchemaExpr
 	|	onExpr
-	|	updateExpr
+	|	updateExpr) forExpr?
 	;
 	
 selectExpr
@@ -695,12 +706,12 @@ createWindowExpr
 	:	CREATE WINDOW i=IDENT (DOT viewExpression (DOT viewExpression)*)? (ru=RETAINUNION|ri=RETAININTERSECTION)? AS? 
 		  (
 		  	createWindowExprModelAfter		  
-		  |   	LPAREN createWindowColumnList RPAREN
+		  |   	LPAREN createColumnList RPAREN
 		  )		
 		  (i1=INSERT (WHERE expression)? )?
-		-> {i1 != null}? ^(CREATE_WINDOW_EXPR $i viewExpression* $ru? $ri? createWindowExprModelAfter? createWindowColumnList? 
+		-> {i1 != null}? ^(CREATE_WINDOW_EXPR $i viewExpression* $ru? $ri? createWindowExprModelAfter? createColumnList? 
 				^(INSERT expression?))
-		-> ^(CREATE_WINDOW_EXPR $i viewExpression* $ru? $ri? createWindowExprModelAfter? createWindowColumnList?)
+		-> ^(CREATE_WINDOW_EXPR $i viewExpression* $ru? $ri? createWindowExprModelAfter? createColumnList?)
 	;
 
 createWindowExprModelAfter
@@ -708,7 +719,7 @@ createWindowExprModelAfter
 	;
 		
 createIndexExpr
-	:	CREATE INDEX n=IDENT ON w=IDENT (columnList)
+	:	CREATE INDEX n=IDENT ON w=IDENT LPAREN columnList RPAREN
 		-> ^(CREATE_INDEX_EXPR $n $w columnList)
 	;
 
@@ -717,16 +728,16 @@ createVariableExpr
 		-> ^(CREATE_VARIABLE_EXPR classIdentifier $n expression?)
 	;
 
-createWindowColumnList 	
-@init  { paraphrases.push("create window column list"); }
+createColumnList 	
+@init  { paraphrases.push("column list"); }
 @after { paraphrases.pop(); }
-	:	createWindowColumnListElement (COMMA createWindowColumnListElement)*
-		-> ^(CREATE_WINDOW_COL_TYPE_LIST createWindowColumnListElement+)
+	:	createColumnListElement (COMMA createColumnListElement)*
+		-> ^(CREATE_COL_TYPE_LIST createColumnListElement+)
 	;
 	
-createWindowColumnListElement
-	:   	name=IDENT type=IDENT
-		-> ^(CREATE_WINDOW_COL_TYPE $name $type)
+createColumnListElement
+	:   	name=IDENT (classIdentifier (b=LBRACK RBRACK)?)
+		-> ^(CREATE_COL_TYPE $name classIdentifier $b?)
 	;
 
 createSelectionList 	
@@ -745,15 +756,36 @@ createSelectionListElement
 		-> ^(SELECTION_ELEMENT_EXPR constant $i?)
 	;
 
+createSchemaExpr
+	:	CREATE keyword=IDENT? SCHEMA name=IDENT AS? 
+		  (
+			variantList
+		  |   	LPAREN createColumnList? RPAREN (inherits=IDENT columnList)?
+		  )		  
+		-> {$inherits != null}? ^(CREATE_SCHEMA_EXPR $name createColumnList? ^(CREATE_SCHEMA_EXPR_INH $inherits columnList))
+		-> {$keyword != null}? ^(CREATE_SCHEMA_EXPR $name variantList ^(CREATE_SCHEMA_EXPR_QUAL $keyword))
+		-> ^(CREATE_SCHEMA_EXPR $name variantList? createColumnList?)
+	;
+
+variantList 	
+	:	variantListElement (COMMA variantListElement)*
+		-> ^(VARIANT_LIST variantListElement+)
+	;
+
+variantListElement
+	:   	STAR^
+	|	classIdentifier
+	;
+
 insertIntoExpr
 @init  { paraphrases.push("insert-into clause"); }
 @after { paraphrases.pop(); }
-	:	(s=ISTREAM | s=RSTREAM)? INTO i=IDENT (columnList)?
+	:	(s=ISTREAM | s=RSTREAM)? INTO i=IDENT (LPAREN columnList RPAREN)?
 		-> ^(INSERTINTO_EXPR $s? $i columnList?)
 	;
 		
 columnList
-	: 	LPAREN IDENT (COMMA IDENT)* RPAREN
+	: 	IDENT (COMMA IDENT)* 
 		-> ^(EXPRCOL IDENT*)
 	;
 	
@@ -832,7 +864,13 @@ streamExpression
 		-> ^(STREAM_EXPR eventFilterExpression? patternInclusionExpression? databaseJoinExpression? methodJoinExpression?
 		viewExpression* $i? $u? $ru? $ri?)
 	;
-	
+		
+forExpr
+	:	FOR i=IDENT (LPAREN expressionList? RPAREN)?
+		-> ^(FOR $i expressionList?)
+	;
+
+
 // Start match recognize
 //
 // Lowest precedence is listed first, order is (highest to lowest):  
@@ -1322,8 +1360,9 @@ distinctExpressionAtom
    	;
 
 guardPostFix
-	:	(atomicExpression | l=LPAREN patternExpression RPAREN) (w=WHERE guardExpression)?
-		-> {$w != null}? ^(GUARD_EXPR atomicExpression? patternExpression? guardExpression) 
+	:	(atomicExpression | l=LPAREN patternExpression RPAREN) ((wh=WHERE guardWhereExpression) | (wi=WHILE guardWhileExpression))?
+		-> {$wh != null}? ^(GUARD_EXPR atomicExpression? patternExpression? guardWhereExpression) 
+		-> {$wi != null}? ^(GUARD_EXPR atomicExpression? patternExpression? guardWhileExpression) 
 		-> atomicExpression? patternExpression?
 	;
 
@@ -1337,10 +1376,14 @@ observerExpression
 		-> ^(OBSERVER_EXPR $ns $nm expressionWithTimeList?)
 	;
 
-guardExpression
+guardWhereExpression
 	:	IDENT COLON! IDENT LPAREN! (expressionWithTimeList)? RPAREN!
 	;
 	
+guardWhileExpression
+	:	LPAREN! expression RPAREN!
+	;
+
 // syntax is [a..b]  or [..b]  or  [a..] or [a:b]   wherein a and b may be recognized as double
 matchUntilRange
 	:	LBRACK (
@@ -1569,6 +1612,7 @@ keywordAllowedIdent returns [String result]
 		|EVENTS { $result = "events"; }
 		|FIRST { $result = "first"; }
 		|LAST { $result = "last"; }
+		|WHILE { $result = "while"; }
 		|UNIDIRECTIONAL { $result = "unidirectional"; }
 		|RETAINUNION { $result = "retain-union"; }
 		|RETAININTERSECTION { $result = "retain-intersection"; }

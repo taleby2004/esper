@@ -18,6 +18,7 @@
     <!ENTITY performance SYSTEM "modules/performance.xml">
     <!ENTITY appendix_outputspec SYSTEM "modules/appendix_outputspec.xml">
     <!ENTITY appendix_keywords SYSTEM "modules/appendix_keywords.xml">
+	<!ENTITY packaging_deployment SYSTEM "modules/packaging_deployment.xml">
 ]>
 <!-- Terminology notes
 
@@ -29,7 +30,7 @@
 	<bookinfo>
 		<title>Esper - Event Stream and Complex Event Processing for Java</title>
 		<subtitle>Reference Documentation</subtitle>
-		<releaseinfo>3.4.0</releaseinfo>
+		<releaseinfo>3.5.0</releaseinfo>
 		<copyright>
 			<year>2009</year>
 			<holder>EsperTech Inc.</holder>
@@ -133,6 +134,8 @@
     &api;
 
     &configuration;
+
+    &packaging_deployment;
 
     &extension;
 

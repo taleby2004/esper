@@ -12,10 +12,7 @@ import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprSubselectNode;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Specification object representing a complete EPL statement including all EPL constructs.
@@ -26,6 +23,7 @@ public class StatementSpecCompiled
     private final CreateWindowDesc createWindowDesc;
     private final CreateIndexDesc createIndexDesc;
     private final CreateVariableDesc createVariableDesc;
+    private final CreateSchemaDesc createSchemaDesc;
     private InsertIntoDesc insertIntoDesc;
     private SelectClauseStreamSelectorEnum selectStreamDirEnum;
     private SelectClauseSpecCompiled selectClauseSpec;
@@ -43,6 +41,8 @@ public class StatementSpecCompiled
     private final Annotation[] annotations;
     private final UpdateDesc updateSpec;
     private final MatchRecognizeSpec matchRecognizeSpec;
+    private final ForClauseSpec forClauseSpec;
+    private final Map<Integer, List<ExprNode>> sqlParameters;
 
     /**
      * Ctor.
@@ -72,6 +72,7 @@ public class StatementSpecCompiled
                                  CreateWindowDesc createWindowDesc,
                                  CreateIndexDesc createIndexDesc,
                                  CreateVariableDesc createVariableDesc,
+                                 CreateSchemaDesc createSchemaDesc,
                                  InsertIntoDesc insertIntoDesc,
                                  SelectClauseStreamSelectorEnum selectClauseStreamSelectorEnum,
                                  SelectClauseSpecCompiled selectClauseSpec,
@@ -88,12 +89,15 @@ public class StatementSpecCompiled
                                  Set<String> eventTypeReferences,
                                  Annotation[] annotations,
                                  UpdateDesc updateSpec,
-                                 MatchRecognizeSpec matchRecognizeSpec)
+                                 MatchRecognizeSpec matchRecognizeSpec,
+                                 ForClauseSpec forClauseSpec,
+                                 Map<Integer, List<ExprNode>> sqlParameters)
     {
         this.onTriggerDesc = onTriggerDesc;
         this.createWindowDesc = createWindowDesc;
         this.createIndexDesc = createIndexDesc;
         this.createVariableDesc = createVariableDesc;
+        this.createSchemaDesc = createSchemaDesc;
         this.insertIntoDesc = insertIntoDesc;
         this.selectStreamDirEnum = selectClauseStreamSelectorEnum;
         this.selectClauseSpec = selectClauseSpec;
@@ -111,6 +115,8 @@ public class StatementSpecCompiled
         this.annotations = annotations;
         this.updateSpec = updateSpec;
         this.matchRecognizeSpec = matchRecognizeSpec;
+        this.forClauseSpec = forClauseSpec;
+        this.sqlParameters = sqlParameters;
     }
 
     /**
@@ -122,6 +128,7 @@ public class StatementSpecCompiled
         createWindowDesc = null;
         createIndexDesc = null;
         createVariableDesc = null;
+        createSchemaDesc = null;
         insertIntoDesc = null;
         selectStreamDirEnum = SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH;
         selectClauseSpec = new SelectClauseSpecCompiled(false);
@@ -139,6 +146,8 @@ public class StatementSpecCompiled
         annotations = new Annotation[0];
         updateSpec = null;
         matchRecognizeSpec = null;
+        forClauseSpec = null;
+        sqlParameters = null;
     }
 
     /**
@@ -369,5 +378,20 @@ public class StatementSpecCompiled
     public CreateIndexDesc getCreateIndexDesc()
     {
         return createIndexDesc;
+    }
+
+    public CreateSchemaDesc getCreateSchemaDesc()
+    {
+        return createSchemaDesc;
+    }
+
+    public ForClauseSpec getForClauseSpec()
+    {
+        return forClauseSpec;
+    }
+
+    public Map<Integer, List<ExprNode>> getSqlParameters()
+    {
+        return sqlParameters;
     }
 }

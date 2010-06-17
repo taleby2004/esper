@@ -11,6 +11,8 @@ package com.espertech.esper.core;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * Interface for a statement-level service for coordinating the insert/remove stream generation,
@@ -28,14 +30,15 @@ public interface StatementResultService
      * @param statementMetricHandle handle for metrics reporting
      */
     public void setContext(EPStatementSPI epStatement, EPServiceProviderSPI epServiceProvider,
-                           boolean isInsertInto, boolean isPattern, boolean isDistinct, StatementMetricHandle statementMetricHandle);
+                           boolean isInsertInto, boolean isPattern, boolean isDistinct, boolean isForClause, StatementMetricHandle statementMetricHandle);
 
     /**
      * For initialize of the service providing select clause column types and names.
      * @param selectClauseTypes types of columns in the select clause
      * @param selectClauseColumnNames column names
      */
-    public void setSelectClause(Class[] selectClauseTypes, String[] selectClauseColumnNames);
+    public void setSelectClause(Class[] selectClauseTypes, String[] selectClauseColumnNames,
+                                boolean forClauseDelivery, ExprNode[] groupDeliveryExpressions, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Returns true to indicate that synthetic events should be produced, for

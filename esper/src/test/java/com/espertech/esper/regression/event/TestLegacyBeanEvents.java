@@ -255,7 +255,7 @@ public class TestLegacyBeanEvents extends TestCase
         assertEquals(null, stmtType.getMetadata().getOptionalSecondaryNames());
         assertNotNull(stmtType.getMetadata().getPrimaryName());
         assertNull(stmtType.getMetadata().getPublicName());
-        assertNull(stmtType.getName());
+        assertNotNull(stmtType.getName());
         assertEquals(EventTypeMetadata.TypeClass.ANONYMOUS, stmtType.getMetadata().getTypeClass());
         assertEquals(false, stmtType.getMetadata().isApplicationConfigured());        
     }

@@ -12,6 +12,7 @@ import com.espertech.esper.util.MetaDefItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
 import java.io.Serializable;
 
 /**
@@ -42,6 +43,15 @@ public class SelectClauseSpecRaw implements MetaDefItem, Serializable
 	}
 
     /**
+     * Adds select expressions within the select clause.
+     * @param elements is the expressions to add
+     */
+    public void addAll(Collection<SelectClauseElementRaw> elements)
+	{
+		selectClauseElements.addAll(elements);
+	}
+
+    /**
      * Returns the list of select expressions.
      * @return list of expressions
      */
@@ -49,6 +59,10 @@ public class SelectClauseSpecRaw implements MetaDefItem, Serializable
 	{
 		return selectClauseElements;
 	}
+
+    public boolean isOnlyWildcard() {
+        return (selectClauseElements.size() == 1) && (selectClauseElements.get(0) instanceof SelectClauseElementWildcard);         
+    }
 
     /**
      * Returns true if the select clause contains at least one wildcard.

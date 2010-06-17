@@ -36,10 +36,16 @@ public class TestPropertyResolution extends TestCase
         assertEquals(1, eventBean.get("seconds"));
         assertEquals(2, eventBean.get("order"));
 
-        // ESPER-390
-        //stmt.destroy();
-        //stmt = epService.getEPAdministrator().createEPL("select `timestamp.hour` from SomeKeywords");
-        //stmt.addListener(listener);
+        stmt.destroy();
+        stmt = epService.getEPAdministrator().createEPL("select timestamp.`hour` as val from SomeKeywords");
+        stmt.addListener(listener);
+
+        SupportBeanReservedKeyword bean = new SupportBeanReservedKeyword(1, 2);
+        bean.setTimestamp(new SupportBeanReservedKeyword.Inner());
+        bean.getTimestamp().setHour(10);
+        epService.getEPRuntime().sendEvent(bean);
+        eventBean = listener.assertOneGetNewAndReset();
+        assertEquals(10, eventBean.get("val"));
     }
 
     public void testWriteOnly()
@@ -117,6 +123,23 @@ public class TestPropertyResolution extends TestCase
         assertEquals(10, event.get("val2"));
         assertEquals("valueOne", event.get("val3"));
         assertEquals(1, event.get("val4"));
+    }
+
+    public void testAccessorStyleGlobalPublic() {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.getEngineDefaults().getEventMeta().setDefaultAccessorStyle(ConfigurationEventTypeLegacy.AccessorStyle.PUBLIC);
+        configuration.addEventType("SupportLegacyBean", SupportLegacyBean.class);
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select fieldLegacyVal from SupportLegacyBean");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        SupportLegacyBean event = new SupportLegacyBean("E1");
+        event.fieldLegacyVal = "val1";
+        epService.getEPRuntime().sendEvent(event);
+        assertEquals("val1", listener.assertOneGetNewAndReset().get("fieldLegacyVal"));
     }
 
     public void testCaseDistinctInsensitive()

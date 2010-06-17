@@ -591,14 +591,9 @@ class ConfigurationParser {
         String variableName = element.getAttributes().getNamedItem("name").getTextContent();
         String type = element.getAttributes().getNamedItem("type").getTextContent();
 
-        Class variableType;
-        try
-        {
-            variableType = JavaClassHelper.getClassForSimpleName(type);
-        }
-        catch (EventAdapterException ex)
-        {
-            throw new ConfigurationException("Invalid variable type for variable '" + variableName + "': " + ex.getMessage());
+        Class variableType = JavaClassHelper.getClassForSimpleName(type);
+        if (variableType == null) {
+            throw new ConfigurationException("Invalid variable type for variable '" + variableName + "', the type is not recognized");
         }
 
         Node initValueNode = element.getAttributes().getNamedItem("initialization-value");
@@ -1294,9 +1289,19 @@ class ConfigurationParser {
             Element subElement = nodeIterator.next();
             if (subElement.getNodeName().equals("class-property-resolution"))
             {
-                String styleText = subElement.getAttributes().getNamedItem("style").getTextContent();
-                Configuration.PropertyResolutionStyle value = Configuration.PropertyResolutionStyle.valueOf(styleText.toUpperCase());
-                configuration.getEngineDefaults().getEventMeta().setClassPropertyResolutionStyle(value);
+                Node styleNode = subElement.getAttributes().getNamedItem("style");
+                if (styleNode != null) {
+                    String styleText = styleNode.getTextContent();
+                    Configuration.PropertyResolutionStyle value = Configuration.PropertyResolutionStyle.valueOf(styleText.toUpperCase());
+                    configuration.getEngineDefaults().getEventMeta().setClassPropertyResolutionStyle(value);
+                }
+
+                Node accessorStyleNode = subElement.getAttributes().getNamedItem("accessor-style");
+                if (accessorStyleNode != null) {
+                    String accessorStyleText = accessorStyleNode.getTextContent();
+                    ConfigurationEventTypeLegacy.AccessorStyle value = ConfigurationEventTypeLegacy.AccessorStyle.valueOf(accessorStyleText.toUpperCase());
+                    configuration.getEngineDefaults().getEventMeta().setDefaultAccessorStyle(value);
+                }
             }
         }
     }

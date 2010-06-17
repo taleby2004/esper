@@ -11,16 +11,19 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
+import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.client.soda.ForClauseKeyword;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Factory for select expression processors.
@@ -47,13 +50,17 @@ public class SelectExprProcessorFactory
     public static SelectExprProcessor getProcessor(List<SelectClauseElementCompiled> selectionList,
                                                    boolean isUsingWildcard,
                                                    InsertIntoDesc insertIntoDesc,
+                                                   ForClauseSpec forClauseSpec,
                                                    StreamTypeService typeService, 
                                                    EventAdapterService eventAdapterService,
                                                    StatementResultService statementResultService,
                                                    ValueAddEventService valueAddEventService,
                                                    SelectExprEventTypeRegistry selectExprEventTypeRegistry,
                                                    MethodResolutionService methodResolutionService,
-                                                   ExprEvaluatorContext exprEvaluatorContext)
+                                                   ExprEvaluatorContext exprEvaluatorContext,
+                                                   VariableService variableService,
+                                                   TimeProvider timeProvider,
+                                                   String engineURI)
         throws ExprValidationException
     {
         SelectExprProcessor synthetic = getProcessorInternal(selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext);
@@ -61,8 +68,41 @@ public class SelectExprProcessorFactory
         // Handle binding as an optional service
         if (statementResultService != null)
         {
+            // Handle for-clause delivery contract checking
+            ExprNode[] groupedDeliveryExpr = null;
+            boolean forDelivery = false;
+            if (forClauseSpec != null) {
+                for (ForClauseItemSpec item : forClauseSpec.getClauses()) {
+                    if (item.getKeyword() == null) {
+                        throw new ExprValidationException("Expected any of the " + Arrays.toString(ForClauseKeyword.values()).toLowerCase() + " for-clause keywords after reserved keyword 'for'");
+                    }
+                    try {
+                        ForClauseKeyword keyword = ForClauseKeyword.valueOf(item.getKeyword().toUpperCase());
+                        if ((keyword == ForClauseKeyword.GROUPED_DELIVERY) && (item.getExpressions().isEmpty())) {
+                            throw new ExprValidationException("The for-clause with the " + ForClauseKeyword.GROUPED_DELIVERY.getName() + " keyword requires one or more grouping expressions");
+                        }
+                        if ((keyword == ForClauseKeyword.DISCRETE_DELIVERY) && (!item.getExpressions().isEmpty())) {
+                            throw new ExprValidationException("The for-clause with the " + ForClauseKeyword.DISCRETE_DELIVERY.getName() + " keyword does not allow grouping expressions");
+                        }
+                        if (forDelivery) {
+                            throw new ExprValidationException("The for-clause with delivery keywords may only occur once in a statement");
+                        }
+                    }
+                    catch (RuntimeException ex) {
+                        throw new ExprValidationException("Expected any of the " + Arrays.toString(ForClauseKeyword.values()).toLowerCase() + " for-clause keywords after reserved keyword 'for'");
+                    }
+
+                    StreamTypeService type = new StreamTypeServiceImpl(synthetic.getResultEventType(), null, false, engineURI);
+                    groupedDeliveryExpr = new ExprNode[item.getExpressions().size()];
+                    for (int i = 0; i < item.getExpressions().size(); i++) {
+                        groupedDeliveryExpr[i] = item.getExpressions().get(i).getValidatedSubtree(type, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext);
+                    }
+                    forDelivery = true;
+                }
+            }
+
             BindProcessor bindProcessor = new BindProcessor(selectionList, typeService.getEventTypes(), typeService.getStreamNames());
-            statementResultService.setSelectClause(bindProcessor.getExpressionTypes(), bindProcessor.getColumnNamesAssigned());
+            statementResultService.setSelectClause(bindProcessor.getExpressionTypes(), bindProcessor.getColumnNamesAssigned(), forDelivery, groupedDeliveryExpr, exprEvaluatorContext);
             return new SelectExprResultProcessor(statementResultService, synthetic, bindProcessor, exprEvaluatorContext);
         }
 
@@ -109,19 +149,18 @@ public class SelectExprProcessorFactory
         verifyNameUniqueness(selectionList);
 
         // Construct processor
-        log.debug(".getProcessor Using SelectExprEvalProcessor");
         List<SelectClauseExprCompiledSpec> expressionList = getExpressions(selectionList);
         List<SelectClauseStreamCompiledSpec> streamWildcards = getStreamWildcards(selectionList);
-        if (streamWildcards.size() == 0)
-        {
-            // This one only deals with wildcards and expressions in the selection
-            return new SelectExprEvalProcessor(expressionList, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext);
+
+        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(expressionList, streamWildcards, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext);
+        SelectExprProcessor processor = factory.getEvaluator();
+
+        // add reference to the type obtained
+        EventTypeSPI type = (EventTypeSPI) processor.getResultEventType();
+        if (type.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS) {
+            selectExprEventTypeRegistry.add(processor.getResultEventType());
         }
-        else
-        {
-            // This one also deals with stream selectors (e.g. select *, p1, s0.* from S0 as s0)
-            return new SelectExprEvalProcessorStreams(expressionList, streamWildcards, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, selectExprEventTypeRegistry, exprEvaluatorContext);
-        }
+        return processor;
     }
 
     /**

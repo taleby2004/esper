@@ -15,6 +15,7 @@ import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.client.util.EventRenderer;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
+import com.espertech.esper.collection.DualWorkQueue;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.core.thread.*;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
@@ -57,7 +58,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private EventRenderer eventRenderer;
     private ThreadLocal<Map<EPStatementHandle, ArrayDequeJDK6Backport<FilterHandleCallback>>> matchesPerStmtThreadLocal;
     private ThreadLocal<Map<EPStatementHandle, Object>> schedulePerStmtThreadLocal;
-    private InternalEventRouterImpl internalEventRouterImpl;
+    private InternalEventRouter internalEventRouter;
     private ExprEvaluatorContext engineFilterAndDispatchTimeContext;
 
     private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
@@ -155,11 +156,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     /**
      * Sets the route for events to use
-     * @param internalEventRouterImpl router
+     * @param internalEventRouter router
      */
-    public void setInternalEventRouterImpl(InternalEventRouterImpl internalEventRouterImpl)
+    public void setInternalEventRouter(InternalEventRouter internalEventRouter)
     {
-        this.internalEventRouterImpl = internalEventRouterImpl;
+        this.internalEventRouter = internalEventRouter;
     }
 
     public long getRoutedInternal()
@@ -252,7 +253,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         // Get it wrapped up, process event
         EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
-        ThreadWorkQueue.add(eventBean);
+        ThreadWorkQueue.addBack(eventBean);
     }
 
     public void sendEvent(Map map, String eventTypeName) throws EPException
@@ -293,15 +294,15 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         // Process event
         EventBean event = services.getEventAdapterService().adapterForMap(map, eventTypeName);
-        if (internalEventRouterImpl.isHasPreprocessing())
+        if (internalEventRouter.isHasPreprocessing())
         {
-            event = internalEventRouterImpl.preprocess(event,engineFilterAndDispatchTimeContext);
+            event = internalEventRouter.preprocess(event,engineFilterAndDispatchTimeContext);
             if (event == null)
             {
                 return;
             }
         }
-        ThreadWorkQueue.add(event);
+        ThreadWorkQueue.addBack(event);
     }
 
     public long getNumEventsEvaluated()
@@ -317,40 +318,50 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public void routeEventBean(EventBean event)
     {
-        ThreadWorkQueue.add(event);
+        ThreadWorkQueue.addBack(event);
     }
 
     public void route(Object event)
     {
         routedExternal.incrementAndGet();
 
-        if (internalEventRouterImpl.isHasPreprocessing())
+        if (internalEventRouter.isHasPreprocessing())
         {
             EventBean eventBean = services.getEventAdapterService().adapterForBean(event);
-            event = internalEventRouterImpl.preprocess(eventBean,engineFilterAndDispatchTimeContext);
+            event = internalEventRouter.preprocess(eventBean,engineFilterAndDispatchTimeContext);
             if (event == null)
             {
                 return;
             }
         }
                 
-        ThreadWorkQueue.add(event);
+        ThreadWorkQueue.addBack(event);
     }
 
     // Internal route of events via insert-into, holds a statement lock
-    public void route(EventBean event, EPStatementHandle epStatementHandle)
+    public void route(EventBean event, EPStatementHandle epStatementHandle, boolean addToFront)
     {
         routedInternal.incrementAndGet();
 
         if (isLatchStatementInsertStream)
         {
-            InsertIntoLatchFactory insertIntoLatchFactory = epStatementHandle.getInsertIntoLatchFactory();
-            Object latch = insertIntoLatchFactory.newLatch(event);
-            ThreadWorkQueue.add(latch);
+            if (addToFront) {
+                Object latch = epStatementHandle.getInsertIntoFrontLatchFactory().newLatch(event);
+                ThreadWorkQueue.addFront(latch);
+            }
+            else {
+                Object latch = epStatementHandle.getInsertIntoBackLatchFactory().newLatch(event);
+                ThreadWorkQueue.addBack(latch);
+            }
         }
         else
         {
-            ThreadWorkQueue.add(event);
+            if (addToFront) {
+                ThreadWorkQueue.addFront(event);
+            }
+            else {
+                ThreadWorkQueue.addBack(event);
+            }
         }
     }
 
@@ -382,9 +393,9 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public void processWrappedEvent(EventBean eventBean)
     {
-        if (internalEventRouterImpl.isHasPreprocessing())
+        if (internalEventRouter.isHasPreprocessing())
         {
-            eventBean = internalEventRouterImpl.preprocess(eventBean, engineFilterAndDispatchTimeContext);
+            eventBean = internalEventRouter.preprocess(eventBean, engineFilterAndDispatchTimeContext);
             if (eventBean == null)
             {
                 return;
@@ -623,8 +634,43 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
      */
     public void processThreadWorkQueue()
     {
+        DualWorkQueue queues = ThreadWorkQueue.getThreadQueue();
+
+        if (queues.getFrontQueue().isEmpty()) {
+            boolean haveDispatched = services.getNamedWindowService().dispatch(engineFilterAndDispatchTimeContext);
+            if (haveDispatched)
+            {
+                // Dispatch results to listeners
+                dispatch();
+            }
+        }
+        else {
+            Object item;
+            while ( (item = queues.getFrontQueue().poll()) != null)
+            {
+                if (item instanceof InsertIntoLatchSpin)
+                {
+                    processThreadWorkQueueLatchedSpin((InsertIntoLatchSpin) item);
+                }
+                else if (item instanceof InsertIntoLatchWait)
+                {
+                    processThreadWorkQueueLatchedWait((InsertIntoLatchWait) item);
+                }
+                else
+                {
+                    processThreadWorkQueueUnlatched(item);
+                }
+
+                boolean haveDispatched = services.getNamedWindowService().dispatch(engineFilterAndDispatchTimeContext);
+                if (haveDispatched)
+                {
+                    dispatch();
+                }
+            }
+        }
+
         Object item;
-        while ( (item = ThreadWorkQueue.next()) != null)
+        while ( (item = queues.getBackQueue().poll()) != null)
         {
             if (item instanceof InsertIntoLatchSpin)
             {
@@ -638,36 +684,17 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             {
                 processThreadWorkQueueUnlatched(item);
             }
-        }
 
-        // Process named window deltas
-        boolean haveDispatched = services.getNamedWindowService().dispatch(engineFilterAndDispatchTimeContext);
-        if (haveDispatched)
-        {
-            // Dispatch results to listeners
-            dispatch();
-        }
-
-        if (!(ThreadWorkQueue.isEmpty()))
-        {
-            processThreadWorkQueue();
+            if (!queues.getFrontQueue().isEmpty()) {
+                processThreadWorkQueue();
+            }
         }
     }
 
     private void processThreadWorkQueueLatchedWait(InsertIntoLatchWait insertIntoLatch)
     {
         // wait for the latch to complete
-        Object item = insertIntoLatch.await();
-
-        EventBean eventBean;
-        if (item instanceof EventBean)
-        {
-            eventBean = (EventBean) item;
-        }
-        else
-        {
-            eventBean = services.getEventAdapterService().adapterForBean(item);
-        }
+        EventBean eventBean = insertIntoLatch.await();
 
         services.getEventProcessingRWLock().acquireReadLock();
         try
@@ -686,17 +713,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private void processThreadWorkQueueLatchedSpin(InsertIntoLatchSpin insertIntoLatch)
     {
         // wait for the latch to complete
-        Object item = insertIntoLatch.await();
-
-        EventBean eventBean;
-        if (item instanceof EventBean)
-        {
-            eventBean = (EventBean) item;
-        }
-        else
-        {
-            eventBean = services.getEventAdapterService().adapterForBean(item);
-        }
+        EventBean eventBean = insertIntoLatch.await();
 
         services.getEventProcessingRWLock().acquireReadLock();
         try
@@ -883,6 +900,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             // internal join processing, if applicable
             handle.internalDispatch(exprEvaluatorContext);
         }
+        catch (RuntimeException ex) {
+            log.error("Exception encountered processing statement '" + handle.getStatementName() + "': " + ex.getMessage(), ex);
+            throw ex;
+        }
         finally
         {
             handle.getStatementLock().releaseLock(services.getStatementLockFactory());
@@ -909,6 +930,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             handle.getScheduleCallback().scheduledTrigger(services.getExtensionServicesContext());
 
             handle.getEpStatementHandle().internalDispatch(exprEvaluatorContext);
+        }
+        catch (RuntimeException ex) {
+            log.error("Exception encountered processing statement '" + handle.getEpStatementHandle().getStatementName() + "': " + ex.getMessage(), ex);
+            throw ex;
         }
         finally
         {
@@ -984,6 +1009,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             // internal join processing, if applicable
             handle.internalDispatch(this.engineFilterAndDispatchTimeContext);
         }
+        catch (RuntimeException ex) {
+            log.error("Exception encountered processing statement '" + handle.getStatementName() + "': " + ex.getMessage(), ex);
+            throw ex;
+        }
         finally
         {
             handle.getStatementLock().releaseLock(services.getStatementLockFactory());
@@ -1026,6 +1055,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
             // internal join processing, if applicable
             handle.internalDispatch(engineFilterAndDispatchTimeContext);
+        }
+        catch (RuntimeException ex) {
+            log.error("Exception encountered processing statement '" + handle.getStatementName() + "': " + ex.getMessage(), ex);
+            throw ex;
         }
         finally
         {
@@ -1227,7 +1260,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         try
         {
-            StatementSpecRaw spec = EPAdministratorImpl.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+            StatementSpecRaw spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
             StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null);
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations);

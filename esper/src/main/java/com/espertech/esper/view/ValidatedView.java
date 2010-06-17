@@ -10,10 +10,18 @@ package com.espertech.esper.view;
 
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.db.SQLParameterDesc;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.client.ConfigurationInformation;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Interface for views that require validation against stream event types.
@@ -29,9 +37,14 @@ public interface ValidatedView
      * @param exprEvaluatorContext context for expression evaluation
      * @throws ExprValidationException is thrown to indicate an exception in validating the view
      */
-    public void validate(StreamTypeService streamTypeService,
+    public void validate(EngineImportService engineImportService,
+                         StreamTypeService streamTypeService,
                          MethodResolutionService methodResolutionService,
                          TimeProvider timeProvider,
                          VariableService variableService,
-                         ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException;
+                         ExprEvaluatorContext exprEvaluatorContext,
+                         ConfigurationInformation configSnapshot,
+                         SchedulingService schedulingService,
+                         String engineURI,
+                         Map<Integer, List<ExprNode>> sqlParameters) throws ExprValidationException;
 }

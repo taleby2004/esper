@@ -1,6 +1,22 @@
 Esper Changelog
 ===================
 
+Changes in version 3.5.0
+------------------------
+Major API changes
+  - None
+  
+New Features
+  - Support for EPL modules, deployment
+  - Support for create schema
+  - Support for expressions in SQL statements
+  - Support for "for delivery" option  
+  - Preemptive processing of events inserted into named windows makes order of processing more intuitive especially when used with contained-events
+  - Support for timer:withinmax
+  - New Pattern Guard post-fix operator : while
+
+Minor changes  
+
 Changes in version 3.4.0
 ------------------------
 Major API changes

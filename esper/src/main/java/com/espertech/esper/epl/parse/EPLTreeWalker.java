@@ -10,7 +10,9 @@ package com.espertech.esper.epl.parse;
 
 import com.espertech.esper.antlr.ASTUtil;
 import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.EPAdministratorHelper;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
@@ -20,8 +22,11 @@ import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.generated.EsperEPL2Ast;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
 import com.espertech.esper.pattern.*;
+import com.espertech.esper.pattern.guard.GuardEnum;
 import com.espertech.esper.rowregex.*;
+import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.*;
 import com.espertech.esper.util.JavaClassHelper;
@@ -66,13 +71,13 @@ public class EPLTreeWalker extends EsperEPL2Ast
     private final SelectClauseStreamSelectorEnum defaultStreamSelector;
     private final String engineURI;
     private final ConfigurationInformation configurationInformation;
+    private final SchedulingService schedulingService;
 
     /**
      * Ctor.
      * @param engineImportService is required to resolve lib-calls into static methods or configured aggregation functions
      * @param variableService for variable access
      * @param input is the tree nodes to walk
-     * @param timeProvider providing the current engine time
      * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
      * @param engineURI engine URI
      * @param configurationInformation configuration info
@@ -80,7 +85,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
     public EPLTreeWalker(TreeNodeStream input,
                          EngineImportService engineImportService,
                          VariableService variableService,
-                         final TimeProvider timeProvider,
+                         SchedulingService schedulingService,
                          SelectClauseStreamSelectorEnum defaultStreamSelector,
                          String engineURI,
                          ConfigurationInformation configurationInformation)
@@ -89,7 +94,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         this.engineImportService = engineImportService;
         this.variableService = variableService;
         this.defaultStreamSelector = defaultStreamSelector;
-        this.timeProvider = timeProvider;
+        this.timeProvider = schedulingService;
         exprEvaluatorContext = new ExprEvaluatorContext()
         {
             public TimeProvider getTimeProvider()
@@ -99,6 +104,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         };
         this.engineURI = engineURI;
         this.configurationInformation = configurationInformation;
+        this.schedulingService = schedulingService;
 
         if (defaultStreamSelector == null)
         {
@@ -383,6 +389,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case CREATE_INDEX_EXPR:
                 leaveCreateIndex(node);
                 break;
+            case CREATE_SCHEMA_EXPR:
+                leaveCreateSchema(node);
+                break;
             case CREATE_WINDOW_SELECT_EXPR:
                 leaveCreateWindowSelect(node);
                 break;
@@ -458,6 +467,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 break;
             case ON_STREAM:
                 leaveOnStream(node);
+                break;
+            case FOR:
+                leaveForClause(node);
                 break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
@@ -552,20 +564,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         StreamSpecOptions streamSpecOptions = new StreamSpecOptions(false,isRetainUnion,isRetainIntersection);
 
         // handle table-create clause, i.e. (col1 type, col2 type)
-        for (int nodeNum = 0; nodeNum < node.getChildCount(); nodeNum++) {
-            if (node.getChild(nodeNum).getType() == CREATE_WINDOW_COL_TYPE_LIST)
-            {
-                Tree parent = node.getChild(nodeNum);
-                for (int i = 0; i < parent.getChildCount(); i++)
-                {
-                    String name = parent.getChild(i).getChild(0).getText();
-                    String type = parent.getChild(i).getChild(1).getText();
-                    Class clazz = JavaClassHelper.getClassForSimpleName(type);
-                    SelectClauseExprRawSpec selectElement = new SelectClauseExprRawSpec(new ExprConstantNode(clazz), name);
-                    statementSpec.getSelectClauseSpec().add(selectElement);
-                }
-            }
-        }
+        statementSpec.getSelectClauseSpec().addAll(getColTypeList(node));
 
         boolean isInsert = false;
         ExprNode insertWhereExpr = null;
@@ -587,6 +586,29 @@ public class EPLTreeWalker extends EsperEPL2Ast
         statementSpec.getStreamSpecs().add(streamSpec);
     }
 
+    private List<SelectClauseElementRaw> getColTypeList(Tree node)
+    {
+        List<SelectClauseElementRaw> result = new ArrayList<SelectClauseElementRaw>();
+        for (int nodeNum = 0; nodeNum < node.getChildCount(); nodeNum++) {
+            if (node.getChild(nodeNum).getType() == CREATE_COL_TYPE_LIST)
+            {
+                Tree parent = node.getChild(nodeNum);
+                for (int i = 0; i < parent.getChildCount(); i++)
+                {
+                    String name = parent.getChild(i).getChild(0).getText();
+                    String type = parent.getChild(i).getChild(1).getText();
+                    Class clazz = JavaClassHelper.getClassForSimpleName(type);
+                    if (clazz == null) {
+                        throw new ASTWalkException("The type '" + type + "' is not a recognized type");
+                    }
+                    SelectClauseExprRawSpec selectElement = new SelectClauseExprRawSpec(new ExprConstantNode(clazz), name);
+                    result.add(selectElement);
+                }
+            }
+        }
+        return result;
+    }
+
     private void leaveCreateIndex(Tree node)
     {
         log.debug(".leaveCreateIndex");
@@ -606,6 +628,73 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
 
         statementSpec.setCreateIndexDesc(new CreateIndexDesc(indexName, windowName, columns));
+    }
+
+    private void leaveCreateSchema(Tree node)
+    {
+        log.debug(".leaveCreateSchema");
+
+        String schemaName = node.getChild(0).getText();
+
+        List<ColumnDesc> columnTypes = new ArrayList<ColumnDesc>();
+        for (int nodeNum = 0; nodeNum < node.getChildCount(); nodeNum++) {
+            if (node.getChild(nodeNum).getType() == CREATE_COL_TYPE_LIST)
+            {
+                Tree parent = node.getChild(nodeNum);
+                for (int i = 0; i < parent.getChildCount(); i++)
+                {
+                    String name = parent.getChild(i).getChild(0).getText();
+                    String type = parent.getChild(i).getChild(1).getText();
+                    boolean isArray = false;
+                    if (parent.getChild(i).getChildCount() > 2) {
+                        isArray = true;
+                    }
+                    columnTypes.add(new ColumnDesc(name, type, isArray));
+                }
+            }
+        }
+
+        // get model-after types (could be multiple for variants)
+        Set<String> typeNames = new HashSet<String>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            if (node.getChild(i).getType() == VARIANT_LIST) {
+                for (int j = 0; j < node.getChild(i).getChildCount(); j++) {
+                    typeNames.add(node.getChild(i).getChild(j).getText());
+                }
+            }
+        }
+
+        // get inherited
+        Set<String> inherited = new LinkedHashSet<String>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            Tree p = node.getChild(i);
+            if (p.getType() == CREATE_SCHEMA_EXPR_INH) {
+                if (!p.getChild(0).getText().toLowerCase().equals("inherits")) {
+                    throw new EPException("Expected 'inherits' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
+                }
+                for (int j = 1; j < p.getChildCount(); j++) {
+                    if (p.getChild(j).getType() == EXPRCOL) {
+                        for (int k = 0; k < p.getChild(j).getChildCount(); k++) {
+                            inherited.add(p.getChild(j).getChild(k).getText());
+                        }
+                    }
+                }
+            }
+        }
+
+        // get qualifier
+        boolean variant = false;
+        for (int i = 0; i < node.getChildCount(); i++) {
+            Tree p = node.getChild(i);
+            if (p.getType() == CREATE_SCHEMA_EXPR_QUAL) {
+                if (!p.getChild(0).getText().toLowerCase().equals("variant")) {
+                    throw new EPException("Expected 'variant' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
+                }
+                variant = true;
+            }
+        }
+        statementSpec.getStreamSpecs().add(new FilterStreamSpecRaw(new FilterSpecRaw(Object.class.getName(), Collections.EMPTY_LIST, null), Collections.EMPTY_LIST, null, new StreamSpecOptions()));
+        statementSpec.setCreateSchemaDesc(new CreateSchemaDesc(schemaName, typeNames, columnTypes, inherited, variant));
     }
 
     private void leaveCreateVariable(Tree node)
@@ -743,6 +832,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
 
         statementSpec.getStreamSpecs().add(streamSpec);
+    }
+
+    private void leaveForClause(Tree node)
+    {
+        log.debug(".leaveForClause");
+
+        if (statementSpec.getForClauseSpec() == null) {
+            statementSpec.setForClauseSpec(new ForClauseSpec());
+        }
+        String ident = node.getChild(0).getText();
+        List<ExprNode> expressions = getExprNodes(node, 1);
+        statementSpec.getForClauseSpec().getClauses().add(new ForClauseItemSpec(ident, expressions));
     }
 
     private void leaveUpdateExpr(Tree node)
@@ -1073,7 +1174,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         PatternStreamSpecRaw streamSpec = new PatternStreamSpecRaw(evalNode, new LinkedList<ViewSpec>(), null, new StreamSpecOptions());
         statementSpec.getStreamSpecs().add(streamSpec);
-        statementSpec.setExistsSubstitutionParameters(substitutionParamNodes.size() > 0);
+        statementSpec.setSubstitutionParameters(substitutionParamNodes);
 
         astPatternNodeMap.clear();
     }
@@ -1097,7 +1198,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
                     " not all pattern nodes have been removed from AST-to-pattern nodes map");
         }
 
-        statementSpec.setExistsSubstitutionParameters(substitutionParamNodes.size() > 0);
+        statementSpec.setSubstitutionParameters(substitutionParamNodes);
     }
 
     private void leaveSelectionElement(Tree node) throws ASTWalkException
@@ -1516,16 +1617,46 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 sqlFragments = PlaceholderParser.parsePlaceholder(sqlWithParams);
                 for (PlaceholderParser.Fragment fragment : sqlFragments)
                 {
-                    if (variableService.getReader(fragment.getValue()) != null)
-                    {
-                        statementSpec.setHasVariables(true);
-                        addVariable(statementSpec, fragment.getValue());
+                    if (!(fragment instanceof PlaceholderParser.ParameterFragment)) {
+                        continue;
                     }
+
+                    // Parse expression, store for substitution parameters
+                    String expression = fragment.getValue();
+                    if (expression.toUpperCase().equals(DatabasePollingViewableFactory.SAMPLE_WHERECLAUSE_PLACEHOLDER)) {
+                        continue;
+                    }
+                    
+                    if (expression.trim().length() == 0) {
+                        throw new ASTWalkException("Missing expression within ${...} in SQL statement");
+                    }
+                    String toCompile = "select * from java.lang.Object where " + expression;
+                    StatementSpecRaw raw = EPAdministratorHelper.compileEPL(toCompile, expression, false, null, SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
+                            engineImportService, variableService, schedulingService, engineURI, configurationInformation);
+
+                    if ((raw.getSubstitutionParameters() != null) && (raw.getSubstitutionParameters().size() > 0)) {
+                        throw new ASTWalkException("EPL substitution parameters are not allowed in SQL ${...} expressions, consider using a variable instead");
+                    }
+
+                    if (raw.isHasVariables()) {
+                        statementSpec.setHasVariables(true);
+                    }
+                    
+                    // add expression
+                    if (statementSpec.getSqlParameters() == null) {
+                        statementSpec.setSqlParameters(new HashMap<Integer, List<ExprNode>>());
+                    }
+                    List<ExprNode> listExp = statementSpec.getSqlParameters().get(statementSpec.getStreamSpecs().size());
+                    if (listExp == null) {
+                        listExp = new ArrayList<ExprNode>();
+                        statementSpec.getSqlParameters().put(statementSpec.getStreamSpecs().size(), listExp);
+                    }
+                    listExp.add(raw.getFilterRootNode());
                 }
             }
             catch (PlaceholderParseException ex)
             {
-                log.warn("Failed to parse SQL text for parameter and variable use '" + sqlWithParams + "' :" + ex.getMessage());
+                log.warn("Failed to parse SQL text '" + sqlWithParams + "' :" + ex.getMessage());
                 // Let the view construction handle the validation
             }
 
@@ -2352,12 +2483,19 @@ public class EPLTreeWalker extends EsperEPL2Ast
     private void leaveGuard(Tree node) throws ASTWalkException
     {
         log.debug(".leaveGuard");
-
-        // Get the object information from AST
-        Tree startGuard = node.getChild(1);
-        String objectNamespace = startGuard.getText();
-        String objectName = node.getChild(2).getText();
-        List<ExprNode> obsParameters = getExprNodes(node, 3);
+        String objectNamespace;
+        String objectName;
+        List<ExprNode> obsParameters;
+        if (node.getChild(1).getType() == IDENT && node.getChild(2).getType() == IDENT) {
+            objectNamespace = node.getChild(1).getText();
+            objectName = node.getChild(2).getText();
+            obsParameters = getExprNodes(node, 3);
+        }
+        else {
+            objectNamespace = GuardEnum.WHILE_GUARD.getNamespace();
+            objectName = GuardEnum.WHILE_GUARD.getName();
+            obsParameters = getExprNodes(node, 1);
+        }
 
         PatternGuardSpec guardSpec = new PatternGuardSpec(objectNamespace, objectName, obsParameters);
         EvalGuardNode guardNode = new EvalGuardNode(guardSpec);

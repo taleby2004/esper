@@ -175,6 +175,7 @@ public class TestResultSetProcessorFactory extends TestCase
                 null,  // create win
                 null,  // create index 
                 null,  // create var
+                null,  // create schema
                 insertIntoDesc,
                 SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
                 selectClauseSpec,
@@ -190,6 +191,8 @@ public class TestResultSetProcessorFactory extends TestCase
                 null,
                 new HashSet<String>(),
                 new Annotation[0],
+                null,
+                null,
                 null,
                 null);
     }

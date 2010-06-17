@@ -9,6 +9,8 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.core.deploy.DeploymentStateService;
+import com.espertech.esper.core.deploy.DeploymentStateServiceImpl;
 import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.core.thread.ThreadingServiceImpl;
 import com.espertech.esper.epl.core.EngineImportException;
@@ -119,13 +121,16 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 
         StatementIsolationServiceImpl statementIsolationService = new StatementIsolationServiceImpl();
 
+        DeploymentStateService deploymentStateService = new DeploymentStateServiceImpl();
+
         // New services context
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
                 statementLockFactory, eventProcessingRWLock, null, jndiContext, statementContextFactory,
                 plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
                 namedWindowService, variableService, timeSourceService, valueAddEventService, metricsReporting, statementEventTypeRef,
-                statementVariableRef, configSnapshot, threadingService, internalEventRouterImpl, statementIsolationService, schedulingMgmtService);
+                statementVariableRef, configSnapshot, threadingService, internalEventRouterImpl, statementIsolationService, schedulingMgmtService,
+                deploymentStateService);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -204,6 +209,8 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         }
         eventAdapterService.setClassLegacyConfigs(classLegacyInfo);
         eventAdapterService.setDefaultPropertyResolutionStyle(configSnapshot.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
+        eventAdapterService.setDefaultAccessorStyle(configSnapshot.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
+
         for (String javaPackage : configSnapshot.getEventTypeAutoNamePackages())
         {
             eventAdapterService.addAutoNamePackage(javaPackage);
@@ -420,6 +427,9 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             String property = (String) entry.getKey();
             String className = (String) entry.getValue();
             Class clazz = JavaClassHelper.getClassForSimpleName(className);
+            if (clazz == null) {
+                throw new ConfigurationException("The type '" + className + "' is not a recognized type");
+            }
             propertyTypes.put(property, clazz);
         }
         return propertyTypes;

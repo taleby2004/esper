@@ -44,7 +44,15 @@
 		</orderedlist>
 
         <para>
-			EPL provides the concept of <emphasis>named window</emphasis>. Named windows are data windows that can be inserted-into and deleted-from by one or more statements, and that can queried by one or more statements. Named windows have a global character, being visible and shared across an engine instance beyond a single statement. Use the <literal>CREATE WINDOW</literal> clause to create named windows. Use the <literal>INSERT INTO</literal> clause to insert data into a named window, the <literal>ON DELETE</literal> clause to remove events from a named window, and the <literal>ON SELECT</literal> clause to perform a non-continuous fire-once query on a named window. Finally, the name of the named window can occur in a statement's <literal>FROM</literal> clause to query a named window or include the named window in a join or subquery.
+			EPL provides the concept of <emphasis>named window</emphasis>. Named windows are data windows that can be inserted-into and deleted-from by one or more statements, and that can queried by one or more statements. Named windows have a global character, being visible and shared across an engine instance beyond a single statement. Use the <literal>CREATE WINDOW</literal> clause to create named windows. Use the <literal>INSERT INTO</literal> clause to insert data into a named window, the <literal>ON DELETE</literal> clause to remove events from a named window, the <literal>ON UPDATE</literal> clause to update events held by a named window and the <literal>ON SELECT</literal> clause to perform a query triggered by a pattern or arriving event on a named window. Finally, the name of the named window can occur in a statement's <literal>FROM</literal> clause to query a named window or include the named window in a join or subquery.
+        </para>
+
+        <para>
+			EPL allows execution of on-demand (fire-and-forget, non-continuous, triggered by API) queries against named windows through the runtime API. The query engine automatically indexes named window data for fast access by <literal>ON SELECT/UPDATE/INSERT/DELETE</literal> without the need to create an index explicitly. For fast on-demand query execution via runtime API use the <literal>CREATE INDEX</literal> syntax to create an explicit index.
+        </para>
+
+        <para>
+			Use <literal>CREATE SCHEMA</literal> to declare an event type.
         </para>
 
         <para>
@@ -2383,7 +2391,7 @@ from pattern [every linkDown=LinkDownEvent -> linkUp=LinkUpEvent(ip=linkDown.ip)
 			</para>
 
 			<para>
-				Variant streams are predefined via runtime or initialization-time configuration as described in <xref linkend="config-variantstream"/>. Your application may predefine variant streams to carry events of a limited set of event types, or you may choose the variant stream to carry any and all types of events. This choice affects what event properties are available for consuming statements or patterns of the variant stream.
+				Variant streams can be declared by means of <literal>create variant schema</literal> or can be predefined via runtime or initialization-time configuration as described in <xref linkend="config-variantstream"/>. Your application may declare or predefine variant streams to carry events of a limited set of event types, or you may choose the variant stream to carry any and all types of events. This choice affects what event properties are available for consuming statements or patterns of the variant stream.
 			</para>
 				
 			<para>
@@ -2965,7 +2973,7 @@ select * from pattern [
 		</para>
 		
 		<para>
-			Esper does not parse of otherwise inspect your SQL query. Therefore your SQL can make use of any database-specific SQL language extensions or features that your database provides.
+			Esper does not parse or otherwise inspect your SQL query. Therefore your SQL can make use of any database-specific SQL language extensions or features that your database provides.
 		</para>
 
 		<para>
@@ -2974,7 +2982,7 @@ select * from pattern [
 			
 		<para>
 			Also if you have enabled query result caching in your Esper database configuration and provide EPL <literal>where</literal> clause and/or <literal>on</literal> clause (outer join) expressions, then 
-			Esper builds indexes on the SQL query results to enable fast lookup. This is especially useful if your queries return a large number of rows. For building the proper indexes, Esper inspects the expression found in your EPL query <literal>where</literal> clause, if present. For outer joins, Esper also inspects your EPL query <literal>on</literal> clause. Esper analyzes the EPL <literal>on</literal> clause and <literal>where</literal> clause expressions, if present, looking for property comparison with or without logical AND-relationships between properties. When a SQL query returns rows for caching, Esper builds the appropriate index and lookup strategies for fast row matching against indexes.
+			Esper builds indexes on the SQL query results to enable fast lookup. This is especially useful if your queries return a large number of rows. For building the proper indexes, Esper inspects the expression found in your EPL query <literal>where</literal> clause, if present. For outer joins, Esper also inspects your EPL query <literal>on</literal> clause. Esper analyzes the EPL <literal>on</literal> clause and <literal>where</literal> clause expressions, if present, looking for property comparison with or without logical AND-relationships between properties. When a SQL query returns rows for caching, Esper builds and caches the appropriate index and lookup strategies for fast row matching against indexes.
 		</para>
 
 		<para>
@@ -3025,7 +3033,7 @@ select * from pattern [
 			</para>
 
 			<para>
-				Substitution parameters in the SQL query string take the form <literal>${</literal><emphasis>event_property_name</emphasis><literal>}</literal>. The engine resolves <emphasis>event_property_name</emphasis> at statement execution time to the actual event property value supplied by the events in the joined event stream.
+				Substitution parameters in the SQL query string take the form <literal>${</literal><emphasis>expression</emphasis><literal>}</literal>. The engine resolves <emphasis>expression</emphasis> at statement execution time to the actual expression result by evaluating the events in the joined event stream or current variable values, if any event property references or variables occur in the expression. An <emphasis>expression</emphasis> may not contain EPL substitution parameters.
 			</para>
 
 			<para>
@@ -3061,6 +3069,20 @@ select * from pattern [
 				Any window, such as the time window, generates insert stream (istream) events as events enter the window, and remove stream (rstream) events as events leave the window. The engine executes the given SQL query for each <literal>CustomerCallEvent</literal> in both the insert stream and the remove stream. As a performance optimization, the <literal>istream</literal> or <literal>rstream</literal> keywords in the <literal>select</literal> clause can be used to instruct the engine to only join insert stream or remove stream events, reducing the number of SQL query executions.
 			</para>
 			
+			<para>
+				Since any expression may be placed within the <literal>${...}</literal> syntax, you may use variables or user-defined functions as well.
+			</para>
+
+			<para>
+				The next example assumes that a variable by name <literal>varLowerLimit</literal> is defined and that a user-defined function <literal>getLimit</literal> exists on the <literal>MyLib</literal> imported class that takes a <literal>LimitEvent</literal> as a parameter:
+			</para>
+			<programlisting><![CDATA[select * from LimitEvent le, 
+  sql:MyCustomerDB [' select cust_name from Customer where 
+      amount > ${max(varLowerLimit, MyLib.getLimit(le))} ']]]></programlisting>
+
+			<para>
+				The example above takes the higher of the current variable value or the value returned by the user-defined function to return only those customer names where the amount exceeds the computed limit.
+			</para>
 		</sect2>
 
 		<sect2 id="histdata_join_where" revision="1">
@@ -4336,6 +4358,136 @@ prepared.execute();	// execute a second time]]></programlisting>
 		</sect2>
 	</sect1>
 	
+    <sect1 id="epl_createschema">
+        <title>Declaring an Event Type: <emphasis>Create Schema</emphasis></title>
+
+		<indexterm><primary>create schema</primary></indexterm>
+		<indexterm><primary>event type</primary><secondary>declaring</secondary></indexterm>
+		<para>
+			EPL allows declaring an event type via the <literal>create schema</literal> clause and also by means of the static or runtime configuration API <literal>addEventType</literal> functions. The term schema and event type has the same meaning in EPL.
+		</para>
+
+		<para>
+			Your application can declare an event type by providing the property names and types or by providing a class name. Your application may also declare a variant stream schema.
+		</para>
+
+		<para>
+			When using the <literal>create schema</literal> syntax to declare an event type, the engine automatically removes the event type when there are no started statements referencing the event type, including the statement that declared the event type. When using
+			the configuration API, the event type stays cached even if there are no statements that refer to the event type and until explicitly removed via the runtime configuration API.
+		</para>
+
+		<sect2 id="epl_createschema_properties" revision="1">
+			<title>Declare an Event Type by Providing Names and Types</title>
+
+			<para>
+				The synopsis of the <literal>create schema</literal> syntax providing property names and types is:
+			</para>
+			<synopsis>create schema <emphasis>schema_name</emphasis> [as] (<emphasis>property_name</emphasis> <emphasis>property_type</emphasis> [,<emphasis>property_name</emphasis> <emphasis>property_type</emphasis> [,...])
+  [inherits <emphasis>inherited_event_type</emphasis>[, <emphasis>inherited_event_type</emphasis>] [,...]]</synopsis>
+
+			<para>				
+				The <emphasis>property_name</emphasis> is an identifier providing the event property name. The <emphasis>property_type</emphasis> is also required for each property. Valid property types are listed in <xref linkend="variable_create"/>
+				and in addition include:
+			</para>
+	
+			<orderedlist spacing="compact">
+				<listitem>
+					<para>
+						 Any Java class name, fully-qualified or the simple class name if imports are configured.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						 Add left and right square brackets <literal>[]</literal> to any type to denote an array-type event property.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Use an event type name as a property type.
+					</para>
+				</listitem>
+			</orderedlist>
+
+			<para>
+				The optional <literal>inherits</literal> keywords may be used to provide a list of event types that are supertypes to the declared type.
+			</para>
+			
+			<para>
+				A few example event type declarations follow:
+			</para>
+			<programlisting><![CDATA[// Declare type SecurityEvent
+create schema SecurityEvent as (ipAddress string, userId String, numAttempts int)
+			
+// Declare type AuthorizationEvent with the roles property being an array of String 
+// and the hostinfo property being a POJO object
+create schema AuthorizationEvent(group String, roles String[], hostinfo com.mycompany.HostNameInfo)
+
+// Declare type CompositeEvent in which the innerEvents property is an array of SecurityEvent
+create schema CompositeEvent(group String, innerEvents SecurityEvent[])
+
+// Declare type WebPageVisitEvent that inherits all properties from PageHitEvent
+create schema WebPageVisitEvent(userId String) inherits PageHitEvent]]></programlisting>	
+		</sect2>
+
+		<sect2 id="epl_createschema_class" revision="1">
+			<title>Declare an Event Type by Providing a Class Name</title>
+
+			<para>
+				When using Java classes as the underlying event representation your application may simply provide the class name:
+			</para>
+			<synopsis>create schema <emphasis>schema_name</emphasis> [as] <emphasis>class_name</emphasis></synopsis>
+
+			<para>				
+				The <emphasis>class_name</emphasis> must be a fully-qualified class name (including the package name) if imports are not configured. If you application configures imports then the simple class name suffices without package name.
+			</para>
+	
+			<para>
+				The next example statements declare an event type based on a class:
+			</para>
+			<programlisting><![CDATA[// Shows the use of a fully-qualified class name to declare the LoginEvent event type
+create schema LoginEvent as com.mycompany.LoginValue
+
+// When the configuration includes imports, the declaration does not need a package name
+create schema LogoutEvent as SignoffValue]]></programlisting>	
+		</sect2>
+
+		<sect2 id="epl_createschema_variant" revision="1">
+			<title>Declare a Variant Stream</title>
+
+			<para>
+				A variant stream is a predefined stream into which events of multiple disparate event types can be inserted.
+				Please see <xref linkend="insert-into-merging-types"/> for rules regarding property visibility and additional information.
+			</para>
+			
+			<para>
+				The synopsis is:
+			</para>
+			<synopsis>create variant schema <emphasis>schema_name</emphasis> [as] <emphasis>eventtype_name|*</emphasis> [, <emphasis>eventtype_name|*</emphasis>] [,...]</synopsis>
+
+			<para>
+				Provide the <literal>variant</literal> keyword to declare a variant stream.
+			</para>
+
+			<para>				
+				The '<literal>*</literal>' wildcard character declares a variant stream that accepts any type of event inserted into the variant stream.
+			</para>
+
+			<para>				
+				Provide <emphasis>eventtype_name</emphasis> if the variant stream should hold events of the given type only. When using <literal>insert into</literal> to 
+				insert into the variant stream the engine checks to ensure the inserted event type or its supertypes match the required event type.
+			</para>
+	
+			<para>
+				A few examples are shown below:
+			</para>
+			<programlisting><![CDATA[// Create a variant stream that accepts only LoginEvent and LogoutEvent event types
+create variant schema SecurityVariant as LoginEvent, LogoutEvent
+
+// Create a variant stream that accepts any event type
+create variant schema AnyEvent as *]]></programlisting>	
+		</sect2>
+	</sect1>
+
 	<sect1 id="split_overview" revision="1">
 		<title>Splitting and Duplicating Streams</title>
 		
@@ -5191,5 +5343,116 @@ from pattern [a=Withdrawal -> b=Withdrawal(id = a.id)]]]></programlisting>
 				For Java application objects, the copy operation is implemented by serialization. Your event object must therefore implement the <literal>java.io.Serializable</literal> interface to become eligible for update. As an alternative to serialization, you may instead configure a copy method as part of the event type configuration via <literal>ConfigurationEventTypeLegacy</literal>.
 			</para>			
 		</sect2>
+	</sect1>
+	
+	<sect1 id="epl-grouped-delivery" revision="1">
+		<title>Controlling Event Delivery : The <literal>For</literal> Clause</title>
+		
+		<para>
+			The engine delivers all result events of a given statement to the statement's listeners and subscriber (if any) in a single invocation of each listener and subscriber's <literal>update</literal> method passing an array of result events. For example, a statement using a time-batch view may provide many result events after a time period passes, a pattern may provide multiple matching events or in a join the join cardinality could be multiple rows.
+		</para>
+		
+		<para>
+			For statements that typically post multiple result events to listeners the <literal>for</literal> keyword controls the number of invocations of the engine to listeners and subscribers and the subset of all result events delivered by each invocation. 
+			This can be useful when your application listener or subscriber code expects multiple invocations or expects that invocations only receive events that belong together by some additional criteria.
+		</para>
+
+		<para>
+			The <literal>for</literal> keyword is a reserved keyword. It is followed by either the <literal>grouped_delivery</literal> keyword for grouped delivery or the <literal>discrete_delivery</literal> keyword for discrete delivery. The <literal>for</literal> clause is valid after any EPL select statement.
+		</para>
+
+		<para>
+			The synopsis for grouped delivery is as follows:
+		</para>
+		<synopsis>... for grouped_delivery (<emphasis>group_expression</emphasis> [, <emphasis>group_expression</emphasis>] [,...])</synopsis>
+		
+		<para>
+			The <emphasis>group_expression</emphasis> expression list provides one or more expressions to apply to result events. The engine invokes listeners and subscribers once for each distinct set of values returned by <emphasis>group_expression</emphasis> expressions passing only the events for that group.
+		</para>
+
+		<para>
+			The synopsis for discrete delivery is as follows:
+		</para>
+		<synopsis>... for discrete_delivery</synopsis>
+
+		<para>
+			With discrete delivery the engine invokes listeners and subscribers once for each result event passing a single result event in each invocation.
+		</para>
+
+		<para>
+			Consider the following example without <literal>for</literal>-clause. The time batch data view collects RFIDEvent events for 10 seconds and posts an array of result events:
+		</para>
+		<programlisting><![CDATA[select * from RFIDEvent.win:time_batch(10 sec)]]></programlisting>
+		
+		<para>
+			Let's consider an example event sequence as follows:
+		</para>
+		<table frame="topbot">
+			<title>Sample Sequence of Events for <literal>For</literal> Keyword</title>
+			<tgroup cols="1">
+				<colspec colwidth="1*"/>
+				<thead>
+					<row>
+						<entry>Event</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>RFIDEvent(id:1, zone:'A')</entry>
+					</row>
+					<row>
+						<entry>RFIDEvent(id:2, zone:'B')</entry>
+					</row>
+					<row>
+						<entry>RFIDEvent(id:3, zone:'A')</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table> 
+		
+		<para>
+			Without <literal>for</literal>-clause and after the 10-second time period passes, the engine delivers an array of 3 events in a single invocation to listeners and the subscriber.
+		</para>
+
+		<para>
+			The next example specifies the <literal>for</literal>-clause and grouped delivery by zone:
+		</para>
+		<programlisting><![CDATA[select * from RFIDEvent.win:time_batch(10 sec) for grouped_delivery (zone)]]></programlisting>
+
+		<para>
+			With grouped delivery and after the 10-second time period passes, the above statement delivers result events in two invocations to listeners and the subscriber: The first invocation delivers an array of two events that contains zone A events with id 1 and 3. The second invocation delivers an array of 1 event that contains a zone B event with id 2.
+		</para>
+		
+		<para>
+			The next example specifies the <literal>for</literal>-clause and discrete delivery:
+		</para>
+		<programlisting><![CDATA[select * from RFIDEvent.win:time_batch(10 sec) for discrete_delivery]]></programlisting>
+
+		<para>
+			With discrete delivery and after the 10-second time period passes, the above statement delivers result events in three invocations to listeners and the subscriber: The first invocation delivers an array of 1 event that contains the event with id 1, the second invocation delivers an array of 1 event that contains the event with id 2 and the third invocation delivers an array of 1 event that contains the event with id 3.
+		</para>
+
+		<para>
+		  Remove stream events are also delivered in multiple invocations, one for each group, if your statement selects remove stream events explicitly via <literal>irstream</literal> or <literal>rstream</literal> keywords.
+		</para>
+
+		<para>
+		  The <literal>insert into</literal> for inserting events into a stream is not affected by the <literal>for</literal>-clause.
+		</para>
+
+		<para>
+		  The delivery order respects the natural sort order or the explicit sort order as provided by the <literal>order by</literal> clause, if present.
+		</para>
+
+		<para>
+			The following are known limitations:
+		</para>
+		<orderedlist spacing="compact">
+			<listitem>
+				<para>
+					The engine validates <emphasis>group_expression</emphasis> expressions against the output event type, therefore all properties specified in <emphasis>group_expression</emphasis> expressions must occur in the <literal>select</literal> clause.
+				</para>
+			</listitem>
+		</orderedlist>			
 	</sect1>
 </chapter>

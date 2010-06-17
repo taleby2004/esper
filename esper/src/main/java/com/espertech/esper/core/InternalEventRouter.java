@@ -46,5 +46,9 @@ public interface InternalEventRouter
      * @param exprEvaluatorContext context for expression evalauation
      * @param routeDest routing destination
      */
-    public void route(EventBean event, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext);
+    public void route(EventBean event, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront);
+
+    public boolean isHasPreprocessing();
+
+    public EventBean preprocess(EventBean event, ExprEvaluatorContext engineFilterAndDispatchTimeContext);
 }

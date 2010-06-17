@@ -8,14 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.client.EPStatementException;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.VariableValueException;
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.annotation.HookType;
 import com.espertech.esper.client.hook.SQLColumnTypeConversion;
 import com.espertech.esper.client.hook.SQLOutputRowConversion;
-import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.agg.AggregationService;
@@ -44,6 +40,7 @@ import com.espertech.esper.epl.view.FilterExprView;
 import com.espertech.esper.epl.view.OutputConditionExpression;
 import com.espertech.esper.epl.view.OutputProcessView;
 import com.espertech.esper.epl.view.OutputProcessViewFactory;
+import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.pattern.EvalRootNode;
@@ -62,6 +59,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -121,6 +119,10 @@ public class EPStatementStartMethod
         {
             return startCreateIndex();
         }
+        else if (statementSpec.getCreateSchemaDesc() != null)
+        {
+            return startCreateSchema();
+        }
         else if (statementSpec.getCreateVariableDesc() != null)
         {
             return startCreateVariable(isNewStatement);
@@ -138,48 +140,108 @@ public class EPStatementStartMethod
         final NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(spec.getWindowName());
         processor.getRootView().addExplicitIndex(spec.getWindowName(), spec.getIndexName(), spec.getColumns());
 
-        Viewable viewable = new Viewable() {
-
-            public View addView(View view)
-            {
-                return null;
-            }
-
-            public List<View> getViews()
-            {
-                return null;
-            }
-
-            public boolean removeView(View view)
-            {
-                return false;
-            }
-
-            public void removeAllViews()
-            {
-            }
-
-            public boolean hasViews()
-            {
-                return false;
-            }
-
-            public EventType getEventType()
-            {
-                return processor.getNamedWindowType();
-            }
-
-            public Iterator<EventBean> iterator()
-            {
-                return new ArrayEventIterator(null);
-            }
-        };
         EPStatementStopMethod stopMethod = new EPStatementStopMethod() {
             public void stop()
             {
                 processor.getRootView().removeExplicitIndex(spec.getIndexName());
             }
         };
+        Viewable viewable = new ViewableDefaultImpl(processor.getNamedWindowType());
+        EPStatementStartResult result = new EPStatementStartResult(viewable, stopMethod, null);
+        return result;
+    }
+
+    private EPStatementStartResult startCreateSchema() throws ExprValidationException
+    {
+        final CreateSchemaDesc spec = statementSpec.getCreateSchemaDesc();
+        EventType eventType = null;
+
+        try {
+            if (!spec.isVariant()) {
+                if (spec.getTypes().isEmpty()) {
+                    Map<String, Object> typing = new HashMap<String, Object>();
+                    Set<String> columnNames = new HashSet<String>();
+                    for (ColumnDesc column : spec.getColumns()) {
+                        boolean added = columnNames.add(column.getName());
+                        if (!added) {
+                            throw new ExprValidationException("Duplicate column name '" + column.getName() + "'");
+                        }
+                        Class plain = JavaClassHelper.getClassForSimpleName(column.getType());
+                        if (plain != null) {
+                            if (column.isArray()) {
+                                plain = Array.newInstance(plain, 0).getClass();
+                            }
+                            typing.put(column.getName(), plain);
+                        }
+                        else {
+                            if (column.isArray()) {
+                                typing.put(column.getName(), column.getType() + "[]");
+                            }
+                            else {
+                                typing.put(column.getName(), column.getType());
+                            }
+                        }
+                    }
+                    eventType = services.getEventAdapterService().addNestableMapType(spec.getSchemaName(), typing, spec.getInherits(), true, false, false);
+                }
+                else {
+                    if (spec.getTypes().size() == 1) {
+                        String typeName = spec.getTypes().iterator().next();
+                        try {
+                            eventType = services.getEventAdapterService().addBeanType(spec.getSchemaName(), spec.getTypes().iterator().next(), false);
+                        }
+                        catch (EventAdapterException ex) {
+                            Class clazz;
+                            try {
+                                clazz = services.getEngineImportService().resolveClass(typeName);
+                                eventType = services.getEventAdapterService().addBeanType(spec.getSchemaName(), clazz, true);
+                            }
+                            catch (EngineImportException e) {
+                                log.debug("Engine import failed to resolve event type '" + typeName + "'");
+                                throw ex;
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                boolean isAny = false;
+                ConfigurationVariantStream config = new ConfigurationVariantStream();
+                for (String typeName : spec.getTypes()) {
+                    if (typeName.trim().equals("*")) {
+                        isAny = true;
+                        break;
+                    }
+                    config.addEventTypeName(typeName);
+                }
+                if (!isAny) {
+                    config.setTypeVariance(ConfigurationVariantStream.TypeVariance.PREDEFINED);
+                }
+                else {
+                    config.setTypeVariance(ConfigurationVariantStream.TypeVariance.ANY);
+                }
+                services.getValueAddEventService().addVariantStream(spec.getSchemaName(), config, services.getEventAdapterService());
+                eventType = services.getValueAddEventService().getValueAddProcessor(spec.getSchemaName()).getValueAddEventType();
+            }
+        }
+        catch (RuntimeException ex) {
+            throw new ExprValidationException(ex.getMessage(), ex);
+        }
+
+        // enter a reference
+        services.getStatementEventTypeRefService().addReferences(statementContext.getStatementName(), Collections.singleton(spec.getSchemaName()));
+
+        final EventType allocatedEventType = eventType;
+        EPStatementStopMethod stopMethod = new EPStatementStopMethod() {
+            public void stop()
+            {
+                services.getStatementEventTypeRefService().removeReferencesStatement(statementContext.getStatementName());
+                if (services.getStatementEventTypeRefService().getStatementNamesForType(spec.getSchemaName()).isEmpty()) {
+                    services.getEventAdapterService().removeType(allocatedEventType.getName());
+                }
+            }
+        };
+        Viewable viewable = new ViewableDefaultImpl(eventType);
         EPStatementStartResult result = new EPStatementStartResult(viewable, stopMethod, null);
         return result;
     }
@@ -307,8 +369,13 @@ public class EPStatementStartMethod
             resultSetProcessor = ResultSetProcessorFactory.getProcessor(
                     statementSpec, statementContext, typeService, null, new boolean[0], true);
 
-            InternalEventRouter routerService = (statementSpec.getInsertIntoDesc() == null)?  null : services.getInternalEventRouter();
-            onExprView = processor.addOnExpr(onTriggerDesc, validatedJoin, streamEventType, statementContext.getStatementStopService(), routerService, resultSetProcessor, statementContext.getEpStatementHandle(), statementContext.getStatementResultService(), statementContext, statementSpec.getSelectClauseSpec().isDistinct());
+            InternalEventRouter routerService = null;
+            boolean addToFront = false;
+            if (statementSpec.getInsertIntoDesc() != null) {
+                routerService = services.getInternalEventRouter();
+                addToFront = statementContext.getNamedWindowService().isNamedWindow(statementSpec.getInsertIntoDesc().getEventTypeName());
+            }
+            onExprView = processor.addOnExpr(onTriggerDesc, validatedJoin, streamEventType, statementContext.getStatementStopService(), routerService, addToFront, resultSetProcessor, statementContext.getEpStatementHandle(), statementContext.getStatementResultService(), statementContext, statementSpec.getSelectClauseSpec().isDistinct());
             eventStreamParentViewable.addView(onExprView);
         }
         // variable assignments
@@ -363,6 +430,8 @@ public class EPStatementStartMethod
             processors[0] = ResultSetProcessorFactory.getProcessor(
                     statementSpec, statementContext, typeService, null, new boolean[0], false);
             whereClauses[0] = statementSpec.getFilterRootNode();
+            boolean[] isNamedWindowInsert = new boolean[desc.getSplitStreams().size() + 1];
+            isNamedWindowInsert[0] = false;
 
             int index = 1;
             for (OnTriggerSplitStream splits : desc.getSplitStreams())
@@ -376,11 +445,12 @@ public class EPStatementStartMethod
                 processors[index] = ResultSetProcessorFactory.getProcessor(
                     splitSpec, statementContext, typeService, null, new boolean[0], false);
                 whereClauses[index] = splitSpec.getFilterRootNode();
+                isNamedWindowInsert[index] = statementContext.getNamedWindowService().isNamedWindow(splits.getInsertInto().getEventTypeName());
 
                 index++;
             }
 
-            onExprView = new RouteResultView(desc.isFirst(), streamEventType, statementContext.getEpStatementHandle(), services.getInternalEventRouter(), processors, whereClauses, statementContext);
+            onExprView = new RouteResultView(desc.isFirst(), streamEventType, statementContext.getEpStatementHandle(), services.getInternalEventRouter(), isNamedWindowInsert, processors, whereClauses, statementContext);
             eventStreamParentViewable.addView(onExprView);
         }
 
@@ -464,7 +534,7 @@ public class EPStatementStartMethod
         StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamName}, new boolean[] {true}, services.getEngineURI());
 
         // determine subscriber result types
-        statementContext.getStatementResultService().setSelectClause(new Class[] {streamEventType.getUnderlyingType()}, new String[] {"*"});
+        statementContext.getStatementResultService().setSelectClause(new Class[] {streamEventType.getUnderlyingType()}, new String[] {"*"}, false, null, statementContext);
 
         // Materialize sub-select views
         startSubSelect(subSelectStreamDesc, new String[]{streamName}, new EventType[] {streamEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations());
@@ -907,10 +977,13 @@ public class EPStatementStartMethod
             if (viewable instanceof ValidatedView)
             {
                 ValidatedView validatedView = (ValidatedView) viewable;
-                validatedView.validate(typeService,
+                validatedView.validate(services.getEngineImportService(), 
+                        typeService,
                         statementContext.getMethodResolutionService(),
-                        statementContext.getSchedulingService(),
-                        statementContext.getVariableService(), statementContext);
+                        statementContext.getTimeProvider(),
+                        statementContext.getVariableService(), statementContext,
+                        services.getConfigSnapshot(), services.getSchedulingService(), services.getEngineURI(),
+                        statementSpec.getSqlParameters());
             }
             if (viewable instanceof HistoricalEventViewable)
             {

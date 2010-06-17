@@ -4,9 +4,11 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPRuntimeIsolated;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.ArrayDequeJDK6Backport;
+import com.espertech.esper.collection.DualWorkQueue;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.filter.FilterHandle;
@@ -188,7 +190,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
 
         // Get it wrapped up, process event
         EventBean eventBean = unisolatedServices.getEventAdapterService().adapterForDOM(document);
-        ThreadWorkQueue.add(eventBean);
+        ThreadWorkQueue.addBack(eventBean);
     }
 
     public void sendEvent(Map map, String eventTypeName) throws EPException
@@ -265,6 +267,14 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
 
     private void processTimeEvent(TimerEvent event)
     {
+        if (event instanceof TimerControlEvent) {
+            TimerControlEvent tce = (TimerControlEvent) event;
+            if (tce.getClockType() == TimerControlEvent.ClockType.CLOCK_INTERNAL) {
+                log.warn("Timer control events are not processed by the isolated runtime as the setting is always external timer.");                
+            }
+            return;
+        }
+
         // Evaluation of all time events is protected from statement management
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()) && (ExecutionPathDebugLog.isTimerDebugEnabled))
         {
@@ -409,8 +419,43 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
      */
     public void processThreadWorkQueue()
     {
+        DualWorkQueue queues = ThreadWorkQueue.getThreadQueue();
+
+        if (queues.getFrontQueue().isEmpty()) {
+            boolean haveDispatched = unisolatedServices.getNamedWindowService().dispatch(isolatedTimeEvalContext);
+            if (haveDispatched)
+            {
+                // Dispatch results to listeners
+                dispatch();
+            }
+        }
+        else {
+            Object item;
+            while ( (item = queues.getFrontQueue().poll()) != null)
+            {
+                if (item instanceof InsertIntoLatchSpin)
+                {
+                    processThreadWorkQueueLatchedSpin((InsertIntoLatchSpin) item);
+                }
+                else if (item instanceof InsertIntoLatchWait)
+                {
+                    processThreadWorkQueueLatchedWait((InsertIntoLatchWait) item);
+                }
+                else
+                {
+                    processThreadWorkQueueUnlatched(item);
+                }
+
+                boolean haveDispatched = unisolatedServices.getNamedWindowService().dispatch(isolatedTimeEvalContext);
+                if (haveDispatched)
+                {
+                    dispatch();
+                }
+            }
+        }
+
         Object item;
-        while ( (item = ThreadWorkQueue.next()) != null)
+        while ( (item = queues.getBackQueue().poll()) != null)
         {
             if (item instanceof InsertIntoLatchSpin)
             {
@@ -424,36 +469,17 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
             {
                 processThreadWorkQueueUnlatched(item);
             }
-        }
 
-        // Process named window deltas
-        boolean haveDispatched = unisolatedServices.getNamedWindowService().dispatch(isolatedTimeEvalContext);
-        if (haveDispatched)
-        {
-            // Dispatch results to listeners
-            dispatch();
-        }
-
-        if (!(ThreadWorkQueue.isEmpty()))
-        {
-            processThreadWorkQueue();
+            if (!queues.getFrontQueue().isEmpty()) {
+                processThreadWorkQueue();
+            }
         }
     }
 
     private void processThreadWorkQueueLatchedWait(InsertIntoLatchWait insertIntoLatch)
     {
         // wait for the latch to complete
-        Object item = insertIntoLatch.await();
-
-        EventBean eventBean;
-        if (item instanceof EventBean)
-        {
-            eventBean = (EventBean) item;
-        }
-        else
-        {
-            eventBean = unisolatedServices.getEventAdapterService().adapterForBean(item);
-        }
+        EventBean eventBean = insertIntoLatch.await();
 
         unisolatedServices.getEventProcessingRWLock().acquireReadLock();
         try
@@ -476,17 +502,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
     private void processThreadWorkQueueLatchedSpin(InsertIntoLatchSpin insertIntoLatch)
     {
         // wait for the latch to complete
-        Object item = insertIntoLatch.await();
-
-        EventBean eventBean;
-        if (item instanceof EventBean)
-        {
-            eventBean = (EventBean) item;
-        }
-        else
-        {
-            eventBean = unisolatedServices.getEventAdapterService().adapterForBean(item);
-        }
+        EventBean eventBean = insertIntoLatch.await();
 
         unisolatedServices.getEventProcessingRWLock().acquireReadLock();
         try
@@ -734,18 +750,33 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
     }
 
     // Internal route of events via insert-into, holds a statement lock
-    public void route(EventBean event, EPStatementHandle epStatementHandle)
+    public void route(EventBean event, EPStatementHandle epStatementHandle, boolean addToFront)
     {
         if (isLatchStatementInsertStream)
         {
-            InsertIntoLatchFactory insertIntoLatchFactory = epStatementHandle.getInsertIntoLatchFactory();
-            Object latch = insertIntoLatchFactory.newLatch(event);
-            ThreadWorkQueue.add(latch);
+            if (addToFront) {
+                Object latch = epStatementHandle.getInsertIntoFrontLatchFactory().newLatch(event);
+                ThreadWorkQueue.addFront(latch);
+            }
+            else {
+                Object latch = epStatementHandle.getInsertIntoBackLatchFactory().newLatch(event);
+                ThreadWorkQueue.addBack(latch);
+            }
         }
         else
         {
-            ThreadWorkQueue.add(event);
+            if (addToFront) {
+                  ThreadWorkQueue.addFront(event);
+            }
+            else {
+                ThreadWorkQueue.addBack(event);
+            }
         }
+    }
+
+    public void setInternalEventRouter(InternalEventRouter internalEventRouter)
+    {
+        throw new UnsupportedOperationException("Isolated runtime does not route itself");
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

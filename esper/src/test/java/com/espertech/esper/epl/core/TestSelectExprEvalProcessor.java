@@ -1,8 +1,10 @@
 package com.espertech.esper.epl.core;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.HashSet;
 
+import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
@@ -19,8 +21,8 @@ import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 
 public class TestSelectExprEvalProcessor extends TestCase
 {
-    private SelectExprEvalProcessor methodOne;
-    private SelectExprEvalProcessor methodTwo;
+    private SelectExprProcessorHelper methodOne;
+    private SelectExprProcessorHelper methodTwo;
 
     public void setUp() throws Exception
     {
@@ -29,40 +31,40 @@ public class TestSelectExprEvalProcessor extends TestCase
         SupportValueAddEventService vaeService = new SupportValueAddEventService();
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
 
-        methodOne = new SelectExprEvalProcessor(selectList, null, false, new SupportStreamTypeSvc1Stream(), eventAdapterService, vaeService, selectExprEventTypeRegistry, null, null);
+        methodOne = new SelectExprProcessorHelper(selectList, Collections.<SelectClauseStreamCompiledSpec>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), eventAdapterService, vaeService, selectExprEventTypeRegistry, null, null);
 
         InsertIntoDesc insertIntoDesc = new InsertIntoDesc(true, "Hello");
         insertIntoDesc.add("a");
         insertIntoDesc.add("b");
 
-        methodTwo = new SelectExprEvalProcessor(selectList, insertIntoDesc, false, new SupportStreamTypeSvc1Stream(), eventAdapterService, vaeService, selectExprEventTypeRegistry, null, null);
+        methodTwo = new SelectExprProcessorHelper(selectList, Collections.<SelectClauseStreamCompiledSpec>emptyList(), insertIntoDesc, false, new SupportStreamTypeSvc1Stream(), eventAdapterService, vaeService, selectExprEventTypeRegistry, null, null);
     }
 
-    public void testGetResultEventType()
+    public void testGetResultEventType() throws Exception
     {
-        EventType type = methodOne.getResultEventType();
+        EventType type = methodOne.getEvaluator().getResultEventType();
         ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"resultOne", "resultTwo"});
         assertEquals(Double.class, type.getPropertyType("resultOne"));
         assertEquals(Integer.class, type.getPropertyType("resultTwo"));
 
-        type = methodTwo.getResultEventType();
+        type = methodTwo.getEvaluator().getResultEventType();
         ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"a", "b"});
         assertEquals(Double.class, type.getPropertyType("a"));
         assertEquals(Integer.class, type.getPropertyType("b"));
     }
 
-    public void testProcess()
+    public void testProcess() throws Exception
     {
         EventBean[] events = new EventBean[] {makeEvent(8.8, 3, 4)};
 
-        EventBean result = methodOne.process(events, true, false);
+        EventBean result = methodOne.getEvaluator().process(events, true, false);
         assertEquals(8.8d, result.get("resultOne"));
         assertEquals(12, result.get("resultTwo"));
 
-        result = methodTwo.process(events, true, false);
+        result = methodTwo.getEvaluator().process(events, true, false);
         assertEquals(8.8d, result.get("a"));
         assertEquals(12, result.get("b"));
-        assertSame(result.getEventType(), methodTwo.getResultEventType());
+        assertSame(result.getEventType(), methodTwo.getEvaluator().getResultEventType());
     }
 
     private EventBean makeEvent(double doubleBoxed, int intPrimitive, int intBoxed)

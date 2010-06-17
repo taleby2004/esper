@@ -12,6 +12,7 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.adapter.AdapterState;
 import org.apache.commons.logging.*;
 import org.springframework.jms.core.*;
+import org.w3c.dom.Node;
 
 import javax.jms.*;
 
@@ -47,16 +48,17 @@ public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
     {
         try
         {
-            message.acknowledge();
-
             if (stateManager.getState() == AdapterState.DESTROYED)
             {
+                log.warn(".onMessage Event message not sent to engine, state of adapter is destroyed, message ack'd");
+                message.acknowledge();
                 return;
             }
 
             if (epServiceProviderSPI == null)
             {
                 log.warn(".onMessage Event message not sent to engine, service provider not set yet, message ack'd");
+                message.acknowledge();
                 return;
             }
 
@@ -66,7 +68,12 @@ public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
 
                 if (event != null)
                 {
-                    epServiceProviderSPI.getEPRuntime().sendEvent(event);
+                    if (event instanceof Node) {
+                        epServiceProviderSPI.getEPRuntime().sendEvent((Node)event);
+                    }
+                    else {
+                        epServiceProviderSPI.getEPRuntime().sendEvent(event);
+                    }
                 }
                 else
                 {
@@ -75,6 +82,8 @@ public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
                         log.warn(".onMessage Event object not sent to engine: " + message.getJMSMessageID());
                     }
                 }
+
+                message.acknowledge();
             }
         }
         catch (JMSException ex)
