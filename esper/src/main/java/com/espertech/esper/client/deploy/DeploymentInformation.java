@@ -17,8 +17,10 @@ public class DeploymentInformation
     /**
      * Ctor.
      * @param deploymentId deployment id
+     * @param addedDate date the deployment was added
      * @param lastUpdateDate date of last update to state
      * @param items module statement-level details
+     * @param state current state
      * @param module the module
      */
     public DeploymentInformation(String deploymentId, Module module, Calendar addedDate, Calendar lastUpdateDate, DeploymentInformationItem[] items, DeploymentState state)
@@ -59,16 +61,28 @@ public class DeploymentInformation
         return items;
     }
 
+    /**
+     * Returns current deployment state.
+     * @return state
+     */
     public DeploymentState getState()
     {
         return state;
     }
 
+    /**
+     * Returns date the deployment was added.
+     * @return added-date
+     */
     public Calendar getAddedDate()
     {
         return addedDate;
     }
 
+    /**
+     * Returns the module.
+     * @return module
+     */
     public Module getModule()
     {
         return module;

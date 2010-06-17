@@ -612,20 +612,36 @@ public class EPStatementObjectModel implements Serializable
         this.createIndex = createIndex;
     }
 
+    /**
+     * Returns the create-schema clause.
+     * @return clause
+     */
     public CreateSchemaClause getCreateSchema()
     {
         return createSchema;
     }
 
+    /**
+     * Sets the create-schema clause.
+     * @param createSchema clause to set
+     */
     public void setCreateSchema(CreateSchemaClause createSchema)
     {
         this.createSchema = createSchema;
     }
 
+    /**
+     * Returns the for-clause.
+     * @return for-clause
+     */
     public ForClause getForClause() {
         return forClause;
     }
 
+    /**
+     * Sets the for-clause.
+     * @param forClause for-clause
+     */
     public void setForClause(ForClause forClause) {
         this.forClause = forClause;
     }

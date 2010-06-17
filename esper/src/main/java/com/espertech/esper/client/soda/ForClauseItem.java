@@ -10,9 +10,8 @@ package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * An item in a for-clause for controlling delivery of result events to listeners and subscribers.
@@ -24,9 +23,9 @@ public class ForClauseItem implements Serializable
     private ForClauseKeyword keyword;
     private List<Expression> expressions;
 
-
     /**
      * Creates a for-clause with no expressions.
+     * @param keyword keyword to use
      * @return for-clause
      */
     public static ForClauseItem create(ForClauseKeyword keyword)
@@ -54,18 +53,34 @@ public class ForClauseItem implements Serializable
         setKeyword(keyword);
     }
 
+    /**
+     * Returns the for-clause keyword.
+     * @return keyword
+     */
     public ForClauseKeyword getKeyword() {
         return keyword;
     }
 
+    /**
+     * Sets the for-clause keyword.
+     * @param keyword to set
+     */
     public void setKeyword(ForClauseKeyword keyword) {
         this.keyword = keyword;
     }
 
+    /**
+     * Returns for-clause expressions.
+     * @return expressions
+     */
     public List<Expression> getExpressions() {
         return expressions;
     }
 
+    /**
+     * Sets for-clause expressions.
+     * @param expressions expressions to set
+     */
     public void setExpressions(List<Expression> expressions) {
         this.expressions = expressions;
     }

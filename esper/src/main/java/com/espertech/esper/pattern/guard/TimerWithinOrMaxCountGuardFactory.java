@@ -14,6 +14,8 @@ import java.util.List;
 
 public class TimerWithinOrMaxCountGuardFactory implements GuardFactory, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 6650243610865501435L;
+    
     /**
      * Number of milliseconds.
      */

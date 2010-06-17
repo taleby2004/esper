@@ -94,21 +94,39 @@ public class DeploymentOptions {
         this.compileOnly = compileOnly;
     }
 
+    /**
+     * Returns the isolated service provider to deploy to, if specified.
+     * @return isolated service provider name
+     */
     public String getIsolatedServiceProvider()
     {
         return isolatedServiceProvider;
     }
 
-    public void setIsolatedServiceProvider(String isolatedServiceProvider)
+    /**
+     * Sets the isolated service provider to deploy to, if specified the deployment occurs to the provider indicated.
+     * @param name isolated service provider name
+     */
+    public void setIsolatedServiceProvider(String name)
     {
-        this.isolatedServiceProvider = isolatedServiceProvider;
+        this.isolatedServiceProvider = name;
     }
 
+    /**
+     * Returns true to validate the module syntax and EPL syntax only. Use this option to
+     * not deploy any EPL statement, performing only syntax checking.
+     * @return validate flag
+     */
     public boolean isValidateOnly()
     {
         return validateOnly;
     }
 
+    /**
+     * Set to true to validate the module syntax and EPL syntax only. Use this option to
+     * not deploy any EPL statement, performing only syntax checking.
+     * @param validateOnly validate flag
+     */
     public void setValidateOnly(boolean validateOnly)
     {
         this.validateOnly = validateOnly;

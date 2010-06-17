@@ -743,12 +743,24 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         {
             log.debug( "configuring from file: " + configFile.getName() );
         }
+
+        FileInputStream inputStream = null;
         try {
-            ConfigurationParser.doConfigure(this, new FileInputStream(configFile), configFile.toString());
+            inputStream = new FileInputStream(configFile);
+            ConfigurationParser.doConfigure(this, inputStream, configFile.toString());
 		}
 		catch (FileNotFoundException fnfe) {
 			throw new EPException( "could not find file: " + configFile, fnfe );
 		}
+        finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.debug("Error closing input stream", e);
+                }
+            }
+        }
         return this;
     }
 

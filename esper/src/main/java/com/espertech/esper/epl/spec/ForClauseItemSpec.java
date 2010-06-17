@@ -16,6 +16,8 @@ import java.util.List;
 
 public class ForClauseItemSpec implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 4374267047749646423L;
+    
     private String keyword;
     private List<ExprNode> expressions;
 

@@ -9,6 +9,8 @@ import java.io.PrintWriter;
  */
 public class DeploymentActionException extends DeploymentException {
 
+    private static final long serialVersionUID = -2738808350555092087L;
+    
     private static String newline = System.getProperty("line.separator");
 
     private List<DeploymentItemException> exceptions;

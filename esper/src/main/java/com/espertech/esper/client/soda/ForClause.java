@@ -10,10 +10,12 @@ package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
+/**
+ * A for-clause is a means to specify listener and observer delivery.
+ */
 public class ForClause implements Serializable
 {
     private static final long serialVersionUID = -5295670899343685182L;
@@ -29,10 +31,18 @@ public class ForClause implements Serializable
         return new ForClause();
     }
 
+    /**
+     * Returns for-clause items.
+     * @return items
+     */
     public List<ForClauseItem> getItems() {
         return items;
     }
 
+    /**
+     * Sets for-clause items.
+     * @param items items
+     */
     public void setItems(List<ForClauseItem> items) {
         this.items = items;
     }

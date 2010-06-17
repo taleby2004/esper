@@ -25,6 +25,8 @@ import java.util.List;
  */
 public class ExpressionGuardFactory implements GuardFactory, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -5107582730824731419L;
+    
     protected ExprNode expression;
 
     /**

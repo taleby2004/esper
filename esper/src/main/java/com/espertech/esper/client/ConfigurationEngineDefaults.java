@@ -713,11 +713,19 @@ public class ConfigurationEngineDefaults implements Serializable
             this.defaultAccessorStyle = ConfigurationEventTypeLegacy.AccessorStyle.JAVABEAN;
         }
 
+        /**
+         * Returns the default accessor style, JavaBean unless changed.
+         * @return style enum
+         */
         public ConfigurationEventTypeLegacy.AccessorStyle getDefaultAccessorStyle()
         {
             return defaultAccessorStyle;
         }
 
+        /**
+         * Sets the default accessor style, which is JavaBean unless changed.
+         * @param defaultAccessorStyle style enum
+         */
         public void setDefaultAccessorStyle(ConfigurationEventTypeLegacy.AccessorStyle defaultAccessorStyle)
         {
             this.defaultAccessorStyle = defaultAccessorStyle;
@@ -1165,25 +1173,46 @@ public class ConfigurationEngineDefaults implements Serializable
         NANO
     }
 
+    /**
+     * Returns the provider for runtime and administrative interfaces.
+     */
     public static class AlternativeContext implements Serializable {
+        private static final long serialVersionUID = 4488861684585251042L;
+        
         private String runtime;
         private String admin;
 
+        /**
+         * Class name of runtime provider.
+         * @return provider class
+         */
         public String getRuntime()
         {
             return runtime;
         }
 
+        /**
+         * Set the class name of the runtime provider.
+         * @param runtime provider class
+         */
         public void setRuntime(String runtime)
         {
             this.runtime = runtime;
         }
 
+        /**
+         * Class name of admin provider.
+         * @return provider class
+         */
         public String getAdmin()
         {
             return admin;
         }
 
+        /**
+         * Set the class name of the admin provider.
+         * @param admin provider class
+         */
         public void setAdmin(String admin)
         {
             this.admin = admin;

@@ -16,6 +16,10 @@ import com.espertech.esper.client.deploy.EPDeploymentAdmin;
  */
 public interface EPAdministrator
 {
+    /**
+     * Returns deployment administrative services.
+     * @return deployment administration
+     */
     public EPDeploymentAdmin getDeploymentAdmin();
 
     /**

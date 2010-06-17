@@ -34,6 +34,12 @@ public class CreateSchemaClause implements Serializable
     public CreateSchemaClause() {
     }
 
+    /**
+     * Ctor.
+     * @param schemaName name of type
+     * @param types are for model-after, could be multiple when declaring a variant stream, or a single fully-qualified class name
+     * @param variant true for variant stream
+     */
     public CreateSchemaClause(String schemaName, Set<String> types, boolean variant)
     {
         this.schemaName = schemaName;
@@ -41,6 +47,12 @@ public class CreateSchemaClause implements Serializable
         this.variant = variant;
     }
 
+    /**
+     * Ctor.
+     * @param schemaName name of type
+     * @param columns column definition
+     * @param inherits inherited types, if any
+     */
     public CreateSchemaClause(String schemaName, List<SchemaColumnDesc> columns, Set<String> inherits)
     {
         this.schemaName = schemaName;
@@ -48,6 +60,14 @@ public class CreateSchemaClause implements Serializable
         this.inherits = inherits;
     }
 
+    /**
+     * Ctor.
+     * @param schemaName name of type
+     * @param types are for model-after, could be multiple when declaring a variant stream, or a single fully-qualified class name
+     * @param variant true for variant stream
+     * @param columns column definition
+     * @param inherits inherited types, if any
+     */
     public CreateSchemaClause(String schemaName, Set<String> types, List<SchemaColumnDesc> columns, Set<String> inherits, boolean variant)
     {
         this.schemaName = schemaName;
@@ -57,51 +77,91 @@ public class CreateSchemaClause implements Serializable
         this.variant = variant;
     }
 
+    /**
+     * Returns the type name, aka. schema name.
+     * @return type name
+     */
     public String getSchemaName()
     {
         return schemaName;
     }
 
+    /**
+     * Sets the type name.
+     * @param schemaName to set
+     */
     public void setSchemaName(String schemaName)
     {
         this.schemaName = schemaName;
     }
 
+    /**
+     * Returns model-after types, i.e. (fully-qualified) class name or event type name(s), multiple for variant types.
+     * @return type names or class names
+     */
     public Set<String> getTypes()
     {
         return types;
     }
 
+    /**
+     * Sets model-after types, i.e. (fully-qualified) class name or event type name(s), multiple for variant types.
+     * @param types type names or class names
+     */
     public void setTypes(Set<String> types)
     {
         this.types = types;
     }
 
+    /**
+     * Returns the column definition.
+     * @return column def
+     */
     public List<SchemaColumnDesc> getColumns()
     {
         return columns;
     }
 
+    /**
+     * Sets the column definition.
+     * @param columns column def
+     */
     public void setColumns(List<SchemaColumnDesc> columns)
     {
         this.columns = columns;
     }
 
+    /**
+     * Returns the names of event types inherited from, if any
+     * @return types inherited
+     */
     public Set<String> getInherits()
     {
         return inherits;
     }
 
+    /**
+     * Sets the names of event types inherited from, if any
+     * @param inherits types inherited
+     */
     public void setInherits(Set<String> inherits)
     {
         this.inherits = inherits;
     }
 
+    /**
+     * Returns true for variant stream type, or false for regular event type.
+     * @return indicator
+     */
     public boolean isVariant()
     {
         return variant;
     }
 
+    /**
+     * Set true for variant stream type, or false for regular event type.
+     * @param variant indicator
+     */
     public void setVariant(boolean variant)
     {
         this.variant = variant;

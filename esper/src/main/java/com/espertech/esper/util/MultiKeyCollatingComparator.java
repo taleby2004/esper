@@ -14,7 +14,7 @@ public final class MultiKeyCollatingComparator implements Comparator<MultiKeyUnt
 {
     private final boolean[] isDescendingValues;
     private final boolean[] stringTypedValue;
-    private transient Collator collator;
+    private transient Collator collator = null;
     private static final long serialVersionUID = -1166857207888935691L;
 
     /**

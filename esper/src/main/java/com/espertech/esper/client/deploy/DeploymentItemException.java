@@ -7,6 +7,8 @@ import com.espertech.esper.client.EPException;
  */
 public class DeploymentItemException extends DeploymentException {
 
+    private static final long serialVersionUID = 5496069128630634391L;
+    
     private String expression;
     private EPException inner;
     private int lineNumber;
@@ -16,6 +18,7 @@ public class DeploymentItemException extends DeploymentException {
      * @param message exception text
      * @param expression EPL
      * @param inner compile or start exception
+     * @param lineNumber line number
      */
     public DeploymentItemException(String message, String expression, EPException inner, int lineNumber) {
         super(message);
@@ -40,6 +43,10 @@ public class DeploymentItemException extends DeploymentException {
         return inner;
     }
 
+    /**
+     * Returns line number.
+     * @return line number
+     */
     public int getLineNumber()
     {
         return lineNumber;

@@ -8,15 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-
+/**
+ * Keywords for use in the for-clause.
+ */
 public enum ForClauseKeyword
 {
+    /**
+     * Grouped delivery - listener receives invocation per group.
+     */
     GROUPED_DELIVERY("grouped_delivery"),
+
+    /**
+     * Discrete delivery - listener receives invocation per event.
+     */
     DISCRETE_DELIVERY("discrete_delivery");
 
     private final String name;
@@ -25,6 +29,10 @@ public enum ForClauseKeyword
         this.name = name;
     }
 
+    /**
+     * Returns for-keyword.
+     * @return keyword
+     */
     public String getName() {
         return name;
     }

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 
 public class ForClauseSpec implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -8529660985454535028L;
+    
     private List<ForClauseItemSpec> clauses;
 
     public ForClauseSpec()

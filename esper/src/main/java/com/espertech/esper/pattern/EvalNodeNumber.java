@@ -21,7 +21,7 @@ import java.io.Serializable;
  */
 public class EvalNodeNumber implements MetaDefItem, Serializable
 {
-    private short[] number;
+    private final short[] number;
     private static final long serialVersionUID = -2623267386821650096L;
 
     /**

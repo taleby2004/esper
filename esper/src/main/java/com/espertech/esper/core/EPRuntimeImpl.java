@@ -1088,10 +1088,18 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     {
         services = null;
 
-        matchesArrayThreadLocal.remove();
-        matchesPerStmtThreadLocal.remove();
-        scheduleArrayThreadLocal.remove();
-        schedulePerStmtThreadLocal.remove();
+        if (matchesArrayThreadLocal != null) {
+            matchesArrayThreadLocal.remove();
+        }
+        if (matchesPerStmtThreadLocal != null) {
+            matchesPerStmtThreadLocal.remove();
+        }
+        if (scheduleArrayThreadLocal != null) {
+            scheduleArrayThreadLocal.remove();
+        }
+        if (schedulePerStmtThreadLocal != null) {
+            schedulePerStmtThreadLocal.remove();
+        }
 
         matchesArrayThreadLocal = null;
         matchesPerStmtThreadLocal = null;

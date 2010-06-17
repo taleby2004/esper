@@ -78,7 +78,6 @@ public class EPAdministratorHelper
      * Compile the EPL.
      * @param eplStatement expression to compile
      * @param statementName is the name of the statement
-     * @param services is the context
      * @param defaultStreamSelector - the configuration for which insert or remove streams (or both) to produce
      * @param eplStatementForErrorMsg - use this text for the error message
      * @param addPleaseCheck - indicator to add a "please check" wording for stack paraphrases

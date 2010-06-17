@@ -5,6 +5,8 @@ package com.espertech.esper.client.deploy;
  */
 public class DeploymentOrderException extends DeploymentException {
 
+    private static final long serialVersionUID = -6298842035260203021L;
+
     /**
      * Ctor.
      * @param message error message

@@ -26,7 +26,7 @@ import java.util.*;
 
 public class EPDeploymentAdminImpl implements EPDeploymentAdmin
 {
-    public static String newline = System.getProperty("line.separator");
+    public static final String newline = System.getProperty("line.separator");
     private static Log log = LogFactory.getLog(EPDeploymentAdminImpl.class);
 
     private final EPAdministratorSPI epService;
@@ -56,7 +56,20 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         if (log.isDebugEnabled()) {
             log.debug("Reading resource '" + file.getAbsolutePath() + "'");
         }
-        return readInternal(new FileInputStream(file), file.getAbsolutePath());
+        FileInputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(file);
+            return readInternal(inputStream, file.getAbsolutePath());
+        }
+        finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.debug("Error closing input stream", e);
+                }
+            }            
+        }
     }
 
     public Module read(URL url) throws IOException, ParseException {
@@ -88,7 +101,16 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
            throw new IOException("Failed to find resource '" + resource + "' in classpath");
         }
 
-        return readInternal(stream, resource);
+        try {
+            return readInternal(stream, resource);
+        }
+        finally {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                log.debug("Error closing input stream", e);
+            }
+        }
     }
 
     public synchronized DeploymentResult deploy(Module module, DeploymentOptions options) throws DeploymentActionException
@@ -274,11 +296,11 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         Set<String> referencedTypes = new HashSet<String>();
         for (DeploymentInformationItem item : reverted) {
             EPStatement statement = epService.getStatement(item.getStatementName());
-            referencedTypes.addAll(statementEventTypeRef.getTypesForStatementName(statement.getName()));
             if (statement == null) {
                 log.debug("Deployment id '" + info.getDeploymentId() + "' statement name '" + item + "' not found");
                 continue;
             }
+            referencedTypes.addAll(statementEventTypeRef.getTypesForStatementName(statement.getName()));
             if (statement.isDestroyed()) {
                 continue;
             }
@@ -381,7 +403,6 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         }
 
         Map<String, SortedSet<Integer>> proposedModuleNames = new HashMap<String, SortedSet<Integer>>();
-        Map<Integer, Module> proposedModuleNumbers = new HashMap<Integer, Module>();
         int count = 0;
         for (Module proposedModule : proposedModules) {
             SortedSet<Integer> moduleNumbers = proposedModuleNames.get(proposedModule.getName());
@@ -389,7 +410,6 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
                 moduleNumbers = new TreeSet<Integer>();
                 proposedModuleNames.put(proposedModule.getName(), moduleNumbers);
             }
-            proposedModuleNumbers.put(count, proposedModule);
             moduleNumbers.add(count);
             count++;
         }

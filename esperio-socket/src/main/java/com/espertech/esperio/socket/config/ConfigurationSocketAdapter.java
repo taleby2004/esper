@@ -205,12 +205,23 @@ public class ConfigurationSocketAdapter {
         {
             log.debug( "configuring from file: " + configFile.getName() );
         }
+        FileInputStream inputStream = null;
         try {
-            ConfigurationSocketAdapterParser.doConfigure(this, new FileInputStream(configFile), configFile.toString());
+            inputStream = new FileInputStream(configFile);
+            ConfigurationSocketAdapterParser.doConfigure(this, inputStream, configFile.toString());
 		}
 		catch (FileNotFoundException fnfe) {
 			throw new RuntimeException( "could not find file: " + configFile, fnfe );
 		}
+        finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.debug("Error closing input stream", e);
+                }
+            }
+        }        
         return this;
     }
 

@@ -31,6 +31,7 @@ public class Module {
      * @param uses names of modules that this module depends on
      * @param imports the Java class imports
      * @param items EPL statements
+     * @param moduleText text of module
      */
     public Module(String name, String uri, Set<String> uses, Set<String> imports, List<ModuleItem> items, String moduleText) {
         this.name = name;
@@ -157,11 +158,19 @@ public class Module {
         this.imports = imports;
     }
 
+    /**
+     * Returns module text.
+     * @return text
+     */
     public String getModuleText()
     {
         return moduleText;
     }
 
+    /**
+     * Sets module text.
+     * @param moduleText text to set
+     */
     public void setModuleText(String moduleText)
     {
         this.moduleText = moduleText;

@@ -19,6 +19,8 @@ import java.util.Set;
  */
 public class CreateSchemaDesc implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 8400789369907593190L;
+    
     private final String schemaName;
     private final Set<String> types;
     private final List<ColumnDesc> columns;

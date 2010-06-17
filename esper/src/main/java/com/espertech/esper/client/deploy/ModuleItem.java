@@ -1,8 +1,5 @@
 package com.espertech.esper.client.deploy;
 
-import java.util.Set;
-import java.util.List;
-
 /**
  * Represents an EPL statement as part of a {@link Module}.
  * <p>
@@ -64,31 +61,55 @@ public class ModuleItem {
         this.commentOnly = commentOnly;
     }
 
+    /**
+     * Returns the line number of item.
+     * @return item line num
+     */
     public int getLineNumber()
     {
         return lineNumber;
     }
 
+    /**
+     * Sets item line num
+     * @param lineNumber to set
+     */
     public void setLineNumber(int lineNumber)
     {
         this.lineNumber = lineNumber;
     }
 
+    /**
+     * Returns item char position in line.
+     * @return char position
+     */
     public int getCharPosStart()
     {
         return charPosStart;
     }
 
+    /**
+     * Sets item char position in line.
+     * @param charPosStart char position
+     */
     public void setCharPosStart(int charPosStart)
     {
         this.charPosStart = charPosStart;
     }
 
+    /**
+     * Returns end position of character on line for the item.
+     * @return position
+     */
     public int getCharPosEnd()
     {
         return charPosEnd;
     }
 
+    /**
+     * Sets the end position of character on line for the item.
+     * @param charPosEnd position
+     */
     public void setCharPosEnd(int charPosEnd)
     {
         this.charPosEnd = charPosEnd;

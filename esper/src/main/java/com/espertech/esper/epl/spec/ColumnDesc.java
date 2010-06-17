@@ -6,6 +6,8 @@ import java.io.Serializable;
 
 public class ColumnDesc implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -3508097717971934622L;
+    
     private final String name;
     private final String type;
     private final boolean array;

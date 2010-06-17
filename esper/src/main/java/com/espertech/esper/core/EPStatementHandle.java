@@ -27,7 +27,7 @@ public class EPStatementHandle implements MetaDefItem, Serializable
 
     private final String statementName;
     private final String statementId;
-    private transient ManagedLock statementLock;
+    private transient ManagedLock statementLock = null;
     private final int hashCode;
     private transient EPStatementDispatch optionalDispatchable;
     // handles self-join (ie. statement where from-clause lists the same event type or a super-type more then once)
@@ -38,7 +38,7 @@ public class EPStatementHandle implements MetaDefItem, Serializable
     private final boolean preemptive;
     private transient InsertIntoLatchFactory insertIntoFrontLatchFactory;
     private transient InsertIntoLatchFactory insertIntoBackLatchFactory;
-    private transient StatementMetricHandle metricsHandle;
+    private transient StatementMetricHandle metricsHandle = null;
     private final StatementFilterVersion statementFilterVersion;
 
     /**
