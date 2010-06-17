@@ -7,15 +7,27 @@ Major API changes
   - None
   
 New Features
-  - Support for EPL modules, deployment
-  - Support for create schema
-  - Support for expressions in SQL statements
-  - Support for "for delivery" option  
-  - Preemptive processing of events inserted into named windows makes order of processing more intuitive especially when used with contained-events
-  - Support for timer:withinmax
-  - New Pattern Guard post-fix operator : while
+  - Support for EPL modules and deployment services.
+  - Support for "create schema": Declare an event type in a module file.
+  - Support for "for delivery" option: Grouped-delivery means any listeners/subscribers receive one invocation per group, discrete delivery an invocation per event.
+  - Support for expressions in parameters to SQL statements.
+  - Preemptive processing of events inserted into named windows. This helps to make behavior of queries with named windows more intuitive.
+  - Support for a new pattern guard "timer:withinmax". It takes a time period and maximum-count and ends the pattern subexpression when either the stopwatch or counter match.
+  - Support for a new pattern guard post-fix operator "while": Similar to a while loop, ends the pattern subexpression when an expression turns false.
 
 Minor changes  
+  - Fixed issue ESPER-388 Provide option to auto-remove event type when all statements referencing a type are destroyed
+  - Fixed issue ESPER-392 Nested properties with keywords can not be escaped with ticks
+  - Fixed issue ESPER-460 Added ResultSet to context provided to SQLOutputRowConversion and SQLColumnTypeConversion
+  - Fixed issue ESPER-463 Nested properties can not be escaped with ticks
+  - Fixed issue ESPER-464 Add an engine-level configuration parameter for default AccessorStyle
+  - Fixed issue ESPER-468 IllegalArgumentException while parsing "B until not B" pattern
+  - Fixed issue ESPER-469 Using java.sql.Date with renderer returns PropertyAccessException
+  - Fixed issue ESPER-470 Spring JMS input adapter ack's message before unmarshal
+  - Fixed issue ESPER-472 ClassCastException while sending TimeControlEvent into isolated runtime
+  - Fixed issue ESPER-473 Custom marshaller for Spring JMS adapter that returns DOM object results in an unrecognized event
+  - Many other documentation and performance improvements
+
 
 Changes in version 3.4.0
 ------------------------
