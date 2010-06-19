@@ -9,6 +9,8 @@ Presentations, Articles and Books
 *------------------------+----------------------------------------------------------------------------+
 | Presentation                       | Date
 *------------------------+----------------------------------------------------------------------------+
+| {{{http://www.youtube.com/watch?v=ngogsWCGOMw} Complex Event Processing: Queries on Speed Ignite presentation, Denver Open Source User Group, by Andy Ennamorato}}| Feb., 2010
+*------------------------+-------------+---------------------------------------------------------------+
 | {{{http://www.slideshare.net/javasymposium/creating-an-eventdriven-soa} Creating an Event-Driven SOA - Java Symposium, by Eben Hewitt}}| March 17, 2010
 *------------------------+-------------+---------------------------------------------------------------+
 | {{{http://skillsmatter.com/podcast/cloud-grid/talk-on-esper-and-quickfixj} Open Source in Finance eXchange: David Vincent on Climbing mount complexity, one event at a time }}| December, 2009
@@ -55,6 +57,9 @@ and {{{http://www.slideshare.net/pizak/fast-soa-with-apache-synapse}Fast SOA Wit
 *------------------------+-----------+-----------------------------------------------------------------+
 | Publication | Organization | Date
 *------------------------+-----------+-----------------------------------------------------------------+
+| {{{http://static.intelie.com.br/pedro-master-dissertation.pdf} and
+{{{http://static.intelie.com.br/pedro-paper-acm-sac-2010.pdf} Data Stream Anomaly Detection through Principal Subspace Tracking}} | Dissertation by Pedro Teixeira, PUC Rio de Janeiro | Sept., 2009
+*------------------------+-----------+-----------------------------------------------------------------+
 | {{{http://www.slideshare.net/opher.etzion/debs2009-event-processing-languages-tutorial} DEBS conference 2009 Event Processing Languages Tutorial}} | DEBS conference | June, 2009
 *------------------------+-----------+-----------------------------------------------------------------+
 | {{{http://www.dfrc.ch/esper/}Data Fusion with Esper for aircraft flight path identification}} {{{http://dist.codehaus.org/esper/EsperDataFusion.jnlp}(Run live demo)}} | {{{http://www.dfrc.ch/}Data Fusion Research Center AG}} | October, 2008
@@ -71,6 +76,8 @@ and {{{http://www.slideshare.net/pizak/fast-soa-with-apache-synapse}Fast SOA Wit
 	
 *------------------------+-----------+-----------------------------------------------------------------+
 | Title                  | Published by | Date
+*------------------------+-----------+-----------------------------------------------------------------+
+| {{{http://www.manning.com/etzion/}Event Processing in Action}} by Opher Etzion and Peter Niblett | Manning | July, 2010 
 *------------------------+-----------+-----------------------------------------------------------------+
 | {{{http://www.manning.com/davis/}Open Source SOA}} by Jeff Davis | Manning | March, 2009 
 *------------------------+-----------+-----------------------------------------------------------------+

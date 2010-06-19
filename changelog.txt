@@ -8,7 +8,7 @@ Major API changes
   
 New Features
   - Support for EPL modules and deployment services.
-  - Support for "create schema": Declare an event type in a module file.
+  - Support for "create schema": Declare an event type via EPL statement.
   - Support for "for delivery" option: Grouped-delivery means any listeners/subscribers receive one invocation per group, discrete delivery an invocation per event.
   - Support for expressions in parameters to SQL statements.
   - Preemptive processing of events inserted into named windows. This helps to make behavior of queries with named windows more intuitive.

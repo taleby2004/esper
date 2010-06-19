@@ -38,15 +38,17 @@ Commonly Asked Questions
 	
 Esper Enterprise Edition Feature Summary 
 
-	* Rich Web-based Multi-window GUI based on Flex
+	* Rich web-based multi-window GUI based on Flex
 
-	* Real-time continously-updating displays
+	* Real-time continuously-updating displays
 	
 		* Charts, Timeline, Gauge, Grids
 	
 		* Interactive, composable, configurable
 
 	* Data distribution service
+	
+	* Hot deployment of EPL modules and event-driven applications packaged as WAR
 	
 	* {{{http://www.espertech.com/products/esperee.php}Info and Download}}
 
@@ -93,11 +95,11 @@ Core CEP Features
 
 	* Crontab-like timer <'at'> operator
 
-	* Lifecycle of pattern can be controlled by timer and via operators, repeat-number and repeat-until, every-distinct
+	* Lifecycle of pattern can be controlled by timer and via operators, repeat-number and repeat-until, every-distinct, while
 
         * Pattern-matched events provided to listeners
         
-        * Support for <match_recognize> which is a proposed SQL standard for row pattern matching based on regular expressions
+        * Support for <match-recognize> which is a proposed SQL standard for row pattern matching based on regular expressions
 
         []
 
@@ -114,8 +116,20 @@ Core CEP Features
         * Applications can plug-in their own event representation and dynamic type resolution
         
         * Insert-into can directly populate a plain or legacy Java object or Map from a select-clause
+        
+        * Support for a create-schema syntax, useful to declare event types from a column-and-type list, from existing classes or from other types
 
         []
+
+
+* Modularization and Deployment
+	
+	* Module parsing and deployment API
+	
+	* A module files is a plain text file with EPL statements
+	
+	[]
+	
         
 * API
 

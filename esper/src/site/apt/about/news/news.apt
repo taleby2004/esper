@@ -1,7 +1,26 @@
 News
 
 
-* March 20, 2010  -  Esper 3.5.0
+* June 21, 2010  -  Esper 3.5.0
+	      
+  * Support for EPL modules and deployment services.
+  
+  * Support for "create schema": Declare an event type via EPL statement.
+  
+  * Support for "for delivery" option: Grouped-delivery means any listeners/subscribers receive one invocation per group, discrete delivery an invocation per event.
+  
+  * Support for expressions in parameters to SQL statements.
+  
+  * Preemptive processing of events inserted into named windows. This helps to make behavior of queries with named windows more intuitive.
+  
+  * Support for a new pattern guard "timer:withinmax". It takes a time period and maximum-count and ends the pattern subexpression when either the stopwatch or counter match.
+  
+  * Support for a new pattern guard post-fix operator "while": Similar to a while loop, ends the pattern subexpression when an expression turns false.
+  
+  []
+
+
+* March 20, 2010  -  Esper 3.4.0
 	      
   * Support for variables of type Object (any type), POJO or EventType
   
