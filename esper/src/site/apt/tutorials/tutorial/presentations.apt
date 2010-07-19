@@ -9,6 +9,8 @@ Presentations, Articles and Books
 *------------------------+----------------------------------------------------------------------------+
 | Presentation                       | Date
 *------------------------+----------------------------------------------------------------------------+
+| {{{http://www.slideshare.net/intelie/debs2010} HOLMES: An event-driven solution to monitor data centers through continuous queries and machine learning, by Pedro Teixeira et al, DEBS 2010}} | July, 2010
+*------------------------+-------------+---------------------------------------------------------------+
 | {{{http://www.youtube.com/watch?v=ngogsWCGOMw} Complex Event Processing: Queries on Speed Ignite presentation, Denver Open Source User Group}}
 and {{{www.slideshare.net/.../complex-event-processing-with-esper} Complex Event Processing with Esper by Nathan Reese}} | Feb., 2010
 *------------------------+-------------+---------------------------------------------------------------+
@@ -58,8 +60,7 @@ and {{{http://www.slideshare.net/pizak/fast-soa-with-apache-synapse}Fast SOA Wit
 *------------------------+-----------+-----------------------------------------------------------------+
 | Publication | Organization | Date
 *------------------------+-----------+-----------------------------------------------------------------+
-| {{{http://static.intelie.com.br/pedro-master-dissertation.pdf} and
-{{{http://static.intelie.com.br/pedro-paper-acm-sac-2010.pdf} Data Stream Anomaly Detection through Principal Subspace Tracking}} | Dissertation by Pedro Teixeira, PUC Rio de Janeiro | Sept., 2009
+| {{{http://static.intelie.com.br/pedro-paper-acm-sac-2010.pdf} Data Stream Anomaly Detection through Principal Subspace Tracking}} | Dissertation by Pedro Teixeira, PUC Rio de Janeiro | Sept., 2009
 *------------------------+-----------+-----------------------------------------------------------------+
 | {{{http://www.slideshare.net/opher.etzion/debs2009-event-processing-languages-tutorial} DEBS conference 2009 Event Processing Languages Tutorial}} | DEBS conference | June, 2009
 *------------------------+-----------+-----------------------------------------------------------------+

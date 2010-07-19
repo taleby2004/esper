@@ -178,7 +178,7 @@ httpAdapter.destroy();]]></programlisting>
 			</para>
 			
 			<para>
-			  For example, the URI <literal>http://localhost:8079/sendevent?type=MyFirewallEvent&amp;name=Joe&amp;changed=true</literal> entered into a browser sends an input event of type <literal>MyFirewallEvent</literal> setting the <literal>name</literal> property of the event to "Joe" and the <literal>changed</literal> property of the event to true.
+			  For example, the URI <literal>http://localhost:8079/sendevent?stream=MyFirewallEvent&amp;name=Joe&amp;changed=true</literal> entered into a browser sends an input event of type <literal>MyFirewallEvent</literal> setting the <literal>name</literal> property of the event to "Joe" and the <literal>changed</literal> property of the event to true.
 			</para>
 			
 			<para>
