@@ -12,6 +12,7 @@ Technology Introduction
 	ESP stands for Event Stream Processing and deals with the task of processing multiple streams of event data with the goal of identifying the meaningful events within those streams,
 	and deriving meaningful information from them. Real-time OLAP (online analytical processing) and continuous query are also terms used frequently for this technology.
 		
+	Esper provides an optimized language for dealing with high frequency time-based event data: the Event Processing Language (EPL).
 
 	The Esper engine has been developed to address the requirements of applications that analyze and react to events. Some typical examples of applications are:
 	
