@@ -52,7 +52,7 @@
 			</item>
 			<item name="The Esper/NEsper Team" href="/team/team.html" collapse="false">
 				<item name="How To Contribute" href="/team/contribute/contribute.html"/>
-				<item name="Mailing Lists" href="http://xircles.codehaus.org/projects/esper/lists"/>
+				<item name="Mailing Lists/Forums" href="/about/esper/mailinglist.html"/>
 				<item name="Roadmap" href="http://jira.codehaus.org/browse/ESPER?report=com.atlassian.jira.plugin.system.project:roadmap-panel"/>
 				<item name="Source Repository" href="http://xircles.codehaus.org/projects/esper/repo"/>
 			</item>

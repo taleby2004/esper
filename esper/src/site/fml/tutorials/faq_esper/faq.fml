@@ -97,6 +97,19 @@
         </p>
       </answer>
     </faq>
+    <faq id="whouses">
+      <question>Who uses Esper?</question>
+      <answer>
+        <p>
+        	We think Esper is the most widely-deployed CEP engine available. It's licensing and technical requirements have made it suitable for integration into
+        	many environments and software products. 	
+	</p>
+        <p>
+        	EsperTech provides redistribution licenses to software companies that incorporate Esper/NEsper under commercial (non-GPL) terms.
+        	Some of the comnpanies that agreed to be listed as licensors appear on the EsperTech web site.        	
+	</p>
+      </answer>    
+    </faq>
     <faq id="other-solutions">
       <question>How would you position Esper next to existing solutions (or hacks) in the industry?</question>
       <answer>

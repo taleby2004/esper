@@ -4,8 +4,7 @@ Event Stream Intelligence with Esper and NEsper
 
 	Esper and NEsper enable rapid development of applications that process large volumes of incoming messages or events. Esper and NEsper filter 
 	and analyze events in various ways, and respond to conditions of interest in real-time.
-		
-
+	
 Technology Introduction
 
 	Complex Event Processing, or CEP, is technology to process events and discover complex patterns among multiple streams of event data.
@@ -45,7 +44,7 @@ Esper Enterprise Edition Feature Summary
 	
 		* Charts, Timeline, Gauge, Grids
 	
-		* Interactive, composable, configurable
+		* Interactive, composable, configurable, can be integrated
 
 	* Data distribution service
 	
