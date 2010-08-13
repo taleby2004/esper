@@ -1257,7 +1257,7 @@ listener or subscriber instances then such shared state should be thread-safe.
 			</para>
 
 			<para>
-				<emphasis>Route Execution Threading</emphasis> means that the thread sending in an event via any of the <literal>sendEvent</literal> methods only identifies and pre-processes an event, and a pool of engine-managed threads handles the actual processing of the event for each statement, pushing threading to the level of each statement for event-arrival-based execution.
+				<emphasis>Route Execution Threading</emphasis> means that the thread sending in an event via any of the <literal>sendEvent</literal> methods (or the inbound threading pooled thread if inbound threading is enabled) only identifies and pre-processes an event, and a pool of engine-managed threads handles the actual processing of the event for each statement, pushing threading to the level of each statement for event-arrival-based execution.
 			</para>
 
 			<para>
