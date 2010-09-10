@@ -54,7 +54,7 @@
 				<item name="How To Contribute" href="/team/contribute/contribute.html"/>
 				<item name="Mailing Lists/Forums" href="/about/esper/mailinglist.html"/>
 				<item name="Roadmap" href="http://jira.codehaus.org/browse/ESPER?report=com.atlassian.jira.plugin.system.project:roadmap-panel"/>
-				<item name="Source Repository" href="http://xircles.codehaus.org/projects/esper/repo"/>
+				<item name="Source Repository" href="/about/esper/sourcerepo.html"/>
 			</item>
 		</menu>
 	</body>
