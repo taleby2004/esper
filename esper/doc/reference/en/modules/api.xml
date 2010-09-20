@@ -649,17 +649,12 @@ finally {
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Add new event types for all event representations, check if an event type exists, or update an existing Map event type.
+						Add new event types for all event representations, check if an event type exists, update an existing Map event type or remove an event type.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
 						Add and remove variables (get and set variable values is done via the runtime API).
-					</para>
-				</listitem>
-				<listitem>
-					<para>
-						Add, change and remove event types.
 					</para>
 				</listitem>
 				<listitem>
@@ -699,6 +694,10 @@ finally {
 				</listitem>
 			</itemizedlist>				
 	    </sect2>
+	    
+	    <para>
+			For examples of above runtime configuration API functions please consider the Configuration chapter, which applies to both static configuration and runtime configuration as the <literal>ConfigurationOperations</literal> interface is the same.
+	    </para>
 
     </sect1>
 

@@ -7,6 +7,7 @@ import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
+import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.view.ViewResolutionServiceImpl;
 import com.espertech.esper.view.ViewEnumHelper;
 import com.espertech.esper.view.ViewFactoryContext;
@@ -59,7 +60,7 @@ public class SupportStatementContextFactory
                 null,
                 null,
                 new OutputConditionFactoryDefault(),
-                new NamedWindowServiceImpl(null, variableService, false),
+                new NamedWindowServiceImpl(null, variableService, false, new ManagedReadWriteLock("dummyeplock", true)),
                 null,
                 new StatementResultServiceImpl(null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc
                 null, // resolution URIs
