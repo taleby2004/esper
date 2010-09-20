@@ -10,18 +10,18 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.NullIterator;
 import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.core.StatementResultService;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
+import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
-import com.espertech.esper.view.BatchingDataWindowView;
+import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.filter.FilterSpecCompiled;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -114,10 +114,10 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
      * @param filterList is a list of filter expressions
      * @return consumer representative view
      */
-    public NamedWindowConsumerView addConsumer(List<ExprNode> filterList, EPStatementHandle statementHandle, StatementStopService statementStopService)
+    public NamedWindowConsumerView addConsumer(List<ExprNode> filterList, PropertyEvaluator optPropertyEvaluator, EPStatementHandle statementHandle, StatementStopService statementStopService)
     {
         // Construct consumer view, allow a callback to this view to remove the consumer
-        NamedWindowConsumerView consumerView = new NamedWindowConsumerView(filterList, eventType, statementStopService, this, exprEvaluatorContext);
+        NamedWindowConsumerView consumerView = new NamedWindowConsumerView(ExprNodeUtility.getEvaluators(filterList), optPropertyEvaluator, eventType, statementStopService, this, exprEvaluatorContext);
 
         // Keep a list of consumer views per statement to accomodate joins and subqueries
         List<NamedWindowConsumerView> viewsPerStatements = consumers.get(statementHandle);
@@ -147,14 +147,15 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
         {
             return new TreeMap<EPStatementHandle, List<NamedWindowConsumerView>>(new Comparator<EPStatementHandle>()
             {
-                // sorted descending order
                 public int compare(EPStatementHandle o1, EPStatementHandle o2)
                 {
-                    if (o1.getPriority() == o2.getPriority())
-                    {
+                    if (o1 == o2) {
                         return 0;
                     }
-                    return o1.getPriority() > o2.getPriority() ? -1 : 1;
+                    if (o1.equals(o2)) {
+                        return 0;
+                    }
+                    return o1.getPriority() >= o2.getPriority() ? -1 : 1;
                 }
             });
         }
@@ -249,7 +250,7 @@ public class NamedWindowTailView extends ViewSupport implements Iterable<EventBe
             {
                 return Collections.EMPTY_LIST;
             }
-            ArrayDequeJDK6Backport<EventBean> list = new ArrayDequeJDK6Backport<EventBean>();
+            ArrayDeque<EventBean> list = new ArrayDeque<EventBean>();
             while (it.hasNext())
             {
                 list.add(it.next());

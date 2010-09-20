@@ -10,6 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.*;
 import com.espertech.esper.type.MinMaxTypeEnum;
 import com.espertech.esper.schedule.TimeProvider;
@@ -104,6 +105,11 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return engineImportService.resolveAggregation(functionName);
     }
 
+    public Pair<Class, String> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException
+    {
+        return engineImportService.resolveSingleRow(functionName);
+    }
+
     public AggregationMethod makeSumAggregator(Class type)
     {
         if (type == BigInteger.class)
@@ -133,6 +139,35 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return new NumIntegerSumAggregator();
     }
 
+    public Class getSumAggregatorType(Class type)
+    {
+        if (type == BigInteger.class)
+        {
+            return BigInteger.class;
+        }
+        if (type == BigDecimal.class)
+        {
+            return BigDecimal.class;
+        }
+        if ((type == Long.class) || (type == long.class))
+        {
+            return Long.class;
+        }
+        if ((type == Integer.class) || (type == int.class))
+        {
+            return Integer.class;
+        }
+        if ((type == Double.class) || (type == double.class))
+        {
+            return Double.class;
+        }
+        if ((type == Float.class) || (type == float.class))
+        {
+            return Float.class;
+        }
+        return Integer.class;
+    }
+
     public AggregationMethod makeDistinctAggregator(AggregationMethod aggregationMethod, Class childType)
     {
         return new DistinctValueAggregator(aggregationMethod, childType);
@@ -145,6 +180,15 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
             return new BigDecimalAvgAggregator();
         }
         return new AvgAggregator();
+    }
+
+    public Class getAvgAggregatorType(Class type)
+    {
+        if ((type == BigDecimal.class) || (type == BigInteger.class))
+        {
+            return BigDecimal.class;
+        }
+        return Double.class;
     }
 
     public AggregationMethod makeAvedevAggregator()
@@ -170,12 +214,12 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return new StddevAggregator();
     }
 
-    public AggregationMethod makeFirstValueAggregator(Class type) {
-        return new FirstValueAggregator(type);
+    public AggregationMethod makeFirstEverValueAggregator(Class type) {
+        return new FirstEverValueAggregator(type);
     }
 
-    public AggregationMethod makeLastValueAggregator(Class type) {
-        return new LastValueAggregator(type);
+    public AggregationMethod makeLastEverValueAggregator(Class type) {
+        return new LastEverValueAggregator(type);
     }
 
     public AggregationMethod makeRateAggregator() {
@@ -212,7 +256,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return row;
     }
 
-    public long getCurrentRowCount(AggregationMethod[] aggregators)
+    public long getCurrentRowCount(AggregationMethod[] aggregators, AggregationAccess[] groupAccesses)
     {
         return 0;   // since the aggregators are always fresh ones 
     }
@@ -221,4 +265,14 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
     {
         // To be overridden by implementations that care when aggregators get removed
     }
+
+    public AggregationAccess makeAccessStreamId(boolean isJoin, int streamId, MultiKeyUntyped groupKey)
+    {
+        if (isJoin) {
+            return new AggregationAccessJoinImpl(streamId);
+        }
+        else {
+            return new AggregationAccessImpl(streamId);
+        }
+    }    
 }

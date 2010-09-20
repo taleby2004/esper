@@ -8,22 +8,26 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.util.*;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.SimpleNumberBigDecimalCoercer;
+import com.espertech.esper.util.SimpleNumberBigIntegerCoercer;
+import com.espertech.esper.util.SimpleNumberCoercerFactory;
 
-import java.util.Iterator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Represents the between-clause function in an expression tree.
  */
-public class ExprBetweenNode extends ExprNode
+public class ExprBetweenNode extends ExprNode implements ExprEvaluator
 {
     private final boolean isLowEndpointIncluded;
     private final boolean isHighEndpointIncluded;
@@ -31,6 +35,8 @@ public class ExprBetweenNode extends ExprNode
 
     private boolean isAlwaysFalse;
     private ExprBetweenComp computer;
+    private ExprEvaluator[] evaluators;
+
     private static final long serialVersionUID = -9089344387956311948L;
 
     /**
@@ -45,6 +51,11 @@ public class ExprBetweenNode extends ExprNode
         isLowEndpointIncluded = lowEndpointIncluded;
         isHighEndpointIncluded = highEndpointIncluded;
         isNotBetween = notBetween;
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
     }
 
     public boolean isConstantResult()
@@ -79,6 +90,10 @@ public class ExprBetweenNode extends ExprNode
         return isNotBetween;
     }
 
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 3)
@@ -87,9 +102,10 @@ public class ExprBetweenNode extends ExprNode
         }
 
         // Must be either numeric or string
-        Class typeOne = JavaClassHelper.getBoxedType(this.getChildNodes().get(0).getType());
-        Class typeTwo = JavaClassHelper.getBoxedType(this.getChildNodes().get(1).getType());
-        Class typeThree = JavaClassHelper.getBoxedType(this.getChildNodes().get(2).getType());
+        evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
+        Class typeOne = JavaClassHelper.getBoxedType(evaluators[0].getType());
+        Class typeTwo = JavaClassHelper.getBoxedType(evaluators[1].getType());
+        Class typeThree = JavaClassHelper.getBoxedType(evaluators[2].getType());
 
         if (typeOne == null)
         {
@@ -143,14 +159,13 @@ public class ExprBetweenNode extends ExprNode
         }
 
         // Evaluate first child which is the base value to compare to
-        Iterator<ExprNode> it = this.getChildNodes().iterator();
-        Object value = it.next().evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object value = evaluators[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (value == null)
         {
             return false;
         }
-        Object lower = it.next().evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-        Object higher = it.next().evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object lower = evaluators[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object higher = evaluators[2].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
         boolean result = computer.isBetween(value, lower, higher);
 

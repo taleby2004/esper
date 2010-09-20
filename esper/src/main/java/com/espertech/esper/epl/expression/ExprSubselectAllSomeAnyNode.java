@@ -19,6 +19,7 @@ import com.espertech.esper.type.RelationalOpEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -47,6 +48,10 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
         isNot = not;
         isAll = all;
         this.relationalOp = relationalOpEnum;
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     /**
@@ -90,4 +95,9 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
     {
         return evalStrategy.evaluate(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
+
+    @Override
+    public boolean isAllowMultiColumnSelect() {
+        return false;
+    }    
 }

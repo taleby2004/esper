@@ -15,7 +15,92 @@ public class TestDataWindowUnionExpiry extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    
+
+    public void testFirstUniqueAndLengthOnDelete()
+    {
+        init(false);
+
+        EPStatement nwstmt = epService.getEPAdministrator().createEPL("create window MyWindow.std:firstunique(string).win:firstlength(3) retain-union as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        epService.getEPAdministrator().createEPL("on SupportBean_S0 delete from MyWindow where string = p00");
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from MyWindow");
+        stmt.addListener(listener);
+
+        String[] fields = new String[] {"string", "intPrimitive"};
+
+        sendEvent("E1", 1);
+        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+
+        sendEvent("E1", 99);
+        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 99}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 99});
+
+        sendEvent("E2", 2);
+        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 99}, {"E2", 2}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
+        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E2", 2}});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], "string".split(","), new Object[] {"E1"});
+        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], "string".split(","), new Object[] {"E1"});
+        listener.reset();
+
+        sendEvent("E1", 3);
+        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 3}, {"E2", 2}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 3});
+    }
+
+    public void testFirstUniqueAndFirstLength()
+    {
+        init(false);
+
+        String epl = "select irstream string, intPrimitive from SupportBean.win:firstlength(3).std:firstunique(string) retain-union";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+
+        runAssertionFirstUniqueAndFirstLength(stmt);
+
+        stmt.destroy();
+        listener.reset();
+
+        epl = "select irstream string, intPrimitive from SupportBean.std:firstunique(string).win:firstlength(3) retain-union";
+        stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+
+        runAssertionFirstUniqueAndFirstLength(stmt);
+    }
+
+    private void runAssertionFirstUniqueAndFirstLength(EPStatement stmt)
+    {
+        String[] fields = new String[] {"string", "intPrimitive"};
+
+        sendEvent("E1", 1);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+
+        sendEvent("E1", 2);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 2});
+
+        sendEvent("E2", 1);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 1});
+
+        sendEvent("E2", 3);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}});
+        assertFalse(listener.getAndClearIsInvoked());
+
+        sendEvent("E3", 3);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}, {"E3", 3}});
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
+
+        sendEvent("E3", 4);
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}, {"E3", 3}});
+        assertFalse(listener.getAndClearIsInvoked());
+    }
+
     public void testBatchWindow()
     {
         init(false);
@@ -89,7 +174,7 @@ public class TestDataWindowUnionExpiry extends TestCase
         init(false);
         String[] fields = new String[] {"string"};
 
-        String text = "select irstream string from SupportBean.std:groupby(intPrimitive).win:length(2).std:unique(intBoxed) retain-union";
+        String text = "select irstream string from SupportBean.std:groupwin(intPrimitive).win:length(2).std:unique(intBoxed) retain-union";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
@@ -222,7 +307,7 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.std:unique(intPrimitive).std:unique(intBoxed) retain-union");
         stmt.addListener(listener);
-        
+
         sendEvent("E1", 1, 10);
         ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
@@ -415,7 +500,7 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         sendTimer(13000);
         ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E4"));        
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E4"));
 
         sendTimer(10000000);
         assertFalse(listener.isInvoked());
@@ -494,11 +579,11 @@ public class TestDataWindowUnionExpiry extends TestCase
         init(false);
         String text = null;
 
-        text = "select string from SupportBean.std:groupby(string).std:groupby(intPrimitive).std:unique(string).std:unique(intPrimitive) retain-union";
-        tryInvalid(text, "Error starting statement: Multiple group-by views are not allowed in conjuntion with multiple data windows [select string from SupportBean.std:groupby(string).std:groupby(intPrimitive).std:unique(string).std:unique(intPrimitive) retain-union]");
+        text = "select string from SupportBean.std:groupwin(string).std:groupwin(intPrimitive).std:unique(string).std:unique(intPrimitive) retain-union";
+        tryInvalid(text, "Error starting statement: Multiple group-by views are not allowed in conjuntion with multiple data windows [select string from SupportBean.std:groupwin(string).std:groupwin(intPrimitive).std:unique(string).std:unique(intPrimitive) retain-union]");
 
-        text = "select string from SupportBean.std:groupby(string).std:unique(string).std:merge(string) retain-union";
-        tryInvalid(text, "Error starting statement: Error attaching view to parent view: Group by view for this merge view could not be found among parent views [select string from SupportBean.std:groupby(string).std:unique(string).std:merge(string) retain-union]");
+        text = "select string from SupportBean.std:groupwin(string).std:unique(string).std:merge(intPrimitive) retain-union";
+        tryInvalid(text, "Error starting statement: Error attaching view to parent view: Group by view for this merge view could not be found among parent views [select string from SupportBean.std:groupwin(string).std:unique(string).std:merge(intPrimitive) retain-union]");
     }
 
     public void testValidLegacy()

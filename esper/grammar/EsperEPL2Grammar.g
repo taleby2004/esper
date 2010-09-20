@@ -77,6 +77,9 @@ tokens
 	SQL='sql';
 	METADATASQL='metadatasql';
 	PREVIOUS='prev';
+	PREVIOUSTAIL='prevtail';
+	PREVIOUSCOUNT='prevcount';
+	PREVIOUSWINDOW='prevwindow';
 	PRIOR='prior';
 	EXISTS='exists';
 	WEEKDAY='weekday';
@@ -186,6 +189,8 @@ tokens
 	EXPRCOL;
 	CONCAT;	
 	LIB_FUNCTION;
+	LIB_FUNC_CHAIN;
+	DOT_EXPR;
 	UNARY_MINUS;
 	TIME_PERIOD;
 	ARRAY_EXPR;
@@ -242,6 +247,7 @@ tokens
 	ANNOTATION_VALUE;
 	FIRST_AGGREG;
 	LAST_AGGREG;
+	WINDOW_AGGREG;
 	UPDATE_EXPR;
 	ON_SET_EXPR_ITEM;
 	CREATE_SCHEMA_EXPR;
@@ -449,6 +455,9 @@ tokens
 	parserTokenParaphases.put(SQL, "'sql'");
 	parserTokenParaphases.put(METADATASQL, "'metadatasql'");
 	parserTokenParaphases.put(PREVIOUS, "'prev'");
+	parserTokenParaphases.put(PREVIOUSTAIL, "'prevtail'");
+	parserTokenParaphases.put(PREVIOUSCOUNT, "'prevcount'");
+	parserTokenParaphases.put(PREVIOUSWINDOW, "'prevwindow'");
 	parserTokenParaphases.put(PRIOR, "'prior'");
 	parserTokenParaphases.put(EXISTS, "'exists'");
 	parserTokenParaphases.put(WEEKDAY, "'weekday'");
@@ -1190,7 +1199,9 @@ unaryExpression
 	: MINUS eventProperty -> ^(UNARY_MINUS eventProperty)
 	| constant
 	| substitution
-	| LPAREN! expression RPAREN!
+	| LPAREN expression RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	    -> {$d != null}? ^(DOT_EXPR expression libFunctionNoClass+)
+	    -> expression
 	| eventPropertyOrLibFunction
 	| (builtinFunc) => (builtinFunc)
 	| arrayExpression
@@ -1217,7 +1228,7 @@ subQueryExpr
 @init  { paraphrases.push("subquery"); }
 @after { paraphrases.pop(); }
 	:	LPAREN! 
-		SELECT! DISTINCT? selectionListElement
+		SELECT! DISTINCT? selectionList
 	    FROM! subSelectFilterExpr
 	    (WHERE! whereClause)?
 	    RPAREN!
@@ -1251,8 +1262,12 @@ builtinFunc
 	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
 	| firstAggregation
 	| lastAggregation
+	| windowAggregation
 	| COALESCE^ LPAREN! expression COMMA! expression (COMMA! expression)* RPAREN!
 	| PREVIOUS^ LPAREN! expression (COMMA! expression)? RPAREN!
+	| PREVIOUSTAIL^ LPAREN! expression (COMMA! expression)? RPAREN!
+	| PREVIOUSCOUNT^ LPAREN! expression RPAREN!
+	| PREVIOUSWINDOW^ LPAREN! expression RPAREN!
 	| PRIOR^ LPAREN! NUM_INT COMMA! eventProperty RPAREN!
 	// MIN and MAX can also be "Math.min" static function and "min(price)" aggregation function and "min(a, b, c...)" built-in function
 	// therefore handled in code via libFunction as below
@@ -1263,14 +1278,26 @@ builtinFunc
 	;
 	
 firstAggregation
-	: FIRST LPAREN (a=ALL | d=DISTINCT)? expression RPAREN
-	  -> ^(FIRST_AGGREG $d? expression)
+	: FIRST LPAREN accessAggExpr (COMMA expression)? RPAREN
+	  -> ^(FIRST_AGGREG accessAggExpr expression?)
 	;
 
 lastAggregation
-	: LAST LPAREN (a=ALL | d=DISTINCT)? expression RPAREN
-	  -> ^(LAST_AGGREG $d? expression)
+	: LAST LPAREN accessAggExpr (COMMA expression)? RPAREN
+	  -> ^(LAST_AGGREG accessAggExpr expression?)
 	;
+	
+windowAggregation
+	: WINDOW LPAREN accessAggExpr RPAREN
+	  -> ^(WINDOW_AGGREG accessAggExpr)
+	;
+
+accessAggExpr
+   	:   	s=STAR -> PROPERTY_WILDCARD_SELECT[$s]
+	|	(propertyStreamSelector) => propertyStreamSelector
+	|	expression
+	;
+
 
 maxFunc
 	: (MAX^ | MIN^) LPAREN! expression (COMMA! expression (COMMA! expression)* )? RPAREN!
@@ -1282,12 +1309,22 @@ eventPropertyOrLibFunction
 	;
 	
 libFunction
+	: libFunctionWithClass (DOT libFunctionNoClass)*
+	  -> ^(LIB_FUNC_CHAIN libFunctionWithClass libFunctionNoClass*)
+	;
+		
+libFunctionWithClass
 	: (classIdentifierNonGreedy DOT)? funcIdent LPAREN (libFunctionArgs)? RPAREN
 	  -> ^(LIB_FUNCTION classIdentifierNonGreedy? funcIdent libFunctionArgs?)
 	;	
-	
+
+libFunctionNoClass
+	: funcIdent LPAREN (libFunctionArgs)? RPAREN
+	  -> ^(LIB_FUNCTION funcIdent libFunctionArgs?)
+	;	
+
 funcIdent
-	: IDENT
+	: escapableIdent
 	| max=MAX -> IDENT[$max]
 	| min=MIN -> IDENT[$min]
 	;
@@ -1386,29 +1423,16 @@ guardWhileExpression
 
 // syntax is [a..b]  or [..b]  or  [a..] or [a:b]   wherein a and b may be recognized as double
 matchUntilRange
+  @init { Boolean isopen = true; } 
 	:	LBRACK (
-			l=NUM_INT (  (d1=DOT DOT r=NUM_INT?) 
-			           | (c1=COLON r=NUM_INT)
-				  )? 
-		   |	db=NUM_DOUBLE (
-		                        d1=DOT r=NUM_INT? 
-		                        |
-		                        db2=NUM_DOUBLE
-		                      )? 
-		   |	DOT DOT r=NUM_INT
-		   |	DOT db3=NUM_DOUBLE
+			expression (c1=COLON (expression { isopen = false; }) ? )? 
+		   |	c2=COLON expression
 		   )
 		RBRACK
-		-> {$l != null && d1 != null && r != null}? ^(MATCH_UNTIL_RANGE_CLOSED $l $r) 
-		-> {$l != null && d1 != null}? ^(MATCH_UNTIL_RANGE_HALFOPEN $l) 
-		-> {$l != null && c1 != null}? ^(MATCH_UNTIL_RANGE_CLOSED $l $r) 
-		-> {$l != null}? ^(MATCH_UNTIL_RANGE_BOUNDED $l) 
-		-> {$db != null && d1 != null && r != null}? ^(MATCH_UNTIL_RANGE_CLOSED $db $r) 
-		-> {$db != null && d1 != null}? ^(MATCH_UNTIL_RANGE_HALFOPEN $db) 
-		-> {$db != null && db2 != null}? ^(MATCH_UNTIL_RANGE_CLOSED $db $db2) 
-		-> {$db3 != null}? ^(MATCH_UNTIL_RANGE_HALFCLOSED $db3)
-		-> {$r != null}? ^(MATCH_UNTIL_RANGE_HALFCLOSED $r) 
-		-> ^(MATCH_UNTIL_RANGE_HALFCLOSED $db) 
+		-> {$c1 != null && !isopen}? ^(MATCH_UNTIL_RANGE_CLOSED expression expression) 
+		-> {$c1 != null && isopen}? ^(MATCH_UNTIL_RANGE_HALFOPEN expression) 
+		-> {$c2 != null}? ^(MATCH_UNTIL_RANGE_HALFCLOSED expression)
+		-> ^(MATCH_UNTIL_RANGE_BOUNDED expression) 
 	;
 	
 //----------------------------------------------------------------------------
@@ -1467,19 +1491,19 @@ patternFilterExpression
 
 classIdentifier
   @init { String identifier = ""; }
-	:	i1=escapableIdent { identifier = $i1.result; }
+	:	i1=escapableStr { identifier = $i1.result; }
 	    ( 
-	    	 DOT i2=escapableIdent { identifier += "." + $i2.result; }
+	    	 DOT i2=escapableStr { identifier += "." + $i2.result; }
 	    )* 
 	    -> ^(CLASS_IDENT[identifier])
 	;
 	
 classIdentifierNonGreedy
   @init { String identifier = ""; } 
-	:	i1=escapableIdent { identifier = $i1.result; }
+	:	i1=escapableStr { identifier = $i1.result; }
 	    ( 
 	    	 options {greedy=false;} :
-	    	 DOT i2=escapableIdent { identifier += "." + $i2.result; }
+	    	 DOT i2=escapableStr { identifier += "." + $i2.result; }
 	    )* 
 	    -> ^(CLASS_IDENT[identifier])
 	;
@@ -1621,6 +1645,7 @@ keywordAllowedIdent returns [String result]
 		|SQL { $result = "sql"; }
 		|METADATASQL { $result = "metadatasql"; }
 		|PREVIOUS { $result = "prev"; }
+		|PREVIOUSTAIL { $result = "prevtail"; }
 		|PRIOR { $result = "prior"; }
 		|WEEKDAY { $result = "weekday"; }
 		|LW { $result = "lastweekday"; }
@@ -1640,11 +1665,16 @@ keywordAllowedIdent returns [String result]
 		|MATCHES { $result = "matches"; }
 	;
 		
-escapableIdent returns [String result]
+escapableStr returns [String result]
 	:	i1=IDENT { $result = $i1.getText(); }
 		|i2=TICKED_STRING_LITERAL { $result = removeTicks($i2.getText()); }
 	;
 	
+escapableIdent
+	:	IDENT 
+		|t=TICKED_STRING_LITERAL -> IDENT[$t]
+	;
+
 timePeriod 	
 	:	
 	(	

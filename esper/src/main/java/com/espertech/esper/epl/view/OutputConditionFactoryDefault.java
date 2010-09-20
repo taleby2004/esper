@@ -34,7 +34,8 @@ public class OutputConditionFactoryDefault implements OutputConditionFactory
      */
 	public OutputCondition createCondition(OutputLimitSpec outputLimitSpec,
 										 	  	  StatementContext statementContext,
-										 	      OutputCallback outputCallback)
+										 	      OutputCallback outputCallback,
+                                                   boolean isGrouped)
             throws ExprValidationException
     {
 		if(outputCallback ==  null)
@@ -60,8 +61,10 @@ public class OutputConditionFactoryDefault implements OutputConditionFactory
 
         if(outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.FIRST)
 		{
-			log.debug(".createCondition creating OutputConditionFirst");
-			return new OutputConditionFirst(outputLimitSpec, statementContext, outputCallback);
+            if (isGrouped) {
+                return new OutputConditionNull(outputCallback);
+            }
+			return new OutputConditionFirst(outputLimitSpec, statementContext, outputCallback, isGrouped);
 		}
 
         if(outputLimitSpec.getRateType() == OutputLimitRateType.CRONTAB)

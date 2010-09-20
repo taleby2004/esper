@@ -4,10 +4,7 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.core.*;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNodeUtility;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
@@ -49,7 +46,7 @@ public class PropertyEvaluatorFactory
         EventPropertyGetter[] getters = new EventPropertyGetter[length];
         FragmentEventType types[] = new FragmentEventType[length];
         EventType currentEventType = sourceEventType;
-        ExprNode whereClauses[] = new ExprNode[length];
+        ExprEvaluator whereClauses[] = new ExprEvaluator[length];
 
         List<EventType> streamEventTypes = new ArrayList<EventType>();
         List<String> streamNames = new ArrayList<String>();
@@ -98,8 +95,8 @@ public class PropertyEvaluatorFactory
                 String[] whereStreamNames = streamNames.toArray(new String[streamNames.size()]);
                 boolean[] isIStreamOnly = new boolean[streamNames.size()];
                 Arrays.fill(isIStreamOnly, true);
-                StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI);
-                whereClauses[i] = atom.getOptionalWhereClause().getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext);
+                StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
+                whereClauses[i] = atom.getOptionalWhereClause().getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext).getExprEvaluator();
             }
 
             // validate select clause
@@ -109,7 +106,7 @@ public class PropertyEvaluatorFactory
                 String[] whereStreamNames = streamNames.toArray(new String[streamNames.size()]);
                 boolean[] isIStreamOnly = new boolean[streamNames.size()];
                 Arrays.fill(isIStreamOnly, true);
-                StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI);
+                StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
                 for (SelectClauseElementRaw raw : atom.getOptionalSelectClause().getSelectExprList())
                 {
                     if (raw instanceof SelectClauseStreamRawSpec)
@@ -186,7 +183,7 @@ public class PropertyEvaluatorFactory
             String[] whereStreamNames = streamNames.toArray(new String[streamNames.size()]);
             boolean[] isIStreamOnly = new boolean[streamNames.size()];
             Arrays.fill(isIStreamOnly, true);
-            StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI);
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
 
             SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider,engineURI);
             return new PropertyEvaluatorSelect(selectExpr, accumulative);

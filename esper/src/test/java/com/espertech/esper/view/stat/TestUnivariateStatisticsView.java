@@ -1,5 +1,6 @@
 package com.espertech.esper.view.stat;
 
+import com.espertech.esper.client.EventType;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -21,7 +22,8 @@ public class TestUnivariateStatisticsView extends TestCase
     public void setUp() throws Exception
     {
         // Set up sum view and a test child view
-        myView = new UnivariateStatisticsView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"));
+        EventType type = UnivariateStatisticsView.createEventType(SupportStatementContextFactory.makeContext(), null);
+        myView = new UnivariateStatisticsView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null);
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -64,12 +66,12 @@ public class TestUnivariateStatisticsView extends TestCase
 
     public void testGetSchema()
     {
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName()) == long.class);
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName()) == double.class);
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName()) == double.class);
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName()) == double.class);
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName()) == double.class);
-        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName()) == double.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__DATAPOINTS.getName()) == Long.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__AVERAGE.getName()) == Double.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEV.getName()) == Double.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__STDDEVPA.getName()) == Double.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__VARIANCE.getName()) == Double.class);
+        assertTrue(myView.getEventType().getPropertyType(ViewFieldEnum.UNIVARIATE_STATISTICS__TOTAL.getName()) == Double.class);
     }
 
     public void testCopyView() throws Exception

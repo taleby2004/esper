@@ -15,52 +15,58 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.schedule.TimeProvider;
-import net.sf.cglib.reflect.FastMethod;
-import net.sf.cglib.reflect.FastClass;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an invocation of a instance method on an event of a given stream in the expression tree.
  */
-public class ExprStreamInstanceMethodNode extends ExprNode
+public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvaluator, ExprNodeInnerNodeProvider
 {
     private static final Log log = LogFactory.getLog(ExprNode.class);
-	private final String streamName;
-	private final String methodName;
-
-    private int streamNum = -1;
-    private Class[] paramTypes;
-	private FastMethod instanceMethod;
     private static final long serialVersionUID = 3422689488586035557L;
+
+	private final String streamName;
+	private final List<ExprChainedSpec> chainSpec;
+
+    private transient int streamNum = -1;
+    private transient ExprDotEval[] evaluators;
 
     /**
 	 * Ctor.
 	 * @param streamName - the declaring class for the method that this node will invoke
-	 * @param methodName - the name of the method that this node will invoke
 	 */
-	public ExprStreamInstanceMethodNode(String streamName, String methodName)
+	public ExprStreamInstanceMethodNode(String streamName, List<ExprChainedSpec> chainSpec)
 	{
 		if(streamName == null)
 		{
 			throw new NullPointerException("Stream name is null");
 		}
-		if(methodName == null)
+		if((chainSpec == null) || (chainSpec.isEmpty()))
 		{
-			throw new NullPointerException("Method name is null");
+			throw new NullPointerException("chain name is null or empty");
 		}
 
 		this.streamName = streamName;
-		this.methodName = methodName;
+		this.chainSpec = chainSpec;
 	}
+
+    @Override
+    public ExprEvaluator getExprEvaluator() {
+        return this;
+    }
 
     public boolean isConstantResult()
     {
         return false;
+    }
+
+    @Override
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
 	/**
@@ -69,22 +75,6 @@ public class ExprStreamInstanceMethodNode extends ExprNode
 	 */
 	public String getStreamName() {
 		return streamName;
-	}
-
-	/**
-     * Returns the method name.
-	 * @return the name of the method
-	 */
-	public String getMethodName() {
-		return methodName;
-	}
-
-	/**
-     * Returns parameter descriptor.
-	 * @return the types of the child nodes of this node
-	 */
-	public Class[] getParamTypes() {
-		return paramTypes;
 	}
 
     /**
@@ -104,19 +94,7 @@ public class ExprStreamInstanceMethodNode extends ExprNode
 	{
         StringBuilder buffer = new StringBuilder();
 		buffer.append(streamName);
-		buffer.append('.');
-		buffer.append(methodName);
-
-		buffer.append('(');
-		String appendString = "";
-		for(ExprNode child : getChildNodes())
-		{
-			buffer.append(appendString);
-			buffer.append(child.toExpressionString());
-			appendString = ", ";
-		}
-		buffer.append(')');
-
+        ExprNodeUtility.toExpressionString(chainSpec, buffer);
 		return buffer.toString();
 	}
 
@@ -127,29 +105,23 @@ public class ExprStreamInstanceMethodNode extends ExprNode
 			return false;
 		}
 
-		if(instanceMethod == null)
-		{
-			throw new IllegalStateException("ExprStreamInstanceMethodNode has not been validated");
+        ExprStreamInstanceMethodNode other = (ExprStreamInstanceMethodNode) node;
+        if (!streamName.equals(other.streamName)) {
+            return false;
 		}
-		else
-		{
-			ExprStreamInstanceMethodNode otherNode = (ExprStreamInstanceMethodNode) node;
-			return streamName.equals(otherNode.streamName) && instanceMethod.equals(otherNode.instanceMethod);
-		}
+        if (other.chainSpec.size() != this.chainSpec.size()) {
+            return false;
+        }
+        for (int i = 0; i < chainSpec.size(); i++) {
+            if (!(this.chainSpec.get(i).equals(other.chainSpec.get(i)))) {
+                return false;
+            }
+        }
+        return true;
 	}
 
 	public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
 	{
-		// Get the types of the childNodes
-		List<ExprNode> childNodes = this.getChildNodes();
-		paramTypes = new Class[childNodes.size()];
-		int count = 0;
-
-        for(ExprNode childNode : childNodes)
-		{
-			paramTypes[count++] = childNode.getType();
-        }
-
         String[] streams = streamTypeService.getStreamNames();
         for (int i = 0; i < streams.length; i++)
         {
@@ -168,27 +140,16 @@ public class ExprStreamInstanceMethodNode extends ExprNode
         EventType eventType = streamTypeService.getEventTypes()[streamNum];
         Class type = eventType.getUnderlyingType();
 
-        // Try to resolve the method
-		try
-		{
-            Method method = methodResolutionService.resolveMethod(type, methodName, paramTypes);
-			FastClass declaringClass = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
-			instanceMethod = declaringClass.getMethod(method);
-		}
-		catch(Exception e)
-		{
-            log.debug("Error resolving method for instance", e);
-            throw new ExprValidationException(e.getMessage(), e);
-		}
+        evaluators = ExprDotNodeUtility.getChainEvaluators(type, chainSpec, methodResolutionService, false);
 	}
 
 	public Class getType()
 	{
-		if(instanceMethod == null)
-		{
-			throw new IllegalStateException("ExprStaticMethodNode has not been validated");
-		}
-		return instanceMethod.getReturnType();
+        if (evaluators == null)
+        {
+            throw new IllegalStateException("Stream underlying node has not been validated");
+        }
+        return evaluators[evaluators.length - 1].getResultType();
 	}
 
 	public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
@@ -199,25 +160,35 @@ public class ExprStreamInstanceMethodNode extends ExprNode
         {
             return null;
         }
-        Object underlying = event.getUnderlying();
+        Object inner = event.getUnderlying();
 
-        // get parameters
-        List<ExprNode> childNodes = this.getChildNodes();
-		Object[] args = new Object[childNodes.size()];
-		int count = 0;
-		for(ExprNode childNode : childNodes)
-		{
-			args[count++] = childNode.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-		}
-
-		try
-		{
-            return instanceMethod.invoke(underlying, args);
-		}
-		catch (InvocationTargetException e)
-		{
-            log.warn("Error evaluating instance method by name '" + instanceMethod.getName() + "': " + e.getMessage(), e);
+        if (inner == null) {
             return null;
-		}
+        }
+
+        for (ExprDotEval methodEval : evaluators) {
+            inner = methodEval.evaluate(inner, eventsPerStream, isNewData, exprEvaluatorContext);
+            if (inner == null) {
+                break;
+            }
+        }
+        return inner;
 	}
+
+    public void accept(ExprNodeVisitor visitor)
+    {
+        super.accept(visitor);
+
+        // visit all parameters
+        for (ExprChainedSpec chain : this.chainSpec) {
+            for (ExprNode param : chain.getParameters()) {
+                param.accept(visitor);
+            }
+        }
+    }
+
+    @Override
+    public List<ExprNode> getAdditionalNodes() {
+        return ExprNodeUtility.collectChainParameters(chainSpec);
+    }
 }

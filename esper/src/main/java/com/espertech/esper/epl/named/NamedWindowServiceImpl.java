@@ -12,6 +12,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.ExceptionHandlingService;
 import com.espertech.esper.core.StatementLockFactory;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -35,6 +36,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
     private final StatementLockFactory statementLockFactory;
     private final VariableService variableService;
     private final Set<NamedWindowLifecycleObserver> observers;
+    private final ExceptionHandlingService exceptionHandlingService;
     private final boolean isPrioritized;
     private final ManagedReadWriteLock eventProcessingRWLock;
 
@@ -61,7 +63,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
      * @param isPrioritized if the engine is running with prioritized execution
      */
     public NamedWindowServiceImpl(StatementLockFactory statementLockFactory, VariableService variableService, boolean isPrioritized,
-                                  ManagedReadWriteLock eventProcessingRWLock)
+                                  ManagedReadWriteLock eventProcessingRWLock, ExceptionHandlingService exceptionHandlingService)
     {
         this.processors = new HashMap<String, NamedWindowProcessor>();
         this.windowStatementLocks = new HashMap<String, ManagedLock>();
@@ -70,6 +72,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
         this.observers = new HashSet<NamedWindowLifecycleObserver>();
         this.isPrioritized = isPrioritized;
         this.eventProcessingRWLock = eventProcessingRWLock;
+        this.exceptionHandlingService = exceptionHandlingService;
     }
 
     public void destroy()
@@ -208,6 +211,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
                     // internal join processing, if applicable
                     handle.internalDispatch(exprEvaluatorContext);
                 }
+                catch (RuntimeException ex) {
+                    exceptionHandlingService.handleException(ex, handle);
+                }
                 finally
                 {
                     handle.getStatementLock().releaseLock(null);
@@ -285,6 +291,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
                     // internal join processing, if applicable
                     handle.internalDispatch(exprEvaluatorContext);
                 }
+                catch (RuntimeException ex) {
+                    exceptionHandlingService.handleException(ex, handle);
+                }
                 finally
                 {
                     handle.getStatementLock().releaseLock(null);
@@ -334,6 +343,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
                 // internal join processing, if applicable
                 handle.internalDispatch(exprEvaluatorContext);
+            }
+            catch (RuntimeException ex) {
+                exceptionHandlingService.handleException(ex, handle);
             }
             finally
             {

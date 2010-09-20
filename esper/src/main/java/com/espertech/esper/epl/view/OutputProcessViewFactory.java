@@ -62,6 +62,11 @@ public class OutputProcessViewFactory
         int streamCount = statementSpec.getStreamSpecs().size();
         OutputLimitSpec outputLimitSpec = statementSpec.getOutputLimitSpec();
         boolean isDistinct = statementSpec.getSelectClauseSpec().isDistinct();
+        boolean isGrouped = statementSpec.getGroupByExpressions() != null && !statementSpec.getGroupByExpressions().isEmpty();
+
+        if ((outputLimitSpec != null) && (outputLimitSpec.getAfterTimePeriodExpr() != null)) {
+            outputLimitSpec.getAfterTimePeriodExpr().validate(null, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext);
+        }
 
         OutputProcessView outputProcessView;
         try
@@ -85,11 +90,11 @@ public class OutputProcessViewFactory
             {
                 if (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.SNAPSHOT)
                 {
-                    outputProcessView = new OutputProcessViewSnapshot(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct);
+                    outputProcessView = new OutputProcessViewSnapshot(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, isGrouped);
                 }
                 else
                 {
-                    outputProcessView = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct);
+                    outputProcessView = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, isGrouped);
                 }
             }
         }

@@ -22,7 +22,7 @@
         </para>
 
         <para>
-			The keep-all data window counts as a data window but has no expiry policy: it retains all events received. The group-by data window allocates a new data window per group and thereby counts as a data window, but cannot appear alone.
+			The keep-all data window counts as a data window but has no expiry policy: it retains all events received. The grouped-window declaration allocates a new data window per grouping criteria and thereby counts as a data window, but cannot appear alone.
         </para>
 
         <para>
@@ -99,8 +99,8 @@
 						<entry>Retains only the most recent among events having the same value for the criteria expression(s). Acts as a length window of size 1 for each distinct expression value.</entry>
 					</row>
 					<row>
-						<entry>Group By</entry>
-						<entry>std:groupby(<emphasis>grouping criteria(s)</emphasis>)</entry>
+						<entry>Grouped Data Window</entry>
+						<entry>std:groupwin(<emphasis>grouping criteria(s)</emphasis>)</entry>
 						<entry>Groups events into sub-views by the value of the specified expression(s), generally used to provide a separate data window per group.</entry>
 					</row>
 					<row>
@@ -154,27 +154,27 @@
 				<tbody>
 					<row>
 						<entry>Size</entry>
-						<entry>std:size()</entry>
-						<entry>Derives a count of the number of events in a data window, or in an insert stream if used without a data window.</entry>
+						<entry>std:size([<emphasis>expression</emphasis>, ...])</entry>
+						<entry>Derives a count of the number of events in a data window, or in an insert stream if used without a data window, and optionally provides additional event properties as listed in parameters.</entry>
 					</row>
 					<row>
 						<entry>Univariate statistics</entry>
-						<entry>stat:uni(<emphasis>value expression</emphasis>)</entry>
+						<entry>stat:uni(<emphasis>value expression</emphasis> [,<emphasis>expression</emphasis>, ...])</entry>
 						<entry>Calculates univariate statistics on the values returned by the expression.</entry>
 					</row>
 					<row>
 						<entry>Regression</entry>
-						<entry>stat:linest(<emphasis>value expression, value expression</emphasis>)</entry>
+						<entry>stat:linest(<emphasis>value expression, value expression</emphasis> [,<emphasis>expression</emphasis>, ...])</entry>
 						<entry>Calculates regression on the values returned by two expressions.</entry>
 					</row>
 					<row>
 						<entry>Correlation</entry>
-						<entry>stat:correl(<emphasis>value expression, value expression</emphasis>)</entry>
+						<entry>stat:correl(<emphasis>value expression, value expression</emphasis> [,<emphasis>expression</emphasis>, ...])</entry>
 						<entry>Calculates the correlation value on the values returned by two expressions.</entry>
 					</row>
 					<row>
 						<entry>Weighted average</entry>
-						<entry>stat:weighted_avg(<emphasis>value expression, value expression</emphasis>)</entry>
+						<entry>stat:weighted_avg(<emphasis>value expression, value expression</emphasis> [,<emphasis>expression</emphasis>, ...])</entry>
 						<entry>Calculates weighted average given a weight expression and an expression to compute the average for.</entry>
 					</row>
 				</tbody>
@@ -242,7 +242,7 @@
 					sum of price is calculated only for the last 10 events for each symbol and aggregates per symbol:
 				</para>
 	
-				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupby(symbol).win:length(10) group by symbol]]></programlisting>
+				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10) group by symbol]]></programlisting>
 			</sect2>
 
 			<sect2 id="view-win-length-batch" >
@@ -592,18 +592,18 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<programlisting><![CDATA[select * from StockTickEvent.std:unique(symbol, feed)]]></programlisting>
 			</sect2>
 
-			<sect2 id="view-std-groupby" >
-			   <title>Group-By (<literal>std:groupby</literal>)</title>
+			<sect2 id="view-std-groupwin" >
+			   <title>Grouped Data Window (<literal>std:groupwin</literal>)</title>
 		
-				<indexterm><primary>group-by window</primary></indexterm>
-				<indexterm><primary>views</primary><secondary>group-by window</secondary></indexterm>
-				<indexterm><primary>data window views</primary><secondary>group-by window</secondary></indexterm>
+				<indexterm><primary>groupwin window</primary></indexterm>
+				<indexterm><primary>views</primary><secondary>grouped data window</secondary></indexterm>
+				<indexterm><primary>data window views</primary><secondary>grouped data window</secondary></indexterm>
 				
 				<para>
-					This view groups events into sub-views by the value returned by the specified expression or the combination of values returned by a list of expressions. The view takes a single expression to supply the group-by values, or a list of expressions as parameters, as the synopsis shows:
+					This view groups events into sub-views by the value returned by the specified expression or the combination of values returned by a list of expressions. The view takes a single expression to supply the group criteria values, or a list of expressions as parameters, as the synopsis shows:
 				</para>
 
-				<synopsis>std:groupby(<emphasis>grouping_expression</emphasis> [, <emphasis>grouping_expression</emphasis> ...])</synopsis>
+				<synopsis>std:groupwin(<emphasis>grouping_expression</emphasis> [, <emphasis>grouping_expression</emphasis> ...])</synopsis>
 
 				<para>
 					The <emphasis>grouping_expression</emphasis> expression(s) return one or more group keys, by which the view creates sub-views for each distinct group key. Note that the expression should not return an unlimited number of values: the grouping expression should not
@@ -618,51 +618,65 @@ following conditions occurs, whichever occurs first: the data window has collect
 					This example computes the total price for the last 5 events considering the last 5 events per each symbol, aggregating the price across all symbols (since no <literal>group by</literal> clause is specified the aggregation is across all symbols):
 				</para>
 	
-				<programlisting><![CDATA[select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(5)]]></programlisting>
+				<programlisting><![CDATA[select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(5)]]></programlisting>
+
+				<para>
+					The @Hint("<literal>reclaim_group_aged=</literal><emphasis>age_in_seconds</emphasis>") hint instructs the engine to discard grouped data window state that has not been updated for <emphasis>age_in_seconds</emphasis> seconds. 
+					The optional @Hint("<literal>reclaim_group_freq=</literal><emphasis>sweep_frequency_in_seconds</emphasis>") can be specified in addition to control the frequency at which the engine sweeps data window state.
+					If the hint is not specified, the frequency defaults to the same value as <emphasis>age_in_seconds</emphasis>. Use the hints when your group criteria returns a changing or unlimited number of values. By default and without hints the view does not reclaim or remove data windows for group criteria values.
+				</para>
+				
+				<para>
+					The updated sample statement with both hints:
+				</para>
+				<programlisting><![CDATA[// Remove data window views for symbols not updated for 10 seconds or more and sweep every 30 seconds
+@Hint('reclaim_group_aged=10,reclaim_group_freq=30')
+select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(5)]]></programlisting>
 
 				<para>
 					To compute the total price for the last 5 events considering the last 5 events per each symbol and outputting a price per symbol, add the <literal>group by</literal> clause:
 				</para>
 	
-				<programlisting><![CDATA[select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(5) group by symbol]]></programlisting>
+				<programlisting><![CDATA[select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(5) group by symbol]]></programlisting>
 
 				<para>
-					The group-by view can also take multiple expressions that provide values to group by. This example computes the total price for each symbol and feed for the last 10 events per symbol and feed combination:
+					The <literal>std:groupwin</literal> grouped-window view can also take multiple expressions that provide values to group by. This example computes the total price for each symbol and feed for the last 10 events per symbol and feed combination:
 				</para>
 	
-				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupby(symbol, feed).win:length(10)]]></programlisting>
+				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupwin(symbol, feed).win:length(10)]]></programlisting>
 
 				<para>
-					The order in which the group-by view appears within sub-views of a stream controls the data the engine derives from events for each group. The next 2 statements demonstrate this using a length window.
+					The order in which the <literal>std:groupwin</literal> grouped-window view appears within sub-views of a stream controls the data the engine derives from events for each group. The next 2 statements demonstrate this using a length window.
 				</para>
 
 				<para>
-					By putting the group-by view in position after the length window, we can change the semantics of the query. The query now returns the total price per symbol for only the last 10 events across all symbols. Here the engine allocates only one length window for all events:
+					Without the <literal>std:groupwin</literal> declaration query the same query returns the total price per symbol for only the last 10 events across all symbols. Here the engine allocates only one length window for all events:
 				</para>
 	
-				<programlisting><![CDATA[select sum(price) from StockTickEvent.win:length(10).std:groupby(symbol)]]></programlisting>
+				<programlisting><![CDATA[select sum(price) from StockTickEvent.win:length(10)]]></programlisting>
 
 				<para>
-					We have learned that by placing the group-by view before other views, these other views become part of the grouped set of views. The engine dynamically allocates a new view instance for each subview, every time it encounters a new group key such as a new value for symbol. Therefore, in <literal>std:groupby(symbol).win:length(10)</literal> the engine allocates a new length window for each distinct symbol. However in <literal>win:length(10).std:groupby(symbol)</literal> the engine maintains a single length window.
+					We have learned that by placing the <literal>std:groupwin</literal> grouped-window view before other views, these other views become part of the grouped set of views. The engine dynamically allocates a new view instance for each subview, every time it encounters a new group key such as a new value for symbol. Therefore, in <literal>std:groupwin(symbol).win:length(10)</literal> the engine allocates a new length window for each distinct symbol. However in <literal>win:length(10)</literal> alone the engine maintains a single length window.
 				</para>
 
 				<para>
-					Multiple group-by views can also be used in the same statement. The statement below groups by symbol and feed. As the statement declares the length window after the group-by view for symbols, the engine allocates a new length window per symbol however reports total price per symbol and feed. The query results are total price per symbol and feed for the last 100 events per symbol (and not per feed).
+					The <literal>std:groupwin</literal> can be used with multiple data window views to achieve a grouped intersection or union policy.
 				</para>
-
-				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupby(symbol).win:length(100)
-    .std:groupby(feed)]]></programlisting>
 
 				<para>
-					Last, we consider the permutation where the length window is declared after the group-by. Here, the query results are total price per symbol and feed for the last 100 events per symbol and feed.
+					The next query retains the last 4 events per symbol and only those events that are also not older then 10 seconds:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.std:groupwin(symbol).win:length(4).win:time(10)]]></programlisting>
+
+				<para>
+					Last, we consider a grouped data window for two group criteria. Here, the query results are total price per symbol and feed for the last 100 events per symbol and feed.
 				</para>
 
-				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupby(symbol, feed)
-    .win:length(100)]]></programlisting>
+				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupwin(symbol, feed).win:length(100)]]></programlisting>
     
 				<para>
-					For advanced users: There is an optional view that can control how the group-by view gets evaluated and that view is the <literal>std:merge</literal> view. 
-					The merge view can only occur after a group-by view in a view chain and controls
+					For advanced users: There is an optional view that can control how the <literal>std:groupwin</literal> grouped-window view gets evaluated and that view is the <literal>std:merge</literal> view. 
+					The merge view can only occur after a <literal>std:groupwin</literal> grouped-window view in a view chain and controls
 					at what point in the view chain the merge of the data stream occurs from view-instance-per-criteria to single view.
 				</para>
 
@@ -670,10 +684,10 @@ following conditions occurs, whichever occurs first: the data window has collect
 					Compare the following statements:
 				</para>
 				
-				<programlisting><![CDATA[select * from Market.std:groupby(ticker).win:length(1000000)
+				<programlisting><![CDATA[select * from Market.std:groupwin(ticker).win:length(1000000)
     .stat:weighted_avg(price, volume).std:merge(ticker)
 // ... and ...
-select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
+select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
     .stat:weighted_avg(price, volume)]]></programlisting>
 
 				<para>
@@ -694,28 +708,41 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<indexterm><primary>data window views</primary><secondary>size window</secondary></indexterm>
 
 				<para>
-					This view posts the number of events received from a stream or view. The synopsis is:
+					This view posts the number of events received from a stream or view plus any additional event properties or expression values listed as parameters. The synopsis is:
 				</para>
 
-				<synopsis>std:size()</synopsis>
+				<synopsis>std:size([<emphasis>expression</emphasis>, ...])</synopsis>
 
 				<para>					
 					The view posts a single long-typed property named <literal>size</literal>. The view posts the prior size as old data, and the current size as new data to update listeners of the view. Via the <literal>iterator</literal> method of the statement the size value can also be polled (read).
 				</para>
+				
+				<para>
+					As optional parameters the view takes a list of expressions that the view evaluates against the last arriving event and provides along the <literal>size</literal> field.
+				</para>
 
 				<para>					
-					This view provides only a single property named <literal>size</literal> and no other properties of your selected stream are available. Use the <literal>count(...)</literal> aggregation function to select other properties of your stream.
+					An alternative to receiving a data window event count is the <literal>prevcount</literal> function. Compared to the <literal>std:size</literal> view the <literal>prevcount</literal> function requires a data window while the <literal>std:size</literal> view does not. The related <literal>count(...)</literal> aggregation function provides a count per group when used with <literal>group by</literal>.
 				</para>
 
 				<para>
-					When combined with a data window view, the size view reports the current and prior number of events in the data window. This example reports the number of tick events within the last 1 minute:
+					When combined with a data window view, the size view reports the current number of events in the data window in the insert stream and the prior number of events in the data window as the remove stream. This example reports the number of tick events within the last 1 minute:
 				</para>
 				<programlisting><![CDATA[select size from StockTickEvent.win:time(1 min).std:size()]]></programlisting>
 
 				<para>
-					The size view is also useful in conjunction with a group-by view to count the number of events per group. The EPL below returns the number of events per symbol.
+					To select additional event properties you may add each event property to output as a parameter to the view. 
 				</para>
-				<programlisting><![CDATA[select size from StockTickEvent.std:groupby(symbol).std:size()]]></programlisting>
+
+				<para>
+					The next example selects the symbol and feed event properties in addition to the <literal>size</literal> property:
+				</para>
+				<programlisting><![CDATA[select size, symbol, feed from StockTickEvent.win:time(1 min).std:size(symbol, feed)]]></programlisting>
+
+				<para>
+					The size view is also useful in conjunction with a <literal>std:groupwin</literal> grouped-window view to count the number of events per group. The EPL below returns the number of events per symbol.
+				</para>
+				<programlisting><![CDATA[select size from StockTickEvent.std:groupwin(symbol).std:size()]]></programlisting>
 
 				<para>
 					When used without a data window, the view simply counts the number of events:
@@ -723,7 +750,7 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<programlisting><![CDATA[select size from StockTickEvent.std:size()]]></programlisting>
 
 				<para>
-					All views can be used with pattern statements as well. The next EPL snippet shows a pattern where we look for tick events followed by trade events for the same symbol. The size view counts the number of occurances of the pattern.
+					All views can be used with pattern statements as well. The next EPL snippet shows a pattern where we look for tick events followed by trade events for the same symbol. The size view counts the number of occurrences of the pattern.
 				</para>
 				<programlisting><![CDATA[select size from pattern[every s=StockTickEvent -> TradeEvent(symbol=s.symbol)].std:size()]]></programlisting>
 			</sect2>
@@ -815,6 +842,15 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
         <sect1 id="stat-views" >
            <title>Statistics views</title>
            
+           <para>
+			   The statistics views can be used combined with data window views or alone. Very similar to aggregation functions, these views aggregate or derive information from an event stream. As compared to aggregation functions,
+			   statistics views can post multiple derived fields including properties from the last event that was received. The derived fields and event properties are available for querying in the <literal>where</literal>-clause and are often compared to prior values using the <literal>prior</literal> function.
+           </para>
+           
+           <para>
+			   Statistics views accept one or more primary value expressions and any number of optional additional expressions that return values based on the last event received.
+           </para>
+           
 			<sect2 id="view-stat-uni" >
 			   <title>Univariate statistics (<literal>stat:uni</literal>)</title>
 		
@@ -823,9 +859,13 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<indexterm><primary>derived-value views</primary><secondary>univariate statistics</secondary></indexterm>
 
 				<para>
-					This view calculates univariate statistics on a numeric expression. The view takes a single expression as a parameter. The expression must return a numeric value:
+					This view calculates univariate statistics on a numeric expression. The view takes a single value expression as a parameter plus any number of optional additional expressions to return properties of the last event. The value expression must return a numeric value:
 				</para>
-				<synopsis>stat:uni(<emphasis>value_expression</emphasis>)</synopsis>
+				<synopsis>stat:uni(<emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
+				
+				<para>
+					After the value expression you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+				</para>
 				
 				<table frame="topbot" id="view-stat-uni-table" revision="2">
 					<title>Univariate statistics derived properties</title>
@@ -870,8 +910,16 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<para>
 					The below example selects the standard deviation on price for stock tick events for the last 10 events.
 				</para>
-	
 				<programlisting><![CDATA[select stddev from StockTickEvent.win:length(10).stat:uni(price)]]></programlisting>
+
+				<para>
+					To add properties from the event stream you may simply add all additional properties as parameters to the view.
+				</para>
+
+				<para>
+					This example selects all of the derived values, based on the price property, plus the values of the symbol and feed event properties:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.win:length(10).stat:uni(price, symbol, feed)]]></programlisting>
 			</sect2>
 
 			<sect2 id="view-stat-linest" >
@@ -881,10 +929,14 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<indexterm><primary>views</primary><secondary>regression</secondary></indexterm>
 				<indexterm><primary>derived-value views</primary><secondary>regression</secondary></indexterm>
 				<para>
-					This view calculates regression and related intermediate results on the values returned by two expressions. The view takes two expressions as parameters. The expressions must return a numeric value:
+					This view calculates regression and related intermediate results on the values returned by two expressions. The view takes two value expressions as parameters plus any number of optional additional expressions to return properties of the last event. The value expressions must return a numeric value:
 				</para>
 				
-				<synopsis>stat:linest(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis>)</synopsis>
+				<synopsis>stat:linest(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
+
+				<para>
+					After the two value expressions you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+				</para>
 
 				<table frame="topbot" id="view-stat-linest-table" revision="2">
 					<title>Regression derived properties</title>
@@ -979,10 +1031,19 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				</table>
 				
 				<para>
-					Calculate regression and return the slope and y-intercept on price and offer for all events in the last 10 seconds.
+					The next example calculates regression and returns the slope and y-intercept on price and offer for all events in the last 10 seconds.
 				</para>
-	
 				<programlisting><![CDATA[select slope, YIntercept from StockTickEvent.win:time(10 seconds).stat:linest(price, offer)]]></programlisting>	
+				
+				<para>
+					To add properties from the event stream you may simply add all additional properties as parameters to the view.
+				</para>
+
+				<para>
+					This example selects all of the derived values, based on the price and offer properties, plus the values of the symbol and feed event properties:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.win:time(10 seconds).stat:linest(price, offer, symbol, feed)]]></programlisting>
+
 			</sect2>
 				
 			<sect2 id="view-stat-correl" >
@@ -993,11 +1054,15 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<indexterm><primary>derived-value views</primary><secondary>correlation</secondary></indexterm>
 
 				<para>
-					This view calculates the correlation value on the value returned by two expressions. The view takes two expressions as parameters. The expressions must be return a numeric value:
+					This view calculates the correlation value on the value returned by two expressions. The view takes two value expressions as parameters plus any number of optional additional expressions to return properties of the last event. The value expressions must be return a numeric value:
 				</para>
 				
-				<synopsis>stat:correl(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis>)</synopsis>
+				<synopsis>stat:correl(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
 				
+				<para>
+					After the two value expressions you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+				</para>
+
 				<table frame="topbot" id="view-stat-correl-table" revision="2">
 					<title>Correlation derived properties</title>
 					<tgroup cols="2">
@@ -1019,10 +1084,19 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				</table>
 	
 				<para>
-					Calculate correlation on price and offer over all stock tick events for GE.
+					The next example calculates correlation on price and offer over all stock tick events for GE:
 				</para>
-	
 				<programlisting><![CDATA[select correlation from StockTickEvent(symbol='GE').stat:correl(price, offer)]]></programlisting>            
+				
+				<para>
+					To add properties from the event stream you may simply add all additional properties as parameters to the view.
+				</para>
+
+				<para>
+					This example selects all of the derived values, based on the price and offer property, plus the values of the feed event property:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent(symbol='GE').stat:correl(price, offer, feed)]]></programlisting>            
+
 			</sect2>
 						
 			<sect2 id="view-stat-weightedavg" >
@@ -1033,10 +1107,14 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				<indexterm><primary>derived-value views</primary><secondary>weighted average</secondary></indexterm>
 
 				<para>
-					This view returns the weighted average given an expression returning values to compute the average for and an expression returning weight. The view takes two expressions as parameters. The expressions must return numeric values:
+					This view returns the weighted average given an expression returning values to compute the average for and an expression returning weight. The view takes two value expressions as parameters plus any number of optional additional expressions to return properties of the last event. The value expressions must return numeric values:
 				</para>				
-				<synopsis>stat:weighted_avg(<emphasis>value_expression_field</emphasis>, <emphasis>value_expression_weight</emphasis>)</synopsis>
+				<synopsis>stat:weighted_avg(<emphasis>value_expression_field</emphasis>, <emphasis>value_expression_weight</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
 				
+				<para>
+					After the value expression you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+				</para>
+
 				<table frame="topbot" id="view-stat-weightedavg-table" revision="2">
 					<title>Weighted average derived properties</title>
 					<tgroup cols="2">
@@ -1058,17 +1136,31 @@ select * from Market.std:groupby(ticker).win:length(1000000).std:merge(ticker)
 				</table>
 	
 				<para>
-					A statement that derives the volume-weighted average price for the last 3 seconds:
+					A statement that derives the volume-weighted average price for the last 3 seconds is shown below:
 				</para>
 	
 				<programlisting><![CDATA[select average 
 from StockTickEvent(symbol='GE').win:time(3 seconds).stat:weighted_avg(price, volume)]]></programlisting>            
+
+				<para>
+					To add properties from the event stream you may simply add all additional properties as parameters to the view.
+				</para>
+
+				<para>
+					This example selects all of the derived values, based on the price and volume properties, plus the values of the symbol and feed event properties:
+				</para>
+				<programlisting><![CDATA[select *
+from StockTickEvent.win:time(3 seconds).stat:weighted_avg(price, volume, symbol, feed)]]></programlisting>
 			</sect2> 
 			
 		</sect1>
 
         <sect1 id="ext-views" >
            <title>Extension View Set</title>
+           
+           <para>
+			   The views in this set are data windows that order events according to a criteria.
+           </para>
 
 			<sect2 id="view-ext-sort" >
 			   <title>Sorted Window View (<literal>ext:sort</literal>)</title>

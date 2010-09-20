@@ -8,19 +8,22 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.JavaClassHelper;
+
+import java.util.Map;
 
 /**
  * Represents a NOT expression in an expression tree.
  */
-public class ExprNotNode extends ExprNode
+public class ExprNotNode extends ExprNode implements ExprEvaluator
 {
+    private transient ExprEvaluator evaluator;
     private static final long serialVersionUID = -5958420226808323787L;
 
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
@@ -31,16 +34,26 @@ public class ExprNotNode extends ExprNode
             throw new ExprValidationException("The NOT node requires exactly 1 child node");
         }
 
-        Class childType = this.getChildNodes().get(0).getType();
+        evaluator = this.getChildNodes().get(0).getExprEvaluator();
+        Class childType = evaluator.getType();
         if (!JavaClassHelper.isBoolean(childType))
         {
             throw new ExprValidationException("Incorrect use of NOT clause, sub-expressions do not return boolean");
         }
     }
 
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
     public Class getType()
     {
         return Boolean.class;
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     public boolean isConstantResult()
@@ -50,7 +63,7 @@ public class ExprNotNode extends ExprNode
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Boolean evaluated = (Boolean) this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Boolean evaluated = (Boolean) evaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (evaluated == null)
         {
             return null;

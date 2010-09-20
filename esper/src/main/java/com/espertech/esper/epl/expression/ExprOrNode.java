@@ -16,17 +16,27 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 
+import java.util.Map;
+
 /**
  * Represents an OR expression in a filter expression tree.
  */
-public class ExprOrNode extends ExprNode
+public class ExprOrNode extends ExprNode implements ExprEvaluator
 {
+    private transient ExprEvaluator[] evaluators;
     private static final long serialVersionUID = -1079540621551505814L;
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
 
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
+        evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
+
         // Sub-nodes must be returning boolean
-        for (ExprNode child : this.getChildNodes())
+        for (ExprEvaluator child : evaluators)
         {
             Class childType = child.getType();
             if (!JavaClassHelper.isBoolean(childType))
@@ -51,10 +61,14 @@ public class ExprOrNode extends ExprNode
         return false;
     }
 
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         // At least one child must evaluate to true
-        for (ExprNode child : this.getChildNodes())
+        for (ExprEvaluator child : evaluators)
         {
             Boolean evaluated = (Boolean) child.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
             if (evaluated == null)

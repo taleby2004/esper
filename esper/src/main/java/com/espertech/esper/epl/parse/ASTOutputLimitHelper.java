@@ -82,7 +82,7 @@ public class ASTOutputLimitHelper
             whenExpression = astExprNodeMap.remove(expressionNode);
             if (node.getChildCount() > count+1)
             {
-                thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(node.getChild(1), astExprNodeMap);
+                thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(node.getChild(node.getChildCount() - 1), astExprNodeMap);
             }
         }
         else if (node.getType() == EsperEPL2GrammarParser.CRONTAB_LIMIT_EXPR)
@@ -114,7 +114,7 @@ public class ASTOutputLimitHelper
                 ExprNode expression = astExprNodeMap.remove(child);
 
                 try {
-                    timePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI), null, null, timeProvider, variableService, exprEvaluatorContext);
+                    timePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext);
                 }
                 catch (ExprValidationException ex)
                 {
@@ -138,7 +138,7 @@ public class ASTOutputLimitHelper
                 if (expression != null)
                 {
                     try {
-                        afterTimePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI), null, null, timeProvider, variableService, exprEvaluatorContext);
+                        afterTimePeriodExpr = (ExprTimePeriod) expression.getValidatedSubtree(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext);
                     }
                     catch (ExprValidationException ex)
                     {

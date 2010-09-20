@@ -9,17 +9,20 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
 import com.espertech.esper.epl.agg.AggregationResultFuture;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Map;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Base expression node that represents an aggregation function such as 'sum' or 'count'.
@@ -32,11 +35,11 @@ import java.util.LinkedList;
  * Concrete subclasses must supply an aggregation state prototype node {@link AggregationMethod} that reflects
  * each group's (there may be group-by critera) current aggregation state.
  */
-public abstract class ExprAggregateNode extends ExprNode
+public abstract class ExprAggregateNode extends ExprNode implements ExprEvaluator
 {
 	private AggregationResultFuture aggregationResultFuture;
 	private int column;
-    private AggregationMethod aggregationMethod;
+    private AggregationMethodFactory aggregationMethodFactory;
 
     /**
      * Indicator for whether the aggregation is distinct - i.e. only unique values are considered.
@@ -62,10 +65,10 @@ public abstract class ExprAggregateNode extends ExprNode
      * @param streamTypeService is the types per stream
      * @param methodResolutionService used for resolving method and function names
      * @param exprEvaluatorContext context for expression evaluation
-     * @return aggregation function use
+     * @return aggregation function factory to use
      * @throws ExprValidationException when expression validation failed
      */
-    protected abstract AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext)
+    protected abstract AggregationMethodFactory validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext)
         throws ExprValidationException;
 
     /**
@@ -77,47 +80,46 @@ public abstract class ExprAggregateNode extends ExprNode
         isDistinct = distinct;
     }
 
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
     public boolean isConstantResult()
     {
         return false;
     }
 
+    @Override
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+    
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
-        this.aggregationMethod = validateAggregationChild(streamTypeService, methodResolutionService, exprEvaluatorContext);
-
-        Class childType = null;
-        if (this.getChildNodes().size() > 0)
-        {
-            childType = this.getChildNodes().get(0).getType();
-        }
-
-        if (isDistinct)
-        {
-            aggregationMethod = methodResolutionService.makeDistinctAggregator(aggregationMethod, childType);
-        }
+        aggregationMethodFactory = validateAggregationChild(streamTypeService, methodResolutionService, exprEvaluatorContext);
     }
 
     public Class getType()
     {
-        if (aggregationMethod == null)
+        if (aggregationMethodFactory == null)
         {
             throw new IllegalStateException("Aggregation method has not been set");
         }
-        return aggregationMethod.getValueType();
+        return aggregationMethodFactory.getResultType();
     }
 
     /**
-     * Returns the aggregation state prototype for use in grouping aggregation states per group-by keys.
+     * Returns the aggregation state factory for use in grouping aggregation states per group-by keys.
      * @return prototype aggregation state as a factory for aggregation states per group-by key value
      */
-    public AggregationMethod getPrototypeAggregator()
+    public AggregationMethodFactory getFactory()
     {
-        if (aggregationMethod == null)
+        if (aggregationMethodFactory == null)
         {
             throw new IllegalStateException("Aggregation method has not been set");
         }
-        return aggregationMethod;
+        return aggregationMethodFactory;
     }
 
     /**
@@ -148,6 +150,14 @@ public abstract class ExprAggregateNode extends ExprNode
         // Map to hold per level of the node (1 to N depth) of expression node a list of aggregation expr nodes, if any
         // exist at that level
         TreeMap<Integer, List<ExprAggregateNode>> aggregateExprPerLevel = new TreeMap<Integer, List<ExprAggregateNode>>();
+
+        if (topNode instanceof ExprNodeInnerNodeProvider) {
+            ExprNodeInnerNodeProvider parameterized = (ExprNodeInnerNodeProvider) topNode;
+            List<ExprNode> additionalNodes = parameterized.getAdditionalNodes();
+            for (ExprNode additionalNode : additionalNodes) {
+                recursiveAggregateEnter(additionalNode, aggregateExprPerLevel, 1);
+            }
+        }
 
         // Recursively enter all aggregate functions and their level into map
         recursiveAggregateEnter(topNode, aggregateExprPerLevel, 1);
@@ -203,6 +213,14 @@ public abstract class ExprAggregateNode extends ExprNode
         // ask all child nodes to enter themselves
         for (ExprNode node : currentNode.getChildNodes())
         {
+            // handle expression nodes in which have additional expression nodes as part of their parameterization and not as child nodes
+            if (node instanceof ExprNodeInnerNodeProvider) {
+                ExprNodeInnerNodeProvider parameterized = (ExprNodeInnerNodeProvider) node;
+                List<ExprNode> additionalNodes = parameterized.getAdditionalNodes();
+                for (ExprNode additionalNode : additionalNodes) {
+                    recursiveAggregateEnter(additionalNode, aggregateExprPerLevel, currentLevel + 1);
+                }
+            }
             recursiveAggregateEnter(node, aggregateExprPerLevel, currentLevel + 1);
         }
 
@@ -237,7 +255,7 @@ public abstract class ExprAggregateNode extends ExprNode
         }
 
         ExprNode child = this.getChildNodes().get(0);
-        Class childType = child.getType();
+        Class childType = child.getExprEvaluator().getType();
         if (!JavaClassHelper.isNumeric(childType))
         {
             throw new ExprValidationException("Implicit conversion from datatype '" +
@@ -252,7 +270,7 @@ public abstract class ExprAggregateNode extends ExprNode
      * Renders the aggregation function expression.
      * @return expression string is the textual rendering of the aggregation function and it's sub-expression
      */
-    public final String toExpressionString()
+    public String toExpressionString()
     {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getAggregationFunctionName());

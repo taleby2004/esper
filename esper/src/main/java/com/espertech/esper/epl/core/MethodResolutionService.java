@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.agg.AggregationAccess;
 import com.espertech.esper.type.MinMaxTypeEnum;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.agg.AggregationMethod;
@@ -75,6 +77,15 @@ public interface MethodResolutionService
     public AggregationSupport resolveAggregation(String functionName) throws EngineImportUndefinedException, EngineImportException;
 
     /**
+     * Used at statement compile-time to try and resolve a given function name into an
+     * single-row function. Matches function name case-neutral.
+     * @param functionName is the function name
+     * @throws EngineImportUndefinedException if the function is not a configured single-row function
+     * @throws EngineImportException if the function providing class could not be loaded or doesn't match
+     */
+    public Pair<Class, String> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException;
+
+    /**
      * Makes a new plug-in aggregation instance by name.
      * @param name is the plug-in aggregation function name
      * @return new instance of plug-in aggregation method
@@ -93,14 +104,14 @@ public interface MethodResolutionService
      * @param type of value
      * @return aggregator
      */
-    public AggregationMethod makeFirstValueAggregator(Class type);
+    public AggregationMethod makeFirstEverValueAggregator(Class type);
 
     /**
      * Makes a new last-value aggregator.
      * @param type of value
      * @return aggregator
      */
-    public AggregationMethod makeLastValueAggregator(Class type);
+    public AggregationMethod makeLastEverValueAggregator(Class type);
 
     /**
      * Makes a new sum-aggregator.
@@ -108,6 +119,8 @@ public interface MethodResolutionService
      * @return aggregator
      */
     public AggregationMethod makeSumAggregator(Class type);
+
+    public Class getSumAggregatorType(Class inputValueType);
 
     /**
      * Makes a new distinct-value-aggregator.
@@ -123,6 +136,7 @@ public interface MethodResolutionService
      * @return aggregator
      */
     public AggregationMethod makeAvgAggregator(Class type);
+    public Class getAvgAggregatorType(Class childType);
 
     /**
      * Makes a new avedev-aggregator.
@@ -203,5 +217,7 @@ public interface MethodResolutionService
      * @param aggregators aggregators
      * @return row count
      */
-    public long getCurrentRowCount(AggregationMethod[] aggregators);
+    public long getCurrentRowCount(AggregationMethod[] aggregators, AggregationAccess[] accesses);
+
+    public AggregationAccess makeAccessStreamId(boolean isJoin, int streamId, MultiKeyUntyped mk);
 }

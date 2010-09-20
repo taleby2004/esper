@@ -1,10 +1,9 @@
 package com.espertech.esper.view.internal;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.view.internal.PriorEventBufferSingle;
+import junit.framework.TestCase;
 
 public class TestPriorEventBufferSingle extends TestCase
 {
@@ -43,15 +42,11 @@ public class TestPriorEventBufferSingle extends TestCase
         assertEvents3And4();
 
         buffer.update(null, new EventBean[] {events[1], events[3]});
-        tryInvalid(events[0], 0);
         assertNull(buffer.getRelativeToEvent(events[1], 0));
         assertEvents2();
         assertEvents3And4();
 
         buffer.update(new EventBean[] {events[5]}, null);
-        tryInvalid(events[0], 0);
-        tryInvalid(events[1], 0);
-        tryInvalid(events[3], 0);
         assertEvents2();
         assertEquals(events[1], buffer.getRelativeToEvent(events[4], 0));
         assertEquals(events[2], buffer.getRelativeToEvent(events[5], 0));

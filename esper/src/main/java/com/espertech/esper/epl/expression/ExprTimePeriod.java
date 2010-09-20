@@ -12,13 +12,14 @@ import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * Expression representing a time period.
  * <p>
  * Child nodes to this expression carry the actual parts and must return a numeric value.
  */
-public class ExprTimePeriod extends ExprNode
+public class ExprTimePeriod extends ExprNode implements ExprEvaluator
 {
     private static final Log log = LogFactory.getLog(ExprTimePeriod.class);
 
@@ -28,6 +29,7 @@ public class ExprTimePeriod extends ExprNode
     private final boolean hasSecond;
     private final boolean hasMillisecond;
     private boolean hasVariable;
+    private transient ExprEvaluator[] evaluators;
     private static final long serialVersionUID = -7229827032500659319L;
 
     /**
@@ -45,6 +47,11 @@ public class ExprTimePeriod extends ExprNode
         this.hasMinute = hasMinute;
         this.hasSecond = hasSecond;
         this.hasMillisecond = hasMillisecond;
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
     }
 
     /**
@@ -103,10 +110,15 @@ public class ExprTimePeriod extends ExprNode
 
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
+        evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
         for (ExprNode childNode : this.getChildNodes())
         {
             validate(childNode);
         }
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     private void validate(ExprNode expression) throws ExprValidationException
@@ -115,7 +127,7 @@ public class ExprTimePeriod extends ExprNode
         {
             return;
         }
-        Class returnType = expression.getType();
+        Class returnType = expression.getExprEvaluator().getType();
         if (!JavaClassHelper.isNumeric(returnType))
         {
             throw new ExprValidationException("Time period expression requires a numeric parameter type");
@@ -133,45 +145,54 @@ public class ExprTimePeriod extends ExprNode
 
         if (hasDay)
         {
-            Double result = eval(this.getChildNodes().get(exprCtr++), eventsPerStream, exprEvaluatorContext);
+            Double result = eval(evaluators[exprCtr], eventsPerStream, exprEvaluatorContext);
             if (result == null)
             {
+                logWarn(exprCtr);
                 return null;
             }
+            exprCtr++;
             seconds += result * 24 * 60 * 60;
         }
         if (hasHour)
         {
-            Double result = eval(this.getChildNodes().get(exprCtr++), eventsPerStream, exprEvaluatorContext);
+            Double result = eval(evaluators[exprCtr], eventsPerStream, exprEvaluatorContext);
             if (result == null)
             {
+                logWarn(exprCtr);
                 return null;
             }
+            exprCtr++;
             seconds += result * 60 * 60;
         }
         if (hasMinute)
         {
-            Double result = eval(this.getChildNodes().get(exprCtr++), eventsPerStream, exprEvaluatorContext);
+            Double result = eval(evaluators[exprCtr], eventsPerStream, exprEvaluatorContext);
             if (result == null)
             {
+                logWarn(exprCtr);
                 return null;
             }
+            exprCtr++;
             seconds += result * 60;
         }
         if (hasSecond)
         {
-            Double result = eval(this.getChildNodes().get(exprCtr++), eventsPerStream, exprEvaluatorContext);
+            Double result = eval(evaluators[exprCtr], eventsPerStream, exprEvaluatorContext);
             if (result == null)
             {
+                logWarn(exprCtr);
                 return null;
             }
+            exprCtr++;
             seconds += result;
         }
         if (hasMillisecond)
         {
-            Double result = eval(this.getChildNodes().get(exprCtr), eventsPerStream, exprEvaluatorContext);
+            Double result = eval(evaluators[exprCtr], eventsPerStream, exprEvaluatorContext);
             if (result == null)
             {
+                logWarn(exprCtr);
                 return null;
             }
             if (result != 0)
@@ -180,6 +201,11 @@ public class ExprTimePeriod extends ExprNode
             }
         }
         return seconds;
+    }
+
+    private void logWarn(int ctr)
+    {
+        log.warn("Time period expression returned a null value for expression '" + this.getChildNodes().get(ctr).toExpressionString() + "'");
     }
 
     public Class getType()
@@ -258,12 +284,11 @@ public class ExprTimePeriod extends ExprNode
         return (hasMillisecond == other.hasMillisecond);
     }
 
-    private Double eval(ExprNode expr, EventBean[] events, ExprEvaluatorContext exprEvaluatorContext)
+    private Double eval(ExprEvaluator expr, EventBean[] events, ExprEvaluatorContext exprEvaluatorContext)
     {
         Object value = expr.evaluate(events, true, exprEvaluatorContext);
         if (value == null)
         {
-            log.warn("Time period expression returned a null value for expression '" + expr.toExpressionString() + "'");
             return null;
         }
         if (value instanceof BigDecimal)

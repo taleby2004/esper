@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.List;
@@ -56,9 +57,10 @@ public interface PatternStateFactory
      * @param evalMatchUntilNode is the factory node
      * @param beginState is the begin state
      * @param stateObjectId is the state node's object id
+     * @param convertor converts between match-event map and events-per-stream
      * @return state node
      */
-    public EvalStateNode makeMatchUntilState(Evaluator parentNode, EvalMatchUntilNode evalMatchUntilNode, MatchedEventMap beginState, Object stateObjectId);
+    public EvalStateNode makeMatchUntilState(Evaluator parentNode, EvalMatchUntilNode evalMatchUntilNode, MatchedEventMap beginState, Object stateObjectId, MatchedEventConvertor convertor);
 
     /**
      * Makes a followed-by state node.
@@ -131,7 +133,7 @@ public interface PatternStateFactory
      * @param expressions distinct-value expressions 
      * @return state node
      */
-    public EvalStateNode makeEveryDistinctStateNode(Evaluator parentNode, EvalEveryDistinctNode evalEveryNode, MatchedEventMap beginState, PatternContext context, Object stateNodeId, List<ExprNode> expressions, MatchedEventConvertor convertor);
+    public EvalStateNode makeEveryDistinctStateNode(Evaluator parentNode, EvalEveryDistinctNode evalEveryNode, MatchedEventMap beginState, PatternContext context, Object stateNodeId, ExprEvaluator[] expressions, MatchedEventConvertor convertor);
 
     /**
      * Makes an or-state node.

@@ -14,7 +14,7 @@ public class SupportStreamTypeSvc3Stream implements StreamTypeService
 
     public SupportStreamTypeSvc3Stream()
     {
-        impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), new boolean[10], "default");
+        impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), new boolean[10], "default", false);
     }
 
     public PropertyResolutionDescriptor resolveByPropertyName(String propertyName) throws DuplicatePropertyException, PropertyNotFoundException
@@ -63,5 +63,14 @@ public class SupportStreamTypeSvc3Stream implements StreamTypeService
     public boolean[] getIStreamOnly()
     {
         return new boolean[10]; 
+    }
+
+    public int getStreamNumForStreamName(String streamName)
+    {
+        return impl.getStreamNumForStreamName(streamName);
+    }
+
+    public boolean isOnDemandStreams() {
+        return impl.isOnDemandStreams();
     }
 }

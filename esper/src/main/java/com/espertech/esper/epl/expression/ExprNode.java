@@ -8,23 +8,26 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.util.MetaDefItem;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.MetaDefItem;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Superclass for filter nodes in a filter expression tree. Allow
  * validation against stream event types and evaluation of events against filter tree.
  */
-public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefItem, Serializable
+public abstract class ExprNode implements ExprValidator, MetaDefItem, Serializable
 {
     private static final long serialVersionUID = 0L;
 
@@ -135,13 +138,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             }
         }
 
-        String methodName = staticMethodNode.getMethodName();
-        ExprStreamInstanceMethodNode exprStream = new ExprStreamInstanceMethodNode(streamName, methodName);
-        for (ExprNode childNode : staticMethodNode.getChildNodes())
-        {
-            exprStream.addChildNode(childNode);
-        }
-
+        ExprStreamInstanceMethodNode exprStream = new ExprStreamInstanceMethodNode(streamName, staticMethodNode.getChainSpec());
         try
         {
             exprStream.validate(streamTypeService, methodResolutionService, null, null, null, exprEvaluatorContext);
@@ -161,7 +158,7 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
     private ExprNode resolveAsStreamName(ExprIdentNode identNode, StreamTypeService streamTypeService, ExprValidationException existingException, ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
-        ExprStreamUnderlyingNode exprStream = new ExprStreamUnderlyingNode(identNode.getUnresolvedPropertyName());
+        ExprStreamUnderlyingNode exprStream = new ExprStreamUnderlyingNode(identNode.getUnresolvedPropertyName(), false);
 
         try
         {
@@ -297,8 +294,9 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
         // If there is a class name, assume a static method is possible
         if (parse.getClassName() != null)
         {
-            ExprNode result = new ExprStaticMethodNode(parse.getClassName(), parse.getMethodName(), methodResolutionService.isUdfCache());
-            result.addChildNode(new ExprConstantNode(parse.getArgString()));
+            List<ExprNode> parameters = Collections.singletonList((ExprNode) new ExprConstantNode(parse.getArgString()));
+            List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(parse.getMethodName(), parameters));
+            ExprNode result = new ExprStaticMethodNode(parse.getClassName(), chain, methodResolutionService.isUdfCache());
 
             // Validate
             try
@@ -311,6 +309,36 @@ public abstract class ExprNode implements ExprValidator, ExprEvaluator, MetaDefI
             }
 
             return result;
+        }
+
+        // There is no class name, try a single-row function
+        String functionName = parse.getMethodName();
+        try
+        {
+            Pair<Class, String> classMethodPair = methodResolutionService.resolveSingleRow(functionName);
+            List<ExprNode> params = Collections.singletonList((ExprNode) new ExprConstantNode(parse.getArgString()));
+            List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(classMethodPair.getSecond(), params));
+            ExprNode result = new ExprPlugInSingleRowNode(functionName, classMethodPair.getFirst(), chain, false);
+
+            // Validate
+            try
+            {
+                result.validate(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext);
+            }
+            catch (RuntimeException e)
+            {
+                throw new ExprValidationException("Plug-in aggregation function '" + parse.getMethodName() + "' failed validation: " + e.getMessage());
+            }
+
+            return result;
+        }
+        catch (EngineImportUndefinedException e)
+        {
+            // Not an single-row function
+        }
+        catch (EngineImportException e)
+        {
+            throw new IllegalStateException("Error resolving single-row function: " + e.getMessage(), e);
         }
 
         // There is no class name, try an aggregation function

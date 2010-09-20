@@ -26,6 +26,23 @@ public class TestPriorFunction extends TestCase
         epService.initialize();
     }
 
+    public void testPriorTimewindowStats() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+
+        String epl = "SELECT prior(1, average) as value FROM SupportBean().win:time(5 minutes).stat:uni(intPrimitive)";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("value"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 4));
+        assertEquals(1.0, listener.assertOneGetNewAndReset().get("value"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
+        assertEquals(2.5, listener.assertOneGetNewAndReset().get("value"));
+    }
+
     public void testPriorStream()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("S0", SupportBean_S0.class);
@@ -470,7 +487,7 @@ public class TestPriorFunction extends TestCase
         tryPriorSortWindow(viewExpr);
     }
 
-    public void testPreviousTimeBatchWindowJoin()
+    public void testPriorTimeBatchWindowJoin()
     {
         String viewExpr = "select string as currSymbol, " +
                           "prior(2, symbol) as priorSymbol, " +

@@ -8,7 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 
@@ -28,10 +30,10 @@ public class ExprStddevNode extends ExprAggregateNode
         super(distinct);
     }
 
-    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public AggregationMethodFactory validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
-        super.validateSingleNumericChild(streamTypeService);
-        return methodResolutionService.makeStddevAggregator();
+        Class childType = super.validateSingleNumericChild(streamTypeService);
+        return new ExprStddevNodeFactory(super.isDistinct, childType);
     }
 
     public final boolean equalsNodeAggregate(ExprAggregateNode node)
@@ -43,7 +45,6 @@ public class ExprStddevNode extends ExprAggregateNode
 
         return true;
     }
-
 
     protected String getAggregationFunctionName()
     {

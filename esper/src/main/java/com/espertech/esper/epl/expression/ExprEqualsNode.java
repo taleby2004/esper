@@ -19,16 +19,21 @@ import com.espertech.esper.util.SimpleNumberCoercer;
 import com.espertech.esper.util.SimpleNumberCoercerFactory;
 import com.espertech.esper.util.CoercionException;
 
+import java.util.Map;
+
 /**
  * Represents an equals (=) comparator in a filter expressiun tree.
  */
-public class ExprEqualsNode extends ExprNode
+public class ExprEqualsNode extends ExprNode implements ExprEvaluator
 {
     private final boolean isNotEquals;
 
     private boolean mustCoerce;
-    private SimpleNumberCoercer numberCoercerLHS;
-    private SimpleNumberCoercer numberCoercerRHS;
+
+    private transient SimpleNumberCoercer numberCoercerLHS;
+    private transient SimpleNumberCoercer numberCoercerRHS;
+    private transient ExprEvaluator[] evaluators;
+
     private static final long serialVersionUID = 5504809379222369952L;
 
     /**
@@ -38,6 +43,11 @@ public class ExprEqualsNode extends ExprNode
     public ExprEqualsNode(boolean isNotEquals)
     {
         this.isNotEquals = isNotEquals;
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
     }
 
     /**
@@ -56,10 +66,11 @@ public class ExprEqualsNode extends ExprNode
         {
             throw new IllegalStateException("Equals node does not have exactly 2 child nodes");
         }
+        evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
 
         // Must be the same boxed type returned by expressions under this
-        Class typeOne = JavaClassHelper.getBoxedType(this.getChildNodes().get(0).getType());
-        Class typeTwo = JavaClassHelper.getBoxedType(this.getChildNodes().get(1).getType());
+        Class typeOne = JavaClassHelper.getBoxedType(evaluators[0].getType());
+        Class typeTwo = JavaClassHelper.getBoxedType(evaluators[1].getType());
 
         // Null constants can be compared for any type
         if ((typeOne == null) || (typeTwo == null))
@@ -98,7 +109,7 @@ public class ExprEqualsNode extends ExprNode
         {
             if (!JavaClassHelper.isNumeric(coercionType))
             {
-                throw new IllegalStateException("Coercion type " + coercionType + " not numeric");
+                throw new ExprValidationException("Cannot convert datatype '" + coercionType.getName() + "' to a numeric value");
             }
             mustCoerce = true;
             numberCoercerLHS = SimpleNumberCoercerFactory.getCoercer(typeOne, coercionType);
@@ -116,10 +127,14 @@ public class ExprEqualsNode extends ExprNode
         return Boolean.class;
     }
 
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object leftResult = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-        Object rightResult = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object leftResult = evaluators[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object rightResult = evaluators[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
 
         if (leftResult == null)
         {

@@ -11,6 +11,8 @@ package com.espertech.esper.client;
 import com.espertech.esper.client.soda.StreamSelector;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides access to engine configuration defaults for modification.
@@ -27,6 +29,7 @@ public class ConfigurationEngineDefaults implements Serializable
     private Language language;
     private Expression expression;
     private Execution execution;
+    private ExceptionHandling exceptionHandling;
     private ConfigurationMetricsReporting metricsReporting;
     private AlternativeContext alternativeContext;
     private static final long serialVersionUID = -528835191586154300L;
@@ -47,6 +50,7 @@ public class ConfigurationEngineDefaults implements Serializable
         language = new Language();
         expression = new Expression();
         execution = new Execution();
+        exceptionHandling = new ExceptionHandling();
         alternativeContext = new AlternativeContext();
     }
 
@@ -166,6 +170,14 @@ public class ConfigurationEngineDefaults implements Serializable
     public void setAlternativeContext(AlternativeContext alternativeContext)
     {
         this.alternativeContext = alternativeContext;
+    }
+
+    public ExceptionHandling getExceptionHandling() {
+        return exceptionHandling;
+    }
+
+    public void setExceptionHandling(ExceptionHandling exceptionHandling) {
+        this.exceptionHandling = exceptionHandling;
     }
 
     /**
@@ -997,6 +1009,7 @@ public class ConfigurationEngineDefaults implements Serializable
         private boolean udfCache;
         private boolean selfSubselectPreeval;
         private boolean extendedAggregation;
+        private boolean duckTyping;
 
         /**
          * Ctor.
@@ -1118,6 +1131,16 @@ public class ConfigurationEngineDefaults implements Serializable
         {
             this.extendedAggregation = extendedAggregation;
         }
+
+        public boolean isDuckTyping()
+        {
+            return duckTyping;
+        }
+
+        public void setDuckTyping(boolean duckTyping)
+        {
+            this.duckTyping = duckTyping;
+        }
     }
 
     /**
@@ -1216,6 +1239,25 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setAdmin(String admin)
         {
             this.admin = admin;
+        }
+    }
+
+    public static class ExceptionHandling implements Serializable {
+        private List<String> handlerFactories;
+
+        public List<String> getHandlerFactories() {
+            return handlerFactories;
+        }
+
+        public void addClass(String exceptionHandlerFactoryClassName) {
+            if (handlerFactories == null) {
+                handlerFactories = new ArrayList<String>();
+            }
+            handlerFactories.add(exceptionHandlerFactoryClassName);
+        }
+
+        public void addClass(Class exceptionHandlerFactoryClass) {
+            addClass(exceptionHandlerFactoryClass.getName());
         }
     }
 }

@@ -91,10 +91,28 @@ public class PriorEventBufferSingle implements ViewUpdatedCollection, RelativeAc
         {
             if (!priorEventMap.containsKey(event))
             {
-                throw new IllegalStateException("Event not currently in collection, event=" + event);
+                return null;
             }
         }
         return priorEvent;
+    }
+
+    public EventBean getRelativeToEnd(EventBean event, int index)
+    {
+        // No requirement to index from end of current buffer
+        return null;
+    }
+
+    public Iterator<EventBean> getWindowToEvent(Object evalEvent)
+    {
+        // no requirement for window iterator support
+        return null;
+    }
+
+    public int getWindowToEventCount(EventBean evalEvent)
+    {
+        // no requirement for count support
+        return 0;
     }
 
     public void destroy()

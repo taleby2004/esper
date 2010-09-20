@@ -10,10 +10,12 @@ import com.espertech.esper.rowregex.RegexPartitionStateRandomAccessGetter;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 
+import java.util.Map;
+
 /**
  * Represents the 'prev' previous event function in match-recognize "define" item.
  */
-public class ExprPreviousMatchRecognizeNode extends ExprNode
+public class ExprPreviousMatchRecognizeNode extends ExprNode implements ExprEvaluator
 {
     private static final long serialVersionUID = 0L;
 
@@ -22,6 +24,7 @@ public class ExprPreviousMatchRecognizeNode extends ExprNode
     private Integer constantIndexNumber;
 
     private transient RegexPartitionStateRandomAccessGetter getter;
+    private transient ExprEvaluator evaluator;
     private int assignedIndex;
 
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
@@ -36,13 +39,13 @@ public class ExprPreviousMatchRecognizeNode extends ExprNode
             throw new ExprValidationException("Match-Recognize Previous expression requires an property identifier as the first parameter");
         }
 
-        if (!this.getChildNodes().get(1).isConstantResult() || (!JavaClassHelper.isNumericNonFP(this.getChildNodes().get(1).getType())))
+        if (!this.getChildNodes().get(1).isConstantResult() || (!JavaClassHelper.isNumericNonFP(this.getChildNodes().get(1).getExprEvaluator().getType())))
         {
             throw new ExprValidationException("Match-Recognize Previous expression requires an integer index parameter or expression as the second parameter");
         }
 
         ExprNode constantNode = this.getChildNodes().get(1);
-        Object value = constantNode.evaluate(null, false, exprEvaluatorContext);
+        Object value = constantNode.getExprEvaluator().evaluate(null, false, exprEvaluatorContext);
         if (!(value instanceof Number))
         {
             throw new ExprValidationException("Match-Recognize Previous expression requires an integer index parameter or expression as the second parameter");
@@ -52,7 +55,17 @@ public class ExprPreviousMatchRecognizeNode extends ExprNode
         // Determine stream number
         ExprIdentNode identNode = (ExprIdentNode) this.getChildNodes().get(0);
         streamNumber = identNode.getStreamId();
-        resultType = this.getChildNodes().get(0).getType();
+        evaluator = this.getChildNodes().get(0).getExprEvaluator();
+        resultType = evaluator.getType();
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     /**
@@ -64,7 +77,7 @@ public class ExprPreviousMatchRecognizeNode extends ExprNode
         if (constantIndexNumber == null)
         {
             ExprNode constantNode = this.getChildNodes().get(1);
-            Object value = constantNode.evaluate(null, false, null);
+            Object value = constantNode.getExprEvaluator().evaluate(null, false, null);
             constantIndexNumber = ((Number) value).intValue();            
         }
         return constantIndexNumber;
@@ -93,7 +106,7 @@ public class ExprPreviousMatchRecognizeNode extends ExprNode
         // Substitute original event with prior event, evaluate inner expression
         EventBean originalEvent = eventsPerStream[streamNumber];
         eventsPerStream[streamNumber] = substituteEvent;
-        Object evalResult = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object evalResult = evaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         eventsPerStream[streamNumber] = originalEvent;
 
         return evalResult;

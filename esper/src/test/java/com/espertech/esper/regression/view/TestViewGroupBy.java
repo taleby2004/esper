@@ -1,6 +1,8 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -38,9 +40,63 @@ public class TestViewGroupBy extends TestCase
         epService.initialize();
     }
 
+    public void testIhg() throws Exception {
+        String module = "create variable integer SUMMARY_OUTPUT_TIME=60;\n" +
+                "create variant schema GuestSummaryData as *;\n" +
+                "\n" +
+                "insert into GuestSummaryData\n" +
+                "select esbEvent.sourceIP as ipAddresses from \n" +
+                "EsbServiceRequestEvent.win:time_length_batch(100, SUMMARY_OUTPUT_TIME) as esbEvent, \n" +
+                "TransactionEvent.win:time_length_batch(100, SUMMARY_OUTPUT_TIME) as txnEvent where\n" +
+                "cast(txnEvent.transactionId, string)=esbEvent.transactionId and\n" +
+                "esbEvent.destination='todo';\n" +
+                "\n" +
+                "insert into SummaryData\n" +
+                "select *\n" +
+                "from GuestSummaryData.win:time_length_batch(100, SUMMARY_OUTPUT_TIME*2);\n" +
+                "\n" +
+                "@Name('DashboardApp-PersistableSummaryData')\n" +
+                "@Description('persist summary data')\n" +
+                "select *\n" +
+                "from SummaryData.win:time_length_batch(90, 2000);";
+        
+        Map<String, Object> defEsb = new HashMap<String, Object>();
+        defEsb.put("sourceIP", "string");
+        defEsb.put("transactionId", "string");
+        defEsb.put("destination", "string");
+        epService.getEPAdministrator().getConfiguration().addEventType("EsbServiceRequestEvent", defEsb);
+
+        Map<String, Object> defTxn = new HashMap<String, Object>();
+        defTxn.put("transactionId", "string");
+        epService.getEPAdministrator().getConfiguration().addEventType("TransactionEvent", defTxn);
+
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(module, null, null, null);
+    }
+
+    public void testReclaimAgedHint() {
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        String epl = "@Hint('reclaim_group_aged=5,reclaim_group_freq=1') " +
+                "select * from SupportBean.std:groupwin(string).win:keepall()";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+
+        int maxSlots = 10;
+        int maxEventsPerSlot = 1000;
+        for (int timeSlot = 0; timeSlot < maxSlots; timeSlot++) {
+            epService.getEPRuntime().sendEvent(new CurrentTimeEvent(timeSlot * 1000 + 1));
+
+            for (int i = 0; i < maxEventsPerSlot; i++) {
+                epService.getEPRuntime().sendEvent(new SupportBean("E" + timeSlot, 0));
+            }
+        }
+        
+        EventBean[] iterator = ArrayAssertionUtil.iteratorToArray(stmt.iterator());
+        assertTrue(iterator.length <= 6 * maxEventsPerSlot);
+    }
+
     public void testInvalidGroupByNoChild()
     {
-        String stmtText = "select avg(price), symbol from " + SupportMarketDataBean.class.getName() + ".win:length(100).std:groupby(symbol)";
+        String stmtText = "select avg(price), symbol from " + SupportMarketDataBean.class.getName() + ".win:length(100).std:groupwin(symbol)";
 
         try
         {
@@ -48,7 +104,7 @@ public class TestViewGroupBy extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting statement: Invalid use of the 'std:groupby' view, the view requires one or more child views to group, or consider using the group-by clause [select avg(price), symbol from com.espertech.esper.support.bean.SupportMarketDataBean.win:length(100).std:groupby(symbol)]", ex.getMessage());
+            assertEquals("Error starting statement: Invalid use of the 'std:groupwin' view, the view requires one or more child views to group, or consider using the group-by clause [select avg(price), symbol from com.espertech.esper.support.bean.SupportMarketDataBean.win:length(100).std:groupwin(symbol)]", ex.getMessage());
         }
     }
 
@@ -57,16 +113,16 @@ public class TestViewGroupBy extends TestCase
         EPAdministrator epAdmin = epService.getEPAdministrator();
         String filter = "select * from " + SupportMarketDataBean.class.getName();
 
-        priceLast3Stats = epAdmin.createEPL(filter + ".std:groupby(symbol).win:length(3).stat:uni(price)");
+        priceLast3Stats = epAdmin.createEPL(filter + ".std:groupwin(symbol).win:length(3).stat:uni(price)");
         priceLast3Stats.addListener(priceLast3StatsListener);
 
-        volumeLast3Stats = epAdmin.createEPL(filter + ".std:groupby(symbol).win:length(3).stat:uni(volume)");
+        volumeLast3Stats = epAdmin.createEPL(filter + ".std:groupwin(symbol).win:length(3).stat:uni(volume)");
         volumeLast3Stats.addListener(volumeLast3StatsListener);
 
-        priceAllStats = epAdmin.createEPL(filter + ".std:groupby(symbol).stat:uni(price)");
+        priceAllStats = epAdmin.createEPL(filter + ".std:groupwin(symbol).stat:uni(price)");
         priceAllStats.addListener(priceAllStatsListener);
 
-        volumeAllStats = epAdmin.createEPL(filter + ".std:groupby(symbol).stat:uni(volume)");
+        volumeAllStats = epAdmin.createEPL(filter + ".std:groupwin(symbol).stat:uni(volume)");
         volumeAllStats.addListener(volumeAllStatsListener);
 
         Vector<Map<String, Object>> expectedList = new Vector<Map<String, Object>>();
@@ -134,7 +190,7 @@ public class TestViewGroupBy extends TestCase
 
     public void testLengthWindowGrouped()
     {
-        String stmtText = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".std:groupby(symbol).win:length(2)";
+        String stmtText = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".std:groupwin(symbol).win:length(2)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
@@ -147,23 +203,25 @@ public class TestViewGroupBy extends TestCase
         // further math tests can be found in the view unit test
         EPAdministrator admin = epService.getEPAdministrator();
         admin.getConfiguration().addEventType("Market", SupportMarketDataBean.class);
-        EPStatement statement = admin.createEPL("select * from Market.std:groupby(symbol).win:length(1000000).stat:correl(price, volume)");
+        EPStatement statement = admin.createEPL("select * from Market.std:groupwin(symbol).win:length(1000000).stat:correl(price, volume, feed)");
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
-        String[] fields = new String[] {"symbol", "correlation"};
+        assertEquals(Double.class, statement.getEventType().getPropertyType("correlation"));
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 10.0, 1000L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", Double.NaN});
+        String[] fields = new String[] {"symbol", "correlation", "feed"};
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 1.0, 2L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", Double.NaN});
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 10.0, 1000L, "f1"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", Double.NaN, "f1"});
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 2.0, 4L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", 1.0});
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 1.0, 2L, "f2"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", Double.NaN, "f2"});
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 20.0, 2000L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", 1.0});
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 2.0, 4L, "f3"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", 1.0, "f3"});
+
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 20.0, 2000L, "f4"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", 1.0, "f4"});
     }
 
     public void testLinest()
@@ -171,23 +229,62 @@ public class TestViewGroupBy extends TestCase
         // further math tests can be found in the view unit test
         EPAdministrator admin = epService.getEPAdministrator();
         admin.getConfiguration().addEventType("Market", SupportMarketDataBean.class);
-        EPStatement statement = admin.createEPL("select * from Market.std:groupby(symbol).win:length(1000000).stat:linest(price, volume)");
+        EPStatement statement = admin.createEPL("select * from Market.std:groupwin(symbol).win:length(1000000).stat:linest(price, volume, feed)");
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
-        String[] fields = new String[] {"symbol", "slope", "YIntercept"};
+        assertEquals(Double.class, statement.getEventType().getPropertyType("slope"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("YIntercept"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("XAverage"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("XStandardDeviationPop"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("XStandardDeviationSample"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("XSum"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("XVariance"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("YAverage"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("YStandardDeviationPop"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("YStandardDeviationSample"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("YSum"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("YVariance"));
+        assertEquals(Long.class, statement.getEventType().getPropertyType("dataPoints"));
+        assertEquals(Long.class, statement.getEventType().getPropertyType("n"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("sumX"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("sumXSq"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("sumXY"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("sumY"));
+        assertEquals(Double.class, statement.getEventType().getPropertyType("sumYSq"));
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 10.0, 50000L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", Double.NaN, Double.NaN});
+        String[] fields = new String[] {"symbol", "slope", "YIntercept", "feed"};
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 1.0, 1L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", Double.NaN, Double.NaN});
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 10.0, 50000L, "f1"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", Double.NaN, Double.NaN, "f1"});
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 2.0, 2L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", 1.0, 0.0});
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 1.0, 1L, "f2"));
+        EventBean event = listener.assertOneGetNewAndReset();
+        ArrayAssertionUtil.assertProps(event, fields, new Object[] {"DEF", Double.NaN, Double.NaN, "f2"});
+        assertEquals(1d, event.get("XAverage"));
+        assertEquals(0d, event.get("XStandardDeviationPop"));
+        assertEquals(Double.NaN, event.get("XStandardDeviationSample"));
+        assertEquals(1d, event.get("XSum"));
+        assertEquals(Double.NaN, event.get("XVariance"));
+        assertEquals(1d, event.get("YAverage"));
+        assertEquals(0d, event.get("YStandardDeviationPop"));
+        assertEquals(Double.NaN, event.get("YStandardDeviationSample"));
+        assertEquals(1d, event.get("YSum"));
+        assertEquals(Double.NaN, event.get("YVariance"));
+        assertEquals(1L, event.get("dataPoints"));
+        assertEquals(1L, event.get("n"));
+        assertEquals(1d, event.get("sumX"));
+        assertEquals(1d, event.get("sumXSq"));
+        assertEquals(1d, event.get("sumXY"));
+        assertEquals(1d, event.get("sumY"));
+        assertEquals(1d, event.get("sumYSq"));
+        // above computed values tested in more detail in RegressionBean test
 
-        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 11.0, 50100L, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", 100.0, 49000.0});
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 2.0, 2L, "f3"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"DEF", 1.0, 0.0, "f3"});
+
+        epService.getEPRuntime().sendEvent(new SupportMarketDataBean("ABC", 11.0, 50100L, "f4"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"ABC", 100.0, 49000.0, "f4"});
     }
 
     private void sendEvent(String symbol, double price)

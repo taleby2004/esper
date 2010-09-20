@@ -128,6 +128,7 @@ public final class FilterSpecCompiler
                 {
                     andNode.addChildNode(unoptimized);
                 }
+                andNode.validate(streamTypeService, methodResolutionService, null, timeProvider, variableService, statementContext);
                 exprNode = andNode;
             }
         }
@@ -212,7 +213,7 @@ public final class FilterSpecCompiler
             ExprNode validated = node.getValidatedSubtree(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext);
             validatedNodes.add(validated);
 
-            if ((validated.getType() != Boolean.class) && ((validated.getType() != boolean.class)))
+            if ((validated.getExprEvaluator().getType() != Boolean.class) && ((validated.getExprEvaluator().getType() != boolean.class)))
             {
                 throw new ExprValidationException("Filter expression not returning a boolean value: '" + validated.toExpressionString() + "'");
             }
@@ -299,6 +300,10 @@ public final class FilterSpecCompiler
         SelectClauseSpecCompiled selectClauseSpec = subselect.getStatementSpecCompiled().getSelectClauseSpec();
         if (selectClauseSpec.getSelectExprList().size() > 0)
         {
+            if (selectClauseSpec.getSelectExprList().size() > 1) {
+                throw new ExprValidationException("Subquery multi-column select is not allowed in this context.");
+            }
+
             SelectClauseElementCompiled element = selectClauseSpec.getSelectExprList().get(0);
             if (element instanceof SelectClauseExprCompiledSpec)
             {
@@ -306,8 +311,8 @@ public final class FilterSpecCompiler
                 SelectClauseExprCompiledSpec compiled = (SelectClauseExprCompiledSpec) element;
                 ExprNode selectExpression = compiled.getSelectExpression();
                 selectExpression = selectExpression.getValidatedSubtree(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
-                subselect.setSelectClause(selectExpression);
-                subselect.setSelectAsName(compiled.getAssignedName());
+                subselect.setSelectClause(new ExprNode[] {selectExpression});
+                subselect.setSelectAsNames(new String[] {compiled.getAssignedName()});
 
                 // handle aggregation
                 List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
@@ -612,6 +617,9 @@ public final class FilterSpecCompiler
                                 throwConversionError(identNodeInner.getType(), identNodeInSet.getType(), identNodeInSet.getResolvedPropertyName());
                             }
                             isMustCoerce = true;
+                        }
+                        else {
+                            break;  // assumed not compatible 
                         }
                     }
 

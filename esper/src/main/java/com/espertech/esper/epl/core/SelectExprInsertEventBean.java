@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -99,6 +100,7 @@ public class SelectExprInsertEventBean
             }
 
             final int streamNum = i;
+            final Class returnType = streamTypes[streamNum].getUnderlyingType();
             ExprEvaluator evaluator = new ExprEvaluator() {
                 public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                 {
@@ -107,6 +109,15 @@ public class SelectExprInsertEventBean
                     {
                         return event.getUnderlying();
                     }
+                    return null;
+                }
+
+                public Class getType()
+                {
+                    return returnType;
+                }
+
+                public Map<String, Object> getEventType() {
                     return null;
                 }
             };
@@ -172,6 +183,7 @@ public class SelectExprInsertEventBean
                 else if (columnType instanceof EventType)
                 {
                     EventType columnEventType = (EventType) columnType;
+                    final Class returnType = columnEventType.getUnderlyingType();
                     widener = TypeWidenerFactory.getCheckPropertyAssignType(columnNames[i], columnEventType.getUnderlyingType(), desc.getType(), desc.getPropertyName());
                     int streamNum = 0;
                     for (int j = 0; j < typeService.getEventTypes().length; j++)
@@ -191,6 +203,15 @@ public class SelectExprInsertEventBean
                             {
                                 return event.getUnderlying();
                             }
+                            return null;
+                        }
+
+                        public Class getType()
+                        {
+                            return returnType;
+                        }
+
+                        public Map<String, Object> getEventType() {
                             return null;
                         }
                     };
@@ -252,6 +273,7 @@ public class SelectExprInsertEventBean
                     selectedWritable = writableDesc;
 
                     final String propertyName = eventPropDescriptor.getPropertyName();
+                    final Class propertyType = eventPropDescriptor.getPropertyType();
                     evaluator = new ExprEvaluator() {
 
                         public Object evaluate(EventBean[] eventsPerStream, boolean isNewData,ExprEvaluatorContext exprEvaluatorContext)
@@ -261,6 +283,14 @@ public class SelectExprInsertEventBean
                             {
                                 return event.get(propertyName);
                             }
+                            return null;
+                        }
+
+                        public Class getType()
+                        {
+                            return propertyType;
+                        }
+                        public Map<String, Object> getEventType() {
                             return null;
                         }
                     };

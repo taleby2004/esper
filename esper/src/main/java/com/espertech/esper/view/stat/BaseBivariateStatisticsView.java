@@ -8,10 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.view.stat;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.view.ViewSupport;
 
 import java.util.Iterator;
@@ -25,46 +28,58 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     /**
      * This bean can be overridden by subclasses providing extra values such as correlation, regression.
      */
-    protected BaseStatisticsBean statisticsBean;
+    protected BaseStatisticsBean statisticsBean = new BaseStatisticsBean();
 
-    private ExprNode expressionX;
-    private ExprNode expressionY;
-    private EventBean[] eventsPerStream = new EventBean[1];
+    private final ExprNode expressionX;
+    private final ExprNode expressionY;
+    private final ExprEvaluator expressionXEval;
+    private final ExprEvaluator expressionYEval;
+    private final EventBean[] eventsPerStream = new EventBean[1];
 
     /**
      * Services required by implementing classes.
      */
-    protected StatementContext statementContext;
+    protected final StatementContext statementContext;
+    protected final StatViewAdditionalProps additionalProps;
+    protected final EventType eventType;
 
+    private Object[] lastValuesEventNew;
     private EventBean lastNewEvent;
+
+    protected abstract EventBean populateMap(BaseStatisticsBean baseStatisticsBean, EventAdapterService eventAdapterService,
+                                             EventType eventType, StatViewAdditionalProps additionalProps, Object[] decoration);
 
     /**
      * Constructor requires the name of the two fields to use in the parent view to compute the statistics.
-     * @param statisticsBean is the base class prodiving sum of X and Y and squares for use by subclasses
      * @param expressionX is the expression to get the X values from
      * @param expressionY is the expression to get the Y values from
      * @param statementContext contains required view services
      */
     public BaseBivariateStatisticsView(StatementContext statementContext,
-                                       BaseStatisticsBean statisticsBean,
                                        ExprNode expressionX,
-                                       ExprNode expressionY)
+                                       ExprNode expressionY,
+                                       EventType eventType,
+                                       StatViewAdditionalProps additionalProps
+                                       )
     {
         this.statementContext = statementContext;
-        this.statisticsBean = statisticsBean;
         this.expressionX = expressionX;
+        this.expressionXEval = expressionX.getExprEvaluator();
         this.expressionY = expressionY;
+        this.expressionYEval = expressionY.getExprEvaluator();
+        this.eventType = eventType;
+        this.additionalProps = additionalProps;
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
         // If we have child views, keep a reference to the old values, so we can fireStatementStopped them as old data event.
-        BaseStatisticsBean oldValues = null;
+        EventBean oldValues = null;
         if (lastNewEvent == null)
         {
             if (this.hasViews())
             {
-                oldValues = (BaseStatisticsBean) statisticsBean.clone();
+                oldValues = populateMap(statisticsBean, statementContext.getEventAdapterService(), eventType, additionalProps, null);
             }
         }
 
@@ -74,9 +89,18 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             for (int i = 0; i < newData.length; i++)
             {
                 eventsPerStream[0] = newData[i];
-                double X = ((Number) expressionX.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                double Y = ((Number) expressionY.evaluate(eventsPerStream, true, statementContext)).doubleValue();
+                double X = ((Number) expressionXEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
+                double Y = ((Number) expressionYEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
                 statisticsBean.addPoint(X, Y);
+            }
+
+            if ((additionalProps != null) && (newData.length != 0)) {
+                if (lastValuesEventNew == null) {
+                    lastValuesEventNew = new Object[additionalProps.getAdditionalExpr().length];
+                }
+                for (int val = 0; val < additionalProps.getAdditionalExpr().length; val++) {
+                    lastValuesEventNew[val] = additionalProps.getAdditionalExpr()[val].evaluate(eventsPerStream, true, statementContext);
+                }
             }
         }
 
@@ -86,8 +110,8 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             for (int i = 0; i < oldData.length; i++)
             {
                 eventsPerStream[0] = oldData[i];
-                double X = ((Number) expressionX.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                double Y = ((Number) expressionY.evaluate(eventsPerStream, true, statementContext)).doubleValue();
+                double X = ((Number) expressionXEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
+                double Y = ((Number) expressionYEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
                 statisticsBean.removePoint(X, Y);
             }
         }
@@ -95,31 +119,26 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
         // If there are child view, fireStatementStopped update method
         if (this.hasViews())
         {
+            EventBean newDataMap = populateMap(statisticsBean, statementContext.getEventAdapterService(), eventType, additionalProps, lastValuesEventNew);
+
             if (lastNewEvent == null)
             {
-                // Make a copy of the current values since if we change the values subsequently, the handed-down
-                // values should not change
-                BaseStatisticsBean newValues = (BaseStatisticsBean) statisticsBean.clone();
-                EventBean newValuesEvent = statementContext.getEventAdapterService().adapterForBean(newValues);
-                EventBean oldValuesEvent = statementContext.getEventAdapterService().adapterForBean(oldValues);
-                updateChildren(new EventBean[] {newValuesEvent}, new EventBean[] {oldValuesEvent});
-                lastNewEvent = newValuesEvent;
+                updateChildren(new EventBean[] {newDataMap}, new EventBean[] {oldValues});
             }
             else
             {
-                // Make a copy of the current values since if we change the values subsequently, the handed-down
-                // values should not change
-                BaseStatisticsBean newValues = (BaseStatisticsBean) statisticsBean.clone();
-                EventBean newValuesEvent = statementContext.getEventAdapterService().adapterForBean(newValues);
-                updateChildren(new EventBean[] {newValuesEvent}, new EventBean[] {lastNewEvent});
-                lastNewEvent = newValuesEvent;
+                updateChildren(new EventBean[] {newDataMap}, new EventBean[] {lastNewEvent});
             }
+
+            lastNewEvent = newDataMap;
         }
     }
 
     public final Iterator<EventBean> iterator()
     {
-        return new SingleEventIterator(statementContext.getEventAdapterService().adapterForBean(statisticsBean));
+        return new SingleEventIterator(populateMap(statisticsBean,
+                statementContext.getEventAdapterService(),
+                eventType, additionalProps, lastValuesEventNew));
     }
 
     /**

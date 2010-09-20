@@ -9,6 +9,9 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+
+import java.util.Map;
 
 /**
  * Interface for evaluating of an event tuple.
@@ -23,4 +26,12 @@ public interface ExprEvaluator
      * @return evaluation result, a boolean value for OR/AND-type evalution nodes.
      */
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
+
+    /**
+     * Returns the type that the node's evaluate method returns an instance of.
+     * @return type returned when evaluated
+     */
+    public Class getType();
+
+    public Map<String, Object> getEventType() throws ExprValidationException;
 }

@@ -8,10 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
 import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.agg.AggregationValidationContext;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
 
 /**
  * Represents a custom aggregation function in an expresson tree.
@@ -34,41 +35,49 @@ public class ExprPlugInAggFunctionNode extends ExprAggregateNode
         aggregationSupport.setFunctionName(functionName);
     }
 
-    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public AggregationMethodFactory validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
-        if (this.getChildNodes().size() > 1)
-        {
-            Class[] parameterTypes = new Class[this.getChildNodes().size()];
-            Object[] constant = new Object[this.getChildNodes().size()];
-            boolean[] isConstant = new boolean[this.getChildNodes().size()];
+        Class[] parameterTypes = new Class[this.getChildNodes().size()];
+        Object[] constant = new Object[this.getChildNodes().size()];
+        boolean[] isConstant = new boolean[this.getChildNodes().size()];
+        ExprNode[] expressions = new ExprNode[this.getChildNodes().size()];
 
-            int count = 0;
-            for (ExprNode child : this.getChildNodes())
-            {
-                if (child.isConstantResult())
-                {
-                    isConstant[count] = true;
-                    constant[count] = child.evaluate(null, true, exprEvaluatorContext);
-                }
-                parameterTypes[count] = child.getType();
-                count++;
-            }
-            aggregationSupport.validateMultiParameter(parameterTypes, isConstant, constant);
-        }
-        else if (this.getChildNodes().size() == 1)
+        int count = 0;
+        boolean hasDataWindows = true;
+        for (ExprNode child : this.getChildNodes())
         {
-            Class childType = this.getChildNodes().get(0).getType();
-            try
+            if (child.isConstantResult())
             {
-                aggregationSupport.validate(childType);
+                isConstant[count] = true;
+                constant[count] = child.getExprEvaluator().evaluate(null, true, exprEvaluatorContext);
             }
-            catch (RuntimeException ex)
-            {
-                throw new ExprValidationException("Plug-in aggregation function '" + aggregationSupport.getFunctionName() + "' failed validation: " + ex.getMessage());
+            parameterTypes[count] = child.getExprEvaluator().getType();
+            expressions[count] = child;
+            
+            count++;
+
+            if (!ExprNodeUtility.hasRemoveStream(child, streamTypeService)) {
+                hasDataWindows = false;
             }
         }
 
-        return aggregationSupport;
+        AggregationValidationContext context = new AggregationValidationContext(parameterTypes, isConstant, constant, super.isDistinct(), hasDataWindows, expressions);
+        try
+        {
+            aggregationSupport.validate(context);
+        }
+        catch (RuntimeException ex)
+        {
+            throw new ExprValidationException("Plug-in aggregation function '" + aggregationSupport.getFunctionName() + "' failed validation: " + ex.getMessage());
+        }
+
+        Class childType = null;
+        if (this.getChildNodes().size() > 0)
+        {
+            childType = this.getChildNodes().get(0).getExprEvaluator().getType();
+        }
+
+        return new ExprPlugInAggFunctionNodeFactory(aggregationSupport, super.isDistinct(), childType);
     }
 
     public String getAggregationFunctionName()

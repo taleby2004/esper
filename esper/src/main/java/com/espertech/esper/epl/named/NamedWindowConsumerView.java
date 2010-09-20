@@ -8,11 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
-import com.espertech.esper.collection.OneEventCollection;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.FlushedEventBuffer;
+import com.espertech.esper.collection.OneEventCollection;
+import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.view.StatementStopCallback;
 import com.espertech.esper.view.StatementStopService;
@@ -21,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Represents a consumer of a named window that selects from a named window via a from-clause.
@@ -31,11 +32,13 @@ import java.util.List;
 public class NamedWindowConsumerView extends ViewSupport implements StatementStopCallback
 {
     private static final Log log = LogFactory.getLog(NamedWindowConsumerView.class);
-    private final List<ExprNode> filterList;
+    private final ExprEvaluator[] filterList;
     private final EventType eventType;
     private final NamedWindowTailView tailView;
     private final ExprEvaluatorContext exprEvaluatorContext;
+    private final PropertyEvaluator optPropertyEvaluator;
     private EventBean[] eventPerStream = new EventBean[1];
+    private final FlushedEventBuffer optPropertyContainedBuffer;
 
     /**
      * Ctor.
@@ -45,13 +48,21 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
      * @param filterList is a list of filter expressions
      * @param exprEvaluatorContext context for expression evalauation
      */
-    public NamedWindowConsumerView(List<ExprNode> filterList,
+    public NamedWindowConsumerView(ExprEvaluator[] filterList,
+                                   PropertyEvaluator optPropertyEvaluator,
                                    EventType eventType,
                                    StatementStopService statementStopService,
                                    NamedWindowTailView tailView,
                                    ExprEvaluatorContext exprEvaluatorContext)
     {
         this.filterList = filterList;
+        this.optPropertyEvaluator = optPropertyEvaluator;
+        if (optPropertyEvaluator != null) {
+            optPropertyContainedBuffer = new FlushedEventBuffer();
+        }
+        else {
+            optPropertyContainedBuffer = null;
+        }
         this.eventType = eventType;
         this.tailView = tailView;
         this.exprEvaluatorContext = exprEvaluatorContext;
@@ -68,16 +79,37 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         }
 
         // if we have a filter for the named window,
-        if (!filterList.isEmpty())
+        if (filterList.length != 0)
         {
             newData = passFilter(newData, true, exprEvaluatorContext);
             oldData = passFilter(oldData, false, exprEvaluatorContext);
+        }
+
+        if (optPropertyEvaluator != null) {
+            newData = getUnpacked(newData);
+            oldData = getUnpacked(oldData);
         }
 
         if ((newData != null) || (oldData != null))
         {
             updateChildren(newData, oldData);
         }
+    }
+
+    private EventBean[] getUnpacked(EventBean[] data)
+    {
+        if (data == null) {
+            return null;
+        }
+        if (data.length == 0) {
+            return data;
+        }
+
+        for (int i = 0; i < data.length; i++) {
+            EventBean[] unpacked = optPropertyEvaluator.getProperty(data[i], exprEvaluatorContext);
+            optPropertyContainedBuffer.add(unpacked);
+        }
+        return optPropertyContainedBuffer.getAndFlush();
     }
 
     private EventBean[] passFilter(EventBean[] eventData, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
@@ -92,7 +124,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         {
             eventPerStream[0] = event;
             boolean pass = true;
-            for (ExprNode filter : filterList)
+            for (ExprEvaluator filter : filterList)
             {
                 Boolean result = (Boolean) filter.evaluate(eventPerStream, isNewData, exprEvaluatorContext);
                 if ((result != null) && (!result))
@@ -121,6 +153,9 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
 
     public EventType getEventType()
     {
+        if (optPropertyEvaluator != null) {
+            return optPropertyEvaluator.getFragmentEventType();
+        }
         return eventType;
     }
 

@@ -57,7 +57,7 @@ public class TestInvalidView extends TestCase
 
         // keyword as part of identifier
         exceptionText = getSyntaxExceptionView("select * from MyEvent, MyEvent2 where a.day=b.day");
-        assertEquals("Incorrect syntax near 'day' (a reserved keyword) at line 1 column 40, please check the where clause [select * from MyEvent, MyEvent2 where a.day=b.day]", exceptionText);
+        assertEquals("Incorrect syntax near 'a' at line 1 column 38, please check the where clause near reserved keyword 'day' [select * from MyEvent, MyEvent2 where a.day=b.day]", exceptionText);
 
         exceptionText = getSyntaxExceptionView("select * * from " + EVENT_NUM);
         assertEquals("Incorrect syntax near '*' expecting 'from' but found a star '*' at line 1 column 9 [select * * from com.espertech.esper.support.bean.SupportBean_N]", exceptionText);
@@ -211,7 +211,7 @@ public class TestInvalidView extends TestCase
 
         // function not known
         exceptionText = getStatementExceptionView("select gogglex(1) from " + EVENT_NUM + ".win:length(1)");
-        assertEquals("Error in expression: Unknown method named 'gogglex' could not be resolved [select gogglex(1) from com.espertech.esper.support.bean.SupportBean_N.win:length(1)]", exceptionText);
+        assertEquals("Error in expression: Unknown single-row function or aggregation function named 'gogglex' could not be resolved [select gogglex(1) from com.espertech.esper.support.bean.SupportBean_N.win:length(1)]", exceptionText);
 
         // insert into column name incorrect
         epService.getEPAdministrator().createEPL("insert into Xyz select 1 as dodi from java.lang.String");

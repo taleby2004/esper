@@ -196,7 +196,7 @@ public class ResultSetProcessorFactory
 
             ExprNode validatedGroupBy = groupByNodes.get(i).getValidatedSubtree(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(),stmtContext);
             groupByNodes.set(i, validatedGroupBy);
-            groupByTypes[i] = validatedGroupBy.getType();
+            groupByTypes[i] = validatedGroupBy.getExprEvaluator().getType();
         }
         stmtContext.getMethodResolutionService().setGroupKeyTypes(groupByTypes);
 
@@ -263,7 +263,7 @@ public class ResultSetProcessorFactory
         if (optionalHavingNode != null)
         {
             ExprAggregateNode.getAggregatesBottomUp(optionalHavingNode, havingAggregateExprNodes);
-            propertiesAggregatedHaving = getAggregatedProperties(havingAggregateExprNodes);
+            propertiesAggregatedHaving = ExprNodeUtility.getAggregatedProperties(havingAggregateExprNodes);
         }
         if (!allowAggregation && !havingAggregateExprNodes.isEmpty())
         {
@@ -286,7 +286,8 @@ public class ResultSetProcessorFactory
 
         // Construct the appropriate aggregation service
         boolean hasGroupBy = !groupByNodes.isEmpty();
-        AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, stmtContext.getMethodResolutionService(), stmtContext, statementSpecCompiled.getAnnotations(), stmtContext.getVariableService(), stmtContext.getStatementStopService());
+        AggregationService aggregationService = AggregationServiceFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, stmtContext.getMethodResolutionService(), stmtContext, statementSpecCompiled.getAnnotations(), stmtContext.getVariableService(), stmtContext.getStatementStopService(), typeService.getEventTypes().length > 1,
+                statementSpecCompiled.getFilterRootNode(), statementSpecCompiled.getHavingExprRootNode());
 
         boolean useCollatorSort = false;
         if (stmtContext.getConfigSnapshot() != null)
@@ -306,7 +307,7 @@ public class ResultSetProcessorFactory
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);
         // Figure out all non-aggregated event properties in the select clause (props not under a sum/avg/max aggregation node)
-        Set<Pair<Integer, String>> nonAggregatedProps = getNonAggregatedProps(selectNodes);
+        Set<Pair<Integer, String>> nonAggregatedProps = ExprNodeUtility.getNonAggregatedProps(selectNodes);
 
         // Validate that group-by is filled with sensible nodes (identifiers, and not part of aggregates selected, no aggregates)
         validateGroupBy(groupByNodes);
@@ -332,6 +333,8 @@ public class ResultSetProcessorFactory
             isOutputLimiting = false;   // Snapshot output does not count in terms of limiting output for grouping/aggregation purposes
         }
 
+        ExprEvaluator optionHavingEval = optionalHavingNode == null ? null : optionalHavingNode.getExprEvaluator();
+
         // (1)
         // There is no group-by clause and no aggregate functions with event properties in the select clause and having clause (simplest case)
         if ((groupByNodes.isEmpty()) && (selectAggregateExprNodes.isEmpty()) && (havingAggregateExprNodes.isEmpty()))
@@ -350,7 +353,7 @@ public class ResultSetProcessorFactory
             // directly generating one row, and no need to update aggregate state since there is no aggregate function.
             // There might be some order-by expressions.
             log.debug(".getProcessor Using ResultSetProcessorSimple");
-            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isSelectRStream, stmtContext);
+            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionHavingEval, isSelectRStream, stmtContext);
         }
 
         // (2)
@@ -359,10 +362,10 @@ public class ResultSetProcessorFactory
         if ((namedSelectionList.isEmpty()) && (propertiesAggregatedHaving.isEmpty()) && (havingAggregateExprNodes.isEmpty()) && (!isLast))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
-            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionalHavingNode, isSelectRStream, stmtContext);
+            return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionHavingEval, isSelectRStream, stmtContext);
         }
 
-        boolean hasAggregation = (!selectAggregateExprNodes.isEmpty()) || (!propertiesAggregatedHaving.isEmpty());
+        boolean hasAggregation = (!selectAggregateExprNodes.isEmpty()) || (!havingAggregateExprNodes.isEmpty()) || (!orderByAggregateExprNodes.isEmpty()) || (!propertiesAggregatedHaving.isEmpty());
         if ((groupByNodes.isEmpty()) && hasAggregation)
         {
             // (3)
@@ -371,14 +374,14 @@ public class ResultSetProcessorFactory
             if ((nonAggregatedProps.isEmpty()) && (!isUsingWildcard) && (!isUsingStreamSelect))
             {
                 log.debug(".getProcessor Using ResultSetProcessorRowForAll");
-                return new ResultSetProcessorRowForAll(selectExprProcessor, aggregationService, orderByProcessor, optionalHavingNode, isSelectRStream, isUnidirectional, stmtContext);
+                return new ResultSetProcessorRowForAll(selectExprProcessor, aggregationService, orderByProcessor, optionHavingEval, isSelectRStream, isUnidirectional, stmtContext);
             }
 
             // (4)
             // There is no group-by clause but there are aggregate functions with event properties in the select clause (aggregation case)
             // or having clause and not all event properties are aggregated (some properties are not under aggregation functions).
             log.debug(".getProcessor Using ResultSetProcessorAggregateAll");
-            return new ResultSetProcessorAggregateAll(selectExprProcessor, orderByProcessor, aggregationService, optionalHavingNode, isSelectRStream, isUnidirectional, stmtContext);
+            return new ResultSetProcessorAggregateAll(selectExprProcessor, orderByProcessor, aggregationService, optionHavingEval, isSelectRStream, isUnidirectional, stmtContext);
         }
 
         // Handle group-by cases
@@ -388,8 +391,11 @@ public class ResultSetProcessorFactory
         }
 
         // Figure out if all non-aggregated event properties in the select clause are listed in the group by
-        Set<Pair<Integer, String>> nonAggregatedPropsSelect = getNonAggregatedProps(selectNodes);
+        Set<Pair<Integer, String>> nonAggregatedPropsSelect = ExprNodeUtility.getNonAggregatedProps(selectNodes);
         boolean allInGroupBy = true;
+        if (isUsingStreamSelect) {
+            allInGroupBy = false;
+        }
         for (Pair<Integer, String> nonAggregatedProp : nonAggregatedPropsSelect)
         {
             if (!propertiesGroupBy.contains(nonAggregatedProp))
@@ -405,7 +411,7 @@ public class ResultSetProcessorFactory
         }
 
         // Figure out if all non-aggregated event properties in the order-by clause are listed in the select expression
-        Set<Pair<Integer, String>> nonAggregatedPropsOrderBy = getNonAggregatedProps(orderByNodes);
+        Set<Pair<Integer, String>> nonAggregatedPropsOrderBy = ExprNodeUtility.getNonAggregatedProps(orderByNodes);
 
         boolean allInSelect = true;
         for (Pair<Integer, String> nonAggregatedProp : nonAggregatedPropsOrderBy)
@@ -426,17 +432,18 @@ public class ResultSetProcessorFactory
         // There is a group-by clause, and all event properties in the select clause that are not under an aggregation
         // function are listed in the group-by clause, and if there is an order-by clause, all non-aggregated properties
         // referred to in the order-by clause also appear in the select (output one row per group, not one row per event)
+        ExprEvaluator[] groupByEval = ExprNodeUtility.getEvaluators(groupByNodes);
         if (allInGroupBy && allInSelect)
         {
             log.debug(".getProcessor Using ResultSetProcessorRowPerGroup");
-            return new ResultSetProcessorRowPerGroup(selectExprProcessor, orderByProcessor, aggregationService, groupByNodes, optionalHavingNode, isSelectRStream, isUnidirectional, stmtContext);
+            return new ResultSetProcessorRowPerGroup(selectExprProcessor, orderByProcessor, aggregationService, groupByEval, optionHavingEval, isSelectRStream, isUnidirectional, stmtContext, outputLimitSpec);
         }
 
         // (6)
         // There is a group-by clause, and one or more event properties in the select clause that are not under an aggregation
         // function are not listed in the group-by clause (output one row per event, not one row per group)
         log.debug(".getProcessor Using ResultSetProcessorAggregateGrouped");
-        return new ResultSetProcessorAggregateGrouped(selectExprProcessor, orderByProcessor, aggregationService, groupByNodes, optionalHavingNode, isSelectRStream, isUnidirectional, stmtContext);
+        return new ResultSetProcessorAggregateGrouped(selectExprProcessor, orderByProcessor, aggregationService, groupByEval, optionHavingEval, isSelectRStream, isUnidirectional, stmtContext, outputLimitSpec);
     }
 
     private static void validateHaving(Set<Pair<Integer, String>> propertiesGroupedBy,
@@ -455,7 +462,7 @@ public class ResultSetProcessorFactory
             ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
             havingNode.accept(visitor);
             List<Pair<Integer, String>> allPropertiesHaving = visitor.getExprProperties();
-            Set<Pair<Integer, String>> aggPropertiesHaving = getAggregatedProperties(aggregateNodesHaving);
+            Set<Pair<Integer, String>> aggPropertiesHaving = ExprNodeUtility.getAggregatedProperties(aggregateNodesHaving);
             allPropertiesHaving.removeAll(aggPropertiesHaving);
             allPropertiesHaving.removeAll(propertiesGroupedBy);
 
@@ -480,36 +487,6 @@ public class ResultSetProcessorFactory
                 throw new ExprValidationException("Group-by expressions cannot contain aggregate functions");
             }
         }
-    }
-
-    private static Set<Pair<Integer, String>> getNonAggregatedProps(List<ExprNode> exprNodes)
-    {
-        // Determine all event properties in the clause
-        Set<Pair<Integer, String>> nonAggProps = new HashSet<Pair<Integer, String>>();
-        for (ExprNode node : exprNodes)
-        {
-            ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(false);
-            node.accept(visitor);
-            List<Pair<Integer, String>> propertiesNode = visitor.getExprProperties();
-            nonAggProps.addAll(propertiesNode);
-        }
-
-        return nonAggProps;
-    }
-
-    private static Set<Pair<Integer, String>> getAggregatedProperties(List<ExprAggregateNode> aggregateNodes)
-    {
-        // Get a list of properties being aggregated in the clause.
-        Set<Pair<Integer, String>> propertiesAggregated = new HashSet<Pair<Integer, String>>();
-        for (ExprNode selectAggExprNode : aggregateNodes)
-        {
-            ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
-            selectAggExprNode.accept(visitor);
-            List<Pair<Integer, String>> properties = visitor.getExprProperties();
-            propertiesAggregated.addAll(properties);
-        }
-
-        return propertiesAggregated;
     }
 
     private static Set<Pair<Integer, String>> getGroupByProperties(List<ExprNode> groupByNodes)

@@ -76,6 +76,8 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getExpression().isSelfSubselectPreeval());
         assertTrue(config.getEngineDefaults().getExpression().isUdfCache());
         assertTrue(config.getEngineDefaults().getExpression().isExtendedAggregation());
+        assertFalse(config.getEngineDefaults().getExpression().isDuckTyping());
+        assertNull(config.getEngineDefaults().getExceptionHandling().getHandlerFactories());
 
         ConfigurationEventTypeXMLDOM domType = new ConfigurationEventTypeXMLDOM();
         assertFalse(domType.isXPathPropertyExpr());
@@ -250,6 +252,17 @@ public class TestConfigurationParser extends TestCase
         assertEquals("com.mycompany.MyMatrixAggregationMethod1", pluginAgg.getFunctionClassName());
         assertEquals("func2", pluginAgg.getName());
 
+        // assert plug-in singlerow function loaded
+        assertEquals(2, config.getPlugInSingleRowFunctions().size());
+        ConfigurationPlugInSingleRowFunction pluginSingleRow = config.getPlugInSingleRowFunctions().get(0);
+        assertEquals("com.mycompany.MyMatrixSingleRowMethod0", pluginSingleRow.getFunctionClassName());
+        assertEquals("method1", pluginSingleRow.getFunctionMethodName());
+        assertEquals("func3", pluginSingleRow.getName());
+        pluginSingleRow = config.getPlugInSingleRowFunctions().get(1);
+        assertEquals("com.mycompany.MyMatrixSingleRowMethod1", pluginSingleRow.getFunctionClassName());
+        assertEquals("func4", pluginSingleRow.getName());
+        assertEquals("method2", pluginSingleRow.getFunctionMethodName());
+
         // assert plug-in guard objects loaded
         assertEquals(4, config.getPlugInPatternObjects().size());
         ConfigurationPlugInPatternObject pluginPattern = config.getPlugInPatternObjects().get(0);
@@ -337,6 +350,10 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getExpression().isSelfSubselectPreeval());
         assertFalse(config.getEngineDefaults().getExpression().isUdfCache());
         assertFalse(config.getEngineDefaults().getExpression().isExtendedAggregation());
+        assertTrue(config.getEngineDefaults().getExpression().isDuckTyping());
+        assertEquals(2, config.getEngineDefaults().getExceptionHandling().getHandlerFactories().size());
+        assertEquals("my.company.cep.LoggingExceptionHandlerFactory", config.getEngineDefaults().getExceptionHandling().getHandlerFactories().get(0));
+        assertEquals("my.company.cep.AlertExceptionHandlerFactory", config.getEngineDefaults().getExceptionHandling().getHandlerFactories().get(1));
 
         // variables
         assertEquals(2, config.getVariables().size());

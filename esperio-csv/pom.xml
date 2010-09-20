@@ -3,7 +3,7 @@
 	<name>EsperIO-CSV</name>
 	<groupId>com.espertech</groupId>
 	<artifactId>esperio-csv</artifactId>
-	<version>3.5.0</version>
+	<version>4.0.0</version>
 	<packaging>jar</packaging>
 	<description>EsperIO CSV</description>
 	<inceptionYear>2005</inceptionYear>
@@ -36,12 +36,12 @@
 		<dependency>
 			<groupId>com.espertech</groupId>
 			<artifactId>esper</artifactId>
-			<version>3.5.0</version>
+			<version>4.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.15</version>
+			<version>1.2.16</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.jms</groupId>
@@ -65,12 +65,12 @@
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.7.0</version>
+			<version>1.8.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>antlr-runtime</artifactId>
-			<version>3.1.1</version>
+			<version>3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.4</version>
+			<version>4.8.1</version>
 			<scope>test</scope> 
 		</dependency>
 	</dependencies>
@@ -90,8 +90,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>1.6</source>
+					<target>1.6</target>
 				</configuration>
 			</plugin>
 			<plugin>

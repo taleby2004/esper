@@ -205,7 +205,7 @@ public class TestEPLTreeWalker extends TestCase
         OnTriggerSetAssignment assign = setDesc.getAssignments().get(0);
         assertEquals("prop1", assign.getVariableName());
         assertTrue(assign.getExpression() instanceof ExprConstantNode);
-        
+
         assertEquals("a = b", raw.getFilterExprRootNode().toExpressionString());
     }
 
@@ -335,7 +335,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkCreateWindow() throws Exception
     {
-        String expression = "create window MyWindow.std:groupby(symbol).win:length(20) as select *, aprop, bprop as someval from com.MyClass insert where a=b";
+        String expression = "create window MyWindow.std:groupwin(symbol).win:length(20) as select *, aprop, bprop as someval from com.MyClass insert where a=b";
         EPLTreeWalker walker = parseAndWalkEPL(expression);
         StatementSpecRaw raw = walker.getStatementSpec();
 
@@ -361,7 +361,7 @@ public class TestEPLTreeWalker extends TestCase
 
         // 2 views
         assertEquals(2, raw.getCreateWindowDesc().getViewSpecs().size());
-        assertEquals("groupby", raw.getCreateWindowDesc().getViewSpecs().get(0).getObjectName());
+        assertEquals("groupwin", raw.getCreateWindowDesc().getViewSpecs().get(0).getObjectName());
         assertEquals("std", raw.getCreateWindowDesc().getViewSpecs().get(0).getObjectNamespace());
         assertEquals("length", raw.getCreateWindowDesc().getViewSpecs().get(1).getObjectName());
     }
@@ -419,50 +419,49 @@ public class TestEPLTreeWalker extends TestCase
         assertTrue(matchNode.getChildNodes().get(0) instanceof EvalFilterNode);
         assertTrue(matchNode.getChildNodes().get(1) instanceof EvalOrNode);
 
-        EvalMatchUntilSpec spec = getMatchUntilSpec("A until (B or C)");
+        EvalMatchUntilNode spec = getMatchUntilSpec("A until (B or C)");
         assertNull(spec.getLowerBounds());
         assertNull(spec.getUpperBounds());
 
-        spec = getMatchUntilSpec("[1..10] A until (B or C)");
-        assertEquals(1, (int) spec.getLowerBounds());
-        assertEquals(10, (int) spec.getUpperBounds());
+        spec = getMatchUntilSpec("[1:10] A until (B or C)");
+        assertEquals(1, spec.getLowerBounds().getExprEvaluator().evaluate(null, true, null));
+        assertEquals(10, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
 
-        spec = getMatchUntilSpec("[1 .. 10] A until (B or C)");
-        assertEquals(1, (int) spec.getLowerBounds());
-        assertEquals(10, (int) spec.getUpperBounds());
+        spec = getMatchUntilSpec("[1 : 10] A until (B or C)");
+        assertEquals(1, spec.getLowerBounds().getExprEvaluator().evaluate(null, true, null));
+        assertEquals(10, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
 
         spec = getMatchUntilSpec("[1:10] A until (B or C)");
-        assertEquals(1, (int) spec.getLowerBounds());
-        assertEquals(10, (int) spec.getUpperBounds());
+        assertEquals(1, spec.getLowerBounds().getExprEvaluator().evaluate(null, true, null));
+        assertEquals(10, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
 
-        spec = getMatchUntilSpec("[1..] A until (B or C)");
-        assertEquals(1, (int) spec.getLowerBounds());
+        spec = getMatchUntilSpec("[1:] A until (B or C)");
+        assertEquals(1, spec.getLowerBounds().getExprEvaluator().evaluate(null, true, null));
         assertEquals(null, spec.getUpperBounds());
 
-        spec = getMatchUntilSpec("[1 ..] A until (B or C)");
-        assertEquals(1, (int) spec.getLowerBounds());
+        spec = getMatchUntilSpec("[1 :] A until (B or C)");
+        assertEquals(1, spec.getLowerBounds().getExprEvaluator().evaluate(null, true, null));
         assertEquals(null, spec.getUpperBounds());
 
-        spec = getMatchUntilSpec("[..2] A until (B or C)");
+        spec = getMatchUntilSpec("[:2] A until (B or C)");
         assertEquals(null, spec.getLowerBounds());
-        assertEquals(2, (int) spec.getUpperBounds());
+        assertEquals(2, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
 
-        spec = getMatchUntilSpec("[.. 2] A until (B or C)");
+        spec = getMatchUntilSpec("[: 2] A until (B or C)");
         assertEquals(null, spec.getLowerBounds());
-        assertEquals(2, (int) spec.getUpperBounds());
+        assertEquals(2, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
 
         spec = getMatchUntilSpec("[2] A until (B or C)");
-        assertEquals(2, (int) spec.getLowerBounds());
-        assertEquals(2, (int) spec.getUpperBounds());
+        assertEquals(2, spec.getLowerBounds().getExprEvaluator().evaluate(null, true, null));
+        assertEquals(2, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
     }
 
-    private EvalMatchUntilSpec getMatchUntilSpec(String text) throws Exception
+    private EvalMatchUntilNode getMatchUntilSpec(String text) throws Exception
     {
         EPLTreeWalker walker = parseAndWalkPattern(text);
         StatementSpecRaw raw = walker.getStatementSpec();
         PatternStreamSpecRaw a = (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
-        EvalMatchUntilNode matchNode = (EvalMatchUntilNode) a.getEvalNode();
-        return matchNode.getSpec();
+        return (EvalMatchUntilNode) a.getEvalNode();
     }
 
     public void testWalkSimpleWhere() throws Exception
@@ -538,7 +537,7 @@ public class TestEPLTreeWalker extends TestCase
         identNode = (ExprIdentNode) equalsNode.getChildNodes().get(1);
         assertNull(identNode.getStreamOrPropertyName());
         assertEquals("f4", identNode.getUnresolvedPropertyName());
-        
+
         assertEquals(5, (int) walker.getStatementSpec().getRowLimitSpec().getNumRows());
         assertEquals(10, (int) walker.getStatementSpec().getRowLimitSpec().getOptionalOffset());
     }
@@ -1072,7 +1071,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkPatternNoPackage() throws Exception
     {
-        SupportEventAdapterService.getService().addBeanType("SupportBean_N", SupportBean_N.class, true);
+        SupportEventAdapterService.getService().addBeanType("SupportBean_N", SupportBean_N.class, true, true, true);
         String text = "na=SupportBean_N()";
         parseAndWalkPattern(text);
     }
@@ -1174,7 +1173,9 @@ public class TestEPLTreeWalker extends TestCase
         SelectClauseExprRawSpec spec = getSelectExprSpec(walker.getStatementSpec(), 0);
         ExprStaticMethodNode staticMethod = (ExprStaticMethodNode) spec.getSelectExpression();
         assertEquals("MyClass", staticMethod.getClassName());
-        assertEquals("someFunc", staticMethod.getMethodName());
+        assertEquals("someFunc", staticMethod.getChainSpec().get(0).getName());
+        assertEquals(1, staticMethod.getChainSpec().get(0).getParameters().size());
+        assertEquals("1", staticMethod.getChainSpec().get(0).getParameters().get(0).toExpressionString());
     }
 
     public void testWalkDBJoinStatement() throws Exception
@@ -1294,7 +1295,7 @@ public class TestEPLTreeWalker extends TestCase
         SupportParserHelper.displayAST(ast);
 
         EventAdapterService eventAdapterService = SupportEventAdapterService.getService();
-        eventAdapterService.addBeanType("SupportBean_N", SupportBean_N.class, true);
+        eventAdapterService.addBeanType("SupportBean_N", SupportBean_N.class, true, true, true);
 
         EPLTreeWalker walker = SupportEPLTreeWalkerFactory.makeWalker(ast, engineImportService, variableService);
         walker.startEPLExpressionRule();
@@ -1319,7 +1320,7 @@ public class TestEPLTreeWalker extends TestCase
         EPLTreeWalker walker = parseAndWalkEPL(expression);
         ExprNode exprNode = (walker.getStatementSpec().getFilterRootNode().getChildNodes().get(0));
         exprNode = exprNode.getValidatedSubtree(null, null, null, null, null, null);
-        return exprNode.evaluate(null, false, null);
+        return exprNode.getExprEvaluator().evaluate(null, false, null);
     }
 
     private Object tryRelationalOp(String subExpr) throws Exception
@@ -1329,7 +1330,7 @@ public class TestEPLTreeWalker extends TestCase
         EPLTreeWalker walker = parseAndWalkEPL(expression);
         ExprNode filterExprNode = walker.getStatementSpec().getFilterRootNode();
         filterExprNode.getValidatedSubtree(null, null, null, null, null, null);
-        return filterExprNode.evaluate(null, false, null);
+        return filterExprNode.getExprEvaluator().evaluate(null, false, null);
     }
 
     private SelectClauseExprRawSpec getSelectExprSpec(StatementSpecRaw statementSpec, int index)

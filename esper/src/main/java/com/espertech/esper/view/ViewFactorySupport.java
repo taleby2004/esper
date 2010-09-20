@@ -8,15 +8,15 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeSummaryVisitor;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.client.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -57,7 +57,7 @@ public abstract class ViewFactorySupport implements ViewFactory
     public static Object validateAndEvaluate(String viewName, StatementContext statementContext, ExprNode expression)
             throws ViewParameterException
     {
-        return validateAndEvaluateExpr(statementContext, expression, new StreamTypeServiceImpl(statementContext.getEngineURI()), 0);
+        return validateAndEvaluateExpr(statementContext, expression, new StreamTypeServiceImpl(statementContext.getEngineURI(), false), 0);
     }
 
     /**
@@ -73,7 +73,7 @@ public abstract class ViewFactorySupport implements ViewFactory
     {
         List<Object> results = new ArrayList<Object>();
         int expressionNumber = 0;
-        StreamTypeService streamTypeService = new StreamTypeServiceImpl(statementContext.getEngineURI());
+        StreamTypeService streamTypeService = new StreamTypeServiceImpl(statementContext.getEngineURI(), false);
         for (ExprNode expr : expressions)
         {
             Object result = validateAndEvaluateExpr(statementContext, expr, streamTypeService, expressionNumber);
@@ -157,7 +157,7 @@ public abstract class ViewFactorySupport implements ViewFactory
             throw new ViewParameterException(message);
         }
 
-        return expression.evaluate(null, false, exprEvaluatorContext);
+        return expression.getExprEvaluator().evaluate(null, false, exprEvaluatorContext);
     }
 
     private static Object validateAndEvaluateExpr(StatementContext statementContext, ExprNode expression, StreamTypeService streamTypeService, int expressionNumber)
@@ -167,7 +167,7 @@ public abstract class ViewFactorySupport implements ViewFactory
 
         try
         {
-            return validated.evaluate(null, true, statementContext);
+            return validated.getExprEvaluator().evaluate(null, true, statementContext);
         }
         catch (RuntimeException ex)
         {

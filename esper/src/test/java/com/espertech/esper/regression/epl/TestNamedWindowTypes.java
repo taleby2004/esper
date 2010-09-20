@@ -1,21 +1,20 @@
 package com.espertech.esper.regression.epl;
 
-import com.espertech.esper.event.MappedEventBean;
-import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MapEventType;
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.MappedEventBean;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.event.EventTypeMetadata;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import junit.framework.TestCase;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TestNamedWindowTypes extends TestCase
 {
@@ -39,6 +38,19 @@ public class TestNamedWindowTypes extends TestCase
         listenerWindow = new SupportUpdateListener();
         listenerStmtOne = new SupportUpdateListener();
         listenerStmtDelete = new SupportUpdateListener();
+    }
+
+    public void testEventTypeColumnDef() {
+        epService.getEPAdministrator().createEPL("create schema SchemaOne(col1 int, col2 int)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window SchemaWindow.std:lastevent() as (s1 SchemaOne)");
+        stmt.addListener(listenerWindow);
+        epService.getEPAdministrator().createEPL("insert into SchemaWindow (s1) select sone from SchemaOne as sone");
+        
+        Map<String, Object> value = new HashMap<String, Object>();
+        value.put("col1", 10);
+        value.put("col2", 11);
+        epService.getEPRuntime().sendEvent(value, "SchemaOne");
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNew(), "s1.col1,s1.col2".split(","),new Object[] {10,11});
     }
 
     public void testMapTranspose()
@@ -99,6 +111,8 @@ public class TestNamedWindowTypes extends TestCase
         assertEquals("MyWindow", type.getName());
         assertEquals(EventTypeMetadata.TypeClass.NAMED_WINDOW, type.getMetadata().getTypeClass());
         assertEquals(false, type.getMetadata().isApplicationConfigured());
+        assertEquals(false, type.getMetadata().isApplicationPreConfigured());
+        assertEquals(false, type.getMetadata().isApplicationPreConfiguredStatic());
 
         // create insert into
         String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
@@ -203,6 +217,37 @@ public class TestNamedWindowTypes extends TestCase
         ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
     }
 
+    public void testCreateSchemaModelAfter()
+    {
+        epService.getEPAdministrator().createEPL("create schema EventTypeOne (hsi int)");
+        epService.getEPAdministrator().createEPL("create schema EventTypeTwo (event EventTypeOne)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window NamedWidnow.std:unique(event.hsi) as EventTypeTwo");
+        epService.getEPAdministrator().createEPL("on EventTypeOne as ev insert into NamedWidnow select ev as event");
+
+        Map<String, Object> event = new HashMap<String, Object>();
+        event.put("hsi", 10);
+        epService.getEPRuntime().sendEvent(event, "EventTypeOne");
+        EventBean result = stmt.iterator().next();
+        EventPropertyGetter getter = result.getEventType().getGetter("event.hsi");
+        assertEquals(10, getter.get(result));
+    }
+
+    public void testCreateTableArray()
+    {
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:keepall() (myvalue string[])";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+
+        // create insert into
+        String stmtTextInsertOne = "insert into MyWindow select {'a','b'} as myvalue from " + SupportBean.class.getName();
+        epService.getEPAdministrator().createEPL(stmtTextInsertOne);
+        
+        sendSupportBean("E1", 1L, 10L);
+        String[] values = (String[]) listenerWindow.assertOneGetNewAndReset().get("myvalue");
+        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a","b"}, values);
+    }
+
     public void testCreateTableSyntax()
     {
         // create window
@@ -219,6 +264,8 @@ public class TestNamedWindowTypes extends TestCase
         assertEquals("MyWindow", type.getName());
         assertEquals(EventTypeMetadata.TypeClass.NAMED_WINDOW, type.getMetadata().getTypeClass());
         assertEquals(false, type.getMetadata().isApplicationConfigured());
+        assertEquals(false, type.getMetadata().isApplicationPreConfigured());
+        assertEquals(false, type.getMetadata().isApplicationPreConfiguredStatic());
 
         // create insert into
         String stmtTextInsertOne = "insert into MyWindow select string as stringValOne, string as stringValTwo, cast(longPrimitive, int) as intVal, longBoxed as longVal from " + SupportBean.class.getName();

@@ -403,7 +403,7 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 			</para>
 			<programlisting><![CDATA[// less effective in a highly threaded environment 
 select venue, ccyPair, side, sum(qty)
-from CumulativePrice.std:groupby(ccyPair,side) as w
+from CumulativePrice.std:groupwin(ccyPair,side) as w
 where w.side='O']]></programlisting>
 
 			<para>
@@ -558,7 +558,7 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			</para>
 
 			<para>
-				The hint for use with <literal>group by</literal> to specify how state for groups is reclaimed is described in <xref linkend="epl-groupby-hints"/>.
+				The hint for use with <literal>group by</literal> to specify how state for groups is reclaimed is described in <xref linkend="epl-groupby-hints"/> and <xref linkend="view-std-groupwin"/>.
 			</para>
 
 			<para>
@@ -568,6 +568,30 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			<para>
 				The hint for use with <literal>match_recognize</literal> to specify iterate-only is described in <xref linkend="match-recognize-patternops-iterator"/>.
 			</para>
+		</sect2>
+
+		<sect2 id="perf-tips-16">
+			<title>Optimizing Stream Filter Expressions</title>
+
+			<para>
+				Assume your EPL statement invokes a static method in the stream filter as the below statement shows as an example:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent(MyHelperLibrary.filter(field1, field2, field3, field4*field5))]]></programlisting>
+
+			<para>
+				As a result of starting above statement, the engine must evaluate each MyEvent event invoking the <literal>MyHelperLibrary.filter</literal> method and passing certain event properties. The same applies to pattern filters that 
+				specify functions to evaluate.
+			</para>
+			
+			<para>
+				If possible, consider moving some of the checking performed by the function back into the filter or consider splitting the function into a two parts separated by <literal>and</literal> conjunction. In general for all expressions, the engine evaluates expressions left of the <literal>and</literal> first and can skip evaluation of the 
+				further expressions in the conjunction in the case when the first expression returns false. In addition the engine can build a reverse index for fields provided in stream or pattern filters.
+			</para>
+
+			<para>
+				For example, the below statement could be faster to evaluate:
+			</para>
+			<programlisting><![CDATA[select * from MyEvent(field1="value" and MyHelperLibrary.filter(field1, field2, field3, field4*field5))]]></programlisting>
 		</sect2>
 
     </sect1>
@@ -647,11 +671,11 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
                         1.7.0)
                         and its dependencies as in the sample below (with Esper 2.1) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-3.5.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
-   :lib/antlr-runtime-3.1.1.jar:lib/log4j-1.2.15.jar
+etc:build:lib/esper-4.0.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
+   :lib/antlr-runtime-3.2.jar:lib/log4j-1.2.16.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-3.5.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
-   ;lib\antlr-runtime-3.1.1.jar;lib\log4j-1.2.15.jar]]></programlisting>
+etc;build;lib\esper-4.0.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
+   ;lib\antlr-runtime-3.2.jar;lib\log4j-1.2.16.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in
                         <literal>-Xms1g -Xmx1g</literal>

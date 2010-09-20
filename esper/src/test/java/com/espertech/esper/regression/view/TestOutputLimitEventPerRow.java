@@ -2,6 +2,7 @@ package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -35,6 +36,91 @@ public class TestOutputLimitEventPerRow extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
+    }
+
+    public void testOutputFirstHavingJoinNoJoin() {
+
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
+
+        String stmtText = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow group by string having sum(intPrimitive) > 20 output first every 2 events";
+        tryOutputFirstHaving(stmtText);
+
+        String stmtTextJoin = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.string " +
+                "group by string having sum(intPrimitive) > 20 output first every 2 events";
+        tryOutputFirstHaving(stmtTextJoin);
+
+        String stmtTextOrder = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow group by string having sum(intPrimitive) > 20 output first every 2 events order by string asc";
+        tryOutputFirstHaving(stmtTextOrder);
+
+        String stmtTextOrderJoin = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.string " +
+                "group by string having sum(intPrimitive) > 20 output first every 2 events order by string asc";
+        tryOutputFirstHaving(stmtTextOrderJoin);
+    }
+
+    private void tryOutputFirstHaving(String statementText) {
+        String[] fields = "string,longPrimitive,value".split(",");
+        String[] fieldsLimited = "string,value".split(",");
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+        epService.getEPAdministrator().createEPL("on MarketData md delete from MyWindow mw where mw.intPrimitive = md.price");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(statementText);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
+
+        sendBeanEvent("E1", 101, 10);
+        sendBeanEvent("E2", 102, 15);
+        sendBeanEvent("E1", 103, 10);
+        sendBeanEvent("E2", 104, 5);
+        assertFalse(listener.isInvoked());
+
+        sendBeanEvent("E2", 105, 5);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 105L, 25});
+
+        sendBeanEvent("E2", 106, -6);    // to 19, does not count toward condition
+        sendBeanEvent("E2", 107, 2);    // to 21, counts toward condition
+        assertFalse(listener.isInvoked());
+        sendBeanEvent("E2", 108, 1);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 108L, 22});
+
+        sendBeanEvent("E2", 109, 1);    // to 23, counts toward condition
+        assertFalse(listener.isInvoked());
+        sendBeanEvent("E2", 110, 1);     // to 24
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 110L, 24});
+
+        sendBeanEvent("E2", 111, -10);    // to 14
+        sendBeanEvent("E2", 112, 10);    // to 24, counts toward condition
+        assertFalse(listener.isInvoked());
+        sendBeanEvent("E2", 113, 0);    // to 24, counts toward condition
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 113L, 24});
+
+        sendBeanEvent("E2", 114, -10);    // to 14
+        sendBeanEvent("E2", 115, 1);     // to 15
+        sendBeanEvent("E2", 116, 5);     // to 20
+        sendBeanEvent("E2", 117, 0);     // to 20
+        sendBeanEvent("E2", 118, 1);     // to 21    // counts
+        assertFalse(listener.isInvoked());
+
+        sendBeanEvent("E2", 119, 0);    // to 21
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 119L, 21});
+
+        // remove events
+        sendMDEvent("E2", 0);   // remove 113, 117, 119 (any order of delete!)
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[] {"E2", 21});
+
+        // remove events
+        sendMDEvent("E2", -10); // remove 111, 114
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[] {"E2", 41});
+
+        // remove events
+        sendMDEvent("E2", -6);  // since there is 3*0 we output the next one
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[] {"E2", 47});
+
+        sendMDEvent("E2", 2);
+        assertFalse(listener.isInvoked());
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void test1NoneNoHavingNoJoin()
@@ -201,6 +287,16 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec) " +
+                            "group by symbol " +
+                            "output first every 1 seconds";
+        runAssertion17(stmtText, "first");
+    }
+
+    public void test17FirstNoHavingJoin()
+    {
+        String stmtText = "select symbol, volume, sum(price) " +
+                            "from MarketData.win:time(5.5 sec), " +
+                            "SupportBean.win:keepall() where string=symbol " +
                             "group by symbol " +
                             "output first every 1 seconds";
         runAssertion17(stmtText, "first");
@@ -385,12 +481,16 @@ public class TestOutputLimitEventPerRow extends TestCase
         String fields[] = new String[] {"symbol", "volume", "sum(price)"};
         ResultAssertTestResult expected = new ResultAssertTestResult(CATEGORY, outputLimit, fields);
         expected.addResultInsert(200, 1, new Object[][] {{"IBM", 100L, 25d}});
+        expected.addResultInsert(800, 1, new Object[][] {{"MSFT", 5000L, 9d}});
         expected.addResultInsert(1500, 1, new Object[][] {{"IBM", 150L, 49d}});
-        expected.addResultInsRem(3200, 0, null, null);
+        expected.addResultInsert(1500, 2, new Object[][] {{"YAH", 10000L, 1d}});
         expected.addResultInsert(3500, 1, new Object[][] {{"YAH", 11000L, 3d}});
         expected.addResultInsert(4300, 1, new Object[][] {{"IBM", 150L, 97d}});
-        expected.addResultRemove(5700, 0, new Object[][] {{"IBM", 100L, 72d}});
-        expected.addResultRemove(6300, 0, new Object[][] {{"MSFT", 5000L, null}});
+        expected.addResultInsert(4900, 1, new Object[][] {{"YAH", 11500L, 6d}});
+        expected.addResultInsert(5700, 0, new Object[][] {{"IBM", 100L, 72d}});
+        expected.addResultInsert(5900, 1, new Object[][] {{"YAH", 10500L, 7d}});
+        expected.addResultInsert(6300, 0, new Object[][] {{"MSFT", 5000L, null}});
+        expected.addResultInsert(7000, 0, new Object[][] {{"IBM", 150L, 48d}, {"YAH", 10000L, 6d}});
 
         ResultAssertExecution execution = new ResultAssertExecution(epService, stmt, listener, expected);
         execution.execute();
@@ -935,6 +1035,21 @@ public class TestOutputLimitEventPerRow extends TestCase
         EPRuntime runtime = epService.getEPRuntime();
         runtime.sendEvent(event);
     }
+
+    private void sendBeanEvent(String string, long longPrimitive, int intPrimitive)
+	{
+        SupportBean b = new SupportBean();
+        b.setString(string);
+        b.setLongPrimitive(longPrimitive);
+        b.setIntPrimitive(intPrimitive);
+	    epService.getEPRuntime().sendEvent(b);
+	}
+
+    private void sendMDEvent(String symbol, double price)
+	{
+	    SupportMarketDataBean bean = new SupportMarketDataBean(symbol, price, 0L, null);
+	    epService.getEPRuntime().sendEvent(bean);
+	}
 
     private static final Log log = LogFactory.getLog(TestOutputLimitEventPerRow.class);
 }

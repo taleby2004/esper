@@ -3,6 +3,7 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.agg.AggregationValidationContext;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
@@ -16,12 +17,9 @@ import junit.framework.TestCase;
 public class TestAggregationFunctionPlugIn extends TestCase
 {
     private EPServiceProvider epService;
-    private SupportUpdateListener testListener;
 
     public void setUp()
     {
-        testListener = new SupportUpdateListener();
-
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addPlugInAggregationFunction("concatstring", MyConcatAggregationFunction.class.getName());
         configuration.addPlugInAggregationFunction("totalup", MyInnerAggFunction.class.getName());
@@ -184,9 +182,11 @@ public class TestAggregationFunctionPlugIn extends TestCase
     }
 
     private void runAssertion(SupportUpdateListener listener) {
-        ArrayAssertionUtil.assertEqualsExactOrder(SupportPluginAggregationMethodThree.getChildNodeType(), new Class[] {Integer.class, Integer.class, int.class});
-        ArrayAssertionUtil.assertEqualsExactOrder(SupportPluginAggregationMethodThree.getConstantValue(), new Object[] {1, 10, null});
-        ArrayAssertionUtil.assertEqualsExactOrder(SupportPluginAggregationMethodThree.getIsConstantValue(), new boolean[] {true, true, false});
+
+        AggregationValidationContext validContext = SupportPluginAggregationMethodThree.getContexts().get(0);
+        ArrayAssertionUtil.assertEqualsExactOrder(validContext.getParameterTypes(), new Class[] {Integer.class, Integer.class, int.class});
+        ArrayAssertionUtil.assertEqualsExactOrder(validContext.getConstantValues(), new Object[] {1, 10, null});
+        ArrayAssertionUtil.assertEqualsExactOrder(validContext.getIsConstantValue(), new boolean[] {true, true, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
         listener.assertFieldEqualsAndReset("val", new Object[] {1}, new Object[] {0});
@@ -249,7 +249,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting statement: Plug-in aggregation function 'concat' failed validation: Invalid node type: java.lang.Integer [select * from com.espertech.esper.support.bean.SupportBean group by concat(1)]", ex.getMessage());
+            assertEquals("Error starting statement: Plug-in aggregation function 'concat' failed validation: Invalid parameter type 'java.lang.Integer', expecting string [select * from com.espertech.esper.support.bean.SupportBean group by concat(1)]", ex.getMessage());
         }
 
         try
@@ -259,7 +259,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting statement: Group-by expressions must refer to property names [select * from com.espertech.esper.support.bean.SupportBean group by concat(1, 1)]", ex.getMessage());
+            assertEquals("Error starting statement: Plug-in aggregation function 'concat' failed validation: Invalid parameter type 'java.lang.Integer', expecting string [select * from com.espertech.esper.support.bean.SupportBean group by concat(1, 1)]", ex.getMessage());
         }
     }
 
@@ -324,7 +324,8 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testInvalid()
     {
-        tryInvalid("select xxx(id) from A ", "Error in expression: Unknown method named 'xxx' could not be resolved [select xxx(id) from A ]");
+        tryInvalid("select xxx(id) from A ",
+                "Error in expression: Unknown single-row function or aggregation function named 'xxx' could not be resolved [select xxx(id) from A ]");
     }
 
     private void tryInvalid(String stmtText, String expectedMsg)
@@ -343,7 +344,9 @@ public class TestAggregationFunctionPlugIn extends TestCase
     public class MyInnerAggFunction extends AggregationSupport
     {
         private int total;
-        public void validate(Class childNodeType)
+
+        @Override
+        public void validate(AggregationValidationContext validationContext)
         {
         }
 

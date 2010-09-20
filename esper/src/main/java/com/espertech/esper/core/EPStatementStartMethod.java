@@ -59,7 +59,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -159,42 +158,20 @@ public class EPStatementStartMethod
         try {
             if (!spec.isVariant()) {
                 if (spec.getTypes().isEmpty()) {
-                    Map<String, Object> typing = new HashMap<String, Object>();
-                    Set<String> columnNames = new HashSet<String>();
-                    for (ColumnDesc column : spec.getColumns()) {
-                        boolean added = columnNames.add(column.getName());
-                        if (!added) {
-                            throw new ExprValidationException("Duplicate column name '" + column.getName() + "'");
-                        }
-                        Class plain = JavaClassHelper.getClassForSimpleName(column.getType());
-                        if (plain != null) {
-                            if (column.isArray()) {
-                                plain = Array.newInstance(plain, 0).getClass();
-                            }
-                            typing.put(column.getName(), plain);
-                        }
-                        else {
-                            if (column.isArray()) {
-                                typing.put(column.getName(), column.getType() + "[]");
-                            }
-                            else {
-                                typing.put(column.getName(), column.getType());
-                            }
-                        }
-                    }
-                    eventType = services.getEventAdapterService().addNestableMapType(spec.getSchemaName(), typing, spec.getInherits(), true, false, false);
+                    Map<String, Object> typing = TypeBuilderUtil.buildType(spec.getColumns());
+                    eventType = services.getEventAdapterService().addNestableMapType(spec.getSchemaName(), typing, spec.getInherits(), false, false, true, false, false);
                 }
                 else {
                     if (spec.getTypes().size() == 1) {
                         String typeName = spec.getTypes().iterator().next();
                         try {
-                            eventType = services.getEventAdapterService().addBeanType(spec.getSchemaName(), spec.getTypes().iterator().next(), false);
+                            eventType = services.getEventAdapterService().addBeanType(spec.getSchemaName(), spec.getTypes().iterator().next(), false, false, false, true);
                         }
                         catch (EventAdapterException ex) {
                             Class clazz;
                             try {
                                 clazz = services.getEngineImportService().resolveClass(typeName);
-                                eventType = services.getEventAdapterService().addBeanType(spec.getSchemaName(), clazz, true);
+                                eventType = services.getEventAdapterService().addBeanType(spec.getSchemaName(), clazz, false, false, true);
                             }
                             catch (EngineImportException e) {
                                 log.debug("Engine import failed to resolve event type '" + typeName + "'");
@@ -301,7 +278,7 @@ public class EPStatementStartMethod
         {
             NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) streamSpec;
             NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
-            eventStreamParentViewable = processor.addConsumer(namedSpec.getFilterExpressions(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
+            eventStreamParentViewable = processor.addConsumer(namedSpec.getFilterExpressions(), namedSpec.getOptPropertyEvaluator(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
             triggereventTypeName = namedSpec.getWindowName();
         }
         else
@@ -340,7 +317,7 @@ public class EPStatementStartMethod
             // 1 - arriving stream
             startSubSelect(subSelectStreamDesc, new String[]{namedWindowName, streamSpec.getOptionalStreamName()}, new EventType[] {processor.getNamedWindowType(), streamEventType}, new String[]{namedWindowTypeName, triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations());
 
-            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType, streamEventType}, new String[] {namedWindowName, streamName}, new boolean[] {false, true}, services.getEngineURI());
+            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType, streamEventType}, new String[] {namedWindowName, streamName}, new boolean[] {false, true}, services.getEngineURI(), false);
             if (onTriggerDesc instanceof OnTriggerWindowUpdateDesc) {
                 OnTriggerWindowUpdateDesc updateDesc = (OnTriggerWindowUpdateDesc) onTriggerDesc;
                 for (OnTriggerSetAssignment assignment : updateDesc.getAssignments())
@@ -382,7 +359,7 @@ public class EPStatementStartMethod
         else if (statementSpec.getOnTriggerDesc() instanceof OnTriggerSetDesc)
         {
             OnTriggerSetDesc desc = (OnTriggerSetDesc) statementSpec.getOnTriggerDesc();
-            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamSpec.getOptionalStreamName()}, new boolean[] {true}, services.getEngineURI());
+            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamSpec.getOptionalStreamName()}, new boolean[] {true}, services.getEngineURI(), false);
 
             // Materialize sub-select views
             startSubSelect(subSelectStreamDesc, new String[]{streamSpec.getOptionalStreamName()}, new EventType[] {streamEventType}, new String[]{triggereventTypeName}, stopCallbacks, statementSpec.getAnnotations());
@@ -410,7 +387,7 @@ public class EPStatementStartMethod
             {
                 streamName = "stream_0";
             }
-            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamName}, new boolean[] {true}, services.getEngineURI());
+            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamName}, new boolean[] {true}, services.getEngineURI(), false);
             if (statementSpec.getInsertIntoDesc() == null)
             {
                 throw new ExprValidationException("Required insert-into clause is not provided, the clause is required for split-stream syntax");
@@ -481,7 +458,7 @@ public class EPStatementStartMethod
             StatementSpecCompiled defaultSelectAllSpec = new StatementSpecCompiled();
             defaultSelectAllSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
 
-            StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {onExprView.getEventType()}, new String[] {"trigger_stream"}, new boolean[] {true}, services.getEngineURI());
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {onExprView.getEventType()}, new String[] {"trigger_stream"}, new boolean[] {true}, services.getEngineURI(), false);
             ResultSetProcessor outputResultSetProcessor = ResultSetProcessorFactory.getProcessor(
                     defaultSelectAllSpec, statementContext, streamTypeService, null, new boolean[0], true);
 
@@ -531,7 +508,7 @@ public class EPStatementStartMethod
         }
 
         final EventType streamEventType = services.getEventAdapterService().getExistsTypeByName(triggereventTypeName);
-        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamName}, new boolean[] {true}, services.getEngineURI());
+        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {streamEventType}, new String[] {streamName}, new boolean[] {true}, services.getEngineURI(), false);
 
         // determine subscriber result types
         statementContext.getStatementResultService().setSelectClause(new Class[] {streamEventType.getUnderlyingType()}, new String[] {"*"}, false, null, statementContext);
@@ -647,7 +624,7 @@ public class EPStatementStartMethod
         statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
         statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH);
 
-        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {windowType}, new String[] {windowName}, new boolean[] {true}, services.getEngineURI());
+        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {windowType}, new String[] {windowName}, new boolean[] {true}, services.getEngineURI(), false);
         ResultSetProcessor resultSetProcessor = ResultSetProcessorFactory.getProcessor(
                 statementSpec, statementContext, typeService, null, new boolean[0], true);
 
@@ -665,7 +642,7 @@ public class EPStatementStartMethod
             if (statementSpec.getCreateWindowDesc().getInsertFilter() != null)
             {
                 EventBean[] eventsPerStream = new EventBean[1];
-                ExprNode filter = statementSpec.getCreateWindowDesc().getInsertFilter();
+                ExprEvaluator filter = statementSpec.getCreateWindowDesc().getInsertFilter().getExprEvaluator();
                 for (Iterator<EventBean> it = sourceWindow.getTailView().iterator(); it.hasNext();)
                 {
                     EventBean candidate = it.next();
@@ -708,9 +685,9 @@ public class EPStatementStartMethod
         if (createDesc.getAssignment() != null)
         {
             // Evaluate assignment expression
-            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[0], new String[0], new boolean[0], services.getEngineURI());
+            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[0], new String[0], new boolean[0], services.getEngineURI(), false);
             ExprNode validated = createDesc.getAssignment().getValidatedSubtree(typeService, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
-            value = validated.evaluate(null, true, statementContext);
+            value = validated.getExprEvaluator().evaluate(null, true, statementContext);
         }
 
         // Create variable
@@ -745,7 +722,7 @@ public class EPStatementStartMethod
         statementSpec.getSelectClauseSpec().getSelectExprList().clear();
         statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
         statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH);
-        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {createView.getEventType()}, new String[] {"create_variable"}, new boolean[] {true}, services.getEngineURI());
+        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {createView.getEventType()}, new String[] {"create_variable"}, new boolean[] {true}, services.getEngineURI(), false);
         ResultSetProcessor resultSetProcessor = ResultSetProcessorFactory.getProcessor(
                 statementSpec, statementContext, typeService, null, new boolean[0], true);
 
@@ -880,7 +857,7 @@ public class EPStatementStartMethod
             {
                 NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) streamSpec;
                 NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
-                NamedWindowConsumerView consumerView = processor.addConsumer(namedSpec.getFilterExpressions(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
+                NamedWindowConsumerView consumerView = processor.addConsumer(namedSpec.getFilterExpressions(), namedSpec.getOptPropertyEvaluator(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
                 eventStreamParentViewable[i] = consumerView;
                 unmaterializedViewChain[i] = services.getViewService().createFactories(i, consumerView.getEventType(), namedSpec.getViewSpecs(), namedSpec.getOptions(), statementContext);
                 joinAnalysisResult.setNamedWindow(i);
@@ -923,7 +900,7 @@ public class EPStatementStartMethod
         statementStreamSpecs.addAll(statementSpec.getStreamSpecs());
 
         // Construct type information per stream
-        StreamTypeService typeService = new StreamTypeServiceImpl(streamEventTypes, streamNames, getHasIStreamOnly(isNamedWindow, unmaterializedViewChain), services.getEngineURI());
+        StreamTypeService typeService = new StreamTypeServiceImpl(streamEventTypes, streamNames, getHasIStreamOnly(isNamedWindow, unmaterializedViewChain), services.getEngineURI(), false);
         ViewResourceDelegate viewResourceDelegate = new ViewResourceDelegateImpl(unmaterializedViewChain, statementContext);
 
         // boolean multiple expiry policy
@@ -1254,7 +1231,8 @@ public class EPStatementStartMethod
             }
         });
 
-        JoinSetFilter filter = new JoinSetFilter(statementSpec.getFilterRootNode());
+        ExprEvaluator filterEval = statementSpec.getFilterRootNode() == null ? null : statementSpec.getFilterRootNode().getExprEvaluator();
+        JoinSetFilter filter = new JoinSetFilter(filterEval);
         OutputProcessView indicatorView = OutputProcessViewFactory.makeView(resultSetProcessor, statementSpec,
                 statementContext, services.getInternalEventRouter());
 
@@ -1358,11 +1336,11 @@ public class EPStatementStartMethod
             try
             {
                 EventType outputLimitType = OutputConditionExpression.getBuiltInEventType(statementContext.getEventAdapterService());
-                StreamTypeService typeServiceOutputWhen = new StreamTypeServiceImpl(new EventType[] {outputLimitType}, new String[]{null}, new boolean[] {true}, statementContext.getEngineURI());
+                StreamTypeService typeServiceOutputWhen = new StreamTypeServiceImpl(new EventType[] {outputLimitType}, new String[]{null}, new boolean[] {true}, statementContext.getEngineURI(), false);
                 outputLimitWhenNode = outputLimitWhenNode.getValidatedSubtree(typeServiceOutputWhen, methodResolutionService, null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
                 statementSpec.getOutputLimitSpec().setWhenExpressionNode(outputLimitWhenNode);
 
-                if (JavaClassHelper.getBoxedType(outputLimitWhenNode.getType()) != Boolean.class)
+                if (JavaClassHelper.getBoxedType(outputLimitWhenNode.getExprEvaluator().getType()) != Boolean.class)
                 {
                     throw new ExprValidationException("The when-trigger expression in the OUTPUT WHEN clause must return a boolean-type value");
                 }
@@ -1499,7 +1477,7 @@ public class EPStatementStartMethod
         // Add filter view that evaluates the filter expression
         if (statementSpec.getFilterRootNode() != null)
         {
-            FilterExprView filterView = new FilterExprView(statementSpec.getFilterRootNode(), statementContext);
+            FilterExprView filterView = new FilterExprView(statementSpec.getFilterRootNode().getExprEvaluator(), statementContext);
             finalView.addView(filterView);
             finalView = filterView;
         }
@@ -1558,7 +1536,7 @@ public class EPStatementStartMethod
             {
                 NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) statementSpec.getStreamSpecs().get(0);
                 NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
-                NamedWindowConsumerView consumerView = processor.addConsumer(namedSpec.getFilterExpressions(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
+                NamedWindowConsumerView consumerView = processor.addConsumer(namedSpec.getFilterExpressions(), namedSpec.getOptPropertyEvaluator(), statementContext.getEpStatementHandle(), statementContext.getStatementStopService());
                 ViewFactoryChain viewFactoryChain = services.getViewService().createFactories(0, consumerView.getEventType(), namedSpec.getViewSpecs(), namedSpec.getOptions(), statementContext);
                 subselect.setRawEventType(viewFactoryChain.getEventType());
                 subSelectStreamDesc.add(subselect, subselectStreamNumber, consumerView, viewFactoryChain);
@@ -1630,47 +1608,83 @@ public class EPStatementStartMethod
             // Validate select expression
             SelectClauseSpecCompiled selectClauseSpec = subselect.getStatementSpecCompiled().getSelectClauseSpec();
             AggregationService aggregationService = null;
+            List<ExprNode> selectExpressions = new ArrayList<ExprNode>();
+            List<String> assignedNames = new ArrayList<String>();
+            boolean isWildcard = false;
+            boolean isStreamWildcard = false;
             if (selectClauseSpec.getSelectExprList().size() > 0)
             {
-                SelectClauseElementCompiled element = selectClauseSpec.getSelectExprList().get(0);
-                if (element instanceof SelectClauseExprCompiledSpec)
-                {
-                    // validate
-                    SelectClauseExprCompiledSpec compiled = (SelectClauseExprCompiledSpec) element;
-                    ExprNode selectExpression = compiled.getSelectExpression();
-                    selectExpression = selectExpression.getValidatedSubtree(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
-                    subselect.setSelectClause(selectExpression);
-                    subselect.setSelectAsName(compiled.getAssignedName());
+                List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
 
-                    // handle aggregation
-                    List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
-                    ExprAggregateNode.getAggregatesBottomUp(selectExpression, aggExprNodes);
-                    if (aggExprNodes.size() > 0)
+                for (int i = 0; i < selectClauseSpec.getSelectExprList().size(); i++) {
+                    SelectClauseElementCompiled element = selectClauseSpec.getSelectExprList().get(i);
+
+                    if (element instanceof SelectClauseExprCompiledSpec)
                     {
-                        List<ExprAggregateNode> havingAgg = Collections.emptyList();
-                        List<ExprAggregateNode> orderByAgg = Collections.emptyList();
-                        aggregationService = AggregationServiceFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, null, statementContext, annotations, statementContext.getVariableService(), statementContext.getStatementStopService());
+                        // validate
+                        SelectClauseExprCompiledSpec compiled = (SelectClauseExprCompiledSpec) element;
+                        ExprNode selectExpression = compiled.getSelectExpression();
+                        selectExpression = selectExpression.getValidatedSubtree(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
 
-                        // Other stream properties, if there is aggregation, cannot be under aggregation.
-                        for (ExprAggregateNode aggNode : aggExprNodes)
+                        selectExpressions.add(selectExpression);
+                        assignedNames.add(compiled.getAssignedName());
+
+                        // handle aggregation
+                        ExprAggregateNode.getAggregatesBottomUp(selectExpression, aggExprNodes);
+
+                        if (aggExprNodes.size() > 0)
                         {
-                            List<Pair<Integer, String>> propertiesNodesAggregated = getExpressionProperties(aggNode, true);
-                            for (Pair<Integer, String> pair : propertiesNodesAggregated)
+                            // This stream (stream 0) properties must either all be under aggregation, or all not be.
+                            List<Pair<Integer, String>> propertiesNotAggregated = getExpressionProperties(selectExpression, false);
+                            for (Pair<Integer, String> pair : propertiesNotAggregated)
                             {
-                                if (pair.getFirst() != 0)
+                                if (pair.getFirst() == 0)
                                 {
-                                    throw new ExprValidationException("Subselect aggregation function cannot aggregate across correlated properties");
+                                    throw new ExprValidationException("Subselect properties must all be within aggregation functions");
                                 }
                             }
                         }
+                    }
+                    else if (element instanceof SelectClauseElementWildcard) {
+                        isWildcard = true;
+                    }
+                    else if (element instanceof SelectClauseStreamCompiledSpec) {
+                        isStreamWildcard = true;
+                    }
+                }   // end of for loop
 
-                        // This stream (stream 0) properties must either all be under aggregation, or all not be.
-                        List<Pair<Integer, String>> propertiesNotAggregated = getExpressionProperties(selectExpression, false);
-                        for (Pair<Integer, String> pair : propertiesNotAggregated)
+                if (!selectExpressions.isEmpty()) {
+                    subselect.setSelectClause(selectExpressions.toArray(new ExprNode[selectExpressions.size()]));
+                    subselect.setSelectAsNames(assignedNames.toArray(new String[assignedNames.size()]));
+                    if (isWildcard || isStreamWildcard) {
+                        throw new ExprValidationException("Subquery multi-column select does not allow wildcard or stream wildcard when selecting multiple columns.");
+                    }
+                    if (selectExpressions.size() > 1 && !subselect.isAllowMultiColumnSelect()) {
+                        throw new ExprValidationException("Subquery multi-column select is not allowed in this context.");
+                    }
+                    if ((selectExpressions.size() > 1 && aggExprNodes.size() > 0)) {
+                        // all properties must be aggregated
+                        if (!ExprNodeUtility.getNonAggregatedProps(selectExpressions).isEmpty()) {
+                            throw new ExprValidationException("Subquery with multi-column select requires that either all or none of the selected columns are under aggregation.");
+                        }
+                    }
+                }
+
+                if (aggExprNodes.size() > 0)
+                {
+                    List<ExprAggregateNode> havingAgg = Collections.emptyList();
+                    List<ExprAggregateNode> orderByAgg = Collections.emptyList();
+                    aggregationService = AggregationServiceFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, statementContext.getMethodResolutionService(), statementContext, annotations, statementContext.getVariableService(), statementContext.getStatementStopService(), false, statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode());
+
+                    // Other stream properties, if there is aggregation, cannot be under aggregation.
+                    for (ExprAggregateNode aggNode : aggExprNodes)
+                    {
+                        List<Pair<Integer, String>> propertiesNodesAggregated = getExpressionProperties(aggNode, true);
+                        for (Pair<Integer, String> pair : propertiesNodesAggregated)
                         {
-                            if (pair.getFirst() == 0)
+                            if (pair.getFirst() != 0)
                             {
-                                throw new ExprValidationException("Subselect properties must all be within aggregation functions");
+                                throw new ExprValidationException("Subselect aggregation functions cannot aggregate across correlated properties");
                             }
                         }
                     }
@@ -1690,10 +1704,11 @@ public class EPStatementStartMethod
 
             // Validate filter expression, if there is one
             ExprNode filterExpr = statementSpec.getFilterRootNode();
+            boolean correlatedSubquery = false;
             if (filterExpr != null)
             {
                 filterExpr = filterExpr.getValidatedSubtree(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
-                if (JavaClassHelper.getBoxedType(filterExpr.getType()) != Boolean.class)
+                if (JavaClassHelper.getBoxedType(filterExpr.getExprEvaluator().getType()) != Boolean.class)
                 {
                     throw new ExprValidationException("Subselect filter expression must return a boolean value");
                 }
@@ -1704,9 +1719,10 @@ public class EPStatementStartMethod
                 List<Pair<Integer, String>> propertiesNodes = visitor.getExprProperties();
                 for (Pair<Integer, String> pair : propertiesNodes)
                 {
-                    if ((pair.getFirst() != 0) && (aggregationService != null))
+                    if (pair.getFirst() != 0)
                     {
-                        throw new ExprValidationException("Subselect filter expression cannot be a correlated expression when aggregating properties via aggregation function");
+                        correlatedSubquery = true;
+                        break;
                     }
                 }
             }
@@ -1722,21 +1738,35 @@ public class EPStatementStartMethod
             // Note that "var1 + max(var2)" is not allowed as some properties are not under aggregation (which event to use?).
             if (aggregationService != null)
             {
-                SubselectAggregatorView aggregatorView = new SubselectAggregatorView(aggregationService, filterExpr, statementContext);
-                subselectView.addView(aggregatorView);
-                subselectView = aggregatorView;
-
-                eventIndex = null;
                 subselect.setStrategy(new TableLookupStrategyNullRow());
                 subselect.setFilterExpr(null);      // filter not evaluated by subselect expression as not correlated
+                ExprEvaluator filterExprEval = (filterExpr == null) ? null : filterExpr.getExprEvaluator();
+
+                if (!correlatedSubquery) {
+                    SubselectAggregatorView aggregatorView = new SubselectAggregatorView(aggregationService, filterExprEval, statementContext);
+                    subselectView.addView(aggregatorView);
+                    subselectView = aggregatorView;
+                    eventIndex = null;
+                }
+                else {
+                    Pair<EventTable, TableLookupStrategy> indexPair = determineSubqueryIndex(filterExpr, eventType,
+                            outerEventTypes, subselectTypeService);
+                    subselect.setStrategy(indexPair.getSecond());
+                    subselect.setFilterExpr(null);  // this will be evaluated in the preprocessor
+                    eventIndex = indexPair.getFirst();
+
+                    SubselectAggregationPreprocessor preprocessor = new SubselectAggregationPreprocessor(aggregationService, filterExpr.getExprEvaluator());
+                    subselect.setSubselectAggregationPreprocessor(preprocessor);
+                }
             }
             else
             {
                 // Determine indexing of the filter expression
                 Pair<EventTable, TableLookupStrategy> indexPair = determineSubqueryIndex(filterExpr, eventType,
                         outerEventTypes, subselectTypeService);
+                ExprEvaluator filterExprEval = (filterExpr == null) ? null : filterExpr.getExprEvaluator();
                 subselect.setStrategy(indexPair.getSecond());
-                subselect.setFilterExpr(filterExpr);
+                subselect.setFilterExpr(filterExprEval);
                 eventIndex = indexPair.getFirst();
             }
 

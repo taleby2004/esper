@@ -19,12 +19,12 @@ public class TestExprPreviousNode extends TestCase {
 
     public void testGetType()  throws Exception
     {
-        assertEquals(double.class, prevNode.getType());
+        assertEquals(Double.class, prevNode.getType());
     }
 
     public void testValidate() throws Exception
     {
-        prevNode = new ExprPreviousNode();
+        prevNode = new ExprPreviousNode(PreviousType.PREV);
 
         // No subnodes: Exception is thrown.
         tryInvalidValidate(prevNode);
@@ -49,13 +49,13 @@ public class TestExprPreviousNode extends TestCase {
 
     public void testEquals()  throws Exception
     {
-        ExprPreviousNode node1 = new ExprPreviousNode();
+        ExprPreviousNode node1 = new ExprPreviousNode(PreviousType.PREV);
         assertTrue(node1.equalsNode(prevNode));
     }
 
     public void testToExpressionString() throws Exception
     {
-        assertEquals("prev(s1.intPrimitive,s1.doublePrimitive)", prevNode.toExpressionString());
+        assertEquals("prev(s1.intPrimitive, s1.doublePrimitive)", prevNode.toExpressionString());
     }
 
     private EventBean[] makeEvent(int intPrimitive, double doublePrimitive)

@@ -8,10 +8,12 @@ import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.type.WildcardParameter;
 
+import java.util.Map;
+
 /**
  * Expression for use within crontab to specify a wildcard.
  */
-public class ExprNumberSetWildcard extends ExprNode
+public class ExprNumberSetWildcard extends ExprNode implements ExprEvaluator
 {
     private static final WildcardParameter wildcardParameter = new WildcardParameter();
     private static final long serialVersionUID = -6098833102154556698L;
@@ -21,9 +23,18 @@ public class ExprNumberSetWildcard extends ExprNode
         return "*";
     }
 
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
     public boolean isConstantResult()
     {
         return true;
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     public boolean equalsNode(ExprNode node)

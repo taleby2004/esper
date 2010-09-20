@@ -8,10 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.util.JavaClassHelper;
 
 /**
  * Represents the nth(...) and aggregate function is an expression tree.
@@ -29,7 +28,7 @@ public class ExprNthAggNode extends ExprAggregateNode
         super(distinct);
     }
 
-    public AggregationMethod validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public AggregationMethodFactory validateAggregationChild(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         String message = "The nth aggregation function requires two parameters, an expression returning aggregation values and a numeric index constant";
         if (this.getChildNodes().size() != 2) {
@@ -42,10 +41,10 @@ public class ExprNthAggNode extends ExprAggregateNode
             throw new ExprValidationException(message);
         }
 
-        Number num = (Number) second.evaluate(null, true, exprEvaluatorContext);
+        Number num = (Number) second.getExprEvaluator().evaluate(null, true, exprEvaluatorContext);
         int size = num.intValue();
 
-        return methodResolutionService.makeNthAggregator(first.getType(), size);
+        return new ExprNthAggNodeFactory(first.getExprEvaluator().getType(), size, super.isDistinct);
     }
 
     protected String getAggregationFunctionName()

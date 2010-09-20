@@ -14,6 +14,8 @@ import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.property.PropertyEvaluator;
+import com.espertech.esper.epl.property.PropertyEvaluatorFactory;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.client.EventType;
@@ -78,12 +80,16 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         if (context.getNamedWindowService().isNamedWindow(eventName))
         {
             EventType namedWindowType = context.getNamedWindowService().getProcessor(eventName).getTailView().getEventType();
-            StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType}, new String[] {"s0"}, new boolean[] {true}, context.getEngineURI());
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {namedWindowType}, new String[] {"s0"}, new boolean[] {true}, context.getEngineURI(), false);
 
             List<ExprNode> validatedNodes = FilterSpecCompiler.validateAllowSubquery(rawFilterSpec.getFilterExpressions(), streamTypeService, context, null, null);
 
+            PropertyEvaluator optionalPropertyEvaluator = null;
+            if (rawFilterSpec.getOptionalPropertyEvalSpec() != null) {
+                optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(rawFilterSpec.getOptionalPropertyEvalSpec(), namedWindowType, this.getOptionalStreamName(), context.getEventAdapterService(), context.getMethodResolutionService(), context.getTimeProvider(), context.getVariableService(), context.getEngineURI());
+            }
             eventTypeReferences.add(((EventTypeSPI) namedWindowType).getMetadata().getPrimaryName());
-            return new NamedWindowConsumerStreamSpec(eventName, this.getOptionalStreamName(), this.getViewSpecs(), validatedNodes, this.getOptions());
+            return new NamedWindowConsumerStreamSpec(eventName, this.getOptionalStreamName(), this.getViewSpecs(), validatedNodes, this.getOptions(), optionalPropertyEvaluator);
         }
 
         EventType eventType = null;
@@ -104,7 +110,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
 
         // Validate all nodes, make sure each returns a boolean and types are good;
         // Also decompose all AND super nodes into individual expressions
-        StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {eventType}, new String[] {super.getOptionalStreamName()}, new boolean[] {true}, context.getEngineURI());
+        StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {eventType}, new String[] {super.getOptionalStreamName()}, new boolean[] {true}, context.getEngineURI(), false);
 
         FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, eventName, rawFilterSpec.getFilterExpressions(), rawFilterSpec.getOptionalPropertyEvalSpec(),
                 null, null,  // no tags
@@ -122,7 +128,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
      * @return event type
      * @throws ExprValidationException if the info cannot be resolved
      */
-    protected static EventType resolveType(String engineURI, String eventName, EventAdapterService eventAdapterService, URI[] optionalResolutionURIs)
+    public static EventType resolveType(String engineURI, String eventName, EventAdapterService eventAdapterService, URI[] optionalResolutionURIs)
             throws ExprValidationException
     {
         EventType eventType = eventAdapterService.getExistsTypeByName(eventName);
@@ -165,7 +171,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
         String message = null;
         try
         {
-            eventType = eventAdapterService.addBeanType(eventName, eventName, true);
+            eventType = eventAdapterService.addBeanType(eventName, eventName, true, false, false, false);
         }
         catch (EventAdapterException ex)
         {

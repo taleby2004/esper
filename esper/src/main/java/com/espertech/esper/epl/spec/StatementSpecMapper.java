@@ -13,8 +13,11 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.EPAdministratorHelper;
+import com.espertech.esper.epl.agg.AggregationAccessType;
 import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
@@ -264,6 +267,7 @@ public class StatementSpecMapper
         CreateWindowClause clause = new CreateWindowClause(createWindowDesc.getWindowName(), unmapViews(createWindowDesc.getViewSpecs(), unmapContext));
         clause.setInsert(createWindowDesc.isInsert());
         clause.setInsertWhereClause(filter);
+        clause.setColumns(unmapColumns(createWindowDesc.getColumns()));
         model.setCreateWindow(clause);
     }
 
@@ -296,10 +300,7 @@ public class StatementSpecMapper
         {
             return;
         }
-        List<SchemaColumnDesc> columns = new ArrayList<SchemaColumnDesc>();
-        for (ColumnDesc col : desc.getColumns()) {
-            columns.add(new SchemaColumnDesc(col.getName(), col.getType(), col.isArray()));
-        }
+        List<SchemaColumnDesc> columns = unmapColumns(desc.getColumns());
         model.setCreateSchema(new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.isVariant()));
     }
 
@@ -669,7 +670,16 @@ public class StatementSpecMapper
         spec.setDefines(defines);
 
         if (clause.getIntervalClause() != null) {
-            spec.setInterval(new MatchRecognizeInterval((ExprTimePeriod) mapExpressionDeep(clause.getIntervalClause().getExpression(), mapContext)));
+            ExprTimePeriod timePeriod = (ExprTimePeriod) mapExpressionDeep(clause.getIntervalClause().getExpression(), mapContext);
+            try
+            {
+                timePeriod.validate(null, null, null, null, null, null);
+            }
+            catch (ExprValidationException e)
+            {
+                throw new RuntimeException("Error validating time-period expression: " + e.getMessage(), e);
+            }
+            spec.setInterval(new MatchRecognizeInterval(timePeriod));
         }
         spec.setPattern(mapExpressionDeepRowRegex(clause.getPattern(), mapContext));
         raw.setMatchRecognizeSpec(spec);
@@ -890,7 +900,8 @@ public class StatementSpecMapper
         {
             insertFromWhereExpr = mapExpressionDeep(createWindow.getInsertWhereClause(), mapContext);
         }
-        raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews(), mapContext), new StreamSpecOptions(), createWindow.isInsert(), insertFromWhereExpr));
+        List<ColumnDesc> columns = mapColumns(createWindow.getColumns());
+        raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews(), mapContext), new StreamSpecOptions(), createWindow.isInsert(), insertFromWhereExpr,  columns));
     }
 
     private static void mapCreateIndex(CreateIndexClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -949,11 +960,30 @@ public class StatementSpecMapper
         {
             return;
         }
-        List<ColumnDesc> columns = new ArrayList<ColumnDesc>();
-        for (SchemaColumnDesc col : clause.getColumns()) {
-            columns.add(new ColumnDesc(col.getName(), col.getType(), col.isArray()));
-        }
+        List<ColumnDesc> columns = mapColumns(clause.getColumns());
         raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant()));
+    }
+
+    private static List<ColumnDesc> mapColumns(List<SchemaColumnDesc> columns) {
+        if (columns == null) {
+            return null;
+        }
+        List<ColumnDesc> result = new ArrayList<ColumnDesc>();
+        for (SchemaColumnDesc col : columns) {
+            result.add(new ColumnDesc(col.getName(), col.getType(), col.isArray()));
+        }
+        return result;
+    }
+
+    private static List<SchemaColumnDesc> unmapColumns(List<ColumnDesc> columns) {
+        if (columns == null) {
+            return null;
+        }
+        List<SchemaColumnDesc> result = new ArrayList<SchemaColumnDesc>();
+        for (ColumnDesc col : columns) {
+            result.add(new SchemaColumnDesc(col.getName(), col.getType(), col.isArray()));
+        }
+        return result;
     }
 
     private static InsertIntoDesc mapInsertInto(InsertIntoClause insertInto)
@@ -1195,12 +1225,13 @@ public class StatementSpecMapper
         }
         else if (expr instanceof PreviousExpression)
         {
-            return new ExprPreviousNode();
+            PreviousExpression prev = (PreviousExpression) expr;
+            return new ExprPreviousNode(PreviousType.valueOf(prev.getType().toString()));
         }
         else if (expr instanceof StaticMethodExpression)
         {
             StaticMethodExpression method = (StaticMethodExpression) expr;
-            return new ExprStaticMethodNode(method.getClassName(), method.getMethod(),
+            return new ExprStaticMethodNode(method.getClassName(), mapChains(method.getChain(), mapContext),
                     mapContext.getConfiguration().getEngineDefaults().getExpression().isUdfCache());
         }
         else if (expr instanceof MinProjectionExpression)
@@ -1276,15 +1307,15 @@ public class StatementSpecMapper
             StddevProjectionExpression node = (StddevProjectionExpression) expr;
             return new ExprStddevNode(node.isDistinct());
         }
-        else if (expr instanceof LastProjectionExpression)
+        else if (expr instanceof LastEverProjectionExpression)
         {
-            LastProjectionExpression node = (LastProjectionExpression) expr;
-            return new ExprLastNode(node.isDistinct());
+            LastEverProjectionExpression node = (LastEverProjectionExpression) expr;
+            return new ExprLastEverNode(node.isDistinct());
         }
-        else if (expr instanceof FirstProjectionExpression)
+        else if (expr instanceof FirstEverProjectionExpression)
         {
-            FirstProjectionExpression node = (FirstProjectionExpression) expr;
-            return new ExprFirstNode(node.isDistinct());
+            FirstEverProjectionExpression node = (FirstEverProjectionExpression) expr;
+            return new ExprFirstEverNode(node.isDistinct());
         }
         else if (expr instanceof InstanceOfExpression)
         {
@@ -1329,6 +1360,25 @@ public class StatementSpecMapper
                 throw new EPException("Substitution parameter value for index " + node.getIndex() + " not set, please provide a value for this parameter");
             }
             return new ExprConstantNode(node.getConstant());
+        }
+        else if (expr instanceof SingleRowMethodExpression) {
+            SingleRowMethodExpression single = (SingleRowMethodExpression) expr;
+            if ((single.getChain() == null) || (single.getChain().size() == 0)) {
+                throw new IllegalArgumentException("Single row method expression requires one or more method calls");
+            }
+            List<ExprChainedSpec> chain = mapChains(single.getChain(), mapContext);
+            String functionName = chain.get(0).getName();
+            Pair<Class, String> pair;
+            try
+            {
+                pair = mapContext.getEngineImportService().resolveSingleRow(functionName);
+            }
+            catch (Exception e)
+            {
+                throw new IllegalArgumentException("Function name '" + functionName + "' cannot be resolved to a single-row function: " + e.getMessage(), e);
+            }
+            chain.get(0).setName(pair.getSecond());
+            return new ExprPlugInSingleRowNode(functionName, pair.getFirst(), chain, false);
         }
         else if (expr instanceof PlugInProjectionExpression)
         {
@@ -1392,6 +1442,26 @@ public class StatementSpecMapper
                 throw new IllegalArgumentException("Cron parameter not recognized: " + cronParam.getType());
             }
             return new ExprNumberSetCronParam(operator);
+        }
+        else if (expr instanceof AccessProjectionExpressionBase) {
+            AccessProjectionExpressionBase base = (AccessProjectionExpressionBase) expr;
+            AggregationAccessType type;
+            if (expr instanceof FirstProjectionExpression) {
+                type = AggregationAccessType.FIRST;
+            }
+            else if (expr instanceof LastProjectionExpression) {
+                type = AggregationAccessType.LAST;
+            }
+            else {
+                type = AggregationAccessType.WINDOW;
+            }
+
+            return new ExprAccessAggNode(type, base.isWildcard(), base.getStreamWildcard());
+        }
+        else if (expr instanceof DotExpression) {
+            DotExpression base = (DotExpression) expr;
+            return new ExprDotNode(mapChains(base.getChain(), mapContext),
+                    mapContext.getConfiguration().getEngineDefaults().getExpression().isDuckTyping());
         }
         throw new IllegalArgumentException("Could not map expression node of type " + expr.getClass().getSimpleName());
     }
@@ -1583,12 +1653,15 @@ public class StatementSpecMapper
         }
         else if (expr instanceof ExprPreviousNode)
         {
-            return new PreviousExpression();
+            ExprPreviousNode prev = (ExprPreviousNode) expr;
+            PreviousExpression result = new PreviousExpression();
+            result.setType(PreviousExpressionType.valueOf(prev.getPreviousType().toString()));
+            return result;
         }
         else if (expr instanceof ExprStaticMethodNode)
         {
             ExprStaticMethodNode node = (ExprStaticMethodNode) expr;
-            return new StaticMethodExpression(node.getClassName(), node.getMethodName());
+            return new StaticMethodExpression(node.getClassName(), unmapChains(node.getChainSpec(), unmapContext));
         }
         else if (expr instanceof ExprMinMaxAggrNode)
         {
@@ -1660,15 +1733,15 @@ public class StatementSpecMapper
             ExprMedianNode median = (ExprMedianNode) expr;
             return new MedianProjectionExpression(median.isDistinct());
         }
-        else if (expr instanceof ExprLastNode)
+        else if (expr instanceof ExprLastEverNode)
         {
-            ExprLastNode last = (ExprLastNode) expr;
-            return new LastProjectionExpression(last.isDistinct());
+            ExprLastEverNode last = (ExprLastEverNode) expr;
+            return new LastEverProjectionExpression(last.isDistinct());
         }
-        else if (expr instanceof ExprFirstNode)
+        else if (expr instanceof ExprFirstEverNode)
         {
-            ExprFirstNode first = (ExprFirstNode) expr;
-            return new FirstProjectionExpression(first.isDistinct());
+            ExprFirstEverNode first = (ExprFirstEverNode) expr;
+            return new FirstEverProjectionExpression(first.isDistinct());
         }
         else if (expr instanceof ExprAvedevNode)
         {
@@ -1684,6 +1757,13 @@ public class StatementSpecMapper
         {
             ExprPlugInAggFunctionNode node = (ExprPlugInAggFunctionNode) expr;
             return new PlugInProjectionExpression(node.getAggregationFunctionName(), node.isDistinct());
+        }
+        else if (expr instanceof ExprPlugInSingleRowNode)
+        {
+            ExprPlugInSingleRowNode node = (ExprPlugInSingleRowNode) expr;
+            List<Pair<String, List<Expression>>> chain = unmapChains(node.getChainSpec(), unmapContext);
+            chain.get(0).setFirst(node.getFunctionName());  // starts with actual function name not mapped on
+            return new SingleRowMethodExpression(chain);
         }
         else if (expr instanceof ExprInstanceofNode)
         {
@@ -1767,6 +1847,32 @@ public class StatementSpecMapper
                 throw new IllegalArgumentException("Cron parameter not recognized: " + cronParam.getCronOperator());
             }
             return new CrontabParameterExpression(type);
+        }
+        else if (expr instanceof ExprAccessAggNode)
+        {
+            ExprAccessAggNode accessNode = (ExprAccessAggNode) expr;
+            AccessProjectionExpressionBase ape;
+            if (accessNode.getAccessType() == AggregationAccessType.FIRST) {
+                ape = new FirstProjectionExpression();
+            }
+            else if (accessNode.getAccessType() == AggregationAccessType.WINDOW) {
+                ape = new WindowProjectionExpression();
+            }
+            else {
+                ape = new LastProjectionExpression();
+            }
+            ape.setWildcard(accessNode.isWildcard());
+            ape.setStreamWildcard(accessNode.getStreamWildcard());
+            return ape;
+        }
+        else if (expr instanceof ExprDotNode)
+        {
+            ExprDotNode dotNode = (ExprDotNode) expr;
+            DotExpression dotExpr = new DotExpression();
+            for (ExprChainedSpec chain : dotNode.getChainSpec()) {
+                dotExpr.add(chain.getName(), unmapExpressionDeep(chain.getParameters(), unmapContext));
+            }
+            return dotExpr;
         }
         throw new IllegalArgumentException("Could not map expression node of type " + expr.getClass().getSimpleName());
     }
@@ -1961,7 +2067,9 @@ public class StatementSpecMapper
         else if (eval instanceof PatternMatchUntilExpr)
         {
             PatternMatchUntilExpr until = (PatternMatchUntilExpr) eval;
-            return new EvalMatchUntilNode(new EvalMatchUntilSpec(until.getLow(), until.getHigh()));
+            ExprNode low = until.getLow() != null ? mapExpressionDeep(until.getLow(), mapContext) : null;
+            ExprNode high = until.getHigh() != null ? mapExpressionDeep(until.getHigh(), mapContext) : null;
+            return new EvalMatchUntilNode(low, high, null);
         }
         else if (eval instanceof PatternEveryDistinctExpr)
         {
@@ -2017,7 +2125,9 @@ public class StatementSpecMapper
         else if (eval instanceof EvalMatchUntilNode)
         {
             EvalMatchUntilNode matchUntilNode = (EvalMatchUntilNode) eval;
-            return new PatternMatchUntilExpr(matchUntilNode.getSpec().getLowerBounds(), matchUntilNode.getSpec().getUpperBounds());
+            Expression low = matchUntilNode.getLowerBounds() != null ? unmapExpressionDeep(matchUntilNode.getLowerBounds(), unmapContext) : null;
+            Expression high = matchUntilNode.getUpperBounds() != null ? unmapExpressionDeep(matchUntilNode.getUpperBounds(), unmapContext) : null;
+            return new PatternMatchUntilExpr(low, high);
         }
         else if (eval instanceof EvalEveryDistinctNode)
         {
@@ -2260,5 +2370,21 @@ public class StatementSpecMapper
                 listExp.add(rawSqlExpr.getFilterRootNode());
             }
         }
+    }
+    
+    private static List<ExprChainedSpec> mapChains(List<Pair<String, List<Expression>>> pairs, StatementSpecMapContext mapContext) {
+        List<ExprChainedSpec> chains = new ArrayList<ExprChainedSpec>();
+        for (Pair<String, List<Expression>> chain : pairs) {
+            chains.add(new ExprChainedSpec(chain.getFirst(), mapExpressionDeep(chain.getSecond(), mapContext)));
+        }
+        return chains;
+    }
+
+    private static List<Pair<String, List<Expression>>> unmapChains(List<ExprChainedSpec> pairs, StatementSpecUnMapContext unmapContext) {
+        List<Pair<String, List<Expression>>> result = new ArrayList<Pair<String, List<Expression>>>();
+        for (ExprChainedSpec chain : pairs) {
+            result.add(new Pair<String, List<Expression>>(chain.getName(), unmapExpressionDeep(chain.getParameters(), unmapContext)));
+        }
+        return result;
     }
 }

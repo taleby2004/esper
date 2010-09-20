@@ -2,6 +2,8 @@ package com.espertech.esper.view.std;
 
 import java.util.List;
 
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -23,7 +25,8 @@ public class TestGroupByView extends TestCase
     public void setUp() throws Exception
     {
         statementContext = SupportStatementContextFactory.makeContext();
-        myGroupByView = new GroupByView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"));
+        ExprNode[] expressions = SupportExprNodeFactory.makeIdentNodesMD("symbol");
+        myGroupByView = new GroupByViewImpl(statementContext, expressions, ExprNodeUtility.getEvaluators(expressions));
 
         SupportBeanClassView childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
@@ -111,7 +114,8 @@ public class TestGroupByView extends TestCase
     public void testMakeSubviews() throws Exception
     {
         EventStream eventStream = new SupportStreamImpl(SupportMarketDataBean.class, 4);
-        GroupByView groupView = new GroupByView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"));
+        ExprNode[] expressions = SupportExprNodeFactory.makeIdentNodesMD("symbol");
+        GroupByView groupView = new GroupByViewImpl(statementContext, expressions, ExprNodeUtility.getEvaluators(expressions));
         eventStream.addView(groupView);
 
         Object[] groupByValue = new Object[] {"IBM"};
@@ -119,7 +123,7 @@ public class TestGroupByView extends TestCase
         // Invalid for no child nodes
         try
         {
-            GroupByView.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
+            GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
             assertTrue(false);
         }
         catch (EPException ex)
@@ -132,7 +136,7 @@ public class TestGroupByView extends TestCase
         groupView.addView(mergeViewOne);
         try
         {
-            GroupByView.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
+            GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
             assertTrue(false);
         }
         catch (EPException ex)
@@ -141,7 +145,7 @@ public class TestGroupByView extends TestCase
         }
 
         // Add a size view parent of merge view
-        groupView = new GroupByView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"));
+        groupView = new GroupByViewImpl(statementContext, expressions, ExprNodeUtility.getEvaluators(expressions));
 
         FirstElementView firstElementView_1 = new FirstElementView();
 
@@ -150,7 +154,7 @@ public class TestGroupByView extends TestCase
         mergeViewOne = new MergeView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
         firstElementView_1.addView(mergeViewOne);
 
-        List<View> subViews = GroupByView.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
+        List<View> subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
 
         assertTrue(subViews.size() == 1);
         assertTrue(subViews.get(0) instanceof FirstElementView);

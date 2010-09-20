@@ -63,7 +63,8 @@ public class OutputProcessViewPolicy extends OutputProcessView
                           int streamCount,
     					  OutputLimitSpec outputLimitSpec,
     					  StatementContext statementContext,
-                          boolean isDistinct)
+                          boolean isDistinct,
+                          boolean isGrouped)
             throws ExprValidationException
     {
         super(resultSetProcessor, outputStrategy, isInsertInto, statementContext, isDistinct, outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents());
@@ -75,7 +76,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
     	}
 
     	OutputCallback outputCallback = getCallbackToLocal(streamCount);
-    	this.outputCondition = statementContext.getOutputConditionFactory().createCondition(outputLimitSpec, statementContext, outputCallback);
+    	this.outputCondition = statementContext.getOutputConditionFactory().createCondition(outputLimitSpec, statementContext, outputCallback, isGrouped);
         outputLimitLimitType = outputLimitSpec.getDisplayLimit();
     }
 
@@ -203,6 +204,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
             if (AuditPath.isAuditEnabled) {
                 super.indicateEarlyReturn(newOldEvents);
             }
+            resetEventBatches();
             return;
         }
 
@@ -259,6 +261,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
             if (AuditPath.isAuditEnabled) {
                 super.indicateEarlyReturn(newOldEvents);
             }
+            resetEventBatches();
             return;
         }
 

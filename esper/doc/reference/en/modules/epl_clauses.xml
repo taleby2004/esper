@@ -33,7 +33,7 @@
 		<orderedlist spacing="compact">
 			<listitem>
 				<para>
-					Data window views: <literal>win:length</literal>, <literal>win:length_batch</literal>, <literal>win:time</literal>, <literal>win:time_batch</literal>, <literal>win:time_length_batch</literal>, <literal>win:time_accum</literal>, <literal>win:ext_timed</literal>, <literal>ext:sort_window</literal>, <literal>ext:time_order</literal>, <literal>std:unique</literal>, <literal>std:groupby</literal>, <literal>std:lastevent</literal>, <literal>std:firstevent</literal>, <literal>std:firstunique</literal>, <literal>win:firstlength</literal>,  <literal>win:firsttime</literal>.
+					Data window views: <literal>win:length</literal>, <literal>win:length_batch</literal>, <literal>win:time</literal>, <literal>win:time_batch</literal>, <literal>win:time_length_batch</literal>, <literal>win:time_accum</literal>, <literal>win:ext_timed</literal>, <literal>ext:sort_window</literal>, <literal>ext:time_order</literal>, <literal>std:unique</literal>, <literal>std:groupwin</literal>, <literal>std:lastevent</literal>, <literal>std:firstevent</literal>, <literal>std:firstunique</literal>, <literal>win:firstlength</literal>,  <literal>win:firsttime</literal>.
 				</para>
 			</listitem>
 			<listitem>
@@ -1299,19 +1299,19 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 group by expressway]]></programlisting>
 
 			<para>
-				The next example serves to show staggering of views. It uses the <literal>std:groupby</literal> view to create a separate length window per car id:
+				The next example serves to show staggering of views. It uses the <literal>std:groupwin</literal> view to create a separate length window per car id:
 			</para>
 				
          <programlisting><![CDATA[select cardId, expressway, direction, segment, count(*) 
-from CarLocEvent.std:groupby(carId).win:length(4) 
+from CarLocEvent.std:groupwin(carId).win:length(4) 
 group by carId, expressway, direction, segment]]></programlisting>
 
 			<para>
-				The first view <literal>std:groupby(carId)</literal> groups car location events by car id. The second view <literal>win:length(4)</literal> keeps a length window of the 4 last events, with one separate length window for each car id. The example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. 
+				The first view <literal>std:groupwin(carId)</literal> groups car location events by car id. The second view <literal>win:length(4)</literal> keeps a length window of the 4 last events, with one separate length window for each car id. The example reports the number of events per car id and per expressway, direction and segment considering the last 4 events for each car id only. 
 			</para>
 			
 			<para>
-				Note that the <literal>group by</literal> syntax is generally preferable over <literal>std:groupby</literal> for grouping information as it is SQL-compliant, easier to read and does not create a separate data window per group. The <literal>std:groupby</literal> in above example creates a separate data window (length window in the example) per group, demonstrating staggering views.
+				Note that the <literal>group by</literal> syntax is generally preferable over <literal>std:groupwin</literal> for grouping information as it is SQL-compliant, easier to read and does not create a separate data window per group. The <literal>std:groupwin</literal> in above example creates a separate data window (length window in the example) per group, demonstrating staggering views.
 			</para>
 
 			<para>
@@ -1326,7 +1326,7 @@ group by carId, expressway, direction, segment]]></programlisting>
 		<sect2 id="epl-from-clause-view-multidatawindow" >
 		   <title>Multiple Data Window Views</title>
 		   <para>
-			   Data window views provide an expiry policy that indicates when to remove events from the data window, with the exception of the keep-all data window which has no expiry policy and the group-by view for allocating a new data window per group.
+			   Data window views provide an expiry policy that indicates when to remove events from the data window, with the exception of the keep-all data window which has no expiry policy and the <literal>std:groupwin</literal> grouped-window view for allocating a new data window per group.
 		   </para>
 		   
 		   <para>
@@ -1407,6 +1407,16 @@ from ProductEvent as prod, OrderEvent as ord]]></programlisting>
 				The next statement demonstrates this capability by invoking a method 'computeTotal' on OrderEvent events and a method 'getMultiplier' on ProductEvent events:
 			</para>
             <programlisting><![CDATA[select ord.computeTotal(prod.getMultiplier()) from ProductEvent as prod, OrderEvent as ord]]></programlisting>
+
+			<para>
+				Instance methods may also be chained: Your EPL may invoke a method on the result returned by a method invocation.
+			</para>
+
+			<para>
+				Assume that your product event exposes a method <literal>getZone</literal> which returns a zone object. Assume that the Zone class declares a method <literal>checkZone</literal>.
+				This example statement invokes a method chain:
+			</para>
+            <programlisting><![CDATA[select prod.getZone().checkZone("zone 1") from ProductEvent as prod]]></programlisting>
 
 		</sect2>
 
@@ -1669,18 +1679,6 @@ group by symbol
 having sum(price) &gt; 1000 and avg(volume) &lt; 500</programlisting>			
 
 				<para>
-					Esper places the following restrictions on expressions in the <literal>having</literal> clause:
-				</para>
-	
-				<orderedlist spacing="compact">
-					<listitem>
-						<para>
-							Any expressions that contain aggregate functions must also occur in the <literal>select</literal> clause
-						</para>
-					</listitem>
-				</orderedlist>
-
-				<para>
 					A statement with the <literal>having</literal> clause should also have a <literal>group by</literal> clause. If you omit <literal>group-by</literal>, all the events not excluded
 					by the <literal>where</literal> clause return as a single group. In that case <literal>having</literal> acts like a <literal>where</literal> except that <literal>having</literal> can have aggregate functions. 
 				</para>
@@ -1742,10 +1740,10 @@ having stddev(price) &gt; 0.8</programlisting>
 		</sect2>
 
         <sect2 id="epl-group-by-versus-view" >
-			 <title>Comparing the <emphasis>Group By</emphasis> clause and the <emphasis>std:groupby</emphasis> view</title>
+			 <title>Comparing the <emphasis>Group By</emphasis> clause and the <emphasis>std:groupwin</emphasis> view</title>
 
 			<para>
-				The <emphasis>group by</emphasis> clause as well as the built-in <emphasis>std:groupby</emphasis> view are similar in their ability to group events. This section explains the key differences in their behavior and use.
+				The <emphasis>group by</emphasis> clause as well as the built-in <emphasis>std:groupwin</emphasis> view are similar in their ability to group events. This section explains the key differences in their behavior and use.
 			</para>
 				
 			<para>
@@ -1753,7 +1751,7 @@ having stddev(price) &gt; 0.8</programlisting>
 			</para>
 
 			<para>
-				The <emphasis>std:groupby</emphasis> view is a built-in view that also groups events. The view is described in greater detail in <xref linkend="view-std-groupby"/>. Its primary use is to create a separate data window per group, or more generally to create separate instances of all its sub-views for each grouping key encountered.
+				The <emphasis>std:groupwin</emphasis> view is a built-in view that also groups events. The view is described in greater detail in <xref linkend="view-std-groupwin"/>. Its primary use is to create a separate data window per group, or more generally to create separate instances of all its sub-views for each grouping key encountered.
 			</para>
 
 			<para>
@@ -1762,7 +1760,7 @@ having stddev(price) &gt; 0.8</programlisting>
 
 			<programlisting>select symbol, avg(price) from StockTickEvent group by symbol
 // ... is equivalent to ...
-select symbol, average from StockTickEvent.std:groupby(symbol).stat:uni(price)</programlisting>
+select symbol, average from StockTickEvent.std:groupwin(symbol).stat:uni(price)</programlisting>
 
 			<para>
 				The next example shows two queries that are NOT equivalent as the length window is ungrouped in the first query, and grouped in the second query:
@@ -1770,7 +1768,7 @@ select symbol, average from StockTickEvent.std:groupby(symbol).stat:uni(price)</
 
 			<programlisting>select symbol, sum(price) from StockTickEvent.win:length(10) group by symbol
 // ... NOT equivalent to ...
-select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)</programlisting>
+select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10)</programlisting>
 
 			<para>
 				The key difference between the two statements is that in the first statement the length window is ungrouped and applies to all events regardless of group. While in the second query each group gets its own instance of a length window. For example, in the second query events arriving for symbol "ABC" get a length window of 10 events, and events arriving for symbol "DEF" get their own length window of 10 events. 
@@ -1834,6 +1832,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 					The <literal>first</literal> keyword specifies that only the first event in an output batch is to be output.
 					Using the <literal>first</literal> keyword instructs the engine to output the first matching event as soon as it arrives, and then ignores matching events for the time interval or number of events specified. 
 					After the time interval elapsed, or the number of matching events has been reached, the next first matching event is output again and the following interval the engine again ignores matching events.
+					For statements that group via the <literal>group by</literal> clause, the <literal>first</literal> keywords provides special behavior as below.
 				</para>
 
 				<para>
@@ -2038,7 +2037,7 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				</para>
 				
 				<para>
-					Second, the <literal>last</literal> and <literal>all</literal> keywords have special meanings when used in a statement with aggregate functions and the <literal>group by</literal> clause:
+					Second, the <literal>last</literal>, <literal>all</literal> and <literal>first</literal> keywords have special meanings when used in a statement with aggregate functions and the <literal>group by</literal> clause:
 				</para>
 				<itemizedlist spacing="compact">
 					<listitem>
@@ -2056,6 +2055,11 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 							The <literal>last</literal> keyword specifies that only groups whose aggregate values have been updated with the most recent batch of events should be output.
 						</para>
 					</listitem>
+					<listitem>
+						<para>
+							The <literal>first</literal> keyword specifies that only groups whose aggregate values have been updated with the most recent batch of events should be output following the defined frequency, keeping frequency state for each group. 
+						</para>
+					</listitem>
 				</itemizedlist>
 
 				<para>
@@ -2063,9 +2067,25 @@ select symbol, sum(price) from StockTickEvent.std:groupby(symbol).win:length(10)
 				</para>
 
 				<para>
-					By adding an output rate limiting clause to a statement that contains a <emphasis>group by</emphasis> clause we can control output of groups to obtain one row for each group, generating an event per group at the given output frequency:
+					By adding an output rate limiting clause to a statement that contains a <emphasis>group by</emphasis> clause we can control output of groups to obtain one row for each group, generating an event per group at the given output frequency.
+				</para>
+				
+				<para>
+				  The next statement outputs total price per symbol cumulatively (no data window was used here). As it specifies the <literal>all</literal> keyword, the statement outputs the current value for all groups seen so far, regardless of whether the group was updated in the last interval. Output occurs after an interval of 5 seconds passed and at the end of each subsequent interval:
 				</para>
 				<programlisting>select symbol, sum(price) from StockTickEvent group by symbol output all every 5 seconds</programlisting>
+
+				<para>
+				  The below statement outputs total price per symbol considering events in the last 3 minutes. When events leave the 3-minute data window output also occurs as new aggregation values are computed. The <literal>last</literal> keyword instructs the engine to output only those groups that had changes. Output occurs after an interval of 10 seconds passed and at the end of each subsequent interval:
+				</para>
+				<programlisting>select symbol, sum(price) from StockTickEvent.win:time(3 min)
+group by symbol output last every 10 seconds</programlisting>
+
+				<para>
+				  This statement also outputs total price per symbol considering events in the last 3 minutes. The <literal>first</literal> keyword instructs the engine to output as soon as there is a new value for a group. After output for a given group the engine suppresses output for the same group for 10 seconds and does not suppress output for other groups. Output occurs again for that group after the interval when the group has new value(s):
+				</para>
+				<programlisting>select symbol, sum(price) from StockTickEvent.win:time(3 min)
+group by symbol output first every 10 seconds</programlisting>
 
 		</sect2>
 
@@ -2115,7 +2135,7 @@ order by price, volume</programlisting>
 		<itemizedlist spacing="compact">
 			<listitem>
 				<para>
-					If the statement is not a join, does not group via <literal>group by</literal> clause and does not declare grouped data windows via <literal>std:groupby</literal> view, the order in which events are delivered to listeners and through the <literal>iterator</literal> pull API is the order of event arrival.
+					If the statement is not a join, does not group via <literal>group by</literal> clause and does not declare grouped data windows via <literal>std:groupwin</literal> view, the order in which events are delivered to listeners and through the <literal>iterator</literal> pull API is the order of event arrival.
 				</para>
 			</listitem>
 			<listitem>
@@ -2701,7 +2721,7 @@ where tick.symbol = news.symbol]]></programlisting>
   where zoneId = RFID.zoneId) as name from RFIDEvent]]></programlisting>
 
 		<para>
-			Note that when a simple or correlated subquery returns multiple rows, the engine returns a <literal>null</literal> value as the subquery result. To limit the number of events returned by a subquery consider using one of the views <literal>std:lastevent</literal>, <literal>std:unique</literal> and <literal>std:groupby</literal>.
+			Note that when a simple or correlated subquery returns multiple rows, the engine returns a <literal>null</literal> value as the subquery result. To limit the number of events returned by a subquery consider using one of the views <literal>std:lastevent</literal>, <literal>std:unique</literal> and <literal>std:groupwin</literal> or aggregation functions or the multi-row and multi-column selects as described below.
 		</para>
 
 		<para>
@@ -2731,8 +2751,16 @@ where price > (select max(price) from MarketData(symbol='GOOG').std:lastevent())
 		</para>
 		
 		<para>
-			As the sub-select expression is evaluated first, the query above actually never fires for the GOOG symbol, only for other symbols that have a price higher then the current maximum for GOOG. As a sidenote, the <literal>insert into</literal> clause can also be handy to compute aggregation results for use in multiple subqueries.
+			When using aggregation functions in a correlated subselect the engine computes the aggregation based on data window or named window contents matching the where-clause.
 		</para>
+		
+		<para>
+			The following example compares the quantity value provided by the current order event against the total quantity of all order events in the last 1 hour for the same client.
+		</para>
+		<programlisting><![CDATA[select * from OrderEvent oe
+where qty > 
+  (select sum(qty) from OrderEvent.win:time(1 hour) pd 
+  where pd.client = oe.client)]]></programlisting>
 
 		<para>
 			Filter expressions in a pattern or stream may also employ subqueries. Subqueries can be uncorrelated or can be correlated to properties of the stream or to properties of tagged events in a pattern. Subqueries may reference named windows as well.
@@ -2791,12 +2819,6 @@ select * from pattern [
 					<listitem>
 						<para>
 							The properties of the subselect stream must all be within aggregation functions.
-						</para>
-					</listitem>
-					<listitem>
-						<para>
-							The <literal>where</literal> clause cannot be used to correlate between the subselect stream and the enclosing stream, since the engine would otherwise be forced to re-evaluate 
-							the aggregation considering all events in the subselect-stream data window, which would likely be a very expensive operation.
 						</para>
 					</listitem>
 				</orderedlist>
@@ -2952,6 +2974,77 @@ select * from pattern [
 
 			<para>
 				The above query compares ProductOrder event's quantity value with all rows from the MinimumQuantity stream of events and returns only those ProductOrder events that have a quantity that is less then all of the minimum quantity values of the MinimumQuantity events.
+			</para>
+		</sect2>
+
+		<sect2 id="epl-subqueries-multicolumn">
+			<title>Multi-Column Selection</title>
+
+			<para>
+				Your subquery may select multiple columns in the <literal>select</literal> clause including multiple aggregated values from a data window or named window.
+			</para>
+			
+			<para>
+				The following example is a correlated subquery that selects wildcard and in addition selects the <literal>bid</literal> and <literal>offer</literal> properties of the last <literal>MarketData</literal> event for the same symbol as the arriving <literal>OrderEvent</literal>:
+			</para>
+
+			<programlisting><![CDATA[select *,
+  (select bid, offer from MarketData.std:unique(symbol) as md 
+   where md.symbol = oe.symbol) as bidoffer
+from OrderEvent oe]]></programlisting>
+
+			<para>
+				Output events for the above query contain all properties of the original <literal>OrderEvent</literal> event. In addition each output event contains a <literal>bidoffer</literal> nested property that itself contains the <literal>bid</literal> and <literal>offer</literal> properties. You may retrieve the bid and offer from output events directly via the <literal>bidoffer.bid</literal> property name syntax for nested properties.  
+			</para>
+
+			<para>
+				The next example is similar to the above query but instead selects aggregations and selects from a named window by name <literal>OrderNamedWindow</literal> (creation not shown here). For each arriving <literal>OrderEvent</literal> it selects the total quantity and count of all order events for the same client, as currently held by the named window:
+			</para>
+			<programlisting><![CDATA[select *,
+  (select sum(qty) as sumPrice, count(*) as countRows 
+   from OrderNamedWindow as onw
+   where onw.client = oe.client) as pastOrderTotals
+from OrderEvent as oe]]></programlisting>
+
+			<para>
+				Output events for the above query contain all properties of the original <literal>OrderEvent</literal> event. In addition each output event contains a <literal>pastOrderTotals</literal> nested property that itself contains the <literal>sumPrice</literal> and <literal>countRows</literal> properties. 
+			</para>
+		</sect2>
+
+		<sect2 id="epl-subqueries-multirow">
+			<title>Multi-Row Selection</title>
+
+			<para>
+				While a subquery cannot change the cardinality of the selected stream, a subquery can return multiple values from the selected data window or named window. This section shows examples of the <literal>window</literal> aggregation function in subselects. 
+			</para>
+			
+			<para>
+				Consider using an inner join, outer join or unidirectional join instead to achieve a 1-to-many cardinality in the number of output events.
+			</para>
+
+			<para>
+				The next example is an uncorrelated subquery that selects all current <literal>ZoneEvent</literal> events considering the last <literal>ZoneEvent</literal> per zone for each arriving <literal>RFIDEvent</literal>.
+			</para>
+			<programlisting><![CDATA[select assetId,
+ (select window(z.*) as winzones from ZoneEvent.std:unique(zone) as z) as zones
+ from RFIDEvent]]></programlisting>
+
+			<para>
+				Output events for the above query contain two properties: the <literal>assetId</literal> property and the <literal>zones</literal> property. The latter property is a nested property that contains the <literal>winzones</literal> property. You may retrieve the zones from output events directly via the <literal>zones.winzones</literal> property name syntax for nested properties.  
+			</para>
+
+			<para>
+				In this example for a correlated subquery against a named window we assume that the <literal>OrderNamedWindow</literal> has been created and contains order events. The query returns for each <literal>MarketData</literal> event
+				the list of order ids for orders with the same symbol:
+			</para>
+			<programlisting><![CDATA[select price,
+ (select window(orderId) as winorders 
+  from OrderNamedWindow onw 
+  where onw.symbol = md.symbol) as orderIds
+ from MarketData md]]></programlisting>
+
+			<para>
+				Output events for the above query contain two properties: the <literal>price</literal> property and the <literal>orderIds</literal> property. The latter property is a nested property that contains the <literal>winorders</literal> property of type array. 
 			</para>
 		</sect2>
     </sect1>
@@ -3820,7 +3913,7 @@ from ServiceOrderEvent as order]]></programlisting>
 			</para>
 
 			<para>
-				The following example further declares a view into the named window. Such a view can be a plug-in view or one of the built-in views, but cannot be a data window view (with the exception of the group-by view which is allowed).
+				The following example further declares a view into the named window. Such a view can be a plug-in view or one of the built-in views, but cannot be a data window view (with the exception of the <literal>std:groupwin</literal> grouped-window view which is allowed).
 			</para>
 			<programlisting><![CDATA[select * from AllOrdersNamedWindow(volume>0, price>0).mycompany:mypluginview()]]></programlisting>
 			
@@ -3942,6 +4035,18 @@ select * from OrdersNamedWindow as win]]></programlisting>
 			<para>
 				 The query above returns a <literal>queryEvent</literal> column and a <literal>win</literal> column for each event. If only a single stream's event is desired in the result, use <literal>select win.*</literal> instead.
 			 </para>
+
+			<para>
+				 To trigger an on-select when an update to the selected named window occurs or when the triggering event is the same event that is being inserted into the named window, specify the named window name as the event type.
+			</para>
+			
+			<para>
+				The next query fires the select for every change to the named window OrdersNamedWindow:
+			</para>
+			<programlisting><![CDATA[on OrdersNamedWindow as trig 
+select onw.symbol, sum(onw.volume) 
+from OrdersNamedWindow as onw 
+where onw.symbol = trig.symbol]]></programlisting>
 		</sect2>
 
 		<sect2 id="named_playback" revision="1">

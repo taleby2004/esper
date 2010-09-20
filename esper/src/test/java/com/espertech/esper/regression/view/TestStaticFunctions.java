@@ -1,23 +1,18 @@
 package com.espertech.esper.regression.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportTemperatureBean;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.epl.SupportStaticMethodLib;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
-
 import com.sun.org.apache.bcel.internal.util.ClassLoader;
+import junit.framework.TestCase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestStaticFunctions extends TestCase
 {
@@ -33,6 +28,45 @@ public class TestStaticFunctions extends TestCase
 	    epService.initialize();
 	    stream = " from " + SupportMarketDataBean.class.getName() +".win:length(5) ";
 	}
+
+    public void testChained() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportChainTop", SupportChainTop.class);
+        epService.getEPAdministrator().getConfiguration().addImport(SupportChainTop.class);
+
+        String subexp = "SupportChainTop.make().getChildOne(\"abc\", 1).getChildTwo(\"def\").getText()";
+        statementText = "select " + subexp + " from SupportBean";
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(statementText);
+        listener = new SupportUpdateListener();
+        stmtOne.addListener(listener);
+
+        Object[][] rows = new Object[][] {
+                {subexp, String.class}
+                };
+        for (int i = 0; i < rows.length; i++) {
+            EventPropertyDescriptor prop = stmtOne.getEventType().getPropertyDescriptors()[i];
+            assertEquals(rows[i][0], prop.getPropertyName());
+            assertEquals(rows[i][1], prop.getPropertyType());
+        }
+        
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), new String[] {subexp},
+                new Object[] {SupportChainTop.make().getChildOne("abc",1).getChildTwo("def").getText()});
+    }
+
+    public void testEscape() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class.getName());
+
+        statementText = "select SupportStaticMethodLib.`join`(abcstream) as value from SupportBean abcstream";
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(statementText);
+        listener = new SupportUpdateListener();
+        stmtOne.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 99));
+
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "value".split(","), new Object[] {"E1 99"});        
+    }
 
     public void testReturnsMapIndexProperty()
     {

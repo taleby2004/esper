@@ -15,10 +15,12 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 
+import java.util.Map;
+
 /**
  * Represents a constant in an expressiun tree.
  */
-public class ExprConstantNode extends ExprNode
+public class ExprConstantNode extends ExprNode implements ExprEvaluator
 {
     private Object value;
     private final Class clazz;
@@ -78,6 +80,10 @@ public class ExprConstantNode extends ExprNode
         return true;
     }
 
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+
     /**
      * Returns the constant's value.
      * @return value of constant
@@ -104,6 +110,11 @@ public class ExprConstantNode extends ExprNode
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         return value;
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
     }
 
     public String toExpressionString()

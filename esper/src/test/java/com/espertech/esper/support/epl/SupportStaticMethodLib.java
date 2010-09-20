@@ -4,6 +4,8 @@ import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.math.BigInteger;
@@ -12,6 +14,16 @@ import java.lang.reflect.Array;
 
 public class SupportStaticMethodLib 
 {
+    private static List<Object[]> invocations = new ArrayList<Object[]>();
+
+    public static List<Object[]> getInvocations() {
+        return invocations;
+    }
+
+    public static void setInvocations(List<Object[]> invocations) {
+        SupportStaticMethodLib.invocations = invocations;
+    }
+
     public static boolean compareEvents(SupportMarketDataBean beanOne, SupportBean beanTwo)
     {
         return beanOne.getSymbol().equals(beanTwo.getString());
@@ -75,6 +87,10 @@ public class SupportStaticMethodLib
         values.put("value", Integer.class);
         values.put("valueTwo", Integer.class);
         return values;
+    }
+
+    public static String join(SupportBean bean) {
+        return bean.getString() + " " + Integer.toString(bean.getIntPrimitive());
     }
 
     public static Map[] fetchResult100()
@@ -467,6 +483,11 @@ public class SupportStaticMethodLib
             sum += Double.parseDouble(array[i]);
         }
         return sum;
+    }
+
+    public static boolean alwaysTrue(Object[] input) {
+        invocations.add(input);
+        return true;
     }
 
     public static double arraySumObject(Object[] array)

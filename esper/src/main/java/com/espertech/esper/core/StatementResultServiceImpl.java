@@ -11,12 +11,12 @@ package com.espertech.esper.core;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.StatementAwareUpdateListener;
 import com.espertech.esper.client.UpdateListener;
-import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.thread.OutboundUnitRunnable;
 import com.espertech.esper.core.thread.ThreadingOption;
 import com.espertech.esper.core.thread.ThreadingService;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.metric.MetricReportingPath;
@@ -56,7 +56,7 @@ public class StatementResultServiceImpl implements StatementResultService
     private StatementMetricHandle statementMetricHandle;
 
     private boolean forClauseDelivery= false;
-    private ExprNode[] groupDeliveryExpressions;
+    private ExprEvaluator[] groupDeliveryExpressions;
     private ExprEvaluatorContext exprEvaluatorContext;
 
     // For natural delivery derived out of select-clause expressions
@@ -77,9 +77,9 @@ public class StatementResultServiceImpl implements StatementResultService
     /**
      * Buffer for holding dispatchable events.
      */
-    protected ThreadLocal<ArrayDequeJDK6Backport<UniformPair<EventBean[]>>> lastResults = new ThreadLocal<ArrayDequeJDK6Backport<UniformPair<EventBean[]>>>() {
-        protected synchronized ArrayDequeJDK6Backport<UniformPair<EventBean[]>> initialValue() {
-            return new ArrayDequeJDK6Backport<UniformPair<EventBean[]>>();
+    protected ThreadLocal<ArrayDeque<UniformPair<EventBean[]>>> lastResults = new ThreadLocal<ArrayDeque<UniformPair<EventBean[]>>>() {
+        protected synchronized ArrayDeque<UniformPair<EventBean[]>> initialValue() {
+            return new ArrayDeque<UniformPair<EventBean[]>>();
         }
     };
 
@@ -123,7 +123,7 @@ public class StatementResultServiceImpl implements StatementResultService
     }
 
     public void setSelectClause(Class[] selectClauseTypes, String[] selectClauseColumnNames,
-                                boolean forClauseDelivery, ExprNode[] groupDeliveryExpressions, ExprEvaluatorContext exprEvaluatorContext)
+                                boolean forClauseDelivery, ExprEvaluator[] groupDeliveryExpressions, ExprEvaluatorContext exprEvaluatorContext)
     {
         if ((selectClauseTypes == null) || (selectClauseTypes.length == 0))
         {
@@ -207,7 +207,7 @@ public class StatementResultServiceImpl implements StatementResultService
 
     public void execute()
     {
-        ArrayDequeJDK6Backport<UniformPair<EventBean[]>> dispatches = lastResults.get();
+        ArrayDeque<UniformPair<EventBean[]>> dispatches = lastResults.get();
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".execute dispatches: " + dispatches.size());
@@ -396,7 +396,7 @@ public class StatementResultServiceImpl implements StatementResultService
     public void dispatchOnStop()
     {
         lastIterableEvent = null;
-        ArrayDequeJDK6Backport<UniformPair<EventBean[]>> dispatches = lastResults.get();
+        ArrayDeque<UniformPair<EventBean[]>> dispatches = lastResults.get();
         if (dispatches.isEmpty())
         {
             return;

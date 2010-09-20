@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class ArrayAssertionUtil
@@ -140,7 +141,9 @@ public class ArrayAssertionUtil
 
         for (int i = 0; i < expectedValues.length; i++)
         {
-            TestCase.assertEquals("at element " + i, expectedValues[i], data[i]);
+            Object value = data[i];
+            Object expected = expectedValues[i];
+            assertProp("Failed to assert at element " + i, "element " + i, expected, value);
         }
     }
 
@@ -537,7 +540,7 @@ public class ArrayAssertionUtil
             }
             else
             {
-                Assert.fail("No events expected by received one or more for stream " + streamName);
+                Assert.fail("No events expected but received one or more for stream " + streamName);
             }
         }
         if (received == null)
@@ -554,7 +557,7 @@ public class ArrayAssertionUtil
                 String name = propertyNames[j];
                 Object value = propertiesThisRow[j];
                 Object eventProp = received[i].get(name);
-                Assert.assertEquals("Error asserting property named " + name + " for row " + i + " for " + streamName,value,eventProp);
+                assertProp("Error asserting property named " + name + " for row " + i + " for " + streamName, name, value,eventProp);
             }
         }
     }
@@ -575,8 +578,31 @@ public class ArrayAssertionUtil
             String name = propertyNames[j].trim();
             Object value = propertiesThisRow[j];
             Object eventProp = received.get(name);
-            Assert.assertEquals("Error asserting property named '" + name + "'",value,eventProp);
+            assertProp("Failed to assert property " + name, name, value, eventProp);
         }
+    }
+
+    private static void assertProp(String message, String name, Object expected, Object received) {
+        if ((expected != null) && (expected.getClass().isArray()) && (received != null) && (received.getClass().isArray())) {
+            Object[] valueArray = toObjectArray(expected);
+            Object[] eventPropArray = toObjectArray(received);
+            assertEqualsExactOrder(eventPropArray, valueArray);
+            return;
+        }
+        Assert.assertEquals("Error asserting property named '" + name + "'",expected,received);
+    }
+
+    private static Object[] toObjectArray(Object array)
+    {
+        if ((array == null) || (!array.getClass().isArray())) {
+            throw new IllegalArgumentException("Object not an array but type '" + array.getClass() + "'");
+        }
+        int size = Array.getLength(array);
+        Object[] val = new Object[size];
+        for (int i = 0; i < size; i++) {
+            val[i] = Array.get(array, i);
+        }
+        return val;
     }
 
     public static void assertAllProps(EventBean received, Object[] propertiesSortedByName)
@@ -1010,4 +1036,20 @@ public class ArrayAssertionUtil
     }
 
     private static final Log log = LogFactory.getLog(ArrayAssertionUtil.class);
+
+    public static EventBean[] sort(Iterator<EventBean> oldevents, final String property) {
+        return sort(iteratorToArray(oldevents), property);
+    }
+
+    public static EventBean[] sort(EventBean[] oldevents, final String property) {
+        List<EventBean> list = Arrays.asList(oldevents);
+        Collections.sort(list, new Comparator<EventBean>() {
+            public int compare(EventBean o1, EventBean o2) {
+                Comparable val1 = (Comparable) o1.get(property);
+                Comparable val2 = (Comparable) o2.get(property);
+                return val1.compareTo(val2);
+            }
+        });
+        return list.toArray(new EventBean[list.size()]);
+    }
 }

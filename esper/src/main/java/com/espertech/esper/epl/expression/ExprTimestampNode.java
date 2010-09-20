@@ -15,10 +15,12 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 
+import java.util.Map;
+
 /**
  * Represents the CURRENT_TIMESTAMP() function or reserved keyword in an expression tree.
  */
-public class ExprTimestampNode extends ExprNode
+public class ExprTimestampNode extends ExprNode implements ExprEvaluator
 {
     private static final long serialVersionUID = -6332243334897136751L;
 
@@ -27,6 +29,11 @@ public class ExprTimestampNode extends ExprNode
      */
     public ExprTimestampNode()
     {
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
     }
 
     public void validate(StreamTypeService streamTypeService,
@@ -48,6 +55,10 @@ public class ExprTimestampNode extends ExprNode
     public Class getType()
     {
         return Long.class;
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

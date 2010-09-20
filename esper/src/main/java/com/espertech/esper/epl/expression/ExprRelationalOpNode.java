@@ -17,13 +17,16 @@ import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.schedule.TimeProvider;
 
+import java.util.Map;
+
 /**
  * Represents a lesser or greater then (</<=/>/>=) expression in a filter expression tree.
  */
-public class ExprRelationalOpNode extends ExprNode
+public class ExprRelationalOpNode extends ExprNode implements ExprEvaluator
 {
     private final RelationalOpEnum relationalOpEnum;
     private RelationalOpEnum.Computer computer;
+    private transient ExprEvaluator[] evaluators;
     private static final long serialVersionUID = -6170161542681634598L;
 
     /**
@@ -35,11 +38,20 @@ public class ExprRelationalOpNode extends ExprNode
         this.relationalOpEnum = relationalOpEnum;
     }
 
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
     public boolean isConstantResult()
     {
         return false;
     }
-    
+
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+
     /**
      * Returns the type of relational op used.
      * @return enum with relational op type
@@ -56,10 +68,11 @@ public class ExprRelationalOpNode extends ExprNode
         {
             throw new IllegalStateException("Relational op node does not have exactly 2 child nodes");
         }
+        evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
 
         // Must be either numeric or string
-        Class typeOne = JavaClassHelper.getBoxedType(this.getChildNodes().get(0).getType());
-        Class typeTwo = JavaClassHelper.getBoxedType(this.getChildNodes().get(1).getType());
+        Class typeOne = JavaClassHelper.getBoxedType(evaluators[0].getType());
+        Class typeTwo = JavaClassHelper.getBoxedType(evaluators[1].getType());
 
         if ((typeOne != String.class) || (typeTwo != String.class))
         {
@@ -89,13 +102,13 @@ public class ExprRelationalOpNode extends ExprNode
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object valueLeft = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object valueLeft = evaluators[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (valueLeft == null)
         {
             return null;
         }
         
-        Object valueRight = this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object valueRight = evaluators[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (valueRight == null)
         {
             return null;

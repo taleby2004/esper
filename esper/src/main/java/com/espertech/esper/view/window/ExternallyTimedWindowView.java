@@ -10,12 +10,12 @@ package com.espertech.esper.view.window;
 
 import java.util.*;
 
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.view.*;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.TimeWindow;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.collection.ArrayDequeJDK6Backport;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -42,6 +42,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
 {
     private final ExternallyTimedWindowViewFactory externallyTimedWindowViewFactory;
     private final ExprNode timestampExpression;
+    private final ExprEvaluator timestampExpressionEval;
     private final long millisecondsBeforeExpiry;
 
     private final EventBean[] eventsPerStream = new EventBean[1];
@@ -65,11 +66,12 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
      * @param exprEvaluatorContext context for expression evalauation
      */
     public ExternallyTimedWindowView(ExternallyTimedWindowViewFactory externallyTimedWindowViewFactory,
-                                     ExprNode timestampExpression, long msecBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection,
+                                     ExprNode timestampExpression, ExprEvaluator timestampExpressionEval, long msecBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection,
                                      boolean isRemoveStreamHandling, ExprEvaluatorContext exprEvaluatorContext)
     {
         this.externallyTimedWindowViewFactory = externallyTimedWindowViewFactory;
         this.timestampExpression = timestampExpression;
+        this.timestampExpressionEval = timestampExpressionEval;
         this.millisecondsBeforeExpiry = msecBeforeExpiry;
         this.viewUpdatedCollection = viewUpdatedCollection;
         this.isRemoveStreamHandling = isRemoveStreamHandling;
@@ -122,7 +124,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
         }
 
         // Remove from the window any events that have an older timestamp then the last event's timestamp
-        ArrayDequeJDK6Backport<EventBean> expired = null;
+        ArrayDeque<EventBean> expired = null;
         if (timestamp != -1)
         {
             expired = timeWindow.expireEvents(timestamp - millisecondsBeforeExpiry + 1);
@@ -181,7 +183,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     private long getLongValue(EventBean obj)
     {
         eventsPerStream[0] = obj;
-        Number num = (Number) timestampExpression.evaluate(eventsPerStream, true, exprEvaluatorContext);
+        Number num = (Number) timestampExpressionEval.evaluate(eventsPerStream, true, exprEvaluatorContext);
         return num.longValue();
     }
 

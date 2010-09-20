@@ -415,7 +415,7 @@ valueExpr
 	| 	eventPropertyExpr[true]
 	|   	evalExprChoice
 	|	builtinFunc
-	|   	libFunc
+	|   	libFuncChain
 	|	caseExpr
 	|	inExpr 
 	|	betweenExpr
@@ -425,6 +425,7 @@ valueExpr
 	|	subSelectInExpr
 	| 	subSelectRowExpr 
 	| 	subSelectExistsExpr
+	|	dotExpr
 	;
 
 valueExprWithTime
@@ -485,7 +486,7 @@ subSelectInQueryExpr
 	;
 	
 subQueryExpr 
-	:	DISTINCT? selectionListElement subSelectFilterExpr (whereClause[true])?
+	:	DISTINCT? selectionList subSelectFilterExpr (whereClause[true])?
 	;
 	
 subSelectFilterExpr
@@ -526,16 +527,24 @@ builtinFunc
 	|	^(f=MEDIAN (DISTINCT)? valueExpr) { leaveNode($f); }
 	|	^(f=STDDEV (DISTINCT)? valueExpr) { leaveNode($f); }
 	|	^(f=AVEDEV (DISTINCT)? valueExpr) { leaveNode($f); }
-	|	^(f=LAST_AGGREG (DISTINCT)? valueExpr) { leaveNode($f); }
-	|	^(f=FIRST_AGGREG (DISTINCT)? valueExpr) { leaveNode($f); }
+	|	^(f=LAST_AGGREG (DISTINCT)? accessValueExpr valueExpr?) { leaveNode($f); }
+	|	^(f=FIRST_AGGREG (DISTINCT)? accessValueExpr valueExpr?) { leaveNode($f); }
+	|	^(f=WINDOW_AGGREG (DISTINCT)? accessValueExpr) { leaveNode($f); }
 	| 	^(f=COALESCE valueExpr valueExpr (valueExpr)* ) { leaveNode($f); }
 	| 	^(f=PREVIOUS valueExpr valueExpr?) { leaveNode($f); }
+	| 	^(f=PREVIOUSTAIL valueExpr valueExpr?) { leaveNode($f); }
+	| 	^(f=PREVIOUSCOUNT valueExpr) { leaveNode($f); }
+	| 	^(f=PREVIOUSWINDOW valueExpr) { leaveNode($f); }
 	| 	^(f=PRIOR c=NUM_INT eventPropertyExpr[true]) {leaveNode($c); leaveNode($f);}
 	| 	^(f=INSTANCEOF valueExpr CLASS_IDENT (CLASS_IDENT)*) { leaveNode($f); }
 	| 	^(f=CAST valueExpr CLASS_IDENT) { leaveNode($f); }
 	| 	^(f=EXISTS eventPropertyExpr[true]) { leaveNode($f); }
 	|	^(f=CURRENT_TIMESTAMP {}) { leaveNode($f); }
 	;
+
+accessValueExpr
+	: 	PROPERTY_WILDCARD_SELECT | ^(s=PROPERTY_SELECTION_STREAM IDENT IDENT?) | valueExpr
+	;		
 	
 arrayExpr
 	:	^(a=ARRAY_EXPR (valueExpr)*) { leaveNode($a); }
@@ -553,8 +562,21 @@ arithmeticExpr
 	| 	^(a=CONCAT valueExpr valueExpr (valueExpr)*) { leaveNode($a); }
 	;
 	
-libFunc
-	:  ^(l=LIB_FUNCTION (CLASS_IDENT)? IDENT (DISTINCT)? (valueExpr)*) { leaveNode($l); }
+dotExpr
+	:	^(d=DOT_EXPR valueExpr libFunctionWithClass*) { leaveNode($d); }
+	;
+
+libFuncChain
+	:  	^(l=LIB_FUNC_CHAIN libFunctionWithClass libOrPropFunction*) { leaveNode($l); }
+	;
+
+libFunctionWithClass
+	:  	^(l=LIB_FUNCTION (CLASS_IDENT)? IDENT (DISTINCT)? (valueExpr)*)
+	;
+	
+libOrPropFunction
+	:   	eventPropertyExpr[false] 
+	|   	libFunctionWithClass
 	;
 	
 //----------------------------------------------------------------------------
@@ -595,15 +617,10 @@ patternFilterExpr
 	;
 
 matchUntilRange
-	:	^(MATCH_UNTIL_RANGE_CLOSED matchUntilRangeParam matchUntilRangeParam)
-	| 	^(MATCH_UNTIL_RANGE_BOUNDED matchUntilRangeParam)
-	| 	^(MATCH_UNTIL_RANGE_HALFCLOSED matchUntilRangeParam)
-	|	^(MATCH_UNTIL_RANGE_HALFOPEN matchUntilRangeParam)
-	;
-
-matchUntilRangeParam
-	:	NUM_DOUBLE
-	|	NUM_INT
+	:	^(MATCH_UNTIL_RANGE_CLOSED valueExpr valueExpr)
+	| 	^(MATCH_UNTIL_RANGE_BOUNDED valueExpr)
+	| 	^(MATCH_UNTIL_RANGE_HALFCLOSED valueExpr)
+	|	^(MATCH_UNTIL_RANGE_HALFOPEN valueExpr)
 	;
 
 filterParam

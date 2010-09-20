@@ -163,8 +163,35 @@ public class SelectExprProcessorHelper
         for (int i = 0; i < selectionList.size(); i++)
         {
             ExprNode expr = selectionList.get(i).getSelectExpression();
-            expressionNodes[i] = expr;
-            expressionReturnTypes[i] = expr.getType();
+            expressionNodes[i] = expr.getExprEvaluator();
+            Map<String, Object> eventTypeExpr = expressionNodes[i].getEventType();
+            if (eventTypeExpr == null) {
+                expressionReturnTypes[i] = expressionNodes[i].getType();
+            }
+            else {
+                final ExprEvaluator innerExprEvaluator = expr.getExprEvaluator();
+                final EventType mapType = eventAdapterService.createAnonymousMapType(eventTypeExpr);
+                ExprEvaluator evaluatorFragment = new ExprEvaluator() {
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                    {
+                        Map<String, Object> values = (Map<String, Object>) innerExprEvaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+                        if (values == null) {
+                            values = Collections.emptyMap();
+                        }
+                        return eventAdapterService.adaptorForTypedMap(values, mapType);
+                    }
+                    public Class getType()
+                    {
+                        return Map.class;
+                    }
+                    public Map<String, Object> getEventType() {
+                        return null;
+                    }
+                };
+
+                expressionReturnTypes[i] = mapType;
+                expressionNodes[i] = evaluatorFragment;
+            }
         }
 
         // Get column names
@@ -257,6 +284,7 @@ public class SelectExprProcessorHelper
 
                 // A match was found, we replace the expression
                 final EventPropertyGetter getter = eventTypeStream.getGetter(propertyName);
+                final Class returnType = eventTypeStream.getPropertyType(propertyName);
                 evaluatorFragment = new ExprEvaluator() {
                     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                     {
@@ -267,6 +295,14 @@ public class SelectExprProcessorHelper
                         }
                         return getter.get(streamEvent);
                     }
+                    public Class getType()
+                    {
+                        return returnType;
+                    }
+                    @Override
+                    public Map<String, Object> getEventType() {
+                        return null;
+                    }
                 };
                 expressionNodes[i] = evaluatorFragment;
             }
@@ -274,6 +310,7 @@ public class SelectExprProcessorHelper
             {
                 ExprEvaluator evaluatorFragment;
                 final EventPropertyGetter getter =  eventTypeStream.getGetter(propertyName);
+                final Class returnType = eventTypeStream.getFragmentType(propertyName).getFragmentType().getUnderlyingType();
 
                 // A match was found, we replace the expression
                 evaluatorFragment = new ExprEvaluator() {
@@ -286,6 +323,15 @@ public class SelectExprProcessorHelper
                             return null;
                         }
                         return getter.getFragment(streamEvent);
+                    }
+
+                    public Class getType()
+                    {
+                        return returnType;
+                    }
+
+                    public Map<String, Object> getEventType() {
+                        return null;
                     }
                 };
 
@@ -313,6 +359,7 @@ public class SelectExprProcessorHelper
 
             ExprStreamUnderlyingNode undNode = (ExprStreamUnderlyingNode) expressionNodes[i];
             final int streamNum = undNode.getStreamId();
+            final Class returnType = undNode.getType();
             EventType eventTypeStream = typeService.getEventTypes()[streamNum];
 
             // A match was found, we replace the expression
@@ -321,6 +368,15 @@ public class SelectExprProcessorHelper
                 public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                 {
                     return eventsPerStream[streamNum];
+                }
+
+                public Class getType()
+                {
+                    return returnType;
+                }
+
+                public Map<String, Object> getEventType() {
+                    return null;
                 }
             };
 
@@ -390,7 +446,7 @@ public class SelectExprProcessorHelper
                         }
 
                         // create or get an underlying type for that Class
-                        underlyingEventType = eventAdapterService.addBeanType(propertyType.getName(), propertyType, false);
+                        underlyingEventType = eventAdapterService.addBeanType(propertyType.getName(), propertyType, false, false, false);
                         selectExprEventTypeRegistry.add(underlyingEventType);
                         underlyingPropertyEventGetter = typeService.getEventTypes()[streamNumber].getGetter(propertyName);
                         if (underlyingPropertyEventGetter == null)
@@ -476,7 +532,7 @@ public class SelectExprProcessorHelper
                 }
                 else
                 {
-                    resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, true);
+                    resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, false, false, true);
                     return new EvalSelectStreamNoUnderlying(selectExprContext, resultEventType, namedStreams, isUsingWildcard);
                 }
             }
@@ -584,7 +640,7 @@ public class SelectExprProcessorHelper
                     }
                     else
                     {
-                        resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, true);
+                        resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, false, false, true);
                     }
                 }
             }

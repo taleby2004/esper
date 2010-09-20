@@ -10,31 +10,35 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.lookup.TableLookupStrategy;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.epl.core.StreamTypeService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Represents a subselect in an expression tree.
  */
-public abstract class ExprSubselectNode extends ExprNode
+public abstract class ExprSubselectNode extends ExprNode implements ExprEvaluator
 {
     private static final Log log = LogFactory.getLog(ExprSubselectNode.class);
 
     /**
      * The validated select clause.
      */
-    protected ExprNode selectClause;
+    protected ExprNode[] selectClause;
+    protected ExprEvaluator[] selectClauseEvaluator;
+
+    protected String[] selectAsNames;
 
     /**
      * The validate filter expression.
      */
-    protected ExprNode filterExpr;
+    protected ExprEvaluator filterExpr;
 
     /**
      * The event type generated for wildcard selects.
@@ -45,7 +49,13 @@ public abstract class ExprSubselectNode extends ExprNode
     private StatementSpecRaw statementSpecRaw;
     private StatementSpecCompiled statementSpecCompiled;
     private TableLookupStrategy strategy;
-    private String selectAsName;
+    private SubselectAggregationPreprocessor subselectAggregationPreprocessor;
+
+    private static Set<EventBean> singleNullRowEventSet = new HashSet<EventBean>();
+    static
+    {
+        singleNullRowEventSet.add(null);
+    }
 
     /**
      * Evaluate the lookup expression returning an evaluation result object.
@@ -57,6 +67,8 @@ public abstract class ExprSubselectNode extends ExprNode
      */
     public abstract Object evaluate(EventBean[] eventsPerStream, boolean isNewData, Set<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
 
+    public abstract boolean isAllowMultiColumnSelect();
+
     /**
      * Ctor.
      * @param statementSpec is the lookup statement spec from the parser, unvalidated
@@ -66,12 +78,13 @@ public abstract class ExprSubselectNode extends ExprNode
         this.statementSpecRaw = statementSpec;
     }
 
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
     public boolean isConstantResult()
     {
-        if (selectClause != null)
-        {
-            return selectClause.isConstantResult();
-        }
         return false;
     }
 
@@ -97,14 +110,19 @@ public abstract class ExprSubselectNode extends ExprNode
      * Sets the validate select clause
      * @param selectClause is the expression representing the select clause
      */
-    public void setSelectClause(ExprNode selectClause)
+    public void setSelectClause(ExprNode[] selectClause)
     {
         this.selectClause = selectClause;
+        this.selectClauseEvaluator = ExprNodeUtility.getEvaluators(selectClause);
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         Set<EventBean> matchingEvents = strategy.lookup(eventsPerStream);
+        if (subselectAggregationPreprocessor != null) {
+            subselectAggregationPreprocessor.evaluate(eventsPerStream, matchingEvents, exprEvaluatorContext);
+            matchingEvents = singleNullRowEventSet;
+        }
         return evaluate(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 
@@ -119,33 +137,33 @@ public abstract class ExprSubselectNode extends ExprNode
 
     /**
      * Supplies the name of the select expression as-tag
-     * @param selectAsName is the as-name
+     * @param selectAsNames is the as-name(s)
      */
-    public void setSelectAsName(String selectAsName)
+    public void setSelectAsNames(String[] selectAsNames)
     {
-        this.selectAsName = selectAsName;
+        this.selectAsNames = selectAsNames;
     }
 
     /**
      * Sets the validated filter expression, or null if there is none.
      * @param filterExpr is the filter
      */
-    public void setFilterExpr(ExprNode filterExpr)
+    public void setFilterExpr(ExprEvaluator filterExpr)
     {
         this.filterExpr = filterExpr;
     }
 
     public String toExpressionString()
     {
-        if (selectAsName != null)
+        if ((selectAsNames != null) && (selectAsNames[0] != null))
         {
-            return selectAsName;
+            return selectAsNames[0];
         }
         if (selectClause == null)
         {
             return "*";
         }
-        return selectClause.toExpressionString();
+        return selectClause[0].toExpressionString();
     }
 
     public boolean equalsNode(ExprNode node)
@@ -175,7 +193,7 @@ public abstract class ExprSubselectNode extends ExprNode
      * Returns the select clause or null if none.
      * @return clause
      */
-    public ExprNode getSelectClause()
+    public ExprNode[] getSelectClause()
     {
         return selectClause;
     }
@@ -184,7 +202,7 @@ public abstract class ExprSubselectNode extends ExprNode
      * Returns filter expr or null if none.
      * @return filter
      */
-    public ExprNode getFilterExpr()
+    public ExprEvaluator getFilterExpr()
     {
         return filterExpr;
     }
@@ -214,5 +232,9 @@ public abstract class ExprSubselectNode extends ExprNode
     public void setFilterSubqueryStreamTypes(StreamTypeService filterSubqueryStreamTypes)
     {
         this.filterSubqueryStreamTypes = filterSubqueryStreamTypes;
+    }
+
+    public void setSubselectAggregationPreprocessor(SubselectAggregationPreprocessor subselectAggregationPreprocessor) {
+        this.subselectAggregationPreprocessor = subselectAggregationPreprocessor;
     }
 }

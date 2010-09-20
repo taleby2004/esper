@@ -17,16 +17,21 @@ import com.espertech.esper.util.LikeUtil;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.schedule.TimeProvider;
 
+import java.util.Map;
+
 /**
  * Represents the like-clause in an expression tree.
  */
-public class ExprLikeNode extends ExprNode
+public class ExprLikeNode extends ExprNode implements ExprEvaluator
 {
     private final boolean isNot;
 
     private boolean isNumericValue;
     private boolean isConstantPattern;
-    private LikeUtil likeUtil;
+
+    private transient LikeUtil likeUtil;
+    private transient ExprEvaluator[] evaluators;
+
     private static final long serialVersionUID = 34888860063217132L;
 
     /**
@@ -38,15 +43,21 @@ public class ExprLikeNode extends ExprNode
         this.isNot = not;
     }
 
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
     public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
     {
         if ((this.getChildNodes().size() != 2) && (this.getChildNodes().size() != 3))
         {
             throw new ExprValidationException("The 'like' operator requires 2 (no escape) or 3 (with escape) child expressions");
         }
+        evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
 
         // check eval child node - can be String or numeric
-        Class evalChildType = this.getChildNodes().get(0).getType();
+        Class evalChildType = evaluators[0].getType();
         isNumericValue = JavaClassHelper.isNumeric(evalChildType);
         if ((evalChildType != String.class) && (!isNumericValue))
         {
@@ -54,7 +65,7 @@ public class ExprLikeNode extends ExprNode
         }
 
         // check pattern child node
-        ExprNode patternChildNode = this.getChildNodes().get(1);
+        ExprEvaluator patternChildNode = evaluators[1];
         Class patternChildType = patternChildNode.getType();
         if (patternChildType != String.class)
         {
@@ -68,7 +79,7 @@ public class ExprLikeNode extends ExprNode
         // check escape character node
         if (this.getChildNodes().size() == 3)
         {
-            ExprNode escapeChildNode = this.getChildNodes().get(2);
+            ExprEvaluator escapeChildNode = evaluators[2];
             if (escapeChildNode.getType() != String.class)
             {
                 throw new ExprValidationException("The 'like' operator escape parameter requires a character-type value");
@@ -86,11 +97,15 @@ public class ExprLikeNode extends ExprNode
         return false;
     }
 
+    public Map<String, Object> getEventType() {
+        return null;
+    }
+
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (likeUtil == null)
         {
-            String patternVal = (String) this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+            String patternVal = (String) evaluators[1].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
             if (patternVal == null)
             {
                 return null;
@@ -99,7 +114,7 @@ public class ExprLikeNode extends ExprNode
             Character escapeCharacter = null;
             if (this.getChildNodes().size() == 3)
             {
-                escape = (String) this.getChildNodes().get(2).evaluate(eventsPerStream, isNewData,exprEvaluatorContext);
+                escape = (String) evaluators[2].evaluate(eventsPerStream, isNewData,exprEvaluatorContext);
             }
             if (escape.length() > 0)
             {
@@ -111,7 +126,7 @@ public class ExprLikeNode extends ExprNode
         {
             if (!isConstantPattern)
             {
-                String patternVal = (String) this.getChildNodes().get(1).evaluate(eventsPerStream, isNewData,exprEvaluatorContext);
+                String patternVal = (String) evaluators[1].evaluate(eventsPerStream, isNewData,exprEvaluatorContext);
                 if (patternVal == null)
                 {
                     return null;
@@ -120,7 +135,7 @@ public class ExprLikeNode extends ExprNode
             }
         }
 
-        Object evalValue = this.getChildNodes().get(0).evaluate(eventsPerStream, isNewData,exprEvaluatorContext);
+        Object evalValue = evaluators[0].evaluate(eventsPerStream, isNewData,exprEvaluatorContext);
         if (evalValue == null)
         {
             return null;

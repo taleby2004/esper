@@ -18,10 +18,12 @@ import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.LevenshteinDistance;
 
+import java.util.Map;
+
 /**
  * Represents an stream property identifier in a filter expressiun tree.
  */
-public class ExprIdentNode extends ExprNode
+public class ExprIdentNode extends ExprNode implements ExprEvaluator
 {
     // select myprop from...        is a simple property, no stream supplied
     // select s0.myprop from...     is a simple property with a stream supplied, or a nested property (cannot tell until resolved)
@@ -69,6 +71,15 @@ public class ExprIdentNode extends ExprNode
         }
         this.unresolvedPropertyName = unresolvedPropertyName;
         this.streamOrPropertyName = streamOrPropertyName;
+    }
+
+    public ExprEvaluator getExprEvaluator()
+    {
+        return this;
+    }
+
+    public Map<String, Object> getEventType() {
+        return null;
     }
 
     /**
@@ -362,18 +373,10 @@ public class ExprIdentNode extends ExprNode
 
         ExprIdentNode other = (ExprIdentNode) node;
 
-        if (this.streamNum == -1)
-        {
-            throw new IllegalStateException("ExprIdentNode has not been validated");
-        }
-
-        if ((other.streamNum != this.streamNum) ||
-            (!(other.resolvedPropertyName.equals(this.resolvedPropertyName))))
-        {
+        if (streamOrPropertyName != null ? !streamOrPropertyName.equals(other.streamOrPropertyName) : other.streamOrPropertyName != null)
             return false;
-        }
-
-
+        if (unresolvedPropertyName != null ? !unresolvedPropertyName.equals(other.unresolvedPropertyName) : other.unresolvedPropertyName != null)
+            return false;
         return true;
     }
 }

@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -51,7 +52,7 @@ public final class EvalEveryDistinctNode extends EvalNode
                     + getChildNodes().size());
         }
 
-        return context.getPatternStateFactory().makeEveryDistinctStateNode(parentNode, this, beginState, context, stateNodeId, expressions, convertor);
+        return context.getPatternStateFactory().makeEveryDistinctStateNode(parentNode, this, beginState, context, stateNodeId, ExprNodeUtility.getEvaluators(expressions), convertor);
     }
 
     public final String toString()
@@ -66,15 +67,6 @@ public final class EvalEveryDistinctNode extends EvalNode
     public List<ExprNode> getExpressions()
     {
         return expressions;
-    }
-
-    /**
-     * Returns convertor for matching events to events-per-stream.
-     * @return convertor
-     */
-    public MatchedEventConvertor getConvertor()
-    {
-        return convertor;
     }
 
     /**

@@ -109,7 +109,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         StatementFilterVersion statementFilterVersion = new StatementFilterVersion();
 
         AnnotationAnalysisResult annotationData = AnnotationAnalysisResult.analyzeAnnotations(annotations);
-        EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementName, statementResourceLock, expression, hasVariables, stmtMetric, annotationData.getPriority(), annotationData.isPremptive(), statementFilterVersion);
+        EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementName, expression, statementResourceLock, expression, hasVariables, stmtMetric, annotationData.getPriority(), annotationData.isPremptive(), statementFilterVersion);
 
         MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getSchedulingService(), engineServices.getConfigSnapshot().getEngineDefaults().getExpression().isUdfCache());
 
@@ -154,7 +154,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getInternalEventEngineRouteDest(),
                 engineServices.getMetricsReportingService(),
                 engineServices.getViewService(),
-                statementFilterVersion);
+                statementFilterVersion,
+                annotations);
     }
 
     /**

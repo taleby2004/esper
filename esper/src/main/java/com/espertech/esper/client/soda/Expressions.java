@@ -497,6 +497,52 @@ public class Expressions implements Serializable
     }
 
     /**
+     * Previous tail function.
+     * @param expression provides the numeric index of the previous event
+     * @param property the name of the property to obtain the value for
+     * @return expression
+     */
+    public static PreviousExpression previousTail(Expression expression, String property)
+    {
+        PreviousExpression expr = new PreviousExpression(expression, property);
+        expr.setType(PreviousExpressionType.PREVTAIL);
+        return expr;
+    }
+
+    /**
+     * Previous tail function.
+     * @param index the numeric index of the previous event
+     * @param property the name of the property to obtain the value for
+     * @return expression
+     */
+    public static PreviousExpression previousTail(int index, String property)
+    {
+        PreviousExpression expr = new PreviousExpression(index, property);
+        expr.setType(PreviousExpressionType.PREVTAIL);
+        return expr;
+    }
+
+    /**
+     * Previous count function.
+     * @param property provides the properties or stream name to select for the previous event
+     * @return expression
+     */
+    public static PreviousExpression previousCount(String property)
+    {
+        return new PreviousExpression(PreviousExpressionType.PREVCOUNT, property(property));
+    }
+
+    /**
+     * Previous window function.
+     * @param property provides the properties or stream name to select for the previous event
+     * @return expression
+     */
+    public static PreviousExpression previousWindow(String property)
+    {
+        return new PreviousExpression(PreviousExpressionType.PREVWINDOW, property(property));
+    }
+
+    /**
      * Between.
      * @param property the name of the property supplying data points.
      * @param lowBoundaryProperty the name of the property supplying lower boundary.
@@ -1055,43 +1101,83 @@ public class Expressions implements Serializable
     }
 
     /**
-     * Last-value aggregation function.
+     * Lastever-value aggregation function.
+     * @param propertyName name of the property providing the values to aggregate.
+     * @return expression
+     */
+    public static LastEverProjectionExpression lastEver(String propertyName)
+    {
+        return new LastEverProjectionExpression(getPropExpr(propertyName), false);
+    }
+
+    /**
+     * Lastever-value aggregation function.
      * @param propertyName name of the property providing the values to aggregate.
      * @return expression
      */
     public static LastProjectionExpression last(String propertyName)
     {
-        return new LastProjectionExpression(getPropExpr(propertyName), false);
+        return new LastProjectionExpression(getPropExpr(propertyName));
     }
 
     /**
-     * Last-value aggregation function.
+     * Lastever-value aggregation function.
+     * @param expression provides the values to aggregate.
+     * @return expression
+     */
+    public static LastEverProjectionExpression lastEver(Expression expression)
+    {
+        return new LastEverProjectionExpression(expression, false);
+    }
+
+    /**
+     * Lastever-value aggregation function.
      * @param expression provides the values to aggregate.
      * @return expression
      */
     public static LastProjectionExpression last(Expression expression)
     {
-        return new LastProjectionExpression(expression, false);
+        return new LastProjectionExpression(expression);
     }
 
     /**
-     * First-value aggregation function.
+     * First-value (windowed) aggregation function.
      * @param propertyName name of the property providing the values to aggregate.
      * @return expression
      */
     public static FirstProjectionExpression first(String propertyName)
     {
-        return new FirstProjectionExpression(getPropExpr(propertyName), false);
+        return new FirstProjectionExpression(getPropExpr(propertyName));
     }
 
     /**
-     * Last-value aggregation function.
+     * First-value (ever) aggregation function.
+     * @param propertyName name of the property providing the values to aggregate.
+     * @return expression
+     */
+    public static FirstEverProjectionExpression firstEver(String propertyName)
+    {
+        return new FirstEverProjectionExpression(getPropExpr(propertyName), false);
+    }
+
+    /**
+     * First-value (in window) aggregation function.
      * @param expression provides the values to aggregate.
      * @return expression
      */
     public static FirstProjectionExpression first(Expression expression)
     {
-        return new FirstProjectionExpression(expression, false);
+        return new FirstProjectionExpression(expression);
+    }
+
+    /**
+     * First-value (ever) aggregation function.
+     * @param expression provides the values to aggregate.
+     * @return expression
+     */
+    public static FirstEverProjectionExpression firstEver(Expression expression)
+    {
+        return new FirstEverProjectionExpression(expression, false);
     }
 
     /**
