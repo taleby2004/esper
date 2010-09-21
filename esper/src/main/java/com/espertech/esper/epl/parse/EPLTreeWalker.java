@@ -869,6 +869,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
     protected static List<OnTriggerSetAssignment> getOnTriggerSetAssignments(Tree node, Map<Tree, ExprNode> astExprNodeMap)
     {
         List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
+        if (node == null) {
+            return assignments;
+        }
 
         for (int i = 0; i < node.getChildCount(); i++)
         {

@@ -164,6 +164,31 @@ public class TestOutputLimitAfter extends TestCase
          assertEquals(stmtText, stmt.getText());
      }
 
+     public void testOutputWhenThen()
+     {
+         epService.getEPAdministrator().createEPL("create variable boolean myvar0 = false");
+         epService.getEPAdministrator().createEPL("create variable boolean myvar1 = false");
+         epService.getEPAdministrator().createEPL("create variable boolean myvar2 = false");
+
+         String epl = "@Name(\"select-streamstar+outputvar\")\n" +
+                 "select a.* from SupportBean.win:time(10) a output after 3 events when myvar0=true then set myvar1=true, myvar2=true";
+
+         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+         stmt.addListener(listener);
+
+         sendEvent("E1");
+         sendEvent("E2");
+         sendEvent("E3");
+         assertFalse(listener.isInvoked());
+
+         epService.getEPRuntime().setVariableValue("myvar0", true);
+         sendEvent("E4");
+         assertTrue(listener.isInvoked());
+         
+         assertEquals(true, epService.getEPRuntime().getVariableValue("myvar1"));
+         assertEquals(true, epService.getEPRuntime().getVariableValue("myvar2"));
+     }
+
      private void runAssertionSnapshotVar()
      {
          sendTimer(6000);

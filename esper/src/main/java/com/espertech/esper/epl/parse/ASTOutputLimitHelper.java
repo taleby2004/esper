@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
+import com.espertech.esper.antlr.ASTUtil;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprTimePeriod;
@@ -82,7 +83,8 @@ public class ASTOutputLimitHelper
             whenExpression = astExprNodeMap.remove(expressionNode);
             if (node.getChildCount() > count+1)
             {
-                thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(node.getChild(node.getChildCount() - 1), astExprNodeMap);
+                Tree setExpr = ASTUtil.findFirstNode(node, EsperEPL2GrammarParser.ON_SET_EXPR);
+                thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(setExpr, astExprNodeMap);
             }
         }
         else if (node.getType() == EsperEPL2GrammarParser.CRONTAB_LIMIT_EXPR)
