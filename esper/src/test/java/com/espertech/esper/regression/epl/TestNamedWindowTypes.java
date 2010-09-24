@@ -288,6 +288,7 @@ public class TestNamedWindowTypes extends TestCase
         //create window with statement object model
         String text = "create window MyWindowThree.win:keepall() as (a string, b integer, c integer)";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
+        assertEquals(text, model.toEPL());
         stmtCreate = epService.getEPAdministrator().create(model);
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("a"));
         assertEquals(Integer.class, stmtCreate.getEventType().getPropertyType("b"));

@@ -113,6 +113,16 @@ select * from MarketData(ticker='$')]]></programlisting>
 			<para>
 				Esper provides the configuration option to use engine-level queues and threadpools for inbound, outbound and internal executions. See <xref linkend="api-threading-advanced"/> for more information.
 			</para>
+			<para>
+				We recommend the inbound threading if your application does not already employ threading.
+			</para>
+			<para>
+				We recommend the outbound threading if your listeners are blocking. For outbound threading also see the section below on tuning and disabling listener delivery guarantees.
+			</para>
+			<para>
+				If enabling advanced threading options keep in mind that the engine will maintain a queue and thread pool. There is additional overhead associated with entering work units into the queue, maintaining the queue and the hand-off between threads. It is not necessarily true that
+				your application will perform better with any of the advanced threading options. 
+			</para>
 		</sect2>
 
 		<sect2 id="perf-tips-4">
