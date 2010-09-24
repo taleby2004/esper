@@ -325,28 +325,21 @@ public class EPStatementObjectModel implements Serializable
         {
             createWindow.toEPL(writer);
 
-            if (fromClause == null)
+            if (fromClause != null)
             {
-                throw new IllegalStateException("From clause has not been defined");
-            }
-            FilterStream fs = (FilterStream) fromClause.getStreams().get(0);
-            if (fs.isRetainUnion()) {
-                writer.write(" retain-union");    
+                FilterStream fs = (FilterStream) fromClause.getStreams().get(0);
+                if (fs.isRetainUnion()) {
+                    writer.write(" retain-union");
+                }
             }
 
             writer.write(" as ");
             if (selectClause == null)
             {
-                throw new IllegalStateException("Select clause has not been defined");
-            }
-
-
-            if (fs.getFilter().getEventTypeName().equals(Object.class.getName())) {
-                createWindow.toEPLCreateTablePart(writer, selectClause);
+                createWindow.toEPLCreateTablePart(writer);
             }
             else {
                 selectClause.toEPL(writer);
-
                 fromClause.toEPL(writer);
                 createWindow.toEPLInsertPart(writer);
             }

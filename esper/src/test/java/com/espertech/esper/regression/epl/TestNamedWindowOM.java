@@ -197,6 +197,23 @@ public class TestNamedWindowOM extends TestCase
         stmtCreate.destroy();
     }
 
+    public void testOMCreateTableSyntax()
+    {
+        String expected = "create window MyWindow.win:keepall() as (a1 string, a2 double, a3 int)";
+
+        // create window object model
+        EPStatementObjectModel model = new EPStatementObjectModel();
+        CreateWindowClause clause = CreateWindowClause.create("MyWindow").addView("win", "keepall");
+        clause.addColumn(new SchemaColumnDesc("a1", "string", false));
+        clause.addColumn(new SchemaColumnDesc("a2", "double", false));
+        clause.addColumn(new SchemaColumnDesc("a3", "int", false));
+        model.setCreateWindow(clause);
+        assertEquals(expected, model.toEPL());
+
+        EPStatement stmtCreate = epService.getEPAdministrator().create(model);
+        assertEquals(expected, stmtCreate.getText());
+    }
+
     private SupportBean sendSupportBean(String string, Long longBoxed)
     {
         SupportBean bean = new SupportBean();

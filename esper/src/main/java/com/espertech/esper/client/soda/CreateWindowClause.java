@@ -13,6 +13,7 @@ import com.espertech.esper.util.JavaClassHelper;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
 
@@ -24,10 +25,10 @@ public class CreateWindowClause implements Serializable
     private static final long serialVersionUID = 0L;
 
     private String windowName;
-    private List<View> views;
+    private List<View> views = new ArrayList<View>();
     private boolean insert;
     private Expression insertWhereClause;
-    private List<SchemaColumnDesc> columns;
+    private List<SchemaColumnDesc> columns = new ArrayList<SchemaColumnDesc>();
 
     /**
      * Ctor.
@@ -257,6 +258,11 @@ public class CreateWindowClause implements Serializable
         return columns;
     }
 
+    public void addColumn(SchemaColumnDesc col)
+    {
+        columns.add(col);
+    }
+
     public void setColumns(List<SchemaColumnDesc> columns)
     {
         this.columns = columns;
@@ -265,46 +271,16 @@ public class CreateWindowClause implements Serializable
     /**
      * To-EPL for create-table syntax.
      * @param writer to use
-     * @param selectClause select clause
      */
-    public void toEPLCreateTablePart(StringWriter writer, SelectClause selectClause)
+    public void toEPLCreateTablePart(StringWriter writer)
     {
         String delimiter = "";
-        if (columns != null) {
-            writer.write('(');
-            for (SchemaColumnDesc col : columns) {
-                writer.append(delimiter);
-                col.toEPL(writer);
-                delimiter = ", ";
-            }
-            writer.write(')');
+        writer.write('(');
+        for (SchemaColumnDesc col : columns) {
+            writer.append(delimiter);
+            col.toEPL(writer);
+            delimiter = ", ";
         }
-        else {
-            for (SelectClauseElement element : selectClause.getSelectList()) {
-                if (!(element instanceof SelectClauseExpression)) {
-                    continue;
-                }
-                SelectClauseExpression expr = (SelectClauseExpression) element;
-                if (!(expr.getExpression() instanceof ConstantExpression)) {
-                    continue;
-                }
-                ConstantExpression constant = (ConstantExpression) expr.getExpression();
-                Class clazz;
-                try
-                {
-                    clazz = JavaClassHelper.getClassForName(constant.getConstantType());
-                }
-                catch (ClassNotFoundException e)
-                {
-                    continue;
-                }
-
-                writer.write(delimiter);
-                writer.append(expr.getAsName());
-                writer.write(' ');
-                writer.append(clazz.getSimpleName().toLowerCase());
-                delimiter = ", ";
-            }
-        }
+        writer.write(')');
     }
 }

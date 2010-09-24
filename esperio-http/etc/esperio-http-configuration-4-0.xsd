@@ -2,10 +2,12 @@
 <xs:schema targetNamespace="http://www.espertech.com/schema/esperio-http" elementFormDefault="qualified" xmlns:esperio="http://www.espertech.com/schema/esperio-http" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:element name="esperio-http-configuration">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="esperio:service" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="esperio:get" minOccurs="0" maxOccurs="unbounded"/>
-				<xs:element ref="esperio:request" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+				<xs:choice>
+					<xs:element ref="esperio:service" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="esperio:get" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element ref="esperio:request" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

@@ -15,9 +15,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.EPAdministratorHelper;
 import com.espertech.esper.epl.agg.AggregationAccessType;
 import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
-import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
@@ -121,6 +119,12 @@ public class StatementSpecMapper
         mapMatchRecognize(sodaStatement.getMatchRecognizeClause(), raw, mapContext);
         mapForClause(sodaStatement.getForClause(), raw, mapContext);
         mapSQLParameters(sodaStatement.getFromClause(), raw, mapContext);
+
+        // from clause is required for create-window
+        if (sodaStatement.getCreateWindow() != null && raw.getStreamSpecs().size() == 0) {
+            FilterSpecRaw spec = new FilterSpecRaw("java.lang.Object", Collections.<ExprNode>emptyList(), null);
+            raw.getStreamSpecs().add(new FilterStreamSpecRaw(spec, Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions()));
+        }
         return raw;
     }
 
