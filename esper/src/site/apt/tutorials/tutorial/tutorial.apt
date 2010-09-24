@@ -185,3 +185,47 @@ select a.id, count(*) from pattern [
 	every a=Status -> (timer:interval(10 sec) and not Status(id=a.id)
 ] group by id
 ----------------------------------------
+
+* Named windows
+	
+	A named window is a global data window that can take part in many statement queries, and that can be selected-from, inserted-
+	into and deleted-from by multiple statements. Named windows are similar to a table in a relational database system.
+	
+	One can create a named window for example as follows:
+
+----------------------------------------
+create window AlertNamedWindow as (origin string, priority string, alarmNumber long)
+----------------------------------------
+	
+	One can trigger a select, update or delete when an event arrives. Here we show a select that simply counts the number of rows:
+
+----------------------------------------
+on TriggerEvent select count(*) from AlertNamedWindow
+----------------------------------------
+	
+	Named windows can as well be queried with fire-and-forget queries through the API and inward-facing JDBC driver. 
+
+* Match-Recognize Pattern Matching
+
+	A match-recognize pattern is a regular-expression-based pattern-matching syntax proposed for inclusion in SQL standards.
+	
+	The below query is a sample match-recognize pattern. It detects a pattern that may be present in the events
+	held by the named window as declared above. It looks for two immediately-followed events, i.e. with no events in-between for the same origin.
+	The first of the two events must have high priority and the second of the two events must have medium priority.
+	
+----------------------------------------	
+select * from AlertNamedWindow
+  match_recognize (
+    partition by origin
+    measures a1.origin as origin, a1.alarmNumber as alarmNumber1, a2.alarmNumber as alarmNumber2
+    pattern (a1 a2)
+    define
+      a1 as a1.priority = 'high',
+      a2 as a2.priority = 'medium' 
+)
+----------------------------------------	
+
+* Variables
+	
+	A variable is a scalar, object or event value that is available for use in all statements including patterns. Variables
+can be used in an expression anywhere in EPL.

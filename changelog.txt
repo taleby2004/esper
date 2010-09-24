@@ -24,6 +24,7 @@ Major API or EPL changes
   - Support for dot-syntax in the form of "(expression).method(...).method(...)", duck typing, array size and get(index) functions
   - Support for subqueries to select multiple columns
   - New example demonstrating runtime configuration 
+  - Support for selecting multiple columns in a subquery
 
 Changes in version 3.5.0
 ------------------------

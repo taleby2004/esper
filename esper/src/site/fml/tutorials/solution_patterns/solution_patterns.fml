@@ -336,21 +336,23 @@ select * from pattern [
       
 	<p>
 	While one could use an EPL pattern statement to look for the absence of any other event between two events, i.e. (A -> (B and not C)),
-	the new match_recognize function provides a good solution.
+	the match-recognize regular-expression pattern matching (proposed for SQL standard) provides a good solution.
         </p>
 		
 	<p>
-	The next statement utilizes match_recognize to look for two immediately-followed events that both have the same alert name and picked flag.
+	The next statement utilizes match-recognize to look for two immediately-followed events that both have the same origin (partition-clause) and 
+	where the first event has a picked flag value of false and the second event has a picked flag value of true.
         </p>
 
 <div class="source"><pre>
 select * from AlertEventStream
   match_recognize (
-    partition by alertName
-    measures sel[0].alarmNumber as alarmNumber, sel[0].notificationId as notificationId
-    pattern (sel sel)
+    partition by origin
+    measures a1.alarmNumber as alarmNumber1, a1.alarmNumber as alarmNumber2, a1.origin as origin
+    pattern (a1 a2)
     define
-      sel as sel.alertName='123' and sel.picked=false
+      a1 as a1.picked = false
+      a2 as a2.picked = true
 )</pre></div>
       
       </answer>
