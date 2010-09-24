@@ -17,11 +17,10 @@ import java.io.Serializable;
 /**
  * Encapsulates the parsed select expressions in a select-clause in an EPL statement.
  */
-public class SelectClauseSpecCompiled implements MetaDefItem, Serializable
+public class SelectClauseSpecCompiled
 {
     private final boolean isDistinct;
 	private List<SelectClauseElementCompiled> selectClauseElements;
-    private static final long serialVersionUID = 5759170079421795146L;
 
     /**
      * Ctor.

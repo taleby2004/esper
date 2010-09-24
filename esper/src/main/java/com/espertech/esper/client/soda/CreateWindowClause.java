@@ -253,16 +253,28 @@ public class CreateWindowClause implements Serializable
         this.views = views;
     }
 
+    /**
+     * Returns all columns for use when create-table syntax is used to define the named window type.
+     * @return columns
+     */
     public List<SchemaColumnDesc> getColumns()
     {
         return columns;
     }
 
+    /**
+     * Adds a column for use when create-table syntax is used to define the named window type.
+     * @param col column to add
+     */
     public void addColumn(SchemaColumnDesc col)
     {
         columns.add(col);
     }
 
+    /**
+     * Sets the columns for use when create-table syntax is used to define the named window type.
+     * @param columns to set
+     */
     public void setColumns(List<SchemaColumnDesc> columns)
     {
         this.columns = columns;

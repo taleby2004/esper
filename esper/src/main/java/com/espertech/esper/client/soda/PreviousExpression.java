@@ -48,6 +48,11 @@ public class PreviousExpression extends ExpressionBase
         this.addChild(new PropertyValueExpression(propertyName));
     }
 
+    /**
+     * Ctor.
+     * @param type type of previous expression (tail, first, window, count)
+     * @param expression to evaluate
+     */
     public PreviousExpression(PreviousExpressionType type, Expression expression)
     {
         this.type = type;
@@ -59,11 +64,19 @@ public class PreviousExpression extends ExpressionBase
         return ExpressionPrecedenceEnum.UNARY;
     }
 
+    /**
+     * Returns the type of the previous expression (tail, first, window, count)
+     * @return type
+     */
     public PreviousExpressionType getType()
     {
         return type;
     }
 
+    /**
+     * Sets the type of the previous expression (tail, first, window, count)
+     * @param type to set
+     */
     public void setType(PreviousExpressionType type)
     {
         this.type = type;

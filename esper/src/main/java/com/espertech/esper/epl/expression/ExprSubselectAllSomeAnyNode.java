@@ -32,7 +32,7 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
     private final boolean isAll;
     private final RelationalOpEnum relationalOp;
 
-    private SubselectEvalStrategy evalStrategy;
+    private transient SubselectEvalStrategy evalStrategy;
     private static final long serialVersionUID = -3884694910286266280L;
 
     /**

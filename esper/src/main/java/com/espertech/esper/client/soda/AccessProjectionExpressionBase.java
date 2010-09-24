@@ -24,6 +24,10 @@ public abstract class AccessProjectionExpressionBase extends ExpressionBase
     public AccessProjectionExpressionBase() {
     }
 
+    /**
+     * Returns the function name of the aggregation function.
+     * @return function name
+     */
     public abstract String getAggregationFunctionName();
 
     /**
@@ -40,18 +44,34 @@ public abstract class AccessProjectionExpressionBase extends ExpressionBase
         return ExpressionPrecedenceEnum.UNARY;
     }
 
+    /**
+     * Returns true for wildcard parameter.
+     * @return wildcard indicator
+     */
     public boolean isWildcard() {
         return wildcard;
     }
 
+    /**
+     * Set to true for wildcard parameter.
+     * @param wildcard wildcard indicator
+     */
     public void setWildcard(boolean wildcard) {
         this.wildcard = wildcard;
     }
 
+    /**
+     * Return stream name for stream-wild, if any.
+     * @return stream wildcard
+     */
     public String getStreamWildcard() {
         return streamWildcard;
     }
 
+    /**
+     * Set stream name for stream-wild, if any.
+     * @param streamWildcard stream wildcard
+     */
     public void setStreamWildcard(String streamWildcard) {
         this.streamWildcard = streamWildcard;
     }

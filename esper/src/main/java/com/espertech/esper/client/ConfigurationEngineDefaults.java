@@ -172,10 +172,18 @@ public class ConfigurationEngineDefaults implements Serializable
         this.alternativeContext = alternativeContext;
     }
 
+    /**
+     * Returns the exception handling configuration.
+     * @return exception handling configuration
+     */
     public ExceptionHandling getExceptionHandling() {
         return exceptionHandling;
     }
 
+    /**
+     * Sets the exception handling configuration.
+     * @param exceptionHandling exception handling configuration
+     */
     public void setExceptionHandling(ExceptionHandling exceptionHandling) {
         this.exceptionHandling = exceptionHandling;
     }
@@ -1132,11 +1140,19 @@ public class ConfigurationEngineDefaults implements Serializable
             this.extendedAggregation = extendedAggregation;
         }
 
+        /**
+         * Returns true to indicate that duck typing is enable for the specific syntax where it is allowed (check the documentation).
+         * @return indicator
+         */
         public boolean isDuckTyping()
         {
             return duckTyping;
         }
 
+        /**
+         * Set to true to indicate that duck typing is enable for the specific syntax where it is allowed (check the documentation).
+         * @param duckTyping indicator
+         */
         public void setDuckTyping(boolean duckTyping)
         {
             this.duckTyping = duckTyping;
@@ -1242,13 +1258,30 @@ public class ConfigurationEngineDefaults implements Serializable
         }
     }
 
+    /**
+     * Configuration object for defining exception handling behavior.
+     */
     public static class ExceptionHandling implements Serializable {
+        private static final long serialVersionUID = -708367341332718634L;
         private List<String> handlerFactories;
 
+        /**
+         * Returns the list of exception handler factory class names,
+         * see {@link com.espertech.esper.client.hook.ExceptionHandlerFactory}
+         * @return list of fully-qualified class names
+         */
         public List<String> getHandlerFactories() {
             return handlerFactories;
         }
 
+        /**
+         * Add an exception handler factory class name.
+         * <p>
+         * Provide a fully-qualified class name of the implementation
+         * of the {@link com.espertech.esper.client.hook.ExceptionHandlerFactory}
+         * interface.
+         * @param exceptionHandlerFactoryClassName class name of exception handler factory
+         */
         public void addClass(String exceptionHandlerFactoryClassName) {
             if (handlerFactories == null) {
                 handlerFactories = new ArrayList<String>();
@@ -1256,6 +1289,14 @@ public class ConfigurationEngineDefaults implements Serializable
             handlerFactories.add(exceptionHandlerFactoryClassName);
         }
 
+        /**
+         * Add an exception handler factory class.
+         * <p>
+         * The class provided should implement the
+         * {@link com.espertech.esper.client.hook.ExceptionHandlerFactory}
+         * interface.
+         * @param exceptionHandlerFactoryClass class of implementation
+         */
         public void addClass(Class exceptionHandlerFactoryClass) {
             addClass(exceptionHandlerFactoryClass.getName());
         }

@@ -29,7 +29,7 @@ public class ExprMathNode extends ExprNode implements ExprEvaluator
     private final boolean isIntegerDivision;
     private final boolean isDivisionByZeroReturnsNull;
 
-    private MathArithTypeEnum.Computer arithTypeEnumComputer;
+    private transient MathArithTypeEnum.Computer arithTypeEnumComputer;
     private Class resultType;
     private transient ExprEvaluator evaluatorLeft;
     private transient ExprEvaluator evaluatorRight;

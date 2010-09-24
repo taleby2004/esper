@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class SingleRowMethodExpression extends ExpressionBase
 {
+    private static final long serialVersionUID = -8698785052124988195L;
     private List<Pair<String, List<Expression>>> chain = new ArrayList<Pair<String, List<Expression>>>();
 
     /**
@@ -43,6 +44,11 @@ public class SingleRowMethodExpression extends ExpressionBase
         chain.add(new Pair<String, List<Expression>>(method, parameterList));
     }
 
+    /**
+     * Returns the optional method invocation chain for the single-row method consisting of
+     * pairs of method name and list of parameters.
+     * @return chain of method invocations
+     */
     public List<Pair<String, List<Expression>>> getChain()
     {
         return chain;
@@ -50,6 +56,7 @@ public class SingleRowMethodExpression extends ExpressionBase
 
     /**
      * Ctor.
+     * @param chain of method invocations with at least one element, each pair a method name and list of parameter expressions
      */
     public SingleRowMethodExpression(List<Pair<String, List<Expression>>> chain)
     {

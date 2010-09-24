@@ -29,9 +29,9 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback, Exp
     private Class resultType;
     private int streamNumber;
     private int constantIndexNumber;
-    private RelativeAccessByEventNIndex relativeAccess;
-    private RandomAccessByIndex randomAccess;
-    private ExprEvaluator evaluator;
+    private transient RelativeAccessByEventNIndex relativeAccess;
+    private transient RandomAccessByIndex randomAccess;
+    private transient ExprEvaluator evaluator;
     private static final long serialVersionUID = -2115346817501589366L;
 
     /**

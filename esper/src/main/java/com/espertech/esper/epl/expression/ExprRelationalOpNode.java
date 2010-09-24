@@ -25,7 +25,7 @@ import java.util.Map;
 public class ExprRelationalOpNode extends ExprNode implements ExprEvaluator
 {
     private final RelationalOpEnum relationalOpEnum;
-    private RelationalOpEnum.Computer computer;
+    private transient RelationalOpEnum.Computer computer;
     private transient ExprEvaluator[] evaluators;
     private static final long serialVersionUID = -6170161542681634598L;
 

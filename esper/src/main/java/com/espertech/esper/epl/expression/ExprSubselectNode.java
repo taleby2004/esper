@@ -31,25 +31,25 @@ public abstract class ExprSubselectNode extends ExprNode implements ExprEvaluato
      * The validated select clause.
      */
     protected ExprNode[] selectClause;
-    protected ExprEvaluator[] selectClauseEvaluator;
+    protected transient ExprEvaluator[] selectClauseEvaluator;
 
     protected String[] selectAsNames;
 
     /**
      * The validate filter expression.
      */
-    protected ExprEvaluator filterExpr;
+    protected transient ExprEvaluator filterExpr;
 
     /**
      * The event type generated for wildcard selects.
      */
-    protected EventType rawEventType;
+    protected transient EventType rawEventType;
 
-    private StreamTypeService filterSubqueryStreamTypes;
+    private transient StreamTypeService filterSubqueryStreamTypes;
     private StatementSpecRaw statementSpecRaw;
-    private StatementSpecCompiled statementSpecCompiled;
-    private TableLookupStrategy strategy;
-    private SubselectAggregationPreprocessor subselectAggregationPreprocessor;
+    private transient StatementSpecCompiled statementSpecCompiled;
+    private transient TableLookupStrategy strategy;
+    private transient SubselectAggregationPreprocessor subselectAggregationPreprocessor;
 
     private static Set<EventBean> singleNullRowEventSet = new HashSet<EventBean>();
     static

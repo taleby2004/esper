@@ -13,8 +13,23 @@ package com.espertech.esper.client.soda;
  */
 public enum PreviousExpressionType
 {
+    /**
+     * Returns a previous event with the index counting from the last event towards the first event.
+     */
     PREV,
+
+    /**
+     * Returns the count of previous events.
+     */
     PREVCOUNT,
+
+    /**
+     * Returns a previous event with the index counting from the first event towards the last event.
+     */
     PREVTAIL,
+
+    /**
+     * Returns all previous events.
+     */
     PREVWINDOW
 }

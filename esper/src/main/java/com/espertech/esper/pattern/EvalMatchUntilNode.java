@@ -22,7 +22,7 @@ public final class EvalMatchUntilNode extends EvalNode
 {
     private ExprNode lowerBounds;
     private ExprNode upperBounds;
-    private MatchedEventConvertor convertor;
+    private transient MatchedEventConvertor convertor;
     private String[] tagsArrayed;
     private static final long serialVersionUID = -959026931248456356L;
 

@@ -49,14 +49,27 @@ public class StaticMethodExpression extends ExpressionBase
         chain.add(new Pair<String, List<Expression>>(method, parameterList));
     }
 
+    /**
+     * Returns the chain of method invocations, each pair a method name and list of parameter expressions
+     * @return method chain
+     */
     public List<Pair<String, List<Expression>>> getChain()
     {
         return chain;
     }
 
     /**
+     * Sets the chain of method invocations, each pair a method name and list of parameter expressions
+     * @param chain method chain
+     */
+    public void setChain(List<Pair<String, List<Expression>>> chain) {
+        this.chain = chain;
+    }
+
+    /**
      * Ctor.
      * @param className class name providing the static method
+     * @param chain method chain
      */
     public StaticMethodExpression(String className, List<Pair<String, List<Expression>>> chain)
     {

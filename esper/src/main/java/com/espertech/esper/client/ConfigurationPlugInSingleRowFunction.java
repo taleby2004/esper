@@ -63,11 +63,19 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
         this.functionClassName = functionClassName;
     }
 
+    /**
+     * Returns the name of the single-row function.
+     * @return function name
+     */
     public String getFunctionMethodName()
     {
         return functionMethodName;
     }
 
+    /**
+     * Sets the name of the single-row function.
+     * @param functionMethodName single-row function name
+     */
     public void setFunctionMethodName(String functionMethodName)
     {
         this.functionMethodName = functionMethodName;

@@ -13,6 +13,8 @@ package com.espertech.esper.client.soda;
  */
 public class LastProjectionExpression extends AccessProjectionExpressionBase
 {
+    private static final long serialVersionUID = -6851246065918661653L;
+    
     /**
      * Ctor.
      */

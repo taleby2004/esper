@@ -25,7 +25,7 @@ public class ExprRelationalOpAllAnyNode extends ExprNode implements ExprEvaluato
     private final boolean isAll;
     private boolean hasCollectionOrArray;
 
-    private RelationalOpEnum.Computer computer;
+    private transient RelationalOpEnum.Computer computer;
     private transient ExprEvaluator[] evaluators;
 
     private static final long serialVersionUID = -9212002972361997109L;

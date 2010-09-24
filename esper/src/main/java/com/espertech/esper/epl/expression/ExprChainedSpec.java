@@ -13,6 +13,8 @@ import java.util.List;
 
 public class ExprChainedSpec implements Serializable
 {
+    private static final long serialVersionUID = -5618484186038424466L;
+    
     private String name;
     private List<ExprNode> parameters;
 

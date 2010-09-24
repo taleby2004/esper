@@ -37,9 +37,9 @@ import java.util.TreeMap;
  */
 public abstract class ExprAggregateNode extends ExprNode implements ExprEvaluator
 {
-	private AggregationResultFuture aggregationResultFuture;
+	private transient AggregationResultFuture aggregationResultFuture;
 	private int column;
-    private AggregationMethodFactory aggregationMethodFactory;
+    private transient AggregationMethodFactory aggregationMethodFactory;
 
     /**
      * Indicator for whether the aggregation is distinct - i.e. only unique values are considered.

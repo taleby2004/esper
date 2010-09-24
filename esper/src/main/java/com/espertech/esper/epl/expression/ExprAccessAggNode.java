@@ -21,6 +21,8 @@ import java.util.Set;
 
 public class ExprAccessAggNode extends ExprAggregateNode
 {
+    private static final long serialVersionUID = -6088874732989061687L;
+    
     private final AggregationAccessType accessType;
     private final boolean isWildcard;
     private final String streamWildcard;

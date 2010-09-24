@@ -34,8 +34,8 @@ public class ExprBetweenNode extends ExprNode implements ExprEvaluator
     private final boolean isNotBetween;
 
     private boolean isAlwaysFalse;
-    private ExprBetweenComp computer;
-    private ExprEvaluator[] evaluators;
+    private transient ExprBetweenComp computer;
+    private transient ExprEvaluator[] evaluators;
 
     private static final long serialVersionUID = -9089344387956311948L;
 

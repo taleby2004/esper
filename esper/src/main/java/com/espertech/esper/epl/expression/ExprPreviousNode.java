@@ -36,7 +36,7 @@ public class ExprPreviousNode extends ExprNode implements ViewResourceCallback, 
     private Integer constantIndexNumber;
     private boolean isConstantIndex;
 
-    private ExprPreviousEval evaluator;
+    private transient ExprPreviousEval evaluator;
 
     public ExprPreviousNode(PreviousType previousType)
     {

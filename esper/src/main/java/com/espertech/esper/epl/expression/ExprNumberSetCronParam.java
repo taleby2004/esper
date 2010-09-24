@@ -25,7 +25,7 @@ public class ExprNumberSetCronParam extends ExprNode implements ExprEvaluator
     private static final Log log = LogFactory.getLog(ExprNumberSetCronParam.class);
 
     private final CronOperatorEnum cronOperator;
-    private TimeProvider timeProvider;
+    private transient TimeProvider timeProvider;
     private transient ExprEvaluator evaluator;
     private static final long serialVersionUID = -1315999998249935318L;
 

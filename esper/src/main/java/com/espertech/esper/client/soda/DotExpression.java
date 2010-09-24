@@ -27,16 +27,29 @@ public class DotExpression extends ExpressionBase
     public DotExpression() {
     }
 
+    /**
+     * Ctor.
+     * @param innerExpression the expression in parenthesis
+     */
     public DotExpression(Expression innerExpression)
     {
         this.getChildren().add(innerExpression);
     }
 
+    /**
+     * Add a method to the chain of methods after the dot.
+     * @param methodName to add
+     * @param parameters parameters to method
+     */
     public void add(String methodName, List<Expression> parameters)
     {
         chain.add(new Pair<String, List<Expression>>(methodName, parameters));
     }
 
+    /**
+     * Returns the method chain of all methods after the dot.
+     * @return method name ane list of parameters
+     */
     public List<Pair<String, List<Expression>>> getChain()
     {
         return chain;
@@ -55,6 +68,11 @@ public class DotExpression extends ExpressionBase
         renderChain(chain, writer);
     }
 
+    /**
+     * Renders a method invocation chain
+     * @param chain pairs of method name and parameters
+     * @param writer to render to
+     */
     protected static void renderChain(List<Pair<String, List<Expression>>> chain, StringWriter writer) {
         for (Pair<String, List<Expression>> pair : chain)
         {
