@@ -12,6 +12,135 @@ Change History
 	[]
 
 
+Version 4.0.0
+
+	Released September 27, 2010
+	
+	Built with JDK 6.0 Update 21
+
+* API changes
+
+  * None.
+    
+* Major changes
+      
+  * The following dependent jar files are upgraded:
+  
+  	* Required: ANTLR version upgrade from 3.1.1 to 3.2
+  	
+        * Optional: LOG4J upgrade from 1.2.15 to 1.2.16
+       
+  * The bound-repeat syntax in the repeat-until pattern operator changed syntax:
+    The old syntax of separating range value by dots "[low .. high]" is no longer supported. Use the colon ":" character instead of "..", version 3.5 supported the same syntax.
+    
+  * The meaning of the index parameter to the "nth" aggregation function has changed:
+    To be consistent with "prev" and "last" functions an index of zero now returns the current row. 
+    For Example: "nth(value, 0)" returns the current row and "nth(value, 1)" returns the previous-row value.
+    
+  * The semantics for "output first" have changed: For statements that have a "group-by" clause the "output first" now outputs the first events per group.
+  
+  * The data window "std:groupby" for grouped data windows has been renamed to "std:groupwin" to avoid confusion with the group-by clause.
+
+  * The "first" aggregation function has been renamed to "firstever".
+  
+  * The "last" aggregation function has been renamed to "lastever". This makes a difference as data window deletes are reflected by the new "last" aggregation function and are not reflected by "lastever".
+  
+  * Support for new aggregation functions that track the data window : "first", "last" and "window" with a convenient syntax for access to all attributes.
+  
+  * Support for new single-row functions for data window access: "prevtail", "prevwindow" and "prevcount".
+
+  * Support for registering an exception handler that is called when any continuous-query statement exception occurs.
+  
+  * Support for all statistics views and the size view to accept additional expressions as parameters for returning values pertaining to the last-applied event.
+  
+  * Support for chained method invocations on events in streams, library static methods and single-row functions.
+  
+  * Support for registering single-row functions by function name.
+  
+  * Support for dot-syntax in the form of "(expression).method(...).method(...)" which includes support for duck typing, obtaining array size and calling get(index) on an array or collection.
+  
+  * Support for subqueries to select multiple columns.
+  
+  * Support for correlated aggregation in subqueries.
+  
+  * Support for selecting multiple columns in a subquery.
+  
+  * Support for contained-event syntax on events selected from a named window.
+  
+  * Support for expressions in the [] bound repeat in patterns.
+  
+  * Support for grouped data windows to remove groups that haven't changed for a given time period, as specified via hint.
+
+  []
+    
+* Minor changes
+
+  * To be congruent to the JDBC 4 specification, the SQL query metadata now uses the value returned by the JDBC driver result set metadata for "getColumnLabel" as the column name or if that is null the value returned by "getColumnName".
+  
+  * For plug-in aggregation functions, the parameter to the "validate" method has changed and is now a validation context that provides additional information. The "validateMultiParameter" method has been removed.
+  
+  * We added a new example demonstrating runtime configuration.
+  
+  * Bug fixes: see JIRA list of resolved issues for release 3.5 or changelog.txt
+
+  []
+
+
+* September 24, 2010  -  Esper 4.0.0 - Major release, read compatibility notes below
+
+  * Requires a Java 6 runtime
+  
+  * The following dependent jar files are upgraded:
+  
+  	* Required: ANTLR version upgrade from 3.1.1 to 3.2
+  	
+        * Optional: LOG4J upgrade from 1.2.15 to 1.2.16
+       
+  * The bound-repeat syntax in the repeat-until pattern operator changed syntax:
+    The old syntax of separating range value by dots "[low .. high]" is no longer supported. Use the colon ":" character instead of "..", version 3.5 supported the same syntax.
+    
+  * The meaning of the index parameter to the "nth" aggregation function has changed:
+    To be consistent with "prev" and "last" functions an index of zero now returns the current row. 
+    For Example: "nth(value, 0)" returns the current row and "nth(value, 1)" returns the previous-row value.
+    
+  * The semantics for "output first" have changed: For statements that have a "group-by" clause the "output first" now outputs the first events per group.
+  
+  * The data window "std:groupby" for grouped data windows has been renamed to "std:groupwin" to avoid confusion with the group-by clause.
+
+  * The "first" aggregation function has been renamed to "firstever".
+  
+  * The "last" aggregation function has been renamed to "lastever". This makes a difference as data window deletes are reflected by the new "last" aggregation function and are not reflected by "lastever".
+  
+  * Support for new aggregation functions that track the data window : "first", "last" and "window" with a convenient syntax for access to all attributes.
+  
+  * Support for new single-row functions for data window access: "prevtail", "prevwindow" and "prevcount".
+
+  * Support for registering an exception handler that is called when any continuous-query statement exception occurs.
+  
+  * Support for all statistics views and the size view to accept additional expressions as parameters for returning values pertaining to the last-applied event.
+  
+  * Support for chained method invocations on events in streams, library static methods and single-row functions.
+  
+  * Support for registering single-row functions by function name.
+  
+  * Support for dot-syntax in the form of "(expression).method(...).method(...)" which includes support for duck typing, obtaining array size and calling get(index) on an array or collection.
+  
+  * Support for subqueries to select multiple columns.
+  
+  * Support for correlated aggregation in subqueries.
+  
+  * Support for selecting multiple columns in a subquery.
+  
+  * Support for contained-event syntax on events selected from a named window.
+  
+  * Support for expressions in the [] bound repeat in patterns.
+  
+  * Support for grouped data windows to remove groups that haven't changed for a given time period, as specified via hint.
+  
+  * Many additional bug fixes and improvements to documentation, code and performance; Please see history for additional information.
+ 	
+  []
+
 
 Version 4.0.0
 
