@@ -20,7 +20,7 @@ public class NamedWindowConsumerStreamSpec extends StreamSpecBase implements Str
 {
     private String windowName;
     private List<ExprNode> filterExpressions;
-    private PropertyEvaluator optPropertyEvaluator;
+    private transient PropertyEvaluator optPropertyEvaluator;
     private static final long serialVersionUID = -8549850729310756432L;
 
     /**

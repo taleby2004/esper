@@ -19,7 +19,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
  */
 public class ExprPlugInAggFunctionNode extends ExprAggregateNode
 {
-    private AggregationSupport aggregationSupport;
+    private transient AggregationSupport aggregationSupport;
     private static final long serialVersionUID = 4512085880102791194L;
 
     /**

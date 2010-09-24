@@ -34,7 +34,7 @@ public class ExprIdentNode extends ExprNode implements ExprEvaluator
 
     private String resolvedStreamName;
     private String resolvedPropertyName;
-    private EventPropertyGetter propertyGetter;
+    private transient EventPropertyGetter propertyGetter;
     private int streamNum = -1;
     private Class propertyType;
     private static final long serialVersionUID = 5882493771230745244L;

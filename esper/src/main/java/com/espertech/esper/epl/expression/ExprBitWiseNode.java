@@ -27,7 +27,7 @@ import java.util.Map;
 public class ExprBitWiseNode extends ExprNode implements ExprEvaluator {
 
     private final BitWiseOpEnum _bitWiseOpEnum;
-    private BitWiseOpEnum.Computer bitWiseOpEnumComputer;
+    private transient BitWiseOpEnum.Computer bitWiseOpEnumComputer;
     private Class resultType;
 
     private transient ExprEvaluator[] evaluators;

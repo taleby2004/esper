@@ -27,6 +27,7 @@ import java.util.List;
  */
 public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNodeProvider
 {
+    private static final long serialVersionUID = 2485214890449563098L;
     private static final Log log = LogFactory.getLog(ExprPlugInSingleRowNode.class);
 
     private final String functionName;

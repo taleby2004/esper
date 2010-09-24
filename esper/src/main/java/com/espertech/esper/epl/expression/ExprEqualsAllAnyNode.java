@@ -26,7 +26,7 @@ public class ExprEqualsAllAnyNode extends ExprNode implements ExprEvaluator
     private final boolean isAll;
 
     private boolean mustCoerce;
-    private SimpleNumberCoercer coercer;
+    private transient SimpleNumberCoercer coercer;
     private boolean hasCollectionOrArray;
 
     private transient ExprEvaluator[] evaluators;

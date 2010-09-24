@@ -9,6 +9,9 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.spec.ViewSpec;
+import com.espertech.esper.util.MetaDefItem;
+
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,7 +21,7 @@ import java.util.List;
  * Implementation classes for views and patterns add additional information defining the
  * stream of events.
  */
-public interface StreamSpec
+public interface StreamSpec extends MetaDefItem, Serializable
 {
     /**
      * Returns the stream name, or null if undefined.

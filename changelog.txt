@@ -5,29 +5,41 @@ Changes in version 4.0.0
 ------------------------
 Major API or EPL changes
   - Requires a Java 6 runtime (JDK6 or JRE6)
+  - The following dependent jar files are upgraded:
+       Required: ANTLR version upgrade from 3.1.1 to 3.2
+       Optional: LOG4J upgrade from 1.2.15 to 1.2.16
+       
   - The bound-repeat syntax in the repeat-until pattern operator changed syntax:
     The old syntax of separating range value by dots "[low .. high]" is no longer supported. Use the colon ":" character instead of "..".
-  - "nth" aggregator "nth(value, 0)" means current row, same as "prev" and "first"
-  - the semantics for "output first" changed for the case when a statement has a "group-by" clause: the output first is now output first per group.
-  - Renamed "first" to "firstever"
-  - Renamed "last" to "lastever" (this makes a difference as out-of-order deletes are handled by last only and not by lastever)
-  - Introduced new aggregation functions that track the data window : first, last and window with a convenient syntax for access to all attributes
-  - Introduced "prevtail", "prevwindow" and "prevcount" functions for data window reporting
-  - ANTLR version upgrade from 3.1.1 to 3.2; (Optional) JUnit version upgrade from 4.4 to 4.8.1 (Optional) LOG4J upgrade from 1.2.16 to 1.2.16; (Optional) MySQL Connector from 3.1.14 to 5.1.13
-  - To be congruent to the JDBC 4 specification, the SQL query metadata now uses the value returned by the JDBC driver result set metadata for "getColumnLabel" as the column name or if that is null the value returned by "getColumnName"
-  - The "std:groupby" view has been renamed to "std:groupwin" to avoid confusion with the group-by clause.
-  - For plug-in aggregation functions, the parameter to the "validate" method has changed and is now a validation context that provides additional information, The "validateMultiParameter" method has been removed.
-  - Support for correlated aggregation in subqueries
-  - New feature allows registering an exception handler that is called when any continous-query statement exception occurs
-  - Statistics views and size view now accept additional expressions as parameters for returning values pertaining to the last-applied event 
-  - Support for chained method invocations on events in streams and for library static methods
-  - Support for registering single-row functions by function name
-  - Support for dot-syntax in the form of "(expression).method(...).method(...)", duck typing, array size and get(index) functions
-  - Support for subqueries to select multiple columns
-  - New example demonstrating runtime configuration 
-  - Support for selecting multiple columns in a subquery
-  - Support for contained-event syntax on events selected from a named window
-  - Support for expressions in the [] bound repeat in patterns
+    
+  - The meaning of the index paramater to the "nth" aggregation function has changed:
+    To be consistent with "prev" and "last" functions an index of zero now returns the current row. 
+    For Example: "nth(value, 0)" returns the current row and "nth(value, 1)" returns the previous-row value.
+    
+  - The semantics for "output first" have changed: For statements that have a "group-by" clause the "output first" now outputs the first events per group.
+  
+  - The "first" aggregation function has been renamed to "firstever".
+  - The "last" aggregation function has been renamed to "lastever". This makes a difference as data window deletes are reflected by the new "last" aggregation function and are not reflected by "lastever".
+  - We introduced new aggregation functions that track the data window : "first", "last" and "window" with a convenient syntax for access to all attributes.
+  - We introduced new single-row function for data window access: "prevtail", "prevwindow" and "prevcount" functions.
+  
+  - The data window "std:groupby" for grouped data windows has been renamed to "std:groupwin" to avoid confusion with the group-by clause.
+
+  - Support for registering an exception handler that is called when any continous-query statement exception occurs.
+  - Support for all statistics views and the size view to accept additional expressions as parameters for returning values pertaining to the last-applied event.
+  - Support for chained method invocations on events in streams, library static methods and single-row functions.
+  - Support for registering single-row functions by function name.
+  - Support for dot-syntax in the form of "(expression).method(...).method(...)" which includes support for duck typing, obtaining array size and calling get(index) on an array or collection.
+  - Support for subqueries to select multiple columns.
+  - Support for correlated aggregation in subqueries.
+  - Support for selecting multiple columns in a subquery.
+  - Support for contained-event syntax on events selected from a named window.
+  - Support for expressions in the [] bound repeat in patterns.
+  - Support for grouped data windows to remove groups that haven't changed for a given time period, as specified via hint.
+
+  - To be congruent to the JDBC 4 specification, the SQL query metadata now uses the value returned by the JDBC driver result set metadata for "getColumnLabel" as the column name or if that is null the value returned by "getColumnName".
+  - For plug-in aggregation functions, the parameter to the "validate" method has changed and is now a validation context that provides additional information. The "validateMultiParameter" method has been removed.
+  - We added a new example demonstrating runtime configuration.
 
 Minor changes  
   - Fixed issue ESPER-471 Static method called 'join' (reserved keyword) not allowed

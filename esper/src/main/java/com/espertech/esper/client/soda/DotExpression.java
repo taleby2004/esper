@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class DotExpression extends ExpressionBase
 {
+    private static final long serialVersionUID = -7597133103354244332L;
     private List<Pair<String, List<Expression>>> chain = new ArrayList<Pair<String, List<Expression>>>();
     
     /**
