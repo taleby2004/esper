@@ -100,18 +100,22 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
             for (int i = 0; i < newData.length; i++)
             {
                 eventsPerStream[0] = newData[i];
-                double point = ((Number) fieldNameXEvaluator.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                double weight = ((Number) fieldNameWeightEvaluator.evaluate(eventsPerStream, true, statementContext)).doubleValue();
+                Number pointnum = (Number) fieldNameXEvaluator.evaluate(eventsPerStream, true, statementContext);
+                Number weightnum = (Number) fieldNameWeightEvaluator.evaluate(eventsPerStream, true, statementContext);
+                if (pointnum != null && weightnum != null) {
+                    double point = pointnum.doubleValue();
+                    double weight = weightnum.doubleValue();
 
-                if (Double.valueOf(sumXtimesW).isNaN())
-                {
-                    sumXtimesW = point * weight;
-                    sumW = weight;
-                }
-                else
-                {
-                    sumXtimesW += point * weight;
-                    sumW += weight;
+                    if (Double.valueOf(sumXtimesW).isNaN())
+                    {
+                        sumXtimesW = point * weight;
+                        sumW = weight;
+                    }
+                    else
+                    {
+                        sumXtimesW += point * weight;
+                        sumW += weight;
+                    }
                 }
             }
 
@@ -131,11 +135,15 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
             for (int i = 0; i < oldData.length; i++)
             {
                 eventsPerStream[0] = oldData[i];
-                double point = ((Number) fieldNameXEvaluator.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                double weight = ((Number) fieldNameWeightEvaluator.evaluate(eventsPerStream, true, statementContext)).doubleValue();
+                Number pointnum = (Number) fieldNameXEvaluator.evaluate(eventsPerStream, true, statementContext);
+                Number weightnum = (Number) fieldNameWeightEvaluator.evaluate(eventsPerStream, true, statementContext);
 
-                sumXtimesW -= point * weight;
-                sumW -= weight;
+                if (pointnum != null && weightnum != null) {
+                    double point = pointnum.doubleValue();
+                    double weight = weightnum.doubleValue();
+                    sumXtimesW -= point * weight;
+                    sumW -= weight;
+                }
             }
         }
 

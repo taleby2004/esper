@@ -89,9 +89,13 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             for (int i = 0; i < newData.length; i++)
             {
                 eventsPerStream[0] = newData[i];
-                double X = ((Number) expressionXEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                double Y = ((Number) expressionYEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                statisticsBean.addPoint(X, Y);
+                Number xnum = (Number) expressionXEval.evaluate(eventsPerStream, true, statementContext);
+                Number ynum = (Number) expressionYEval.evaluate(eventsPerStream, true, statementContext);
+                if (xnum != null && ynum != null) {
+                    double X = xnum.doubleValue();
+                    double Y = ynum.doubleValue();
+                    statisticsBean.addPoint(X, Y);
+                }
             }
 
             if ((additionalProps != null) && (newData.length != 0)) {
@@ -110,9 +114,13 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             for (int i = 0; i < oldData.length; i++)
             {
                 eventsPerStream[0] = oldData[i];
-                double X = ((Number) expressionXEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                double Y = ((Number) expressionYEval.evaluate(eventsPerStream, true, statementContext)).doubleValue();
-                statisticsBean.removePoint(X, Y);
+                Number xnum = (Number) expressionXEval.evaluate(eventsPerStream, true, statementContext);
+                Number ynum = (Number) expressionYEval.evaluate(eventsPerStream, true, statementContext);
+                if (xnum != null && ynum != null) {
+                    double X = xnum.doubleValue();
+                    double Y = ynum.doubleValue();
+                    statisticsBean.removePoint(X, Y);
+                }
             }
         }
 

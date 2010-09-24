@@ -8,6 +8,7 @@ Major API or EPL changes
   - The bound-repeat syntax in the repeat-until pattern operator changed syntax:
     The old syntax of separating range value by dots "[low .. high]" is no longer supported. Use the colon ":" character instead of "..".
   - "nth" aggregator "nth(value, 0)" means current row, same as "prev" and "first"
+  - the semantics for "output first" changed for the case when a statement has a "group-by" clause: the output first is now output first per group.
   - Renamed "first" to "firstever"
   - Renamed "last" to "lastever" (this makes a difference as out-of-order deletes are handled by last only and not by lastever)
   - Introduced new aggregation functions that track the data window : first, last and window with a convenient syntax for access to all attributes
@@ -25,6 +26,19 @@ Major API or EPL changes
   - Support for subqueries to select multiple columns
   - New example demonstrating runtime configuration 
   - Support for selecting multiple columns in a subquery
+  - Support for contained-event syntax on events selected from a named window
+  - Support for expressions in the [] bound repeat in patterns
+
+Minor changes  
+  - Fixed issue ESPER-471 Static method called 'join' (reserved keyword) not allowed
+  - Fixed issue ESPER-481 Create-Window with explicit column-types does not support column types that are an event type (documentation bug/improvement)
+  - Fixed issue ESPER-489 Plug-in loader destroy order should be reverse of creation order
+  - Fixed issue ESPER-493 "IllegalStateException" for an aggregation query without group-by and without aggregations in the select clause
+  - Fixed issue ESPER-455 Aggregation when used with "prev" in where clause may return an incorrect result.
+  - Fixed issue ESPER-466 First-length and first-unique combined to intersection (multiple data windows) to reduce insert stream
+  - Fixed issue ESPER-495 Support XPath attribute node list result casted to string array
+  - Fixed issue ESPER-487 Custom aggregation functions - pass indicator whether running windowed and allow access to child expressions
+  - Fixed issue ESPER-496 On-select with stream wildcard and aggregation produces event-per-group and not event-per-row
 
 Changes in version 3.5.0
 ------------------------
