@@ -334,7 +334,7 @@ public class EPStatementObjectModel implements Serializable
             }
 
             writer.write(" as ");
-            if ((selectClause == null) || (selectClause.getSelectList().isEmpty()))
+            if ((selectClause == null) || (selectClause.getSelectList().isEmpty()) && !createWindow.getColumns().isEmpty())
             {
                 createWindow.toEPLCreateTablePart(writer);
             }

@@ -14,7 +14,7 @@ public class TestRuntimeConfigMain extends TestCase
 {
     public void testRuntimeConfig()
     {
-        TestRuntimeConfigMain main = new TestRuntimeConfigMain();
+        RuntimeConfigMain main = new RuntimeConfigMain();
         main.runExample();
     }
 }

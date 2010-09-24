@@ -229,7 +229,7 @@ public class RuntimeConfigMain
                 " propertyOther=" + second.get("propertyOther"));
     }
 
-    public void configureRevisionType() {
+    private void configureRevisionType() {
         // Declare two types: a base type and an update type
 
         // Define a type for the base events
