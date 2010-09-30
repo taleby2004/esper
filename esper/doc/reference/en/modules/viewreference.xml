@@ -1136,7 +1136,7 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				</table>
 	
 				<para>
-					A statement that derives the volume-weighted average price for the last 3 seconds is shown below:
+					A statement that derives the volume-weighted average price for the last 3 seconds for a given symbol is shown below:
 				</para>
 	
 				<programlisting><![CDATA[select average 
@@ -1151,6 +1151,18 @@ from StockTickEvent(symbol='GE').win:time(3 seconds).stat:weighted_avg(price, vo
 				</para>
 				<programlisting><![CDATA[select *
 from StockTickEvent.win:time(3 seconds).stat:weighted_avg(price, volume, symbol, feed)]]></programlisting>
+
+				<para>
+					Aggregation functions could instead be used to compute the weighted average as well. The next example also posts weighted average per symbol considering the last 3 seconds of stock tick data:
+				</para>
+				<programlisting><![CDATA[select symbol, sum(price*volume)/sum(volume)
+from StockTickEvent.win:time(3 seconds) group by symbol]]></programlisting>            
+
+				<para>
+					The following example computes weighted average keeping a separate data window per symbol considering the last 5 events of each symbol:
+				</para>
+				<programlisting><![CDATA[select symbol, average
+from StockTickEvent.std:groupwin(symbol).win:length(5).stat:weighted_avg(price, volume)]]></programlisting>            
 			</sect2> 
 			
 		</sect1>

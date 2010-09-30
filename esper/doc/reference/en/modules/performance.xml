@@ -532,6 +532,39 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			</para>
 		</sect2>
 
+		<sect2 id="perf-tips-13d">
+			<title>Statement Design for Reduced Memory Consumption</title>
+
+			<para>
+			  This section describes common sources of out-of-memory problems.
+			</para>
+			
+			<para>
+				If using the keep-all data window please consider the information above. If using pattern statements please consider pattern sub-expression lifetime as discussed prior to this section.
+			</para>
+			
+			<para>
+			  When using the <literal>group-by</literal> clause or <literal>std:groupwin</literal> grouped data windows please consider the hints as described below.
+			</para>
+			
+			<para>
+				The <literal>std:unique</literal> unique data window can also be a source for error. If your uniqueness criteria include a field which is never unique the memory use of the data window can grow, unless your application deletes events.
+			</para>
+			
+			<para>
+			  In a match-recognize pattern consider limiting the number of optional events if optional events are part of the data reported in the <literal>measures</literal> clause. Also when using the partition clause, if your partitioning criteria include a field which is never unique the memory use of the match-recognize pattern engine can grow.
+			</para>
+			
+			<para>
+				A further source of memory use is when your application creates new statements but fails to destroy created statements when they are no longer needed.
+			</para>
+			
+			<para>
+				In your application design you may also want to be conscious when the application listener or subscriber objects retain output data.
+			</para>
+			
+		</sect2>
+
 		<sect2 id="perf-tips-14">
 
 			<title>Performance, JVM, OS and hardware</title>

@@ -179,6 +179,15 @@ where sensor.sensorId = loc.sensorId</pre></div>
         </p>
       </answer>
     </faq>    
+    <faq id="troubleshooting-2">
+      <question>How do I design reducing memory use? I have an out-of-memory error and don't know the origin?</question>
+      <answer>
+        <p>
+          The documentation in the performance section includes information on designing statements for reduced memory use
+          and things to look for to prevent memory "leaks".
+        </p>
+      </answer>
+    </faq>    
   </part>
 
   <part id="general">
