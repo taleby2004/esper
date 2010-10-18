@@ -1,5 +1,12 @@
 News
 
+* October 18, 2010  -  NEsper 3.4.1 for .NET (incl. Mono support)
+	      
+  * Update release with performance improvements. Same feature set as 3.4.0.
+
+  []
+
+
 * September 27, 2010  -  Esper 4.0.0 - Major release, read compatibility notes below
 
   * Requires a Java 6 runtime

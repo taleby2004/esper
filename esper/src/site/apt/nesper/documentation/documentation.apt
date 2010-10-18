@@ -4,13 +4,13 @@ NEsper Documentation
  	Since NEsper is feature-equivalent to a given Esper version, the download links below point you to the appropriate Java Esper documentation.
  	
 
-* NEsper 3.4.0 - Feature-equivalent to Esper 3.4, the documentation is the same as the Java version
+* NEsper 3.4.1 - Feature-equivalent to Esper 3.4, the documentation is the same as the Java version
 	
 	<<Reference documentation>>
 	
- 	{{{../../esper-3.4.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
- 	{{{../../esper-3.4.0/doc/reference/en/html/index.html}Online HTML}} \
- 	{{{../../esper-3.4.0/doc/reference/en/html_single/index.html}Single page HTML}}
+ 	{{{../../esper-3.4.1/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 	{{{../../esper-3.4.1/doc/reference/en/html/index.html}Online HTML}} \
+ 	{{{../../esper-3.4.1/doc/reference/en/html_single/index.html}Single page HTML}}
 
 
 * NEsper 3.3.0 - Feature-equivalent to Esper 3.3, the documentation is the same as the Java version
