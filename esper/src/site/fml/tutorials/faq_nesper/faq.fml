@@ -55,10 +55,9 @@
       <question>Can I run it with multiple threads? What, if anything, is multithread-safe?</question>
       <answer>
         <p>
-          Not all facets of NEsper are thread-safe at this point.  We will be going through a development
-          cycle shortly to bring us up to date with the multithreading changes made to Esper during its 1.5
-          release.
-		</p>
+	  NEsper is fully multi-thread safe and typically able to leverage all available CPUs. The engine provides advanced threading options for inbound threading, outbound threading, timer execution threading
+	  and route (internal event) threading. 
+	</p>
         <p>
           Like Esper, NEsper supports multiple independent Esper engines within a process and/or AppDomain. Thus
           applications can segregate work to multiple engine instances allocating one or more threads to each engine instance.
