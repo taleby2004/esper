@@ -1841,7 +1841,7 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 				</para>
 
 				<para>
-					The <literal>snapshot</literal> keyword indicates that the engine output current computation results considering all events as per views specified and/or current aggregation results. While the other keywords control how a batch of events between output intervals is being considered, the <literal>snapshot</literal> keyword outputs all current state of a statement independent of the last batch. Its output is equivalent to the <literal>iterator</literal> method provided by a statement.
+					The <literal>snapshot</literal> keyword indicates that the engine output current computation results considering all events as per views specified and/or current aggregation results. While the other keywords control how a batch of events between output intervals is being considered, the <literal>snapshot</literal> keyword outputs all current state of a statement independent of the last batch. Its output is equivalent to the <literal>iterator</literal> method provided by a statement. The <literal>snapshot</literal> keyword requires a data window declaration if not used within a join and outputs only the last event if used without a data window.
 				</para>
 
 				<para>
