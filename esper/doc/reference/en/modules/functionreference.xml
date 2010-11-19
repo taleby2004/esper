@@ -991,7 +991,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				<para>
 					To explain, consider the statement below which selects the underlying event of the first sensor event held by the length window of 2 events.  
 				</para>
-				<programlisting>select first(*) SensorEvent.win:length(2) </programlisting>
+				<programlisting>select first(*) from SensorEvent.win:length(2) </programlisting>
 				
 				<para>
 				   Assume event E1, event E2 and event E3 are of type SensorEvent. When event E1 arrives the statement outputs the underlying event E1. When event E2 arrives the statement again outputs the underlying event E1. When event E3 arrives the statement outputs the underlying event E2, since 
