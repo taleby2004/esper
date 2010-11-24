@@ -2626,6 +2626,8 @@ from PurchaseOrder.std:lastevent() as order, ServiceEvent:std:lastevent() as ser
         on rfid.productId = refprod.prodId
       left outer join LocationDescription.win:keepall() as refdesc
         on rfid.location = refdesc.locId]]></programlisting>
+        
+        <para>The <literal>on</literal> clause may only employ the <literal>=</literal> equals operator and property names. Any other operators must be placed in the <literal>where</literal>-clause.</para>
     </sect1>
 
     <sect1 id="epl-unidirectional">
