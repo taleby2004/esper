@@ -905,7 +905,7 @@ select tick.symbol, tick.price, news.text from StockTickAndNews]]></programlisti
 				</para>
 
 			<para>
-				The engine posts remove stream events to the <literal>oldEvents</literal> parameter of the <literal>update</literal> method only if either the <literal>irstream</literal> or the <literal>rstream</literal> keyword
+				The engine posts remove stream events to the <literal>oldEvents</literal> parameter of the <literal>update</literal> method only if the <literal>irstream</literal> keyword
 				occurs in the <literal>select</literal> clause. This behavior can be changed via engine-wide configuration as described in <xref linkend="config-engine-stream-selection"/>.
 			</para>
 
