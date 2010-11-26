@@ -382,7 +382,11 @@ having amount > 1000]]></programlisting>
 	
 			<para>
 				When the engine encounters the second withdrawal event, the engine posts a new event to update listeners. The value of the "mycount" property on that new event is 2.
-				Additionally, when the engine encounters the third Withdrawal event, it posts an old event to update listeners containing the prior value of the count. The value of the "mycount" property on that old event is also 2.
+				Additionally, when the engine encounters the third Withdrawal event, it posts an old event to update listeners containing the prior value of the count, if specifing the <literal>rstream</literal> keyword in the select clause to select the remove stream. The value of the "mycount" property on that old event is also 2.
+			</para>
+			
+			<para>
+				Note the statement above does not specify a data window and thereby counts all arriving events since statement start. The statement above retains no events and its memory allocation is only the aggregation state, i.e. a single long value to represent <literal>count(*)</literal>. 
 			</para>
 	
 			<para>
