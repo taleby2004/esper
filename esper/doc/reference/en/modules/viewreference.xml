@@ -388,6 +388,15 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 					seconds. It posts empty result sets after one interval after the statement is created, and keeps posting an empty result set as no events arrive during intervals:					
 				</para>
 				<programlisting><![CDATA[select * from MyEvent.win:time_batch(10 sec, "FORCE_UPDATE, START_EAGER")]]></programlisting>				
+				
+				<para>
+				  The optional reference point is provided as a long-value of milliseconds relative to January 1, 1970 and time 00:00:00.
+				</para>
+				
+				<para>
+				  The following example statement sets the reference point to 5 seconds and the batch size to 1 hour, so that each batch output is 5 seconds after each hour:
+				</para>
+				<programlisting><![CDATA[select * from OrderSummaryEvent.win:time_batch(1 hour, 5000L)]]></programlisting>			
 			</sect2>
 
 			<sect2 id="view-win-time-length-batch" >
