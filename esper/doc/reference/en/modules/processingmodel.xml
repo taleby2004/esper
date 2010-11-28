@@ -341,9 +341,13 @@ having amount > 1000]]></programlisting>
 	<sect1 id="processingmodel_batch" revision="1">
 		<title>Batch Windows</title>
 
-		<indexterm><primary>views</primary><secondary>batch window processing</secondary></indexterm>
+		<indexterm><primary>views</primary><secondary>batch window processing</secondary></indexterm>		
 		<para>
 			The built-in data windows that act on batches of events are the <literal>win:time_batch</literal> and the <literal>win:length_batch</literal> views. The <literal>win:time_batch</literal> data window collects events arriving during a given time interval and posts collected events as a batch to listeners at the end of the time interval. The <literal>win:length_batch</literal> data window collects a given number of events and posts collected events as a batch to listeners when the given number of events has collected.
+		</para>
+		
+		<para>
+		   Related to batch data windows is output rate limiting. While batch data windows retain events the <literal>output</literal> clause offered by output rate limiting can control or stabilize the rate at which events are output, see <xref linkend="epl-output-rate"/>.
 		</para>
 
 		<para>
