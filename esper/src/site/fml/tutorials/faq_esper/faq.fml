@@ -182,6 +182,24 @@
         </p>
       </answer>
     </faq>
+    <faq id="patches">
+      <question>How do you issue bug fixes or patches? How are problems tracked?</question>
+      <answer>
+        <p>
+          We track all known issues in <a href="http://jira.codehaus.org/browse/ESPER">JIRA</a>. Many of the improvement or feature requests are also tracked in JIRA as well as a roadmap.
+        </p>
+        <p>
+          Patches are attached to the specific JIRA issue for which we are issuing a patch. Patches are always cumulative and we always list the JIRA issues addressed by a patch.
+          Patches carry the file name "esper-[release_version]-[JIRAnumber].jar" or "esper-[release_version]-[JIRAnumber]-[subrelease-number].jar".
+          An example patch file name is "esper-4.0.0-JIRA520-1.jar".
+        </p>
+        <p>
+          For environments in which you have no control over classpath or jar loading order you may merge a patch into a release jar via the command 
+          "jar uf esper-[release_version].jar esper-[release_version]-[JIRAnumber].jar".
+          An example is "jar uf esper-4.0.0.jar esper-4.0.0-JIRA520-1.jar".
+        </p>
+      </answer>
+    </faq>
     <faq id="tested-on-OS">
       <question>What operating systems has it been tested on?</question>
       <answer>
