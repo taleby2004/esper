@@ -484,7 +484,7 @@ match_recognize (
 							<entry>One or more matches (reluctant).</entry>
 						</row>
 						<row>
-							<entry>?</entry>
+							<entry>??</entry>
 							<entry>Zero or one match (reluctant).</entry>
 						</row>
 					</tbody>
