@@ -102,6 +102,10 @@ epService.destroy();]]></programlisting>
         <para>
 			The <literal>EPServiceStateListener</literal> interface may be implemented by your application to receive callbacks when an engine instance is about to be destroyed and after an engine instance has been initialized. Listeners are registered via the <literal>addServiceStateListener</literal> method. The <literal>EPStatementStateListener</literal> interface is used to receive callbacks when a new statement gets created and when a statement gets started, stopped or destroyed. Listeners are registered via the <literal>addStatementStateListener</literal> method.
         </para>
+        
+        <para>
+			As engine instances are completely independent, your application may not send <literal>EventBean</literal> instances obtained from one engine instance into a second engine instance since the event type space between two engine instances is not shared.
+        </para>
 
     </sect1>
 
