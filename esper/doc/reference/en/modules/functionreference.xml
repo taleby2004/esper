@@ -1006,7 +1006,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				<para>
 					The following example shows the use of an index expression. The output value for <literal>f1</literal> is the temperature property value of the first event in the data window, the value for <literal>f2</literal> is the temperature property value of the second event in the data window:
 				</para>
-				<programlisting>select first(temperature, 0) as f1, select first(temperature, 1) as f2
+				<programlisting>select first(temperature, 0) as f1, first(temperature, 1) as f2
 from SensorEvent.win:time(10 sec)</programlisting>
 			</sect3>
 
